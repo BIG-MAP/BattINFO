@@ -1,0 +1,3 @@
+[submodule "EMMO"]
+	path = EMMO
+	url = https://github.com/emmo-repo/EMMO
