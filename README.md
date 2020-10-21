@@ -51,7 +51,7 @@ Attributions and credits
 ### Projects
 - [BigMap](http://www.big-map.eu/);
   Grant Agreement No: 957189
-  <img src="bigmap.png" width="10">
+  <img src="bigmap.png" width="30">
 
 
 License
