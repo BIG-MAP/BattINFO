@@ -1,4 +1,3 @@
 [submodule "EMMO"]
 	path = EMMO
-	#url = git@github.com:emmo-repo/EMMO.git
-	url = https://github.com/emmo-repo/EMMO.git
+	url = https://github.com/emmo-repo/EMMO
