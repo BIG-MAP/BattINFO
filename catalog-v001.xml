@@ -1,25 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
-        <uri name="http://emmo.info/batteryInterface/0.0.1/batteryInterface"         uri="./batteryInterface.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2"                        uri="./EMMO/emmo.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/top"                    uri="./EMMO/top/top.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/top/annotations"        uri="./EMMO/top/annotations.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/top/mereotopology"      uri="./EMMO/top/mereotopology.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/top/physical"           uri="./EMMO/top/physical.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/semiotics"       uri="./EMMO/middle/semiotics.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/perceptual"      uri="./EMMO/middle/perceptual.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/reductionistic"  uri="./EMMO/middle/reductionistic.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/holistic"        uri="./EMMO/middle/holistic.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/physicalistic"   uri="./EMMO/middle/physicalistic.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/math"            uri="./EMMO/middle/math.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/properties"      uri="./EMMO/middle/properties.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/materials"       uri="./EMMO/middle/materials.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/metrology"       uri="./EMMO/middle/metrology.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/models"          uri="./EMMO/middle/models.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/manufacturing"   uri="./EMMO/middle/manufacturing.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/isq"             uri="./EMMO/middle/isq.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/siunits"         uri="./EMMO/middle/siunits.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/middle/units-extension" uri="./EMMO/middle/units-extension.owl"/>
+        <uri name="http://emmo.info/batteryInterface/batteryInterface" uri="batteryInterface.owl"/>
+        <uri name="http://emmo.info/emmo/1.0.0-alpha2/emmo-inferred" uri="https://emmo-repo.github.io/versions/1.0.0-alpha2/emmo-inferred.owl"/>
     </group>
 </catalog>
