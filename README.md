@@ -31,12 +31,17 @@ compatibilies:
 
 Obtaining domain-batteryInterface
 --------------------------------
-For faster access, this repository now includes the correct version of
-EMMO as a git submodule.  Hence, use the following command when
-cloning this repository:
+This ontology build on EMMO-1.0.0-alpha2. The correct path to 
+the inferred verion 'emmo-inferred' is specified in the catalog file, catalog-v001.xml.
 
-    git clone --recurse-submodules --shallow-submodules git@github.com:BIG-MAP-ontologies/domain-batteryInterface.git
+The domain ontology is obtained with:
+    git clone git@github.com:BIG-MAP-ontologies/domain-batteryInterface.git
 
+When opening batteryInterface.owl in Protege, the correct version of emmo-inferred will
+be downloaded and imported.
+
+In EMMO-python correct import is obatined with 
+   get_ontology('batteryInterface.owl).load(url_from_catalog=True)
 
 
 Attributions and credits
