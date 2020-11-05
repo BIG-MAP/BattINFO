@@ -26,7 +26,5 @@ jobs:
 
     - name: Check EMMO
       run: |
-        emmocheck --url-from-catalog --verbose batteryInterface.owl
-        # emmocheck --url-from-catalog --verbose --check-imported batteryInterface.owl
-        # emmo-1.0.0-alpha fails the tests updated for emmo-1.0.0-beta
+        emmocheck --check-imported --ignore-namespace=emmo-inferred --url-from-catalog --verbose batteryInterface.owl 
 
