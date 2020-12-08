@@ -2,6 +2,6 @@
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
         <uri name="http://emmo.info/batteryInterface/batteryInterface" uri="batteryInterface.owl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-alpha2/emmo-inferred" uri="https://emmo-repo.github.io/versions/1.0.0-alpha2/emmo-inferred.owl"/>
+        <uri name="http://emmo.info/emmo/1.0.0-beta/emmo-inferred" uri="https://emmo-repo.github.io/versions/1.0.0-beta/emmo-inferred.owl"/>
     </group>
 </catalog>
