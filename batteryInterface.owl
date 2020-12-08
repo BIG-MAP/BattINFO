@@ -59,6 +59,7 @@ It is implemented as a formal language.</dcterms:abstract>
 
     <owl:Class rdf:about="http://emmo.info/batteryInterface/batteryInterface#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3">
         <rdfs:subClassOf rdf:resource="http://emmo.info/emmo/middle/isq#EMMO_cde4368c_1d4d_4c94_8548_604749523c6d"/>
+        <isq:EMMO_de178b12_5d35_4bca_8efa_a4193162571d>T+3 L-3 M-1 I+2 Θ0 N0 J0</isq:EMMO_de178b12_5d35_4bca_8efa_a4193162571d>
         <rdfs:comment xml:lang="en">Measure of a material&apos;s ability to conduct an electric current by ions.</rdfs:comment>
         <skos:prefLabel xml:lang="en">IonicConductivity</skos:prefLabel>
     </owl:Class>
@@ -69,6 +70,7 @@ It is implemented as a formal language.</dcterms:abstract>
 
     <owl:Class rdf:about="http://emmo.info/batteryInterface/batteryInterface#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86">
         <rdfs:subClassOf rdf:resource="http://emmo.info/emmo/middle/isq#EMMO_cde4368c_1d4d_4c94_8548_604749523c6d"/>
+        <isq:EMMO_de178b12_5d35_4bca_8efa_a4193162571d>T+3 L-3 M-1 I+2 Θ0 N0 J0</isq:EMMO_de178b12_5d35_4bca_8efa_a4193162571d>
         <rdfs:comment xml:lang="en">Measure of a material&apos;s ability to conduct an electric current by electrons.</rdfs:comment>
         <skos:prefLabel xml:lang="en">ElectronicConductivity</skos:prefLabel>
     </owl:Class>
