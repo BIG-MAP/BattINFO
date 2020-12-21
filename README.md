@@ -25,7 +25,7 @@ See the following table for version compatibilies:
 
 | Imported Ontologies | Version           |
 | ------------------- | ----------------- |
-| EMMO                | 1.0.0-alpha2      |
+| EMMO                | 1.0.0-beta        |
 
 
 Obtaining domain-batteryInterface
@@ -39,12 +39,12 @@ The domain ontology is obtained with:
 git clone https://github.com/BIG-MAP-ontologies/domain-batteryInterface.git
 ```
 
-When opening batteryInterface.owl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
+When opening OntoBATT.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
 
 In EMMO-python correct import is obtained with:
 
 ```python
-get_ontology('batteryInterface.owl').load(url_from_catalog=True)
+get_ontology('OntoBATT.ttl').load()
 ```
 
 
@@ -55,6 +55,7 @@ Attributions and credits
 - Francesca Lønstad Bleken, SINTEF
 - Jesper Friis, SINTEF
 - Simon Clark, SINTEF
+- Casper Welzel Andersen, EPFL
 - To be added!
 
 ### Projects
