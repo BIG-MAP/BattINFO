@@ -25,12 +25,12 @@ See the following table for version compatibilies:
 
 | Imported Ontologies | Version           |
 | ------------------- | ----------------- |
-| EMMO                | 1.0.0-beta        |
+| emmo-inferred       | 1.0.0-beta        |
 
 
 Obtaining domain-batteryInterface
 --------------------------------
-This ontology build on EMMO-1.0.0-alpha2.
+This ontology builds on top of EMMO.
 The correct path to the inferred verion `emmo-inferred` is specified in the catalog file, [`catalog-v001.xml`](catalog-v001.xml).
 
 The domain ontology is obtained with:
@@ -44,7 +44,11 @@ When opening OntoBATT.ttl in Protégé, the correct version of emmo-inferred wil
 In EMMO-python correct import is obtained with:
 
 ```python
-get_ontology('OntoBATT.ttl').load()
+from emmo import get_ontology
+# Loading from local repository
+ontobatt = get_ontology('/path/to/OntoBATT.ttl').load(url_from_catalog=True)
+# Loading from web
+ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP-ontologies/domain-batteryInterface/master/OntoBATT.ttl').load()
 ```
 
 
