@@ -9,17 +9,17 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/OntoBATT/OntoBATT> .
+@base <http://emmo.info/OntoBATT> .
 
-<http://emmo.info/OntoBATT/OntoBATT> rdf:type owl:Ontology ;
-                                      owl:versionIRI <http://emmo.info/OntoBATT/0.0.1/OntoBATT> ;
-                                      owl:imports <http://emmo.info/OntoBATT/0.0.1/electrode> ;
-                                      owl:imports <http://emmo.info/OntoBATT/0.0.1/electrolyte> ;
-                                      owl:imports <http://emmo.info/OntoBATT/0.0.1/separator> ;
-                                      dcterms:abstract """A toplevel batteryInterface ontology based on EMMO.
+<http://emmo.info/OntoBATT> rdf:type owl:Ontology ;
+                             owl:versionIRI <http://emmo.info/0.0.1/OntoBATT> ;
+                             owl:imports <http://emmo.info/OntoBATT/0.0.1/electrode> ,
+                                         <http://emmo.info/OntoBATT/0.0.1/electrolyte> ,
+                                         <http://emmo.info/OntoBATT/0.0.1/separator> ;
+                             dcterms:abstract """A toplevel batteryInterface ontology based on EMMO.
 
 It is implemented as a formal language.""" ;
-                                      dcterms:license "Creative Commons BY 4.0" .
+                             dcterms:license "Creative Commons BY 4.0" .
 
 #################################################################
 #    Annotation properties
@@ -45,7 +45,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  http://emmo.info/OntoBATT/OntoBATT#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
+###  http://emmo.info/OntoBATT#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
 :EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
@@ -53,7 +53,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "IonicConductivity"@en .
 
 
-###  http://emmo.info/OntoBATT/OntoBATT#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
+###  http://emmo.info/OntoBATT#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
 :EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
@@ -61,7 +61,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ElectronicConductivity"@en .
 
 
-###  http://emmo.info/OntoBATT/OntoBATT#EMMO_c826767a_bf4e_4f0d_a803_358dee5049dc
+###  http://emmo.info/OntoBATT#EMMO_c826767a_bf4e_4f0d_a803_358dee5049dc
 :EMMO_c826767a_bf4e_4f0d_a803_358dee5049dc rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_5b2222df_4da6_442f_8244_96e9e45887d1 ;
                                            rdfs:comment "An electrolyte is a material with high ionic and low electronic conductivity"@en ;
