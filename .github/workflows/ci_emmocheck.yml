@@ -26,5 +26,4 @@ jobs:
 
     - name: Check EMMO
       run: |
-        emmocheck --verbose OntoBATT.ttl
-
+        emmocheck --verbose --url-from-catalog OntoBATT.ttl -s test_namespace
