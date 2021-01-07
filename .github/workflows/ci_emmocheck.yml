@@ -26,5 +26,5 @@ jobs:
 
     - name: Check EMMO
       run: |
-        emmocheck --check-imported --ignore-namespace=emmo-inferred --url-from-catalog --verbose batteryInterface.owl 
+        emmocheck --verbose OntoBATT.ttl
 
