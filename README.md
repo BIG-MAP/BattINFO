@@ -48,7 +48,7 @@ from emmo import get_ontology
 # Loading from local repository
 ontobatt = get_ontology('/path/to/OntoBATT.ttl').load(url_from_catalog=True)
 # Loading from web (not yet available due to closed repo)
-# ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP-ontologies/OntoBATT/master/OntoBATT.ttl').load()
+# ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/OntoBATT/master/OntoBATT.ttl').load()
 ```
 
 
