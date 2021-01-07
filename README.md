@@ -36,7 +36,7 @@ The correct path to the inferred verion `emmo-inferred` is specified in the cata
 The domain ontology is obtained with:
 
 ```console
-git clone https://github.com/BIG-MAP-ontologies/OntoBATT.git
+git clone https://github.com/BIG-MAP/OntoBATT.git
 ```
 
 When opening OntoBATT.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
