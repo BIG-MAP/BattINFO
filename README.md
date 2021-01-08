@@ -36,19 +36,19 @@ The correct path to the inferred verion `emmo-inferred` is specified in the cata
 The domain ontology is obtained with:
 
 ```console
-git clone https://github.com/BIG-MAP/OntoBATT.git
+git clone https://github.com/BIG-MAP/BattINFO.git
 ```
 
-When opening OntoBATT.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
+When opening BattINFO.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
 
 In EMMO-python correct import is obtained with:
 
 ```python
 from emmo import get_ontology
 # Loading from local repository
-ontobatt = get_ontology('/path/to/OntoBATT.ttl').load(url_from_catalog=True)
+ontobatt = get_ontology('/path/to/BattINFO.ttl').load(url_from_catalog=True)
 # Loading from web (not yet available due to closed repo)
-# ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/OntoBATT/master/OntoBATT.ttl').load()
+# ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/BattINFO.ttl').load()
 ```
 
 
