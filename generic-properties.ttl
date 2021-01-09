@@ -95,6 +95,7 @@ emmo:EMMO_802c167d_b792_4cb8_a315_35797345c0e3 rdf:type owl:Class ;
 emmo:EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1 rdf:type owl:Class ;
                                                rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The ability of a material to conduct heat."@en ;
+                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+1 M+1 I0 Θ-1 N0 J0"@en ;
                                                skos:prefLabel "ThermalConductivity"@en .
 
 
