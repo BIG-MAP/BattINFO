@@ -1,9 +1,9 @@
 [![CI tests](https://github.com/emmo-repo/domain-crystallography/workflows/CI%20tests/badge.svg)](https://github.com/emmo-repo/domain-crystallography/actions/)
 
 
-domain-batteryInterface
-======================
-A battery interface domain ontology based on [EMMO][1]. It is implemented as a formal language.
+<ins>Batt</ins>ery <ins>in</ins>ter<ins>f</ins>ace <ins>o</ins>ntology (BattINFO)
+=================================================================================
+A battery interface domain ontology based on [EMMO][1]. 
 
 
 Status
