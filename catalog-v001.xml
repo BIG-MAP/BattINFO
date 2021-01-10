@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
-        <uri name="http://emmo.info/BattINFO/0.0.1/BattINFO" uri="./BattINFO.ttl"/>
-
-        <uri name="http://emmo.info/emmo-inferred/1.0.0-beta" uri="https://emmo-repo.github.io/versions/1.0.0-beta/emmo-inferred.ttl"/>
-
-        <uri name="http://emmo.info/BattINFO/0.0.1/electrode"   uri="electrode.ttl"/>
-        <uri name="http://emmo.info/BattINFO/0.0.1/electrolyte" uri="electrolyte.ttl"/>
-        <uri name="http://emmo.info/BattINFO/0.0.1/separator"   uri="separator.ttl"/>
+        <uri name="http://emmo.info/emmo-inferred/1.0.0-beta" uri="https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1"                    uri="BattINFO.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1/electrode"          uri="electrode.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1/electrolyte"        uri="electrolyte.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1/separator"          uri="separator.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1/properties"         uri="properties.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1/generic-properties" uri="generic-properties.ttl"/>
     </group>
 </catalog>
