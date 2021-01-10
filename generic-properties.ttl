@@ -8,7 +8,7 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/BattINFO> .
+@base <http://emmo.info/BattINFO/generic-properties> .
 
 <http://emmo.info/BattINFO> rdf:type owl:Ontology ;
                              owl:versionIRI <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
