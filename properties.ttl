@@ -1,4 +1,4 @@
-@prefix : <http://emmo.info/BattINFO#> .
+@prefix : <http://emmo.info/BattINFO/properties#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -11,9 +11,9 @@
 @base <http://emmo.info/BattINFO/properties> .
 
 <http://emmo.info/BattINFO/properties> rdf:type owl:Ontology ;
-                                       owl:versionIRI <http://emmo.info/BattINFO/0.0.1/properties> ;
-                                       owl:imports <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
-                                       dcterms:abstract """Common properties for batteries and their interfaces.
+                                        owl:versionIRI <http://emmo.info/BattINFO/0.0.1/properties> ;
+                                        owl:imports <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
+                                        dcterms:abstract """Common properties for batteries and their interfaces.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
                                         dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
@@ -63,6 +63,7 @@ emmo:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
 emmo:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
                                                rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of ElectronicConductivity"@en ;
+                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
                                                skos:prefLabel "ElectronicResistivity"@en .
 
 
@@ -70,6 +71,7 @@ emmo:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
 emmo:EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
                                                rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of IonicConductivity"@en ;
+                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
                                                skos:prefLabel "IonicResistivity"@en .
 
 

@@ -27,9 +27,6 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 #    Annotation properties
 #################################################################
 
-###  http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
-emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d rdf:type owl:AnnotationProperty .
-
 
 ###  http://purl.org/dc/terms/abstract
 dcterms:abstract rdf:type owl:AnnotationProperty .
