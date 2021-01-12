@@ -3,108 +3,114 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix emmo: <http://emmo.info/emmo#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/BattINFO/generic-properties> .
 
-<http://emmo.info/BattINFO/generic-properties> rdf:type owl:Ontology ;
-                                               owl:versionIRI <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
-                                               owl:imports <https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry.ttl> ;
-                                               dcterms:abstract """Generic properties that are intended to eventually be moved into EMMO middle.
+<http://emmo.info/BattINFO/generic-properties> a owl:Ontology ;
+	owl:versionIRI <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
+	owl:imports <https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry.ttl> ;
+	dcterms:abstract """Generic properties that are intended to eventually be moved into EMMO middle.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
-                                               dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                               owl:versionInfo "0.0.1" .
+	dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+	owl:versionInfo "0.0.1" .
+# 
+# 
+# #################################################################
+# #
+# #    Annotation properties
+# #
+# #################################################################
+# 
+# 
+# http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
 
-#################################################################
-#    Annotation properties
-#################################################################
+:EMMO_de178b12_5d35_4bca_8efa_a4193162571d a owl:AnnotationProperty .
+# 
+# http://purl.org/dc/terms/abstract
 
-###  http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
-emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d rdf:type owl:AnnotationProperty .
+dcterms:abstract a owl:AnnotationProperty .
+# 
+# http://purl.org/dc/terms/license
 
+dcterms:license a owl:AnnotationProperty .
+# 
+# http://www.w3.org/2004/02/skos/core#prefLabel
 
-###  http://purl.org/dc/terms/abstract
-dcterms:abstract rdf:type owl:AnnotationProperty .
+skos:prefLabel a owl:AnnotationProperty .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Classes
+# #
+# #################################################################
+# 
+# 
+# http://emmo.info/emmo#EMMO_1e60a5ac_be77_4e7d_a26b_6c97e97b44e8
 
+:EMMO_1e60a5ac_be77_4e7d_a26b_6c97e97b44e8 a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L+2 M0 I0 Θ0 N0 J0" ;
+	skos:prefLabel "DiffusionCoefficient"@en .
+# 
+# http://emmo.info/emmo#EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56
 
-###  http://purl.org/dc/terms/license
-dcterms:license rdf:type owl:AnnotationProperty .
+:EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56 a owl:Class ;
+	rdfs:subClassOf :EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ;
+	:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The energy barrier for diffusion of a given component."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0"@en ;
+	skos:prefLabel "SingleComponentActivationEnergyOfDiffusion"@en .
+# 
+# http://emmo.info/emmo#EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab
 
+:EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 , :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
+	:EMMO_705f27ae_954c_4f13_98aa_18473fc52b25 "Pre-factor in the Arrhenius expression for diffusion."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L+2 M0 I0 Θ0 N-1 J0"@en ;
+	skos:prefLabel "SingleComponentDiffusivity"@en .
+# 
+# http://emmo.info/emmo#EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
 
-###  http://www.w3.org/2004/02/skos/core#prefLabel
-skos:prefLabel rdf:type owl:AnnotationProperty .
+:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395 a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 , :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
+	:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Transport of particles belonging to one component of a material due to a concentration gradient."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L+2 M0 I0 Θ0 N-1 J0"@en ;
+	skos:prefLabel "SingleComponentDiffusion"@en .
+# 
+# http://emmo.info/emmo#EMMO_50c5d440_683c_400f_909e_b03c0327de9c
 
+:EMMO_50c5d440_683c_400f_909e_b03c0327de9c a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+	:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The molar heat capacity of a substance is the heat capacity of one mole of material."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N-1 J0"@en ;
+	skos:prefLabel "MolarHeatCapacity"@en .
+# 
+# http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
 
-#################################################################
-#    Classes
-#################################################################
+:EMMO_802c167d_b792_4cb8_a315_35797345c0e3 a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+	:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The amount of heat to be applied to a given mass of material to produce a unit change in its temperature."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N0 J0"@en ;
+	skos:prefLabel "HeatCapacity"@en .
+# 
+# http://emmo.info/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1
 
-###  http://emmo.info/emmo#EMMO_1e60a5ac_be77_4e7d_a26b_6c97e97b44e8
-emmo:EMMO_1e60a5ac_be77_4e7d_a26b_6c97e97b44e8 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                               skos:prefLabel "DiffusionCoefficient"@en .
+:EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1 a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+	:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The ability of a material to conduct heat."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+1 M+1 I0 Θ-1 N0 J0"@en ;
+	skos:prefLabel "ThermalConductivity"@en .
+# 
+# http://emmo.info/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
 
-
-###  http://emmo.info/emmo#EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56
-emmo:EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The energy barrier for diffusion of a given component."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0"@en ;
-                                               skos:prefLabel "SingleComponentActivationEnergyOfDiffusion"@en .
-
-
-###  http://emmo.info/emmo#EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab
-emmo:EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
-                                                               emmo:EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
-                                               emmo:EMMO_705f27ae_954c_4f13_98aa_18473fc52b25 "Pre-factor in the Arrhenius expression for diffusion."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L+2 M0 I0 Θ0 N-1 J0"@en ;
-                                               skos:prefLabel "SingleComponentDiffusivity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
-emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
-                                                               emmo:EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Transport of particles belonging to one component of a material due to a concentration gradient."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L+2 M0 I0 Θ0 N-1 J0"@en ;
-                                               skos:prefLabel "SingleComponentDiffusion"@en .
-
-
-###  http://emmo.info/emmo#EMMO_50c5d440_683c_400f_909e_b03c0327de9c
-emmo:EMMO_50c5d440_683c_400f_909e_b03c0327de9c rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The molar heat capacity of a substance is the heat capacity of one mole of material."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N-1 J0"@en ;
-                                               skos:prefLabel "MolarHeatCapacity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
-emmo:EMMO_802c167d_b792_4cb8_a315_35797345c0e3 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The amount of heat to be applied to a given mass of material to produce a unit change in its temperature."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N0 J0"@en ;
-                                               skos:prefLabel "HeatCapacity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1
-emmo:EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The ability of a material to conduct heat."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+1 M+1 I0 Θ-1 N0 J0"@en ;
-                                               skos:prefLabel "ThermalConductivity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
-emmo:EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The specific heat capacity (symbol cp) of a substance is the heat capacity of a sample of the substance divided by the mass of the sample."@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ-1 N0 J0"@en ;
-                                               skos:prefLabel "SpecificHeatCapacity"@en .
-
-
-###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
+:EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca a owl:Class ;
+	rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+	:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The specific heat capacity (symbol cp) of a substance is the heat capacity of a sample of the substance divided by the mass of the sample."@en ;
+	:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ-1 N0 J0"@en ;
+	skos:prefLabel "SpecificHeatCapacity"@en .
+# 
+# Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
