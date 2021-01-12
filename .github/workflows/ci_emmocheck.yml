@@ -26,4 +26,9 @@ jobs:
 
     - name: Check EMMO
       run: |
-        emmocheck --verbose --url-from-catalog battinfo.ttl -s test_namespace
+        emmocheck --verbose --url-from-catalog -s test_namespace battinfo.ttl 
+        emmocheck --verbose --url-from-catalog -s test_namespace electrolyte.ttl
+        emmocheck --verbose --url-from-catalog -s test_namespace electrode.ttl
+        emmocheck --verbose --url-from-catalog -s test_namespace separator.ttl
+        emmocheck --verbose --url-from-catalog -s test_namespace properties.ttl
+        emmocheck --verbose --url-from-catalog -s test_namesapce generic_properties.ttl
