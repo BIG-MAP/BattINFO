@@ -31,4 +31,4 @@ jobs:
         emmocheck --verbose --url-from-catalog -s test_namespace electrode.ttl
         emmocheck --verbose --url-from-catalog -s test_namespace separator.ttl
         emmocheck --verbose --url-from-catalog -s test_namespace properties.ttl
-        emmocheck --verbose --url-from-catalog -s test_namesapce generic-properties.ttl
+        emmocheck --verbose --url-from-catalog -s test_namespace generic-properties.ttl
