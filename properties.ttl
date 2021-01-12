@@ -8,71 +8,95 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/BattINFO/properties> .
 
-<http://emmo.info/BattINFO/properties> rdf:type owl:Ontology ;
-                                        owl:versionIRI <http://emmo.info/BattINFO/0.0.1/properties> ;
-                                        owl:imports <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
-                                        dcterms:abstract """Common properties for batteries and their interfaces.
+<http://emmo.info/BattINFO/properties> a owl:Ontology ;
+	owl:versionIRI <http://emmo.info/BattINFO/0.0.1/properties> ;
+	owl:imports <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
+	dcterms:abstract """Common properties for batteries and their interfaces.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
-                                        dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                        owl:versionInfo "0.0.1" .
+	dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+	owl:versionInfo "0.0.1" .
+# 
+# 
+# #################################################################
+# #
+# #    Annotation properties
+# #
+# #################################################################
+# 
+# 
+# http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
 
-#################################################################
-#    Annotation properties
-#################################################################
+emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d a owl:AnnotationProperty .
+# 
+# http://purl.org/dc/terms/abstract
 
-###  http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
-emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d rdf:type owl:AnnotationProperty .
+dcterms:abstract a owl:AnnotationProperty .
+# 
+# http://purl.org/dc/terms/license
 
+dcterms:license a owl:AnnotationProperty .
+# 
+# http://www.w3.org/2004/02/skos/core#prefLabel
 
-###  http://purl.org/dc/terms/abstract
-dcterms:abstract rdf:type owl:AnnotationProperty .
+skos:prefLabel a owl:AnnotationProperty .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Classes
+# #
+# #################################################################
+# 
+# 
+# http://emmo.info/BattINFO/properties#EMMO_3a38e30d_4c97_49d4_b0f4_661c9779e039
 
+:EMMO_3a38e30d_4c97_49d4_b0f4_661c9779e039 a owl:Class ;
+	rdfs:subClassOf emmo:EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
+	emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Porosity or void fraction is a measure of the void (i.e. \"empty\") spaces in a material, and is a fraction of the volume of voids over the total volume, between 0 and 1, or as a percentage between 0% and 100%" ;
+	emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+	skos:prefLabel "Porosity"@en .
+# 
+# http://emmo.info/BattINFO/properties#EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504
 
-###  http://purl.org/dc/terms/license
-dcterms:license rdf:type owl:AnnotationProperty .
+:EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504 a owl:Class ;
+	rdfs:subClassOf emmo:EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
+	emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A measure of deviation from a straight line. It is the ratio of the actual distance traveled divided by the straight line distance." ;
+	emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+	skos:prefLabel "Tortuosity"@en .
+# 
+# http://emmo.info/emmo#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
 
+emmo:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 a owl:Class ;
+	rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
+	emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
+	rdfs:comment "Measure of a material's ability to conduct an electric current by ions."@en ;
+	skos:prefLabel "IonicConductivity"@en .
+# 
+# http://emmo.info/emmo#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
 
-###  http://www.w3.org/2004/02/skos/core#prefLabel
-skos:prefLabel rdf:type owl:AnnotationProperty .
+emmo:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 a owl:Class ;
+	rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
+	emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
+	rdfs:comment "Measure of a material's ability to conduct an electric current by electrons."@en ;
+	skos:prefLabel "ElectronicConductivity"@en .
+# 
+# http://emmo.info/emmo#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
 
+emmo:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa a owl:Class ;
+	rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
+	emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of ElectronicConductivity"@en ;
+	emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
+	skos:prefLabel "ElectronicResistivity"@en .
+# 
+# http://emmo.info/emmo#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
 
-#################################################################
-#    Classes
-#################################################################
-
-###  http://emmo.info/emmo#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
-emmo:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
-                                               rdfs:comment "Measure of a material's ability to conduct an electric current by ions."@en ;
-                                               skos:prefLabel "IonicConductivity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
-emmo:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
-                                               rdfs:comment "Measure of a material's ability to conduct an electric current by electrons."@en ;
-                                               skos:prefLabel "ElectronicConductivity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
-emmo:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of ElectronicConductivity"@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
-                                               skos:prefLabel "ElectronicResistivity"@en .
-
-
-###  http://emmo.info/emmo#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
-emmo:EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
-                                               emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of IonicConductivity"@en ;
-                                               emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
-                                               skos:prefLabel "IonicResistivity"@en .
-
-
-###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
+emmo:EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 a owl:Class ;
+	rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
+	emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of IonicConductivity"@en ;
+	emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
+	skos:prefLabel "IonicResistivity"@en .
+# 
+# Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
