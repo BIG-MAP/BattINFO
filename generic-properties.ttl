@@ -14,7 +14,7 @@
                                                 owl:imports <https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry.ttl> ;
                                                 dcterms:abstract """Generic properties that are intended to eventually be moved into EMMO middle.
 
-Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
+Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
                                                 dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
                                                 owl:versionInfo "0.0.1" .
 
