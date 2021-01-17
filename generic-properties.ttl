@@ -100,6 +100,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 #    Classes
 #################################################################
 
+###  http://emmo.info/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
+:EMMO_1c1ec02e_4def_4979_aff9_572c06a95391 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7684ddff_d99b_405d_aad2_90e830b8403c ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ-1 N0 J0" ;
+                                           rdfs:comment "alpha_V = (1/V) * (dV/dT)"@en ;
+                                           skos:altLabel "The coefficient of thermal expansion describes how the fractional change in volume of an object changes with a change in temperature."@en ;
+                                           skos:prefLabel "VolumetricThermalExpansionCoefficient"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_1e60a5ac_be77_4e7d_a26b_6c97e97b44e8
 :EMMO_1e60a5ac_be77_4e7d_a26b_6c97e97b44e8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
@@ -140,6 +149,34 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The molar heat capacity of a substance is the heat capacity of one mole of material."@en ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N-1 J0"@en ;
                                            skos:prefLabel "MolarHeatCapacity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
+:EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy per unit volume."@en ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "EnergyDensity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
+:EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                                 owl:hasValue "T0 L0 M0 I0 Θ-1 N0 J0"
+                                                               ] ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
+                                           skos:prefLabel "PerTemperatureDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_7684ddff_d99b_405d_aad2_90e830b8403c
+:EMMO_7684ddff_d99b_405d_aad2_90e830b8403c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The coefficient of thermal expansion describes how the fractional change in size of an object changes with a change in temperature."@en ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ-1 N0 J0" ;
+                                           rdfs:comment "May be a tensor for general anisotrope termal expansions."@en ;
+                                           skos:altLabel "CoefficientOfThermalExpansion"@en ;
+                                           skos:prefLabel "ThermalExpansionCoefficient"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
