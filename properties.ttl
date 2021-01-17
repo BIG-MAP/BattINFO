@@ -46,16 +46,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 ###  http://emmo.info/BattINFO#EMMO_1c13c786_35ae_4768_88fe_795813d465cd
 :EMMO_1c13c786_35ae_4768_88fe_795813d465cd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                           skos:prefLabel "TheoteticalSpecificCapacity"@en .
+                                                           :EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "TheoreticalEnergy per unit mass of the cell."@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "TheoteticalSpecificEnergy"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa
 :EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ;
+                                           rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
+                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical amount of charge a cell can store. Minimum of the theoretical capacity of the positive electrode and negative electrode."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "TheoreticalChargeCapacity"@en ;
                                            skos:prefLabel "TheoreticalCapacity"@en .
 
 
@@ -65,6 +68,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Porosity or void fraction is a measure of the void (i.e. \"empty\") spaces in a material, and is a fraction of the volume of voids over the total volume, between 0 and 1, or as a percentage between 0% and 100%."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "Porosity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_791c1915_a791_4450_acd8_7f94764743b5
+:EMMO_791c1915_a791_4450_acd8_7f94764743b5 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Amount of charge that can be stored."@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "Capacity"@en ,
+                                                         "ElectricChargeCapacity"@en ;
+                                           skos:prefLabel "ChargeCapacity"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29
@@ -79,10 +92,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_8632dee1_0adf_4a47_8400_820b48b86732
 :EMMO_8632dee1_0adf_4a47_8400_820b48b86732 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+                                           rdfs:subClassOf :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 ,
+                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "TheoreticalCapacity divided by the mass of the cell."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "TheoreticalSpecificChargeCapacity"@en ;
                                            skos:prefLabel "TheoreticalSpecificCapacity"@en .
 
 

@@ -87,8 +87,25 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ElectroChemicalQuantity"@en .
 
 
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
+:EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric charge per unit mass."@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "SpecificCharge"@en ;
+                                           skos:altLabel "SpecificElectricCharge"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d
+:EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy per unit mass."@en ;
+                                           skos:altLabel "T-2 L+2 M0 I0 Θ0 N0 J0"@en ;
+                                           skos:prefLabel "SpecificEnergy"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
-emmo:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
+:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
                                                rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                                emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
                                                emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
@@ -97,7 +114,7 @@ emmo:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
 
 
 ###  http://emmo.info/emmo#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
-emmo:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
+:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
                                                rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                                emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
                                                emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
@@ -106,7 +123,7 @@ emmo:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
 
 
 ###  http://emmo.info/emmo#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
-emmo:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
+:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
                                                rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                                emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of ElectronicConductivity"@en ;
@@ -115,7 +132,7 @@ emmo:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
 
 
 ###  http://emmo.info/emmo#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
-emmo:EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
+:EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
                                                rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                                emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of IonicConductivity"@en ;

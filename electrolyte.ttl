@@ -28,11 +28,11 @@ emmo:EMMO_c826767a_bf4e_4f0d_a803_358dee5049dc rdf:type owl:Class ;
                                                rdfs:subClassOf emmo:EMMO_5b2222df_4da6_442f_8244_96e9e45887d1 ,
                                                                [ rdf:type owl:Restriction ;
                                                                  owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
-                                                                 owl:someValuesFrom emmo:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
+                                                                 owl:someValuesFrom :EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
                                                                ] ,
                                                                [ rdf:type owl:Restriction ;
                                                                  owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
-                                                                 owl:someValuesFrom emmo:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
+                                                                 owl:someValuesFrom :EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
                                                                ] ;
                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrolyte is a material with high ionic and low electronic conductivity"@en ;
                                                skos:prefLabel "Electrolyte"@en .
