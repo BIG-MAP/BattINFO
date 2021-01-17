@@ -50,8 +50,3 @@ test_unit_dimension:
     - emmo.SIBaseUnit
     - emmo.SIUnitSymbol
     - emmo.SIUnit
-
-# Should be fixed in EMMO
-test_class_label:
-    exceptions:
-      - emmo.3DArray  # change back to Array3D
