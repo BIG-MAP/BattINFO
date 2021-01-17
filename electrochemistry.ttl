@@ -65,18 +65,9 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric charge per unit mass."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
-                                           skos:altLabel "SpecificElectricCharge"@en ;
-                                           skos:prefLabel "SpecificCharge"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_367a4916_d03a_483c_9f2c_6588370fc9d9
-:EMMO_367a4916_d03a_483c_9f2c_6588370fc9d9 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Difference between the theoretical electric potentials of the positive electrode and negeative electrode under no current flow."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           skos:altLabel "NernstVoltage"@en ,
-                                                         "TheoreticalEquilibriumVoltage"@en ;
-                                           skos:prefLabel "TheoreticalOpenCircuitVoltage"@en .
+                                           skos:altLabel "SpecificCapacity"@en ,
+                                                         "SpecificElectricChargeCapacity"@en ;
+                                           skos:prefLabel "SpecificChargeCapacity"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
@@ -95,6 +86,107 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
                                            rdfs:comment "Measure of a material's ability to conduct an electric current by electrons."@en ;
                                            skos:prefLabel "ElectronicConductivity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_494b372c_cfdf_47d3_a4de_5e037c540de8 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_0c0c623c_43b8_426d_a536_168108e2353a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_0c9655c6_6b0b_4819_a219_f286ad196fa9
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_06448f64_8db6_4304_8b2c_e785dba82044
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_7684ddff_d99b_405d_aad2_90e830b8403c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_79a02de5_b884_4eab_bc18_f67997d597a2
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_802c167d_b792_4cb8_a315_35797345c0e3
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                                             owl:someValuesFrom emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A device capable of either generating electrical energy from chemical reactions or using electrical energy to cause chemical reactions. The key feature of an electrochemical cell is that it contains two (or more) electrodes that allow transport of electrons, separated by a salt bridge that allows the movement of ions but blocks movement of electrons.
+
+-- Adapted from J. Newman, Electrochemical Systems (p. 3) and other sources"""@en ;
+                                           skos:prefLabel "ElectroChemicalCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_791c1915_a791_4450_acd8_7f94764743b5
+:EMMO_791c1915_a791_4450_acd8_7f94764743b5 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Amount of charge that can be stored."@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "Capacity"@en ,
+                                                         "ElectricChargeCapacity"@en ;
+                                           skos:prefLabel "ChargeCapacity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29
+:EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29 rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                                 owl:hasValue "T+1 L0 M-1 I+1 Θ0 N0 J0"
+                                                               ] ;
+                                           rdfs:subClassOf emmo:EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
+                                           skos:prefLabel "ChargePerMassDimension"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d
@@ -132,6 +224,24 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "IonicResistivity"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f
+:EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An electrochemical cell that spontaneously produces work.
+
+-- J. Newman, Electrochemical Systems (p. 6)"""@en ;
+                                           skos:prefLabel "GalvanicCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e931087f_7681_4096_b200_5223bcc47eb4
+:EMMO_e931087f_7681_4096_b200_5223bcc47eb4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An electrochemical cell that requires input of work to drive the reaction.
+
+-- J. Newman, Electrochemical Systems (p. 6)"""@en ;
+                                           skos:prefLabel "ElectrolyticCell"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d
 :EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
@@ -140,4 +250,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "SpecificEnergy"@en .
 
 
-###  Generated by the OWL API (version 4.5.7.2018-12-02T02:23:35Z) https://github.com/owlcs/owlapi
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe
+:EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_830b59f7_d047_438c_90cd_62845749efcb ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "Amount of energy stored in a physical object."@en ,
+                                                                                          "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "StoredEnergy"@en .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
