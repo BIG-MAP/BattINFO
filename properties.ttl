@@ -1,4 +1,4 @@
-@prefix : <http://emmo.info/BattINFO/properties#> .
+@prefix : <http://emmo.info/BattINFO#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -12,8 +12,7 @@
 
 <http://emmo.info/BattINFO/properties> rdf:type owl:Ontology ;
                                         owl:versionIRI <http://emmo.info/BattINFO/0.0.1/properties> ;
-                                        owl:imports <http://emmo.info/BattINFO/0.0.1/electrochemistry> ,
-                                                    <http://emmo.info/BattINFO/0.0.1/generic-properties> ;
+                                        owl:imports <http://emmo.info/BattINFO/0.0.1/electrochemistry> ;
                                         dcterms:abstract """Common properties for batteries and their interfaces.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
@@ -44,23 +43,23 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  http://emmo.info/BattINFO/properties#EMMO_1c13c786_35ae_4768_88fe_795813d465cd
+###  http://emmo.info/BattINFO#EMMO_1c13c786_35ae_4768_88fe_795813d465cd
 :EMMO_1c13c786_35ae_4768_88fe_795813d465cd rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/BattINFO/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112> ,
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            skos:prefLabel "TheoteticalSpecificCapacity"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa
+###  http://emmo.info/BattINFO#EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa
 :EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/BattINFO/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112> ,
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical amount of charge a cell can store. Minimum of the theoretical capacity of the positive electrode and negative electrode."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "TheoreticalCapacity"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_3a38e30d_4c97_49d4_b0f4_661c9779e039
+###  http://emmo.info/BattINFO#EMMO_3a38e30d_4c97_49d4_b0f4_661c9779e039
 :EMMO_3a38e30d_4c97_49d4_b0f4_661c9779e039 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Porosity or void fraction is a measure of the void (i.e. \"empty\") spaces in a material, and is a fraction of the volume of voids over the total volume, between 0 and 1, or as a percentage between 0% and 100%."@en ;
@@ -68,7 +67,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "Porosity"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29
+###  http://emmo.info/BattINFO#EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29
 :EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
                                                                  owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
@@ -78,25 +77,25 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ChargePerMassDimension"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_8632dee1_0adf_4a47_8400_820b48b86732
+###  http://emmo.info/BattINFO#EMMO_8632dee1_0adf_4a47_8400_820b48b86732
 :EMMO_8632dee1_0adf_4a47_8400_820b48b86732 rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/BattINFO/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112> ,
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "TheoreticalCapacity divided by the mass of the cell."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "TheoreticalSpecificCapacity"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_9ea6a862_131f_4154_be47_e7417f2fb924
+###  http://emmo.info/BattINFO#EMMO_9ea6a862_131f_4154_be47_e7417f2fb924
 :EMMO_9ea6a862_131f_4154_be47_e7417f2fb924 rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/BattINFO/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112> ,
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical amount of energy that can be stored in a battery cell. Minimum of the theoretical energy of the positive electrode and negative electrode. Product of the Theoretical Capacity and the Theoretical Open-Circuit Voltage."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "TheoreticalEnergy"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504
+###  http://emmo.info/BattINFO#EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504
 :EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A measure of deviation from a straight line. It is the ratio of the actual distance traveled divided by the straight line distance." ;

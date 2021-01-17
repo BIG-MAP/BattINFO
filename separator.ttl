@@ -1,4 +1,4 @@
-@prefix : <http://emmo.info/BattINFO/separator#> .
+@prefix : <http://emmo.info/BattINFO#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -28,7 +28,7 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            rdfs:subClassOf emmo:EMMO_ec7464a9_d99d_45f8_965b_4e9230ea8356 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
-                                                             owl:someValuesFrom <http://emmo.info/BattINFO/properties#EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504>
+                                                             owl:someValuesFrom <http://emmo.info/BattINFO#EMMO_caa0969a_1e27_4950_8af6_5b72fd20e504>
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
