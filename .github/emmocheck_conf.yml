@@ -1,4 +1,7 @@
 # Configurations used when running emmocheck from the ci_emmocheck workflow
+skip:
+  - test_namespace
+
 test_quantity_dimension:
   exceptions:
     - emmo.NonSIUnits
