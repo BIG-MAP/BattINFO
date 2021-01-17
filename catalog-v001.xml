@@ -6,6 +6,7 @@
         <uri name="http://emmo.info/BattINFO/0.0.1/electrode"          uri="electrode.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/electrolyte"        uri="electrolyte.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/separator"          uri="separator.ttl"/>
+        <uri name="http://emmo.info/BattINFO/0.0.1/electrochemistry"   uri="electrochemistry.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/properties"         uri="properties.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/generic-properties" uri="generic-properties.ttl"/>
     </group>
