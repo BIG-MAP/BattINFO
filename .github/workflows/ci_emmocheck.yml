@@ -32,3 +32,6 @@ jobs:
         emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml separator.ttl
         emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml properties.ttl
         emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml generic-properties.ttl
+        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml electrochemistry.ttl
+
+
