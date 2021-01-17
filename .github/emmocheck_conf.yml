@@ -4,16 +4,4 @@ skip:
 
 test_quantity_dimension:
   exceptions:
-    - emmo.NonSIUnits
-    - emmo.StandardizedPhysicalQuantity
-
-    - emmo.CategorizedPhysicalQuantity
-    - emmo.AtomicAndNuclear
-    - emmo.Defined
-    - emmo.Electromagnetic
-    - emmo.FrequentlyUsed
-    - emmo.PhysicoChemical
-    - emmo.ChemicalCompositionQuantity
-    - emmo.Universal
-
     - BattINFO.ElectroChemicalQuantity
