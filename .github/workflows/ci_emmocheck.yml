@@ -26,12 +26,4 @@ jobs:
 
     - name: Check EMMO
       run: |
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml battinfo.ttl
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml electrolyte.ttl
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml electrode.ttl
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml separator.ttl
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml properties.ttl
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml generic-properties.ttl
-        emmocheck --verbose --url-from-catalog -s test_namespace --configfile=.github/emmocheck_conf.yml electrochemistry.ttl
-
-
+        emmocheck --verbose --check-imported --url-from-catalog --skip test_namespace --configfile=.github/emmocheck_conf.yml battinfo.ttl
