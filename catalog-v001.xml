@@ -2,7 +2,8 @@
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
         <uri name="http://emmo.info/emmo-inferred/1.0.0-beta" uri="https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry.ttl"/>
-        <uri name="http://emmo.info/BattINFO/0.0.1"                    uri="BattINFO.ttl"/>
+	<uri name="http://emmo.info/BattINFO/0.0.1"                    uri="BattINFO.ttl"/>
+	<uri name="http://emmo.info/BattINFO/0.0.1/role"               uri="role.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/electrode"          uri="electrode.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/electrolyte"        uri="electrolyte.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.0.1/separator"          uri="separator.ttl"/>
