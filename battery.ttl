@@ -8,16 +8,16 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/BattINFO/role> .
+@base <http://emmo.info/BattINFO/battery> .
 
-<http://emmo.info/BattINFO/role> rdf:type owl:Ontology ;
-                             owl:versionIRI <http://emmo.info/BattINFO/0.0.1/role> ;
+<http://emmo.info/BattINFO/battery> rdf:type owl:Ontology ;
+                             owl:versionIRI <http://emmo.info/BattINFO/0.0.1/battery> ;
                              owl:imports <http://emmo.info/BattINFO/0.0.1/electrode> ,
                                          <http://emmo.info/BattINFO/0.0.1/electrolyte> ,
                                          <http://emmo.info/BattINFO/0.0.1/separator> ;
                              dcterms:abstract """A toplevel battery interface domain ontology based on EMMO.
 
-This file is intended to be empty and merely collecting the other ontologies.
+This file is intended to contain information on the whole battery, and imports the subdomains electrode, electrolyte and separator.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
                              dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
