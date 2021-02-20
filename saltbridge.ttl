@@ -11,30 +11,137 @@
 @base <http://emmo.info/BattINFO/saltbridge> .
 
 <http://emmo.info/BattINFO/saltbridge> rdf:type owl:Ontology ;
-                                         owl:versionIRI <http://emmo.info/BattINFO/0.0.1/saltbridge> ;
-                                         owl:imports <http://emmo.info/BattINFO/0.0.1/properties> ;
-                                         dcterms:abstract """Domain ontology for battery saltbridge.
+                                        owl:versionIRI <http://emmo.info/BattINFO/0.0.1/saltbridge> ;
+                                        owl:imports <http://emmo.info/BattINFO/0.0.1/properties> ;
+                                        dcterms:abstract """Domain ontology for battery saltbridge.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
-                                         dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                         owl:versionInfo "0.0.1" .
+                                        dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+                                        owl:versionInfo "0.0.1" .
 
 #################################################################
 #    Classes
 #################################################################
 
-###   http://emmo.info/BattINFO#EMMO_c826767a_bf4e_4f0d_a803_358dee5049dc
-:EMMO_c826767a_bf4e_4f0d_a803_358dee5049dc rdf:type owl:Class ;
-                                               rdfs:subClassOf emmo:EMMO_5b2222df_4da6_442f_8244_96e9e45887d1 ,
-                                                               [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
-                                                                 owl:someValuesFrom :EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
-                                                               ] ,
-                                                               [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
-                                                                 owl:someValuesFrom :EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
-                                                               ] ;
-                                                emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrolyte is a material with high ionic and low electronic conductivity"@en ;
-						skos:prefLabel "Electrolyte"@en .
+###  http://emmo.info/BattINFO/saltbridge#EMMO_0508a114_544a_4f54_a7de_9b947fb4b618
+:EMMO_0508a114_544a_4f54_a7de_9b947fb4b618 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A solid electrolyte is a solid material where the predominant charge carriers are ions. For example: NASICON (Na Super Ionic Conductor), which has the general formula Na1+xZr2P3-xSix O12 , 0 < x < 3.\" Pingarron et al., Terminology of electrochemical methods of analysis" ;
+                                           skos:prefLabel "SolidElectrolyte"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800
+:EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"Electrolyte solution, the ions of which are electroinactive in the range of applied potential being studied, and whose ionic strength (and, therefore, contribution to the overall conductivity) is usually much greater than the concentration of an electroactive substance to be dissolved in it.\" Pingarron et al., Terminology of electrochemical methods of analysis" ;
+                                           skos:altLabel "BaseElectrolyte" ,
+                                                         "IndifferentElectrolyte" ,
+                                                         "InertElectrolyte" ;
+                                           skos:prefLabel "SupportingElectrolyte"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
+:EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A permeable membrane placed between the positive and negative electrodes to keep them physically separated and prevent an internal short circuit.\"" ;
+                                           skos:prefLabel "Separator"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89
+:EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"An electrolyte in the liquid phase\"" ;
+                                           skos:prefLabel "LiquidElectrolyte"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
+:EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+                                                           ] ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"Means of making electrolytic connection between two half cells without introducing a significant liquid junction  potential. Note: A typical construction is a tube of an inert material (e.g. agar agar) filled with a solution con- taining an electrolyte with approximately equal ion mobilities of the cation and the anion (e.g., KNO3, KCl), with the ends of the tube immersed in the electrolyte solution of the half cells.\" Pingarron et al., Terminology of electrochemical methods of analysis" ;
+                                           skos:prefLabel "SaltBridge"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_a1bbb273_bc05_4e80_8817_82479178bb41
+:EMMO_a1bbb273_bc05_4e80_8817_82479178bb41 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A base that completely dissociates in water.\"" ;
+                                           skos:prefLabel "StrongBase"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
+:EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical species or molecular entity having an available pair of electrons capable of forming a covalent bond with a hydron (proton) (see Brønsted base) or with the vacant orbital of some other species (see Lewis base).\" - IUPAC Gold Book" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/B00601" ;
+                                           skos:prefLabel "Base"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799
+:EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical compound consisting of an assembly of cations and anions.\" IUPAC Gold Book" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05447" ;
+                                           skos:prefLabel "Salt"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_c230694a_04ce_4719_88a4_ecfa85167c30
+:EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A molecular entity or chemical species capable of donating a hydron (proton) (see Brønsted acid) or capable of forming a covalent bond with an electron pair (see Lewis acid).\" - IUPAC Gold Book" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00071" ;
+                                           skos:prefLabel "Acid"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f
+:EMMO_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"An ionic liquid is an electrolyte composed of a salt that is liquid below 100 °C. Ionic liquids have found uses in electrochemical analysis, because their unconventional properties include a negligible vapor pressure, a high thermal and electrochemical stability, and exceptional dissolution properties for both organic and inorganic chemical species.\" Pingarron et al., Terminology of electrochemical methods of analysis" ;
+                                           skos:prefLabel "IonicLiquidElectrolyte"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb
+:EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "An acid that completely dissociates in water." ;
+                                           skos:prefLabel "StrongAcid"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_ce548161_c987_4beb_9091_adcf80027310
+:EMMO_ce548161_c987_4beb_9091_adcf80027310 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A base that partially dissociates in water.\"" ;
+                                           skos:prefLabel "WeakBase"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408
+:EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"An acid that partially dissociates in water.\"" ;
+                                           skos:prefLabel "WeakAcid"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_fa22874b_76a9_4043_8b8f_6086c88746de
+:EMMO_fa22874b_76a9_4043_8b8f_6086c88746de rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A liquid electrolyte that consists of solutes dissolved in a solvent.\"" ;
+                                           skos:prefLabel "ElectrolyticSolution"@en .
+
+
+###  http://emmo.info/BattINFO/saltbridge#EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+:EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 """1. Conducting medium in which the flow of electric current is accompanied by the movement of ions.
+Pingarron et al., Terminology of electrochemical methods of analysis""" ,
+                                                                                          "2. Substance that provides ions on dissolution in a solvent or on melting. Pingarron et al., Terminology of electrochemical methods of analysis" ;
+                                           skos:prefLabel "Electrolyte"@en .
+
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
