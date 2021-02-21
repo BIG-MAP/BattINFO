@@ -29,7 +29,7 @@ See the following table for version compatibilies:
 
 The import structure shown in the figure below.
 
-![BattINFO import structure.](doc/battinfo-structure.png | width=300)
+![BattINFO import structure.](doc/battinfo-structure.png)
 
 
 Obtaining domain-batteryInterface
