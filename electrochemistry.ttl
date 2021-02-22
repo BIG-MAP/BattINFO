@@ -86,7 +86,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
+                                                             owl:someValuesFrom :ElectrochemicalSubcomponent
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of an electrochemical cell."@en ;
                                            skos:prefLabel "ElectrochemicalComponent"@en .
@@ -192,6 +192,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
                                                              owl:someValuesFrom emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
+                                                             owl:someValuesFrom :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A system capable of either generating electrical energy from chemical reactions or using electrical energy to cause chemical reactions. The key feature of an electrochemical cell is that it contains two (or more) electrodes that allow transport of electrons, separated by a salt bridge that allows the movement of ions but blocks movement of electrons. 
 
@@ -287,16 +291,66 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ElectrochemicalMaterial"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#ElectrochemicalSubcomponent
+###  http://emmo.info/BattINFO#ElectrochemicalSubcomponent
 :ElectrochemicalSubcomponent rdf:type owl:Class ;
-                             rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                             rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                             [ rdf:type owl:Restriction ;
+                                               owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                               owl:someValuesFrom :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
+                                             ] ;
                              emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A subcomponent of an ElectrochemicalComponent."@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#ElectrochemicalSystem
+###  http://emmo.info/BattINFO#ElectrochemicalSystem
 :ElectrochemicalSystem rdf:type owl:Class ;
-                       rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                       rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
+                                         owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                       ] ;
                        emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system comprising at least one electrochemical cell and the components necessary to support it."@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#ActiveElectrochemicalMaterial
+:ActiveElectrochemicalMaterial rdf:type owl:Class ;
+                               rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
+                                               [ rdf:type owl:Restriction ;
+                                                 owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                 owl:someValuesFrom :ElectroactiveSubstance
+                                               ] .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#ElectroactiveSubstance
+:ElectroactiveSubstance rdf:type owl:Class ;
+                        rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#ElectrochemicalSubcomponent
+:ElectrochemicalSubcomponent rdf:type owl:Class .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#ElectronicSubcomponent
+:ElectronicSubcomponent rdf:type owl:Class ;
+                        rdfs:subClassOf :ElectrochemicalSubcomponent ;
+                        emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is electronic"@en ;
+                        emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a """Current Collector
+Conducting Additive"""@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#IonicSubcomponent
+:IonicSubcomponent rdf:type owl:Class ;
+                   rdfs:subClassOf :ElectrochemicalSubcomponent .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#ReactiveSubcomponent
+:ReactiveSubcomponent rdf:type owl:Class ;
+                      rdfs:subClassOf :ElectrochemicalSubcomponent ;
+                      emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is to participate in a reaction."@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#StructuralSubcomponent
+:StructuralSubcomponent rdf:type owl:Class ;
+                        rdfs:subClassOf :ElectrochemicalSubcomponent .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

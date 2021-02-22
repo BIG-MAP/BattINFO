@@ -12,7 +12,12 @@
 
 <http://emmo.info/BattINFO/electrode> rdf:type owl:Ontology ;
                                        owl:versionIRI <http://emmo.info/BattINFO/0.0.1/electrode> ;
+<<<<<<< HEAD
                                        owl:imports <http://emmo.info/BattINFO/0.0.1/saltbridge> ;
+=======
+                                       owl:imports <http://emmo.info/BattINFO/0.0.1/properties> ,
+                                                   <http://emmo.info/BattINFO/0.0.1/saltbridge> ;
+>>>>>>> ef73eca15c33bae7b4bd1ef0d2b4a4fae585c994
                                        dcterms:abstract """Domain ontology for battery electrodes.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
@@ -23,20 +28,24 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 #    Classes
 #################################################################
 
-###  http://emmo.info/BattINFO/electrode#CompositeElectrode
+###  http://emmo.info/BattINFO#CompositeElectrode
 :CompositeElectrode rdf:type owl:Class ;
                     rdfs:subClassOf :Electrode ,
                                     [ rdf:type owl:Restriction ;
-                                      owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                      owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
                                       owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
                                       owl:onClass <http://emmo.info/BattINFO/electrochemistry#ElectrochemicalSubcomponent>
                                     ] ;
                     emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of multiple ElectrochemicalSubComponent"@en .
 
 
-###  http://emmo.info/BattINFO/electrode#Electrode
+###  http://emmo.info/BattINFO#Electrode
 :Electrode rdf:type owl:Class ;
-           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
+                             owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+                           ] ;
            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electron conductor in an electrochemical cell connected to the external circuit. - Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019)"@en ;
            rdfs:comment "Alternative definition: Half-cell consisting of at least one electron conductor and at least one ionic conductor (electrolyte). - Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019)"@en ,
                         "Note 1: The current flow through electrochemical cells may be zero or non-zero. An electrochemical cell with current flow can operate either as a galvanic cell or an electrolytic cell."@en ,
@@ -44,11 +53,11 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                         "Note 3: Many types of electrodes are used. These may be classified into groups according to their composition, form and size, and according to their operating mode. See section 4."@en .
 
 
-###  http://emmo.info/BattINFO/electrode#SimpleElectrode
+###  http://emmo.info/BattINFO#SimpleElectrode
 :SimpleElectrode rdf:type owl:Class ;
                  rdfs:subClassOf :Electrode ,
                                  [ rdf:type owl:Restriction ;
-                                   owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                   owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                    owl:onClass <http://emmo.info/BattINFO/electrochemistry#ElectrochemicalSubcomponent>
                                  ] ;
