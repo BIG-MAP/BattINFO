@@ -12,7 +12,8 @@
 
 <http://emmo.info/BattINFO/electrochemistry> rdf:type owl:Ontology ;
                                               owl:versionIRI <http://emmo.info/BattINFO/0.0.1/electrochemistry> ;
-                                              owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
+                                              owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ,
+                                                          <http://emmo.info/emmo/1.0.0-beta/saltbridge> ;
                                               dcterms:abstract """Concepts related to electrochemistry.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
@@ -206,7 +207,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
                                                              owl:someValuesFrom :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A system capable of either generating electrical energy from chemical reactions or using electrical energy to cause chemical reactions. The key feature of an electrochemical cell is that it contains two (or more) electrodes that allow transport of electrons, separated by a salt bridge that allows the movement of ions but blocks movement of electrons. 
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A system capable of either generating electrical energy from chemical reactions or using electrical energy to cause chemical reactions. The key feature of an electrochemical cell is that it contains two (or more) electrodes that allow transport of electrons, separated by a salt bridge that allows the movement of ions but blocks movement of electrons.
 
 -- Adapted from J. Newman, Electrochemical Systems (p. 3) and other sources"""@en ;
                                            skos:prefLabel "ElectrochemicalCell"@en .
