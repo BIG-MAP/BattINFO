@@ -100,6 +100,18 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 #    Classes
 #################################################################
 
+###  http://emmo.info/emmo#EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb
+:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_49804605_c0fe_4538_abda_f70ba1dc8a5d ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf :EMMO_c5aae418_1622_4d02_93c5_21159e28e6c1
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
+                                                           ] ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A 'physical' that stands for a real world object that takes active part of a functional process."@en ;
+                                           skos:prefLabel "ActiveParticipant"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
 :EMMO_1c1ec02e_4def_4979_aff9_572c06a95391 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7684ddff_d99b_405d_aad2_90e830b8403c ;
@@ -149,6 +161,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The molar heat capacity of a substance is the heat capacity of one mole of material."@en ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N-1 J0"@en ;
                                            skos:prefLabel "MolarHeatCapacity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead
+:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_43e9a05d_98af_41b4_92f6_00f79a09bfce ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A 'process' that is recognized by chemical sciences and is catogrized accordingly."@en ;
+                                           skos:prefLabel "ChemicalPhenomenon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
@@ -203,26 +222,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SpecificHeatCapacity"@en .
 
 
-###  http://emmo.info/emmo/generic-concepts#EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb
-:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_49804605_c0fe_4538_abda_f70ba1dc8a5d ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty [ owl:inverseOf :EMMO_c5aae418_1622_4d02_93c5_21159e28e6c1
-                                                                            ] ;
-                                                             owl:someValuesFrom :EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
-                                                           ] ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A 'physical' that stands for a real world object that takes active part of a functional process."@en ;
-                                           skos:prefLabel "ActiveParticipant"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead
-:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_43e9a05d_98af_41b4_92f6_00f79a09bfce ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A 'process' that is recognized by chemical sciences and is catogrized accordingly."@en ;
-                                           skos:prefLabel "ChemicalPhenomenon"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
+###  http://emmo.info/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
 :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A process that results in the interconversion of chemical species. Chemical reactions may be elementary reactions or stepwise reactions. (It should be noted that this definition includes experimentally observable interconversions of conformers.) Detectable chemical reactions normally involve sets of molecular entities as indicated by this definition, but it is often conceptually convenient to use the term also for changes involving single molecular entities (i.e. 'microscopic chemical events').
@@ -231,7 +231,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ChemicalReaction"@en .
 
 
-###  http://emmo.info/emmo/generic-concepts#EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
+###  http://emmo.info/emmo#EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
 :EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_43e9a05d_98af_41b4_92f6_00f79a09bfce ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process that makes a product work as intended when in use."@en ;
@@ -239,6 +239,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 - The car crash process for a crash box in a car.
 - The discharging process of a battery."""@en ;
                                            skos:prefLabel "FunctionalProcess"@en .
+
+
+###  http://emmo.info/emmo/generic-concepts#FunctionalMaterial
+:FunctionalMaterial rdf:type owl:Class ;
+                    rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                    :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Materials that have one or more properties that can be significantly changed in a controlled fashion by external stimuli (temperature, electric/magnetic field, etc.) and are therefore applied in a broad range of technological devices as for example in memories, displays and telecommunication. - NTNU FY3114 - Functional Materials"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
