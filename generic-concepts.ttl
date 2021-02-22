@@ -178,6 +178,23 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "EnergyDensity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1
+:EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c5ddfdba_c074_4aa4_ad6b_1ac4942d300d ,
+                                                           [ rdf:type owl:Class ;
+                                                             owl:unionOf ( :EMMO_04f2a2d5_e799_4692_a654_420e76f5acc1
+                                                                           :EMMO_3c218fbe_60c9_4597_8bcf_41eb1773af1f
+                                                                           :EMMO_7509da43_56b1_4d7f_887a_65d1663df4ba
+                                                                         )
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
+                                                             owl:someValuesFrom :EMMO_a2b006f2_bbfd_4dba_bcaa_3fca20cd6be1
+                                                           ] ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A space within a solid host domain that is filled by a liquid, gas, or vacuum. The characteristic length of the pore is much less than the characteristic length of the host domain. An exception is possible for 1 dimension (e.g. long pores)."@en ;
+                                           skos:prefLabel "Pore"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
 :EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -222,6 +239,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SpecificHeatCapacity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767
+:EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Materials that have one or more properties that can be significantly changed in a controlled fashion by external stimuli (temperature, electric/magnetic field, etc.) and are therefore applied in a broad range of technological devices as for example in memories, displays and telecommunication. - NTNU FY3114 - Functional Materials"@en ;
+                                           skos:prefLabel "FunctionalMaterial"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
 :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
@@ -239,28 +264,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 - The car crash process for a crash box in a car.
 - The discharging process of a battery."""@en ;
                                            skos:prefLabel "FunctionalProcess"@en .
-
-
-###  http://emmo.info/emmo#FunctionalMaterial
-:FunctionalMaterial rdf:type owl:Class ;
-                    rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
-                                    :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
-                    :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Materials that have one or more properties that can be significantly changed in a controlled fashion by external stimuli (temperature, electric/magnetic field, etc.) and are therefore applied in a broad range of technological devices as for example in memories, displays and telecommunication. - NTNU FY3114 - Functional Materials"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#Pore
-:Pore rdf:type owl:Class ;
-      rdfs:subClassOf [ rdf:type owl:Class ;
-                        owl:unionOf ( :EMMO_04f2a2d5_e799_4692_a654_420e76f5acc1
-                                      :EMMO_3c218fbe_60c9_4597_8bcf_41eb1773af1f
-                                      :EMMO_7509da43_56b1_4d7f_887a_65d1663df4ba
-                                    )
-                      ] ,
-                      [ rdf:type owl:Restriction ;
-                        owl:onProperty :EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
-                        owl:someValuesFrom :EMMO_a2b006f2_bbfd_4dba_bcaa_3fca20cd6be1
-                      ] ;
-      :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A space within a solid host domain that is filled by a liquid, gas, or vacuum. The characteristic length of the pore is much less than the characteristic length of the host domain. An exception is possible for 1 dimension (e.g. long pores)."@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
