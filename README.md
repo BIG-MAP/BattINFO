@@ -23,9 +23,13 @@ Imported Ontologies
 This ontology builds on top of EMMO.
 See the following table for version compatibilies:
 
-| Imported Ontologies | Version           |
-| ------------------- | ----------------- |
-| emmo-inferred       | 1.0.0-beta        |
+| Imported Ontologies      | Version           |
+| ------------------------ | ----------------- |
+| emmo-inferred-chemistry  | 1.0.0-beta        |
+
+The import structure shown in the figure below.
+
+![BattINFO import structure.](doc/battinfo-structure.png)
 
 
 Obtaining domain-batteryInterface
@@ -56,11 +60,22 @@ Attributions and credits
 ------------------------
 
 ### Contributors
-- Francesca Lønstad Bleken, SINTEF
-- Jesper Friis, SINTEF
-- Simon Clark, SINTEF
-- Casper Welzel Andersen, EPFL
-- To be added!
+- Francesca Lønstad Bleken, SINTEF, Norway
+- Jesper Friis, SINTEF, Norway
+- Simon Clark, SINTEF, Norway
+- Casper Welzel Andersen, EPFL, Switzerland
+- Eibar Flores, DTU, Denmark
+- Martin Uhrin, DTU, Denmark
+- Simon Stier, Fraunhofer, Germany
+- Marek Marcinek, Warsaw University of Technology, Poland
+- Anna Szczesna, Warsaw University of Technology, Poland
+- Miran Gaberscek, National Institute of Chemistry, Slovenia
+- Deyana Stoytcheva, ICMAB, Spain
+- Rosa Palacin, ICMAB, Spain
+- Ingeborg-Helene Svenum, SINTEF, Norway
+- Inga Gudem Ringdalen, SINTEF, Norway
+- Emanuele Farhi, SOLEIL synchrotron, France
+
 
 ### Projects
 - [BIG-MAP](http://www.big-map.eu/);
