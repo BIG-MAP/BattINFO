@@ -43,6 +43,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
+###  http://emmo.info/BattINFO#ActiveElectrochemicalMaterial
+:ActiveElectrochemicalMaterial rdf:type owl:Class ;
+                               rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
+                                               [ rdf:type owl:Restriction ;
+                                                 owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                 owl:someValuesFrom :ElectroactiveSubstance
+                                               ] .
+
+
 ###  http://emmo.info/BattINFO#EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df
 :EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_494b372c_cfdf_47d3_a4de_5e037c540de8 ,
@@ -286,9 +295,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
 :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/emmo/generic-concepts#FunctionalMaterial> ;
+                                           rdfs:subClassOf emmo:FunctionalMaterial ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A material that participates in a functional process in an electrochemical assembly." ;
                                            skos:prefLabel "ElectrochemicalMaterial"@en .
+
+
+###  http://emmo.info/BattINFO#ElectroactiveSubstance
+:ElectroactiveSubstance rdf:type owl:Class ;
+                        rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 .
 
 
 ###  http://emmo.info/BattINFO#ElectrochemicalSubcomponent
@@ -311,25 +325,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                        emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system comprising at least one electrochemical cell and the components necessary to support it."@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#ActiveElectrochemicalMaterial
-:ActiveElectrochemicalMaterial rdf:type owl:Class ;
-                               rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
-                                               [ rdf:type owl:Restriction ;
-                                                 owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                 owl:someValuesFrom :ElectroactiveSubstance
-                                               ] .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#ElectroactiveSubstance
-:ElectroactiveSubstance rdf:type owl:Class ;
-                        rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#ElectrochemicalSubcomponent
-:ElectrochemicalSubcomponent rdf:type owl:Class .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#ElectronicSubcomponent
+###  http://emmo.info/BattINFO#ElectronicSubcomponent
 :ElectronicSubcomponent rdf:type owl:Class ;
                         rdfs:subClassOf :ElectrochemicalSubcomponent ;
                         emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is electronic"@en ;
@@ -337,18 +333,18 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 Conducting Additive"""@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#IonicSubcomponent
+###  http://emmo.info/BattINFO#IonicSubcomponent
 :IonicSubcomponent rdf:type owl:Class ;
                    rdfs:subClassOf :ElectrochemicalSubcomponent .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#ReactiveSubcomponent
+###  http://emmo.info/BattINFO#ReactiveSubcomponent
 :ReactiveSubcomponent rdf:type owl:Class ;
                       rdfs:subClassOf :ElectrochemicalSubcomponent ;
                       emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is to participate in a reaction."@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#StructuralSubcomponent
+###  http://emmo.info/BattINFO#StructuralSubcomponent
 :StructuralSubcomponent rdf:type owl:Class ;
                         rdfs:subClassOf :ElectrochemicalSubcomponent .
 

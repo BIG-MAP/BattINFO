@@ -241,9 +241,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FunctionalProcess"@en .
 
 
-###  http://emmo.info/emmo/generic-concepts#FunctionalMaterial
+###  http://emmo.info/emmo#FunctionalMaterial
 :FunctionalMaterial rdf:type owl:Class ;
-                    rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                    rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                    :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
                     :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Materials that have one or more properties that can be significantly changed in a controlled fashion by external stimuli (temperature, electric/magnetic field, etc.) and are therefore applied in a broad range of technological devices as for example in memories, displays and telecommunication. - NTNU FY3114 - Functional Materials"@en .
 
 
