@@ -1,0 +1,64 @@
+---
+title:  'Battery INterFace Ontology (BattINFO) Reference Documentation'
+version: 0.0.1
+author:
+- name: Simon Clark
+  affiliation: SINTEF, Norway
+- name: Jesper Friis
+  affiliation: SINTEF, Norway
+- name: Francesca Lønstad Bleken
+  affiliation: SINTEF, Norway
+- name: Casper Welzel Andersen
+  affiliation: EPFL, Switzerland
+- name: Eibar Flores
+  affiliation: DTU, Denmark
+- name: Martin Uhrin
+  affiliation: DTU, Denmark
+- name: Simon Stier
+  affiliation: Fraunhofer, Germany
+- name: Marek Marcinek
+  affiliation: Warsaw University of Technology, Poland
+- name: Anna Szczesna
+  affiliation: Warsaw University of Technology, Poland
+- name: Miran Gaberscek
+  affiliation: National Institute of Chemistry, Slovenia
+- name: Deyana Stoytcheva
+  affiliation: ICMAB, Spain
+- name: Rosa Palacin
+  affiliation: ICMAB, Spain
+- name: Ingeborg-Helene Svenum
+  affiliation: SINTEF, Norway
+- name: Inga Gudem Ringdalen
+  affiliation: SINTEF, Norway
+- name: Emanuele Farhi
+  affiliation: SOLEIL synchrotron, France
+institute: 'Battery Interface Genome - Materials Acceleration Platform (BIG-MAP)'
+keywords: [Battery, EMMO, 'materials science', modelling, characterisation, materials, ontology]
+abstract: |
+  This is a reference documentation for the Battery Interface Ontology
+  (BattINFO).
+
+  BattINFO is an ontology of batteries and their interfaces based on
+  the top-level European Materials and Modelling Ontology
+  (EMMO). BattINFO aims to formalize the current state of knowledge on
+  battery interfaces to support the development of computational tools
+  and the deployment of interoperable data in the BIG-MAP project and
+  beyond. The definitions included in BattINFO are based as far as
+  possible on accepted standards defined by the International Union of
+  Pure and Applied Chemistry (IUPAC) or other preeminent textbooks on
+  the subject. BattINFO objects and their relations to each other are
+  designed with three goals in mind: (i) to be scientifically rigorous
+  and accurate, (ii) to reflect current battery orthodoxy and dominant
+  jargon, and (iii) to be flexible to describe a range of battery
+  chemistries, not only Li-ion.
+
+  The development of BattINFO is a mammoth undertaking and will continue
+  throughout the project. However, it is important to establish an
+  initial version to support the activities in other BIG-MAP work
+  packages and provide a preliminary platform for collaboration. The
+  objective of this deliverable is to establish the initial version of
+  BattINFO. This report outlines the conceptual foundation for the
+  definitions in the ontology and serves as a guide to help interpret
+  the implementation of BattINFO in the ontology web language (OWL).
+
+...
