@@ -3,7 +3,8 @@
 set -e
 set -x
 
-rootdir=$(git rootdir)
+# Directories
+rootdir=$(git rev-parse --show-toplevel)
 ontodocdir=$rootdir/doc/ontodoc
 tmpdir=$ontodocdir/tmp
 pagesdir=$tmpdir/gh-pages

@@ -3,7 +3,8 @@
 set -e
 set -x
 
-rootdir=$(git rootdir)
+# Directories
+rootdir=$(git rev-parse --show-toplevel)
 ontodocdir=$rootdir/doc/ontodoc
 tmpdir=$ontodocdir/tmp
 
@@ -19,6 +20,6 @@ ontodoc --template=battinfo.md --format=html $tmpdir/battinfo-inferred.ttl \
         $tmpdir/battinfo.html
 
 
-# Some goes wrong when generating pdf
+# Something goes wrong when generating pdf
 #ontodoc --template=battinfo.md $tmpdir/battinfo-inferred.ttl \
 #        $tmpdir/battinfo.pdf
