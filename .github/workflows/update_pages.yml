@@ -53,15 +53,22 @@ jobs:
     - name: Update GitHub Pages
       run: |
         pwd
+        echo "=== ls ../../.."
+        ls -a ../../..
+        echo "=== ls ../.."
+        ls -a ../..
         echo "=== ls .."
-        ls ..
+        ls -a ..
         echo "=== ls"
-        ls
+        ls -a
+        git pull
+        echo "=== ls"
+        ls -a
         echo "=== ls doc"
-        ls doc
+        ls -a doc
         echo "=== ls doc/ontodoc"
-        ls doc/ontodoc
+        ls -a doc/ontodoc
         echo "=== ls doc/ontodoc/tmp"
-        ls doc/ontodoc/tmp
+        ls -a doc/ontodoc/tmp
         echo "=== "
         doc/ontodoc/update-pages.sh
