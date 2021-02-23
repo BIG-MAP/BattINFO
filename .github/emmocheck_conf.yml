@@ -5,4 +5,8 @@ skip:
 test_quantity_dimension:
   exceptions:
     - BattINFO.ElectroChemicalQuantity
+    - BattINFO.ElectrochemicalKineticQuantity
+    - BattINFO.ElectrochemicalTransportQuantity
     - BattINFO.BatteryQuantity
+    # We ignore reaction rate constant since its dimensionality may vary
+    - BattINFO.ReactionRateConstant
