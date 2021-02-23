@@ -13,10 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      #with:
-      #  ref: gh-pages
-      #  path: doc/ontodoc/tmp/gh-pages
 
     - name: Setup git identity
       run: |
@@ -53,8 +49,7 @@ jobs:
         path: doc/ontodoc/tmp/gh-pages
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
         ssh-strict: no
-        #repository: emmo-repo/emmo-repo.github.io
 
     - name: Update GitHub Pages
       run: |
-        doc/ontodoc/update_pages.sh
+        doc/ontodoc/update-pages.sh
