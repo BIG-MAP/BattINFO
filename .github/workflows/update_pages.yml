@@ -13,33 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+
+    - name: Check out repository
+      uses: actions/checkout@v2
 
     - name: Setup git identity
       run: |
         git config --global user.email "battinfo.github.action@github.com"
         git config --global user.name "BattINFO GitHub Action"
-        pwd
-        echo "=== ls ../../.."
-        ls -a ../../..
-        echo "=== ls ../.."
-        ls -a ../..
-        echo "=== ls .."
-        ls -a ..
-        echo "=== ls"
-        ls -a
-        git pull
-        echo "=== ls"
-        ls -a
-        echo "=== ls doc"
-        ls -a doc
-        echo "=== ls doc/ontodoc"
-        ls -a doc/ontodoc
-        echo "=== ls doc/ontodoc/tmp"
-        ls -a doc/ontodoc/tmp
-        echo "=== "
-
-
+        git config pull.rebase false
 
     - name: Setup Python 3.7
       uses: actions/setup-python@v1
