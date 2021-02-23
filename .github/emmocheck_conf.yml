@@ -5,3 +5,4 @@ skip:
 test_quantity_dimension:
   exceptions:
     - BattINFO.ElectroChemicalQuantity
+    - BattINFO.BatteryQuantity
