@@ -7,3 +7,8 @@
 
 
 %BRANCHDOC ActiveParticipant
+%BRANCHDOC ElectrochemicalSystem
+%BRANCHDOC ElectrochemicalCell
+%BRANCHDOC ElectrochemicalComponent
+%BRANCHDOC ElectrochemicalSubcomponent
+%BRANCHDOC ElectrochemicalMaterial
