@@ -39,12 +39,11 @@ jobs:
 
     - name: Check out BattINFO repository
       uses: actions/checkout@v2
-      with:
-        path: /home/runner/work/BattINFO
 
     - name: Setup git identity
       run: |
-        cd /home/runner/work/BattINFO
+        pwd
+        cd $GITHUB_WORKSPACE
         git config --global user.email "battinfo.github.action@github.com"
         git config --global user.name "BattINFO GitHub Action"
         git config pull.rebase false
@@ -53,7 +52,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: gh-pages
-        path: /home/runner/work/BattINFO/doc/ontodoc/tmp/gh-pages
+        path: $GITHUB_WORKSPACE/doc/ontodoc/tmp/gh-pages
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
         ssh-strict: no
 
