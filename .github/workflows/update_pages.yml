@@ -30,7 +30,7 @@ jobs:
 
     - name: Install EMMO-python
       run: |
-        pip install --upgrade pip
+        pip install --upgrade pip setuptools
         pip install EMMO
 
     - name: Install pandoc 2.1.2
