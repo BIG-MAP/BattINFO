@@ -1,7 +1,6 @@
 #!/bin/sh
 # Bash script for generating documentation
-set -e
-set -x
+set -ex
 
 # Directories
 rootdir=$(git rev-parse --show-toplevel)
