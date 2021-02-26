@@ -14,9 +14,6 @@ jobs:
 
     steps:
 
-    - name: Check out repository
-      uses: actions/checkout@v2
-
     - name: Setup git identity
       run: |
         git config --global user.email "battinfo.github.action@github.com"
@@ -46,14 +43,19 @@ jobs:
         sudo apt-get install texlive-latex-extra
         pip install semver
 
+    - name: Check out BattINFO repository
+      uses: actions/checkout@v2
+      with:
+        path: /home/runner/work/BattINFO
+
     - name: Checkout GitHub Pages for EMMO-repo
       uses: actions/checkout@v2
       with:
         ref: gh-pages
-        path: doc/ontodoc/tmp/gh-pages
+        path: /home/runner/work/BattINFO/doc/ontodoc/tmp/gh-pages
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
         ssh-strict: no
 
     - name: Update GitHub Pages
       run: |
-        doc/ontodoc/update-pages.sh
+        /home/runner/work/BattINFO/doc/ontodoc/update-pages.sh
