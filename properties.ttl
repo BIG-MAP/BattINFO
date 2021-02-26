@@ -12,7 +12,8 @@
 
 <http://emmo.info/BattINFO/properties> rdf:type owl:Ontology ;
                                         owl:versionIRI <http://emmo.info/BattINFO/0.0.1/properties> ;
-                                        owl:imports <http://emmo.info/BattINFO/0.0.1/electrochemistry> ;
+                                        owl:imports <http://emmo.info/BattINFO/0.0.1/characterisation> ,
+                                                    <http://emmo.info/BattINFO/0.0.1/electrochemistry> ;
                                         dcterms:abstract """Common properties for batteries and their interfaces.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
@@ -52,6 +53,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "TheoteticalSpecificEnergy"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1
+:EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Physical quantities defined within the domain of batteries."@en ;
+                                           skos:prefLabel "BatteryQuantity"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa
 :EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
@@ -64,7 +72,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_367a4916_d03a_483c_9f2c_6588370fc9d9
 :EMMO_367a4916_d03a_483c_9f2c_6588370fc9d9 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           rdfs:subClassOf :EMMO_0c0c623c_43b8_426d_a536_168108e2353a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Difference between the theoretical electric potentials of the positive electrode and negeative electrode under no current flow."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:altLabel "NernstVoltage"@en ,
