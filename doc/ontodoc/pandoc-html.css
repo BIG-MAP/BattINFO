@@ -21,7 +21,7 @@ body, div, p {
     hyphens: auto;
     margin: 0in;
     text-align: justify;
-    text-indent: .25in;
+    /* text-indent: .25in; */
     line-height: 200%;
     pagination: widow-orphan;
     font-size: 12pt;
