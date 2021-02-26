@@ -104,6 +104,14 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ,
                                            skos:prefLabel "ChemicalPotential"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6
+:EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Deviation of the potential of an electrode from its equilibrium value required to cause a given current to flow through the electrode."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/O04358" ;
+                                           rdfs:label "Overpotential"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
 :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -155,6 +163,12 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ,
                                            skos:prefLabel "ElectrochemicalThermodynamicQuantity"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_34e440e0_b720_4585_a915_fbe5abb8615d
+:EMMO_34e440e0_b720_4585_a915_fbe5abb8615d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0c0c623c_43b8_426d_a536_168108e2353a ;
+                                           rdfs:label "TheoreticalOpenCircuitVoltage"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
 :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
@@ -164,6 +178,13 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ,
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of an electrochemical cell."@en ;
                                            skos:prefLabel "ElectrochemicalComponent"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
+:EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A material relation in electrochemistry."@en ;
+                                           rdfs:label "ElectrochemicalRelation"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_47b7d606_7030_4674_9828_cf83fb4a2995
@@ -185,6 +206,15 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ReactionRate"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
+:EMMO_499a652b_5be6_4931_be7b_15d42e544b0b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "Product of ElectronCharge and AvagadroConstant"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Fundamental physical constant representing molar elementary charge: F=9.648 533 99(24)×10^4 C mol−1."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/F02325" ;
+                                           rdfs:label "FaradayConstant"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b
 :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
@@ -196,7 +226,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 :EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system comprising at least one electrochemical cell and the components necessary to support it."@en ;
@@ -230,6 +260,14 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "TransportNumber"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
+:EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The potential of a working electrode relative to a reference electrode of the same kinds placed in the solution adjacent to the surface of the working electrode (just outside the double layer)."@en ;
+                                           rdfs:comment "The driving force for an electrochemcial charge-transfer reaction."@en ;
+                                           rdfs:label "SurfaceOverpotential"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89
 :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
@@ -259,6 +297,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            rdfs:subClassOf :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ChemicalPotential per mole."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
+                                           rdfs:label "MolarChemicalPotential"@en ;
                                            skos:altLabel "PartialMolarFreeEnergy"@en ,
                                                          "PartialMolarGibbsFreeEnergy"@en ;
                                            skos:prefLabel "MolarChemicalPotential"@en .
@@ -365,6 +404,16 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ElectrochemicalCell"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
+:EMMO_740d5817_3fa7_464a_90c3_55552e51a3df rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_quotient" ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+                                           rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ,
+                                                        "This quantity applies in general to a system which is not in equilibrium."@en ;
+                                           rdfs:label "ReactionQuotient"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_791c1915_a791_4450_acd8_7f94764743b5
 :EMMO_791c1915_a791_4450_acd8_7f94764743b5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -396,6 +445,14 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ChargePerMassDimension"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36
+:EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical equilibrium potential under standard conditions."@en ;
+                                           rdfs:label "StandardPotential"@en ;
+                                           skos:altLabel "StandardElectrodePotential"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6
 :EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd ;
@@ -403,6 +460,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
                                            rdfs:comment "Of a substance in a specified phase, the partial molar Gibbs energy of the substance at the specified electric potential."@en ;
+                                           rdfs:label "MolarElectrochemicalPotential"@en ;
                                            skos:prefLabel "MolarElectrochemicalPotential"@en .
 
 
@@ -449,6 +507,14 @@ Conducting Additive"""@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Measured electric potential of an electrode without external current flow."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "OpenCircuitPotential"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4
+:EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The concentration overpotential of an electrode reaction at a given electrode current density (c.d.) is basically the difference in equilibrium potentials across the diffusion layer. More precisely, it is the potential of a reference electrode (of the same electrode reaction as the working electrode ) with the interfacial concentrations which establish themselves at c.d., relative to the potential of a similar reference electrode with the concentrations of the bulk solution. From such a measured potential difference, with c.d. flowing, one needs to subtract the ohmic potential drop prevailing between the two electrodes."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01230" ;
+                                           rdfs:label "ConcentrationOverpotential"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31
@@ -552,12 +618,65 @@ i0 = ia = - ic
                                            skos:prefLabel "ExchangeCurrent"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4
+:EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_b953f2b1_c8d1_4dd9_b630_d3ef6580c2bb ;
+                                           rdfs:label "ElectrochemicalConstant"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938
+:EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The standard phenomenological model for electrode kinetics, describing the relation between the electrode current from an electrochemical charge-transfer reaction and the surface overpotential of the electrode."@en ;
+                                           rdfs:comment "i = i0 * (exp(alpha*n*F*eta/(R*T)) – exp(-(1-alpha)*n*F*eta/(R*T)))" ;
+                                           rdfs:label "ButlerVolmerEquation"@en ;
+                                           skos:altLabel "ButlerVolmerApproximation"@en ,
+                                                         "ErdeyGruzVolmerEquation"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3
 :EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Change in the Gibbs free energy between the products and reactants in a reaction."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "GibbsFreeEnergyOfReaction"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
+:EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical electrode potential considering a given electrochemical charge-transfer reaction."@en ;
+                                           rdfs:label "TheoreticalOpenCircuitPotential"@en ;
+                                           skos:altLabel "EquilibriumPotential"@en ,
+                                                         "NernstPotential"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_dbd808a7_8a8f_43be_9870_02cc35bd1646
@@ -653,150 +772,9 @@ Pingarron et al., Terminology of electrochemical methods of analysis""" ;
                                            skos:prefLabel "Electrolyte"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6
-:EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Deviation of the potential of an electrode from its equilibrium value required to cause a given current to flow through the electrode."@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/O04358" ;
-                                           rdfs:label "Overpotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_34e440e0_b720_4585_a915_fbe5abb8615d
-:EMMO_34e440e0_b720_4585_a915_fbe5abb8615d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0c0c623c_43b8_426d_a536_168108e2353a ;
-                                           rdfs:label "TheoreticalOpenCircuitVoltage"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
-:EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A material relation in electrochemistry."@en ;
-                                           rdfs:label "ElectrochemicalRelation"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
-:EMMO_499a652b_5be6_4931_be7b_15d42e544b0b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 ;
-                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "Product of ElectronCharge and AvagadroConstant"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Fundamental physical constant representing molar elementary charge: F=9.648 533 99(24)×10^4 C mol−1."@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/F02325" ;
-                                           rdfs:label "FaradayConstant"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
-:EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The potential of a working electrode relative to a reference electrode of the same kinds placed in the solution adjacent to the surface of the working electrode (just outside the double layer)."@en ;
-                                           rdfs:comment "The driving force for an electrochemcial charge-transfer reaction."@en ;
-                                           rdfs:label "SurfaceOverpotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d
-:EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ChemicalPotential per mole."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
-                                           rdfs:label "MolarChemicalPotential"@en ;
-                                           skos:altLabel "PartialMolarFreeEnergy"@en ,
-                                                         "PartialMolarGibbsFreeEnergy"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
-:EMMO_740d5817_3fa7_464a_90c3_55552e51a3df rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_quotient" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
-                                           rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ,
-                                                        "This quantity applies in general to a system which is not in equilibrium."@en ;
-                                           rdfs:label "ReactionQuotient"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36
-:EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical equilibrium potential under standard conditions."@en ;
-                                           rdfs:label "StandardPotential"@en ;
-                                           skos:altLabel "StandardElectrodePotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6
-:EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ElectrochemicalPotential per mole."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
-                                           rdfs:comment "Of a substance in a specified phase, the partial molar Gibbs energy of the substance at the specified electric potential."@en ;
-                                           rdfs:label "MolarElectrochemicalPotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4
-:EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The concentration overpotential of an electrode reaction at a given electrode current density (c.d.) is basically the difference in equilibrium potentials across the diffusion layer. More precisely, it is the potential of a reference electrode (of the same electrode reaction as the working electrode ) with the interfacial concentrations which establish themselves at c.d., relative to the potential of a similar reference electrode with the concentrations of the bulk solution. From such a measured potential difference, with c.d. flowing, one needs to subtract the ohmic potential drop prevailing between the two electrodes."@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01230" ;
-                                           rdfs:label "ConcentrationOverpotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4
-:EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_b953f2b1_c8d1_4dd9_b630_d3ef6580c2bb ;
-                                           rdfs:label "ElectrochemicalConstant"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938
-:EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The standard phenomenological model for electrode kinetics, describing the relation between the electrode current from an electrochemical charge-transfer reaction and the surface overpotential of the electrode."@en ;
-                                           rdfs:comment "i = i0 * (exp(alpha*n*F*eta/(R*T)) – exp(-(1-alpha)*n*F*eta/(R*T)))" ;
-                                           rdfs:label "ButlerVolmerEquation"@en ;
-                                           skos:altLabel "ButlerVolmerApproximation"@en ,
-                                                         "ErdeyGruzVolmerEquation"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
-:EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical electrode potential considering a given electrochemical charge-transfer reaction."@en ;
-                                           rdfs:label "TheoreticalOpenCircuitPotential"@en ;
-                                           skos:altLabel "EquilibriumPotential"@en ,
-                                                         "NernstPotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e
+###  http://emmo.info/BattINFO#EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e
 :EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
-                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
@@ -808,6 +786,10 @@ Pingarron et al., Terminology of electrochemical methods of analysis""" ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
