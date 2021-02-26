@@ -28,7 +28,7 @@ git pull origin gh-pages
 cp -u ${tmpdir}/battinfo.html index.html
 
 # Update gh-pages
-if git add index.html; then
+if git add index.html battinfo.pdf; then
     git commit -m "Update BattINFO reference documentation"
     git push origin gh-pages
 fi
