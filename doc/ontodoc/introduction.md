@@ -17,7 +17,7 @@ The purpose of this report is to lay the groundwork for the development of BattI
 The Battery Interface Domain Ontology is available from the github repository
 [https://github.com/BIG-MAP/BattINFO][BattINFO].
 
-It released under the [Creative Commons Attribution 4.0 International license (CC BY 4.0)][CC-BY-4.0].
+It is released under the [Creative Commons Attribution 4.0 International license (CC BY 4.0)][CC-BY-4.0].
 
 
 ## References

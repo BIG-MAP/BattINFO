@@ -24,13 +24,13 @@ jobs:
         git config pull.rebase false
 
     - name: Setup Python 3.7
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: 3.7
 
     - name: Install EMMO-python
       run: |
-        pip install --upgrade pip
+        pip install --upgrade pip setuptools
         pip install EMMO
 
     - name: Install pandoc 2.1.2
