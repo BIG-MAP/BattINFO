@@ -8,9 +8,9 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/BattINFO/cheracterisation> .
+@base <http://emmo.info/BattINFO/characterisation> .
 
-<http://emmo.info/BattINFO/cheracterisation> rdf:type owl:Ontology ;
+<http://emmo.info/BattINFO/characterisation> rdf:type owl:Ontology ;
                                               owl:versionIRI <http://emmo.info/BattINFO/0.0.1/characterisation> ;
                                               owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
                                               dcterms:abstract """Domain ontology for characterisation.
