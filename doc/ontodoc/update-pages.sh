@@ -13,7 +13,7 @@ pagesdir=$tmpdir/gh-pages
 ${ontodocdir}/mkdoc.sh
 
 # Check up gh-pages
-if ! [ -d $pagesdir ]; then
+if ! [ -d ${pagesdir} ]; then
     git clone --branch=gh-pages --single-branch \
         git@github.com:BIG-MAP/OntoBATT.git $pagesdir
 fi
