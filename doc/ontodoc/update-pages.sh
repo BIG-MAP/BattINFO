@@ -10,7 +10,7 @@ tmpdir=$ontodocdir/tmp
 pagesdir=$tmpdir/gh-pages
 
 # Generate documentation
-$ontodocdir/mkdoc.sh
+${ontodocdir}/mkdoc.sh
 
 # Check up gh-pages
 if ! [ -d $pagesdir ]; then
