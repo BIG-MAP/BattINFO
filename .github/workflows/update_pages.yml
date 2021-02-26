@@ -51,10 +51,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: gh-pages
-        path: $GITHUB_WORKSPACE/doc/ontodoc/tmp/gh-pages
+        path: doc/ontodoc/tmp/gh-pages
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
         ssh-strict: no
 
     - name: Update GitHub Pages
       run: |
+        pwd
         $GITHUB_WORKSPACE/doc/ontodoc/update-pages.sh
