@@ -4,9 +4,9 @@ set -ex
 
 # Directories
 rootdir=$(git rev-parse --show-toplevel)
-ontodocdir=$rootdir/doc/ontodoc
-tmpdir=$ontodocdir/tmp
-pagesdir=$tmpdir/gh-pages
+ontodocdir=${rootdir}/doc/ontodoc
+tmpdir=${ontodocdir}/tmp
+pagesdir=${tmpdir}/gh-pages
 
 # Generate documentation
 ${ontodocdir}/mkdoc.sh
