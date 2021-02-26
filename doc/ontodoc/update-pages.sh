@@ -15,7 +15,7 @@ ${ontodocdir}/mkdoc.sh
 # Check up gh-pages
 if ! [ -d ${pagesdir} ]; then
     git clone --branch=gh-pages --single-branch \
-        git@github.com:BIG-MAP/OntoBATT.git $pagesdir
+        git@github.com:BIG-MAP/OntoBATT.git ${pagesdir}
 fi
 
 # Copy documentation to gh-pages
