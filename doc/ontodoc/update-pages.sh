@@ -20,8 +20,8 @@ fi
 
 # Copy documentation to gh-pages
 # FIXME - generate separate index.html with links to versions
-cd $pagesdir
-cp -u $tmpdir/battinfo.html index.html
+cd ${pagesdir}
+cp -u ${tmpdir}/battinfo.html index.html
 
 # Update gh-pages
 git pull origin gh-pages
