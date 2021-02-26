@@ -9,8 +9,8 @@ tmpdir=${ontodocdir}/tmp
 
 cd $ontodocdir
 
-mkdir -p $tmpdir/figs
-cp -u $rootdir/bigmap.png $tmpdir/figs/.
+mkdir -p ${tmpdir}/figs
+cp -u ${rootdir}/bigmap.png ${tmpdir}/figs/.
 
 ontograph -m $rootdir/battinfo.ttl $tmpdir/battinfo-structure.png
 ontoconvert -si $rootdir/battinfo.ttl $tmpdir/battinfo-inferred.ttl
