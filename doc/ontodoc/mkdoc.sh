@@ -9,11 +9,11 @@ tmpdir=${ontodocdir}/tmp
 
 cd $ontodocdir
 
-mkdir -p ${tmpdir}/figs
-cp -u ${rootdir}/bigmap.png ${tmpdir}/figs/.
-
-ontograph -m ${rootdir}/battinfo.ttl ${tmpdir}/battinfo-structure.png
-ontoconvert -si ${rootdir}/battinfo.ttl ${tmpdir}/battinfo-inferred.ttl
+#mkdir -p ${tmpdir}/figs
+#cp -u ${rootdir}/bigmap.png ${tmpdir}/figs/.
+#
+#ontograph -m ${rootdir}/battinfo.ttl ${tmpdir}/battinfo-structure.png
+#ontoconvert -si ${rootdir}/battinfo.ttl ${tmpdir}/battinfo-inferred.ttl
 
 ontodoc --template=battinfo.md --format=html ${tmpdir}/battinfo-inferred.ttl \
         ${tmpdir}/battinfo.html

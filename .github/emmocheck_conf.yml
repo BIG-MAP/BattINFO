@@ -8,6 +8,7 @@ test_quantity_dimension:
     - BattINFO.ElectrochemicalKineticQuantity
     - BattINFO.ElectrochemicalTransportQuantity
     - BattINFO.ElectrochemicalThermodynamicQuantity
+    - BattINFO.ElectrochemicalConstant
     - BattINFO.BatteryQuantity
     # We ignore reaction rate constant since its dimensionality may vary
     - BattINFO.ReactionRateConstant

@@ -4,7 +4,9 @@
 %%
 
 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HEADER "Generic concepts"    level=1
+
 These classes are intended to be merged back into EMMO.
 
 %HEADER "Participant subclasses"    level=2
@@ -36,7 +38,11 @@ These classes are intended to be merged back into EMMO.
 %ENTITY PerTemperatureDimension
 
 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HEADER "Electrochemical and battery-specific concepts"    level=1
+All classes under here are defined with the http://emmo.info/BattINFO#
+namespace.
+
 
 %% %BRANCHDOC ActiveParticipant ontologies=generic-concepts
 %BRANCHDOC ActiveParticipant
@@ -48,5 +54,13 @@ These classes are intended to be merged back into EMMO.
 
 
 %BRANCHDOC ElectrochemicalQuantity
+%BRANCHDOC ElectrochemicalTransportQuantity
 %BRANCHDOC ElectrochemicalKineticQuantity
 %BRANCHDOC ElectrochemicalThermodynamicQuantity
+%% %BRANCHDOC BatteryQuantity
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%HEADER "Appendix"    level=1
+
+%BRANCHFIG EMMO namespaces=BattINFO caption="All classes defined with the BattINFO namespace.  In addition parent classes belonging to EMMO are included."
