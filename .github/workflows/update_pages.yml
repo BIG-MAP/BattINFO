@@ -42,8 +42,6 @@ jobs:
 
     - name: Setup git identity
       run: |
-        pwd
-        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
         cd $GITHUB_WORKSPACE
         git config --global user.email "battinfo.github.action@github.com"
         git config --global user.name "BattINFO GitHub Action"
