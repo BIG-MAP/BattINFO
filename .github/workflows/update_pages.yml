@@ -43,6 +43,7 @@ jobs:
     - name: Setup git identity
       run: |
         pwd
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
         cd $GITHUB_WORKSPACE
         git config --global user.email "battinfo.github.action@github.com"
         git config --global user.name "BattINFO GitHub Action"
@@ -58,4 +59,4 @@ jobs:
 
     - name: Update GitHub Pages
       run: |
-        /home/runner/work/BattINFO/doc/ontodoc/update-pages.sh
+        $GITHUB_WORKSPACE/doc/ontodoc/update-pages.sh
