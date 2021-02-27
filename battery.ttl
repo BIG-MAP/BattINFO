@@ -11,8 +11,8 @@
 @base <http://emmo.info/BattINFO/battery> .
 
 <http://emmo.info/BattINFO/battery> rdf:type owl:Ontology ;
-                             owl:versionIRI <http://emmo.info/BattINFO/0.0.1/battery> ;
-                             owl:imports <http://emmo.info/BattINFO/0.0.1/electrode> ;
+                             owl:versionIRI <http://emmo.info/BattINFO/0.1/battery> ;
+                             owl:imports <http://emmo.info/BattINFO/0.1/electrode> ;
                              dcterms:abstract """A toplevel battery interface domain ontology based on EMMO.
 
 This file is intended to contain information on the whole battery, and imports the submodules electrode and saltbridge.

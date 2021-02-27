@@ -11,7 +11,7 @@
 @base <http://emmo.info/BattINFO/electrochemistry> .
 
 <http://emmo.info/BattINFO/electrochemistry> rdf:type owl:Ontology ;
-                                              owl:versionIRI <http://emmo.info/BattINFO/0.0.1/electrochemistry> ;
+                                              owl:versionIRI <http://emmo.info/BattINFO/0.1/electrochemistry> ;
                                               owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
                                               dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
 

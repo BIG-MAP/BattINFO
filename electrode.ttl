@@ -11,8 +11,8 @@
 @base <http://emmo.info/BattINFO/electrode> .
 
 <http://emmo.info/BattINFO/electrode> rdf:type owl:Ontology ;
-                                       owl:versionIRI <http://emmo.info/BattINFO/0.0.1/electrode> ;
-                                       owl:imports <http://emmo.info/BattINFO/0.0.1/saltbridge> ;
+                                       owl:versionIRI <http://emmo.info/BattINFO/0.1/electrode> ;
+                                       owl:imports <http://emmo.info/BattINFO/0.1/saltbridge> ;
                                        dcterms:abstract """Domain ontology for battery electrodes.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
