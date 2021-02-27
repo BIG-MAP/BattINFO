@@ -9,14 +9,14 @@
 
 These classes are intended to be merged back into EMMO.
 
-%HEADER "Participant subclasses"    level=2
-%ENTITY ActiveParticipant
-%ENTITY FunctionalMaterial
-
 %HEADER "Process subclasses"    level=2
 %ENTITY FunctionalProcess
 %ENTITY ChemicalPhenomenon
 %ENTITY ChemicalReaction
+
+%HEADER "Participant subclasses"    level=2
+%ENTITY ActiveParticipant
+%ENTITY FunctionalMaterial
 
 %HEADER "Physicalistic subclasses"    level=2
 %ENTITY Pore
@@ -34,7 +34,7 @@ These classes are intended to be merged back into EMMO.
 %ENTITY ThermalConductivity
 %ENTITY SpecificHeatCapacity
 
-%HEADER "Additional quantity dimensions"    level=2
+%HEADER "Physical dimensions"    level=2
 %ENTITY PerTemperatureDimension
 
 
@@ -57,10 +57,28 @@ namespace.
 %BRANCHDOC ElectrochemicalTransportQuantity
 %BRANCHDOC ElectrochemicalKineticQuantity
 %BRANCHDOC ElectrochemicalThermodynamicQuantity
-%% %BRANCHDOC BatteryQuantity
+%BRANCHDOC ElectrochemicalConstant
+
+%BRANCHDOC PhysicalQuantity namespaces=BattINFO title="Additional physical quantities" caption="Additional physical quantities defined in BattINFO.  Parent classes belonging to EMMO are shown in gray."
+
+
+%BRANCHDOC MaterialRelation
+
+%BRANCHDOC ChemicalSpecies namespaces=BattINFO
+
+
+%HEADER "Real world objects"    level=2
+%ENTITY ElectrodePore
+%ENTITY ElectrochemicalDevice
+
+
+%HEADER "Physical dimensions"    level=2
+%ENTITY ChargePerMassDimension
 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HEADER "Appendix"    level=1
 
-%BRANCHFIG EMMO namespaces=BattINFO caption="All classes defined with the BattINFO namespace.  In addition parent classes belonging to EMMO are included."
+%BRANCHFIG EMMO namespaces=BattINFO terminated=0 caption="All classes defined with the BattINFO namespace, except physical quantities.  In addition parent classes belonging to EMMO are shown in gray." leafs=PhysicalQuantity,PhysicalDimension
+
+%BRANCHFIG PhysicalQuantity namespaces=BattINFO terminated=0 caption="All physical quantities defined with the BattINFO namespace.  In addition parent classes belonging to EMMO are shown in gray."

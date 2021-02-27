@@ -57,5 +57,4 @@ jobs:
 
     - name: Update GitHub Pages
       run: |
-        pwd
         $GITHUB_WORKSPACE/doc/ontodoc/update-pages.sh

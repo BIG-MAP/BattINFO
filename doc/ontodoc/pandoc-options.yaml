@@ -11,4 +11,4 @@ toc-depth: 2
 variables:
   date: now
   logo: tmp/figs/bigmap.png
-#  titlegraphic: tmp/figs/bigmap.png
+  titlegraphic: ../BIG-MAP_concepts.png
