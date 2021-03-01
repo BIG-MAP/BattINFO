@@ -11,13 +11,13 @@
 @base <http://emmo.info/BattINFO/observations> .
 
 <http://emmo.info/BattINFO/observations> rdf:type owl:Ontology ;
-                                       owl:versionIRI <http://emmo.info/BattINFO/0.1/observations> ;
-                                       owl:imports <http://emmo.info/BattINFO/0.1/battery> ;
+                                       owl:versionIRI <http://emmo.info/BattINFO/0.1.0/observations> ;
+                                       owl:imports <http://emmo.info/BattINFO/0.1.0/battery> ;
                                        dcterms:abstract """Domain ontology for semiosis processes in battery development.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
                                        dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                       owl:versionInfo "0.0.1" .
+                                       owl:versionInfo "0.1.0" .
 
 #################################################################
 #    Classes

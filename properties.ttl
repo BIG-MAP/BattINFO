@@ -11,14 +11,14 @@
 @base <http://emmo.info/BattINFO/properties> .
 
 <http://emmo.info/BattINFO/properties> rdf:type owl:Ontology ;
-                                        owl:versionIRI <http://emmo.info/BattINFO/0.1/properties> ;
-                                        owl:imports <http://emmo.info/BattINFO/0.1/characterisation> ,
-                                                    <http://emmo.info/BattINFO/0.1/electrochemistry> ;
+                                        owl:versionIRI <http://emmo.info/BattINFO/0.1.0/properties> ;
+                                        owl:imports <http://emmo.info/BattINFO/0.1.0/characterisation> ,
+                                                    <http://emmo.info/BattINFO/0.1.0/electrochemistry> ;
                                         dcterms:abstract """Common properties for batteries and their interfaces.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
                                         dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                        owl:versionInfo "0.0.1" .
+                                        owl:versionInfo "0.1.0" .
 
 #################################################################
 #    Annotation properties
