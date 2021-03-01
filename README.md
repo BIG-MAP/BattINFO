@@ -8,18 +8,6 @@ A battery interface domain ontology based on [EMMO][1].
 A reference documentation of the individual classes is available in [html](https://big-map.github.io/BattINFO/index.html) and [pdf](https://big-map.github.io/BattINFO/battinfo.pdf) formats.
 
 
-Status
-------
-- [x] Proposal
-- [ ] Accepted, under development
-- [ ] Official
-
-This domain ontology is work-in-progress (WIP), it will be submitted to the EMMC for approval once mature for initial testing.
-
-* Application submitted: TBD
-* Application accepted on: TBD
-
-
 Imported Ontologies
 -------------------
 This ontology builds on top of EMMO.
