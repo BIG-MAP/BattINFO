@@ -17,7 +17,6 @@ mkdoc.sh
   It includes the other templates.
 * [introduction.md](introduction.md): Introductory text.
 * [classes.md](classes.md): Introduction and sections for Classes
-* [figs](figs): Figures used in the introduction.
 
 ### `pandoc` configuration files
 

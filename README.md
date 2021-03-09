@@ -41,7 +41,7 @@ from emmo import get_ontology
 ontobatt = get_ontology('/path/to/BattINFO.ttl').load(url_from_catalog=True)
 
 # Loading from web (not yet available due to closed repo)
-ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/BattINFO.ttl').load()
+ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl').load()
 ```
 
 ## Attributions and credits
