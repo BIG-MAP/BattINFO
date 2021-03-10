@@ -38,9 +38,9 @@ In EMMO-python, correct import is obtained with:
 from emmo import get_ontology
 
 # Loading from local repository
-ontobatt = get_ontology('/path/to/BattINFO.ttl').load(url_from_catalog=True)
+ontobatt = get_ontology('/path/to/BattINFO/battinfo.ttl').load(url_from_catalog=True)
 
-# Loading from web (not yet available due to closed repo)
+# Loading from web
 ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl').load()
 ```
 
