@@ -79,4 +79,82 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "CompositeElectrode"@en .
 
 
+###  http://emmo.info/BattINFO/electrode#EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6
+:EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the electrochemical cell."@en ;
+                                           skos:prefLabel "PositiveElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b
+:EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
+                                           skos:prefLabel "NegativeElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5
+:EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode of an electrochemical cell through which net electric current flows and at which the predomi- nating electrochemical reaction is a reduction."@en ;
+                                           rdfs:comment "The concepts of “anode” and “cathode” are related only to the direction of electron flow, not to the polarity of the electrodes."@en ;
+                                           skos:prefLabel "Cathode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5
+:EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A disc electrode that is embedded in the centre of a cylinder which rotates in solution around the longi- tudinal cylinder axis."@en ;
+                                           rdfs:comment "A second annular working electrode may be positioned concentric with the disc to make a rotating ring-disc electrode (RRDE). This arrangement is largely used in mechanistic studies."@en ,
+                                                        "The current is directly proportional to the electrode area and the electrode is uniformly accessible."@en ,
+                                                        "The limiting current is given by the Levich equation."@en ;
+                                           skos:prefLabel "RotatingDiskElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_7729c34e_1ae9_403d_b933_1765885e7f29
+:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode that maintains an essentially constant potential under the conditions prevailing in an electrochemical measurement, and that serves for observation, measurement, or control of the potential of the indicator or working electrode."@en ;
+                                           skos:prefLabel "ReferenceElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea
+:EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode whose function is to carry the electric current flowing through the electrical circuit of an electrochemical cell, the electrochemical processes on its surface not being of interest."@en ;
+                                           skos:altLabel "AuxiliaryElectrode"@en ;
+                                           skos:prefLabel "CounterElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_b6319c74_d2ce_48c0_a75a_63156776b302
+:EMMO_b6319c74_d2ce_48c0_a75a_63156776b302 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode of an electrochemical cell through which net electric current flows and at which the predominating electrochemical reaction is an oxidation."@en ;
+                                           rdfs:comment "At an anode, electrons are produced in a galvanic cell or extracted in an electrolytic cell."@en ,
+                                                        "The concepts of “anode” and “cathode” are related only to the direction of electron flow, not to the polarity of the electrodes."@en ;
+                                           skos:prefLabel "Anode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_c2024587_3237_474e_8df9_91d10db2df47
+:EMMO_c2024587_3237_474e_8df9_91d10db2df47 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode whose potential changes with an applied potential."@en ;
+                                           rdfs:comment "A non-polarizable electrode is an electrode that holds its potential essentially constant by efficiently allowing electric current to pass. This is a desirable characteristic for a reference electrode."@en ;
+                                           skos:prefLabel "PolarizableElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_f6fcd255_248d_4603_b128_04dab960a676
+:EMMO_f6fcd255_248d_4603_b128_04dab960a676 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode that responds to one, or more than one, species in the solution being investigated, with no appreciable change of bulk solution composition during the measurement."@en ;
+                                           skos:prefLabel "IndicatorElectrode"@en .
+
+
+###  http://emmo.info/BattINFO/electrode#EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35
+:EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode at which one or more electroactive substances undergo reaction in the solution being investigated."@en ;
+                                           skos:prefLabel "WorkingElectrode"@en .
+
+
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
