@@ -817,4 +817,91 @@ Pingarron et al., Terminology of electrochemical methods of analysis""" ;
                                            skos:prefLabel "NernstEquation"@en .
 
 
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_19abaccd_43be_4048_965c_e4fb63c5951b
+:EMMO_19abaccd_43be_4048_965c_e4fb63c5951b rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A chemical phenomenon that is accompanied by the flow of electric current"@en ;
+                                           skos:prefLabel "ElectrochemicalPhenomenon"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
+:EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_7afbed84_7593_4a23_bd88_9d9c6b04e8f6 ;
+                                                             owl:someValuesFrom :EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_7afbed84_7593_4a23_bd88_9d9c6b04e8f6 ;
+                                                             owl:someValuesFrom :EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An element or compound that loses (or \"donates\") an electron to an electron recipient (oxidizing agent) in a redox chemical reaction."@en ;
+                                           skos:altLabel "Reductant"@en ;
+                                           skos:prefLabel "ReducingAgent"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
+:EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A substance that is consumed in the course of a chemical reaction. It is sometimes known, especially in the older literature, as a reagent, but this term is better used in a more specialized sense as a test substance that is added to a system in order to bring about a reaction or to see whether a reaction occurs (e.g. an analytical reagent)."@en ;
+                                           skos:prefLabel "Reactant"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564
+:EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A substance that is formed during a chemical reaction."@en ;
+                                           skos:prefLabel "Product"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
+:EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ,
+                                                           :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Any process either caused or accompanied by the passage of an electric current and involving in most cases the transfer of electrons between two substances."@en ;
+                                           skos:prefLabel "ElectrochemicalReaction"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3
+:EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A ConventionalQuantitativeProperty that is unique to the field of electrochemistry"@en ;
+                                           skos:prefLabel "ConventionalElectrochemicalProperty"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_d07d939a_7865_406d_867a_0500b02cba47
+:EMMO_d07d939a_7865_406d_867a_0500b02cba47 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of chemical reaction that involves a transfer of electrons between two species."@en ;
+                                           skos:prefLabel "RedoxReaction"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e
+:EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_7afbed84_7593_4a23_bd88_9d9c6b04e8f6 ;
+                                                             owl:someValuesFrom :EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_7afbed84_7593_4a23_bd88_9d9c6b04e8f6 ;
+                                                             owl:someValuesFrom :EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An element or compound that accepts an electron from an electron donator (reducing agent) in a redox chemical reaction."@en ;
+                                           skos:prefLabel "Oxidant"@en ,
+                                                          "OxidizingAgent"@en .
+
+
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
