@@ -791,8 +791,8 @@ i0 = ia = - ic
                                                              owl:someValuesFrom :EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An element or compound that accepts an electron from an electron donator (reducing agent) in a redox chemical reaction."@en ;
-                                           skos:prefLabel "Oxidant"@en ,
-                                                          "OxidizingAgent"@en .
+                                           skos:altLabel "Oxidant"@en ;
+                                           skos:prefLabel "OxidizingAgent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42
