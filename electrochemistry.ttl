@@ -904,4 +904,71 @@ Pingarron et al., Terminology of electrochemical methods of analysis""" ;
                                            skos:prefLabel "NernstEquation"@en .
 
 
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_1150b4d8_1d86_496f_a154_731868f0b46d
+:EMMO_1150b4d8_1d86_496f_a154_731868f0b46d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_7afbed84_7593_4a23_bd88_9d9c6b04e8f6 ;
+                                                             owl:someValuesFrom :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A chemical reaction for which the expression for the rate of disappearance of a reactant (or rate of appearance of a product) involves rate constants of more than a single elementary reaction. 
+
+- IUPAC Gold Book"""@en ;
+                                           skos:prefLabel "CompositeReaction"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
+:EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A reaction for which no reaction intermediates have been detected or need to be postulated in order to describe the chemical reaction on a molecular scale. An elementary reaction is assumed to occur in a single step and to pass through a single transition state.
+
+- IUPAC Gold Book"""@en ;
+                                           skos:prefLabel "ElementaryReaction"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_142ec80c_ea80_423b_882b_e21f802316d4
+:EMMO_142ec80c_ea80_423b_882b_e21f802316d4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A rate-controlling (rate-determining or rate-limiting) step in a reaction occurring by a composite reaction sequence is an elementary reaction the rate constant for which exerts a strong effect — stronger than that of any other rate constant — on the overall rate.
+
+-IUPAC Gold Book"""@en ;
+                                           skos:prefLabel "RateDeterminingStep"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_1e72986e_e19f_4c24_8663_cadd4318bd72
+:EMMO_1e72986e_e19f_4c24_8663_cadd4318bd72 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_54ee6b5e_5261_44a8_86eb_5717e7fdb9d0 ,
+                                                           emmo:EMMO_bd8db028_aec2_4a44_ad93_1a9f8270f72c ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The symbolic representation of a chemical reaction in the form of symbols and formulae, wherein the reactant entities are given on the left-hand side and the product entities on the right-hand side.
+
+- IUPAC Gold Book"""@en ;
+                                           skos:prefLabel "StoichiometricEquation"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_4bfe0f6d_030f_4789_b0d0_5367046a6027
+:EMMO_4bfe0f6d_030f_4789_b0d0_5367046a6027 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_51e93eca_9443_4ed2_b7b0_296b554deae2
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """One or more cells connected to form one unit and having provisions for external connections.
+
+Crompton, Battery Reference Book, 3rd Edition"""@en ;
+                                           skos:prefLabel "Battery"@en .
+
+
+###  http://emmo.info/BattINFO/electrochemistry#EMMO_51e93eca_9443_4ed2_b7b0_296b554deae2
+:EMMO_51e93eca_9443_4ed2_b7b0_296b554deae2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Box or enclosure which contains the electrochemical cells, associated connectors and hardware.
+
+- Crompton, Battery Reference Book, 3rd Edition"""@en ;
+                                           skos:prefLabel "BatteryCase"@en .
+
+
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
