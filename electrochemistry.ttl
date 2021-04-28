@@ -1089,6 +1089,7 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The electrode electric potential range between which the substance is neither oxidized nor reduced."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrochemical_window"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0"@en ;
                                            skos:altLabel "ElectrochemicalStabilityWindow"@en ;
                                            skos:prefLabel "ElectrochemicalWindow"@en .
 
