@@ -55,6 +55,21 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "SolidElectrolyte"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_07e219c3_890f_488f_bd96_bee8e445d764
+:EMMO_07e219c3_890f_488f_bd96_bee8e445d764 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric current that flows, at a particular value of the applied potential, in the absence of the substance whose electrode behaviour is being investigated, i.e. a \"blank\" solution.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/R05311"@en ;
+                                           rdfs:comment "I_{r}"@en ,
+                                                        "The residual (or background) current may be subtracted from the total current to calculate the net faradaic current."@en ;
+                                           skos:altLabel "BackgroundCurrent"@en ;
+                                           skos:prefLabel "ResidualCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df
 :EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_494b372c_cfdf_47d3_a4de_5e037c540de8 ,
@@ -152,6 +167,31 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "RateDeterminingStep"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_14577b99_a8a9_4358_9bc5_ab8c401dd34b
+:EMMO_14577b99_a8a9_4358_9bc5_ab8c401dd34b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Algebraic sum of faradaic currents flowing through an electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           rdfs:comment "I"@en ;
+                                           skos:prefLabel "NetFaradaicCurrent"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90
+:EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current that is controlled by the rate at which electroactive species diffuse toward (or away from) and electrode-solution interface.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Diffusion_current"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/D01722"@en ;
+                                           rdfs:comment "Diffusion current is governed by Fick’s Laws of diffusion. It is the principle on which many electroana- lytical methods are based, because the current is proportional to the bulk concentration of the diffusing species. I_{d} = z*F*A*D*\\grad(c)_{x=0}, where z is the electron number of an electrochemical reaction, F the Faraday constant, A the electrode surface area, D the diffusion coefficient of electroactive substance, and (∂c/∂x)x=0 the gradient of the amount concentration at the electrode surface position x = 0."@en ,
+                                                        "I_{d}"@en ;
+                                           skos:prefLabel "DiffusionCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_17e305af_52a9_4255_a70f_700ba1088f13
 :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
@@ -223,11 +263,39 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "SupportingElectrolyte"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6
+:EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric current that accompanies the adsorption of a species.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0"@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00159"@en ;
+                                           rdfs:comment "I_{ads}"@en ,
+                                                        "The terms “adsorption current” and “limiting adsorption current” should not be applied to faradaic cur- rents that have been increased or decreased by adding a non-electroactive surfactant to a solution con- taining an electroactive substance, nor to currents resulting from the effect of adsorption or desorption on double-layer currents."@en ;
+                                           skos:prefLabel "AdsorptionCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_21745019_2830_4395_bca7_15ddfd266673
 :EMMO_21745019_2830_4395_bca7_15ddfd266673 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity that relates to the kinetics of a reaction."@en ;
                                            skos:prefLabel "ElectrochemicalKineticQuantity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_22cec04f_c7f3_4ff8_a34b_e512379c9dcb
+:EMMO_22cec04f_c7f3_4ff8_a34b_e512379c9dcb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Component of electric current due to transport of ions in the electric field between the electrodes.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/M03921"@en ;
+                                           rdfs:comment "I_{m}"@en ,
+                                                        "The sign convention regarding current is such that the migration current is positive for the oxida- tion of a cation or the reduction of an anion and is negative for the reduction of a cation or for the oxidation of an anion. Hence, the migration current may either increase or decrease the total current observed. The migration current approaches zero as the transport number of the electroactive sub- stance is decreased by increasing the concentration of supporting electrolyte, and hence the conduc- tivity of the solution."@en ;
+                                           rdfs:label "MigrationCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
@@ -236,6 +304,21 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is ionic."@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Electrolyte"@en ;
                                            skos:prefLabel "IonicSubcomponent"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_26c84165_e6e3_47f6_8433_e04e755a4751
+:EMMO_26c84165_e6e3_47f6_8433_e04e755a4751 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Alternating_current"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric current having a sinusoidal wave form that changes direction during a cycle.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Alternating_current"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00252"@en ;
+                                           rdfs:comment "The amplitude of an alternating current is half the peak-to-peak difference of the sinusoidal current."@en ;
+                                           skos:altLabel "AC"@en ;
+                                           skos:prefLabel "AlternatingCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_29a57599_aa0d_458f_b23e_666a2da55883
@@ -248,11 +331,41 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "ReactionOrder"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456
+:EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Faradaic_current"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric current that results from the electrooxidation or electroreduction of an electroactive substance.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Faradaic_current"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/F02321"@en ;
+                                           rdfs:comment "Current that is produced by other processes, for example by diffusion of charged species, is termed ‘non- faradaic current’."@en ,
+                                                        "I_f"@en ;
+                                           skos:prefLabel "FaradaicCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_2d896559_eee3_447c_9759_87c854a4266a
 :EMMO_2d896559_eee3_447c_9759_87c854a4266a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A thermodynamically derived ElectrochemicalQuantity."@en ;
                                            skos:prefLabel "ElectrochemicalThermodynamicQuantity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_327eb3e1_f74a_4076_96de_5a2e3f63cb65
+:EMMO_327eb3e1_f74a_4076_96de_5a2e3f63cb65 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Component of an electric current that is associated with the presence of an analyate in square-wave voltammetry.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05897"@en ;
+                                           rdfs:comment "I_{SW}"@en ,
+                                                        "The component may be faradaic (if the analyte is electroactive) or non-faradaic (if the analyte is surface-active). The simultaneous occurrence of both effects is quite common."@en ;
+                                           skos:prefLabel "SquareWaveCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
@@ -264,6 +377,21 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of an electrochemical cell."@en ;
                                            skos:prefLabel "ElectrochemicalComponent"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05
+:EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """In dynamic voltammetric techniques, the maximum value of the faradaic current attained by varying the applied potential in the current-potential or I-E curve.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Typical examples of imposed potential programmes in dynamic voltammetric techniques resulting in peak-shaped responses are linear-scan voltammetry, cyclic voltammetry, ac voltammetry, differential pulse voltammetry, square-wave voltammetry, stripping voltammetry, and derivative techniques."@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/P04457"@en ;
+                                           rdfs:comment "I_{p}"@en ,
+                                                        "Since the concentration of an electroactive substance at the electrode-solution interface decreases mono- tonically, the faradaic current due to its electrooxidation or electroreduction increases monotonically with time because of the increasing concentration gradient of the electroactive substance, the concentra- tion of which remains constant in the bulk. The maximum current value is passed when the transport rate of electroactive substance to the electrode-solution interface starts to be lower than the rate at which it is removed by reaction at the electrode. The result of these two competing processes leads to the peak- shaped I-E dependence."@en ;
+                                           skos:prefLabel "PeakCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
@@ -329,6 +457,15 @@ Crompton, Battery Reference Book, 3rd Edition"""@en ;
                                            skos:prefLabel "Battery"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc
+:EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Conductivity of an electrolyte solution divided by its molar concentration."@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L0 M-1 I+2 Θ0 N-1 J0" ;
+                                           rdfs:comment "\\Lambda_m = \\kappa / c"@en ;
+                                           skos:prefLabel "MolarConductivity"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf
 :EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
@@ -369,6 +506,15 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "BatteryCase"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_54f6eb59_8893_4d17_99fb_243bcd41887b
+:EMMO_54f6eb59_8893_4d17_99fb_243bcd41887b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
+                                                           <http://emmo.info/emmo/generic-concepts#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276> ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A conservation of mass equation used to describe the motion of a charged chemical species in a fluid medium."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Nernst%E2%80%93Planck_equation"@en ;
+                                           skos:prefLabel "NernstPlanckEquation"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
 :EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ,
@@ -393,6 +539,13 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonicCurrent"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574
+:EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f19ff3b4_6bfe_4c41_a2b2_9affd39c140b ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "For any electrolyte A_xB_y, the limiting molar conductivity is expressed as x times the limiting molar conductivity of A^{y+} and y times the limiting molar conductivity of B^{x-}."@en ;
+                                           skos:prefLabel "KohlrauschsLaw"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
 :EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
@@ -408,6 +561,19 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/T06489" ;
                                            rdfs:comment "ISO recommends the name current fraction of ions B."@en ;
                                            skos:prefLabel "TransportNumber"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00
+:EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Diffusion current of the potential-independent value that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03534"@en ;
+                                           rdfs:comment "I_{d,lim}"@en ;
+                                           skos:altLabel "LimitingDiffusionCurrent"@en ;
+                                           skos:prefLabel "DiffusionLimitedCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
@@ -664,6 +830,22 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "MolarElectrochemicalPotential"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_885b462e_f6bc_412d_8b94_9425e13af0c7
+:EMMO_885b462e_f6bc_412d_8b94_9425e13af0c7 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Direct_current"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ElectricCurrent that flows in a constant direction, i.e. a current with a constant sign.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Direct_current"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/D01767"@en ;
+                                           rdfs:comment "I_{DC}"@en ,
+                                                        "The term ‘direct current’ should be used where there is ambiguity concerning the constancy of direction of current. See alternating current."@en ;
+                                           skos:altLabel "DC"@en ;
+                                           skos:prefLabel "DirectCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d
 :EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
@@ -688,6 +870,18 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:altLabel "Depolarizer"@en ,
                                                          "ElectrochemicallyActiveSubstance"@en ;
                                            skos:prefLabel "ElectroactiveSubstance"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b
+:EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current of an electroactive substance B formed by a prior chemical reaction from another substance Y that is no electroactive at the potential at which B is electrochemically transformed.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/K03399"@en ;
+                                           rdfs:comment "The kinetic current is partially or entirely controlled by the rate of the chemical reaction. This reaction may be heterogeneous, occurring at an electrode-solution interface (surface reaction), or it may be homo- geneous, occurring at some distance from the interface (bulk reaction)."@en ;
+                                           skos:prefLabel "KineticCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d
@@ -718,6 +912,42 @@ Conducting Additive"""@en ;
                                            skos:prefLabel "OpenCircuitPotential"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c
+:EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation relating the limiting molar conductivity Λ_m^0 (see Kohlrausch's law) to the ionic diffusion coefficients."@en ;
+                                           rdfs:comment "\\Lambda_m^0 = (F^2/(R*T)) * (v_{+} * z_{+}^2 * D_{+} + v_{–} * z_{–}^2 * D_{–})"@en ;
+                                           skos:prefLabel "NernstEinsteinEquation"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4
 :EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
@@ -728,6 +958,27 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01230" ;
                                            skos:prefLabel "ConcentrationOverpotential"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
+:EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Molar conductivity at infinite dilution"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L0 M-1 I+2 Θ0 N-1 J0" ;
+                                           skos:prefLabel "LimitingMolarConductivity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a24f8581_a5a4_41a4_bb45_d0fdd5c0d810
+:EMMO_a24f8581_a5a4_41a4_bb45_d0fdd5c0d810 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Value of an electric current at an instant in time, t.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/I03062"@en ;
+                                           rdfs:comment "I_{t}"@en ,
+                                                        "The instantaneous current is usually time-dependent and may have the character of an adsorption current, catalytic current, diffusion current, double-layer current, or kinetic current, and may include a migration current. A plot of the dependence of instantaneous current on time is commonly called an “I-t curve”."@en ;
+                                           skos:prefLabel "InstantaneousCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31
@@ -744,6 +995,18 @@ F have their usual significance. This definition is equivalent to the other, -(R
 
 R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An assessment (IUPAC Technical Report),” Pure Appl. Chem., vol. 86, no. 2, pp. 245–258, 2014. https://doi.org/10.1515/pac-2014-5026"""@en ;
                                            skos:prefLabel "ChargeTransferCoefficient"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a56fc557_9dea_42e6_b936_e9d62dcaf84f
+:EMMO_a56fc557_9dea_42e6_b936_e9d62dcaf84f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 """Non-faradaic current associated with the charging of the electrical double layer at the electrode-solution interface.
+
+----J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/D01847"@en ;
+                                           skos:prefLabel "DoubleLayerCurrent"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
@@ -824,6 +1087,27 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "IonicLiquidElectrolyte"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf
+:EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current measured in a solution containing two electroactive substances, A and B, that exceeds the sum of the faradaic currents that would be obtained for A and B separately under the same experimental conditions.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0"@en ;
+                                           rdfs:comment "I_{cat}"@en ,
+                                                        """In either of the two following situations, the current increase is termed a catalytic current: 
+
+(i) The scheme below generates a catalytic or regenerative current: 
+
+B±e→ B′
+B' + A → B
+
+(ii) The presence at the electrode-solution interface of a substance, which may be added or generated by an electrochemical reaction, decreases the overpotential for the electrochemical reaction of B.
+
+In either case, the magnitude of the catalytic current depends on the applied potential. If the current observed with a mixture of A and B is lower than the sum of the separate currents, the term non-additive current should be used."""@en ;
+                                           rdfs:label "CatalyticCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
 :EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
@@ -842,9 +1126,19 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "ActiveElectrochemicalMaterialLoading"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
+:EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The number of molecules and/or formula units that participate in the reaction as written"@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "StoichiometricCoefficient"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
 :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
+                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The common value (i0) of the anodic and cathodic partial currents when the reaction is at equilibrium:
 
 i0 = ia = - ic
@@ -921,6 +1215,18 @@ i0 = ia = - ic
                                            skos:prefLabel "ButlerVolmerEquation"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_d5ac8868_d318_4065_aa23_72140ae888ae
+:EMMO_d5ac8868_d318_4065_aa23_72140ae888ae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03532"@en ;
+                                           rdfs:comment "A limiting current is reached when the overpotential is sufficiently large that the faradaic current is deter- mined solely by the ability to supply electroactive species by mass transport. A limiting current is there- fore independent of applied potential over a corresponding finite potential range. A limiting current may have the character of an adsorption, catalytic, diffusion, or kinetic current, and may include a migration current."@en ;
+                                           skos:prefLabel "LimitingCurrent"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3
 :EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
@@ -992,9 +1298,19 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 ###  http://emmo.info/BattINFO#EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42
 :EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectronicCurrent"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44
+:EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Product of the stoichiometric coefficient and +1 for a product and -1 for a reactant."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0"@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S06025"@en ;
+                                           skos:prefLabel "StoichiometricNumber"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_e931087f_7681_4096_b200_5223bcc47eb4
@@ -1047,6 +1363,18 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A subcomponent of an ElectrochemicalComponent."@en ;
                                            skos:prefLabel "ElectrochemicalSubcomponent"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767
+:EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Difference of electric potentials measured between identical metallic leads to two electrodes of an electrochemical cell.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "Single electrode potentials relative to hypothetical standards, such as vacuum zero, are not experimentally accessible."@en ,
+                                                        "The applied potential is divided into a) two electrode potentials, each of which is the dif- ference of potential existing between the bulk of the solution and the interior of the con- ducting material of the electrode, b) an IR or ohmic potential drop through the solution of resistance R at electric current I, and c) another ohmic potential drop through each elec- trode and its metallic leads."@en ;
+                                           skos:altLabel "Voltage"@en ;
+                                           skos:prefLabel "AppliedPotential"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_fa22874b_76a9_4043_8b8f_6086c88746de
@@ -1116,92 +1444,8 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "NernstEquation"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc
-:EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Conductivity of an electrolyte solution divided by its molar concentration."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L0 M-1 I+2 Θ0 N-1 J0" ;
-                                           rdfs:comment "\\Lambda_m = \\kappa / c"@en ;
-                                           skos:prefLabel "MolarConductivity"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_54f6eb59_8893_4d17_99fb_243bcd41887b
-:EMMO_54f6eb59_8893_4d17_99fb_243bcd41887b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
-                                                           <http://emmo.info/emmo/generic-concepts#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276> ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A conservation of mass equation used to describe the motion of a charged chemical species in a fluid medium."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Nernst%E2%80%93Planck_equation"@en ;
-                                           skos:prefLabel "NernstPlanckEquation"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574
-:EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f19ff3b4_6bfe_4c41_a2b2_9affd39c140b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "For any electrolyte A_xB_y, the limiting molar conductivity is expressed as x times the limiting molar conductivity of A^{y+} and y times the limiting molar conductivity of B^{x-}."@en ;
-                                           skos:prefLabel "KohlrauschsLaw"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c
-:EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation relating the limiting molar conductivity Λ_m^0 (see Kohlrausch's law) to the ionic diffusion coefficients."@en ;
-                                           rdfs:comment "\\Lambda_m^0 = (F^2/(R*T)) * (v_{+} * z_{+}^2 * D_{+} + v_{–} * z_{–}^2 * D_{–})"@en ;
-                                           skos:prefLabel "NernstEinsteinEquation"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
-:EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Molar conductivity at infinite dilution"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L0 M-1 I+2 Θ0 N-1 J0" ;
-                                           skos:prefLabel "LimitingMolarConductivity"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
-:EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The number of molecules and/or formula units that participate in the reaction as written"@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "StoichiometricCoefficient"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44
-:EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Product of the stoichiometric coefficient and +1 for a product and -1 for a reactant."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0"@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S06025"@en ;
-                                           skos:prefLabel "StoichiometricNumber"@en .
+###  http://emmo.info/emmo/generic-concepts#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
+<http://emmo.info/emmo/generic-concepts#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276> rdf:type owl:Class .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
