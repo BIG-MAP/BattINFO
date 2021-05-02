@@ -1158,6 +1158,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Range of electrode potentials of a given working electrode in a given electrolyte, where the electric current from reactions of the electrode or electrolyte is negligible compared with the current from reactions of the system under investigation.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "Because the working potential range is a function of a specific electrode/electrolyte system, only approximate ranges can be given for generic systems."@en ,
                                                         "The working potential range is usually limited by the stability of the electrolyte, itself affected by the catalytic properties of the electrode, or by the stability of the electrode."@en ;
                                            skos:prefLabel "WorkingPotentialRange"@en .
