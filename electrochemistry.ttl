@@ -104,6 +104,15 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "CompositeReaction"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb
+:EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Mass m of electrochemically-transformed substance is proportional to the charge Q passed, m ∝ Q.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           skos:prefLabel "FaradaysFirstLawOfElectrolysis"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_129926b6_fc30_441d_b359_29b44c988514
 :EMMO_129926b6_fc30_441d_b359_29b44c988514 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
@@ -294,6 +303,17 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonicSubcomponent"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c
+:EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric potential difference between two solutions separated by an ion-selective membrane in the absence of any electric current flowing through the membrane.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:prefLabel "MembranePotential"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_26c84165_e6e3_47f6_8433_e04e755a4751
 :EMMO_26c84165_e6e3_47f6_8433_e04e755a4751 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -387,6 +407,20 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:subClassOf emmo:EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A material relation in electrochemistry."@en ;
                                            skos:prefLabel "ElectrochemicalRelation"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
+:EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Area of electrode - solution interface.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
+                                           rdfs:comment "A"@en ,
+                                                        """The geometric area, A_{geom} , is the interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces. 
+
+The real (true) area, A_{real}, takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible."""@en ;
+                                           skos:prefLabel "ElectrodeSurfaceArea"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_47b7d606_7030_4674_9828_cf83fb4a2995
@@ -527,6 +561,13 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonicCurrent"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_579eed46_6918_4275_9a70_dfd0409ab418
+:EMMO_579eed46_6918_4275_9a70_dfd0409ab418 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
+                                           rdfs:comment "If reference is made only to ‘Faraday’s Law of electrolysis’ the first law is meant."@en ;
+                                           skos:prefLabel "FaradaysLawsOfElectrolysis"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574
 :EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f19ff3b4_6bfe_4c41_a2b2_9affd39c140b ;
@@ -582,6 +623,16 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "An electrolyte in the liquid phase."@en ;
                                            skos:prefLabel "LiquidElectrolyte"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03
+:EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """When the same electric charge (quantity of electricity) Q is passed through several electrolytes, the mass, m_i, of the substances deposited are proportional to their respective chemical equivalent molar mass, M_i/z_i.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "m_1/m_2 = (M_1/z_1) / (M_2/z_2)"@en ;
+                                           skos:prefLabel "FaradaysSecondLawOfElectrolysis"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
@@ -1009,6 +1060,17 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectrochemicalReaction"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc
+:EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Surface area of an electrode that takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0"@en ;
+                                           rdfs:comment "A_{real}" ;
+                                           skos:prefLabel "ElectrodeRealSurfaceArea"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
 :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
@@ -1031,11 +1093,36 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectrochemicalQuantity"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f
+:EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Equilibrium electrode potential under conditions of unit concentration of species involved in the electrode reaction.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           rdfs:comment "E^{\\circ '}"@en ,
+                                                        "E_{eq} = E^{\\circ '} - (R*T / (z*F)) * \\sum_i{\\nu_i * ln(c_i/c^{circ})}"@en ,
+                                                        "It is E°′ which is calculated in electrochemical experiments when the concentrations of the various species are known, but their activities are not. Its value depends on the composi- tion of the electrolyte solution. The argument of ln is dimensionless, while the concentration ci is normalized through division by the standard concentration, usually c° = 1 mol dm^{−3} for soluble species."@en ;
+                                           skos:altLabel "FormalPotential"@en ;
+                                           skos:prefLabel "FormalElectrodePotential"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3
 :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A ConventionalQuantitativeProperty that is unique to the field of electrochemistry"@en ;
                                            skos:prefLabel "ConventionalElectrochemicalProperty"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74
+:EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrochemical cell with a working electrode, reference electrode, and auxiliary electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "A potentiostat can be used to maintain a potential difference between the working and ref- erence electrodes."@en ,
+                                                        "Electric current flows between the working and auxiliary electrodes. Electrode potential may be measured between the working and reference electrodes."@en ;
+                                           skos:prefLabel "ThreeElectrodeCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
@@ -1063,6 +1150,17 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are electrons." ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-2 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectronicCurrentDensity"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_c39b2498_783e_48e1_9814_6164bd99823c
+:EMMO_c39b2498_783e_48e1_9814_6164bd99823c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Range of electrode potentials of a given working electrode in a given electrolyte, where the electric current from reactions of the electrode or electrolyte is negligible compared with the current from reactions of the system under investigation.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "Because the working potential range is a function of a specific electrode/electrolyte system, only approximate ranges can be given for generic systems."@en ,
+                                                        "The working potential range is usually limited by the stability of the electrolyte, itself affected by the catalytic properties of the electrode, or by the stability of the electrode."@en ;
+                                           skos:prefLabel "WorkingPotentialRange"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f
@@ -1344,6 +1442,21 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrochemicalMaterial"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_f509645f_eb27_470e_9112_7ab828ed40d3
+:EMMO_f509645f_eb27_470e_9112_7ab828ed40d3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric potential at an electrode, reported as the difference in potential relative to a reference electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrode_potential" ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01956" ;
+                                           rdfs:comment "E, U"@en ,
+                                                        "The absolute value of the electrode potential cannot be measured, so E is always reported relative to the potential of a reference electrode, e.g. that of a standard hydrogen electrode (SHE)."@en ;
+                                           skos:prefLabel "ElectrodePotential"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
 :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
@@ -1361,6 +1474,7 @@ i0 = ia = - ic
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Difference of electric potentials measured between identical metallic leads to two electrodes of an electrochemical cell.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "Single electrode potentials relative to hypothetical standards, such as vacuum zero, are not experimentally accessible."@en ,
                                                         "The applied potential is divided into a) two electrode potentials, each of which is the dif- ference of potential existing between the bulk of the solution and the interior of the con- ducting material of the electrode, b) an IR or ohmic potential drop through the solution of resistance R at electric current I, and c) another ohmic potential drop through each elec- trode and its metallic leads."@en ;
                                            skos:altLabel "Voltage"@en ;
@@ -1375,6 +1489,17 @@ i0 = ia = - ic
 -Electrolyte Solutions. (2021, February 17). Retrieved April 28, 2021, from https://chem.libretexts.org/@go/page/1619"""@en ;
                                            rdfs:comment "A liquid electrolyte that consists of solutes dissolved in a solvent."@en ;
                                            skos:prefLabel "ElectrolyticSolution"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3
+:EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
+                                           rdfs:comment "A_{geom}"@en ;
+                                           skos:prefLabel "ElectrodeGeometricSurfaceArea"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
@@ -1432,129 +1557,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb
-:EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Mass m of electrochemically-transformed substance is proportional to the charge Q passed, m ∝ Q.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           skos:prefLabel "FaradaysFirstLawOfElectrolysis"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c
-:EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric potential difference between two solutions separated by an ion-selective membrane in the absence of any electric current flowing through the membrane.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           skos:prefLabel "MembranePotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
-:EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Area of electrode - solution interface.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
-                                           rdfs:comment "A"@en ,
-                                                        """The geometric area, A_{geom} , is the interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces. 
-
-The real (true) area, A_{real}, takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible."""@en ;
-                                           skos:prefLabel "ElectrodeSurfaceArea"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_579eed46_6918_4275_9a70_dfd0409ab418
-:EMMO_579eed46_6918_4275_9a70_dfd0409ab418 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
-                                           rdfs:comment "If reference is made only to ‘Faraday’s Law of electrolysis’ the first law is meant."@en ;
-                                           skos:prefLabel "FaradaysLawsOfElectrolysis"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03
-:EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """When the same electric charge (quantity of electricity) Q is passed through several electrolytes, the mass, m_i, of the substances deposited are proportional to their respective chemical equivalent molar mass, M_i/z_i.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "m_1/m_2 = (M_1/z_1) / (M_2/z_2)"@en ;
-                                           skos:prefLabel "FaradaysSecondLawOfElectrolysis"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc
-:EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Surface area of an electrode that takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0"@en ;
-                                           rdfs:comment "A_{real}" ;
-                                           skos:prefLabel "ElectrodeRealSurfaceArea"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f
-:EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Equilibrium electrode potential under conditions of unit concentration of species involved in the electrode reaction.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           rdfs:comment "E^{\\circ '}"@en ,
-                                                        "E_{eq} = E^{\\circ '} - (R*T / (z*F)) * \\sum_i{\\nu_i * ln(c_i/c^{circ})}"@en ,
-                                                        "It is E°′ which is calculated in electrochemical experiments when the concentrations of the various species are known, but their activities are not. Its value depends on the composi- tion of the electrolyte solution. The argument of ln is dimensionless, while the concentration ci is normalized through division by the standard concentration, usually c° = 1 mol dm^{−3} for soluble species."@en ;
-                                           skos:altLabel "FormalPotential"@en ;
-                                           skos:prefLabel "FormalElectrodePotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74
-:EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrochemical cell with a working electrode, reference electrode, and auxiliary electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "A potentiostat can be used to maintain a potential difference between the working and ref- erence electrodes."@en ,
-                                                        "Electric current flows between the working and auxiliary electrodes. Electrode potential may be measured between the working and reference electrodes."@en ;
-                                           skos:prefLabel "ThreeElectrodeCell"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_c39b2498_783e_48e1_9814_6164bd99823c
-:EMMO_c39b2498_783e_48e1_9814_6164bd99823c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Range of electrode potentials of a given working electrode in a given electrolyte, where the electric current from reactions of the electrode or electrolyte is negligible compared with the current from reactions of the system under investigation.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "Because the working potential range is a function of a specific electrode/electrolyte system, only approximate ranges can be given for generic systems."@en ,
-                                                        "The working potential range is usually limited by the stability of the electrolyte, itself affected by the catalytic properties of the electrode, or by the stability of the electrode."@en ;
-                                           skos:prefLabel "WorkingPotentialRange"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_f509645f_eb27_470e_9112_7ab828ed40d3
-:EMMO_f509645f_eb27_470e_9112_7ab828ed40d3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric potential at an electrode, reported as the difference in potential relative to a reference electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrode_potential" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01956" ;
-                                           rdfs:comment "E, U"@en ,
-                                                        "The absolute value of the electrode potential cannot be measured, so E is always reported relative to the potential of a reference electrode, e.g. that of a standard hydrogen electrode (SHE)."@en ;
-                                           skos:prefLabel "ElectrodePotential"@en .
-
-
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3
-:EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
-                                           rdfs:comment "A_{geom}"@en ;
-                                           skos:prefLabel "ElectrodeGeometricSurfaceArea"@en .
 
 
 ###  http://emmo.info/emmo/generic-concepts#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
