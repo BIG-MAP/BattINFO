@@ -1551,4 +1551,233 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "NernstEquation"@en .
 
 
+
+###  http://emmo.info/BattINFO#EMMO_029f0b45-70a7-481f-8154-bf982a77e08c
+:EMMO_029f0b45-70a7-481f-8154-bf982a77e08c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of a single ElectrochemicalSubComponent"@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Metal foil."@en ;
+                                           skos:prefLabel "SimpleElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
+                                                             owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electron conductor in an electrochemical cell connected to the external circuit. - Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019)"@en ;
+                                           rdfs:comment "Alternative definition: Half-cell consisting of at least one electron conductor and at least one ionic conductor (electrolyte). - Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019)"@en ,
+                                                        "Note 1: The current flow through electrochemical cells may be zero or non-zero. An electrochemical cell with current flow can operate either as a galvanic cell or an electrolytic cell."@en ,
+                                                        "Note 2: In some electroanalytical techniques (conductometry and differential potentiometry), two indicator electrodes are used. For many analytical measurements in cells with current flow, a three-electrode cell is used."@en ,
+                                                        "Note 3: Many types of electrodes are used. These may be classified into groups according to their composition, form and size, and according to their operating mode. See section 4."@en ;
+                                           skos:prefLabel "Electrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6
+:EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the electrochemical cell."@en ;
+                                           skos:prefLabel "PositiveElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b
+:EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
+                                           skos:prefLabel "NegativeElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5
+:EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode of an electrochemical cell through which net electric current flows and at which the predomi- nating electrochemical reaction is a reduction."@en ;
+                                           rdfs:comment "The concepts of “anode” and “cathode” are related only to the direction of electron flow, not to the polarity of the electrodes."@en ;
+                                           skos:prefLabel "Cathode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_3663991d-9319-4f7a-922b-f0e428b58801
+:EMMO_3663991d-9319-4f7a-922b-f0e428b58801 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_f68030be_94b8_4c61_a161_886468558054 ;
+                                                             owl:someValuesFrom :EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Porous electrodes consist of porous matrices of a single reactive electronic conductor or a mixture of solids that include essentially non-conducting, reactive materials in addition to electronic conductors. An electrolytic solution fills the void spaces of the porous matrix. At a given time, there may be a large range of reaction rates within the pores. The distribution of these rates will depend on physical structure, conductivity of the matrix and of the electrolyte, and on parameters characterizing the electrode processes themselves. - Newman and Thomas-Alyea, Electrochemical Systems."@en ;
+                                           skos:prefLabel "PorousElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f
+:EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
+                                                             owl:someValuesFrom :EMMO_3663991d-9319-4f7a-922b-f0e428b58801
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A pore that exists within an electrode host domain."@en ;
+                                           skos:prefLabel "ElectrodePore"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5
+:EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A disc electrode that is embedded in the centre of a cylinder which rotates in solution around the longi- tudinal cylinder axis."@en ;
+                                           rdfs:comment "A second annular working electrode may be positioned concentric with the disc to make a rotating ring-disc electrode (RRDE). This arrangement is largely used in mechanistic studies."@en ,
+                                                        "The current is directly proportional to the electrode area and the electrode is uniformly accessible."@en ,
+                                                        "The limiting current is given by the Levich equation."@en ;
+                                           skos:prefLabel "RotatingDiskElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7729c34e_1ae9_403d_b933_1765885e7f29
+:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode that maintains an essentially constant potential under the conditions prevailing in an electrochemical measurement, and that serves for observation, measurement, or control of the potential of the indicator or working electrode."@en ;
+                                           skos:prefLabel "ReferenceElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
+:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of multiple ElectrochemicalSubComponent"@en ;
+                                           skos:prefLabel "CompositeElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea
+:EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode whose function is to carry the electric current flowing through the electrical circuit of an electrochemical cell, the electrochemical processes on its surface not being of interest."@en ;
+                                           skos:altLabel "AuxiliaryElectrode"@en ;
+                                           skos:prefLabel "CounterElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b6319c74_d2ce_48c0_a75a_63156776b302
+:EMMO_b6319c74_d2ce_48c0_a75a_63156776b302 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode of an electrochemical cell through which net electric current flows and at which the predominating electrochemical reaction is an oxidation."@en ;
+                                           rdfs:comment "At an anode, electrons are produced in a galvanic cell or extracted in an electrolytic cell."@en ,
+                                                        "The concepts of “anode” and “cathode” are related only to the direction of electron flow, not to the polarity of the electrodes."@en ;
+                                           skos:prefLabel "Anode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_c2024587_3237_474e_8df9_91d10db2df47
+:EMMO_c2024587_3237_474e_8df9_91d10db2df47 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode whose potential changes with an applied potential."@en ;
+                                           rdfs:comment "A non-polarizable electrode is an electrode that holds its potential essentially constant by efficiently allowing electric current to pass. This is a desirable characteristic for a reference electrode."@en ;
+                                           skos:prefLabel "PolarizableElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f6fcd255_248d_4603_b128_04dab960a676
+:EMMO_f6fcd255_248d_4603_b128_04dab960a676 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode that responds to one, or more than one, species in the solution being investigated, with no appreciable change of bulk solution composition during the measurement."@en ;
+                                           skos:prefLabel "IndicatorElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35
+:EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode at which one or more electroactive substances undergo reaction in the solution being investigated."@en ;
+                                           skos:prefLabel "WorkingElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
+:EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A permeable membrane placed between the positive and negative electrodes to keep them physically separated and prevent an internal short circuit.\"" ;
+                                           skos:prefLabel "Separator"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
+:EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "\"Means of making electrolytic connection between two half cells without introducing a significant liquid junction  potential. Note: A typical construction is a tube of an inert material (e.g. agar agar) filled with a solution con- taining an electrolyte with approximately equal ion mobilities of the cation and the anion (e.g., KNO3, KCl), with the ends of the tube immersed in the electrolyte solution of the half cells.\" Pingarron et al., Terminology of electrochemical methods of analysis"@en ;
+                                           skos:prefLabel "SaltBridge"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6cae5943-737a-4f88-9903-9de4cffebd11
+:EMMO_6cae5943-737a-4f88-9903-9de4cffebd11 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A salt bridge consisting of at least two subcomponents, one of which is an IonicSubcomponent."@en ;
+                                           skos:prefLabel "CompositeSaltBridge"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
+:EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A salt bridge consisting of exactly 1 subcomponent that is an IonicSubcomponent."@en ;
+                                           skos:prefLabel "SimpleSaltBridge"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a1bbb273_bc05_4e80_8817_82479178bb41
+:EMMO_a1bbb273_bc05_4e80_8817_82479178bb41 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A base that completely dissociates in water.\"" ;
+                                           skos:prefLabel "StrongBase"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
+:EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical species or molecular entity having an available pair of electrons capable of forming a covalent bond with a hydron (proton) (see Brønsted base) or with the vacant orbital of some other species (see Lewis base).\" - IUPAC Gold Book" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/B00601" ;
+                                           skos:prefLabel "Base"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799
+:EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical compound consisting of an assembly of cations and anions.\" IUPAC Gold Book" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05447" ;
+                                           skos:prefLabel "Salt"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_c230694a_04ce_4719_88a4_ecfa85167c30
+:EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A molecular entity or chemical species capable of donating a hydron (proton) (see Brønsted acid) or capable of forming a covalent bond with an electron pair (see Lewis acid).\" - IUPAC Gold Book" ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00071" ;
+                                           skos:prefLabel "Acid"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb
+:EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "An acid that completely dissociates in water." ;
+                                           skos:prefLabel "StrongAcid"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ce548161_c987_4beb_9091_adcf80027310
+:EMMO_ce548161_c987_4beb_9091_adcf80027310 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A base that partially dissociates in water.\"" ;
+                                           skos:prefLabel "WeakBase"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408
+:EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 ;
+                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"An acid that partially dissociates in water.\"" ;
+                                           skos:prefLabel "WeakAcid"@en .
+
+
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
