@@ -8,6 +8,7 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
+@prefix electrochemistry: <http://emmo.info/electrochemistry#> .
 @base <http://emmo.info/BattINFO/characterisation> .
 
 <http://emmo.info/BattINFO/characterisation> rdf:type owl:Ontology ;
