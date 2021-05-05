@@ -1,4 +1,4 @@
-@prefix : <http://emmo.info/BattINFO#> .
+@prefix : <http://emmo.info/electrochemistry#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -8,10 +8,10 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
-@base <http://emmo.info/BattINFO/electrochemistry> .
+@base <http://emmo.info/electrochemistry/electrochemistry> .
 
-<http://emmo.info/BattINFO/electrochemistry> rdf:type owl:Ontology ;
-                                              owl:versionIRI <http://emmo.info/BattINFO/0.1.0/electrochemistry> ;
+<http://emmo.info/electrochemistry/electrochemistry> rdf:type owl:Ontology ;
+                                              owl:versionIRI <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
                                               owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
                                               dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
 
@@ -43,7 +43,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  http://emmo.info/BattINFO#EMMO_029f0b45-70a7-481f-8154-bf982a77e08c
+###  http://emmo.info/electrochemistry#EMMO_029f0b45-70a7-481f-8154-bf982a77e08c
 :EMMO_029f0b45-70a7-481f-8154-bf982a77e08c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of a single ElectrochemicalSubComponent"@en ;
@@ -51,7 +51,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "SimpleElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_0508a114_544a_4f54_a7de_9b947fb4b618
+###  http://emmo.info/electrochemistry#EMMO_0508a114_544a_4f54_a7de_9b947fb4b618
 :EMMO_0508a114_544a_4f54_a7de_9b947fb4b618 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 """A solid electrolyte is a solid material where the predominant charge carriers are ions.
@@ -64,7 +64,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "SolidElectrolyte"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_07e219c3_890f_488f_bd96_bee8e445d764
+###  http://emmo.info/electrochemistry#EMMO_07e219c3_890f_488f_bd96_bee8e445d764
 :EMMO_07e219c3_890f_488f_bd96_bee8e445d764 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -79,7 +79,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ResidualCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df
+###  http://emmo.info/electrochemistry#EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df
 :EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_494b372c_cfdf_47d3_a4de_5e037c540de8 ,
                                                            [ rdf:type owl:Restriction ;
@@ -90,7 +90,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ElectrochemicalDevice"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_0c9655c6_6b0b_4819_a219_f286ad196fa9
+###  http://emmo.info/electrochemistry#EMMO_0c9655c6_6b0b_4819_a219_f286ad196fa9
 :EMMO_0c9655c6_6b0b_4819_a219_f286ad196fa9 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
                                                            emmo:EMMO_ffb73b1e_5786_43e4_a964_cb32ac7affb7 ;
@@ -99,7 +99,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "InternalConductance"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+###  http://emmo.info/electrochemistry#EMMO_0f007072-a8dd-4798-b865-1bf9363be627
 :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
                                                            [ rdf:type owl:Restriction ;
@@ -122,7 +122,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "Electrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1150b4d8_1d86_496f_a154_731868f0b46d
+###  http://emmo.info/electrochemistry#EMMO_1150b4d8_1d86_496f_a154_731868f0b46d
 :EMMO_1150b4d8_1d86_496f_a154_731868f0b46d rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
                                                            [ rdf:type owl:Restriction ;
@@ -136,7 +136,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "CompositeReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb
+###  http://emmo.info/electrochemistry#EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb
 :EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Mass m of electrochemically-transformed substance is proportional to the charge Q passed, m ∝ Q.
@@ -145,7 +145,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "FaradaysFirstLawOfElectrolysis"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_129926b6_fc30_441d_b359_29b44c988514
+###  http://emmo.info/electrochemistry#EMMO_129926b6_fc30_441d_b359_29b44c988514
 :EMMO_129926b6_fc30_441d_b359_29b44c988514 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The electrode electric potential range between which the substance is neither oxidized nor reduced."@en ;
@@ -155,7 +155,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ElectrochemicalWindow"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
+###  http://emmo.info/electrochemistry#EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
 :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A reaction for which no reaction intermediates have been detected or need to be postulated in order to describe the chemical reaction on a molecular scale. An elementary reaction is assumed to occur in a single step and to pass through a single transition state.
@@ -166,7 +166,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ElementaryReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd
+###  http://emmo.info/electrochemistry#EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd
 :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The electrochemical potential is the chemical potential of an ion in the presence of an electric potential.
@@ -181,7 +181,7 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ;
                                            skos:prefLabel "ElectrochemicalPotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_142ec80c_ea80_423b_882b_e21f802316d4
+###  http://emmo.info/electrochemistry#EMMO_142ec80c_ea80_423b_882b_e21f802316d4
 :EMMO_142ec80c_ea80_423b_882b_e21f802316d4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A rate-controlling (rate-determining or rate-limiting) step in a reaction occurring by a composite reaction sequence is an elementary reaction the rate constant for which exerts a strong effect — stronger than that of any other rate constant — on the overall rate.
@@ -195,7 +195,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "RateDeterminingStep"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_14577b99_a8a9_4358_9bc5_ab8c401dd34b
+###  http://emmo.info/electrochemistry#EMMO_14577b99_a8a9_4358_9bc5_ab8c401dd34b
 :EMMO_14577b99_a8a9_4358_9bc5_ab8c401dd34b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Algebraic sum of faradaic currents flowing through an electrode.
@@ -206,7 +206,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "NetFaradaicCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90
+###  http://emmo.info/electrochemistry#EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90
 :EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current that is controlled by the rate at which electroactive species diffuse toward (or away from) and electrode-solution interface.
@@ -220,7 +220,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "DiffusionCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_17e305af_52a9_4255_a70f_700ba1088f13
+###  http://emmo.info/electrochemistry#EMMO_17e305af_52a9_4255_a70f_700ba1088f13
 :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy that can be absorbed or released due to a change of the particle number of the given species"@en ;
@@ -230,21 +230,21 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ChemicalPotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6
+###  http://emmo.info/electrochemistry#EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6
 :EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the electrochemical cell."@en ;
                                            skos:prefLabel "PositiveElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_19abaccd_43be_4048_965c_e4fb63c5951b
+###  http://emmo.info/electrochemistry#EMMO_19abaccd_43be_4048_965c_e4fb63c5951b
 :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A chemical phenomenon that is accompanied by the flow of electric current"@en ;
                                            skos:prefLabel "ElectrochemicalPhenomenon"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6
+###  http://emmo.info/electrochemistry#EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6
 :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ,
                                                            emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
@@ -261,7 +261,7 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "Overpotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
+###  http://emmo.info/electrochemistry#EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
 :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
@@ -272,7 +272,7 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "SpecificChargeCapacity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1e72986e_e19f_4c24_8663_cadd4318bd72
+###  http://emmo.info/electrochemistry#EMMO_1e72986e_e19f_4c24_8663_cadd4318bd72
 :EMMO_1e72986e_e19f_4c24_8663_cadd4318bd72 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_54ee6b5e_5261_44a8_86eb_5717e7fdb9d0 ,
                                                            emmo:EMMO_bd8db028_aec2_4a44_ad93_1a9f8270f72c ;
@@ -287,7 +287,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "StoichiometricEquation"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800
+###  http://emmo.info/electrochemistry#EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800
 :EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 """Electrolyte solution, the ions of which are electroinactive in the range of applied potential being studied, and whose ionic strength (and, therefore, contribution to the overall conductivity) is usually much greater than the concentration of an electroactive substance to be dissolved in it. 
@@ -301,7 +301,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "SupportingElectrolyte"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6
+###  http://emmo.info/electrochemistry#EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6
 :EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -315,21 +315,21 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "AdsorptionCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_21745019_2830_4395_bca7_15ddfd266673
+###  http://emmo.info/electrochemistry#EMMO_21745019_2830_4395_bca7_15ddfd266673
 :EMMO_21745019_2830_4395_bca7_15ddfd266673 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity that relates to the kinetics of a reaction."@en ;
                                            skos:prefLabel "ElectrochemicalKineticQuantity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b
+###  http://emmo.info/electrochemistry#EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b
 :EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
                                            skos:prefLabel "NegativeElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_22cec04f_c7f3_4ff8_a34b_e512379c9dcb
+###  http://emmo.info/electrochemistry#EMMO_22cec04f_c7f3_4ff8_a34b_e512379c9dcb
 :EMMO_22cec04f_c7f3_4ff8_a34b_e512379c9dcb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -343,7 +343,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "MigrationCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
+###  http://emmo.info/electrochemistry#EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
 :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is ionic."@en ;
@@ -351,7 +351,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonicSubcomponent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c
+###  http://emmo.info/electrochemistry#EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c
 :EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
@@ -362,7 +362,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "MembranePotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_26c84165_e6e3_47f6_8433_e04e755a4751
+###  http://emmo.info/electrochemistry#EMMO_26c84165_e6e3_47f6_8433_e04e755a4751
 :EMMO_26c84165_e6e3_47f6_8433_e04e755a4751 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Alternating_current"@en ;
@@ -377,7 +377,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "AlternatingCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_29a57599_aa0d_458f_b23e_666a2da55883
+###  http://emmo.info/electrochemistry#EMMO_29a57599_aa0d_458f_b23e_666a2da55883
 :EMMO_29a57599_aa0d_458f_b23e_666a2da55883 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "If the macroscopic (observed, empirical or phenomenological) rate of reaction (v) for any reaction can be expressed by an empirical differential rate equation (or rate law) which contains a factor of the form k [A]α [B]β ... (expressing in full the dependence of the rate of reaction on the concentrations [A], [B] ...) where α, β are constant exponents (independent of concentration and time) and k is independent of [A] and [B] etc. (rate constant, rate coefficient), then the reaction is said to be of order α with respect to A, of order β with respect to B, ... , and of (total or overall) order n=α+β+... The exponents α, β, ... can be positive or negative integral or rational nonintegral numbers."@en ;
@@ -387,7 +387,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ReactionOrder"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456
+###  http://emmo.info/electrochemistry#EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456
 :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -403,14 +403,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "FaradaicCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_2d896559_eee3_447c_9759_87c854a4266a
+###  http://emmo.info/electrochemistry#EMMO_2d896559_eee3_447c_9759_87c854a4266a
 :EMMO_2d896559_eee3_447c_9759_87c854a4266a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A thermodynamically derived ElectrochemicalQuantity."@en ;
                                            skos:prefLabel "ElectrochemicalThermodynamicQuantity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_327eb3e1_f74a_4076_96de_5a2e3f63cb65
+###  http://emmo.info/electrochemistry#EMMO_327eb3e1_f74a_4076_96de_5a2e3f63cb65
 :EMMO_327eb3e1_f74a_4076_96de_5a2e3f63cb65 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -424,14 +424,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "SquareWaveCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
+###  http://emmo.info/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
 :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "A permeable membrane placed between the positive and negative electrodes to keep them physically separated and prevent an internal short circuit."@en ;
                                            skos:prefLabel "Separator"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
+###  http://emmo.info/electrochemistry#EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
 :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
@@ -442,7 +442,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ElectrochemicalComponent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5
+###  http://emmo.info/electrochemistry#EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5
 :EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Cathode"@en ;
@@ -455,7 +455,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "Cathode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_3663991d-9319-4f7a-922b-f0e428b58801
+###  http://emmo.info/electrochemistry#EMMO_3663991d-9319-4f7a-922b-f0e428b58801
 :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
                                                            [ rdf:type owl:Restriction ;
@@ -468,7 +468,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "PorousElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05
+###  http://emmo.info/electrochemistry#EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05
 :EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -483,14 +483,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "PeakCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
+###  http://emmo.info/electrochemistry#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
 :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A material relation in electrochemistry."@en ;
                                            skos:prefLabel "ElectrochemicalRelation"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
+###  http://emmo.info/electrochemistry#EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
 :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Area of electrode - solution interface.
@@ -504,7 +504,7 @@ The real (true) area, A_{real}, takes into account non-idealities of the interfa
                                            skos:prefLabel "ElectrodeSurfaceArea"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_47b7d606_7030_4674_9828_cf83fb4a2995
+###  http://emmo.info/electrochemistry#EMMO_47b7d606_7030_4674_9828_cf83fb4a2995
 :EMMO_47b7d606_7030_4674_9828_cf83fb4a2995 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """For the general chemical reaction:
@@ -523,7 +523,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ReactionRate"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
+###  http://emmo.info/electrochemistry#EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
 :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "Product of ElectronCharge and AvagadroConstant"@en ;
@@ -533,14 +533,14 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "FaradayConstant"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b
+###  http://emmo.info/electrochemistry#EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b
 :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity related to the transport of mass and/or charge."@en ;
                                            skos:prefLabel "ElectrochemicalTransportQuantity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc
+###  http://emmo.info/electrochemistry#EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc
 :EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Conductivity of an electrolyte solution divided by its molar concentration."@en ;
@@ -549,7 +549,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "MolarConductivity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf
+###  http://emmo.info/electrochemistry#EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf
 :EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
@@ -560,7 +560,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ElectrochemicalSystem"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe
+###  http://emmo.info/electrochemistry#EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe
 :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_830b59f7_d047_438c_90cd_62845749efcb ;
@@ -569,7 +569,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "StoredEnergy"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f
+###  http://emmo.info/electrochemistry#EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f
 :EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1 ,
                                                            [ rdf:type owl:Restriction ;
@@ -580,7 +580,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ElectrodePore"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b
+###  http://emmo.info/electrochemistry#EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b
 :EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """1. A type of redox reaction featuring the complete, net removal of one or more electrons from a molecular entity (also called 'de-electronation'). 
@@ -591,7 +591,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "OxidationReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
+###  http://emmo.info/electrochemistry#EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
 :EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ,
                                                            [ rdf:type owl:Restriction ;
@@ -607,7 +607,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ReducingAgent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347
+###  http://emmo.info/electrochemistry#EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347
 :EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which ions are the charge carrier."@en ;
@@ -615,28 +615,28 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonicCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_579eed46_6918_4275_9a70_dfd0409ab418
+###  http://emmo.info/electrochemistry#EMMO_579eed46_6918_4275_9a70_dfd0409ab418
 :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
                                            rdfs:comment "If reference is made only to ‘Faraday’s Law of electrolysis’ the first law is meant."@en ;
                                            skos:prefLabel "FaradaysLawsOfElectrolysis"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574
+###  http://emmo.info/electrochemistry#EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574
 :EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f19ff3b4_6bfe_4c41_a2b2_9affd39c140b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "For any electrolyte A_xB_y, the limiting molar conductivity is expressed as x times the limiting molar conductivity of A^{y+} and y times the limiting molar conductivity of B^{x-}."@en ;
                                            skos:prefLabel "KohlrauschsLaw"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
+###  http://emmo.info/electrochemistry#EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
 :EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A substance that is consumed in the course of a chemical reaction. It is sometimes known, especially in the older literature, as a reagent, but this term is better used in a more specialized sense as a test substance that is added to a system in order to bring about a reaction or to see whether a reaction occurs (e.g. an analytical reagent)."@en ;
                                            skos:prefLabel "Reactant"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75
+###  http://emmo.info/electrochemistry#EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75
 :EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Of ions B, the current density due to ions B divided by the sum of current densities of all the ions in the electrolyte."@en ;
@@ -646,7 +646,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "TransportNumber"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00
+###  http://emmo.info/electrochemistry#EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00
 :EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_17626b8e_dfce_4d3a_ae6c_5a7215d43a90 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Diffusion current of the potential-independent value that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.
@@ -659,7 +659,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "DiffusionLimitedCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
+###  http://emmo.info/electrochemistry#EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30
 :EMMO_60741c58_a10d_4aa6_bb68_0066a6ff8e30 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The potential of a working electrode relative to a reference electrode of the same kinds placed in the solution adjacent to the surface of the working electrode (just outside the double layer).
@@ -672,14 +672,14 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "SurfaceOverpotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89
+###  http://emmo.info/electrochemistry#EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89
 :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "An electrolyte in the liquid phase."@en ;
                                            skos:prefLabel "LiquidElectrolyte"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03
+###  http://emmo.info/electrochemistry#EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03
 :EMMO_60c5b2e5_164a_4ce6_8409_f386f5e50c03 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """When the same electric charge (quantity of electricity) Q is passed through several electrolytes, the mass, m_i, of the substances deposited are proportional to their respective chemical equivalent molar mass, M_i/z_i.
@@ -689,7 +689,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "FaradaysSecondLawOfElectrolysis"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
+###  http://emmo.info/electrochemistry#EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
 :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Salt_bridge"@en ;
@@ -701,7 +701,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "SaltBridge"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
+###  http://emmo.info/electrochemistry#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
 :EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
                                                            emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
@@ -710,7 +710,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "IonicConductivity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8
+###  http://emmo.info/electrochemistry#EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8
 :EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are ions." ;
@@ -718,7 +718,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "IonicCurrentDensity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d
+###  http://emmo.info/electrochemistry#EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d
 :EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ChemicalPotential per mole."@en ;
@@ -729,7 +729,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "MolarChemicalPotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
+###  http://emmo.info/electrochemistry#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
 :EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
                                                            emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
@@ -738,14 +738,14 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "ElectronicConductivity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73
+###  http://emmo.info/electrochemistry#EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73
 :EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is to participate in a reaction."@en ;
                                            skos:prefLabel "ReactiveSubcomponent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5
+###  http://emmo.info/electrochemistry#EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5
 :EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A disc electrode that is embedded in the centre of a cylinder which rotates in solution around the longitudinal cylinder axis.
@@ -757,7 +757,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "RotatingDiskElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6cae5943-737a-4f88-9903-9de4cffebd11
+###  http://emmo.info/electrochemistry#EMMO_6cae5943-737a-4f88-9903-9de4cffebd11
 :EMMO_6cae5943-737a-4f88-9903-9de4cffebd11 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f ,
                                                            [ rdf:type owl:Restriction ;
@@ -773,7 +773,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "CompositeSaltBridge"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6cb2f0d6_4925_427f_b33d_0c9a96166768
+###  http://emmo.info/electrochemistry#EMMO_6cb2f0d6_4925_427f_b33d_0c9a96166768
 :EMMO_6cb2f0d6_4925_427f_b33d_0c9a96166768 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The complete transfer of one or more electrons to a molecular entity (also called 'electronation'), and, more generally, the reverse of the processes described under oxidation (2) and (3).
@@ -784,7 +784,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ReductionReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
+###  http://emmo.info/electrochemistry#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
 :EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f ,
                                                            [ rdf:type owl:Restriction ;
@@ -796,7 +796,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "SimpleSaltBridge"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+###  http://emmo.info/electrochemistry#EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
 :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
@@ -821,7 +821,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ElectrochemicalCell"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
+###  http://emmo.info/electrochemistry#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
 :EMMO_740d5817_3fa7_464a_90c3_55552e51a3df rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_quotient" ;
@@ -831,7 +831,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ReactionQuotient"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_7729c34e_1ae9_403d_b933_1765885e7f29
+###  http://emmo.info/electrochemistry#EMMO_7729c34e_1ae9_403d_b933_1765885e7f29
 :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
                                                            :EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275 ;
@@ -847,7 +847,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ReferenceElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_791c1915_a791_4450_acd8_7f94764743b5
+###  http://emmo.info/electrochemistry#EMMO_791c1915_a791_4450_acd8_7f94764743b5
 :EMMO_791c1915_a791_4450_acd8_7f94764743b5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ;
@@ -858,7 +858,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ChargeCapacity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_79d1b273-58cd-4be6-a250-434817f7c261
+###  http://emmo.info/electrochemistry#EMMO_79d1b273-58cd-4be6-a250-434817f7c261
 :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73 ,
                                                            :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
@@ -869,14 +869,14 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ActiveElectrochemicalMaterial"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
+###  http://emmo.info/electrochemistry#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
 :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of multiple ElectrochemicalSubComponent"@en ;
                                            skos:prefLabel "CompositeElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29
+###  http://emmo.info/electrochemistry#EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29
 :EMMO_7bfcbe2d_eac6_4953_86d6_6f075334cf29 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
                                                                  owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
@@ -886,14 +886,14 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ChargePerMassDimension"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564
+###  http://emmo.info/electrochemistry#EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564
 :EMMO_7ded61d8_2e4b_4994_9c40_54ec1fd60564 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A substance that is formed during a chemical reaction."@en ;
                                            skos:prefLabel "Product"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36
+###  http://emmo.info/electrochemistry#EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36
 :EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Standard_electrode_potential" ;
@@ -909,7 +909,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "StandardElectrodePotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6
+###  http://emmo.info/electrochemistry#EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6
 :EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ElectrochemicalPotential per mole."@en ;
@@ -920,7 +920,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "MolarElectrochemicalPotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea
+###  http://emmo.info/electrochemistry#EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea
 :EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode whose function is to carry the electric current flowing through the electrical circuit of an electrochemical cell, the electrochemical processes on its surface not being of interest.
@@ -934,7 +934,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "CounterElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_885b462e_f6bc_412d_8b94_9425e13af0c7
+###  http://emmo.info/electrochemistry#EMMO_885b462e_f6bc_412d_8b94_9425e13af0c7
 :EMMO_885b462e_f6bc_412d_8b94_9425e13af0c7 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Direct_current"@en ;
@@ -950,7 +950,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "DirectCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d
+###  http://emmo.info/electrochemistry#EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d
 :EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric potential at which a material undergoes an oxidation or reduction decomposition."@en ;
@@ -958,7 +958,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "ElectrochemicalStabilityLimit"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763
+###  http://emmo.info/electrochemistry#EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763
 :EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance that undergoes a change of oxidation state, or whose chemical bonds are broken or formed, in a charge-transfer reaction at an electrode.
@@ -972,7 +972,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "ElectroactiveSubstance"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b
+###  http://emmo.info/electrochemistry#EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b
 :EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current of an electroactive substance B formed by a prior chemical reaction from another substance Y that is no electroactive at the potential at which B is electrochemically transformed.
@@ -984,7 +984,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "KineticCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+###  http://emmo.info/electrochemistry#EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d
 :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Impetance associated with a power source."@en ;
@@ -994,7 +994,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "InternalResistance"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd
+###  http://emmo.info/electrochemistry#EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd
 :EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is electronic."@en ;
@@ -1003,7 +1003,7 @@ Conducting Additive"""@en ;
                                            skos:prefLabel "ElectronicSubcomponent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b
+###  http://emmo.info/electrochemistry#EMMO_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b
 :EMMO_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ,
                                                            emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
@@ -1016,7 +1016,7 @@ Conducting Additive"""@en ;
                                            skos:prefLabel "OpenCircuitPotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c
+###  http://emmo.info/electrochemistry#EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c
 :EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
                                                            [ rdf:type owl:Restriction ;
@@ -1052,7 +1052,7 @@ Conducting Additive"""@en ;
                                            skos:prefLabel "NernstEinsteinEquation"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4
+###  http://emmo.info/electrochemistry#EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4
 :EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The concentration overpotential of an electrode reaction at a given electrode current density (c.d.) is basically the difference in equilibrium potentials across the diffusion layer. More precisely, it is the potential of a reference electrode (of the same electrode reaction as the working electrode ) with the interfacial concentrations which establish themselves at c.d., relative to the potential of a similar reference electrode with the concentrations of the bulk solution. From such a measured potential difference, with c.d. flowing, one needs to subtract the ohmic potential drop prevailing between the two electrodes.
@@ -1064,7 +1064,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ConcentrationOverpotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
+###  http://emmo.info/electrochemistry#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
 :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Molar conductivity at infinite dilution"@en ;
@@ -1072,14 +1072,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "LimitingMolarConductivity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a1bbb273_bc05_4e80_8817_82479178bb41
+###  http://emmo.info/electrochemistry#EMMO_a1bbb273_bc05_4e80_8817_82479178bb41
 :EMMO_a1bbb273_bc05_4e80_8817_82479178bb41 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A base that completely dissociates in water.\"" ;
                                            skos:prefLabel "StrongBase"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a24f8581_a5a4_41a4_bb45_d0fdd5c0d810
+###  http://emmo.info/electrochemistry#EMMO_a24f8581_a5a4_41a4_bb45_d0fdd5c0d810
 :EMMO_a24f8581_a5a4_41a4_bb45_d0fdd5c0d810 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Value of an electric current at an instant in time, t.
@@ -1092,7 +1092,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "InstantaneousCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31
+###  http://emmo.info/electrochemistry#EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31
 :EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The fraction of the electrostatic potential energy affecting the reduction rate in an electrode reaction, with the remaining fraction affecting the corresponding oxidation rate.
@@ -1108,7 +1108,7 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            skos:prefLabel "ChargeTransferCoefficient"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a56fc557_9dea_42e6_b936_e9d62dcaf84f
+###  http://emmo.info/electrochemistry#EMMO_a56fc557_9dea_42e6_b936_e9d62dcaf84f
 :EMMO_a56fc557_9dea_42e6_b936_e9d62dcaf84f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -1120,7 +1120,7 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            skos:prefLabel "DoubleLayerCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
+###  http://emmo.info/electrochemistry#EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
 :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ,
                                                            :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
@@ -1130,7 +1130,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectrochemicalReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc
+###  http://emmo.info/electrochemistry#EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc
 :EMMO_a82e16c3_b766_482f_be94_b8e9af37f6fc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Surface area of an electrode that takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible.
@@ -1141,7 +1141,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectrodeRealSurfaceArea"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
+###  http://emmo.info/electrochemistry#EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
 :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Number of electrons transferred in a charge transfer reaction between an electrode and a single entity (ion, radical-ion, or molecule) of an electroactive substance, whose identity must be specified.
@@ -1156,14 +1156,14 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ChargeNumber"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112
+###  http://emmo.info/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112
 :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Physical quantities defined within the domain of electrochemistry."@en ;
                                            skos:prefLabel "ElectrochemicalQuantity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
+###  http://emmo.info/electrochemistry#EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
 :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical species or molecular entity having an available pair of electrons capable of forming a covalent bond with a hydron (proton) (see Brønsted base) or with the vacant orbital of some other species (see Lewis base).\" - IUPAC Gold Book" ;
@@ -1171,7 +1171,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "Base"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f
+###  http://emmo.info/electrochemistry#EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f
 :EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Equilibrium electrode potential under conditions of unit concentration of species involved in the electrode reaction.
@@ -1185,7 +1185,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "FormalElectrodePotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_b6319c74_d2ce_48c0_a75a_63156776b302
+###  http://emmo.info/electrochemistry#EMMO_b6319c74_d2ce_48c0_a75a_63156776b302
 :EMMO_b6319c74_d2ce_48c0_a75a_63156776b302 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Anode"@en ;
@@ -1199,7 +1199,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "Anode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799
+###  http://emmo.info/electrochemistry#EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799
 :EMMO_b6a52fdb_ba40_4caf_a8d9_523a467eb799 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical compound consisting of an assembly of cations and anions.\" IUPAC Gold Book" ;
@@ -1207,14 +1207,14 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "Salt"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3
+###  http://emmo.info/electrochemistry#EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3
 :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A ConventionalQuantitativeProperty that is unique to the field of electrochemistry"@en ;
                                            skos:prefLabel "ConventionalElectrochemicalProperty"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74
+###  http://emmo.info/electrochemistry#EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74
 :EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
                                                            [ rdf:type owl:Restriction ;
@@ -1237,7 +1237,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ThreeElectrodeCell"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
+###  http://emmo.info/electrochemistry#EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
 :EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The area of the electrode material that is accessible to the electrolyte that is used for charge transfer and/or storage."@en ;
@@ -1247,7 +1247,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectrochemicallyActiveSurfaceArea"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
+###  http://emmo.info/electrochemistry#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
 :EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
                                                            emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
@@ -1256,7 +1256,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectronicResistivity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_bfc8c075_246e_4633_ba8e_906a9f5f2e3a
+###  http://emmo.info/electrochemistry#EMMO_bfc8c075_246e_4633_ba8e_906a9f5f2e3a
 :EMMO_bfc8c075_246e_4633_ba8e_906a9f5f2e3a rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are electrons." ;
@@ -1264,7 +1264,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ElectronicCurrentDensity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c2024587_3237_474e_8df9_91d10db2df47
+###  http://emmo.info/electrochemistry#EMMO_c2024587_3237_474e_8df9_91d10db2df47
 :EMMO_c2024587_3237_474e_8df9_91d10db2df47 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode whose potential changes with an applied potential.
@@ -1273,7 +1273,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "PolarizableElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c230694a_04ce_4719_88a4_ecfa85167c30
+###  http://emmo.info/electrochemistry#EMMO_c230694a_04ce_4719_88a4_ecfa85167c30
 :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A molecular entity or chemical species capable of donating a hydron (proton) (see Brønsted acid) or capable of forming a covalent bond with an electron pair (see Lewis acid).\" - IUPAC Gold Book" ;
@@ -1281,7 +1281,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "Acid"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c39b2498_783e_48e1_9814_6164bd99823c
+###  http://emmo.info/electrochemistry#EMMO_c39b2498_783e_48e1_9814_6164bd99823c
 :EMMO_c39b2498_783e_48e1_9814_6164bd99823c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Range of electrode potentials of a given working electrode in a given electrolyte, where the electric current from reactions of the electrode or electrolyte is negligible compared with the current from reactions of the system under investigation.
@@ -1293,7 +1293,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "WorkingPotentialRange"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f
+###  http://emmo.info/electrochemistry#EMMO_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f
 :EMMO_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Ionic_liquid"@en ;
@@ -1305,7 +1305,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "IonicLiquidElectrolyte"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf
+###  http://emmo.info/electrochemistry#EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf
 :EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current measured in a solution containing two electroactive substances, A and B, that exceeds the sum of the faradaic currents that would be obtained for A and B separately under the same experimental conditions.
@@ -1326,7 +1326,7 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "CatalyticCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
+###  http://emmo.info/electrochemistry#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
 :EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
                                                            emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
@@ -1335,7 +1335,7 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "IonicResistivity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
+###  http://emmo.info/electrochemistry#EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
 :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Weight of active material in an electrode per unit electrode area."@en ;
@@ -1344,14 +1344,14 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "ActiveElectrochemicalMaterialLoading"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb
+###  http://emmo.info/electrochemistry#EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb
 :EMMO_c9e0fb9b_c11e_48ab_9245_04b45e15dcfb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "An acid that completely dissociates in water." ;
                                            skos:prefLabel "StrongAcid"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
+###  http://emmo.info/electrochemistry#EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
 :EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The number of molecules and/or formula units that participate in the reaction as written"@en ;
@@ -1360,7 +1360,7 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "StoichiometricCoefficient"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
+###  http://emmo.info/electrochemistry#EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
 :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
@@ -1374,20 +1374,20 @@ i0 = ia = - ic
                                            skos:prefLabel "ExchangeCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4
+###  http://emmo.info/electrochemistry#EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4
 :EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_b953f2b1_c8d1_4dd9_b630_d3ef6580c2bb ;
                                            skos:prefLabel "ElectrochemicalConstant"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_ce548161_c987_4beb_9091_adcf80027310
+###  http://emmo.info/electrochemistry#EMMO_ce548161_c987_4beb_9091_adcf80027310
 :EMMO_ce548161_c987_4beb_9091_adcf80027310 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A base that partially dissociates in water.\"" ;
                                            skos:prefLabel "WeakBase"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_d07d939a_7865_406d_867a_0500b02cba47
+###  http://emmo.info/electrochemistry#EMMO_d07d939a_7865_406d_867a_0500b02cba47
 :EMMO_d07d939a_7865_406d_867a_0500b02cba47 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
                                                            [ rdf:type owl:Restriction ;
@@ -1408,7 +1408,7 @@ i0 = ia = - ic
                                            skos:prefLabel "RedoxReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938
+###  http://emmo.info/electrochemistry#EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938
 :EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
                                                            [ rdf:type owl:Restriction ;
@@ -1447,7 +1447,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ButlerVolmerEquation"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_d5ac8868_d318_4065_aa23_72140ae888ae
+###  http://emmo.info/electrochemistry#EMMO_d5ac8868_d318_4065_aa23_72140ae888ae
 :EMMO_d5ac8868_d318_4065_aa23_72140ae888ae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.
@@ -1459,7 +1459,7 @@ i0 = ia = - ic
                                            skos:prefLabel "LimitingCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3
+###  http://emmo.info/electrochemistry#EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3
 :EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Change in the Gibbs free energy between the products and reactants in a reaction."@en ;
@@ -1467,7 +1467,7 @@ i0 = ia = - ic
                                            skos:prefLabel "GibbsFreeEnergyOfReaction"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
+###  http://emmo.info/electrochemistry#EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
 :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Potential of an electrode when no electric current flows through the cell and all local charge transfer equilibria across phase boundaries that are represented in the cell diagram (except at possible electrolyte-electrolyte junctions) and local chemical equilibria are established.
@@ -1483,21 +1483,21 @@ i0 = ia = - ic
                                            skos:prefLabel "EquilibriumElectrodePotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_dbd808a7_8a8f_43be_9870_02cc35bd1646
+###  http://emmo.info/electrochemistry#EMMO_dbd808a7_8a8f_43be_9870_02cc35bd1646
 :EMMO_dbd808a7_8a8f_43be_9870_02cc35bd1646 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/O04322" ;
                                            skos:prefLabel "ReactionRateConstant"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb
+###  http://emmo.info/electrochemistry#EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb
 :EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is to provide structural integrity."@en ;
                                            skos:prefLabel "StructuralSubcomponent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f
+###  http://emmo.info/electrochemistry#EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f
 :EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Galvanic_cell"@en ;
@@ -1511,14 +1511,14 @@ i0 = ia = - ic
                                            skos:prefLabel "GalvanicCell"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408
+###  http://emmo.info/electrochemistry#EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408
 :EMMO_e3ec1307_09d7_4b61_97e3_a69ec87fb408 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"An acid that partially dissociates in water.\"" ;
                                            skos:prefLabel "WeakAcid"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e
+###  http://emmo.info/electrochemistry#EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e
 :EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ,
                                                            [ rdf:type owl:Restriction ;
@@ -1534,7 +1534,7 @@ i0 = ia = - ic
                                            skos:prefLabel "OxidizingAgent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42
+###  http://emmo.info/electrochemistry#EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42
 :EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier."@en ;
@@ -1542,7 +1542,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectronicCurrent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44
+###  http://emmo.info/electrochemistry#EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44
 :EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Product of the stoichiometric coefficient and +1 for a product and -1 for a reactant."@en ;
@@ -1552,7 +1552,7 @@ i0 = ia = - ic
                                            skos:prefLabel "StoichiometricNumber"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e931087f_7681_4096_b200_5223bcc47eb4
+###  http://emmo.info/electrochemistry#EMMO_e931087f_7681_4096_b200_5223bcc47eb4
 :EMMO_e931087f_7681_4096_b200_5223bcc47eb4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electrolytic_cell"@en ;
@@ -1566,7 +1566,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrolyticCell"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7
+###  http://emmo.info/electrochemistry#EMMO_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7
 :EMMO_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Defined by j0 = i0/A, where i0 is the exchange current of the electrode reaction and A is usually taken as the geometric area of the electrode."@en ;
@@ -1577,7 +1577,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ExchangeCurrentDensity"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d
+###  http://emmo.info/electrochemistry#EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d
 :EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
@@ -1586,14 +1586,14 @@ i0 = ia = - ic
                                            skos:prefLabel "SpecificEnergy"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
+###  http://emmo.info/electrochemistry#EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
 :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A material that participates in a functional process in an electrochemical assembly." ;
                                            skos:prefLabel "ElectrochemicalMaterial"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_f509645f_eb27_470e_9112_7ab828ed40d3
+###  http://emmo.info/electrochemistry#EMMO_f509645f_eb27_470e_9112_7ab828ed40d3
 :EMMO_f509645f_eb27_470e_9112_7ab828ed40d3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
@@ -1608,7 +1608,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrodePotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_f6fcd255_248d_4603_b128_04dab960a676
+###  http://emmo.info/electrochemistry#EMMO_f6fcd255_248d_4603_b128_04dab960a676
 :EMMO_f6fcd255_248d_4603_b128_04dab960a676 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode that responds to one, or more than one, species in the solution being investigated, with no appreciable change of bulk solution composition during the measurement.
@@ -1620,7 +1620,7 @@ i0 = ia = - ic
                                            skos:prefLabel "IndicatorElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
+###  http://emmo.info/electrochemistry#EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
 :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
@@ -1631,7 +1631,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrochemicalSubcomponent"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767
+###  http://emmo.info/electrochemistry#EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767
 :EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Difference of electric potentials measured between identical metallic leads to two electrodes of an electrochemical cell.
@@ -1644,7 +1644,7 @@ i0 = ia = - ic
                                            skos:prefLabel "AppliedPotential"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_fa22874b_76a9_4043_8b8f_6086c88746de
+###  http://emmo.info/electrochemistry#EMMO_fa22874b_76a9_4043_8b8f_6086c88746de
 :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A solution (with a solvent and one or many solutes) that generally contains ions, atoms or molecules that have lost or gained electrons, and is electrically conductive.
@@ -1654,7 +1654,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrolyticSolution"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3
+###  http://emmo.info/electrochemistry#EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3
 :EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces.
@@ -1665,7 +1665,7 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrodeGeometricSurfaceArea"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+###  http://emmo.info/electrochemistry#EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
 :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af ,
                                                            :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
@@ -1680,7 +1680,7 @@ i0 = ia = - ic
                                            skos:prefLabel "Electrolyte"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35
+###  http://emmo.info/electrochemistry#EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35
 :EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode at which one or more electroactive substances undergo reaction in the solution being investigated.
@@ -1693,7 +1693,7 @@ i0 = ia = - ic
                                            skos:prefLabel "WorkingElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e
+###  http://emmo.info/electrochemistry#EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e
 :EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
                                                            [ rdf:type owl:Restriction ;
@@ -1732,7 +1732,7 @@ i0 = ia = - ic
                                            skos:prefLabel "NernstEquation"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
+###  http://emmo.info/electrochemistry#EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
 :EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A working electrode in the shape of a ring used in a rotating ring disk electrode (RRDE)."@en ;
@@ -1740,7 +1740,7 @@ i0 = ia = - ic
                                            skos:prefLabel "AnnularWorkingElectrode"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc
+###  http://emmo.info/electrochemistry#EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc
 :EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode made of a solid amalgam of an appropriate metal.
@@ -1752,7 +1752,7 @@ i0 = ia = - ic
                                            skos:prefLabel "SolidAmalgamElectrode"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917
+###  http://emmo.info/electrochemistry#EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917
 :EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 ,
                                                            [ rdf:type owl:Restriction ;
@@ -1766,7 +1766,7 @@ i0 = ia = - ic
                                            skos:prefLabel "RotatingRingDiskElectrode"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275
+###  http://emmo.info/electrochemistry#EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275
 :EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A non-polarizable electrode is an electrode that holds its potential essentially constant by efficiently allowing electric current to pass. This is a desirable characteristic for a reference electrode.
@@ -1775,7 +1775,7 @@ i0 = ia = - ic
                                            skos:prefLabel "NonPolarizableElectrode"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1
+###  http://emmo.info/electrochemistry#EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1
 :EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode of a composite of carbon powder and a pasting liquid (including mineral oil, Nujol, bromoform, bromonaphthalene).
@@ -1787,7 +1787,7 @@ i0 = ia = - ic
                                            skos:prefLabel "CarbonPasteElectrode"@en .
 
 
-###  http://emmo.info/BattINFO/electrochemistry#EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103
+###  http://emmo.info/electrochemistry#EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103
 :EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Development of a carbon paste electrode that is screen printed using a carbon/polymer mixture of suitable composition.
