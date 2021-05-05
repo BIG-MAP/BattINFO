@@ -39,7 +39,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
 :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/electrochemistry#EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df> ,
+                                           rdfs:subClassOf electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
                                                            emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """One or more electrochemical cells connected to form one unit and having provisions for external connections.
@@ -52,7 +52,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
-                                           rdfs:subClassOf <http://emmo.info/electrochemistry#EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb> ;
+                                           rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Box or enclosure which contains the electrochemical cells, associated connectors and hardware.
 
 --Crompton, Battery Reference Book, 3rd Edition"""@en ;
