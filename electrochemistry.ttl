@@ -282,7 +282,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 
 ###  http://emmo.info/electrochemistry#EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800
 :EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 ;
+                                           rdfs:subClassOf :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 """Electrolyte solution, the ions of which are electroinactive in the range of applied potential being studied, and whose ionic strength (and, therefore, contribution to the overall conductivity) is usually much greater than the concentration of an electroactive substance to be dissolved in it. 
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
@@ -873,6 +873,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763
                                                            ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical material that participates in an electrochemical reaction."@en ;
                                            skos:prefLabel "ActiveElectrochemicalMaterial"@en .
 
 
@@ -1705,7 +1706,8 @@ i0 = ia = - ic
 
 --Electrolyte Solutions. (2021, February 17). Retrieved April 28, 2021, from https://chem.libretexts.org/@go/page/1619"""@en ;
                                            rdfs:comment "A liquid electrolyte that consists of solutes dissolved in a solvent."@en ;
-                                           skos:prefLabel "ElectrolyticSolution"@en .
+                                           skos:altLabel "ElectrolyticSolution"@en ;
+                                           skos:prefLabel "ElectrolyteSolution"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_fa7790d6_07bb_4b0f_9965_55966828f5f3
@@ -1784,6 +1786,192 @@ i0 = ia = - ic
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_1259d305_349a_4c91_9490_c494c12d1e2c
+:EMMO_1259d305_349a_4c91_9490_c494c12d1e2c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell in which the predominant reaction mechanisms at each electrode are different (e.g. conversion & intercalation)."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Zinc-ion cell" ;
+                                           skos:prefLabel "HybridCell"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_2e98bc8b_ffe9_4f0d_bfb9_4a4d71836ad5
+:EMMO_2e98bc8b_ffe9_4f0d_bfb9_4a4d71836ad5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of electrochemical reaction in which a guest molecule (or ion) is inserted into a host lattice."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Li^+ + C_6 + e^- <--> LiC_6" ;
+                                           skos:prefLabel "ElectrochemicalIntercalation"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
+:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An electrochemical cell which is not designed to be electrically recharged.
+
+Adapted from:
+--IEC 60050, International electro technical vocabulary. Chapter 486: Secondary cells and batteries. https://www.electropedia.org/iev/iev.nsf/index?openform&part=482"""@en ;
+                                           skos:altLabel "PrimaryElectrochemicalCell"@en ;
+                                           skos:prefLabel "PrimaryCell"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1
+:EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical material that can act as a host lattice in an electrochemical intercalation reaction."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Graphite"@en ;
+                                           skos:prefLabel "IntercalationMaterial"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98
+:EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
+                                           owl:disjointWith :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An ion-transport medium that does not contain water.
+
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           skos:altLabel "NonAqueousElectrolyticSolution"@en ,
+                                                         "NonAqueousSolution"@en ;
+                                           skos:prefLabel "NonAqueousElectrolyte"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+:EMMO_615cff2a_be95_4e65_9471_98db23f4c878 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
+                                                           ] ;
+                                           owl:disjointWith :EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An aqueous electrolyte with a nominal pH greater than 7."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "KOH-H2O"@en ;
+                                           skos:altLabel "AlkalineAqueousElectrolyte"@en ,
+                                                         "AlkalineSolution"@en ;
+                                           skos:prefLabel "AlkalineElectrolyte"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2
+:EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_c230694a_04ce_4719_88a4_ecfa85167c30
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An aqueous electrolyte with a nominal pH values less than 7."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "HCl-H2O"@en ;
+                                           skos:altLabel "AcidicAqueousElectrolyte"@en ,
+                                                         "AcidicSolution"@en ;
+                                           skos:prefLabel "AcidicElectrolyte"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88
+:EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_99f21272_3aba_4dab_a9b7_63e5e1116beb
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode at which the predominant electrochemical reaction is a conversion."@en ;
+                                           skos:prefLabel "ConversionElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad
+:EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_99f21272_3aba_4dab_a9b7_63e5e1116beb
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of electrochemical reaction in which a reactant is converted into a chemically distinct product."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Li <--> Li^+ + e^-" ;
+                                           skos:prefLabel "ElectrochemicalConversion"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c
+:EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode at which the predominant electrochemical reaction is an intercalation."@en ;
+                                           skos:prefLabel "IntercalationElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
+:EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell in which the predominant reaction mechanisms at both electrodes are conversions."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Zinc-air cell"@en ;
+                                           skos:prefLabel "ConversionCell"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_99f21272_3aba_4dab_a9b7_63e5e1116beb
+:EMMO_99f21272_3aba_4dab_a9b7_63e5e1116beb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical material that participates in an electrochemical conversion reaction."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Lithium metal"@en ;
+                                           skos:prefLabel "ConversionMaterial"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc
+:EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell in which the predominant reaction mechanisms at both electrodes are intercalations."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Li-ion cell"@en ;
+                                           skos:prefLabel "IntercalationCell"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
+:EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Aqueous_solution"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An ion-transport medium, which may be immobilized, in which water is the solvent.
+
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Aqueous_solution"@en ;
+                                           skos:altLabel "AqueousElectrolyticSolution"@en ;
+                                           skos:prefLabel "AqueousElectrolyte"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c
+:EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An aqueous electrolyte with a nominal pH value between 6 and 8."@en ;
+                                           skos:altLabel "NearNeutralAqueousElectrolyte"@en ,
+                                                         "NearNeutralSolution"@en ;
+                                           skos:prefLabel "NearNeutralElectrolyte"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
+:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An electrochemical cell which is designed to be electrically recharged.
+
+Adapted from:
+--IEC 60050, International electro technical vocabulary. Chapter 486: Secondary cells and batteries. https://www.electropedia.org/iev/iev.nsf/index?openform&part=482"""@en ;
+                                           skos:altLabel "SecondaryElectrochemicalCell"@en ;
+                                           skos:prefLabel "SecondaryCell"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
