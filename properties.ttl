@@ -8,12 +8,13 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix annotations: <http://emmo.info/emmo/top/annotations#> .
+@prefix electrochemistry: <http://emmo.info/electrochemistry#> .
 @base <http://emmo.info/BattINFO/properties> .
 
 <http://emmo.info/BattINFO/properties> rdf:type owl:Ontology ;
                                         owl:versionIRI <http://emmo.info/BattINFO/0.1.0/properties> ;
                                         owl:imports <http://emmo.info/BattINFO/0.1.0/characterisation> ,
-                                                    <http://emmo.info/BattINFO/0.1.0/electrochemistry> ;
+                                                    <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
                                         dcterms:abstract """Common properties for batteries and their interfaces.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
@@ -44,40 +45,21 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  http://emmo.info/BattINFO#EMMO_1c13c786_35ae_4768_88fe_795813d465cd
-:EMMO_1c13c786_35ae_4768_88fe_795813d465cd rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           :EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "TheoreticalEnergy per unit mass of the cell."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "TheoteticalSpecificEnergy"@en .
-
-
 ###  http://emmo.info/BattINFO#EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1
 :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf electrochemistry:EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Physical quantities defined within the domain of batteries."@en ;
                                            skos:prefLabel "BatteryQuantity"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa
 :EMMO_2b09f961_3374_42e4_8836_bffc6bf522fa rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
-                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf electrochemistry:EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
+                                                           electrochemistry:EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical amount of charge a cell can store. Minimum of the theoretical capacity of the positive electrode and negative electrode."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:altLabel "TheoreticalCapacity"@en ;
                                            skos:prefLabel "TheoreticalChargeCapacity"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_367a4916_d03a_483c_9f2c_6588370fc9d9
-:EMMO_367a4916_d03a_483c_9f2c_6588370fc9d9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0c0c623c_43b8_426d_a536_168108e2353a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Difference between the theoretical electric potentials of the positive electrode and negeative electrode under no current flow."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           skos:altLabel "NernstVoltage"@en ,
-                                                         "TheoreticalEquilibriumVoltage"@en ;
-                                           skos:prefLabel "TheoreticalOpenCircuitVoltage"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_3a38e30d_4c97_49d4_b0f4_661c9779e039
@@ -90,8 +72,8 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_8632dee1_0adf_4a47_8400_820b48b86732
 :EMMO_8632dee1_0adf_4a47_8400_820b48b86732 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 ,
-                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf electrochemistry:EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 ,
+                                                           electrochemistry:EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "TheoreticalCapacity divided by the mass of the cell."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
                                            skos:altLabel "TheoreticalSpecificChargeCapacity"@en ;
@@ -100,8 +82,8 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_9ea6a862_131f_4154_be47_e7417f2fb924
 :EMMO_9ea6a862_131f_4154_be47_e7417f2fb924 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ,
-                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf electrochemistry:EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ,
+                                                           electrochemistry:EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Theoretical amount of energy that can be stored in a battery cell. Minimum of the theoretical energy of the positive electrode and negative electrode. Product of the Theoretical Capacity and the Theoretical Open-Circuit Voltage."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:altLabel "TheoreticalEnergy"@en ;

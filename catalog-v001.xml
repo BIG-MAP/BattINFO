@@ -2,11 +2,9 @@
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
         <uri name="http://emmo.info/emmo/1.0.0-beta/generic-concepts"  uri="generic-concepts.ttl"/>
-        <uri name="http://emmo.info/BattINFO/0.1.0/electrochemistry"   uri="electrochemistry.ttl"/>
+        <uri name="http://emmo.info/electrochemistry/0.1.0/electrochemistry"   uri="electrochemistry.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.1.0/characterisation"   uri="characterisation.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/battery"            uri="battery.ttl"/>
-        <uri name="http://emmo.info/BattINFO/0.1.0/electrode"          uri="electrode.ttl"/>
-        <uri name="http://emmo.info/BattINFO/0.1.0/saltbridge"         uri="saltbridge.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/properties"         uri="properties.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/observations"       uri="observations.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/models"             uri="models.ttl"/>

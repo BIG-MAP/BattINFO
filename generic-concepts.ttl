@@ -100,6 +100,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 #    Classes
 #################################################################
 
+###  http://emmo.info/emmo#EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e
+:EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Equation describing the continumm transport of chemical species."@en ;
+                                           rdfs:comment "Derived from the law of conservation of mass."@en ;
+                                           skos:prefLabel "ChemicalSpeciesContinuityEquation"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb
 :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_49804605_c0fe_4538_abda_f70ba1dc8a5d ,
@@ -110,6 +118,34 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                            ] ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A 'physical' that stands for a real world object that takes active part of a functional process."@en ;
                                            skos:prefLabel "ActiveParticipant"@en .
+
+
+###  http://emmo.info/emmo#EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a
+:EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_eb77076b_a104_42ac_a065_798b2d2809ad
+                                                           ] ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A ChemicalSpecies with a net electric charge."@en ;
+                                           skos:prefLabel "IonicSpecies"@en .
+
+
+###  http://emmo.info/emmo#EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2
+:EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_27c5d8c6_8af7_4d63_beb1_ec37cd8b3fa3 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation that describes the transport of some conserved quantity."@en ;
+                                           skos:prefLabel "ContinuityEquation"@en .
+
+
+###  http://emmo.info/emmo#EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc
+:EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The flux of matter (the number of particles passing through an imaginary window in a given interval divided by the area of the window and the duration of the interval) is proportional to the density gradient at that point.
+
+--P. Atkins and J. De Paula, Atkins’ Physical Chemistry, 8th Ed. New York: W.H. Freeman and Company, 2006, p.757."""@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Fick%27s_laws_of_diffusion#Fick's_first_law"@en ;
+                                           skos:prefLabel "FicksFirstLaw"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
@@ -140,6 +176,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                          "MaximalMassDiffusivity"@en ,
                                                          "MaximumDiffusionCoefficient"@en ;
                                            skos:prefLabel "SingleComponentMaximalDiffusivity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_46ef0f56_2b15_4fc5_83bd_79b58b996b93
+:EMMO_46ef0f56_2b15_4fc5_83bd_79b58b996b93 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The rate of a chemical reaction is directly proportional to the product of the activities or concentrations of the reactants."@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Law_of_mass_action"@en ;
+                                           rdfs:comment "A postulate in the phenomenological theory of chemical reaction kinetics."@en ,
+                                                        "For a chemical reaction in equilibrium, the reaction quotient is a constant."@en ;
+                                           skos:prefLabel "LawOfMassAction"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
@@ -216,6 +262,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalExpansionCoefficient"@en .
 
 
+###  http://emmo.info/emmo#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
+:EMMO_7d20b67d_3565_492e_9d59_f29c2c525276 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation describing the continuum transport of mass."@en ;
+                                           rdfs:comment "Derived from the law of the conservation of mass."@en ,
+                                                        "\\dot{\\rho} - div(N) = \\dot{s}"@en ;
+                                           skos:prefLabel "MassContinuityEquation"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
 :EMMO_802c167d_b792_4cb8_a315_35797345c0e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
@@ -223,6 +278,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The amount of heat to be applied to a given mass of material to produce a unit change in its temperature."@en ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N0 J0"@en ;
                                            skos:prefLabel "HeatCapacity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
+:EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Equation describing the continuum transport of electric charge."@en ;
+                                           rdfs:comment "-\\div(j) + dot{s}_{charge} = 0"@en ,
+                                                        "Derived from the law of conservation of charge (electroneutrality)."@en ;
+                                           skos:prefLabel "ElectricChargeContinuityEquation"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1
@@ -234,6 +298,44 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalConductivity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310
+:EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Rate of mass movement through a unit area."@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Mass_flux"@en ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L-2 M+1 I0 Θ0 N0 J0"@en ;
+                                           skos:prefLabel "MassFlux"@en .
+
+
+###  http://emmo.info/emmo#EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe
+:EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A monoatomic or polyatomic species having one or more elementary charges of the proton.
+
+- IUPAC Gold Book"""@en ;
+                                           skos:prefLabel "Cation"@en .
+
+
+###  http://emmo.info/emmo#EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79
+:EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_27c5d8c6_8af7_4d63_beb1_ec37cd8b3fa3 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f
+                                                           ] ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Relates the diffusive mass flux to the gradient of the concentration."@en ;
+                                           rdfs:comment "J = -D*grad(c)" ;
+                                           skos:prefLabel "DiffusionMassFluxEquation"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
 :EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
@@ -241,6 +343,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The specific heat capacity (symbol cp) of a substance is the heat capacity of a sample of the substance divided by the mass of the sample."@en ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ-1 N0 J0"@en ;
                                            skos:prefLabel "SpecificHeatCapacity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab
+:EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A monoatomic or polyatomic species having one or more elementary charges of the electron.
+
+- IUPAC Gold Book"""@en ;
+                                           skos:prefLabel "Anion"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767

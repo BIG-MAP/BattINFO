@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from emmo import get_ontology
+from emmo.ontology import NoSuchLabelError
 
 battinfo = get_ontology('battinfo.ttl').load(url_from_catalog=True)
 
@@ -15,10 +16,14 @@ with open('glossary.txt') as f:
 missing_classes = []
 included_classes = []
 for key in glossary.keys():
-    if [key] in [e.prefLabel for e in battinfo.get_entities()]:
+    print(key)
+    try:
+        battinfo.get_by_label(key)
         included_classes.append(key)
-    else:
+        print('is there')
+    except NoSuchLabelError:
         missing_classes.append(key)
+        print('is not there')
 
 print('Classes in glossary missing in battinfo:\n', missing_classes)
         
