@@ -11,13 +11,13 @@
 @base <http://emmo.info/electrochemistry/electrochemistry> .
 
 <http://emmo.info/electrochemistry/electrochemistry> rdf:type owl:Ontology ;
-                                              owl:versionIRI <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
-                                              owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
-                                              dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
+                                                      owl:versionIRI <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
+                                                      owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
+                                                      dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
-                                              dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                              owl:versionInfo "0.1.0" .
+                                                      dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+                                                      owl:versionInfo "0.1.0" .
 
 #################################################################
 #    Annotation properties
@@ -230,13 +230,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ChemicalPotential"@en .
 
 
-###  http://emmo.info/electrochemistry#EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6
-:EMMO_183a8e0f_6524_4188_a5c3_a9f95ecf36a6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the electrochemical cell."@en ;
-                                           skos:prefLabel "PositiveElectrode"@en .
-
-
 ###  http://emmo.info/electrochemistry#EMMO_19abaccd_43be_4048_965c_e4fb63c5951b
 :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
@@ -320,13 +313,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity that relates to the kinetics of a reaction."@en ;
                                            skos:prefLabel "ElectrochemicalKineticQuantity"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b
-:EMMO_227decd6_d2c5_4c80_b56f_bf499acfe01b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
-                                           skos:prefLabel "NegativeElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_22cec04f_c7f3_4ff8_a34b_e512379c9dcb
@@ -445,6 +431,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 ###  http://emmo.info/electrochemistry#EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5
 :EMMO_35c650ab_3b23_4938_b312_1b0dede2e6d5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           owl:disjointWith :EMMO_b6319c74_d2ce_48c0_a75a_63156776b302 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Cathode"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode of an electrochemical cell through which net electric current flows and at which the predomi- nating electrochemical reaction is a reduction.
 
@@ -481,6 +468,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:comment "I_{p}"@en ,
                                                         "Since the concentration of an electroactive substance at the electrode-solution interface decreases mono- tonically, the faradaic current due to its electrooxidation or electroreduction increases monotonically with time because of the increasing concentration gradient of the electroactive substance, the concentra- tion of which remains constant in the bulk. The maximum current value is passed when the transport rate of electroactive substance to the electrode-solution interface starts to be lower than the rate at which it is removed by reaction at the electrode. The result of these two competing processes leads to the peak- shaped I-E dependence."@en ;
                                            skos:prefLabel "PeakCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
+:EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A working electrode in the shape of a ring used in a rotating ring disk electrode (RRDE)."@en ;
+                                           skos:altLabel "RingElectrode"@en ;
+                                           skos:prefLabel "AnnularWorkingElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
@@ -710,6 +705,18 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "IonicConductivity"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc
+:EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode made of a solid amalgam of an appropriate metal.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "Liquid and paste amalgams can also be used."@en ,
+                                                        "Solid amalgam electrodes are electrochemically similar to the hanging mercury drop electrode. Their main advantages are high hydrogen overpotential (similar to liquid mercury); a wide working potential range; the simple mechanical, chemical, and electrochemical regeneration of the surface; a long lifetime; low toxicity of material (comparable with that of dental amalgams); applicability for field measurements; compatibility with flow-through systems; simple construction, without mobile parts; and easy miniaturization."@en ;
+                                           skos:altLabel "SAE"@en ;
+                                           skos:prefLabel "SolidAmalgamElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8
 :EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
@@ -893,6 +900,20 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "Product"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917
+:EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A second annular working electrode positioned concentric with a rotating disc electrode to make a rotating ring-disc electrode (RRDE).
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "This arrangement is largely used in mechanistic studies."@en ;
+                                           skos:prefLabel "RotatingRingDiskElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36
 :EMMO_7fc10197_41d9_4c1e_a107_928f03eb2d36 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544 ;
@@ -923,6 +944,7 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 ###  http://emmo.info/electrochemistry#EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea
 :EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           owl:disjointWith :EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode whose function is to carry the electric current flowing through the electrical circuit of an electrochemical cell, the electrochemical processes on its surface not being of interest.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
@@ -1064,6 +1086,15 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "ConcentrationOverpotential"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275
+:EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A non-polarizable electrode is an electrode that holds its potential essentially constant by efficiently allowing electric current to pass. This is a desirable characteristic for a reference electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           skos:prefLabel "NonPolarizableElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
 :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
@@ -1169,6 +1200,18 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "\"A chemical species or molecular entity having an available pair of electrons capable of forming a covalent bond with a hydron (proton) (see Brønsted base) or with the vacant orbital of some other species (see Lewis base).\" - IUPAC Gold Book" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/B00601" ;
                                            skos:prefLabel "Base"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1
+:EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode of a composite of carbon powder and a pasting liquid (including mineral oil, Nujol, bromoform, bromonaphthalene).
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "The CPE was first described by Adams in 1958. A CPE is typically housed in a Teflon holder, contacted by a conductive wire (occasionally a piston is used to renew the surface by extrusion of the used paste). Problems are long-term stability of the paste and that the binder can influence its properties."@en ,
+                                                        "These electrodes can easily be chemically modified by the incorporation of reagents (electrocatalysts, redox mediators, complexation agents, enzymes, etc.) and by the attachment of micro- or nanoparticles to prepare electrochemical sensors for analytical applications."@en ;
+                                           skos:altLabel "CPE"@en ;
+                                           skos:prefLabel "CarbonPasteElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_b21de1ef_6c15_4d63_b320_c9b96fbf186f
@@ -1593,6 +1636,17 @@ i0 = ia = - ic
                                            skos:prefLabel "ElectrochemicalMaterial"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103
+:EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Development of a carbon paste electrode that is screen printed using a carbon/polymer mixture of suitable composition.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "These electrodes can easily be chemically modified by the incorporation of reagents (electrocatalysts, redox mediators, complexation agents, enzymes, etc.) and by the attachment of micro- or nanoparticles to prepare electrochemical sensors for analytical applications."@en ,
+                                                        "Typical composition of a carbon ink expressed as mass fractions is graphite powder 60 % and polystyrene 40 %."@en ;
+                                           skos:prefLabel "CarbonInkElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_f509645f_eb27_470e_9112_7ab828ed40d3
 :EMMO_f509645f_eb27_470e_9112_7ab828ed40d3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -1730,72 +1784,6 @@ i0 = ia = - ic
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
-:EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A working electrode in the shape of a ring used in a rotating ring disk electrode (RRDE)."@en ;
-                                           skos:altLabel "RingElectrode"@en ;
-                                           skos:prefLabel "AnnularWorkingElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc
-:EMMO_65c90d8d_9712_4f3f_b830_d8163ec4cfcc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode made of a solid amalgam of an appropriate metal.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "Liquid and paste amalgams can also be used."@en ,
-                                                        "Solid amalgam electrodes are electrochemically similar to the hanging mercury drop electrode. Their main advantages are high hydrogen overpotential (similar to liquid mercury); a wide working potential range; the simple mechanical, chemical, and electrochemical regeneration of the surface; a long lifetime; low toxicity of material (comparable with that of dental amalgams); applicability for field measurements; compatibility with flow-through systems; simple construction, without mobile parts; and easy miniaturization."@en ;
-                                           skos:altLabel "SAE"@en ;
-                                           skos:prefLabel "SolidAmalgamElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917
-:EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A second annular working electrode positioned concentric with a rotating disc electrode to make a rotating ring-disc electrode (RRDE).
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "This arrangement is largely used in mechanistic studies."@en ;
-                                           skos:prefLabel "RotatingRingDiskElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275
-:EMMO_9f466223_e20a_474d_ac4d_6d4b6131c275 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A non-polarizable electrode is an electrode that holds its potential essentially constant by efficiently allowing electric current to pass. This is a desirable characteristic for a reference electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           skos:prefLabel "NonPolarizableElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1
-:EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode of a composite of carbon powder and a pasting liquid (including mineral oil, Nujol, bromoform, bromonaphthalene).
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "The CPE was first described by Adams in 1958. A CPE is typically housed in a Teflon holder, contacted by a conductive wire (occasionally a piston is used to renew the surface by extrusion of the used paste). Problems are long-term stability of the paste and that the binder can influence its properties."@en ,
-                                                        "These electrodes can easily be chemically modified by the incorporation of reagents (electrocatalysts, redox mediators, complexation agents, enzymes, etc.) and by the attachment of micro- or nanoparticles to prepare electrochemical sensors for analytical applications."@en ;
-                                           skos:altLabel "CPE"@en ;
-                                           skos:prefLabel "CarbonPasteElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103
-:EMMO_ec6f3d6f_bdf5_418f_9314_3ef2ff528103 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Development of a carbon paste electrode that is screen printed using a carbon/polymer mixture of suitable composition.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "These electrodes can easily be chemically modified by the incorporation of reagents (electrocatalysts, redox mediators, complexation agents, enzymes, etc.) and by the attachment of micro- or nanoparticles to prepare electrochemical sensors for analytical applications."@en ,
-                                                        "Typical composition of a carbon ink expressed as mass fractions is graphite powder 60 % and polystyrene 40 %."@en ;
-                                           skos:prefLabel "CarbonInkElectrode"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
