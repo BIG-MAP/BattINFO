@@ -38,6 +38,63 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
+###  http://emmo.info/BattINFO#EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264
+:EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c592590c_f59c_4777_8984_92055b098fb0 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Lead-acid_battery"@en ;
+                                           skos:prefLabel "LeadAcidBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_448de413_b4ed_43d0_941c_bf138167dcb9
+:EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An battery that is not capable of being electrically recharged following discharge.
+
+Adapted from:
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           skos:altLabel "NonRechargeableBattery"@en ;
+                                           skos:prefLabel "PrimaryBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1
+:EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
+                                                           ] ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Rechargeable_battery"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An battery that is capable of being recharged following discharge.
+
+Adapted from:
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Rechargeable_battery"@en ;
+                                           skos:altLabel "RechargeableBattery"@en ;
+                                           skos:prefLabel "SecondaryBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_546f029f_2b9b_4c74_9054_725dcccebce9
+:EMMO_546f029f_2b9b_4c74_9054_725dcccebce9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6315c804_cb84_4586_8ae9_9fe790007714 ;
+                                           skos:prefLabel "LithiumIonBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6315c804_cb84_4586_8ae9_9fe790007714
+:EMMO_6315c804_cb84_4586_8ae9_9fe790007714 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A battery in which the dominant electrochemical reactions at both electrodes are intercalations."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "lithium-ion battery"@en ;
+                                           skos:prefLabel "IntercalationBattery"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
 :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
@@ -51,6 +108,67 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "Battery"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda
+:EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c592590c_f59c_4777_8984_92055b098fb0 ;
+                                           skos:prefLabel "MetalAirBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b7091902_c136_455c_855c_8466c0b70256
+:EMMO_b7091902_c136_455c_855c_8466c0b70256 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
+                                           skos:prefLabel "NegativeElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b74a4e98_f09d_49aa_b588_c60489928700
+:EMMO_b74a4e98_f09d_49aa_b588_c60489928700 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_1259d305_349a_4c91_9490_c494c12d1e2c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A battery in which the types of electrochemical reactions in the electrodes differ (e.g. one conversion electrode and one intercalation electrode)."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "zinc-ion battery"@en ;
+                                           skos:prefLabel "HybridBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ba312910_be26_40ab_848a_bb2ceeab8109
+:EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:prefLabel "ZincAirBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce
+:EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:prefLabel "SiliconAirBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_c592590c_f59c_4777_8984_92055b098fb0
+:EMMO_c592590c_f59c_4777_8984_92055b098fb0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
+                                                           ] ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "A battery in which the dominant electrochemical reactions at both electrodes are conversions."@en ;
+                                           skos:prefLabel "ConversionBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_cc99988e_051c_45fd_b885_d4a2662a679c
+:EMMO_cc99988e_051c_45fd_b885_d4a2662a679c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b74a4e98_f09d_49aa_b588_c60489928700 ;
+                                           skos:prefLabel "MagnesiumIonBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa
+:EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the cell."@en ;
+                                           skos:prefLabel "PositiveElectrode"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
@@ -60,137 +178,19 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryCase"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264
-:EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_c592590c_f59c_4777_8984_92055b098fb0 ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Lead-acid_battery"@en ;
-                                           skos:prefLabel "LeadAcidBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_448de413_b4ed_43d0_941c_bf138167dcb9
-:EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom <http://emmo.info/electrochemistry/electrochemistry#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69>
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An battery that is not capable of being electrically recharged following discharge.
-
-Adapted from:
---IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
-                                           skos:altLabel "NonRechargeableBattery"@en ;
-                                           skos:prefLabel "PrimaryBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1
-:EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom <http://emmo.info/electrochemistry/electrochemistry#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098>
-                                                           ] ;
-                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Rechargeable_battery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An battery that is capable of being recharged following discharge.
-
-Adapted from:
---IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Rechargeable_battery"@en ;
-                                           skos:altLabel "RechargeableBattery"@en ;
-                                           skos:prefLabel "SecondaryBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_546f029f_2b9b_4c74_9054_725dcccebce9
-:EMMO_546f029f_2b9b_4c74_9054_725dcccebce9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6315c804_cb84_4586_8ae9_9fe790007714 ;
-                                           skos:prefLabel "LithiumIonBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_6315c804_cb84_4586_8ae9_9fe790007714
-:EMMO_6315c804_cb84_4586_8ae9_9fe790007714 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom <http://emmo.info/electrochemistry/electrochemistry#EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc>
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A battery in which the dominant electrochemical reactions at both electrodes are intercalations."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "lithium-ion battery"@en ;
-                                           skos:prefLabel "IntercalationBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda
-:EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_c592590c_f59c_4777_8984_92055b098fb0 ;
-                                           skos:prefLabel "MetalAirBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_b7091902_c136_455c_855c_8466c0b70256
-:EMMO_b7091902_c136_455c_855c_8466c0b70256 rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
-                                           skos:prefLabel "NegativeElectrode"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_b74a4e98_f09d_49aa_b588_c60489928700
-:EMMO_b74a4e98_f09d_49aa_b588_c60489928700 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom <http://emmo.info/electrochemistry/electrochemistry#EMMO_1259d305_349a_4c91_9490_c494c12d1e2c>
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A battery in which the types of electrochemical reactions in the electrodes differ (e.g. one conversion electrode and one intercalation electrode)."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "zinc-ion battery"@en ;
-                                           skos:prefLabel "HybridBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_ba312910_be26_40ab_848a_bb2ceeab8109
-:EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
-                                           skos:prefLabel "ZincAirBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce
-:EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
-                                           skos:prefLabel "SiliconAirBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_c592590c_f59c_4777_8984_92055b098fb0
-:EMMO_c592590c_f59c_4777_8984_92055b098fb0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom <http://emmo.info/electrochemistry/electrochemistry#EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe>
-                                                           ] ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "A battery in which the dominant electrochemical reactions at both electrodes are conversions."@en ;
-                                           skos:prefLabel "ConversionBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_cc99988e_051c_45fd_b885_d4a2662a679c
-:EMMO_cc99988e_051c_45fd_b885_d4a2662a679c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b74a4e98_f09d_49aa_b588_c60489928700 ;
-                                           skos:prefLabel "MagnesiumIonBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa
-:EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the cell."@en ;
-                                           skos:prefLabel "PositiveElectrode"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_e8f54254_7f49_429a_939e_80023121e165
+###  http://emmo.info/BattINFO#EMMO_e8f54254_7f49_429a_939e_80023121e165
 :EMMO_e8f54254_7f49_429a_939e_80023121e165 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
                                            skos:prefLabel "MagnesiumAirBattery"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_ea0d14e9_46e7_41dc_b6f4_d678b7d6fcbb
+###  http://emmo.info/BattINFO#EMMO_ea0d14e9_46e7_41dc_b6f4_d678b7d6fcbb
 :EMMO_ea0d14e9_46e7_41dc_b6f4_d678b7d6fcbb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b74a4e98_f09d_49aa_b588_c60489928700 ;
                                            skos:prefLabel "ZincIonBattery"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_ff072645_062b_4d0b_b341_e4d503e137e3
+###  http://emmo.info/BattINFO#EMMO_ff072645_062b_4d0b_b341_e4d503e137e3
 :EMMO_ff072645_062b_4d0b_b341_e4d503e137e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
                                            skos:prefLabel "LithiumAirBattery"@en .
