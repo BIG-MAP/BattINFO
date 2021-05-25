@@ -99,6 +99,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "InternalConductance"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_0d9ba00d_04bc_4bdc_85af_3380694f6f68
+:EMMO_0d9ba00d_04bc_4bdc_85af_3380694f6f68 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A practical hydrogen electrode whose potential depends on the pH of the solution"@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reversible_hydrogen_electrode"@en ;
+                                           skos:prefLabel "ReversibleHydrogenElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_0f007072-a8dd-4798-b865-1bf9363be627
 :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
@@ -169,6 +177,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0"@en ;
                                            skos:altLabel "ElectrochemicalStabilityWindow"@en ;
                                            skos:prefLabel "ElectrochemicalWindow"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_1375560e_dec2_491c_93ac_613a1d905008
+:EMMO_1375560e_dec2_491c_93ac_613a1d905008 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8b40856f_1ca2_4137_9616_7fb624671909 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An air electrode that is designed to perform both the oxygen reduction reaction (ORR) and the oxygen evolution reaction (OER)."@en ;
+                                           skos:altLabel "BAE"@en ;
+                                           skos:prefLabel "BifunctionalAirElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
@@ -405,6 +421,30 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "FaradaicCurrent"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_2a40b878_7d09_49db_91b2_d0ee30192284
+:EMMO_2a40b878_7d09_49db_91b2_d0ee30192284 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """For solutions in protic solvents, the universal reference electrode for which, under standard conditions, the standard electrode potential (H+ / H2) is zero at all temperatures.
+
+--IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Standard_hydrogen_electrode"@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05917"@en ;
+                                           rdfs:comment "Potential of a platinum electrode in a theoretical ideal solution (the current standard for zero potential for all temperatures)"@en ;
+                                           skos:altLabel "SHE"@en ;
+                                           skos:prefLabel "StandardHydrogenElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f
+:EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Foil, wire, disc, or mesh electrode made of platinum, which is the most commonly used metallic working electrode in electrochemistry.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "Pt has a very small overpotential for hydrogen evolution, which determines the negative potential limit in protic solvents. Pt adsorbs hydrogen, resulting in hydrogen adsorption/desorption waves. However, the positive potential limit in polar aprotic solvents free of oxygen and water is higher than that for any other commonly used electrode materials. In the presence of water and/or oxygen, Pt forms a film of oxide (and/or chemisorbed oxygen), resulting in potentially interfering waves or peaks."@en ;
+                                           skos:altLabel "PtElectrode"@en ;
+                                           skos:prefLabel "PlatinumElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_2d896559_eee3_447c_9759_87c854a4266a
 :EMMO_2d896559_eee3_447c_9759_87c854a4266a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
@@ -622,6 +662,24 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ElectrodePore"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5
+:EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The OER is the back reaction of the ORR."@en ,
+                                                                                          "The OER usually requires a catalyst in practical electrodes."@en ,
+                                                                                          "The process of generating molecular oxygen (O2) by a chemical reaction, usually from water (H2O)."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_evolution"@en ;
+                                           skos:altLabel "OER"@en ;
+                                           skos:prefLabel "OxygenEvolutionReaction"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
+:EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The boundary between two electrochemical materials, at which electrochemical reactions normally take place."@en ;
+                                           skos:prefLabel "ElectrochemicalInterface"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b
 :EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
@@ -669,6 +727,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:subClassOf emmo:EMMO_f19ff3b4_6bfe_4c41_a2b2_9affd39c140b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "For any electrolyte A_xB_y, the limiting molar conductivity is expressed as x times the limiting molar conductivity of A^{y+} and y times the limiting molar conductivity of B^{x-}."@en ;
                                            skos:prefLabel "KohlrauschsLaw"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e
+:EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           :EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode in which the actve electrochemical material is a metal."@en ;
+                                           skos:prefLabel "MetalElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_5b95ac64_2724_4c64_a7ca_db08bde7f5ab
@@ -760,6 +826,16 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:altLabel "AlkalineAqueousElectrolyte"@en ,
                                                          "AlkalineSolution"@en ;
                                            skos:prefLabel "AlkalineElectrolyte"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_634467ad_feed_4979_adb2_877d98fe1768
+:EMMO_634467ad_feed_4979_adb2_877d98fe1768 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Any junction between two electrolyte solutions of different composition."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03584"@en ;
+                                           rdfs:comment "Across such a junction there arises a potential difference, called the liquid junction potential."@en ,
+                                                        "In the operational pH cell the junction is between the test, or pH standard, solution and the filling solution or the bridge solution of the reference electrode."@en ;
+                                           skos:prefLabel "LiquidJunction"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
@@ -918,6 +994,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "SimpleSaltBridge"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190
+:EMMO_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of reference electrode based on the reaction between sliver and silver chloride."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Silver_chloride_electrode"@en ;
+                                           skos:prefLabel "SilverChlorideElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
 :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
@@ -941,6 +1025,17 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                                         "The current flow through the electrochemical cell may be zero or non-zero. An electrochem- ical cell with current flow can operate either as a galvanic cell or as an electrolytic cell."@en ,
                                                         "The two electrodes may be a working electrode and an auxiliary electrode or, for zero- current measurements (potentiometric mode), an indicator electrode and a reference electrode. There may be a third electrode, the cell having a separate auxiliary electrode (to carry current) and reference electrode (for measurement of electrode potential) in addition to a working electrode (See three-electrode cell)."@en ;
                                            skos:prefLabel "ElectrochemicalCell"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_6fec8cc1_4e6c_428e_8343_6cf3c286a185
+:EMMO_6fec8cc1_4e6c_428e_8343_6cf3c286a185 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Foil, wire or disc electrode made of gold which is easily fabricated into a variety of electrode geometries.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "At positive potentials, Au forms an oxide and/or chemisorbed oxygen layer, while in the presence of com- plexing anions, such as chloride or cyanide, it readily undergoes oxidation and dissolution, limiting its working potential range and its applications."@en ;
+                                           skos:altLabel "AuElectrode"@en ;
+                                           skos:prefLabel "GoldElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
@@ -1068,6 +1163,31 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "MolarElectrochemicalPotential"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_82b66bfe_ec25_417b_ba65_b631ddaaca0e
+:EMMO_82b66bfe_ec25_417b_ba65_b631ddaaca0e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A reference electrode based on the reaction between elemental mercury and mercury(I) chloride."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Saturated_calomel_electrode"@en ;
+                                           skos:prefLabel "SaturatedCalomelElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306
+:EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Potential of a platinum electrode in 1 M acid solution."@en ;
+                                           skos:altLabel "NHE"@en ;
+                                           skos:prefLabel "NormalHydrogenElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_86be0987_5e21_43ec_b975_8f679999d328
+:EMMO_86be0987_5e21_43ec_b975_8f679999d328 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode containing two different metals (e.g. platinum and ruthenium) on its surface (e.g. to modify its electrocatalytic properties).
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           skos:prefLabel "BimetallicElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea
 :EMMO_871bc4a4_2d17_4b88_9b0f_7ab85f14afea rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
@@ -1097,6 +1217,14 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                                         "The term ‘direct current’ should be used where there is ambiguity concerning the constancy of direction of current. See alternating current."@en ;
                                            skos:altLabel "DC"@en ;
                                            skos:prefLabel "DirectCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_8b40856f_1ca2_4137_9616_7fb624671909
+:EMMO_8b40856f_1ca2_4137_9616_7fb624671909 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A gas diffusion electrode in which the gas is air."@en ;
+                                           rdfs:comment "The reaction occuring in an air electrode is typically the oxygen reduction reaction (ORR)."@en ;
+                                           skos:prefLabel "AirElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d
@@ -1221,6 +1349,23 @@ Conducting Additive"""@en ;
                                            skos:prefLabel "NernstEinsteinEquation"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c
+:EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system comprising one electrode in contact with an ionic conductor."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Half-cell"@en ;
+                                           skos:prefLabel "ElectrochemicalHalfCell"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4
 :EMMO_9ed7210c_c4fa_467b_822d_ba12f885bdf4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
@@ -1240,6 +1385,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            skos:prefLabel "NonPolarizableElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4
+:EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process of generating molecular hydrogen (H2) by a chemical reaction, usually from water (H2O)."@en ;
+                                           skos:altLabel "HER"@en ;
+                                           skos:prefLabel "HydrogenEvolutionReaction"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
@@ -1268,6 +1421,17 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:comment "I_{t}"@en ,
                                                         "The instantaneous current is usually time-dependent and may have the character of an adsorption current, catalytic current, diffusion current, double-layer current, or kinetic current, and may include a migration current. A plot of the dependence of instantaneous current on time is commonly called an “I-t curve”."@en ;
                                            skos:prefLabel "InstantaneousCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_a462859d_d8bd_48ea_8bde_1576f1248a1e
+:EMMO_a462859d_d8bd_48ea_8bde_1576f1248a1e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode in the form of foil, mesh, wire, rod, tube, powder, pellets, or single crystal of silver.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "Ag electrodes were first used in potentiometry for the determination of Cl−, Br−, I−, as well as for Ag+ ions, to which they are sensitive."@en ;
+                                           skos:altLabel "AgElectrode"@en ;
+                                           skos:prefLabel "SilverElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31
@@ -1425,6 +1589,19 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:prefLabel "ConventionalElectrochemicalProperty"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_b76a778f_253f_4210_a67f_fb6444d0de26
+:EMMO_b76a778f_253f_4210_a67f_fb6444d0de26 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df78745e_f9db_4830_88f0_8ce074fcb8ff ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Mercury electrode formed by sequence of mercury drops falling from a small aperture.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Dropping_mercury_electrode"@en ;
+                                           rdfs:comment "Other kinds of mercury drop electrodes are the static mercury drop electrode (SMDE), in which a drop is held at constant radius before being mechanically knocked off, and the hanging mercury drop elec- trode (HMDE), in which the whole experiment is performed on a single drop of mercury."@en ,
+                                                        "The DME was introduced by Jaroslav Heyrovský (1890 – 1967). A drop is renewed every few seconds. Many metals amalgamate with mercury so that in the analysis of metal ions in aqueous solution the DME maintains a fresh surface throughout."@en ;
+                                           skos:altLabel "DME"@en ;
+                                           skos:prefLabel "DroppingMercuryElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
 :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
@@ -1468,6 +1645,19 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                            skos:altLabel "EASA"@en ,
                                                          "ECSA"@en ;
                                            skos:prefLabel "ElectrochemicallyActiveSurfaceArea"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215
+:EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A type of electrode specifically designed for gaseous reactants or products or both. 
+
+--IEC 60050"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Gas_diffusion_electrode"@en ;
+                                           rdfs:comment "A gas diffusion electrode usually comprises one or more porous layers, like the gas diffusion layer and the catalyst layer."@en ,
+                                                        "Gas diffusion electrodes can be gas diffusion anodes or gas diffusion cathodes."@en ;
+                                           skos:altLabel "GDE"@en ;
+                                           skos:prefLabel "GasDiffusionElectrode"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
@@ -1547,6 +1737,17 @@ B' + A → B
 
 In either case, the magnitude of the catalytic current depends on the applied potential. If the current observed with a mixture of A and B is lower than the sum of the separate currents, the term non-additive current should be used."""@en ;
                                            skos:prefLabel "CatalyticCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854
+:EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The reduction half reaction whereby molecular oxygen (O2) is reduced to water (H2O) or hydrogen peroxide (H2O2)."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_reduction_reaction"@en ;
+                                           rdfs:comment "The ORR is the dominant cathode reaction in metal-air batteries and hydrogen fuel cells."@en ,
+                                                        "The ORR usually requires a catalyst in practical electrodes."@en ;
+                                           skos:altLabel "ORR"@en ;
+                                           skos:prefLabel "OxygenReductionReaction"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
@@ -1729,6 +1930,18 @@ i0 = ia = - ic
                                            skos:prefLabel "StructuralSubcomponent"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_df78745e_f9db_4830_88f0_8ce074fcb8ff
+:EMMO_df78745e_f9db_4830_88f0_8ce074fcb8ff rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Liquid metal electrode used in polarography.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "A mercury film electrode (MFE) or thin mercury film electrode (TMFE) is formed by coating a conducting substrate, usually glassy carbon, with a layer of mercury (thin film, amalgam, or array of microdrops), often by electrodeposition from a solution containing Hg(II). The electrode area is normally in the range of 0.1 to 0.5 cm2 and mercury film thickness typically ranges from 10 to 1000 nm, producing a film of large surface area-to-volume ratio that results in a high analyte pre-concentration during the deposition step of anodic stripping voltammetry. Compared to an HMDE, the MFE provides high sensitivity and resolution; however, it is somewhat less reproducible and more prone to interferences from intermetallic formation and surface-active substances."@en ,
+                                                        "Liquid mercury is an ideal electrode material for negative potentials because of its high overpotential for hydrogen evolution (electrochemical reduction of hydroxonium cations from solution). However, mercury is readily oxidized, particularly in the presence of anions that form complexes or that pre- cipitate with Hg(I) or Hg(II) ions, and thus it is not suitable for use at positive potentials. The use of liquid mercury has largely been discontinued because of concerns about the toxicity of the element and its compounds."@en ;
+                                           skos:altLabel "HgElectrode"@en ;
+                                           skos:prefLabel "MercuryElectrode"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f
 :EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
@@ -1807,15 +2020,6 @@ i0 = ia = - ic
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/M03777" ;
                                            skos:altLabel "MeanExchangeCurrentDensity"@en ;
                                            skos:prefLabel "ExchangeCurrentDensity"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d
-:EMMO_ea0c7651_b58b_4caf_ae02_fb6a4dfe6a5d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy per unit mass."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0"@en ;
-                                           skos:prefLabel "SpecificEnergy"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
@@ -1985,219 +2189,6 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_0d9ba00d_04bc_4bdc_85af_3380694f6f68
-:EMMO_0d9ba00d_04bc_4bdc_85af_3380694f6f68 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A practical hydrogen electrode whose potential depends on the pH of the solution"@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reversible_hydrogen_electrode"@en ;
-                                           skos:prefLabel "ReversibleHydrogenElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_1375560e_dec2_491c_93ac_613a1d905008
-:EMMO_1375560e_dec2_491c_93ac_613a1d905008 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_8b40856f_1ca2_4137_9616_7fb624671909 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An air electrode that is designed to perform both the oxygen reduction reaction (ORR) and the oxygen evolution reaction (OER)."@en ;
-                                           skos:altLabel "BAE"@en ;
-                                           skos:prefLabel "BifunctionalAirElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_2a40b878_7d09_49db_91b2_d0ee30192284
-:EMMO_2a40b878_7d09_49db_91b2_d0ee30192284 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """For solutions in protic solvents, the universal reference electrode for which, under standard conditions, the standard electrode potential (H+ / H2) is zero at all temperatures.
-
---IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Standard_hydrogen_electrode"@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05917"@en ;
-                                           rdfs:comment "Potential of a platinum electrode in a theoretical ideal solution (the current standard for zero potential for all temperatures)"@en ;
-                                           skos:altLabel "SHE"@en ;
-                                           skos:prefLabel "StandardHydrogenElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f
-:EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Foil, wire, disc, or mesh electrode made of platinum, which is the most commonly used metallic working electrode in electrochemistry.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "Pt has a very small overpotential for hydrogen evolution, which determines the negative potential limit in protic solvents. Pt adsorbs hydrogen, resulting in hydrogen adsorption/desorption waves. However, the positive potential limit in polar aprotic solvents free of oxygen and water is higher than that for any other commonly used electrode materials. In the presence of water and/or oxygen, Pt forms a film of oxide (and/or chemisorbed oxygen), resulting in potentially interfering waves or peaks."@en ;
-                                           skos:altLabel "PtElectrode"@en ;
-                                           skos:prefLabel "PlatinumElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5
-:EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The OER is the back reaction of the ORR."@en ,
-                                                                                          "The OER usually requires a catalyst in practical electrodes."@en ,
-                                                                                          "The process of generating molecular oxygen (O2) by a chemical reaction, usually from water (H2O)."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_evolution"@en ;
-                                           skos:altLabel "OER"@en ;
-                                           skos:prefLabel "OxygenEvolutionReaction"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
-:EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The boundary between two electrochemical materials, at which electrochemical reactions normally take place."@en ;
-                                           skos:prefLabel "ElectrochemicalInterface"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e
-:EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
-                                                           :EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode in which the actve electrochemical material is a metal."@en ;
-                                           skos:prefLabel "MetalElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_634467ad_feed_4979_adb2_877d98fe1768
-:EMMO_634467ad_feed_4979_adb2_877d98fe1768 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Any junction between two electrolyte solutions of different composition."@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03584"@en ;
-                                           rdfs:comment "Across such a junction there arises a potential difference, called the liquid junction potential."@en ,
-                                                        "In the operational pH cell the junction is between the test, or pH standard, solution and the filling solution or the bridge solution of the reference electrode."@en ;
-                                           skos:prefLabel "LiquidJunction"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190
-:EMMO_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of reference electrode based on the reaction between sliver and silver chloride."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Silver_chloride_electrode"@en ;
-                                           skos:prefLabel "SilverChlorideElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_6fec8cc1_4e6c_428e_8343_6cf3c286a185
-:EMMO_6fec8cc1_4e6c_428e_8343_6cf3c286a185 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Foil, wire or disc electrode made of gold which is easily fabricated into a variety of electrode geometries.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "At positive potentials, Au forms an oxide and/or chemisorbed oxygen layer, while in the presence of com- plexing anions, such as chloride or cyanide, it readily undergoes oxidation and dissolution, limiting its working potential range and its applications."@en ;
-                                           skos:altLabel "AuElectrode"@en ;
-                                           skos:prefLabel "GoldElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_82b66bfe_ec25_417b_ba65_b631ddaaca0e
-:EMMO_82b66bfe_ec25_417b_ba65_b631ddaaca0e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A reference electrode based on the reaction between elemental mercury and mercury(I) chloride."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Saturated_calomel_electrode"@en ;
-                                           skos:prefLabel "SaturatedCalomelElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306
-:EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Potential of a platinum electrode in 1 M acid solution."@en ;
-                                           skos:altLabel "NHE"@en ;
-                                           skos:prefLabel "NormalHydrogenElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_86be0987_5e21_43ec_b975_8f679999d328
-:EMMO_86be0987_5e21_43ec_b975_8f679999d328 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode containing two different metals (e.g. platinum and ruthenium) on its surface (e.g. to modify its electrocatalytic properties).
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           skos:prefLabel "BimetallicElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_8b40856f_1ca2_4137_9616_7fb624671909
-:EMMO_8b40856f_1ca2_4137_9616_7fb624671909 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A gas diffusion electrode in which the gas is air."@en ;
-                                           rdfs:comment "The reaction occuring in an air electrode is typically the oxygen reduction reaction (ORR)."@en ;
-                                           skos:prefLabel "AirElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c
-:EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system comprising one electrode in contact with an ionic conductor."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Half-cell"@en ;
-                                           skos:prefLabel "ElectrochemicalHalfCell"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4
-:EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process of generating molecular hydrogen (H2) by a chemical reaction, usually from water (H2O)."@en ;
-                                           skos:altLabel "HER"@en ;
-                                           skos:prefLabel "HydrogenEvolutionReaction"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_a462859d_d8bd_48ea_8bde_1576f1248a1e
-:EMMO_a462859d_d8bd_48ea_8bde_1576f1248a1e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode in the form of foil, mesh, wire, rod, tube, powder, pellets, or single crystal of silver.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "Ag electrodes were first used in potentiometry for the determination of Cl−, Br−, I−, as well as for Ag+ ions, to which they are sensitive."@en ;
-                                           skos:altLabel "AgElectrode"@en ;
-                                           skos:prefLabel "SilverElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_b76a778f_253f_4210_a67f_fb6444d0de26
-:EMMO_b76a778f_253f_4210_a67f_fb6444d0de26 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_df78745e_f9db_4830_88f0_8ce074fcb8ff ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Mercury electrode formed by sequence of mercury drops falling from a small aperture.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Dropping_mercury_electrode"@en ;
-                                           rdfs:comment "Other kinds of mercury drop electrodes are the static mercury drop electrode (SMDE), in which a drop is held at constant radius before being mechanically knocked off, and the hanging mercury drop elec- trode (HMDE), in which the whole experiment is performed on a single drop of mercury."@en ,
-                                                        "The DME was introduced by Jaroslav Heyrovský (1890 – 1967). A drop is renewed every few seconds. Many metals amalgamate with mercury so that in the analysis of metal ions in aqueous solution the DME maintains a fresh surface throughout."@en ;
-                                           skos:altLabel "DME"@en ;
-                                           skos:prefLabel "DroppingMercuryElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215
-:EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A type of electrode specifically designed for gaseous reactants or products or both. 
-
---IEC 60050"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Gas_diffusion_electrode"@en ;
-                                           rdfs:comment "A gas diffusion electrode usually comprises one or more porous layers, like the gas diffusion layer and the catalyst layer."@en ,
-                                                        "Gas diffusion electrodes can be gas diffusion anodes or gas diffusion cathodes."@en ;
-                                           skos:altLabel "GDE"@en ;
-                                           skos:prefLabel "GasDiffusionElectrode"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854
-:EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The reduction half reaction whereby molecular oxygen (O2) is reduced to water (H2O) or hydrogen peroxide (H2O2)."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_reduction_reaction"@en ;
-                                           rdfs:comment "The ORR is the dominant cathode reaction in metal-air batteries and hydrogen fuel cells."@en ,
-                                                        "The ORR usually requires a catalyst in practical electrodes."@en ;
-                                           skos:altLabel "ORR"@en ;
-                                           skos:prefLabel "OxygenReductionReaction"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_df78745e_f9db_4830_88f0_8ce074fcb8ff
-:EMMO_df78745e_f9db_4830_88f0_8ce074fcb8ff rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Liquid metal electrode used in polarography.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           rdfs:comment "A mercury film electrode (MFE) or thin mercury film electrode (TMFE) is formed by coating a conducting substrate, usually glassy carbon, with a layer of mercury (thin film, amalgam, or array of microdrops), often by electrodeposition from a solution containing Hg(II). The electrode area is normally in the range of 0.1 to 0.5 cm2 and mercury film thickness typically ranges from 10 to 1000 nm, producing a film of large surface area-to-volume ratio that results in a high analyte pre-concentration during the deposition step of anodic stripping voltammetry. Compared to an HMDE, the MFE provides high sensitivity and resolution; however, it is somewhat less reproducible and more prone to interferences from intermetallic formation and surface-active substances."@en ,
-                                                        "Liquid mercury is an ideal electrode material for negative potentials because of its high overpotential for hydrogen evolution (electrochemical reduction of hydroxonium cations from solution). However, mercury is readily oxidized, particularly in the presence of anions that form complexes or that pre- cipitate with Hg(I) or Hg(II) ions, and thus it is not suitable for use at positive potentials. The use of liquid mercury has largely been discontinued because of concerns about the toxicity of the element and its compounds."@en ;
-                                           skos:altLabel "HgElectrode"@en ;
-                                           skos:prefLabel "MercuryElectrode"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
