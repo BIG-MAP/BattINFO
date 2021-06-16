@@ -1357,7 +1357,7 @@ Conducting Additive"""@en ;
                                                              owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                              owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ;
