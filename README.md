@@ -1,4 +1,4 @@
-[![CI tests](https://github.com/emmo-repo/domain-crystallography/workflows/CI%20tests/badge.svg)](https://github.com/emmo-repo/domain-crystallography/actions/)
+[![CI tests](https://github.com/BIG-MAP/BattINFO/workflows/CI%20tests/badge.svg)](https://github.com/BIG-MAP/BattINFO/actions/)
 
 # Battery INterFace Ontology (BattINFO)
 
