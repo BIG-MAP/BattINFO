@@ -30,6 +30,42 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "P3DModel"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
+:EMMO_149bb81f_e724_42f0_9560_184ff916bdba rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "ReactiveSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
+:EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectronicComponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
+:EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b ;
+                                           skos:prefLabel "SeparatorContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
+:EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectrochemicalCellContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
+:EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectrochemicalSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
+:EMMO_470d4c68_21b3_4405_ac3f_9588c4152437 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 ;
+                                           skos:prefLabel "CurrentCollectorContinuumModel"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f
 :EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
@@ -43,6 +79,30 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                                          "DoyleFullerNewmanModel"@en ,
                                                          "NewmanModel"@en ;
                                            skos:prefLabel "P2DModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
+:EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "IonicSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
+:EMMO_679f6984_e0dc_4285_9dbb_429c5779590c rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
+                                           skos:prefLabel "ElectrochemicalEquivalentCircuitModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
+:EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "StructuralSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71
+:EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
@@ -65,6 +125,30 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                                              owl:someValuesFrom emmo:EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
                                                            ] ;
                                            skos:prefLabel "BatteryContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
+:EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
+                                           skos:prefLabel "ElectrodeContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236
+:EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
+                                           skos:prefLabel "SaltBridgeContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
+:EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_149bb81f_e724_42f0_9560_184ff916bdba ;
+                                           skos:prefLabel "ActiveElectrochemicalMaterialContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
+:EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
+                                           skos:prefLabel "ElectrochemicalContinuumModel"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_e939a312_661c_4b21_9651_06f34659e20a
@@ -97,94 +181,22 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "P4DModel"@en .
 
 
-###  http://emmo.info/BattINFO/models#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
-:EMMO_149bb81f_e724_42f0_9560_184ff916bdba rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
-                                           skos:prefLabel "ReactiveSubcomponentContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
-:EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
-                                           skos:prefLabel "ElectronicComponentContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
-:EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b ;
-                                           skos:prefLabel "SeparatorContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
-:EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
-                                           skos:prefLabel "ElectrochemicalCellContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
-:EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
-                                           skos:prefLabel "ElectrochemicalSubcomponentContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
-:EMMO_470d4c68_21b3_4405_ac3f_9588c4152437 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 ;
-                                           skos:prefLabel "CurrentCollectorContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
-:EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
-                                           skos:prefLabel "IonicSubcomponentContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
-:EMMO_679f6984_e0dc_4285_9dbb_429c5779590c rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
-                                           rdfs:label "ElectrochemicalEquivalentCircuitModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
-:EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
-                                           skos:prefLabel "StructuralSubcomponentContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71
-:EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
-                                           skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
-:EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
-                                           skos:prefLabel "ElectrodeContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236
-:EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
-                                           skos:prefLabel "SaltBridgeContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
-:EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_149bb81f_e724_42f0_9560_184ff916bdba ;
-                                           skos:prefLabel "ActiveElectrochemicalMaterialContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
-:EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
-                                           skos:prefLabel "ElectrochemicalContinuumModel"@en .
-
-
-###  http://emmo.info/BattINFO/models#EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469
+###  http://emmo.info/BattINFO#EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469
 :EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 ;
                                            skos:prefLabel "ElectrolyteContinuumModel"@en .
+
+
+###  http://emmo.info/emmo/generic-concepts#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
+<http://emmo.info/emmo/generic-concepts#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe> rdf:type owl:Class .
+
+
+###  http://emmo.info/emmo/generic-concepts#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
+<http://emmo.info/emmo/generic-concepts#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709> rdf:type owl:Class .
+
+
+###  http://emmo.info/emmo/generic-concepts#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783
+<http://emmo.info/emmo/generic-concepts#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783> rdf:type owl:Class .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
