@@ -153,22 +153,7 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 
 ###  http://emmo.info/BattINFO#EMMO_e939a312_661c_4b21_9651_06f34659e20a
 :EMMO_e939a312_661c_4b21_9651_06f34659e20a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/generic-concepts#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/generic-concepts#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/generic-concepts#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe>
-                                                           ] ;
+                                           rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Randles_circuit"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equivalent electrical circuit that consists of an active electrolyte resistance RS in series with the parallel combination of the double-layer capacitance Cdl and an impedance of a faradaic reaction."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Randles_circuit"@en ;
