@@ -112,7 +112,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
                                                              owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_7f8db4c8_4dc5_4e39_bfb0_0a123679d831
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
@@ -489,6 +509,10 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
                                                            ] ;
@@ -634,6 +658,10 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 ###  http://emmo.info/electrochemistry#EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf
 :EMMO_4e4d7f4b-680b-469e-bdd4-728dd3e465bf rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
@@ -840,7 +868,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 
 ###  http://emmo.info/electrochemistry#EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
 :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+                                           rdfs:subClassOf :EMMO_6cae5943-737a-4f88-9903-9de4cffebd11 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Salt_bridge"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Means of making electrolytic connection between two half cells without introducing a significant liquid junction  potential. 
 
@@ -957,7 +985,7 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 
 ###  http://emmo.info/electrochemistry#EMMO_6cae5943-737a-4f88-9903-9de4cffebd11
 :EMMO_6cae5943-737a-4f88-9903-9de4cffebd11 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f ,
+                                           rdfs:subClassOf :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
@@ -967,8 +995,8 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                                              owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
                                                              owl:onClass :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A salt bridge consisting of at least two subcomponents, one of which is an IonicSubcomponent."@en ;
-                                           skos:prefLabel "CompositeSaltBridge"@en .
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ion bridge consisting of at least two subcomponents, one of which is an IonicSubcomponent."@en ;
+                                           skos:prefLabel "CompositeIonBridge"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_6cb2f0d6_4925_427f_b33d_0c9a96166768
@@ -984,14 +1012,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 
 ###  http://emmo.info/electrochemistry#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
 :EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f ,
+                                           rdfs:subClassOf :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                              owl:onClass :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A salt bridge consisting of exactly 1 subcomponent that is an IonicSubcomponent."@en ;
-                                           skos:prefLabel "SimpleSaltBridge"@en .
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ion bridge consisting of exactly 1 subcomponent that is an IonicSubcomponent."@en ;
+                                           skos:prefLabel "SimpleIonBridge"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190
@@ -1006,12 +1034,17 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
+                                                             owl:someValuesFrom :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """System that consists of at least two electron conductors (electrodes) in contact with ionic conductors (electrolytes).
 
@@ -1352,6 +1385,10 @@ Conducting Additive"""@en ;
 ###  http://emmo.info/electrochemistry#EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c
 :EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
@@ -1761,7 +1798,8 @@ In either case, the magnitude of the catalytic current depends on the applied po
 
 ###  http://emmo.info/electrochemistry#EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
 :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           emmo:EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Weight of active material in an electrode per unit electrode area."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-2 M+1 I0 Θ0 N0 J0"@en ;
                                            skos:altLabel "ActiveMaterialLoading"@en ;
@@ -2082,6 +2120,14 @@ Adapted from:
 :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
                                                            ] ;
@@ -2189,6 +2235,13 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
+
+
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
+:EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical component resposible for transporting ions and maintaining physical separation between electrodes."@en ;
+                                           skos:prefLabel "IonBridge"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
