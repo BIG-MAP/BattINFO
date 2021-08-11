@@ -93,7 +93,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 21 mm and height 70 mm."@en ;
                                            skos:altLabel "2170"@en ,
                                                          21700 ;
-                                           skos:prefLabel "21700Cell"@en .
+                                           skos:prefLabel "Cylindrical21700Cell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_448de413_b4ed_43d0_941c_bf138167dcb9
@@ -234,7 +234,7 @@ Adapted from:
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 18 mm and height 65 mm."@en ;
                                            skos:altLabel "1865"@en ,
                                                          18650 ;
-                                           skos:prefLabel "18650Cell"@en .
+                                           skos:prefLabel "Cylindrical18650Cell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
@@ -450,7 +450,7 @@ Adapted from:
                                            rdfs:comment "Introduced by Tesla in 2020 as a high energy capacity cell for use in EVs. Also presented by JAC/Volkswagen in joint-development with CBAK in early 2021."@en ;
                                            skos:altLabel 4680 ,
                                                          "46800"@en ;
-                                           skos:prefLabel "4680Cell"@en .
+                                           skos:prefLabel "Cylindrical4680Cell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_f67b8129_8d47_4f02_be71_18cb482d2d57
