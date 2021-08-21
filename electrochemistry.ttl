@@ -144,6 +144,9 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrode"@en ;
                                            rdfs:comment "Alternative definition: Half-cell consisting of at least one electron conductor and at least one ionic conductor (electrolyte). - Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019)"@en ,
+                                                        """Conductive part in electric contact with a medium of lower conductivity and intended to perform one or more of the functions of emitting charge carriers to or receiving charge carriers from that medium or to establish an electric field in that medium.
+
+-- IEC 60050-151: 2001, 151-13-01"""@en ,
                                                         "In some electroanalytical techniques (conductometry and differential potentiometry), two indicator electrodes are used. For many analytical measurements in cells with current flow, a three-electrode cell is used."@en ,
                                                         "Many types of electrodes are used. These may be classified into groups according to their composition, form and size, and according to their operating mode. See section 4."@en ,
                                                         "The current flow through electrochemical cells may be zero or non-zero. An electrochemical cell with current flow can operate either as a galvanic cell or an electrolytic cell."@en ;
@@ -346,6 +349,13 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "SupportingElectrolyte"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
+:EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical component resposible for transporting ions and maintaining physical separation between electrodes."@en ;
+                                           skos:prefLabel "IonBridge"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6
 :EMMO_214d925c_76c4_4f69_9afc_056a1ea82fc6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -525,7 +535,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            owl:disjointWith :EMMO_b6319c74_d2ce_48c0_a75a_63156776b302 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Cathode"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode of an electrochemical cell through which net electric current flows and at which the predomi- nating electrochemical reaction is a reduction.
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode of an electrochemical cell through which net electric current flows and at which the predominating electrochemical reaction is a reduction.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Cathode"@en ;
@@ -642,7 +652,7 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 ###  http://emmo.info/electrochemistry#EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b
 :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity related to the transport of mass and/or charge."@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity related to the transport of mass, charge, or energy."@en ;
                                            skos:prefLabel "ElectrochemicalTransportQuantity"@en .
 
 
@@ -775,7 +785,9 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 ###  http://emmo.info/electrochemistry#EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75
 :EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Of ions B, the current density due to ions B divided by the sum of current densities of all the ions in the electrolyte."@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Quotient of the current carried by an ionic component and the total current. 
+
+-- IUPAC, Compendium of Chemical Terminology, 2014. DOI: 10.1351/goldbook.I03352"""@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/T06489" ;
                                            rdfs:comment "ISO recommends the name current fraction of ions B."@en ;
@@ -1074,10 +1086,10 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 ###  http://emmo.info/electrochemistry#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
 :EMMO_740d5817_3fa7_464a_90c3_55552e51a3df rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A quantity that provides a measurement of the relative quantities of products and reactants present in a reaction mixture for a reaction with well-defined overall stoichiometry, at a particular point in time."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_quotient" ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
-                                           rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ,
-                                                        "This quantity applies in general to a system which is not in equilibrium."@en ;
+                                           rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ;
                                            skos:prefLabel "ReactionQuotient"@en .
 
 
@@ -1262,7 +1274,8 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 
 ###  http://emmo.info/electrochemistry#EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d
 :EMMO_8f4b90ef_fea4_47c9_99f5_a9b3290a505d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric potential at which a material undergoes an oxidation or reduction decomposition."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectrochemicalStabilityLimit"@en .
@@ -1491,7 +1504,7 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 :EMMO_a56fc557_9dea_42e6_b936_e9d62dcaf84f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 """Non-faradaic current associated with the charging of the electrical double layer at the electrode-solution interface.
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Non-faradaic current associated with the charging of the electrical double layer at the electrode-solution interface.
 
 ----J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
@@ -1676,7 +1689,7 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
 
 ###  http://emmo.info/electrochemistry#EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
 :EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The area of the electrode material that is accessible to the electrolyte that is used for charge transfer and/or storage."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
                                            skos:altLabel "EASA"@en ,
@@ -1826,13 +1839,11 @@ In either case, the magnitude of the catalytic current depends on the applied po
 :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ,
                                                            emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The common value (i0) of the anodic and cathodic partial currents when the reaction is at equilibrium:
-
-i0 = ia = - ic
-
- For an electrode at equilibrium at which only one reaction is significant i = 0. When more than one reaction is significant at a given electrode, subscripts to i0 may be used to distinguish exchange currents. i is not usually zero when only one of these reactions is at equilibrium."""@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The common value (i0) of the anodic and cathodic partial currents when the reaction is at equilibrium."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E02238" ;
+                                           rdfs:comment "For an electrode at equilibrium at which only one reaction is significant i = 0. When more than one reaction is significant at a given electrode, subscripts to i0 may be used to distinguish exchange currents. i is not usually zero when only one of these reactions is at equilibrium."@en ,
+                                                        "i0 = ia = - ic"@en ;
                                            skos:prefLabel "ExchangeCurrent"@en .
 
 
@@ -2181,7 +2192,10 @@ Adapted from:
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrolyte"@en ;
                                            rdfs:comment "A solid electrolyte is a solid material where the predominant charge carriers are ions. For example: NASICON (Na Super Ionic Conductor), which has the general formula Na1+xZr2P3-xSix O12 , 0 < x < 3."@en ,
-                                                        "An ionic liquid is an electrolyte composed of a salt that is liquid below 100 °C. Ionic liquids have found uses in electrochemical analysis, because their unconventional properties include a negligible vapor pressure, a high thermal and electrochemical stability, and exceptional dissolution properties for both organic and inorganic chemical species."@en ;
+                                                        "An ionic liquid is an electrolyte composed of a salt that is liquid below 100 °C. Ionic liquids have found uses in electrochemical analysis, because their unconventional properties include a negligible vapor pressure, a high thermal and electrochemical stability, and exceptional dissolution properties for both organic and inorganic chemical species."@en ,
+                                                        """Liquid or solid substance containing mobile ions that render it conductive.
+
+--IEC 60050-482, 114-01-02"""@en ;
                                            skos:prefLabel "Electrolyte"@en .
 
 
@@ -2235,13 +2249,6 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
-:EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical component resposible for transporting ions and maintaining physical separation between electrodes."@en ;
-                                           skos:prefLabel "IonBridge"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
