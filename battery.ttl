@@ -40,9 +40,60 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 ###  http://emmo.info/BattINFO#EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264
 :EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_c592590c_f59c_4777_8984_92055b098fb0 ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Lead-acid_battery"@en ;
                                            skos:prefLabel "LeadAcidBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b
+:EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
+                                           skos:altLabel "C6"@en ,
+                                                         "Gr"@en ;
+                                           skos:prefLabel "Graphite"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_0e840617_26ee_4ec2_adc3_5d0b2b221995
+:EMMO_0e840617_26ee_4ec2_adc3_5d0b2b221995 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
+                                           skos:altLabel "LithiumCobaltOxide"@en ;
+                                           skos:prefLabel "LCO"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_0ff373b5_a835_46cf_9b02_552f1ab739d3
+:EMMO_0ff373b5_a835_46cf_9b02_552f1ab739d3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 ;
+                                           skos:prefLabel "NMC811"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60
+:EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+                                           skos:prefLabel "Pouch"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a
+:EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of battery cell that uses a paste electrolyte, with only enough moisture to allow current to flow"@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Dry_cell"@en ;
+                                           skos:prefLabel "DryCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_1dfc6b61_3a39_4c26_a684_59cdf3e072ff
+:EMMO_1dfc6b61_3a39_4c26_a684_59cdf3e072ff rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Battery chemistry in which the charge carrier is a metal ion and contains at least one intercalation electrode."@en ;
+                                           skos:prefLabel "MetalIonBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_33aad30c_a490_4537_8243_b9dc0cf505d9
+:EMMO_33aad30c_a490_4537_8243_b9dc0cf505d9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 21 mm and height 70 mm."@en ;
+                                           skos:altLabel "2170"@en ,
+                                                         21700 ;
+                                           skos:prefLabel "Cylindrical21700Cell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_448de413_b4ed_43d0_941c_bf138167dcb9
@@ -58,6 +109,29 @@ Adapted from:
 --IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
                                            skos:altLabel "NonRechargeableBattery"@en ;
                                            skos:prefLabel "PrimaryBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_4682cec6_f601_40f0_b463_b5345efdda3e
+:EMMO_4682cec6_f601_40f0_b463_b5345efdda3e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
+                                           skos:altLabel "Si"@en ;
+                                           skos:prefLabel "Silicon"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_490c74cd_025a_49dd_b1be_51fa4eea5300
+:EMMO_490c74cd_025a_49dd_b1be_51fa4eea5300 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea ,
+                                                           :EMMO_8475ddaa_cc2a_4ceb_827b_fe4ff7c46562 ;
+                                           skos:altLabel "24A"@en ;
+                                           skos:prefLabel "LR03"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4
+:EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 14.5 mm and height 50.5 mm."@en ;
+                                           skos:altLabel "AA" ;
+                                           skos:prefLabel "AACell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1
@@ -77,22 +151,64 @@ Adapted from:
                                            skos:prefLabel "SecondaryBattery"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481
+:EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical interface within a battery cell."@en ;
+                                           skos:prefLabel "BatteryInterface"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_546f029f_2b9b_4c74_9054_725dcccebce9
 :EMMO_546f029f_2b9b_4c74_9054_725dcccebce9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6315c804_cb84_4586_8ae9_9fe790007714 ;
+                                           rdfs:subClassOf :EMMO_1dfc6b61_3a39_4c26_a684_59cdf3e072ff ;
                                            skos:prefLabel "LithiumIonBattery"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_6315c804_cb84_4586_8ae9_9fe790007714
-:EMMO_6315c804_cb84_4586_8ae9_9fe790007714 rdf:type owl:Class ;
+###  http://emmo.info/BattINFO#EMMO_59edd80e_497d_4cfe_b1c5_6a328cca9a00
+:EMMO_59edd80e_497d_4cfe_b1c5_6a328cca9a00 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           skos:prefLabel "PrismaticCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_674dfe07_eb75_4ef0_9a8e_b6554a39a4f5
+:EMMO_674dfe07_eb75_4ef0_9a8e_b6554a39a4f5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4 ,
+                                                           :EMMO_ba56db8a_2380_425d_8594_a0851a10c91f ;
+                                           skos:altLabel "15D"@en ;
+                                           skos:prefLabel "R6"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+:EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom electrochemistry:EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc
+                                                             owl:someValuesFrom electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A battery in which the dominant electrochemical reactions at both electrodes are intercalations."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "lithium-ion battery"@en ;
-                                           skos:prefLabel "IntercalationBattery"@en .
+                                           skos:prefLabel "BatteryCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_697d84ef_77b2_41ef_9fca_84dc6c2e0795
+:EMMO_697d84ef_77b2_41ef_9fca_84dc6c2e0795 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4 ,
+                                                           :EMMO_8475ddaa_cc2a_4ceb_827b_fe4ff7c46562 ;
+                                           skos:altLabel "15A"@en ;
+                                           skos:prefLabel "LR6"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea
+:EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 10.5 mm and height 44.5 mm."@en ;
+                                           skos:altLabel "AAA" ;
+                                           skos:prefLabel "AAACell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_71952657_72f9_4d4a_9236_50aefa6098f3
+:EMMO_71952657_72f9_4d4a_9236_50aefa6098f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:altLabel "FeAirBattery"@en ;
+                                           skos:prefLabel "IronAirBattery"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
@@ -100,18 +216,131 @@ Adapted from:
                                            rdfs:subClassOf electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
                                                            emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """One or more electrochemical cells connected to form one unit and having provisions for external connections.
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices.
+
+--IEC 60050-482"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electric_battery"@en ;
+                                           rdfs:comment """One or more electrochemical cells connected to form one unit and having provisions for external connections.
 
 --Crompton, Battery Reference Book, 3rd Edition"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electric_battery"@en ;
-                                           skos:altLabel "ElectricBattery"@en ;
+                                           skos:altLabel "Accumulator"@en ,
+                                                         "ElectricBattery"@en ;
                                            skos:prefLabel "Battery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_751732ff_399a_48cc_8f67_3ffaf294be3f
+:EMMO_751732ff_399a_48cc_8f67_3ffaf294be3f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 18 mm and height 65 mm."@en ;
+                                           skos:altLabel "1865"@en ,
+                                                         18650 ;
+                                           skos:prefLabel "Cylindrical18650Cell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
+:EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+                                           skos:prefLabel "Can"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda
 :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_c592590c_f59c_4777_8984_92055b098fb0 ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
                                            skos:prefLabel "MetalAirBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633
+:EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
+                                           skos:altLabel "LithiumNickelManganeseCobaltOxide"@en ;
+                                           skos:prefLabel "NMC"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c
+:EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Active electrochemical materials suitable for intercalating Li/Li+."@en ;
+                                           skos:prefLabel "LithiumIntercalationMaterial"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_820d5e1f_286e_4acf_89e1_6451622041dd
+:EMMO_820d5e1f_286e_4acf_89e1_6451622041dd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           skos:prefLabel "PouchCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_8475ddaa_cc2a_4ceb_827b_fe4ff7c46562
+:EMMO_8475ddaa_cc2a_4ceb_827b_fe4ff7c46562 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
+                                                           :EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 ;
+                                           skos:prefLabel "AlkalineBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_8ad95beb_8212_42a9_8afa_b5efdbb825f2
+:EMMO_8ad95beb_8212_42a9_8afa_b5efdbb825f2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea ,
+                                                           :EMMO_901c0bf1_007a_4355_a870_aadb0dec6f90 ;
+                                           skos:prefLabel "KR03"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_8af22f67_57d8_4fe9_ab48_9b883275b8da
+:EMMO_8af22f67_57d8_4fe9_ab48_9b883275b8da rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Active electrochemical materials suitable for intercalating Zn/Zn2+"@en ;
+                                           skos:prefLabel "ZincIntercalationMaterial"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_901c0bf1_007a_4355_a870_aadb0dec6f90
+:EMMO_901c0bf1_007a_4355_a870_aadb0dec6f90 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
+                                                           :EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 ;
+                                           skos:altLabel "NickelCadmiumBattery"@en ;
+                                           skos:prefLabel "NiCdBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_916a24e9_f160_4ab9_9c79_de0ac23e8768
+:EMMO_916a24e9_f160_4ab9_9c79_de0ac23e8768 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea ,
+                                                           :EMMO_ba56db8a_2380_425d_8594_a0851a10c91f ;
+                                           skos:altLabel "24D"@en ;
+                                           skos:prefLabel "R03"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3
+:EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Battery cell in which the casing is in the shape of a cylinder."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/List_of_battery_sizes#Cylindrical_batteries"@en ;
+                                           rdfs:comment """IEEE defines a cylindrical cell as, \"A cell with spiral-wound electrodes.\" This definition is not entirely accurate as some cylindircal cells like alkaline batteries do not use sprial-wound electrodes.
+
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           skos:prefLabel "CylindricalCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_92fd74d5_54e1_4a7a_9306_016f2ce38019
+:EMMO_92fd74d5_54e1_4a7a_9306_016f2ce38019 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4 ,
+                                                           :EMMO_901c0bf1_007a_4355_a870_aadb0dec6f90 ;
+                                           skos:altLabel "1.2K2"@en ;
+                                           skos:prefLabel "KR6"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
+:EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+                                                           ] ;
+                                           skos:prefLabel "BatteryModule"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a95f946c_1e9f_4560_bd82_6618909d9e10
+:EMMO_a95f946c_1e9f_4560_bd82_6618909d9e10 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4 ,
+                                                           :EMMO_bee2c66c_8640_48b9_a9d2_ec1388b16d73 ;
+                                           skos:altLabel "1.2H2"@en ;
+                                           skos:prefLabel "HR6"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_b7091902_c136_455c_855c_8466c0b70256
@@ -121,44 +350,53 @@ Adapted from:
                                            skos:prefLabel "NegativeElectrode"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_b74a4e98_f09d_49aa_b588_c60489928700
-:EMMO_b74a4e98_f09d_49aa_b588_c60489928700 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom electrochemistry:EMMO_1259d305_349a_4c91_9490_c494c12d1e2c
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A battery in which the types of electrochemical reactions in the electrodes differ (e.g. one conversion electrode and one intercalation electrode)."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "zinc-ion battery"@en ;
-                                           skos:prefLabel "HybridBattery"@en .
-
-
 ###  http://emmo.info/BattINFO#EMMO_ba312910_be26_40ab_848a_bb2ceeab8109
 :EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:altLabel "ZnAirBattery"@en ;
                                            skos:prefLabel "ZincAirBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ba56db8a_2380_425d_8594_a0851a10c91f
+:EMMO_ba56db8a_2380_425d_8594_a0851a10c91f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
+                                                           :EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 ;
+                                           skos:altLabel "CarbonZincBattery"@en ,
+                                                         "LeclancheCell"@en ;
+                                           skos:prefLabel "ZincCarbonBattery"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce
 :EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:altLabel "SiAirBattery"@en ;
                                            skos:prefLabel "SiliconAirBattery"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_c592590c_f59c_4777_8984_92055b098fb0
-:EMMO_c592590c_f59c_4777_8984_92055b098fb0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom electrochemistry:EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
-                                                           ] ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "A battery in which the dominant electrochemical reactions at both electrodes are conversions."@en ;
-                                           skos:prefLabel "ConversionBattery"@en .
+###  http://emmo.info/BattINFO#EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00
+:EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+                                           skos:prefLabel "BatteryPack"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f
+:EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           skos:altLabel "CoinCell"@en ;
+                                           skos:prefLabel "ButtonCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_bee2c66c_8640_48b9_a9d2_ec1388b16d73
+:EMMO_bee2c66c_8640_48b9_a9d2_ec1388b16d73 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
+                                                           :EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 ;
+                                           skos:altLabel "NickelMetalHydrideBattery"@en ;
+                                           skos:prefLabel "NiMHBattery"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_cc99988e_051c_45fd_b885_d4a2662a679c
 :EMMO_cc99988e_051c_45fd_b885_d4a2662a679c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b74a4e98_f09d_49aa_b588_c60489928700 ;
+                                           rdfs:subClassOf :EMMO_1dfc6b61_3a39_4c26_a684_59cdf3e072ff ;
                                            skos:prefLabel "MagnesiumIonBattery"@en .
 
 
@@ -172,27 +410,66 @@ Adapted from:
 ###  http://emmo.info/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Box or enclosure which contains the electrochemical cells, associated connectors and hardware.
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit.
 
---Crompton, Battery Reference Book, 3rd Edition"""@en ;
-                                           skos:prefLabel "BatteryCase"@en .
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           rdfs:comment """Box or enclosure which contains the electrochemical cells, associated connectors and hardware.
+
+--Crompton, Battery Reference Book, 3rd Edition"""@en ,
+                                                        """Container is preferred over jar or battery case. A battery container can be a single cell or multicell unit (also called a monoblock). The term jar sometimes implies that it is made of glass, which is rarely the case; the term jar is a slang term.
+
+--IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           skos:altLabel "BatteryCase"@en ,
+                                                         "Jar"@en ;
+                                           skos:prefLabel "Container"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e525f02e_78e7_4e8b_9402_ce756a768868
+:EMMO_e525f02e_78e7_4e8b_9402_ce756a768868 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 ;
+                                           skos:prefLabel "NMC532"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_e8f54254_7f49_429a_939e_80023121e165
 :EMMO_e8f54254_7f49_429a_939e_80023121e165 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:altLabel "MgAirBattery"@en ;
                                            skos:prefLabel "MagnesiumAirBattery"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_ea0d14e9_46e7_41dc_b6f4_d678b7d6fcbb
 :EMMO_ea0d14e9_46e7_41dc_b6f4_d678b7d6fcbb rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b74a4e98_f09d_49aa_b588_c60489928700 ;
+                                           rdfs:subClassOf :EMMO_1dfc6b61_3a39_4c26_a684_59cdf3e072ff ;
                                            skos:prefLabel "ZincIonBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ea87d1bd_e8fc_40c6_bb1a_2f7cc8529e57
+:EMMO_ea87d1bd_e8fc_40c6_bb1a_2f7cc8529e57 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 46 mm and height 80 mm."@en ;
+                                           rdfs:comment "Introduced by Tesla in 2020 as a high energy capacity cell for use in EVs. Also presented by JAC/Volkswagen in joint-development with CBAK in early 2021."@en ;
+                                           skos:altLabel 4680 ,
+                                                         "46800"@en ;
+                                           skos:prefLabel "Cylindrical4680Cell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f67b8129_8d47_4f02_be71_18cb482d2d57
+:EMMO_f67b8129_8d47_4f02_be71_18cb482d2d57 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 ;
+                                           skos:prefLabel "NMC111"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f787bc90_474f_4f70_954d_e3fd93d6fb6c
+:EMMO_f787bc90_474f_4f70_954d_e3fd93d6fb6c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea ,
+                                                           :EMMO_bee2c66c_8640_48b9_a9d2_ec1388b16d73 ;
+                                           skos:prefLabel "HR03"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_ff072645_062b_4d0b_b341_e4d503e137e3
 :EMMO_ff072645_062b_4d0b_b341_e4d503e137e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:altLabel "LiAirBattery"@en ;
                                            skos:prefLabel "LithiumAirBattery"@en .
 
 
