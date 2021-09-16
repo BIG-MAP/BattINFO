@@ -791,6 +791,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/T06489" ;
                                            rdfs:comment "ISO recommends the name current fraction of ions B."@en ;
+                                           skos:altLabel "TransferrenceNumber"@en ;
                                            skos:prefLabel "TransportNumber"@en .
 
 
