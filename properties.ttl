@@ -81,12 +81,187 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "TheoreticalStoredEnergy"@en .
 
 
-###  http://emmo.info/BattINFO/properties#EMMO_a9c9789c_6a98_4e58_98b2_21a87989b5a8
+###  http://emmo.info/BattINFO#EMMO_a9c9789c_6a98_4e58_98b2_21a87989b5a8
 :EMMO_a9c9789c_6a98_4e58_98b2_21a87989b5a8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy per unit mass."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
+                                           skos:altLabel "GravimetricEnergyDensity"@en ;
                                            skos:prefLabel "SpecificEnergy"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd
+:EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ;
+                                           skos:prefLabel "NominalBatteryProperty"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_3219d87f_7800_46b2_bb88_82bda64d3f39
+:EMMO_3219d87f_7800_46b2_bb88_82bda64d3f39 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L-1 M+1 I0 Θ0 N0 J0" ,
+                                                                                          "TypicalEnergyDensity"@en ;
+                                           skos:altLabel "NominalVolumetricEnergyDensity"@en ,
+                                                         "TypicalVolumetricEnergyDensity"@en ;
+                                           skos:prefLabel "NominalEnergyDensity"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_50f5f611_ac42_4d78_8d04_18f17d398f39
+:EMMO_50f5f611_ac42_4d78_8d04_18f17d398f39 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:altLabel "StandardVoltage"@en ,
+                                                         "TypicalVoltage"@en ;
+                                           skos:prefLabel "NominalVoltage"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_52ca57f1_752c_4408_afb4_1706541a404c
+:EMMO_52ca57f1_752c_4408_afb4_1706541a404c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9c9789c_6a98_4e58_98b2_21a87989b5a8 ,
+                                                           :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ,
+                                                                                          "TypicalSpecificEnergy"@en ;
+                                           skos:altLabel "NominalGravimetricEnergyDensity"@en ,
+                                                         "TypicalGravimetricEnergyDensity"@en ;
+                                           skos:prefLabel "NominalSpecificEnergy"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_62b8109a_0cba_4a19_99f3_625a8e81e73c
+:EMMO_62b8109a_0cba_4a19_99f3_625a8e81e73c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ,
+                                                           electrochemistry:EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-2 Θ0 N0 J0" ;
+                                           skos:altLabel "NominalIR"@en ;
+                                           skos:prefLabel "NominalInternalResistance"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_6a3a27d8_8431_4a80_b1f5_083c1d9a6088
+:EMMO_6a3a27d8_8431_4a80_b1f5_083c1d9a6088 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:prefLabel "ChargeCutoffVoltage"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_729b1d25_d978_430b_bc38_fa5bece61523
+:EMMO_729b1d25_d978_430b_bc38_fa5bece61523 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "MaximumContinuousDischargeCurrent"@en ;
+                                           skos:prefLabel "MaxContinuousDischargeCurrent"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_7a9162f8_2f38_4c95_90f4_8793f91e8dd7
+:EMMO_7a9162f8_2f38_4c95_90f4_8793f91e8dd7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
+                                           skos:altLabel "MaximumOperatingTemperature"@en ;
+                                           skos:prefLabel "MaxOperatingTemperature"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_94b51e34_c180_48a3_bb66_6ff84f4fc5f4
+:EMMO_94b51e34_c180_48a3_bb66_6ff84f4fc5f4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:altLabel "CycleCharacteristic"@en ,
+                                                         "TypicalCycleLife"@en ;
+                                           skos:prefLabel "NominalCycleLife"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_9d73f8c7_0efa_474d_8f38_c89f6a4deef6
+:EMMO_9d73f8c7_0efa_474d_8f38_c89f6a4deef6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
+                                           skos:altLabel "MinimumOperatingTemperature"@en ;
+                                           skos:prefLabel "MinOperatingTemperature"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_9fdda665_8a9b_4c72_8197_5bce0dc7ef0d
+:EMMO_9fdda665_8a9b_4c72_8197_5bce0dc7ef0d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:prefLabel "DischargeCutoffVoltage"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_a23f6675_3e73_41df_8414_70f6e3d9bb41
+:EMMO_a23f6675_3e73_41df_8414_70f6e3d9bb41 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "MaxPulseDischargeTime"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_b2ac9963_30d9_4263_a246_5d2bbedddfaf
+:EMMO_b2ac9963_30d9_4263_a246_5d2bbedddfaf rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ,
+                                                           emmo:EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
+                                           skos:altLabel "StandardEnergy"@en ,
+                                                         "TypicalEnergy"@en ;
+                                           skos:prefLabel "NominalEnergy"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_b3595038_bd09_4931_aa89_016e14f478d3
+:EMMO_b3595038_bd09_4931_aa89_016e14f478d3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ,
+                                                           emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-3 M0 I0 Θ0 N0 J0" ;
+                                           skos:altLabel "TypicalVolume"@en ;
+                                           skos:prefLabel "NominalVolume"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_beac1f4a_c8a3_49d3_859a_253ec73e385c
+:EMMO_beac1f4a_c8a3_49d3_859a_253ec73e385c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "ChargeCutoffCurrent"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_bfce6262_3d92_40d8_bbe8_09031fb82a2c
+:EMMO_bfce6262_3d92_40d8_bbe8_09031fb82a2c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ,
+                                                           emmo:EMMO_04cf0295_3e8f_4693_a87f_3130d125cf05 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+1 M+1 I0 Θ0 N0 J0" ;
+                                           skos:altLabel "TypicalWeight"@en ;
+                                           skos:prefLabel "NominalWeight"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83
+:EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
+                                           skos:prefLabel "ConventionalBatteryProperty"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_f634cb4f_cf98_4506_b10d_8c7e22bd8458
+:EMMO_f634cb4f_cf98_4506_b10d_8c7e22bd8458 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "MaxPulseDischargeCurrent"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_f7bdf711_4edf_448d_8044_ef713148418e
+:EMMO_f7bdf711_4edf_448d_8044_ef713148418e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ,
+                                                           electrochemistry:EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "NominalCapacity"@en ,
+                                                         "StandardCapacity"@en ,
+                                                         "StandardChargeCapacity"@en ,
+                                                         "TypicalCapacity"@en ,
+                                                         "TypicalChargeCapacity"@en ;
+                                           skos:prefLabel "NominalChargeCapacity"@en .
+
+
+###  http://emmo.info/BattINFO/properties#EMMO_fff4cdda_8051_4405_a457_d009cde4836d
+:EMMO_fff4cdda_8051_4405_a457_d009cde4836d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1c1722ba_91fd_4564_a55d_5c5e43f06fcd ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:altLabel "TypicalShelfLife"@en ;
+                                           skos:prefLabel "NominalShelfLife"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
