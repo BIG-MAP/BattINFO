@@ -26,7 +26,7 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 
 ###  http://emmo.info/BattINFO#EMMO_5f99ad2d_6b5f_469d_8aed_e3d44d78dfc2
 :EMMO_5f99ad2d_6b5f_469d_8aed_e3d44d78dfc2 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_22522299_4091_4d1f_82a2_3890492df6db ,
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_1fc333a8_63ba_48f7_ad4a_557858015354
@@ -35,8 +35,8 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_51365816_c56b_4020_85f2_381ba18afe0c
                                                            ] ;
-                                           skos:altLabel "ElectrochemicalImpedanceSpectroscopy"@en ;
-                                           skos:prefLabel "EIS"@en .
+                                           skos:altLabel "ElectrochemicalImpedanceSpectroscopyMeasurement"@en ;
+                                           skos:prefLabel "EISMeasurement"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_7e1065da_acae_46c9_93f2_9ec44f970a34
@@ -46,13 +46,14 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_c6a93bd1_7f29_4bea_9509_6cb70a198425
                                                            ] ;
-                                           skos:prefLabel "FullCellGITT"@en .
+                                           skos:prefLabel "FullCellGITTMeasurement"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_8d1fff4a_baa5_46e3_ab7b_5bbf99e6485f
 :EMMO_8d1fff4a_baa5_46e3_ab7b_5bbf99e6485f rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_22522299_4091_4d1f_82a2_3890492df6db ;
-                                           skos:prefLabel "GITT"@en .
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:altLabel "GalvanostaticIntermittentChargeTitrationTechniqueMeasurement"@en ;
+                                           skos:prefLabel "GITTMeasurement"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_b9b0e83f_3d98_4b5a_b274_dc5475b5d1a1
@@ -62,9 +63,79 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_1fc333a8_63ba_48f7_ad4a_557858015354
                                                            ] ;
-                                           skos:prefLabel "HalfCellGITT"@en .
+                                           skos:prefLabel "HalfCellGITTMeasurement"@en .
 
 
+###  http://emmo.info/BattINFO/observations#EMMO_17629d79_ab43_4edf_8e83_6806954d2f84
+:EMMO_17629d79_ab43_4edf_8e83_6806954d2f84 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "SEMMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38
+:EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "TEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_2928dbf7_b87c_49ca_897b_f238cf6940c7
+:EMMO_2928dbf7_b87c_49ca_897b_f238cf6940c7 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "BatteryCyclingMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_2a258485_03af_4a03_b682_f5d3dfc195db
+:EMMO_2a258485_03af_4a03_b682_f5d3dfc195db rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "FIBSEMMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_37113041_eb70_47d8_997d_abcd531ddbc2
+:EMMO_37113041_eb70_47d8_997d_abcd531ddbc2 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "FIBSEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_3b2c5633_f363_4134_9179_80240418baf1
+:EMMO_3b2c5633_f363_4134_9179_80240418baf1 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "BatteryCyclingMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_65d3cadd_774e_4684_9597_2ef42e48eca9
+:EMMO_65d3cadd_774e_4684_9597_2ef42e48eca9 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "EISMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_7ec3d94a_f161_4303_9581_63d714fb9578
+:EMMO_7ec3d94a_f161_4303_9581_63d714fb9578 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "GITTMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_d2a90a0b_fa4b_4979_9ba6_a093ec0ec5f3
+:EMMO_d2a90a0b_fa4b_4979_9ba6_a093ec0ec5f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "TEMMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_f02fdb1d_9b43_4104_83a3_5d5faf2ef0ed
+:EMMO_f02fdb1d_9b43_4104_83a3_5d5faf2ef0ed rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "SEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_f2670198_4e9b_4ca6_8134_8c570791ce47
+:EMMO_f2670198_4e9b_4ca6_8134_8c570791ce47 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "XrayCTMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO/observations#EMMO_f93da1c4_bafc_4699_aa1a_791115191b98
+:EMMO_f93da1c4_bafc_4699_aa1a_791115191b98 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "XrayCTMeasurementResult"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

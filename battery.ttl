@@ -130,8 +130,8 @@ Adapted from:
 :EMMO_4e9ad83a_370a_4c83_a312_0135e83332a4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 14.5 mm and height 50.5 mm."@en ;
-                                           skos:altLabel "AA" ;
-                                           skos:prefLabel "AACell"@en .
+                                           skos:altLabel "AABattery" ;
+                                           skos:prefLabel "AABatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1
@@ -200,8 +200,8 @@ Adapted from:
 :EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_927c9315_1ea4_460a_ab8c_6048024c52f3 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Cylindrical cell with diameter 10.5 mm and height 44.5 mm."@en ;
-                                           skos:altLabel "AAA" ;
-                                           skos:prefLabel "AAACell"@en .
+                                           skos:altLabel "AAABattery" ;
+                                           skos:prefLabel "AAABatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_71952657_72f9_4d4a_9236_50aefa6098f3
@@ -273,7 +273,7 @@ Adapted from:
 :EMMO_8475ddaa_cc2a_4ceb_827b_fe4ff7c46562 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
                                                            :EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 ;
-                                           skos:prefLabel "AlkalineBattery"@en .
+                                           skos:prefLabel "AlkalineBatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_8ad95beb_8212_42a9_8afa_b5efdbb825f2
@@ -294,8 +294,8 @@ Adapted from:
 :EMMO_901c0bf1_007a_4355_a870_aadb0dec6f90 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
                                                            :EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 ;
-                                           skos:altLabel "NickelCadmiumBattery"@en ;
-                                           skos:prefLabel "NiCdBattery"@en .
+                                           skos:altLabel "NickelCadmiumBatteryCell"@en ;
+                                           skos:prefLabel "NiCdBatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_916a24e9_f160_4ab9_9c79_de0ac23e8768
@@ -361,9 +361,9 @@ Adapted from:
 :EMMO_ba56db8a_2380_425d_8594_a0851a10c91f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
                                                            :EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 ;
-                                           skos:altLabel "CarbonZincBattery"@en ,
+                                           skos:altLabel "CarbonZincBatteryCell"@en ,
                                                          "LeclancheCell"@en ;
-                                           skos:prefLabel "ZincCarbonBattery"@en .
+                                           skos:prefLabel "ZincCarbonBatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce
@@ -390,8 +390,8 @@ Adapted from:
 :EMMO_bee2c66c_8640_48b9_a9d2_ec1388b16d73 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19eeb4ac_0190_4ab6_ab16_03abfc5fd68a ,
                                                            :EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 ;
-                                           skos:altLabel "NickelMetalHydrideBattery"@en ;
-                                           skos:prefLabel "NiMHBattery"@en .
+                                           skos:altLabel "NickelMetalHydrideBatteryCell"@en ;
+                                           skos:prefLabel "NiMHBatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_cc99988e_051c_45fd_b885_d4a2662a679c
