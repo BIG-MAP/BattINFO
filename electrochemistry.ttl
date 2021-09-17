@@ -139,14 +139,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
                                                            ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electrode"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electron conductor in an electrochemical cell connected to the external circuit.
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electronically conductive part in electric contact with a medium of lower electronic  conductivity and intended to perform one or more of the functions of emitting charge carriers to or receiving charge carriers from that medium or to establish an electric field in that medium.
 
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+-- IEC 60050-151: 2001, 151-13-01"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrode"@en ;
                                            rdfs:comment "Alternative definition: Half-cell consisting of at least one electron conductor and at least one ionic conductor (electrolyte). - Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019)"@en ,
-                                                        """Conductive part in electric contact with a medium of lower conductivity and intended to perform one or more of the functions of emitting charge carriers to or receiving charge carriers from that medium or to establish an electric field in that medium.
+                                                        """Electron conductor in an electrochemical cell connected to the external circuit.
 
--- IEC 60050-151: 2001, 151-13-01"""@en ,
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ,
                                                         "In some electroanalytical techniques (conductometry and differential potentiometry), two indicator electrodes are used. For many analytical measurements in cells with current flow, a three-electrode cell is used."@en ,
                                                         "Many types of electrodes are used. These may be classified into groups according to their composition, form and size, and according to their operating mode. See section 4."@en ,
                                                         "The current flow through electrochemical cells may be zero or non-zero. An electrochemical cell with current flow can operate either as a galvanic cell or an electrolytic cell."@en ;
@@ -1059,15 +1059,15 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                                              owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
                                                              owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """System that consists of at least two electron conductors (electrodes) in contact with ionic conductors (electrolytes).
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A system containing two electrodes that allow transport of electrons, separated by an electrolyte that allows movement of ions but blocks movement of electrons.
 
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+-- J. Newman and K. E. Thmoas-Alyea, Electrochemical Systems, 3rd ed. Hoboken, New Jersey: John Wiley & Sons, 2004."""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrochemical_cell"@en ;
-                                           rdfs:comment """A system capable of either generating electrical energy from chemical reactions or using electrical energy to cause chemical reactions. The key feature of an electrochemical cell is that it contains two (or more) electrodes that allow transport of electrons, separated by a salt bridge that allows the movement of ions but blocks movement of electrons.
-
--- Adapted from J. Newman, Electrochemical Systems (p. 3) and other sources"""@en ,
-                                                        "If processes of interest occur at both the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or two working electrodes."@en ,
+                                           rdfs:comment "If processes of interest occur at both the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or two working electrodes."@en ,
                                                         "In electrochemistry the term “cell” is commonly qualified to describe the particular device on which electrochemical reactions take place. Examples of galvanic and electrolytic cells are standard cells, electrochemical sensor cells, conductivity cells, spectroelectrochemical cells, fuel cells, batteries, electrochemical measuring cells, and two- and three-electrode cells."@en ,
+                                                        """System that consists of at least two electron conductors (electrodes) in contact with ionic conductors (electrolytes).
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ,
                                                         "The current flow through the electrochemical cell may be zero or non-zero. An electrochem- ical cell with current flow can operate either as a galvanic cell or as an electrolytic cell."@en ,
                                                         "The two electrodes may be a working electrode and an auxiliary electrode or, for zero- current measurements (potentiometric mode), an indicator electrode and a reference electrode. There may be a third electrode, the cell having a separate auxiliary electrode (to carry current) and reference electrode (for measurement of electrode potential) in addition to a working electrode (See three-electrode cell)."@en ;
                                            skos:prefLabel "ElectrochemicalCell"@en .
@@ -1135,12 +1135,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 ###  http://emmo.info/electrochemistry#EMMO_79d1b273-58cd-4be6-a250-434817f7c261
 :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73 ,
-                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical material that participates in an electrochemical reaction."@en ;
+                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance that undergoes a change of oxidation state, or whose chemical bonds are broken or formed, in a charge-transfer reaction at an electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           rdfs:comment "If an electroactive substance B is formed, in the solution or at the electrode surface, by a chemical reaction from another substance C, the substance C should be called the precursor of B." ;
+                                           skos:altLabel "ElectroactiveSubstance"@en ;
                                            skos:prefLabel "ActiveElectrochemicalMaterial"@en .
 
 
@@ -1280,20 +1280,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric potential at which a material undergoes an oxidation or reduction decomposition."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectrochemicalStabilityLimit"@en .
-
-
-###  http://emmo.info/electrochemistry#EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763
-:EMMO_92ba4a12-146e-4b1f-86f3-bcc66ac52763 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance that undergoes a change of oxidation state, or whose chemical bonds are broken or formed, in a charge-transfer reaction at an electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Depolarizer"@en ;
-                                           rdfs:comment "If an electroactive substance B is formed, in the solution or at the electrode surface, by a chemical reaction from another substance C, the substance C should be called the precursor of B."@en ,
-                                                        "In potentiometry with an ion-selective electrode, the term electroactive substance refers to the sensed ions."@en ;
-                                           skos:altLabel "Depolarizer"@en ,
-                                                         "ElectrochemicallyActiveSubstance"@en ;
-                                           skos:prefLabel "ElectroactiveSubstance"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
@@ -2187,12 +2173,15 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af ,
                                                            :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electrolyte"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """1. Conducting medium in which the flow of electric current is accompanied by the movement of ions. 
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A material in which the mobile species are ions and free movement of electrons is blocked.
+
+-- J. Newman and K. E. Thmoas-Alyea, Electrochemical Systems, 3rd ed. Hoboken, New Jersey: John Wiley & Sons, 2004.""" ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrolyte"@en ;
+                                           rdfs:comment """1. Conducting medium in which the flow of electric current is accompanied by the movement of ions. 
 2. Substance that provides ions on dissolution in a solvent or on melting.
 
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrolyte"@en ;
-                                           rdfs:comment "A solid electrolyte is a solid material where the predominant charge carriers are ions. For example: NASICON (Na Super Ionic Conductor), which has the general formula Na1+xZr2P3-xSix O12 , 0 < x < 3."@en ,
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ,
+                                                        "A solid electrolyte is a solid material where the predominant charge carriers are ions. For example: NASICON (Na Super Ionic Conductor), which has the general formula Na1+xZr2P3-xSix O12 , 0 < x < 3."@en ,
                                                         "An ionic liquid is an electrolyte composed of a salt that is liquid below 100 °C. Ionic liquids have found uses in electrochemical analysis, because their unconventional properties include a negligible vapor pressure, a high thermal and electrochemical stability, and exceptional dissolution properties for both organic and inorganic chemical species."@en ,
                                                         """Liquid or solid substance containing mobile ions that render it conductive.
 
