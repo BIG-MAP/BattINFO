@@ -38,6 +38,37 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
+###  http://emmo.info/BattINFO#EMMO_008dac04_b4f6_46d6_a944_e900e06447e2
+:EMMO_008dac04_b4f6_46d6_a944_e900e06447e2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ,
+                                                           :EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce ,
+                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ;
+                                           skos:prefLabel "SiliconAirBatteryPack"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_036ac7e0_051c_4362_8e68_9e7baacef673
+:EMMO_036ac7e0_051c_4362_8e68_9e7baacef673 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ,
+                                                           :EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f ;
+                                           skos:prefLabel "A10"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_060a57c8_0d5d_4189_9fb3_5486456fe3ac
+:EMMO_060a57c8_0d5d_4189_9fb3_5486456fe3ac rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ,
+                                                           :EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 ,
+                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ;
+                                           skos:prefLabel "ZincAirBatteryPack"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_06a26c09_795d_46d5_894b_b83d92b86250
+:EMMO_06a26c09_795d_46d5_894b_b83d92b86250 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ,
+                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
+                                                           :EMMO_ff072645_062b_4d0b_b341_e4d503e137e3 ;
+                                           skos:prefLabel "LithiumAirBatteryPack"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264
 :EMMO_080561f8_2ade_42bd_a01b_11e2d9b7f264 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
@@ -85,6 +116,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Battery chemistry in which the charge carrier is a metal ion and contains at least one intercalation electrode."@en ;
                                            skos:prefLabel "MetalIonBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_2ecdb09a_abae_40b2_a867_ac29f38d4428
+:EMMO_2ecdb09a_abae_40b2_a867_ac29f38d4428 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ,
+                                                           :EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f ;
+                                           skos:prefLabel "A312"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_33aad30c_a490_4537_8243_b9dc0cf505d9
@@ -205,6 +243,13 @@ Adapted from:
                                            skos:prefLabel "AAABatteryCell"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_6cfef518_1542_4591_8e66_9336cea110c7
+:EMMO_6cfef518_1542_4591_8e66_9336cea110c7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ,
+                                                           :EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f ;
+                                           skos:prefLabel "A13"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_71952657_72f9_4d4a_9236_50aefa6098f3
 :EMMO_71952657_72f9_4d4a_9236_50aefa6098f3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
@@ -212,10 +257,56 @@ Adapted from:
                                            skos:prefLabel "IronAirBattery"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_71a08c52_d75a_433b_926d_f388990349db
+:EMMO_71a08c52_d75a_433b_926d_f388990349db rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ;
+                                           skos:prefLabel "A675"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
 :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
-                                                           emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                                           emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_3219d87f_7800_46b2_bb88_82bda64d3f39
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_50f5f611_ac42_4d78_8d04_18f17d398f39
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_52ca57f1_752c_4408_afb4_1706541a404c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_62b8109a_0cba_4a19_99f3_625a8e81e73c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_94b51e34_c180_48a3_bb66_6ff84f4fc5f4
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_b2ac9963_30d9_4263_a246_5d2bbedddfaf
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_b3595038_bd09_4931_aa89_016e14f478d3
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_bfce6262_3d92_40d8_bbe8_09031fb82a2c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_f7bdf711_4edf_448d_8044_ef713148418e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_fff4cdda_8051_4405_a457_d009cde4836d
+                                                           ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices.
 
@@ -236,6 +327,20 @@ Adapted from:
                                            skos:altLabel "1865"@en ,
                                                          18650 ;
                                            skos:prefLabel "Cylindrical18650Cell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b
+:EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:prefLabel "MetalAirBatteryCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7ad0ba09_b943_46af_9eec_3466785073ce
+:EMMO_7ad0ba09_b943_46af_9eec_3466785073ce rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_71952657_72f9_4d4a_9236_50aefa6098f3 ,
+                                                           :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ,
+                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ;
+                                           skos:prefLabel "IronAirBatteryPack"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
@@ -277,6 +382,14 @@ Adapted from:
                                            skos:prefLabel "AlkalineBatteryCell"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1
+:EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ,
+                                                           :EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 ;
+                                           skos:prefLabel "ZincAirBatteryCell"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_8ad95beb_8212_42a9_8afa_b5efdbb825f2
 :EMMO_8ad95beb_8212_42a9_8afa_b5efdbb825f2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6cb096f6_1063_45c1_8853_33c154fd60ea ,
@@ -289,6 +402,14 @@ Adapted from:
                                            rdfs:subClassOf electrochemistry:EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Active electrochemical materials suitable for intercalating Zn/Zn2+"@en ;
                                            skos:prefLabel "ZincIntercalationMaterial"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_8c864412_d44e_434e_830b_366b92178db9
+:EMMO_8c864412_d44e_434e_830b_366b92178db9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ,
+                                                           :EMMO_e8f54254_7f49_429a_939e_80023121e165 ;
+                                           skos:prefLabel "MagnesiumAirBatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_901c0bf1_007a_4355_a870_aadb0dec6f90
@@ -326,6 +447,12 @@ Adapted from:
                                            skos:prefLabel "KR6"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87
+:EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
+                                           skos:prefLabel "MetalAirBatteryPack"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
 :EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
@@ -349,6 +476,22 @@ Adapted from:
                                            rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
                                            skos:prefLabel "NegativeElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b7f4045b_8942_4262_81e2_3dc47f75a1a5
+:EMMO_b7f4045b_8942_4262_81e2_3dc47f75a1a5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           :EMMO_71952657_72f9_4d4a_9236_50aefa6098f3 ,
+                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ;
+                                           skos:prefLabel "IronAirBatteryCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b8585d03_1aa0_4110_84c4_c81eb137af97
+:EMMO_b8585d03_1aa0_4110_84c4_c81eb137af97 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ,
+                                                           :EMMO_ff072645_062b_4d0b_b341_e4d503e137e3 ;
+                                           skos:prefLabel "LithiumAirBatteryCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_ba312910_be26_40ab_848a_bb2ceeab8109
@@ -428,6 +571,14 @@ Adapted from:
                                            skos:prefLabel "Container"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_e121f1b0_c9e8_410a_b0dd_f8b8c07bbc74
+:EMMO_e121f1b0_c9e8_410a_b0dd_f8b8c07bbc74 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ,
+                                                           :EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce ;
+                                           skos:prefLabel "SiliconAirBatteryCell"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_e525f02e_78e7_4e8b_9402_ce756a768868
 :EMMO_e525f02e_78e7_4e8b_9402_ce756a768868 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 ;
@@ -439,6 +590,14 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
                                            skos:altLabel "MgAirBattery"@en ;
                                            skos:prefLabel "MagnesiumAirBattery"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e9aaed8d_1290_4d1d_9a06_ed5313b9af0d
+:EMMO_e9aaed8d_1290_4d1d_9a06_ed5313b9af0d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ,
+                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
+                                                           :EMMO_e8f54254_7f49_429a_939e_80023121e165 ;
+                                           skos:prefLabel "MagnesiumAirBatteryPack"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_ea0d14e9_46e7_41dc_b6f4_d678b7d6fcbb
@@ -476,125 +635,6 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
                                            skos:altLabel "LiAirBattery"@en ;
                                            skos:prefLabel "LithiumAirBattery"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_008dac04_b4f6_46d6_a944_e900e06447e2
-:EMMO_008dac04_b4f6_46d6_a944_e900e06447e2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce ,
-                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
-                                                           :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ;
-                                           skos:prefLabel "SiliconAirBatteryPack"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_036ac7e0_051c_4362_8e68_9e7baacef673
-:EMMO_036ac7e0_051c_4362_8e68_9e7baacef673 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f ,
-                                                           :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ;
-                                           skos:prefLabel "A10"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_060a57c8_0d5d_4189_9fb3_5486456fe3ac
-:EMMO_060a57c8_0d5d_4189_9fb3_5486456fe3ac rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 ,
-                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
-                                                           :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ;
-                                           skos:prefLabel "ZincAirBatteryPack"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_06a26c09_795d_46d5_894b_b83d92b86250
-:EMMO_06a26c09_795d_46d5_894b_b83d92b86250 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
-                                                           :EMMO_ff072645_062b_4d0b_b341_e4d503e137e3 ,
-                                                           :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ;
-                                           skos:prefLabel "LithiumAirBatteryPack"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_2ecdb09a_abae_40b2_a867_ac29f38d4428
-:EMMO_2ecdb09a_abae_40b2_a867_ac29f38d4428 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f ,
-                                                           :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ;
-                                           skos:prefLabel "A312"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_6cfef518_1542_4591_8e66_9336cea110c7
-:EMMO_6cfef518_1542_4591_8e66_9336cea110c7 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_bed12248_4ce6_401c_9ef7_4ebe24ca3b1f ,
-                                                           :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ;
-                                           skos:prefLabel "A13"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_71a08c52_d75a_433b_926d_f388990349db
-:EMMO_71a08c52_d75a_433b_926d_f388990349db rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 ;
-                                           skos:prefLabel "A675"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b
-:EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
-                                           skos:prefLabel "MetalAirBatteryCell"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_7ad0ba09_b943_46af_9eec_3466785073ce
-:EMMO_7ad0ba09_b943_46af_9eec_3466785073ce rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_71952657_72f9_4d4a_9236_50aefa6098f3 ,
-                                                           :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
-                                                           :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ;
-                                           skos:prefLabel "IronAirBatteryPack"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1
-:EMMO_86fa94a2_8dff_44c5_a4e5_edd3b95022b1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
-                                                           :EMMO_ba312910_be26_40ab_848a_bb2ceeab8109 ,
-                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ;
-                                           skos:prefLabel "ZincAirBatteryCell"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_8c864412_d44e_434e_830b_366b92178db9
-:EMMO_8c864412_d44e_434e_830b_366b92178db9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
-                                                           :EMMO_e8f54254_7f49_429a_939e_80023121e165 ,
-                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ;
-                                           skos:prefLabel "MagnesiumAirBatteryCell"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87
-:EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c53b47a_1db0_4066_98b8_2c24e4904dda ;
-                                           skos:prefLabel "MetalAirBatteryPack"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_b7f4045b_8942_4262_81e2_3dc47f75a1a5
-:EMMO_b7f4045b_8942_4262_81e2_3dc47f75a1a5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
-                                                           :EMMO_71952657_72f9_4d4a_9236_50aefa6098f3 ,
-                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ;
-                                           skos:prefLabel "IronAirBatteryCell"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_b8585d03_1aa0_4110_84c4_c81eb137af97
-:EMMO_b8585d03_1aa0_4110_84c4_c81eb137af97 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
-                                                           :EMMO_ff072645_062b_4d0b_b341_e4d503e137e3 ,
-                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ;
-                                           skos:prefLabel "LithiumAirBatteryCell"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_e121f1b0_c9e8_410a_b0dd_f8b8c07bbc74
-:EMMO_e121f1b0_c9e8_410a_b0dd_f8b8c07bbc74 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
-                                                           :EMMO_bc460fc0_6a2c_4cfb_ba2e_290e66e4afce ,
-                                                           :EMMO_77a5ade9_495b_4e90_aab5_b0ed75e52d2b ;
-                                           skos:prefLabel "SiliconAirBatteryCell"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_e9aaed8d_1290_4d1d_9a06_ed5313b9af0d
-:EMMO_e9aaed8d_1290_4d1d_9a06_ed5313b9af0d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 ,
-                                                           :EMMO_e8f54254_7f49_429a_939e_80023121e165 ,
-                                                           :EMMO_980f0790_b3b3_42f7_93b5_6c22c8ce2f87 ;
-                                           skos:prefLabel "MagnesiumAirBatteryPack"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
