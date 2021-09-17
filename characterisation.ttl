@@ -45,17 +45,16 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "Potentiostat"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6
+:EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           skos:prefLabel "LightMicroscope"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_2744ed81_a5e0_461b_b22d_bc04bfc4638c
 :EMMO_2744ed81_a5e0_461b_b22d_bc04bfc4638c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
                                            skos:prefLabel "CurrentBooster"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_348fbd70_b98d_40d7_9971_2e07e5b9a6a0
-:EMMO_348fbd70_b98d_40d7_9971_2e07e5b9a6a0 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A result from a Diffraction Measurement."@en ;
-                                           skos:prefLabel "DiffractionMeasurementResult"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_51365816_c56b_4020_85f2_381ba18afe0c
@@ -64,11 +63,39 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "FrequencyResponseAnalyser"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f
+:EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
+                                           skos:prefLabel "XrayCTScanner"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_5c69b4f4_74e6_454b_a0fa_408efe7455dd
 :EMMO_5c69b4f4_74e6_454b_a0fa_408efe7455dd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ,
                                                            electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            skos:prefLabel "MeasuringCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_61cfef93_5662_462e_acbf_3c530ab933b1
+:EMMO_61cfef93_5662_462e_acbf_3c530ab933b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Transmission_electron_microscopy"@en ;
+                                           skos:altLabel "TEM"@en ;
+                                           skos:prefLabel "TransmissionElectronMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6
+:EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electron_microscope"@en ;
+                                           skos:prefLabel "ElectronMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_83288903_7611_4177_ba6d_f649826c43df
+:EMMO_83288903_7611_4177_ba6d_f649826c43df rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a ;
+                                           skos:altLabel "FocusedIonBeamScanningElectronMicroscope"@en ;
+                                           skos:prefLabel "FIBSEM"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_8909f008_8b23_42f1_97a9_0447f3ae5201
@@ -80,18 +107,17 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "Potentiometer"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_9cbeffb5_745d_4873_9e9b_acdd7c8fc336
-:EMMO_9cbeffb5_745d_4873_9e9b_acdd7c8fc336 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A measurement of the wave diffraction property of some sample."@en ;
-                                           skos:prefLabel "DiffractionMeasurement"@en .
-
-
 ###  http://emmo.info/BattINFO#EMMO_a503ef5c_3eb0_49a3_b586_eaad85c9ab46
 :EMMO_a503ef5c_3eb0_49a3_b586_eaad85c9ab46 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An instrument that measures the diffraction of an electromagnetic wave (originating from a source) through a sample as seen by a detector."@en ;
                                            skos:prefLabel "DiffractionInstrument"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393
+:EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
+                                           skos:prefLabel "Microscope"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_b0aa5bd5_f822_4784_946d_6728f35d1975
@@ -115,6 +141,14 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "Coulometer"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a
+:EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Scanning_electron_microscope"@en ;
+                                           skos:altLabel "SEM"@en ;
+                                           skos:prefLabel "ScanningElectronMicroscope"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_c6a93bd1_7f29_4bea_9509_6cb70a198425
 :EMMO_c6a93bd1_7f29_4bea_9509_6cb70a198425 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
@@ -129,6 +163,12 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "BatteryMeasuringInstrument"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2
+:EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           skos:prefLabel "IonBeamMicroscope"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_f90d3d69_cd5a_4eab_b5ec_f6b6a0ccc893
 :EMMO_f90d3d69_cd5a_4eab_b5ec_f6b6a0ccc893 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
@@ -138,60 +178,6 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Galvanostat"@en ;
                                            skos:altLabel "Amperostat"@en ;
                                            skos:prefLabel "Galvanostat"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6
-:EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
-                                           skos:prefLabel "LightMicroscope"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f
-:EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           skos:prefLabel "XrayCTScanner"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_61cfef93_5662_462e_acbf_3c530ab933b1
-:EMMO_61cfef93_5662_462e_acbf_3c530ab933b1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Transmission_electron_microscopy"@en ;
-                                           skos:altLabel "TEM"@en ;
-                                           skos:prefLabel "TransmissionElectronMicroscope"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6
-:EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electron_microscope"@en ;
-                                           skos:prefLabel "ElectronMicroscope"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_83288903_7611_4177_ba6d_f649826c43df
-:EMMO_83288903_7611_4177_ba6d_f649826c43df rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a ;
-                                           skos:altLabel "FocusedIonBeamScanningElectronMicroscope"@en ;
-                                           skos:prefLabel "FIBSEM"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393
-:EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           skos:prefLabel "Microscope"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a
-:EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Scanning_electron_microscope"@en ;
-                                           skos:altLabel "SEM"@en ;
-                                           skos:prefLabel "ScanningElectronMicroscope"@en .
-
-
-###  http://emmo.info/BattINFO/characterisation#EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2
-:EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
-                                           skos:prefLabel "IonBeamMicroscope"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
