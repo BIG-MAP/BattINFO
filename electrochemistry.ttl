@@ -12,7 +12,7 @@
 
 <http://emmo.info/electrochemistry/electrochemistry> rdf:type owl:Ontology ;
                                                       owl:versionIRI <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
-                                                      owl:imports <http://emmo.info/emmo/1.0.0-beta/generic-concepts> ;
+                                                      owl:imports <http://emmo.info/electrochemistry/0.1.0/electrochemicalquantities> ;
                                                       dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
