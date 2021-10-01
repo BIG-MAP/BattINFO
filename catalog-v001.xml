@@ -5,7 +5,7 @@
         <uri name="http://emmo.info/electrochemistry/0.1.0/electrochemistry"   uri="electrochemistry.ttl"/>
         <uri name="http://emmo.info/BattINFO/0.1.0/characterisation"   uri="characterisation.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/battery"            uri="battery.ttl"/>
-	<uri name="http://emmo.info/BattINFO/0.1.0/properties"         uri="properties.ttl"/>
+	<uri name="http://emmo.info/BattINFO/0.1.0/batteryquantities"  uri="batteryquantities.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/observations"       uri="observations.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0/models"             uri="models.ttl"/>
 	<uri name="http://emmo.info/BattINFO/0.1.0"                    uri="BattINFO.ttl"/>
