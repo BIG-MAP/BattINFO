@@ -1121,17 +1121,6 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ReferenceElectrode"@en .
 
 
-###  http://emmo.info/electrochemistry#EMMO_791c1915_a791_4450_acd8_7f94764743b5
-:EMMO_791c1915_a791_4450_acd8_7f94764743b5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Amount of electric charge that can be stored."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
-                                           skos:altLabel "Capacity"@en ,
-                                                         "ElectricChargeCapacity"@en ;
-                                           skos:prefLabel "ChargeCapacity"@en .
-
-
 ###  http://emmo.info/electrochemistry#EMMO_79d1b273-58cd-4be6-a250-434817f7c261
 :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73 ,
