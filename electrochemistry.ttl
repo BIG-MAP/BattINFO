@@ -999,14 +999,10 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 ###  http://emmo.info/electrochemistry#EMMO_6cae5943-737a-4f88-9903-9de4cffebd11
 :EMMO_6cae5943-737a-4f88-9903-9de4cffebd11 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca ,
+                                                           <http://org.semanticweb.owlapi/error#Error13> ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ion bridge consisting of at least two subcomponents, one of which is an IonicSubcomponent."@en ;
                                            skos:prefLabel "CompositeIonBridge"@en .
@@ -1026,11 +1022,7 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 ###  http://emmo.info/electrochemistry#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
 :EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
-                                                           ] ;
+                                                           <http://org.semanticweb.owlapi/error#Error14> ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ion bridge consisting of exactly 1 subcomponent that is an IonicSubcomponent."@en ;
                                            skos:prefLabel "SimpleIonBridge"@en .
 
@@ -1073,7 +1065,7 @@ instead of
 
     ElectrochemicalCell hasPart min 2 Electrode
 
-The reason for this that combining the transitivity property of hasPart with cardinality is outside of the DL profile causing reasoners like FaCT++ to fail."""@en ,
+The reason for this is that combining the transitivity property of hasPart with cardinality is outside of the DL profile causing reasoners like FaCT++ to fail."""@en ,
                                                         "If processes of interest occur at both the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or two working electrodes."@en ,
                                                         "In electrochemistry the term “cell” is commonly qualified to describe the particular device on which electrochemical reactions take place. Examples of galvanic and electrolytic cells are standard cells, electrochemical sensor cells, conductivity cells, spectroelectrochemical cells, fuel cells, batteries, electrochemical measuring cells, and two- and three-electrode cells."@en ,
                                                         "The current flow through the electrochemical cell may be zero or non-zero. An electrochem- ical cell with current flow can operate either as a galvanic cell or as an electrolytic cell."@en ,
@@ -1407,6 +1399,7 @@ Conducting Additive"""@en ;
 ###  http://emmo.info/electrochemistry#EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c
 :EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           <http://org.semanticweb.owlapi/error#Error12> ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
                                                              owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
@@ -1414,11 +1407,6 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system comprising one electrode in contact with an ionic conductor."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Half-cell"@en ;
@@ -2259,5 +2247,26 @@ Adapted from:
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
 
+
+###  http://org.semanticweb.owlapi/error#Error12
+<http://org.semanticweb.owlapi/error#Error12> rdf:type owl:Class .
+
+
+###  http://org.semanticweb.owlapi/error#Error13
+<http://org.semanticweb.owlapi/error#Error13> rdf:type owl:Class .
+
+
+###  http://org.semanticweb.owlapi/error#Error14
+<http://org.semanticweb.owlapi/error#Error14> rdf:type owl:Class .
+
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+[ owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
