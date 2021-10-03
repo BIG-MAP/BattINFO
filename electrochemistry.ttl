@@ -1052,12 +1052,11 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
+                                                             owl:someValuesFrom :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+                                                             owl:someValuesFrom :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """System that consists of at least two electron conductors (electrodes) in contact with ionic conductors (electrolytes).
 
@@ -1066,6 +1065,15 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:comment """A system capable of either generating electrical energy from chemical reactions or using electrical energy to cause chemical reactions. The key feature of an electrochemical cell is that it contains two (or more) electrodes that allow transport of electrons, separated by a salt bridge that allows the movement of ions but blocks movement of electrons.
 
 -- Adapted from J. Newman, Electrochemical Systems (p. 3) and other sources"""@en ,
+                                                        """Even though that an ElectrochemicalCell has minimum 2 Electrodes we are using the existential restriction
+
+    ElectrochemicalCell hasPart some Electrode
+
+instead of
+
+    ElectrochemicalCell hasPart min 2 Electrode
+
+The reason for this that combining the transitivity property of hasPart with cardinality is outside of the DL profile causing reasoners like FaCT++ to fail."""@en ,
                                                         "If processes of interest occur at both the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or two working electrodes."@en ,
                                                         "In electrochemistry the term “cell” is commonly qualified to describe the particular device on which electrochemical reactions take place. Examples of galvanic and electrolytic cells are standard cells, electrochemical sensor cells, conductivity cells, spectroelectrochemical cells, fuel cells, batteries, electrochemical measuring cells, and two- and three-electrode cells."@en ,
                                                         "The current flow through the electrochemical cell may be zero or non-zero. An electrochem- ical cell with current flow can operate either as a galvanic cell or as an electrolytic cell."@en ,
