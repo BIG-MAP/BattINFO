@@ -33,16 +33,16 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "DiffractionMeasuringSystem"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_1fc333a8_63ba_48f7_ad4a_557858015354
-:EMMO_1fc333a8_63ba_48f7_ad4a_557858015354 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Measuring instrument [VIM 3.1] for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode.
+###  http://emmo.info/BattINFO#EMMO_17629d79_ab43_4edf_8e83_6806954d2f84
+:EMMO_17629d79_ab43_4edf_8e83_6806954d2f84 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "SEMMeasurementResult"@en .
 
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Potentiostat"@en ;
-                                           rdfs:comment "Most potentiostats use low current (e.g. nA - 2 A). For higher currents, it can be combined with a current booster."@en ,
-                                                        "Potentiostat can be used in a two or three electrode setup."@en ;
-                                           skos:prefLabel "Potentiostat"@en .
+
+###  http://emmo.info/BattINFO#EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38
+:EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "TEMMeasurement"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6
@@ -51,29 +51,16 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "LightMicroscope"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_2744ed81_a5e0_461b_b22d_bc04bfc4638c
-:EMMO_2744ed81_a5e0_461b_b22d_bc04bfc4638c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           skos:prefLabel "CurrentBooster"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_51365816_c56b_4020_85f2_381ba18afe0c
-:EMMO_51365816_c56b_4020_85f2_381ba18afe0c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           skos:prefLabel "FrequencyResponseAnalyser"@en .
+###  http://emmo.info/BattINFO#EMMO_37113041_eb70_47d8_997d_abcd531ddbc2
+:EMMO_37113041_eb70_47d8_997d_abcd531ddbc2 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "FIBSEMMeasurement"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f
 :EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
                                            skos:prefLabel "XrayCTScanner"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_5c69b4f4_74e6_454b_a0fa_408efe7455dd
-:EMMO_5c69b4f4_74e6_454b_a0fa_408efe7455dd rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ,
-                                                           electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
-                                           skos:prefLabel "MeasuringCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_61cfef93_5662_462e_acbf_3c530ab933b1
@@ -98,15 +85,6 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            skos:prefLabel "FIBSEM"@en .
 
 
-###  http://emmo.info/BattINFO#EMMO_8909f008_8b23_42f1_97a9_0447f3ae5201
-:EMMO_8909f008_8b23_42f1_97a9_0447f3ae5201 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Potentiometer_(measuring_instrument)"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An instrument for measuring voltage or 'potential difference' by comparison of an unknown voltage with a known reference voltage."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Potentiometer_(measuring_instrument)"@en ;
-                                           skos:prefLabel "Potentiometer"@en .
-
-
 ###  http://emmo.info/BattINFO#EMMO_a503ef5c_3eb0_49a3_b586_eaad85c9ab46
 :EMMO_a503ef5c_3eb0_49a3_b586_eaad85c9ab46 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
@@ -116,29 +94,8 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 
 ###  http://emmo.info/BattINFO#EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393
 :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
                                            skos:prefLabel "Microscope"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_b0aa5bd5_f822_4784_946d_6728f35d1975
-:EMMO_b0aa5bd5_f822_4784_946d_6728f35d1975 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5c69b4f4_74e6_454b_a0fa_408efe7455dd ;
-                                           skos:prefLabel "OpenMeasuringCell"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_b217fab5_fe3b_4607_864b_32cb79f6a0a0
-:EMMO_b217fab5_fe3b_4607_864b_32cb79f6a0a0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5c69b4f4_74e6_454b_a0fa_408efe7455dd ;
-                                           skos:prefLabel "ClosedMeasuringCell"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_bb5b1538_d1a9_4858_8248_3112507dcba5
-:EMMO_bb5b1538_d1a9_4858_8248_3112507dcba5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Measuring instrument [VIM 3.1] to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration."@en ;
-                                           rdfs:comment "Modern instruments for measuring trace water by Karl Fischer titration use the passage of a measured charge to produce iodine from iodide solution. They are known as Karl Fischer coulometers."@en ,
-                                                        "The silver coulometer is a primary reference measurement procedure [VIM 2.8] for charge and current. By weighing the mass of silver deposited in a known time at constant current, the charge and current are calculated from Faraday’s laws of electrolysis."@en ;
-                                           skos:prefLabel "Coulometer"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a
@@ -147,127 +104,6 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Scanning_electron_microscope"@en ;
                                            skos:altLabel "SEM"@en ;
                                            skos:prefLabel "ScanningElectronMicroscope"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_c6a93bd1_7f29_4bea_9509_6cb70a198425
-:EMMO_c6a93bd1_7f29_4bea_9509_6cb70a198425 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           rdfs:comment "Can be used only in a 2 electrode full cell configuration."@en ;
-                                           skos:prefLabel "BatteryCycler"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_db9c17b5_b932_477b_b520_638c4863f2bf
-:EMMO_db9c17b5_b932_477b_b520_638c4863f2bf rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A MeasuringInstrument used in the battery domain."@en ;
-                                           skos:prefLabel "BatteryMeasuringInstrument"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2
-:EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
-                                           skos:prefLabel "IonBeamMicroscope"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_f90d3d69_cd5a_4eab_b5ec_f6b6a0ccc893
-:EMMO_f90d3d69_cd5a_4eab_b5ec_f6b6a0ccc893 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_db9c17b5_b932_477b_b520_638c4863f2bf ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Instrument which controls the electric current between the working electrode and the auxiliary electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Galvanostat"@en ;
-                                           skos:altLabel "Amperostat"@en ;
-                                           skos:prefLabel "Galvanostat"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_5f99ad2d_6b5f_469d_8aed_e3d44d78dfc2
-:EMMO_5f99ad2d_6b5f_469d_8aed_e3d44d78dfc2 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_1fc333a8_63ba_48f7_ad4a_557858015354
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_51365816_c56b_4020_85f2_381ba18afe0c
-                                                           ] ;
-                                           skos:altLabel "ElectrochemicalImpedanceSpectroscopyMeasurement"@en ;
-                                           skos:prefLabel "EISMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_7e1065da_acae_46c9_93f2_9ec44f970a34
-:EMMO_7e1065da_acae_46c9_93f2_9ec44f970a34 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_8d1fff4a_baa5_46e3_ab7b_5bbf99e6485f ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_c6a93bd1_7f29_4bea_9509_6cb70a198425
-                                                           ] ;
-                                           skos:prefLabel "FullCellGITTMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_8d1fff4a_baa5_46e3_ab7b_5bbf99e6485f
-:EMMO_8d1fff4a_baa5_46e3_ab7b_5bbf99e6485f rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           skos:altLabel "GalvanostaticIntermittentChargeTitrationTechniqueMeasurement"@en ;
-                                           skos:prefLabel "GITTMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_b9b0e83f_3d98_4b5a_b274_dc5475b5d1a1
-:EMMO_b9b0e83f_3d98_4b5a_b274_dc5475b5d1a1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_8d1fff4a_baa5_46e3_ab7b_5bbf99e6485f ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_1fc333a8_63ba_48f7_ad4a_557858015354
-                                                           ] ;
-                                           skos:prefLabel "HalfCellGITTMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_17629d79_ab43_4edf_8e83_6806954d2f84
-:EMMO_17629d79_ab43_4edf_8e83_6806954d2f84 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           skos:prefLabel "SEMMeasurementResult"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38
-:EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           skos:prefLabel "TEMMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_2928dbf7_b87c_49ca_897b_f238cf6940c7
-:EMMO_2928dbf7_b87c_49ca_897b_f238cf6940c7 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           skos:prefLabel "BatteryCyclingMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_2a258485_03af_4a03_b682_f5d3dfc195db
-:EMMO_2a258485_03af_4a03_b682_f5d3dfc195db rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           skos:prefLabel "FIBSEMMeasurementResult"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_37113041_eb70_47d8_997d_abcd531ddbc2
-:EMMO_37113041_eb70_47d8_997d_abcd531ddbc2 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           skos:prefLabel "FIBSEMMeasurement"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_3b2c5633_f363_4134_9179_80240418baf1
-:EMMO_3b2c5633_f363_4134_9179_80240418baf1 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           skos:prefLabel "BatteryCyclingMeasurementResult"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_65d3cadd_774e_4684_9597_2ef42e48eca9
-:EMMO_65d3cadd_774e_4684_9597_2ef42e48eca9 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           skos:prefLabel "EISMeasurementResult"@en .
-
-
-###  http://emmo.info/BattINFO#EMMO_7ec3d94a_f161_4303_9581_63d714fb9578
-:EMMO_7ec3d94a_f161_4303_9581_63d714fb9578 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           skos:prefLabel "GITTMeasurementResult"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_d2a90a0b_fa4b_4979_9ba6_a093ec0ec5f3
@@ -280,6 +116,12 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 :EMMO_f02fdb1d_9b43_4104_83a3_5d5faf2ef0ed rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
                                            skos:prefLabel "SEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2
+:EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           skos:prefLabel "IonBeamMicroscope"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_f2670198_4e9b_4ca6_8134_8c570791ce47
