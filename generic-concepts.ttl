@@ -155,6 +155,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FiniteElementMesh"@en .
 
 
+###  http://emmo.info/emmo#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
+:EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
+                                           skos:prefLabel "ElectricResistorModel"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2
 :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_27c5d8c6_8af7_4d63_beb1_ec37cd8b3fa3 ,
@@ -350,6 +356,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "MassFluxTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
+:EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
+                                           skos:prefLabel "ElectricCapacitorModel"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_65c24b42_8074_434b_99ba_7c50cded4149
 :EMMO_65c24b42_8074_434b_99ba_7c50cded4149 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3c4680d5_f597_4d8f_994f_d93caa71193c ;
@@ -381,7 +393,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1
 :EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_c5ddfdba_c074_4aa4_ad6b_1ac4942d300d ,
+                                           rdfs:subClassOf :EMMO_98ada9d8_f1c8_4f13_99b5_d890f5354152 ,
                                                            [ rdf:type owl:Class ;
                                                              owl:unionOf ( :EMMO_04f2a2d5_e799_4692_a654_420e76f5acc1
                                                                            :EMMO_3c218fbe_60c9_4597_8bcf_41eb1773af1f
@@ -508,6 +520,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ChemicalSpeciesSourceTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783
+:EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
+                                           skos:prefLabel "WarburgElementModel"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
 :EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ,
@@ -627,6 +645,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Discretization"@en .
 
 
+###  http://emmo.info/emmo#EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623
+:EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
+                                           skos:prefLabel "ElectricInductorModel"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79
 :EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0466becd_3e08_436f_8412_e2eedbedfd39 ,
@@ -645,6 +669,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Relates the diffusive mass flux to the gradient of the concentration."@en ;
                                            rdfs:comment "J = -D*grad(c)" ;
                                            skos:prefLabel "DiffusionMassFluxEquation"@en .
+
+
+###  http://emmo.info/emmo#EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2
+:EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
+                                           skos:prefLabel "EquivalentCircuitModelElementary"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
@@ -786,36 +816,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The current through a conductor between two points is directly proportional to the voltage across the two points."@en ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Ohm%27s_law"@en ;
                                            skos:prefLabel "OhmsLaw"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
-:EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
-                                           skos:prefLabel "ElectricResistorModel"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
-:EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
-                                           skos:prefLabel "ElectricCapacitorModel"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783
-:EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
-                                           skos:prefLabel "WarburgElementModel"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623
-:EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
-                                           skos:prefLabel "ElectricInductorModel"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2
-:EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
-                                           skos:prefLabel "EquivalentCircuitModelElementary"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
