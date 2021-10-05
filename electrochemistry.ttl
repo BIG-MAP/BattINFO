@@ -113,6 +113,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
                                                              owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
                                                            ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electrode"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electronically conductive part in electric contact with a medium of lower electronic  conductivity and intended to perform one or more of the functions of emitting charge carriers to or receiving charge carriers from that medium or to establish an electric field in that medium.
@@ -166,6 +175,12 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell in which the predominant reaction mechanisms at each electrode are different (e.g. conversion & intercalation)."@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Zinc-ion cell" ;
                                            skos:prefLabel "HybridCell"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
+:EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           skos:prefLabel "Potentiometer"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_1375560e_dec2_491c_93ac_613a1d905008
@@ -253,12 +268,31 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonBridge"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_22725105_c941_4b14_a4a2_fcb627958607
+:EMMO_22725105_c941_4b14_a4a2_fcb627958607 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Instrument which controls the electric current between the working electrode and the auxiliary electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Galvanostat"@en ;
+                                           skos:altLabel "Amperostat"@en ;
+                                           skos:prefLabel "Galvanostat"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af
 :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is ionic."@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Electrolyte"@en ;
                                            skos:prefLabel "IonicSubcomponent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_279ecc9f_bfbc_4108_ae40_3c1c0f735e60
+:EMMO_279ecc9f_bfbc_4108_ae40_3c1c0f735e60 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           skos:altLabel "FRA"@en ,
+                                                         "FrequencyResponseAnalyzer"@en ;
+                                           skos:prefLabel "FrequencyResponseAnalyser"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_2a40b878_7d09_49db_91b2_d0ee30192284
@@ -848,6 +882,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "CounterElectrode"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_89ff4fa5_142f_49ec_bfe8_117a38648ed8
+:EMMO_89ff4fa5_142f_49ec_bfe8_117a38648ed8 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           skos:prefLabel "MeasuringCell"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_8b40856f_1ca2_4137_9616_7fb624671909
 :EMMO_8b40856f_1ca2_4137_9616_7fb624671909 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 ;
@@ -988,12 +1028,34 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Any process either caused or accompanied by the passage of an electric current and involving in most cases the transfer of electrons between two substances.
 
 Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemical reaction. Encyclopedia Britannica. https://www.britannica.com/science/electrochemical-reaction"""@en ,
                                                                                           "Electrochemical reactions occur at electrochemical interfaces."@en ;
                                            skos:prefLabel "ElectrochemicalReaction"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
+:EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Measuring instrument [VIM 3.1] for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Potentiostat"@en ;
+                                           skos:prefLabel "Potentiostat"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
@@ -1026,6 +1088,17 @@ Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemic
                                                         "These electrodes can easily be chemically modified by the incorporation of reagents (electrocatalysts, redox mediators, complexation agents, enzymes, etc.) and by the attachment of micro- or nanoparticles to prepare electrochemical sensors for analytical applications."@en ;
                                            skos:altLabel "CPE"@en ;
                                            skos:prefLabel "CarbonPasteElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_b525a629_a679_464f_bc5b_b49d2fc82686
+:EMMO_b525a629_a679_464f_bc5b_b49d2fc82686 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An electrochemical cell for conductivity measurements.
+
+--A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: http://doi.org/10.1007/978-3-642-29551-5"""@en ;
+                                           rdfs:comment """Formed, in theory, by two 1 cm2 reversible electrodes spaced 1 cm apart, providing a uniform distribution of electrical field. In practice, however, a number
+of other configurations are used."""@en ;
+                                           skos:prefLabel "ConductivityCell"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_b6319c74_d2ce_48c0_a75a_63156776b302
@@ -1384,7 +1457,11 @@ Adapted from:
 ###  http://emmo.info/electrochemistry#EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
 :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_23b866e8-27c6-4fd8-a1d2-6b58ad4445af ,
-                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
+                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
+                                                           ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electrolyte"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A material in which the mobile species are ions and free movement of electrons is blocked.
 
@@ -1410,9 +1487,27 @@ Adapted from:
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Working_electrode"@en ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/W06686"@en ;
-                                           rdfs:comment "If processes of interest occur both at the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or working electrodes."@en ,
+                                           rdfs:comment """An electrode at which a given electrode process is examined.
+
+--A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: doi.org/10.1007/978-3-642-29551-5"""@en ,
+                                                        "If processes of interest occur both at the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or working electrodes."@en ,
+                                                        "Te potential of a working electrode is controlled with respect to the reference electrode."@en ,
                                                         "This term is typically used in voltammetry, polarography, amperometry, and coulometry."@en ;
                                            skos:prefLabel "WorkingElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940
+:EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Voltmeter"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Measuring instrument [VIM 3.1] to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration.
+
+--J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Voltameter"@en ;
+                                           rdfs:comment "Modern instruments for measuring trace water by Karl Fischer titration use the passage of a measured charge to produce iodine from iodide solution. They are known as Karl Fischer coulometers"@en ,
+                                                        "The silver coulometer is a primary reference measurement procedure [VIM 2.8] for charge and current. By weighing the mass of silver deposited in a known time at constant current, the charge and current are calculated from Faraday’s laws of electrolysis"@en ;
+                                           skos:altLabel "Voltameter"@en ;
+                                           skos:prefLabel "Coulometer"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_fe3a6c9a_85b8_4da6_aa4f_71c8de74939e
@@ -1454,70 +1549,10 @@ Adapted from:
                                            skos:prefLabel "NernstEquation"@en .
 
 
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
-:EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           skos:prefLabel "Potentiometer"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_22725105_c941_4b14_a4a2_fcb627958607
-:EMMO_22725105_c941_4b14_a4a2_fcb627958607 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Instrument which controls the electric current between the working electrode and the auxiliary electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Galvanostat"@en ;
-                                           skos:altLabel "Amperostat"@en ;
-                                           skos:prefLabel "Galvanostat"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_279ecc9f_bfbc_4108_ae40_3c1c0f735e60
-:EMMO_279ecc9f_bfbc_4108_ae40_3c1c0f735e60 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           skos:altLabel "FRA"@en ,
-                                                         "FrequencyResponseAnalyzer"@en ;
-                                           skos:prefLabel "FrequencyResponseAnalyser"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_89ff4fa5_142f_49ec_bfe8_117a38648ed8
-:EMMO_89ff4fa5_142f_49ec_bfe8_117a38648ed8 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           skos:prefLabel "MeasuringCell"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
-:EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Measuring instrument [VIM 3.1] for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Potentiostat"@en ;
-                                           skos:prefLabel "Potentiostat"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_b525a629_a679_464f_bc5b_b49d2fc82686
-:EMMO_b525a629_a679_464f_bc5b_b49d2fc82686 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An electrochemical cell for conductivity measurements.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: http://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           rdfs:comment """Formed, in theory, by two 1 cm2 reversible electrodes spaced 1 cm apart, providing a uniform distribution of electrical field. In practice, however, a number
-of other configurations are used."""@en ;
-                                           skos:prefLabel "ConductivityCell"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940
-:EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Voltmeter"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Measuring instrument [VIM 3.1] to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration.
-
---J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Voltameter"@en ;
-                                           rdfs:comment "Modern instruments for measuring trace water by Karl Fischer titration use the passage of a measured charge to produce iodine from iodide solution. They are known as Karl Fischer coulometers"@en ,
-                                                        "The silver coulometer is a primary reference measurement procedure [VIM 2.8] for charge and current. By weighing the mass of silver deposited in a known time at constant current, the charge and current are calculated from Faraday’s laws of electrolysis"@en ;
-                                           skos:altLabel "Voltameter"@en ;
-                                           skos:prefLabel "Coulometer"@en .
+###  http://emmo.info/electrochemistry/electrochemistry#EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
+:EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
+                                           skos:prefLabel "ChargeCarrierIon"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
