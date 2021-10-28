@@ -305,6 +305,18 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "IonBridge"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706
+:EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A good electron conductor support designed to transfer electrons from the external circuit to the active materials of the cell.
+
+--A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a """Copper foil
+Aluminum foil"""@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Current_collector"@en ;
+                                           skos:prefLabel "CurrentCollector"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_22725105_c941_4b14_a4a2_fcb627958607
 :EMMO_22725105_c941_4b14_a4a2_fcb627958607 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
@@ -878,12 +890,11 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
+                                                             owl:someValuesFrom :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+                                                             owl:someValuesFrom :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
                                                            ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-01"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A system containing two electrodes that allow transport of electrons, separated by an electrolyte that allows movement of ions but blocks movement of electrons.
@@ -893,6 +904,15 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            rdfs:comment """Composite system in which the supplied electric energy mainly produces chemical reactions or, conversely, in which the energy released by chemical reactions is mainly delivered by the system as electric energy.
 
 --IEC60050"""@en ,
+                                                        """Even though an ElectrochemicalCell has minimum 2 Electrodes we are using the existential restriction
+
+    ElectrochemicalCell hasPart some Electrode 
+
+instead of
+
+    ElectrochemicalCell hasPart min 2 Electrode
+
+The reason for this is that combining the transitivity property of hasPart with cardinality is outside of the DL profile causing reasoners like FaCT++ to fail."""@en ,
                                                         "If processes of interest occur at both the anode and the cathode of a cell (as in differential amperometry or controlled-current potentiometric titration with two indicator electrodes), the cell should be said to comprise two indicator or two working electrodes."@en ,
                                                         "In electrochemistry the term “cell” is commonly qualified to describe the particular device on which electrochemical reactions take place. Examples of galvanic and electrolytic cells are standard cells, electrochemical sensor cells, conductivity cells, spectroelectrochemical cells, fuel cells, batteries, electrochemical measuring cells, and two- and three-electrode cells."@en ,
                                                         """System that consists of at least two electron conductors (electrodes) in contact with ionic conductors (electrolytes).
@@ -1909,18 +1929,6 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706
-:EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A good electron conductor support designed to transfer electrons from the external circuit to the active materials of the cell.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a """Copper foil
-Aluminum foil"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Current_collector"@en ;
-                                           skos:prefLabel "CurrentCollector"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
