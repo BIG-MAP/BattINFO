@@ -17,7 +17,7 @@
 				                 <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
                                      dcterms:abstract """A toplevel battery interface domain ontology based on EMMO.
 
-This file is intended to contain information on the whole battery, and imports the submodules electrode and saltbridge.
+This file is intended to contain information on the whole battery, excluding quantites..
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
                                      dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
