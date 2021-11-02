@@ -13,10 +13,11 @@
 
 <http://emmo.info/BattINFO/battery> rdf:type owl:Ontology ;
                                      owl:versionIRI <http://emmo.info/BattINFO/0.1.0/battery> ;
-                                     owl:imports <http://emmo.info/BattINFO/0.1.0/batteryquantities> ;
+                                     owl:imports <http://emmo.info/BattINFO/0.1.0/batteryquantities> ,
+				                 <http://emmo.info/electrochemistry/0.1.0/electrochemistry> ;
                                      dcterms:abstract """A toplevel battery interface domain ontology based on EMMO.
 
-This file is intended to contain information on the whole battery, and imports the submodules electrode and saltbridge.
+This file is intended to contain information on the whole battery, excluding quantites..
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
                                      dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
@@ -697,6 +698,264 @@ Adapted from:
 :EMMO_e837f389_dca0_4ddf_8435_334c8124fd95 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
                                            skos:prefLabel "VoltageMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2
+:EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
+                                           skos:prefLabel "P3DModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
+:EMMO_149bb81f_e724_42f0_9560_184ff916bdba rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "ReactiveSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
+:EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectronicComponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
+:EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b ;
+                                           skos:prefLabel "SeparatorContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
+:EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectrochemicalCellContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
+:EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectrochemicalSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
+:EMMO_470d4c68_21b3_4405_ac3f_9588c4152437 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 ;
+                                           skos:prefLabel "CurrentCollectorContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f
+:EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
+                                           skos:prefLabel "BatteryEquivalentCircuitModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_52ed5408_da62_483d_97d5_a45755022582
+:EMMO_52ed5408_da62_483d_97d5_a45755022582 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
+                                           skos:altLabel "DFNModel"@en ,
+                                                         "DoyleFullerNewmanModel"@en ,
+                                                         "NewmanModel"@en ;
+                                           skos:prefLabel "P2DModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
+:EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "IonicSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
+:EMMO_679f6984_e0dc_4285_9dbb_429c5779590c rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
+                                           skos:prefLabel "ElectrochemicalEquivalentCircuitModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
+:EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "StructuralSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71
+:EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
+:EMMO_b1921f7b_afac_465a_a275_26f929f7f936 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_52ad5472_29eb_49d5_bff3_bb354a656020
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
+                                                           ] ;
+                                           skos:prefLabel "BatteryContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
+:EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
+                                           skos:prefLabel "ElectrodeContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236
+:EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
+                                           skos:prefLabel "SaltBridgeContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
+:EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_149bb81f_e724_42f0_9560_184ff916bdba ;
+                                           skos:prefLabel "ActiveElectrochemicalMaterialContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
+:EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
+                                           skos:prefLabel "ElectrochemicalContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_e939a312_661c_4b21_9651_06f34659e20a
+:EMMO_e939a312_661c_4b21_9651_06f34659e20a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Randles_circuit"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equivalent electrical circuit that consists of an active electrolyte resistance RS in series with the parallel combination of the double-layer capacitance Cdl and an impedance of a faradaic reaction."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Randles_circuit"@en ;
+                                           skos:prefLabel "RandlesCircuitModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2
+:EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
+                                           skos:prefLabel "P4DModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469
+:EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 ;
+                                           skos:prefLabel "ElectrolyteContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_156ba8ab_6ba8_4270_8056_baad043cf566
+:EMMO_156ba8ab_6ba8_4270_8056_baad043cf566 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system for measuring diffraction patterns and processing the result."@en ;
+                                           skos:prefLabel "DiffractionMeasuringSystem"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_17629d79_ab43_4edf_8e83_6806954d2f84
+:EMMO_17629d79_ab43_4edf_8e83_6806954d2f84 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "SEMMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38
+:EMMO_1f5fd244_fdf5_4f89_9dd1_ef0b4dc37d38 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "TEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6
+:EMMO_26c8cdee_c399_4a88_ad52_d4b5ed5f47b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           skos:prefLabel "LightMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_37113041_eb70_47d8_997d_abcd531ddbc2
+:EMMO_37113041_eb70_47d8_997d_abcd531ddbc2 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "FIBSEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f
+:EMMO_5c27cc87_6dc4_440f_91e7_e3b164880f6f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           skos:prefLabel "XrayCTScanner"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_61cfef93_5662_462e_acbf_3c530ab933b1
+:EMMO_61cfef93_5662_462e_acbf_3c530ab933b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Transmission_electron_microscopy"@en ;
+                                           skos:altLabel "TEM"@en ;
+                                           skos:prefLabel "TransmissionElectronMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6
+:EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electron_microscope"@en ;
+                                           skos:prefLabel "ElectronMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_83288903_7611_4177_ba6d_f649826c43df
+:EMMO_83288903_7611_4177_ba6d_f649826c43df rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a ;
+                                           skos:altLabel "FocusedIonBeamScanningElectronMicroscope"@en ;
+                                           skos:prefLabel "FIBSEM"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a503ef5c_3eb0_49a3_b586_eaad85c9ab46
+:EMMO_a503ef5c_3eb0_49a3_b586_eaad85c9ab46 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An instrument that measures the diffraction of an electromagnetic wave (originating from a source) through a sample as seen by a detector."@en ;
+                                           skos:prefLabel "DiffractionInstrument"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393
+:EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           skos:prefLabel "Microscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a
+:EMMO_c38b5dc6_b3b4_4541_90cd_5e1122e74d7a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7a2bf0a7_d3cb_40ec_b335_11902075cad6 ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Scanning_electron_microscope"@en ;
+                                           skos:altLabel "SEM"@en ;
+                                           skos:prefLabel "ScanningElectronMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_d2a90a0b_fa4b_4979_9ba6_a093ec0ec5f3
+:EMMO_d2a90a0b_fa4b_4979_9ba6_a093ec0ec5f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "TEMMeasurementResult"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f02fdb1d_9b43_4104_83a3_5d5faf2ef0ed
+:EMMO_f02fdb1d_9b43_4104_83a3_5d5faf2ef0ed rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "SEMMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2
+:EMMO_f13c7e60_c105_4e65_bcf7_505c282cf2f2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a559acf4_ed75_4aa8_9a72_5f99d2b47393 ;
+                                           skos:prefLabel "IonBeamMicroscope"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f2670198_4e9b_4ca6_8134_8c570791ce47
+:EMMO_f2670198_4e9b_4ca6_8134_8c570791ce47 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "XrayCTMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_f93da1c4_bafc_4699_aa1a_791115191b98
+:EMMO_f93da1c4_bafc_4699_aa1a_791115191b98 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "XrayCTMeasurementResult"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
