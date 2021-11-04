@@ -51,21 +51,23 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryQuantity"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_25e20915_c35d_4bee_ad31_736235a79780
+:EMMO_25e20915_c35d_4bee_ad31_736235a79780 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "DRate"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83
 :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
                                            skos:prefLabel "ConventionalBatteryProperty"@en .
 
 
-###  http://emmo.info/BattINFO/batteryquantities#EMMO_25e20915_c35d_4bee_ad31_736235a79780
-:EMMO_25e20915_c35d_4bee_ad31_736235a79780 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
-                                           skos:prefLabel "DRate"@en .
-
-
-###  http://emmo.info/BattINFO/batteryquantities#EMMO_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee
+###  http://emmo.info/BattINFO#EMMO_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee
 :EMMO_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "CRate"@en .
 
 
