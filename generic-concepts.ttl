@@ -149,6 +149,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "IonicSpecies"@en .
 
 
+###  http://emmo.info/emmo#EMMO_06700060_1326_4478_be51_d8037b986230
+:EMMO_06700060_1326_4478_be51_d8037b986230 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_66305f3d_6eef_448a_953d_17abb87788ae ;
+                                           skos:prefLabel "FiniteElementMesh"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
 :EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
@@ -184,6 +190,24 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FicksFirstLaw"@en .
 
 
+###  http://emmo.info/emmo#EMMO_1b8d1cf9_7b79_4de2_b9ba_3fb7b02a36f0
+:EMMO_1b8d1cf9_7b79_4de2_b9ba_3fb7b02a36f0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_c611d72b_0921_4c93_ab42_43b30084283e
+                                                           ] ;
+                                           skos:prefLabel "FiniteVolumeCell"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
 :EMMO_1c1ec02e_4def_4979_aff9_572c06a95391 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7684ddff_d99b_405d_aad2_90e830b8403c ;
@@ -204,7 +228,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b
 :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
+                                           rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
+                                                           ] ;
                                            skos:altLabel "AccumulationEquation"@en ;
                                            skos:prefLabel "AccumulationTerm"@en .
 
@@ -249,6 +277,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "LawOfMassAction"@en .
 
 
+###  http://emmo.info/emmo#EMMO_489bd765_c35e_48dc_a9e8_dbcda684642b
+:EMMO_489bd765_c35e_48dc_a9e8_dbcda684642b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Normal_(geometry)"@en ;
+                                           skos:prefLabel "DiscretizationFaceNormal"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_4937ad81_eeb8_4cd9_a02f_53e0644e2f02
 :EMMO_4937ad81_eeb8_4cd9_a02f_53e0644e2f02 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
@@ -273,6 +308,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_4a9030bd_a1b2_45ac_909b_f98257c2b355 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b ;
                                            skos:prefLabel "ChargeAccumulationTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f
+:EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
+                                           skos:prefLabel "DiscretizationElementary"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_50c5d440_683c_400f_909e_b03c0327de9c
@@ -336,11 +377,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ConvectionHeatFluxTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_66305f3d_6eef_448a_953d_17abb87788ae
+:EMMO_66305f3d_6eef_448a_953d_17abb87788ae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
+                                           skos:prefLabel "Mesh"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
 :EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy per unit volume."@en ;
-                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L-1 M+1 I0 Θ0 N0 J0" ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "EnergyDensity"@en .
 
 
@@ -363,7 +410,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_6adc3c54_96ea_4319_b7b6_2af3bfc10c33
 :EMMO_6adc3c54_96ea_4319_b7b6_2af3bfc10c33 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
+                                           rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_cdbf555a_6352_40b1_af1d_89eff215d506
+                                                           ] ;
                                            skos:prefLabel "FiniteVolumeModel"@en .
 
 
@@ -372,6 +423,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            rdfs:subClassOf :EMMO_5bc88245_45a1_4163_b640_f8320cc780de ;
                                            rdfs:comment "J = -K*grad(p)"@en ;
                                            skos:prefLabel "ConvectionMassFluxEquation"@en .
+
+
+###  http://emmo.info/emmo#EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540
+:EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3e309118_e8b7_4021_80f4_642d2df65d94 ,
+                                                           :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
+                                                           ] ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Edge_(geometry)"@en ;
+                                           skos:prefLabel "DiscretizationEdge"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
@@ -386,7 +450,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_70cbd515_d278_4d47_9631_4b48931cc83b
 :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
+                                           rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_c611d72b_0921_4c93_ab42_43b30084283e
+                                                           ] ;
                                            skos:altLabel "FluxEquation"@en ;
                                            skos:prefLabel "FluxTerm"@en .
 
@@ -506,6 +574,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalConductivity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
+:EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_39362460_2a97_4367_8f93_0418c2ac9a08 ,
+                                                           :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ;
+                                           skos:prefLabel "DiscretizationNode"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310
 :EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
@@ -545,19 +620,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ConductionHeatFluxTerm"@en .
 
 
-###  http://emmo.info/emmo#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
-:EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-05"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance dissolved into another substance.
-
---IEC60050"""@en ;
-                                           skos:prefLabel "Solute"@en .
-
-
 ###  http://emmo.info/emmo#EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339
 :EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
+                                           rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_06700060_1326_4478_be51_d8037b986230
+                                                           ] ;
                                            skos:prefLabel "FiniteElementModel"@en .
 
 
@@ -572,19 +641,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Cation"@en .
 
 
+###  http://emmo.info/emmo#EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c
+:EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4ce76d7f_03f8_45b6_9003_90052a79bfaa ;
+                                           skos:prefLabel "Discretization"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623
 :EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
                                            skos:prefLabel "ElectricInductorModel"@en .
-
-
-###  http://emmo.info/emmo#EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93
-:EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """In chemistry and physics ‘interface’ means the two-dimensional plane separating two phases.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           skos:prefLabel "Interface"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79
@@ -624,9 +690,28 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5
 :EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
+                                           rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
+                                                           ] ;
                                            skos:altLabel "SourceEquation"@en ;
                                            skos:prefLabel "SourceTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_c611d72b_0921_4c93_ab42_43b30084283e
+:EMMO_c611d72b_0921_4c93_ab42_43b30084283e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_489bd765_c35e_48dc_a9e8_dbcda684642b
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540
+                                                           ] ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Face_(geometry)"@en ;
+                                           skos:prefLabel "DiscretizationFace"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_c64231ab_d281_4263_b470_52012f59d076
@@ -652,6 +737,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 - IUPAC Gold Book"""@en ;
                                            skos:prefLabel "Anion"@en .
+
+
+###  http://emmo.info/emmo#EMMO_cdbf555a_6352_40b1_af1d_89eff215d506
+:EMMO_cdbf555a_6352_40b1_af1d_89eff215d506 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_66305f3d_6eef_448a_953d_17abb87788ae ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_1b8d1cf9_7b79_4de2_b9ba_3fb7b02a36f0
+                                                           ] ;
+                                           skos:prefLabel "FiniteVolumeMesh"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_d0592008_1de9_4ce1_99a4_3c38547c240f
@@ -696,13 +791,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "HeatSourceTerm"@en .
 
 
-###  http://emmo.info/emmo#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
-:EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Substance into which another substance is dissolved."@en ;
-                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Solvent"@en ;
-                                           skos:prefLabel "Solvent"@en .
+###  http://emmo.info/emmo#EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8
+:EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
+                                           skos:prefLabel "ControlVolume"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
@@ -730,6 +822,34 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The current through a conductor between two points is directly proportional to the voltage across the two points."@en ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Ohm%27s_law"@en ;
                                            skos:prefLabel "OhmsLaw"@en .
+
+
+###  http://emmo.info/emmo/generic-concepts#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
+:EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-05"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance dissolved into another substance.
+
+--IEC60050"""@en ;
+                                           skos:prefLabel "Solute"@en .
+
+
+###  http://emmo.info/emmo/generic-concepts#EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93
+:EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """In chemistry and physics ‘interface’ means the two-dimensional plane separating two phases.
+
+--A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
+                                           skos:prefLabel "Interface"@en .
+
+
+###  http://emmo.info/emmo/generic-concepts#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
+:EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Substance into which another substance is dissolved."@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Solvent"@en ;
+                                           skos:prefLabel "Solvent"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

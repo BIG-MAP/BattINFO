@@ -987,10 +987,10 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                                         """Substance that undergoes a change of oxidation state, or whose chemical bonds are broken or formed, in a charge-transfer reaction at an electrode.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           skos:altLabel "ActiveElectrochemicalMaterial"@en ,
+                                           skos:altLabel "ActiveMaterial"@en ,
                                                          "ElectroactiveSubstance"@en ,
                                                          "ElectrochemicallyActiveMaterial"@en ;
-                                           skos:prefLabel "ActiveMaterial"@en .
+                                           skos:prefLabel "ActiveElectrochemicalMaterial"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
