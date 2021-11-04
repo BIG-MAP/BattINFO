@@ -201,47 +201,7 @@ Adapted from:
 ###  http://emmo.info/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
 :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
-                                                           emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_3219d87f_7800_46b2_bb88_82bda64d3f39
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_50f5f611_ac42_4d78_8d04_18f17d398f39
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_52ca57f1_752c_4408_afb4_1706541a404c
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_62b8109a_0cba_4a19_99f3_625a8e81e73c
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_94b51e34_c180_48a3_bb66_6ff84f4fc5f4
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_b2ac9963_30d9_4263_a246_5d2bbedddfaf
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_b3595038_bd09_4931_aa89_016e14f478d3
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_bfce6262_3d92_40d8_bbe8_09031fb82a2c
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_f7bdf711_4edf_448d_8044_ef713148418e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_fff4cdda_8051_4405_a457_d009cde4836d
-                                                           ] ;
+                                                           emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices.
 
