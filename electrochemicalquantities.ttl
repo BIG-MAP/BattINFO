@@ -43,6 +43,26 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
+###  http://emmo.info/electrochemistry#EMMO_0139e120_c0b6_4657_8504_5fb39308fe31
+:EMMO_0139e120_c0b6_4657_8504_5fb39308fe31 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "TheoreticalEnergy"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_057f3082_960a_4c68_8708_cbef88584e9f
+:EMMO_057f3082_960a_4c68_8708_cbef88584e9f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
+                                           skos:prefLabel "NominalElectrochemicalProperty"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa
+:EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalCycleLife"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_07e219c3_890f_488f_bd96_bee8e445d764
 :EMMO_07e219c3_890f_488f_bd96_bee8e445d764 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -65,6 +85,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-2 M-1 I+2 Θ0 N0 J0" ;
                                            rdfs:comment "Inverse of InternalResistance."@en ;
                                            skos:prefLabel "InternalConductance"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_0d0ca626_acfc_42df_a4d6_bfd124c9dc0e
+:EMMO_0d0ca626_acfc_42df_a4d6_bfd124c9dc0e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           :EMMO_fb0b984f_5704_4716_9aaf_19235b032da3 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalSpecificEnergy"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_129926b6_fc30_441d_b359_29b44c988514
@@ -144,6 +172,14 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "Overpotential"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136
+:EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalVoltage"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
 :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -188,6 +224,14 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            rdfs:comment "I_{m}"@en ,
                                                         "The sign convention regarding current is such that the migration current is positive for the oxida- tion of a cation or the reduction of an anion and is negative for the reduction of a cation or for the oxidation of an anion. Hence, the migration current may either increase or decrease the total current observed. The migration current approaches zero as the transport number of the electroactive sub- stance is decreased by increasing the concentration of supporting electrolyte, and hence the conduc- tivity of the solution."@en ;
                                            skos:prefLabel "MigrationCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_22fa1067_3964_4efd_8973_cc91eeb27451
+:EMMO_22fa1067_3964_4efd_8973_cc91eeb27451 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
+                                           skos:prefLabel "MinOperatingTemperature"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c
@@ -263,6 +307,14 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "SquareWaveCurrent"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_374878d4_5682_4bef_a8cd_3b4ff6d87931
+:EMMO_374878d4_5682_4bef_a8cd_3b4ff6d87931 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalEnergy"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05
 :EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -276,6 +328,22 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            rdfs:comment "I_{p}"@en ,
                                                         "Since the concentration of an electroactive substance at the electrode-solution interface decreases mono- tonically, the faradaic current due to its electrooxidation or electroreduction increases monotonically with time because of the increasing concentration gradient of the electroactive substance, the concentra- tion of which remains constant in the bulk. The maximum current value is passed when the transport rate of electroactive substance to the electrode-solution interface starts to be lower than the rate at which it is removed by reaction at the electrode. The result of these two competing processes leads to the peak- shaped I-E dependence."@en ;
                                            skos:prefLabel "PeakCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_3e54f9e3_a31d_4821_9bfb_ef953a42c35b
+:EMMO_3e54f9e3_a31d_4821_9bfb_ef953a42c35b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "MaxPulseDischargeCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_458c65dc_9331_473f_ba96_0bf244ec5e98
+:EMMO_458c65dc_9331_473f_ba96_0bf244ec5e98 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 ,
+                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "TheoreticalSpecificCapacity"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
@@ -318,6 +386,14 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ElectrochemicalTransportQuantity"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9
+:EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-3 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalVolume"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc
 :EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
@@ -334,6 +410,14 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Amount of energy stored in a physical object."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "StoredEnergy"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_534dd59c_904c_45d9_8550_ae9d2eb6bbc9
+:EMMO_534dd59c_904c_45d9_8550_ae9d2eb6bbc9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:prefLabel "DischargeCutoffVoltage"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347
@@ -355,6 +439,14 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            rdfs:comment "ISO recommends the name current fraction of ions B."@en ;
                                            skos:altLabel "TransferrenceNumber"@en ;
                                            skos:prefLabel "TransportNumber"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02
+:EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-2 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalInternalResistance"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00
@@ -424,6 +516,22 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "ElectronicConductivity"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932
+:EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "ChargeCutoffCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_6dcd5baf_58cd_43f5_a692_51508e036c88
+:EMMO_6dcd5baf_58cd_43f5_a692_51508e036c88 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
+                                           skos:prefLabel "ChargeCutoffVoltage"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_740d5817_3fa7_464a_90c3_55552e51a3df
 :EMMO_740d5817_3fa7_464a_90c3_55552e51a3df rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
@@ -432,6 +540,14 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ;
                                            skos:prefLabel "ReactionQuotient"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_74293727_07f7_4b7b_9e23_bea328144ad7
+:EMMO_74293727_07f7_4b7b_9e23_bea328144ad7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
+                                           skos:prefLabel "MaxOperatingTemperature"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_791c1915_a791_4450_acd8_7f94764743b5
@@ -497,6 +613,22 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            skos:prefLabel "ElectrochemicalStabilityLimit"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df
+:EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           emmo:EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L-1 M+1 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalEnergyDensity"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a
+:EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalCapacity"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b
 :EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2a2f59b7_aa16_40aa_9c8b_0de8a2720456 ;
@@ -542,6 +674,14 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01230" ;
                                            skos:prefLabel "ConcentrationOverpotential"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0
+:EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalShelfLife"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
@@ -647,6 +787,23 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            skos:prefLabel "ConventionalElectrochemicalProperty"@en .
 
 
+###  http://emmo.info/electrochemistry#EMMO_b7781ebc_90a7_4f19_997f_aed28dee1b01
+:EMMO_b7781ebc_90a7_4f19_997f_aed28dee1b01 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
+                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:altLabel "TheoreticalChargeCapacity"@en ;
+                                           skos:prefLabel "TheoreticalCapacity"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_ba7ac581_0e13_4815_b888_013c378932f5
+:EMMO_ba7ac581_0e13_4815_b888_013c378932f5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
+                                           skos:prefLabel "MaxContinuousDischargeCurrent"@en .
+
+
 ###  http://emmo.info/electrochemistry#EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
 :EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
@@ -684,6 +841,14 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            rdfs:comment "Because the working potential range is a function of a specific electrode/electrolyte system, only approximate ranges can be given for generic systems."@en ,
                                                         "The working potential range is usually limited by the stability of the electrolyte, itself affected by the catalytic properties of the electrode, or by the stability of the electrode."@en ;
                                            skos:prefLabel "WorkingPotentialRange"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4
+:EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
+                                                           emmo:EMMO_04cf0295_3e8f_4693_a87f_3130d125cf05 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+1 M+1 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalWeight"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf
@@ -757,6 +922,14 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03532"@en ;
                                            rdfs:comment "A limiting current is reached when the overpotential is sufficiently large that the faradaic current is deter- mined solely by the ability to supply electroactive species by mass transport. A limiting current is there- fore independent of applied potential over a corresponding finite potential range. A limiting current may have the character of an adsorption, catalytic, diffusion, or kinetic current, and may include a migration current."@en ;
                                            skos:prefLabel "LimitingCurrent"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_d5dc0c1d_0926_4268_89f0_4519a326eabc
+:EMMO_d5dc0c1d_0926_4268_89f0_4519a326eabc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
+                                                           emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "MaxPulseDischargeTime"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3
@@ -858,180 +1031,7 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "ElectrodeGeometricSurfaceArea"@en .
 
 
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_0139e120_c0b6_4657_8504_5fb39308fe31
-:EMMO_0139e120_c0b6_4657_8504_5fb39308fe31 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "TheoreticalEnergy"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_057f3082_960a_4c68_8708_cbef88584e9f
-:EMMO_057f3082_960a_4c68_8708_cbef88584e9f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           skos:prefLabel "NominalElectrochemicalProperty"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa
-:EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalCycleLife"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_0d0ca626_acfc_42df_a4d6_bfd124c9dc0e
-:EMMO_0d0ca626_acfc_42df_a4d6_bfd124c9dc0e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           :EMMO_fb0b984f_5704_4716_9aaf_19235b032da3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalSpecificEnergy"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136
-:EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalVoltage"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_22fa1067_3964_4efd_8973_cc91eeb27451
-:EMMO_22fa1067_3964_4efd_8973_cc91eeb27451 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
-                                           skos:prefLabel "MinOperatingTemperature"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_374878d4_5682_4bef_a8cd_3b4ff6d87931
-:EMMO_374878d4_5682_4bef_a8cd_3b4ff6d87931 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalEnergy"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_3e54f9e3_a31d_4821_9bfb_ef953a42c35b
-:EMMO_3e54f9e3_a31d_4821_9bfb_ef953a42c35b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
-                                           skos:prefLabel "MaxPulseDischargeCurrent"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_458c65dc_9331_473f_ba96_0bf244ec5e98
-:EMMO_458c65dc_9331_473f_ba96_0bf244ec5e98 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 ,
-                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
-                                           skos:prefLabel "TheoreticalSpecificCapacity"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9
-:EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-3 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalVolume"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_534dd59c_904c_45d9_8550_ae9d2eb6bbc9
-:EMMO_534dd59c_904c_45d9_8550_ae9d2eb6bbc9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           skos:prefLabel "DischargeCutoffVoltage"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02
-:EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-2 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalInternalResistance"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932
-:EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
-                                           skos:prefLabel "ChargeCutoffCurrent"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_6dcd5baf_58cd_43f5_a692_51508e036c88
-:EMMO_6dcd5baf_58cd_43f5_a692_51508e036c88 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
-                                           skos:prefLabel "ChargeCutoffVoltage"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_74293727_07f7_4b7b_9e23_bea328144ad7
-:EMMO_74293727_07f7_4b7b_9e23_bea328144ad7 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
-                                           skos:prefLabel "MaxOperatingTemperature"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df
-:EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           emmo:EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L-1 M+1 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalEnergyDensity"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a
-:EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalCapacity"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0
-:EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalShelfLife"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_b7781ebc_90a7_4f19_997f_aed28dee1b01
-:EMMO_b7781ebc_90a7_4f19_997f_aed28dee1b01 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
-                                                           :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           skos:altLabel "T+1 L0 M0 I+1 Θ0 N0 J0"@en ,
-                                                         "TheoreticalChargeCapacity"@en ;
-                                           skos:prefLabel "TheoreticalCapacity"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_ba7ac581_0e13_4815_b888_013c378932f5
-:EMMO_ba7ac581_0e13_4815_b888_013c378932f5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
-                                           skos:prefLabel "MaxContinuousDischargeCurrent"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4
-:EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           emmo:EMMO_04cf0295_3e8f_4693_a87f_3130d125cf05 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+1 M+1 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "NominalWeight"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_d5dc0c1d_0926_4268_89f0_4519a326eabc
-:EMMO_d5dc0c1d_0926_4268_89f0_4519a326eabc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ,
-                                                           emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
-                                           skos:prefLabel "MaxPulseDischargeTime"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemicalquantities#EMMO_fb0b984f_5704_4716_9aaf_19235b032da3
+###  http://emmo.info/electrochemistry#EMMO_fb0b984f_5704_4716_9aaf_19235b032da3
 :EMMO_fb0b984f_5704_4716_9aaf_19235b032da3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
