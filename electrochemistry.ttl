@@ -114,6 +114,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
@@ -278,6 +282,12 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:altLabel "ChemicalEquation"@en ,
                                                          "ChemicalReactionEquation"@en ;
                                            skos:prefLabel "StoichiometricEquation"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_1f7ba79e_3aaf_47f4_9281_53714416ea26
+:EMMO_1f7ba79e_3aaf_47f4_9281_53714416ea26 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_82fef384_8eec_4765_b707_5397054df594 ;
+                                           skos:prefLabel "CarbonBlack"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_1fc5642c_b7b2_43bf_ad20_f96001db8800
@@ -991,10 +1001,10 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                                         """Substance that undergoes a change of oxidation state, or whose chemical bonds are broken or formed, in a charge-transfer reaction at an electrode.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           skos:altLabel "ActiveMaterial"@en ,
+                                           skos:altLabel "ActiveElectrochemicalMaterial"@en ,
                                                          "ElectroactiveSubstance"@en ,
                                                          "ElectrochemicallyActiveMaterial"@en ;
-                                           skos:prefLabel "ActiveElectrochemicalMaterial"@en .
+                                           skos:prefLabel "ActiveMaterial"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
@@ -1041,6 +1051,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A reference electrode based on the reaction between elemental mercury and mercury(I) chloride."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Saturated_calomel_electrode"@en ;
                                            skos:prefLabel "SaturatedCalomelElectrode"@en .
+
+
+###  http://emmo.info/electrochemistry#EMMO_82fef384_8eec_4765_b707_5397054df594
+:EMMO_82fef384_8eec_4765_b707_5397054df594 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd ;
+                                           skos:prefLabel "ConductiveAdditive"@en .
 
 
 ###  http://emmo.info/electrochemistry#EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306
@@ -1937,18 +1953,6 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_1f7ba79e_3aaf_47f4_9281_53714416ea26
-:EMMO_1f7ba79e_3aaf_47f4_9281_53714416ea26 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_82fef384_8eec_4765_b707_5397054df594 ;
-                                           skos:prefLabel "CarbonBlack"@en .
-
-
-###  http://emmo.info/electrochemistry/electrochemistry#EMMO_82fef384_8eec_4765_b707_5397054df594
-:EMMO_82fef384_8eec_4765_b707_5397054df594 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd ;
-                                           skos:prefLabel "ConductiveAdditive"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
