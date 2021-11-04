@@ -620,6 +620,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ConductionHeatFluxTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
+:EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-05"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance dissolved into another substance.
+
+--IEC60050"""@en ;
+                                           skos:prefLabel "Solute"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339
 :EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ,
@@ -651,6 +661,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
                                            skos:prefLabel "ElectricInductorModel"@en .
+
+
+###  http://emmo.info/emmo#EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93
+:EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """In chemistry and physics ‘interface’ means the two-dimensional plane separating two phases.
+
+--A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
+                                           skos:prefLabel "Interface"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79
@@ -797,6 +816,15 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ControlVolume"@en .
 
 
+###  http://emmo.info/emmo#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
+:EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Substance into which another substance is dissolved."@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Solvent"@en ;
+                                           skos:prefLabel "Solvent"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
 :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
@@ -822,34 +850,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The current through a conductor between two points is directly proportional to the voltage across the two points."@en ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Ohm%27s_law"@en ;
                                            skos:prefLabel "OhmsLaw"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
-:EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-05"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance dissolved into another substance.
-
---IEC60050"""@en ;
-                                           skos:prefLabel "Solute"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93
-:EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """In chemistry and physics ‘interface’ means the two-dimensional plane separating two phases.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           skos:prefLabel "Interface"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
-:EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Substance into which another substance is dissolved."@en ;
-                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Solvent"@en ;
-                                           skos:prefLabel "Solvent"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
