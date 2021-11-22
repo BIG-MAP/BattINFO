@@ -72,10 +72,22 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "SerialNumber"@en .
 
 
+###  http://emmo.info/BattINFO#EMMO_14113a11_a342_4bdd_a6b3_8a279ce9d49c
+:EMMO_14113a11_a342_4bdd_a6b3_8a279ce9d49c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
+                                           skos:prefLabel "LNMO"@en .
+
+
 ###  http://emmo.info/BattINFO#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
 :EMMO_149bb81f_e724_42f0_9560_184ff916bdba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
                                            skos:prefLabel "ReactiveSubcomponentContinuumModel"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce
+:EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "BatteryMeasurementResult"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
@@ -88,6 +100,24 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "PouchCellHousing"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28
+:EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6c481323_498b_42c6_915a_53490f409430 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b
+                                                           ] ;
+                                           skos:prefLabel "BatteryCycling"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_1d3ad695_4a44_47e7_ae3b_7f8a37a6ac6c
@@ -104,6 +134,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_967d9455_ad6d_4266_a0ca_170f5e8b11b8
                                                            ] ;
                                            skos:prefLabel "LithiumIonBatteryElectrode"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
+:EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce ;
+                                           skos:prefLabel "BatteryCyclingMeasurementResult"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
@@ -252,9 +288,25 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
                                                            ] ;
                                            skos:prefLabel "BatteryCell"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_6c481323_498b_42c6_915a_53490f409430
+:EMMO_6c481323_498b_42c6_915a_53490f409430 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "BatteryMeasurement"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_708cc414_2607_4f32_b473_f01aa74962f2
+:EMMO_708cc414_2607_4f32_b473_f01aa74962f2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
+                                           skos:prefLabel "LNO"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
@@ -308,6 +360,12 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
                                            skos:altLabel "LithiumNickelManganeseCobaltOxide"@en ;
                                            skos:prefLabel "NMC"@en .
+
+
+###  http://emmo.info/BattINFO#EMMO_7f423927_944e_4503_8e79_1518c4d7cf56
+:EMMO_7f423927_944e_4503_8e79_1518c4d7cf56 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 ;
+                                           skos:prefLabel "NMC622"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_7fc6941c_0c7b_4d29_bb75_ddcb884156dd
@@ -372,7 +430,8 @@ Adapted from:
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
                                                            ] ;
-                                           skos:prefLabel "CylindricalBatteryCell"@en .
+                                           skos:altLabel "CylindricalBatteryCell"@en ;
+                                           skos:prefLabel "CylindricalCell"@en .
 
 
 ###  http://emmo.info/BattINFO#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
@@ -524,58 +583,49 @@ Adapted from:
                                            skos:prefLabel "NMC111"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_14113a11_a342_4bdd_a6b3_8a279ce9d49c
-:EMMO_14113a11_a342_4bdd_a6b3_8a279ce9d49c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
-                                           skos:prefLabel "LNMO"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce
-:EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
-                                           skos:prefLabel "BatteryMeasurementResult"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28
-:EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c481323_498b_42c6_915a_53490f409430 ,
+###  http://emmo.info/BattINFO/battery#EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a
+:EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60
                                                            ] ;
-                                           skos:prefLabel "BatteryCycling"@en .
+                                           skos:altLabel "PouchBatteryCell"@en ;
+                                           skos:prefLabel "PouchCell"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
-:EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce ;
-                                           skos:prefLabel "BatteryCyclingMeasurementResult"@en .
+###  http://emmo.info/BattINFO/battery#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
+:EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc
+                                                           ] ;
+                                           skos:altLabel "SwagelokBatteryCell"@en ;
+                                           skos:prefLabel "SwagelokCell"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_6c481323_498b_42c6_915a_53490f409430
-:EMMO_6c481323_498b_42c6_915a_53490f409430 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           skos:prefLabel "BatteryMeasurement"@en .
+###  http://emmo.info/BattINFO/battery#EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2
+:EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
+                                                           ] ;
+                                           skos:prefLabel "Cylindrical18650Cell"@en .
 
 
-###  http://emmo.info/BattINFO/battery#EMMO_708cc414_2607_4f32_b473_f01aa74962f2
-:EMMO_708cc414_2607_4f32_b473_f01aa74962f2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
-                                           skos:prefLabel "LNO"@en .
-
-
-###  http://emmo.info/BattINFO/battery#EMMO_7f423927_944e_4503_8e79_1518c4d7cf56
-:EMMO_7f423927_944e_4503_8e79_1518c4d7cf56 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c6c9b1e_a7d7_4fc1_aa37_96811f73f633 ;
-                                           skos:prefLabel "NMC622"@en .
+###  http://emmo.info/BattINFO/battery#EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124
+:EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427
+                                                           ] ;
+                                           skos:altLabel "ButtonBatteryCell"@en ,
+                                                         "ButtonCell"@en ,
+                                                         "CoinBatteryCell"@en ;
+                                           skos:prefLabel "CoinCell"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
