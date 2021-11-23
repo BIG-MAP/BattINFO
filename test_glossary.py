@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-
-from emmo import get_ontology
-from emmo.ontology import NoSuchLabelError
+from ontopy import get_ontology
+from ontopy.ontology import NoSuchLabelError
 
 battinfo = get_ontology('battinfo.ttl').load(url_from_catalog=True)
 

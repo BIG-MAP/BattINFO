@@ -11,11 +11,10 @@ pagesdir=${tmpdir}/gh-pages
 # Generate documentation
 ${ontodocdir}/mkdoc.sh
 
-# Check up gh-pages
+# Checkout gh-pages
 if ! [ -d ${pagesdir} ]; then
     git clone --branch=gh-pages --single-branch \
-        git@github.com:BIG-MAP/OntoBATT.git ${pagesdir}
-    cd ${pagesdir}
+        git@github.com:BIG-MAP/BattINFO.git ${pagesdir}
     git config pull.rebase false
 fi
 
