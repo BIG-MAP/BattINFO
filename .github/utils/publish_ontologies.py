@@ -1,14 +1,21 @@
+#!/usr/bin/env python3
 """Publish ontologies to GitHub Pages."""
+from contextlib import redirect_stderr
+from os import devnull as DEVNULL
 from pathlib import Path
 import re
 import shutil
 import sys
 from urllib.error import HTTPError
 
-from ontopy import get_ontology
+# Remove the print statement concerning 'owlready2_optimized'
+# when importing owlready2 (which is imported also in emmo).
+with open(DEVNULL, "w", encoding="utf8") as handle:
+    with redirect_stderr(handle):
+        from ontopy import get_ontology
 
 
-REPO_DIR = Path(__file__).parent.parent.parent.resolve()
+REPO_DIR = Path(__file__).resolve().parent.parent.parent
 PUBLISH_URL = "https://big-map.github.io/BattINFO/ontology"
 VERSION_IRI_REGEX = re.compile(
     r"https?://(?P<domain>[a-zA-Z._-]+)/(?P<path>[a-zA-Z_-]+(/[a-zA-Z_-]+)*)"
@@ -31,7 +38,9 @@ def main() -> None:
 
     publish_dir.mkdir(parents=True, exist_ok=True)
 
+    print("Publishing ontologies:")
     for ontology_file in local_ontologies:
+        print(f"  * {ontology_file.name}")
         ontology = get_ontology(str(ontology_file))
         try:
             ontology.load()
@@ -45,14 +54,13 @@ def main() -> None:
         version_iri_parts = version_iri_match.groupdict()
         version_iri_parts["top_name"] = version_iri_parts["path"].rsplit("/", 1)[-1]
 
-        shutil.copyfile(
-            src=ontology_file,
-            dst=(
-                publish_dir / version_iri_parts["top_name"] / version_iri_parts["version"] / version_iri_parts["name"] / ontology_file.name
-                if version_iri_parts["name"]
-                else publish_dir / version_iri_parts["top_name"] / version_iri_parts["version"] / ontology_file.name
-            ),
+        relative_destination_dir = (
+            Path() / version_iri_parts["top_name"] / version_iri_parts["version"] / version_iri_parts["name"]
+            if version_iri_parts["name"]
+            else Path() / version_iri_parts["top_name"] / version_iri_parts["version"]
         )
+        (publish_dir / relative_destination_dir).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src=ontology_file, dst=publish_dir / relative_destination_dir / ontology_file.name)
 
         if not version_iri.startswith(PUBLISH_URL):
             # Serve ontologies outside the BIG-MAP domain as part of these ontologies.
@@ -63,11 +71,13 @@ def main() -> None:
                 lines = [
                     re.sub(
                         fr"uri=('|\"){ontology_file.name}('|\")",
-                        f"uri=\"{PUBLISH_URL}/{version_iri_parts['top_name']}/{version_iri_parts['version']}{'/' + version_iri_parts['name'] if version_iri_parts['name'] else ''}/{ontology_file.name}\"",
-                    ) for _ in handle
+                        f"uri=\"{PUBLISH_URL}/{relative_destination_dir}/{ontology_file.name}\"",
+                        line.rstrip(None),
+                    ) for line in handle
                 ]
             with open(catalog_file, "w", encoding="utf8") as handle:
-                handle.write("\n".join(lines) + "\n")
+                handle.write("\n".join(lines))
+                handle.write("\n")
 
 
 if __name__ == "__main__":
