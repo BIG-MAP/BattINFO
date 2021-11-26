@@ -155,6 +155,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FiniteElementMesh"@en .
 
 
+###  http://emmo.info/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
+:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "Height"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
 :EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
@@ -178,6 +185,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                            ] ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation that describes the transport of some conserved quantity."@en ;
                                            skos:prefLabel "ContinuityEquation"@en .
+
+
+###  http://emmo.info/emmo#EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732
+:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ,
+                                                           :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalHeight"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc
@@ -226,6 +241,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SingleComponentActivationEnergyOfDiffusion"@en .
 
 
+###  http://emmo.info/emmo#EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12
+:EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "Radius"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b
 :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
@@ -259,6 +281,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_3cc59a03_3837_4504_900b_6ce3e589f610 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3 ;
                                            skos:prefLabel "HeatAccumulationTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854
+:EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "Diameter"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_42b9bd2b_20af_4b8a_b001_0c0dce9f9745
@@ -354,6 +383,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_5bc88245_45a1_4163_b640_f8320cc780de rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b ;
                                            skos:prefLabel "MassFluxTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326
+:EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 ,
+                                                           :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalRadius"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
@@ -838,6 +875,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Solvent"@en .
 
 
+###  http://emmo.info/emmo#EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9
+:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854 ,
+                                                           :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
+                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
+                                           skos:prefLabel "NominalDiameter"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
 :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
@@ -863,45 +908,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The current through a conductor between two points is directly proportional to the voltage across the two points."@en ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Ohm%27s_law"@en ;
                                            skos:prefLabel "OhmsLaw"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
-:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
-                                           skos:prefLabel "Height"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732
-:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ,
-                                                           :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ;
-                                           skos:prefLabel "NominalHeight"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12
-:EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
-                                           skos:prefLabel "Radius"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854
-:EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
-                                           skos:prefLabel "Diameter"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326
-:EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ,
-                                                           :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 ;
-                                           skos:prefLabel "NominalRadius"@en .
-
-
-###  http://emmo.info/emmo/generic-concepts#EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9
-:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ,
-                                                           :EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854 ;
-                                           skos:prefLabel "NominalDiameter"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
