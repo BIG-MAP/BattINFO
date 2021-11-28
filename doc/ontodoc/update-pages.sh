@@ -4,9 +4,9 @@ set -ex
 
 # Directories
 rootdir=$(git rev-parse --show-toplevel)
-ontodocdir=${rootdir}/doc/ontodoc
-tmpdir=${ontodocdir}/tmp
-pagesdir=${tmpdir}/gh-pages
+ontodocdir=${rootdir}/${ONTODOC_DIR}
+tmpdir=${ontodocdir}/${TMP_DIR}
+pagesdir=${tmpdir}/${PAGES_DIR}
 
 # Generate documentation
 ${ontodocdir}/mkdoc.sh
@@ -28,7 +28,7 @@ cp -u ${tmpdir}/battinfo.html index.html
 cp -u ${tmpdir}/battinfo.pdf .
 
 # Update gh-pages
-if git add index.html battinfo.pdf; then
-    git commit -m "Update BattINFO reference documentation"
+if git add index.html battinfo.pdf ${PUBLISH_ONTOLOGIES_DIR}; then
+    git commit -m "Update BattINFO documentation & ontologies"
     git push origin gh-pages
 fi
