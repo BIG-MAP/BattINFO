@@ -6,7 +6,11 @@ from pathlib import Path
 import re
 import shutil
 import sys
+from typing import TYPE_CHECKING
 from urllib.error import HTTPError
+
+if TYPE_CHECKING:
+    from typing import List
 
 # Remove the print statement concerning 'owlready2_optimized' when importing owlready2
 # (which is imported also in emmo).
@@ -33,7 +37,7 @@ def check_environment() -> None:
     if missing_variables:
         raise EnvironmentVariableNotFound(
             "The following required environment variable(s) was not found to be set "
-            f"in the environment{', '.join(missing_variables)} "
+            f"in the environment: {', '.join(missing_variables)}."
         )
 
 
@@ -57,6 +61,11 @@ def main() -> None:
     absolute_publish_dir = PAGES_DIR / PUBLISH_DIR
 
     local_ontologies = list(ROOT_DIR.glob("*.ttl"))
+
+    catalog_file_locations: List[Path] = []
+
+    catalog_file = sorted(ROOT_DIR.glob("catalog-*.xml"), reverse=True)[0]
+    catalog_file_contents = catalog_file.read_text(encoding="utf8").splitlines()
 
     print("Publishing ontologies:")
     for ontology_file in local_ontologies:
@@ -89,23 +98,20 @@ def main() -> None:
             # Serve ontologies outside the BIG-MAP domain as part of these ontologies.
             # Change the catalog URI, but not the name, i.e., download from the BIG-MAP
             # domain.
-            catalog_file = sorted(ROOT_DIR.glob("catalog-*.xml"), reverse=True)[0]
-            with open(catalog_file, "r", encoding="utf8") as handle:
-                lines = [
-                    re.sub(
-                        fr"uri=('|\"){ontology_file.name}('|\")",
-                        f"uri=\"{PUBLISH_URL}/{relative_destination_dir}/{ontology_file.name}\"",
-                        line.rstrip(None),
-                    ) for line in handle
-                ]
-            with open(catalog_file, "w", encoding="utf8") as handle:
-                handle.write("\n".join(lines))
-                handle.write("\n")
+            catalog_file_contents = [
+                re.sub(
+                    fr"uri=('|\"){ontology_file.name}('|\")",
+                    f"uri=\"{PUBLISH_URL}/{relative_destination_dir}/{ontology_file.name}\"",
+                    line.rstrip(None),
+                ) for line in catalog_file_contents
+            ]
 
-        shutil.copyfile(
-            src=catalog_file,
-            dst=absolute_publish_dir / relative_destination_dir / catalog_file.name,
-        )
+        catalog_file_locations.append(absolute_publish_dir / relative_destination_dir)
+    
+    print("Add catalog-v001.xml files:")
+    for location in catalog_file_locations:
+        print(f"  * {location.relative_to(absolute_publish_dir)}")
+        (location / catalog_file.name).write_text("\n".join(catalog_file_contents) + "\n", encoding="utf8")
 
 
 if __name__ == "__main__":
