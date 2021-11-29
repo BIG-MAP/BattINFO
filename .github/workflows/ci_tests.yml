@@ -32,6 +32,11 @@ jobs:
   documentation-build:
     name: Documentation
     runs-on: ubuntu-latest
+    env:
+      ONTODOC_DIR: doc/ontodoc
+      TMP_DIR: tmp
+      PAGES_DIR: gh-pages
+      PUBLISH_ONTOLOGIES_DIR: ontology
 
     steps:
     - name: Checkout repository
