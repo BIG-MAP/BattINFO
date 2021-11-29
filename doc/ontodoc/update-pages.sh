@@ -29,8 +29,8 @@ git pull origin gh-pages
 
 # Copy documentation to gh-pages
 # FIXME - generate separate index.html with links to versions
-cp -u ${tmpdir}/battinfo.html index.html
-cp -u ${tmpdir}/battinfo.pdf .
+# cp -u ${tmpdir}/battinfo.html index.html
+# cp -u ${tmpdir}/battinfo.pdf .
 
 # Update gh-pages
 if git add index.html battinfo.pdf ${PUBLISH_ONTOLOGIES_DIR}; then
