@@ -11,6 +11,11 @@ pagesdir=${tmpdir}/${PAGES_DIR}
 # Generate documentation
 ${ontodocdir}/mkdoc.sh
 
+if [ "$1"=="TEST" ]; then
+    echo "Not publishing - just testing (for CI)."
+    exit
+fi
+
 # Checkout gh-pages
 if ! [ -d ${pagesdir} ]; then
     git clone --branch=gh-pages --single-branch \
