@@ -2,7 +2,7 @@
 
 # Battery INterFace Ontology (BattINFO)
 
-A battery interface domain ontology based on [EMMO][1].
+A new battery interface domain ontology based on [EMMO][1].
 
 A reference documentation of the individual classes is available in [html](https://big-map.github.io/BattINFO/index.html) and [pdf](https://big-map.github.io/BattINFO/battinfo.pdf) formats.
 
