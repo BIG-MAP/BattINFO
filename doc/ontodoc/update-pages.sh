@@ -9,7 +9,7 @@ tmpdir=${ontodocdir}/${TMP_DIR}
 pagesdir=${tmpdir}/${PAGES_DIR}
 
 # Generate documentation
-${ontodocdir}/mkdoc.sh
+# ${ontodocdir}/mkdoc.sh
 
 if [ "$1"=="TEST" ]; then
     echo "Not publishing - just testing (for CI)."
