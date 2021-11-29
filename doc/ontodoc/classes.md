@@ -40,7 +40,7 @@ These classes are intended to be merged back into EMMO.
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HEADER "Electrochemical and battery-specific concepts"    level=1
-All classes under here are defined with the http://emmo.info/BattINFO#
+All classes under here are defined with the https://big-map.github.io/BattINFO/ontology/BattINFO#
 namespace.
 
 

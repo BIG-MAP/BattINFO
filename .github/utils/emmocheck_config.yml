@@ -1,4 +1,4 @@
-# Configurations used when running emmocheck from the ci_emmocheck workflow
+# Configurations used when running emmocheck from the ci_tests workflow
 skip:
   - test_namespace
 

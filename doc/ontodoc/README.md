@@ -2,11 +2,12 @@
 
 This directory contains the needed templates, introductory text and figures for generating a reference documentation of BattINFO.
 
-The documentation is generated using EMMO-python and pandoc.
-Just run the script
+The documentation is generated using EMMOntoPy and pandoc.
+Just run the script `mkdoc.sh`:
 
 ```console
-mkdoc.sh
+$ mkdoc.sh
+...
 ```
 
 ## Content of this directory

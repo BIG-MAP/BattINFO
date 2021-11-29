@@ -1,8 +1,10 @@
-[![CI tests](https://github.com/BIG-MAP/BattINFO/workflows/CI%20tests/badge.svg)](https://github.com/BIG-MAP/BattINFO/actions/)
+<!-- markdownlint-disable MD033 -->
 
 # Battery INterFace Ontology (BattINFO)
 
-A new battery interface domain ontology based on [EMMO][1].
+[![CI tests](https://github.com/BIG-MAP/BattINFO/workflows/CI%20tests/badge.svg)](https://github.com/BIG-MAP/BattINFO/actions/)
+
+A battery interface domain ontology based on [EMMO][1].
 
 A reference documentation of the individual classes is available in [html](https://big-map.github.io/BattINFO/index.html) and [pdf](https://big-map.github.io/BattINFO/battinfo.pdf) formats.
 
@@ -35,13 +37,13 @@ When opening BattINFO.ttl in Protégé, the correct version of emmo-inferred wil
 In EMMO-python, correct import is obtained with:
 
 ```python
-from emmo import get_ontology
+from ontopy import get_ontology
 
 # Loading from local repository
-ontobatt = get_ontology('/path/to/BattINFO/battinfo.ttl').load(url_from_catalog=True)
+battinfo = get_ontology('/path/to/BattINFO/battinfo.ttl').load(url_from_catalog=True)
 
 # Loading from web
-ontobatt = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl').load()
+battinfo = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl').load()
 ```
 
 ## Attributions and credits
