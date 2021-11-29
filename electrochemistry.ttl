@@ -1487,7 +1487,8 @@ of other configurations are used."""@en ;
 --IEC 60050"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Gas_diffusion_electrode"@en ;
                                            rdfs:comment "A gas diffusion electrode usually comprises one or more porous layers, like the gas diffusion layer and the catalyst layer."@en ,
-                                                        "Gas diffusion electrodes can be gas diffusion anodes or gas diffusion cathodes."@en ;
+                                                        "Gas diffusion electrodes can be gas diffusion anodes or gas diffusion cathodes."@en ,
+                                                        "Gas diffusion electrodes can be used in batteries, fuel cells, and electrolyzers."@en ;
                                            skos:altLabel "GDE"@en ;
                                            skos:prefLabel "GasDiffusionElectrode"@en .
 
