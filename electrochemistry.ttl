@@ -719,7 +719,8 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 
 ###  http://emmo.info/electrochemistry#EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89
 :EMMO_609b340f_3450_4a10_95c2_c457e3eb8a89 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
+                                           rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ,
+                                                           emmo:EMMO_4b3e2374_52a1_4420_8e3f_3ae6b9bf7dff ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "An electrolyte in the liquid phase."@en ;
                                            skos:prefLabel "LiquidElectrolyte"@en .
 
