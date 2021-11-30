@@ -13,8 +13,8 @@
 
 <https://big-map.github.io/BattINFO/ontology/BattINFO/battery> rdf:type owl:Ontology ;
                                      owl:versionIRI <https://big-map.github.io/BattINFO/ontology/BattINFO/0.1.0/battery> ;
-                                     owl:imports <https://big-map.github.io/BattINFO/ontology/BattINFO/0.1.0/batteryquantities> ,
-                                                 <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.1.0/electrochemistry> ;
+                                     owl:imports <https://big-map.github.io/BattINFO/ontology/BattINFO/0.1.0/batteryquantities/batteryquantities.ttl> ,
+                                                 <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.1.0/electrochemistry/electrochemistry.ttl> ;
                                      dcterms:abstract """A toplevel battery interface domain ontology based on EMMO.
 
 This file is intended to contain information on the whole battery, excluding quantites..
