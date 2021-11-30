@@ -108,7 +108,7 @@ if __name__ == "__main__":
     PUBLISH_URL = f"https://big-map.github.io/BattINFO/{PUBLISH_DIR}"
     VERSION_IRI_REGEX = re.compile(
         r"https?://(?P<domain>[a-zA-Z._-]+)/(?P<path>[a-zA-Z_-]+(/[a-zA-Z_-]+)*)"
-        r"/(?P<version>[0-9a-zA-Z._-]+)(/(?P<name>[a-zA-Z_-]+))?"
+        r"/(?P<version>[0-9a-zA-Z._-]+)(/(?P<name>[a-zA-Z_-]+))?(/(?P<filename>[a-zA-Z_.-]+))?"
     )
 
     try:
