@@ -36,8 +36,26 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 
 #################################################################
+#    Object Properties
+#################################################################
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258
+<https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258> rdf:type owl:ObjectProperty .
+
+
+#################################################################
 #    Classes
 #################################################################
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_098b2c3e_6d89_4c75_a638_9c4650a5e616
+:EMMO_098b2c3e_6d89_4c75_a638_9c4650a5e616 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_16a3bd5c_75f0_42b3_b000_cb0d018f840e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "lithium;hexafluorophosphate"
+                                                           ] ;
+                                           skos:prefLabel "LithiumHexafluorophosphate"@en .
+
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b
 :EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b rdf:type owl:Class ;
@@ -70,6 +88,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
                                            skos:prefLabel "Cylindrical4680CellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_11bfbed1_b266_449b_90ba_506efc3e600d
+:EMMO_11bfbed1_b266_449b_90ba_506efc3e600d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "EC"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_13ab56f8_59f0_4301_8114_d6b98ca09f6f
@@ -106,6 +130,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "PouchCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_19495513_c70f_498a_8e8c_febf04935662
+:EMMO_19495513_c70f_498a_8e8c_febf04935662 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "EMC"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28
@@ -171,6 +201,16 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
                                            skos:prefLabel "ElectrochemicalCellContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2c27f40d_9a35_4f20_8a5e_ed4e27b09ef7
+:EMMO_2c27f40d_9a35_4f20_8a5e_ed4e27b09ef7 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_172e2c96_180b_40f8_a3e7_b624471f40c2 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_dba761d5_bc6c_47a8_b54e_db4115829382
+                                                           ] ;
+                                           skos:prefLabel "ECSingleComponentComposition"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
@@ -300,6 +340,13 @@ Adapted from:
                                            skos:prefLabel "IonicSubcomponentContinuumModel"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_62114aea_17fb_40ad_8575_ac6647ac8a6c
+:EMMO_62114aea_17fb_40ad_8575_ac6647ac8a6c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_76e6c5be_5e00_4001_b4ec_0b4ee67b7809 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "1M LiPF6" ;
+                                           skos:prefLabel "LiPF61MSingleComposition"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
 :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
@@ -330,6 +377,28 @@ Adapted from:
 :EMMO_708cc414_2607_4f32_b473_f01aa74962f2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
                                            skos:prefLabel "LNO"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_71a5a495_e6d5_44ee_87c5_3c091e6e451c
+:EMMO_71a5a495_e6d5_44ee_87c5_3c091e6e451c rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_c2fd1dde_f64e_4115_9f3a_139410a763c2 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_92b44afb_f5c0_4cb2_a374_377bbb10da7e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_b0431e99_a501_4a94_abad_9cf833ab080e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_78116683_383a_44c4_ad72_b89e29d8f799 ;
+                                                             owl:someValuesFrom :EMMO_11bfbed1_b266_449b_90ba_506efc3e600d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_78116683_383a_44c4_ad72_b89e29d8f799 ;
+                                                             owl:someValuesFrom :EMMO_19495513_c70f_498a_8e8c_febf04935662
+                                                           ] ;
+                                           skos:prefLabel "ECEMC37"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
@@ -374,6 +443,12 @@ Adapted from:
 :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
                                            skos:prefLabel "StructuralSubcomponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_76e6c5be_5e00_4001_b4ec_0b4ee67b7809
+:EMMO_76e6c5be_5e00_4001_b4ec_0b4ee67b7809 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_172e2c96_180b_40f8_a3e7_b624471f40c2 ;
+                                           skos:prefLabel "LiPF6SingleComponentComposition"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_77fc28f8_a045_4cb9_984a_2804feef4bd6
@@ -423,6 +498,50 @@ Adapted from:
                                            skos:prefLabel "LithiumIntercalationMaterial"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8365b096_c1f4_4fde_86a6_27cd70787ff9
+:EMMO_8365b096_c1f4_4fde_86a6_27cd70787ff9 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_62114aea_17fb_40ad_8575_ac6647ac8a6c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258> ;
+                                                             owl:someValuesFrom :EMMO_90a6f1ac_4b98_4d4a_bd28_943c0df29257
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258> ;
+                                                             owl:someValuesFrom :EMMO_e1a6ee3f_95ae_4cd3_a72f_067a0843bd9b
+                                                           ] ;
+                                           skos:prefLabel "LP57"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_90a6f1ac_4b98_4d4a_bd28_943c0df29257
+:EMMO_90a6f1ac_4b98_4d4a_bd28_943c0df29257 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 ;
+                                           skos:prefLabel "LiCation"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_92b44afb_f5c0_4cb2_a374_377bbb10da7e
+:EMMO_92b44afb_f5c0_4cb2_a374_377bbb10da7e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2c27f40d_9a35_4f20_8a5e_ed4e27b09ef7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:hasValue :EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd
+                                                           ] ;
+                                           skos:prefLabel "EC03SingleComponentComposition"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_93cda198_c35f_4d39_976c_46c49f030a8b
+:EMMO_93cda198_c35f_4d39_976c_46c49f030a8b rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_172e2c96_180b_40f8_a3e7_b624471f40c2 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_a65d105c_023f_4274_ac92_adc865d476e3
+                                                           ] ;
+                                           skos:prefLabel "EMCSingleComponentComposition"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_967d9455_ad6d_4266_a0ca_170f5e8b11b8
 :EMMO_967d9455_ad6d_4266_a0ca_170f5e8b11b8 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706 ,
@@ -469,6 +588,16 @@ Adapted from:
                                            skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_a65d105c_023f_4274_ac92_adc865d476e3
+:EMMO_a65d105c_023f_4274_ac92_adc865d476e3 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_16a3bd5c_75f0_42b3_b000_cb0d018f840e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "ethyl methyl carbonate"
+                                                           ] ;
+                                           skos:prefLabel "EthylMethylCarbonate"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
 :EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
@@ -484,6 +613,16 @@ Adapted from:
                                                            ] ;
                                            skos:altLabel "CylindricalBatteryCell"@en ;
                                            skos:prefLabel "CylindricalCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b0431e99_a501_4a94_abad_9cf833ab080e
+:EMMO_b0431e99_a501_4a94_abad_9cf833ab080e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_93cda198_c35f_4d39_976c_46c49f030a8b ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:hasValue :EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe
+                                                           ] ;
+                                           skos:prefLabel "EMC07SingleComponentComposition"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
@@ -608,6 +747,16 @@ Adapted from:
                                            skos:prefLabel "PrismaticCellHousing"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dba761d5_bc6c_47a8_b54e_db4115829382
+:EMMO_dba761d5_bc6c_47a8_b54e_db4115829382 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_16a3bd5c_75f0_42b3_b000_cb0d018f840e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "1,3-dioxolan-2-one"
+                                                           ] ;
+                                           skos:prefLabel "EthyleneCarbonate"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb
 :EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
@@ -619,6 +768,12 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_1d3ad695_4a44_47e7_ae3b_7f8a37a6ac6c ,
                                                            :EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa ;
                                            skos:prefLabel "LithiumIonBatteryPositiveElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1a6ee3f_95ae_4cd3_a72f_067a0843bd9b
+:EMMO_e1a6ee3f_95ae_4cd3_a72f_067a0843bd9b rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 ;
+                                           skos:prefLabel "PF6Anion"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
@@ -666,116 +821,34 @@ Adapted from:
                                            skos:prefLabel "NMC111"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_11bfbed1_b266_449b_90ba_506efc3e600d
-:EMMO_11bfbed1_b266_449b_90ba_506efc3e600d rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           skos:prefLabel "EC"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_19495513_c70f_498a_8e8c_febf04935662
-:EMMO_19495513_c70f_498a_8e8c_febf04935662 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           skos:prefLabel "EMC"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_2c27f40d_9a35_4f20_8a5e_ed4e27b09ef7
-:EMMO_2c27f40d_9a35_4f20_8a5e_ed4e27b09ef7 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_172e2c96_180b_40f8_a3e7_b624471f40c2 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_dba761d5_bc6c_47a8_b54e_db4115829382
-                                                           ] ;
-                                           skos:prefLabel "ECSingleComponentComposition"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_42c18cc0_fdfb_489c_abb8_68fb6eef79e6
-:EMMO_42c18cc0_fdfb_489c_abb8_68fb6eef79e6 rdf:type owl:Class ;
-                                           rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c2fd1dde_f64e_4115_9f3a_139410a763c2> ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_92b44afb_f5c0_4cb2_a374_377bbb10da7e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_b0431e99_a501_4a94_abad_9cf833ab080e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_78116683_383a_44c4_ad72_b89e29d8f799> ;
-                                                             owl:someValuesFrom :EMMO_11bfbed1_b266_449b_90ba_506efc3e600d
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_78116683_383a_44c4_ad72_b89e29d8f799> ;
-                                                             owl:someValuesFrom :EMMO_19495513_c70f_498a_8e8c_febf04935662
-                                                           ] ;
-                                           skos:prefLabel "ECEMC37"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_92b44afb_f5c0_4cb2_a374_377bbb10da7e
-:EMMO_92b44afb_f5c0_4cb2_a374_377bbb10da7e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2c27f40d_9a35_4f20_8a5e_ed4e27b09ef7 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:hasValue :EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd
-                                                           ] ;
-                                           skos:prefLabel "EC03SingleComponentComposition"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_93cda198_c35f_4d39_976c_46c49f030a8b
-:EMMO_93cda198_c35f_4d39_976c_46c49f030a8b rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_172e2c96_180b_40f8_a3e7_b624471f40c2 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_a65d105c_023f_4274_ac92_adc865d476e3
-                                                           ] ;
-                                           skos:prefLabel "EMCSingleComponentComposition"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_a65d105c_023f_4274_ac92_adc865d476e3
-:EMMO_a65d105c_023f_4274_ac92_adc865d476e3 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_16a3bd5c_75f0_42b3_b000_cb0d018f840e ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                             owl:hasValue "ethyl methyl carbonate"
-                                                           ] ;
-                                           skos:prefLabel "EthylMethylCarbonate"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_b0431e99_a501_4a94_abad_9cf833ab080e
-:EMMO_b0431e99_a501_4a94_abad_9cf833ab080e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_93cda198_c35f_4d39_976c_46c49f030a8b ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:hasValue :EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe
-                                                           ] ;
-                                           skos:prefLabel "EMC07SingleComponentComposition"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_dba761d5_bc6c_47a8_b54e_db4115829382
-:EMMO_dba761d5_bc6c_47a8_b54e_db4115829382 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_16a3bd5c_75f0_42b3_b000_cb0d018f840e ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                             owl:hasValue "1,3-dioxolan-2-one"
-                                                           ] ;
-                                           skos:prefLabel "EthyleneCarbonate"@en .
-
-
 #################################################################
 #    Individuals
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_30c2c2b9_deda_4adc_aacc_31b7aa8ec5e8
+:EMMO_30c2c2b9_deda_4adc_aacc_31b7aa8ec5e8 rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
+                                           emmo:EMMO_67fc0a36_8dcb_4ffa_9a43_31074efa3296 <https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "1.0"^^xsd:double ;
+                                           skos:prefLabel "molar_concentration_1"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe
 :EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "0.7"^^xsd:double ;
                                            skos:prefLabel "emc_ecemc37_mass_fraction"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd
 :EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "0.3"^^xsd:double ;
                                            skos:prefLabel "ec_ecemc37_mass_fraction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a
+<https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> rdf:type owl:NamedIndividual .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
