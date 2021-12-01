@@ -86,7 +86,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8
 :EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
+                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:hasValue :EMMO_7e323492_c252_4274_a5e4_950547f8ae79
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:hasValue :EMMO_afa1cf12_a4c0_482c_800a_d834ba47e6bc
+                                                           ] ;
                                            skos:prefLabel "Cylindrical4680CellHousing"@en .
 
 
@@ -600,7 +608,15 @@ Adapted from:
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
 :EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
+                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:hasValue :EMMO_405dd1bc_8f22_41ad_9a17_e82946d91494
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:hasValue :EMMO_6c1725c6_4c38_4774_8e39_1f3e76556359
+                                                           ] ;
                                            skos:prefLabel "Cylindrical18650CellHousing"@en .
 
 
@@ -649,7 +665,15 @@ Adapted from:
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693
 :EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
+                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:hasValue :EMMO_0488a9ff_b76c_4e78_b11a_304a10b1d93c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:hasValue :EMMO_2f274126_f94c_4bfc_b870_9f74e18457b3
+                                                           ] ;
                                            skos:prefLabel "Cylindrical21700CellHousing"@en .
 
 
@@ -849,6 +873,48 @@ Adapted from:
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a
 <https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> rdf:type owl:NamedIndividual .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_0488a9ff_b76c_4e78_b11a_304a10b1d93c
+:EMMO_0488a9ff_b76c_4e78_b11a_304a10b1d93c rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "70.0"^^xsd:double ;
+                                           rdfs:label "cylindrical_21700_cell_nominal_height"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2f274126_f94c_4bfc_b870_9f74e18457b3
+:EMMO_2f274126_f94c_4bfc_b870_9f74e18457b3 rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "21.0"^^xsd:double ;
+                                           rdfs:label "cylindrical_21700_cell_nominal_diameter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_405dd1bc_8f22_41ad_9a17_e82946d91494
+:EMMO_405dd1bc_8f22_41ad_9a17_e82946d91494 rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "65.0"^^xsd:double ;
+                                           skos:prefLabel "cylindrical_18650_cell_nominal_height"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_6c1725c6_4c38_4774_8e39_1f3e76556359
+:EMMO_6c1725c6_4c38_4774_8e39_1f3e76556359 rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "18.0"^^xsd:double ;
+                                           skos:prefLabel "cylindrical_18650_cell_nominal_diameter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_7e323492_c252_4274_a5e4_950547f8ae79
+:EMMO_7e323492_c252_4274_a5e4_950547f8ae79 rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "46.0"^^xsd:double ;
+                                           rdfs:label "cylindrical_4680_cell_nominal_diameter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_afa1cf12_a4c0_482c_800a_d834ba47e6bc
+:EMMO_afa1cf12_a4c0_482c_800a_d834ba47e6bc rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "80.0"^^xsd:double ;
+                                           rdfs:label "cylindrical_4680_cell_nominal_height"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
