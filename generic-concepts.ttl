@@ -10,68 +10,68 @@
 @base <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts> .
 
 <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts> rdf:type owl:Ontology ;
-                                          owl:versionIRI <https://big-map.github.io/BattINFO/ontology/emmo/1.0.0-beta/generic-concepts/generic-concepts.ttl> ;
-                                          owl:imports <https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry2.ttl> ;
-                                          dcterms:abstract """Generic concepts that are intended to eventually be moved into EMMO middle.
+                                                                     owl:versionIRI <https://big-map.github.io/BattINFO/ontology/emmo/1.0.0-beta/generic-concepts/generic-concepts.ttl> ;
+                                                                     owl:imports <https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta/emmo-inferred-chemistry2.ttl> ;
+                                                                     dcterms:abstract """Generic concepts that are intended to eventually be moved into EMMO middle.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
-                                          dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                          owl:versionInfo "1.0.0-beta" .
+                                                                     dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+                                                                     owl:versionInfo "1.0.0-beta" .
 
 #################################################################
 #    Annotation properties
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_1f1b164d_ec6a_4faa_8d5e_88bda62316cc
+###  http://emmo.info/emmo#EMMO_1f1b164d_ec6a_4faa_8d5e_88bda62316cc
 :EMMO_1f1b164d_ec6a_4faa_8d5e_88bda62316cc rdfs:subPropertyOf rdfs:seeAlso .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f
+###  http://emmo.info/emmo#EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f
 :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f rdfs:subPropertyOf rdfs:isDefinedBy .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25
+###  http://emmo.info/emmo#EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25
 :EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 rdfs:subPropertyOf rdfs:seeAlso .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_705f27ae_954c_4f13_98aa_18473fc52b25
+###  http://emmo.info/emmo#EMMO_705f27ae_954c_4f13_98aa_18473fc52b25
 :EMMO_705f27ae_954c_4f13_98aa_18473fc52b25 rdfs:subPropertyOf rdfs:comment .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84
+###  http://emmo.info/emmo#EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84
 :EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 rdfs:subPropertyOf rdfs:comment .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578
+###  http://emmo.info/emmo#EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578
 :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 rdfs:subPropertyOf rdfs:isDefinedBy .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9
+###  http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9
 :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 rdfs:subPropertyOf rdfs:comment .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_a9b3d04c_7ceb_40a2_b8d3_28d514a770a8
+###  http://emmo.info/emmo#EMMO_a9b3d04c_7ceb_40a2_b8d3_28d514a770a8
 :EMMO_a9b3d04c_7ceb_40a2_b8d3_28d514a770a8 rdfs:subPropertyOf rdfs:seeAlso .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a
+###  http://emmo.info/emmo#EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a
 :EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a rdfs:subPropertyOf rdfs:comment .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d
+###  http://emmo.info/emmo#EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d
 :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d rdfs:subPropertyOf rdfs:seeAlso .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
+###  http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
 :EMMO_de178b12_5d35_4bca_8efa_a4193162571d rdf:type owl:AnnotationProperty ;
                                            rdfs:subPropertyOf rdfs:comment .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_e55f2d7c_9893_48cd_b4a4_fdf38253bd20
+###  http://emmo.info/emmo#EMMO_e55f2d7c_9893_48cd_b4a4_fdf38253bd20
 :EMMO_e55f2d7c_9893_48cd_b4a4_fdf38253bd20 rdfs:subPropertyOf rdfs:seeAlso .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_fe015383_afb3_44a6_ae86_043628697aa2
+###  http://emmo.info/emmo#EMMO_fe015383_afb3_44a6_ae86_043628697aa2
 :EMMO_fe015383_afb3_44a6_ae86_043628697aa2 rdfs:subPropertyOf rdfs:seeAlso .
 
 
@@ -97,10 +97,24 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 
 #################################################################
+#    Object Properties
+#################################################################
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_78116683_383a_44c4_ad72_b89e29d8f799
+:EMMO_78116683_383a_44c4_ad72_b89e29d8f799 rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :EMMO_f68030be_94b8_4c61_a161_886468558054 ;
+                                           rdfs:domain :EMMO_c2fd1dde_f64e_4115_9f3a_139410a763c2 ;
+                                           rdfs:range :EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "This relates a mixed solvent to its constituent solvent parts."@en ;
+                                           rdfs:comment "A mixed solvent must have more than one solvent part. It is a subproperty of hasProperPart"@en ;
+                                           skos:prefLabel "hasSolventPart"@en .
+
+
+#################################################################
 #    Classes
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e
+###  http://emmo.info/emmo#EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e
 :EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7d20b67d_3565_492e_9d59_f29c2c525276 ,
                                                            [ rdf:type owl:Restriction ;
@@ -120,7 +134,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ChemicalSpeciesContinuityEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb
+###  http://emmo.info/emmo#EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb
 :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_49804605_c0fe_4538_abda_f70ba1dc8a5d ,
                                                            [ rdf:type owl:Restriction ;
@@ -132,13 +146,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ActiveParticipant"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_0466becd_3e08_436f_8412_e2eedbedfd39
+###  http://emmo.info/emmo#EMMO_0466becd_3e08_436f_8412_e2eedbedfd39
 :EMMO_0466becd_3e08_436f_8412_e2eedbedfd39 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5bc88245_45a1_4163_b640_f8320cc780de ;
                                            skos:prefLabel "ChemicalSpeciesFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a
+###  http://emmo.info/emmo#EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a
 :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ,
                                                            [ rdf:type owl:Restriction ;
@@ -149,26 +163,26 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "IonicSpecies"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_06700060_1326_4478_be51_d8037b986230
+###  http://emmo.info/emmo#EMMO_06700060_1326_4478_be51_d8037b986230
 :EMMO_06700060_1326_4478_be51_d8037b986230 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_66305f3d_6eef_448a_953d_17abb87788ae ;
                                            skos:prefLabel "FiniteElementMesh"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
+###  http://emmo.info/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
 :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "Height"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
+###  http://emmo.info/emmo#EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe
 :EMMO_09013481_1645_4a0d_8ee8_33969e38bdfe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
                                            skos:prefLabel "ElectricResistorModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2
+###  http://emmo.info/emmo#EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2
 :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_27c5d8c6_8af7_4d63_beb1_ec37cd8b3fa3 ,
                                                            [ rdf:type owl:Restriction ;
@@ -187,7 +201,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ContinuityEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732
+###  http://emmo.info/emmo#EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732
 :EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ,
                                                            :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
@@ -195,7 +209,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "NominalHeight"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc
+###  http://emmo.info/emmo#EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc
 :EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The flux of matter (the number of particles passing through an imaginary window in a given interval divided by the area of the window and the duration of the interval) is proportional to the density gradient at that point.
@@ -205,7 +219,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FicksFirstLaw"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_1b8d1cf9_7b79_4de2_b9ba_3fb7b02a36f0
+###  http://emmo.info/emmo#EMMO_1b8d1cf9_7b79_4de2_b9ba_3fb7b02a36f0
 :EMMO_1b8d1cf9_7b79_4de2_b9ba_3fb7b02a36f0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8 ,
                                                            [ rdf:type owl:Restriction ;
@@ -223,7 +237,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FiniteVolumeCell"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
+###  http://emmo.info/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
 :EMMO_1c1ec02e_4def_4979_aff9_572c06a95391 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7684ddff_d99b_405d_aad2_90e830b8403c ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ-1 N0 J0" ;
@@ -232,7 +246,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "VolumetricThermalExpansionCoefficient"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56
+###  http://emmo.info/emmo#EMMO_26586828_3b8c_4d8b_9c6c_0bc2502f26ae
+:EMMO_26586828_3b8c_4d8b_9c6c_0bc2502f26ae rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:someValuesFrom xsd:string
+                                                           ] .
+
+
+###  http://emmo.info/emmo#EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56
 :EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -241,14 +262,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SingleComponentActivationEnergyOfDiffusion"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12
+###  http://emmo.info/emmo#EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12
 :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "Radius"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b
+###  http://emmo.info/emmo#EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b
 :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
                                                            [ rdf:type owl:Restriction ;
@@ -259,7 +280,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "AccumulationTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab
+###  http://emmo.info/emmo#EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab
 :EMMO_3bd39834_7eb9_4c97_bb25_db88c3df6bab rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -271,32 +292,32 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SingleComponentMaximalDiffusivity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_3c4680d5_f597_4d8f_994f_d93caa71193c
+###  http://emmo.info/emmo#EMMO_3c4680d5_f597_4d8f_994f_d93caa71193c
 :EMMO_3c4680d5_f597_4d8f_994f_d93caa71193c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b ;
                                            skos:prefLabel "ChargeFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_3cc59a03_3837_4504_900b_6ce3e589f610
+###  http://emmo.info/emmo#EMMO_3cc59a03_3837_4504_900b_6ce3e589f610
 :EMMO_3cc59a03_3837_4504_900b_6ce3e589f610 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3 ;
                                            skos:prefLabel "HeatAccumulationTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854
+###  http://emmo.info/emmo#EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854
 :EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
                                            :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+1 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "Diameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_42b9bd2b_20af_4b8a_b001_0c0dce9f9745
+###  http://emmo.info/emmo#EMMO_42b9bd2b_20af_4b8a_b001_0c0dce9f9745
 :EMMO_42b9bd2b_20af_4b8a_b001_0c0dce9f9745 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b ;
                                            skos:prefLabel "MassAccumulationTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_46ef0f56_2b15_4fc5_83bd_79b58b996b93
+###  http://emmo.info/emmo#EMMO_46ef0f56_2b15_4fc5_83bd_79b58b996b93
 :EMMO_46ef0f56_2b15_4fc5_83bd_79b58b996b93 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The rate of a chemical reaction is directly proportional to the product of the activities or concentrations of the reactants."@en ;
@@ -306,14 +327,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "LawOfMassAction"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_489bd765_c35e_48dc_a9e8_dbcda684642b
+###  http://emmo.info/emmo#EMMO_489bd765_c35e_48dc_a9e8_dbcda684642b
 :EMMO_489bd765_c35e_48dc_a9e8_dbcda684642b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Normal_(geometry)"@en ;
                                            skos:prefLabel "DiscretizationFaceNormal"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_4937ad81_eeb8_4cd9_a02f_53e0644e2f02
+###  http://emmo.info/emmo#EMMO_4937ad81_eeb8_4cd9_a02f_53e0644e2f02
 :EMMO_4937ad81_eeb8_4cd9_a02f_53e0644e2f02 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A measure of deviation from a straight line. It is the ratio of the actual distance traveled divided by the straight line distance."@en ;
@@ -321,7 +342,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Tortuosity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
+###  http://emmo.info/emmo#EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
 :EMMO_498d80ae_9339_49c7_8c74_44aa704e0395 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -333,19 +354,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SingleComponentDiffusivity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_4a9030bd_a1b2_45ac_909b_f98257c2b355
+###  http://emmo.info/emmo#EMMO_4a9030bd_a1b2_45ac_909b_f98257c2b355
 :EMMO_4a9030bd_a1b2_45ac_909b_f98257c2b355 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b ;
                                            skos:prefLabel "ChargeAccumulationTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f
+###  http://emmo.info/emmo#EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f
 :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
                                            skos:prefLabel "DiscretizationElementary"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_50c5d440_683c_400f_909e_b03c0327de9c
+###  http://emmo.info/emmo#EMMO_50c5d440_683c_400f_909e_b03c0327de9c
 :EMMO_50c5d440_683c_400f_909e_b03c0327de9c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -354,14 +375,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "MolarHeatCapacity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead
+###  http://emmo.info/emmo#EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead
 :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_43e9a05d_98af_41b4_92f6_00f79a09bfce ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A 'process' that is recognized by chemical sciences and is catogrized accordingly."@en ;
                                            skos:prefLabel "ChemicalPhenomenon"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_52ad5472_29eb_49d5_bff3_bb354a656020
+###  http://emmo.info/emmo#EMMO_52ad5472_29eb_49d5_bff3_bb354a656020
 :EMMO_52ad5472_29eb_49d5_bff3_bb354a656020 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ,
                                                            [ rdf:type owl:Restriction ;
@@ -379,13 +400,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "EnergyContinuityEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_5bc88245_45a1_4163_b640_f8320cc780de
+###  http://emmo.info/emmo#EMMO_5bc88245_45a1_4163_b640_f8320cc780de
 :EMMO_5bc88245_45a1_4163_b640_f8320cc780de rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b ;
                                            skos:prefLabel "MassFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326
+###  http://emmo.info/emmo#EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326
 :EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 ,
                                                            :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
@@ -393,13 +414,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "NominalRadius"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
+###  http://emmo.info/emmo#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
 :EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
                                            skos:prefLabel "ElectricCapacitorModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_65c24b42_8074_434b_99ba_7c50cded4149
+###  http://emmo.info/emmo#EMMO_65c24b42_8074_434b_99ba_7c50cded4149
 :EMMO_65c24b42_8074_434b_99ba_7c50cded4149 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3c4680d5_f597_4d8f_994f_d93caa71193c ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The transport of electric charge driven by a gradient in the electric potential."@en ;
@@ -408,19 +429,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ConductionChargeFluxEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_661b9697_fefc_4389_85f2_9ebe4cfe0d21
+###  http://emmo.info/emmo#EMMO_661b9697_fefc_4389_85f2_9ebe4cfe0d21
 :EMMO_661b9697_fefc_4389_85f2_9ebe4cfe0d21 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 ;
                                            skos:prefLabel "ConvectionHeatFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_66305f3d_6eef_448a_953d_17abb87788ae
+###  http://emmo.info/emmo#EMMO_66305f3d_6eef_448a_953d_17abb87788ae
 :EMMO_66305f3d_6eef_448a_953d_17abb87788ae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
                                            skos:prefLabel "Mesh"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
+###  http://emmo.info/emmo#EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
 :EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy per unit volume."@en ;
@@ -428,7 +449,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "EnergyDensity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1
+###  http://emmo.info/emmo#EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1
 :EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_98ada9d8_f1c8_4f13_99b5_d890f5354152 ,
                                                            [ rdf:type owl:Class ;
@@ -445,7 +466,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Pore"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_6adc3c54_96ea_4319_b7b6_2af3bfc10c33
+###  http://emmo.info/emmo#EMMO_6adc3c54_96ea_4319_b7b6_2af3bfc10c33
 :EMMO_6adc3c54_96ea_4319_b7b6_2af3bfc10c33 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ,
                                                            [ rdf:type owl:Restriction ;
@@ -455,14 +476,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FiniteVolumeModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_6b8cca3a_e6e1_41a6_a5ea_f580d2c0013c
+###  http://emmo.info/emmo#EMMO_6b8cca3a_e6e1_41a6_a5ea_f580d2c0013c
 :EMMO_6b8cca3a_e6e1_41a6_a5ea_f580d2c0013c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5bc88245_45a1_4163_b640_f8320cc780de ;
                                            rdfs:comment "J = -K*grad(p)"@en ;
                                            skos:prefLabel "ConvectionMassFluxEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540
+###  http://emmo.info/emmo#EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540
 :EMMO_6bcaf4f2_8639_40b4_9d03_5ad3c9ba9540 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3e309118_e8b7_4021_80f4_642d2df65d94 ,
                                                            :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ,
@@ -475,7 +496,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "DiscretizationEdge"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
+###  http://emmo.info/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
 :EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
                                                                  owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
@@ -485,14 +506,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "PerTemperatureDimension"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_6ed96a06_0efd_4f0e_95d8_483902c6fb38
+###  http://emmo.info/emmo#EMMO_6ed96a06_0efd_4f0e_95d8_483902c6fb38
 :EMMO_6ed96a06_0efd_4f0e_95d8_483902c6fb38 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
                                            skos:altLabel "Confidentiality"@en ;
                                            skos:prefLabel "Permission"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_70cbd515_d278_4d47_9631_4b48931cc83b
+###  http://emmo.info/emmo#EMMO_70cbd515_d278_4d47_9631_4b48931cc83b
 :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
                                                            [ rdf:type owl:Restriction ;
@@ -503,7 +524,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_7684ddff_d99b_405d_aad2_90e830b8403c
+###  http://emmo.info/emmo#EMMO_7684ddff_d99b_405d_aad2_90e830b8403c
 :EMMO_7684ddff_d99b_405d_aad2_90e830b8403c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -514,13 +535,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalExpansionCoefficient"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117
+###  http://emmo.info/emmo#EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117
 :EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 ;
                                            skos:prefLabel "RadiationHeatFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
+###  http://emmo.info/emmo#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
 :EMMO_7d20b67d_3565_492e_9d59_f29c2c525276 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ,
                                                            [ rdf:type owl:Restriction ;
@@ -541,7 +562,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "MassContinuityEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_7f8db4c8_4dc5_4e39_bfb0_0a123679d831
+###  http://emmo.info/emmo#EMMO_7f8db4c8_4dc5_4e39_bfb0_0a123679d831
 :EMMO_7f8db4c8_4dc5_4e39_bfb0_0a123679d831 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Porosity or void fraction is a measure of the void (i.e. \"empty\") spaces in a material, and is a fraction of the volume of voids over the total volume, between 0 and 1, or as a percentage between 0% and 100%."@en ;
@@ -549,7 +570,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Porosity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
+###  http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
 :EMMO_802c167d_b792_4cb8_a315_35797345c0e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -558,19 +579,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "HeatCapacity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_81cdab15_d13d_47e5_ac1b_65b6bd7c4da6
+###  http://emmo.info/emmo#EMMO_81cdab15_d13d_47e5_ac1b_65b6bd7c4da6
 :EMMO_81cdab15_d13d_47e5_ac1b_65b6bd7c4da6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d0592008_1de9_4ce1_99a4_3c38547c240f ;
                                            skos:prefLabel "ChemicalSpeciesSourceTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783
+###  http://emmo.info/emmo#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783
 :EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
                                            skos:prefLabel "WarburgElementModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
+###  http://emmo.info/emmo#EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
 :EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1285a53a_a8a8_45e4_b39b_d54348721db2 ,
                                                            [ rdf:type owl:Restriction ;
@@ -591,25 +612,25 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ElectricChargeContinuityEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_886437e2_9e44_4e7a_81cb_7404c8f76e8f
+###  http://emmo.info/emmo#EMMO_886437e2_9e44_4e7a_81cb_7404c8f76e8f
 :EMMO_886437e2_9e44_4e7a_81cb_7404c8f76e8f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b ;
                                            skos:prefLabel "EnergyFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_89f827fa_f3c4_4071_a69c_084132f780a7
+###  http://emmo.info/emmo#EMMO_89f827fa_f3c4_4071_a69c_084132f780a7
 :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_886437e2_9e44_4e7a_81cb_7404c8f76e8f ;
                                            skos:prefLabel "HeatFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_8c505092_403d_4912_9a01_5a56793fbfc1
+###  http://emmo.info/emmo#EMMO_8c505092_403d_4912_9a01_5a56793fbfc1
 :EMMO_8c505092_403d_4912_9a01_5a56793fbfc1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_42b9bd2b_20af_4b8a_b001_0c0dce9f9745 ;
                                            skos:prefLabel "ChemicalSpeciesAccumulationTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1
+###  http://emmo.info/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1
 :EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -618,14 +639,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalConductivity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
+###  http://emmo.info/emmo#EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a
 :EMMO_942684c8_f693_47d2_b12f_82a6bc774c9a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_39362460_2a97_4367_8f93_0418c2ac9a08 ,
                                                            :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ;
                                            skos:prefLabel "DiscretizationNode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310
+###  http://emmo.info/emmo#EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310
 :EMMO_9536a2c6_fddd_48b3_ae48_842ba3e78310 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Rate of mass movement through a unit area."@en ;
@@ -634,7 +655,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "MassFlux"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_98909c8e_7f1f_4a9b_a0b1_a4a33cfb626a
+###  http://emmo.info/emmo#EMMO_98909c8e_7f1f_4a9b_a0b1_a4a33cfb626a
 :EMMO_98909c8e_7f1f_4a9b_a0b1_a4a33cfb626a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_52ad5472_29eb_49d5_bff3_bb354a656020 ,
                                                            [ rdf:type owl:Restriction ;
@@ -652,19 +673,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "HeatContinuityEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_98e27347_42ca_4613_98c9_c573f199a50e
+###  http://emmo.info/emmo#EMMO_98e27347_42ca_4613_98c9_c573f199a50e
 :EMMO_98e27347_42ca_4613_98c9_c573f199a50e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5 ;
                                            skos:prefLabel "EnergySourceTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_a0d39183_16d7_4a47_9fbc_16e464402bc7
+###  http://emmo.info/emmo#EMMO_a0d39183_16d7_4a47_9fbc_16e464402bc7
 :EMMO_a0d39183_16d7_4a47_9fbc_16e464402bc7 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 ;
                                            skos:prefLabel "ConductionHeatFluxTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
+###  http://emmo.info/emmo#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
 :EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-05"@en ;
@@ -674,7 +695,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Solute"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339
+###  http://emmo.info/emmo#EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339
 :EMMO_ac9b6e13_f89b_4378_8a2a_a291fe0ec339 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ,
                                                            [ rdf:type owl:Restriction ;
@@ -684,7 +705,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FiniteElementModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe
+###  http://emmo.info/emmo#EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe
 :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-13"@en ;
@@ -695,19 +716,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Cation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c
+###  http://emmo.info/emmo#EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c
 :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4ce76d7f_03f8_45b6_9003_90052a79bfaa ;
                                            skos:prefLabel "Discretization"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623
+###  http://emmo.info/emmo#EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623
 :EMMO_af5ff45c_0f25_4e09_9070_0e9755ea6623 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
                                            skos:prefLabel "ElectricInductorModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93
+###  http://emmo.info/emmo#EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93
 :EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """In chemistry and physics ‘interface’ means the two-dimensional plane separating two phases.
@@ -716,7 +737,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Interface"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79
+###  http://emmo.info/emmo#EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79
 :EMMO_b35b8f5d_8e4c_4600_9554_f951113d2c79 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0466becd_3e08_436f_8412_e2eedbedfd39 ,
                                                            [ rdf:type owl:Restriction ;
@@ -736,13 +757,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "DiffusionMassFluxEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2
+###  http://emmo.info/emmo#EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2
 :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
                                            skos:prefLabel "EquivalentCircuitModelElementary"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
+###  http://emmo.info/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
 :EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
@@ -751,7 +772,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SpecificHeatCapacity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5
+###  http://emmo.info/emmo#EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5
 :EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ,
                                                            [ rdf:type owl:Restriction ;
@@ -762,7 +783,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "SourceTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_c611d72b_0921_4c93_ab42_43b30084283e
+###  http://emmo.info/emmo#EMMO_c611d72b_0921_4c93_ab42_43b30084283e
 :EMMO_c611d72b_0921_4c93_ab42_43b30084283e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f ,
                                                            [ rdf:type owl:Restriction ;
@@ -777,19 +798,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "DiscretizationFace"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_c64231ab_d281_4263_b470_52012f59d076
+###  http://emmo.info/emmo#EMMO_c64231ab_d281_4263_b470_52012f59d076
 :EMMO_c64231ab_d281_4263_b470_52012f59d076 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0466becd_3e08_436f_8412_e2eedbedfd39 ;
                                            skos:prefLabel "DiffusionMigrationMassFluxEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3
+###  http://emmo.info/emmo#EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3
 :EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b ;
                                            skos:prefLabel "EnergyAccumulationTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab
+###  http://emmo.info/emmo#EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab
 :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-12"@en ;
@@ -802,7 +823,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Anion"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_cdbf555a_6352_40b1_af1d_89eff215d506
+###  http://emmo.info/emmo#EMMO_cdbf555a_6352_40b1_af1d_89eff215d506
 :EMMO_cdbf555a_6352_40b1_af1d_89eff215d506 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_66305f3d_6eef_448a_953d_17abb87788ae ,
                                                            [ rdf:type owl:Restriction ;
@@ -812,27 +833,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FiniteVolumeMesh"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_d0592008_1de9_4ce1_99a4_3c38547c240f
+###  http://emmo.info/emmo#EMMO_d0592008_1de9_4ce1_99a4_3c38547c240f
 :EMMO_d0592008_1de9_4ce1_99a4_3c38547c240f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5 ;
                                            skos:altLabel "MassSourceEquation"@en ;
                                            skos:prefLabel "MassSourceTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_d4980a67_3a9f_47e3_9c8a_edc814dd8654
+###  http://emmo.info/emmo#EMMO_d4980a67_3a9f_47e3_9c8a_edc814dd8654
 :EMMO_d4980a67_3a9f_47e3_9c8a_edc814dd8654 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5 ;
                                            skos:altLabel "ChargeSourceEquation"@en ;
                                            skos:prefLabel "ChargeSourceTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_d5c1857a_46bb_4826_92c8_44a37d6ec230
+###  http://emmo.info/emmo#EMMO_d5c1857a_46bb_4826_92c8_44a37d6ec230
 :EMMO_d5c1857a_46bb_4826_92c8_44a37d6ec230 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
                                            skos:prefLabel "FiniteDifferenceModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767
+###  http://emmo.info/emmo#EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767
 :EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
@@ -840,7 +861,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FunctionalMaterial"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac
+###  http://emmo.info/emmo#EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac
 :EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b29fd350_39aa_4af7_9459_3faa0544cba6 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A model that describes the behaviour of a physical system using electric circuit components."@en ;
@@ -848,25 +869,25 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "EquivalentCircuitModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_e3d442e5_eae4_4fc5_a062_553bf900d9cd
+###  http://emmo.info/emmo#EMMO_e3d442e5_eae4_4fc5_a062_553bf900d9cd
 :EMMO_e3d442e5_eae4_4fc5_a062_553bf900d9cd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_98e27347_42ca_4613_98c9_c573f199a50e ;
                                            skos:prefLabel "HeatSourceTerm"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8
+###  http://emmo.info/emmo#EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8
 :EMMO_e55a5449_e49e_4e8c_bccb_8a1eb110b2e8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
                                            skos:prefLabel "ControlVolume"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_e58bde09_bb09_4bd5_911f_c5d7fb3e5e46
+###  http://emmo.info/emmo#EMMO_e58bde09_bb09_4bd5_911f_c5d7fb3e5e46
 :EMMO_e58bde09_bb09_4bd5_911f_c5d7fb3e5e46 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
                                            skos:prefLabel "CalendarDate"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
+###  http://emmo.info/emmo#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
 :EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06"@en ;
@@ -875,7 +896,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "Solvent"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9
+###  http://emmo.info/emmo#EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9
 :EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_41c6bacf_4e5c_44db_bcbc_6a6a470ad854 ,
                                                            :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
@@ -883,7 +904,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "NominalDiameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
+###  http://emmo.info/emmo#EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18
 :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A process that results in the interconversion of chemical species. Chemical reactions may be elementary reactions or stepwise reactions. (It should be noted that this definition includes experimentally observable interconversions of conformers.) Detectable chemical reactions normally involve sets of molecular entities as indicated by this definition, but it is often conceptually convenient to use the term also for changes involving single molecular entities (i.e. 'microscopic chemical events').
@@ -892,7 +913,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ChemicalReaction"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
+###  http://emmo.info/emmo#EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
 :EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_43e9a05d_98af_41b4_92f6_00f79a09bfce ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process that makes a product work as intended when in use."@en ;
@@ -902,12 +923,23 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "FunctionalProcess"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo#EMMO_fc4e0f47_ed67_4f27_ad2d_72312d9cc105
+###  http://emmo.info/emmo#EMMO_fc4e0f47_ed67_4f27_ad2d_72312d9cc105
 :EMMO_fc4e0f47_ed67_4f27_ad2d_72312d9cc105 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The current through a conductor between two points is directly proportional to the voltage across the two points."@en ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Ohm%27s_law"@en ;
                                            skos:prefLabel "OhmsLaw"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c2fd1dde_f64e_4115_9f3a_139410a763c2
+:EMMO_c2fd1dde_f64e_4115_9f3a_139410a763c2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_78116683_383a_44c4_ad72_b89e29d8f799 ;
+                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
+                                                           ] ;
+                                           skos:prefLabel "MixedSolvent"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
