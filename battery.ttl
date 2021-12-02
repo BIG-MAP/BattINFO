@@ -849,33 +849,7 @@ Adapted from:
 #    Individuals
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_30c2c2b9_deda_4adc_aacc_31b7aa8ec5e8
-:EMMO_30c2c2b9_deda_4adc_aacc_31b7aa8ec5e8 rdf:type owl:NamedIndividual ,
-                                                    emmo:EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
-                                           emmo:EMMO_67fc0a36_8dcb_4ffa_9a43_31074efa3296 <https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> ;
-                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "1.0"^^xsd:double ;
-                                           skos:prefLabel "molar_concentration_1"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe
-:EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe rdf:type owl:NamedIndividual ,
-                                                    emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50 ;
-                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "0.7"^^xsd:double ;
-                                           skos:prefLabel "emc_ecemc37_mass_fraction"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd
-:EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd rdf:type owl:NamedIndividual ,
-                                                    emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50 ;
-                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "0.3"^^xsd:double ;
-                                           skos:prefLabel "ec_ecemc37_mass_fraction"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a
-<https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> rdf:type owl:NamedIndividual .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_0488a9ff_b76c_4e78_b11a_304a10b1d93c
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0488a9ff_b76c_4e78_b11a_304a10b1d93c
 :EMMO_0488a9ff_b76c_4e78_b11a_304a10b1d93c rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "70.0"^^xsd:double ;
@@ -889,32 +863,58 @@ Adapted from:
                                            rdfs:label "cylindrical_21700_cell_nominal_diameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_405dd1bc_8f22_41ad_9a17_e82946d91494
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_30c2c2b9_deda_4adc_aacc_31b7aa8ec5e8
+:EMMO_30c2c2b9_deda_4adc_aacc_31b7aa8ec5e8 rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
+                                           emmo:EMMO_67fc0a36_8dcb_4ffa_9a43_31074efa3296 <https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "1.0"^^xsd:double ;
+                                           skos:prefLabel "molar_concentration_1"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_405dd1bc_8f22_41ad_9a17_e82946d91494
 :EMMO_405dd1bc_8f22_41ad_9a17_e82946d91494 rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "65.0"^^xsd:double ;
                                            skos:prefLabel "cylindrical_18650_cell_nominal_height"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_6c1725c6_4c38_4774_8e39_1f3e76556359
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe
+:EMMO_5b580586_8ab2_4195_85e0_d0387f646dfe rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "0.7"^^xsd:double ;
+                                           skos:prefLabel "emc_ecemc37_mass_fraction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6c1725c6_4c38_4774_8e39_1f3e76556359
 :EMMO_6c1725c6_4c38_4774_8e39_1f3e76556359 rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "18.0"^^xsd:double ;
                                            skos:prefLabel "cylindrical_18650_cell_nominal_diameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_7e323492_c252_4274_a5e4_950547f8ae79
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7e323492_c252_4274_a5e4_950547f8ae79
 :EMMO_7e323492_c252_4274_a5e4_950547f8ae79 rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "46.0"^^xsd:double ;
                                            rdfs:label "cylindrical_4680_cell_nominal_diameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFOy#EMMO_afa1cf12_a4c0_482c_800a_d834ba47e6bc
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd
+:EMMO_8d29cee5_1860_4801_beb8_82c32181b2bd rdf:type owl:NamedIndividual ,
+                                                    emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50 ;
+                                           emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "0.3"^^xsd:double ;
+                                           skos:prefLabel "ec_ecemc37_mass_fraction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_afa1cf12_a4c0_482c_800a_d834ba47e6bc
 :EMMO_afa1cf12_a4c0_482c_800a_d834ba47e6bc rdf:type owl:NamedIndividual ,
                                                     emmo:EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732 ;
                                            emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 "80.0"^^xsd:double ;
                                            rdfs:label "cylindrical_4680_cell_nominal_height"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a
+<https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fafdb90d_7312_4d1c_8e8c_23be19098a5a> rdf:type owl:NamedIndividual .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
