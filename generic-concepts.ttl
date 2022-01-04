@@ -567,9 +567,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 ###  http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
 :EMMO_802c167d_b792_4cb8_a315_35797345c0e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
-                                                           :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ;
+                                                           :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3ecff38b_b3cf_4a78_b49f_8580abf8715b
+                                                           ] ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The amount of heat to be applied to a given mass of material to produce a unit change in its temperature."@en ;
-                                           :EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ-1 N0 J0"@en ;
                                            skos:prefLabel "HeatCapacity"@en .
 
 
