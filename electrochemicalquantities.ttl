@@ -774,7 +774,7 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112
 :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_daf05011_df3f_44a0_bb31_f8d565d7a854 ;
+                                           rdfs:subClassOf emmo:EMMO_79751276_b2d0_4e2f_bbd4_99d412f43d55 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Physical quantities defined within the domain of electrochemistry."@en ;
                                            skos:prefLabel "ElectrochemicalQuantity"@en .
 
