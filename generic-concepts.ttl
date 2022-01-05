@@ -127,7 +127,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_49804605_c0fe_4538_abda_f70ba1dc8a5d ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty [ owl:inverseOf :EMMO_c5aae418_1622_4d02_93c5_21159e28e6c1
+                                                             owl:onProperty [ owl:inverseOf :EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
                                                                             ] ;
                                                              owl:someValuesFrom :EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
                                                            ] ;
