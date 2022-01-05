@@ -70,7 +70,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric current that flows, at a particular value of the applied potential, in the absence of the substance whose electrode behaviour is being investigated, i.e. a \"blank\" solution.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/R05311"@en ;
                                            rdfs:comment "I_{r}"@en ,
                                                         "The residual (or background) current may be subtracted from the total current to calculate the net faradaic current."@en ;
@@ -126,7 +125,6 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Algebraic sum of faradaic currents flowing through an electrode.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            rdfs:comment "I"@en ;
                                            skos:prefLabel "NetFaradaicCurrent"@en .
 
@@ -138,7 +136,6 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ;
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Diffusion_current"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/D01722"@en ;
                                            rdfs:comment "Diffusion current is governed by Fick’s Laws of diffusion. It is the principle on which many electroana- lytical methods are based, because the current is proportional to the bulk concentration of the diffusing species. I_{d} = z*F*A*D*\\grad(c)_{x=0}, where z is the electron number of an electrochemical reaction, F the Faraday constant, A the electrode surface area, D the diffusion coefficient of electroactive substance, and (∂c/∂x)x=0 the gradient of the amount concentration at the electrode surface position x = 0."@en ,
                                                         "I_{d}"@en ;
@@ -198,7 +195,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric current that accompanies the adsorption of a species.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0"@en ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00159"@en ;
                                            rdfs:comment "I_{ads}"@en ,
                                                         "The terms “adsorption current” and “limiting adsorption current” should not be applied to faradaic cur- rents that have been increased or decreased by adding a non-electroactive surfactant to a solution con- taining an electroactive substance, nor to currents resulting from the effect of adsorption or desorption on double-layer currents."@en ;
@@ -219,7 +215,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Component of electric current due to transport of ions in the electric field between the electrodes.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/M03921"@en ;
                                            rdfs:comment "I_{m}"@en ,
                                                         "The sign convention regarding current is such that the migration current is positive for the oxida- tion of a cation or the reduction of an anion and is negative for the reduction of a cation or for the oxidation of an anion. Hence, the migration current may either increase or decrease the total current observed. The migration current approaches zero as the transport number of the electroactive sub- stance is decreased by increasing the concentration of supporting electrolyte, and hence the conduc- tivity of the solution."@en ;
@@ -261,7 +256,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Alternating_current"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00252"@en ;
                                            rdfs:comment "The amplitude of an alternating current is half the peak-to-peak difference of the sinusoidal current."@en ;
                                            skos:altLabel "AC"@en ;
@@ -287,7 +281,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Faradaic_current"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/F02321"@en ;
                                            rdfs:comment "Current that is produced by other processes, for example by diffusion of charged species, is termed ‘non- faradaic current’."@en ,
                                                         "I_f"@en ;
@@ -308,7 +301,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Component of an electric current that is associated with the presence of an analyate in square-wave voltammetry.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05897"@en ;
                                            rdfs:comment "I_{SW}"@en ,
                                                         "The component may be faradaic (if the analyte is electroactive) or non-faradaic (if the analyte is surface-active). The simultaneous occurrence of both effects is quite common."@en ;
@@ -331,7 +323,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Typical examples of imposed potential programmes in dynamic voltammetric techniques resulting in peak-shaped responses are linear-scan voltammetry, cyclic voltammetry, ac voltammetry, differential pulse voltammetry, square-wave voltammetry, stripping voltammetry, and derivative techniques."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/P04457"@en ;
                                            rdfs:comment "I_{p}"@en ,
                                                         "Since the concentration of an electroactive substance at the electrode-solution interface decreases mono- tonically, the faradaic current due to its electrooxidation or electroreduction increases monotonically with time because of the increasing concentration gradient of the electroactive substance, the concentra- tion of which remains constant in the bulk. The maximum current value is passed when the transport rate of electroactive substance to the electrode-solution interface starts to be lower than the rate at which it is removed by reaction at the electrode. The result of these two competing processes leads to the peak- shaped I-E dependence."@en ;
@@ -342,7 +333,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_3e54f9e3_a31d_4821_9bfb_ef953a42c35b rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "MaxPulseDischargeCurrent"@en .
 
 
@@ -439,7 +429,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 :EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which ions are the charge carrier."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "IonicCurrent"@en .
 
 
@@ -470,7 +459,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Diffusion current of the potential-independent value that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03534"@en ;
                                            rdfs:comment "I_{d,lim}"@en ;
                                            skos:altLabel "LimitingDiffusionCurrent"@en ;
@@ -534,7 +522,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "ChargeCutoffCurrent"@en .
 
 
@@ -609,7 +596,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Direct_current"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/D01767"@en ;
                                            rdfs:comment "I_{DC}"@en ,
                                                         "The term ‘direct current’ should be used where there is ambiguity concerning the constancy of direction of current. See alternating current."@en ;
@@ -648,7 +634,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current of an electroactive substance B formed by a prior chemical reaction from another substance Y that is no electroactive at the potential at which B is electrochemically transformed.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/K03399"@en ;
                                            rdfs:comment "The kinetic current is partially or entirely controlled by the rate of the chemical reaction. This reaction may be heterogeneous, occurring at an electrode-solution interface (surface reaction), or it may be homo- geneous, occurring at some distance from the interface (bulk reaction)."@en ;
                                            skos:prefLabel "KineticCurrent"@en .
@@ -711,7 +696,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Value of an electric current at an instant in time, t.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/I03062"@en ;
                                            rdfs:comment "I_{t}"@en ,
                                                         "The instantaneous current is usually time-dependent and may have the character of an adsorption current, catalytic current, diffusion current, double-layer current, or kinetic current, and may include a migration current. A plot of the dependence of instantaneous current on time is commonly called an “I-t curve”."@en ;
@@ -741,7 +725,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Non-faradaic current associated with the charging of the electrical double layer at the electrode-solution interface.
 
 ----J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/D01847"@en ;
                                            skos:prefLabel "DoubleLayerCurrent"@en .
 
@@ -813,7 +796,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 :EMMO_ba7ac581_0e13_4815_b888_013c378932f5 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "MaxContinuousDischargeCurrent"@en .
 
 
@@ -870,7 +852,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current measured in a solution containing two electroactive substances, A and B, that exceeds the sum of the faradaic currents that would be obtained for A and B separately under the same experimental conditions.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0"@en ;
                                            rdfs:comment "I_{cat}"@en ,
                                                         """In either of the two following situations, the current increase is termed a catalytic current: 
 
@@ -918,7 +899,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
                                                            :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The common value (i0) of the anodic and cathodic partial currents when the reaction is at equilibrium."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E02238" ;
                                            rdfs:comment "For an electrode at equilibrium at which only one reaction is significant i = 0. When more than one reaction is significant at a given electrode, subscripts to i0 may be used to distinguish exchange currents. i is not usually zero when only one of these reactions is at equilibrium."@en ,
                                                         "i0 = ia = - ic"@en ;
@@ -931,7 +911,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Faradaic current that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/L03532"@en ;
                                            rdfs:comment "A limiting current is reached when the overpotential is sufficiently large that the faradaic current is deter- mined solely by the ability to supply electroactive species by mass transport. A limiting current is there- fore independent of applied potential over a corresponding finite potential range. A limiting current may have the character of an adsorption, catalytic, diffusion, or kinetic current, and may include a migration current."@en ;
                                            skos:prefLabel "LimitingCurrent"@en .
@@ -980,7 +959,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 :EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectronicCurrent"@en .
 
 
