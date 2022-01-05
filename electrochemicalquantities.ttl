@@ -341,6 +341,7 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3ab3cde9_3b18_4f97_a86d_d95ba346af95
 :EMMO_3ab3cde9_3b18_4f97_a86d_d95ba346af95 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_3ee80521_3c23_4dd1_935d_9d522614a3e2 ;
+                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-3 M0 I0 Θ0 N+1 J0" ;
                                            skos:altLabel "Molar"@en ;
                                            skos:prefLabel "MolePerLitre"@en .
 
