@@ -225,7 +225,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_22fa1067_3964_4efd_8973_cc91eeb27451 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
                                            skos:prefLabel "MinOperatingTemperature"@en .
 
 
@@ -244,7 +243,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_2678a656_4a27_4706_8dde_b0a93e9b92fa rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "RestingTime"@en .
 
 
@@ -547,7 +545,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_74293727_07f7_4b7b_9e23_bea328144ad7 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ+1 N0 J0" ;
                                            skos:prefLabel "MaxOperatingTemperature"@en .
 
 
@@ -678,7 +675,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 :EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ,
                                                            :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalShelfLife"@en .
 
 
@@ -920,7 +916,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 :EMMO_d5dc0c1d_0926_4268_89f0_4519a326eabc rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "MaxPulseDischargeTime"@en .
 
 
