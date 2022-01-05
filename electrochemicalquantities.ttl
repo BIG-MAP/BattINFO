@@ -1084,7 +1084,7 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "SpecificEnergy"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_fe1481a4_3a8b_4d2a_904e_503ae55af2ea
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_fe1481a4_3a8b_4d2a_904e_503ae55af2ea
 :EMMO_fe1481a4_3a8b_4d2a_904e_503ae55af2ea rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Charge capacity per unit area."@en ;
