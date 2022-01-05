@@ -36,14 +36,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 
 #################################################################
-#    Object Properties
-#################################################################
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258
-<https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258> rdf:type owl:ObjectProperty .
-
-
-#################################################################
 #    Classes
 #################################################################
 
@@ -512,14 +504,6 @@ Adapted from:
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
                                                              owl:someValuesFrom :EMMO_62114aea_17fb_40ad_8575_ac6647ac8a6c
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258> ;
-                                                             owl:someValuesFrom :EMMO_90a6f1ac_4b98_4d4a_bd28_943c0df29257
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8bcaaf87_6db0_4d15_8e54_377cae75c258> ;
-                                                             owl:someValuesFrom :EMMO_e1a6ee3f_95ae_4cd3_a72f_067a0843bd9b
                                                            ] ;
                                            skos:prefLabel "LP57"@en .
 
