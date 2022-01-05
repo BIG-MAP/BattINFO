@@ -516,7 +516,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            rdfs:subClassOf :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ChemicalPotential per mole."@en ;
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
-                                           rdfs:label "MolarChemicalPotential"@en ;
                                            skos:altLabel "PartialMolarFreeEnergy"@en ,
                                                          "PartialMolarGibbsFreeEnergy"@en ;
                                            skos:prefLabel "MolarChemicalPotential"@en .
@@ -599,7 +598,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
                                            rdfs:comment "Of a substance in a specified phase, the partial molar Gibbs energy of the substance at the specified electric potential."@en ;
-                                           rdfs:label "MolarElectrochemicalPotential"@en ;
                                            skos:prefLabel "MolarElectrochemicalPotential"@en .
 
 
