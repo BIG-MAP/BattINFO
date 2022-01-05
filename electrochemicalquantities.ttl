@@ -23,10 +23,6 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 #    Annotation properties
 #################################################################
 
-###  http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
-emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d rdf:type owl:AnnotationProperty .
-
-
 ###  http://purl.org/dc/terms/abstract
 dcterms:abstract rdf:type owl:AnnotationProperty .
 
@@ -46,7 +42,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0139e120_c0b6_4657_8504_5fb39308fe31
 :EMMO_0139e120_c0b6_4657_8504_5fb39308fe31 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "TheoreticalEnergy"@en .
 
 
@@ -59,7 +54,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa
 :EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalCycleLife"@en .
 
 
@@ -81,7 +75,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 :EMMO_0c9655c6_6b0b_4819_a219_f286ad196fa9 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_ffb73b1e_5786_43e4_a964_cb32ac7affb7 ,
                                                            :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-2 M-1 I+2 Θ0 N0 J0" ;
                                            rdfs:comment "Inverse of InternalResistance."@en ;
                                            skos:prefLabel "InternalConductance"@en .
 
@@ -90,7 +83,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 :EMMO_0d0ca626_acfc_42df_a4d6_bfd124c9dc0e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
                                                            :EMMO_fb0b984f_5704_4716_9aaf_19235b032da3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalSpecificEnergy"@en .
 
 
@@ -99,7 +91,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The electrode electric potential range between which the substance is neither oxidized nor reduced."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrochemical_window"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0"@en ;
                                            skos:altLabel "ElectrochemicalStabilityWindow"@en ;
                                            skos:prefLabel "ElectrochemicalWindow"@en .
 
@@ -111,7 +102,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 - Atkins and DePaula, Aktins' Physical Chemistry, 8th ed., p.952"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrochemical_potential"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
                                            rdfs:comment """In quantum mechanical terms, electrochemical potential is defined as the energy level of the electron orbitals in the species that have a 50 percent probability of occupancy.
 
@@ -147,7 +137,6 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy that can be absorbed or released due to a change of the particle number of the given species"@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Chemical_potential" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01032" ;
                                            skos:prefLabel "ChemicalPotential"@en .
 
@@ -160,7 +149,6 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ;
 
 J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Overpotential"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/O04358" ;
                                            rdfs:comment "Deviation of the potential of an electrode from its equilibrium value required to cause a given current to flow through the electrode."@en ,
                                                         "Overpotential is positive for oxidation reactions and negative for reduction reactions."@en ,
@@ -173,7 +161,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
                                                            :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalVoltage"@en .
 
 
@@ -182,7 +169,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric charge per unit mass."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
                                            skos:altLabel "SpecificChargeCapacity"@en ,
                                                          "SpecificElectricChargeCapacity"@en ;
                                            skos:prefLabel "SpecificCapacity"@en .
@@ -235,7 +221,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electric potential difference between two solutions separated by an ion-selective membrane in the absence of any electric current flowing through the membrane.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "MembranePotential"@en .
 
 
@@ -264,7 +249,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_29a57599_aa0d_458f_b23e_666a2da55883 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "If the macroscopic (observed, empirical or phenomenological) rate of reaction (v) for any reaction can be expressed by an empirical differential rate equation (or rate law) which contains a factor of the form k [A]α [B]β ... (expressing in full the dependence of the rate of reaction on the concentrations [A], [B] ...) where α, β are constant exponents (independent of concentration and time) and k is independent of [A] and [B] etc. (rate constant, rate coefficient), then the reaction is said to be of order α with respect to A, of order β with respect to B, ... , and of (total or overall) order n=α+β+... The exponents α, β, ... can be positive or negative integral or rational nonintegral numbers."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/O04322" ;
                                            skos:altLabel "OrderOfReaction"@en ;
                                            skos:prefLabel "ReactionOrder"@en .
@@ -309,7 +293,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_374878d4_5682_4bef_a8cd_3b4ff6d87931 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
                                                            :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalEnergy"@en .
 
 
@@ -338,7 +321,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
 :EMMO_458c65dc_9331_473f_ba96_0bf244ec5e98 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30 ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M-1 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "TheoreticalSpecificCapacity"@en .
 
 
@@ -348,7 +330,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Area of electrode - solution interface.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
                                            rdfs:comment "A"@en ,
                                                         """The geometric area, A_{geom} , is the interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces. 
 
@@ -369,7 +350,6 @@ occurring under constant-volume conditions, without an appreciable build-up of r
 
 where symbols placed inside square brackets denote amount (or amount of substance) concentrations (conventionally expressed in units of mol dm−3). The symbols R and r are also commonly used in place of ν."""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_rate" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-1 L0 M0 I0 Θ0 N+1 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/R05156" ;
                                            skos:altLabel "RateOfReaction"@en ;
                                            skos:prefLabel "ReactionRate"@en .
@@ -386,7 +366,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 :EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed ,
                                                            :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-3 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalVolume"@en .
 
 
@@ -394,7 +373,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 :EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Conductivity of an electrolyte solution divided by its molar concentration."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L0 M-1 I+2 Θ0 N-1 J0" ;
                                            rdfs:comment "\\Lambda_m = \\kappa / c"@en ;
                                            skos:prefLabel "MolarConductivity"@en .
 
@@ -404,7 +382,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            rdfs:subClassOf emmo:EMMO_830b59f7_d047_438c_90cd_62845749efcb ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Amount of energy stored in a physical object."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "StoredEnergy"@en .
 
 
@@ -412,14 +389,12 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 :EMMO_534dd59c_904c_45d9_8550_ae9d2eb6bbc9 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "DischargeCutoffVoltage"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_54e8cef6_b4cb_4560_947a_50811fa0f177
 :EMMO_54e8cef6_b4cb_4560_947a_50811fa0f177 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-3 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectrolyteVolume"@en .
 
 
@@ -436,7 +411,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Quotient of the current carried by an ionic component and the total current. 
 
 -- IUPAC, Compendium of Chemical Terminology, 2014. DOI: 10.1351/goldbook.I03352"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/T06489" ;
                                            rdfs:comment "ISO recommends the name current fraction of ions B."@en ;
                                            skos:altLabel "TransferrenceNumber"@en ;
@@ -447,7 +421,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 :EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
                                                            :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-2 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalInternalResistance"@en .
 
 
@@ -474,7 +447,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
 
 J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "A positive surface overpotential produces a positive (anodic) current."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "The driving force for an electrochemcial charge-transfer reaction."@en ,
                                                         "\\eta_s = \\phi_{electrode} - \\phi_{solution} - E_{eq}"@en ;
                                            skos:prefLabel "SurfaceOverpotential"@en .
@@ -484,7 +456,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ,
                                                            :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
                                            rdfs:comment "Measure of a material's ability to conduct an electric current by ions."@en ;
                                            skos:prefLabel "IonicConductivity"@en .
 
@@ -493,7 +464,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are ions." ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-2 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "IonicCurrentDensity"@en .
 
 
@@ -501,7 +471,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ChemicalPotential per mole."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
                                            skos:altLabel "PartialMolarFreeEnergy"@en ,
                                                          "PartialMolarGibbsFreeEnergy"@en ;
                                            skos:prefLabel "MolarChemicalPotential"@en .
@@ -511,7 +480,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ,
                                                            :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L-3 M-1 I+2 Θ0 N0 J0" ;
                                            rdfs:comment "Measure of a material's ability to conduct an electric current by electrons."@en ;
                                            skos:prefLabel "ElectronicConductivity"@en .
 
@@ -527,7 +495,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
 :EMMO_6dcd5baf_58cd_43f5_a692_51508e036c88 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "ChargeCutoffVoltage"@en .
 
 
@@ -536,7 +503,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A quantity that provides a measurement of the relative quantities of products and reactants present in a reaction mixture for a reaction with well-defined overall stoichiometry, at a particular point in time."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_quotient" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ;
                                            skos:prefLabel "ReactionQuotient"@en .
 
@@ -553,7 +519,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            rdfs:subClassOf emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Amount of electric charge that can be stored."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:altLabel "ChargeCapacity"@en ,
                                                          "ElectricChargeCapacity"@en ;
                                            skos:prefLabel "Capacity"@en .
@@ -566,7 +531,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Equilibrium electrode potential of an electrode under standard conditions.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S05912"@en ;
                                            rdfs:comment """E° is related to the standard Gibbs Energy of the electrode reaction, Δr
 G° or ΔrG , written as a reduction with respect to that of the standard hydrogen electrode (SHE) E° = −ΔrG°/zF."""@en ,
@@ -579,7 +543,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 :EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ElectrochemicalPotential per mole."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N-1 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
                                            rdfs:comment "Of a substance in a specified phase, the partial molar Gibbs energy of the substance at the specified electric potential."@en ;
                                            skos:prefLabel "MolarElectrochemicalPotential"@en .
@@ -605,7 +568,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
                                                            :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric potential at which a material undergoes an oxidation or reduction decomposition."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectrochemicalStabilityLimit"@en .
 
 
@@ -613,7 +575,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 :EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 ,
                                                            :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L-1 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalEnergyDensity"@en .
 
 
@@ -621,7 +582,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 :EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
                                                            :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalCapacity"@en .
 
 
@@ -640,7 +600,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Impetance associated with a power source."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-2 Θ0 N0 J0" ;
                                            rdfs:comment "According to to Thévenin's theorem can any linear electric curcuit be replaced with a voltage source in series with an impedance. This impedance is for historical reasons termed \"internal resistance\"."@en ,
                                                         "For batteries, it the internal resistance the resistance of the cell."@en ;
                                            skos:prefLabel "InternalResistance"@en .
@@ -653,7 +612,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode potential of working electrode relative to the reference electrode when no potential or electric current is being applied to the electrochemical cell.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "In the case of a reversible electrode system, the OCP is also referred to as the equilibrium electrode potential. Otherwise, it is called the rest potential, or the corrosion potential, depending on the system being studied."@en ;
                                            skos:altLabel "OpenCircuitVoltage"@en ;
                                            skos:prefLabel "OpenCircuitPotential"@en .
@@ -666,7 +624,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 
 IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Overpotential#Concentration_overpotential"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01230" ;
                                            skos:prefLabel "ConcentrationOverpotential"@en .
 
@@ -682,7 +639,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Molar conductivity at infinite dilution"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+3 L0 M-1 I+2 Θ0 N-1 J0" ;
                                            skos:prefLabel "LimitingMolarConductivity"@en .
 
 
@@ -705,7 +661,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
 
 R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An assessment (IUPAC Technical Report),” Pure Appl. Chem., vol. 86, no. 2, pp. 245–258, 2014. https://doi.org/10.1515/pac-2014-5026"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Charge_transfer_coefficient" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            rdfs:comment """The cathodic transfer coefficient αc is defined as –(RT/nF)(dlnkc /dE), where kc
 is the electroreduction rate constant, E is the applied potential, and R, T, and
 F have their usual significance. This definition is equivalent to the other, -(RT/nF)(dln|jc |/dE), where jc is the cathodic current density corrected for any changes in the reactant concentration at the electrode surface with respect to its bulk value.
@@ -731,7 +686,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Surface area of an electrode that takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0"@en ;
                                            rdfs:comment "A_{real}" ;
                                            skos:prefLabel "ElectrodeRealSurfaceArea"@en .
 
@@ -742,7 +696,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Number of electrons transferred in a charge transfer reaction between an electrode and a single entity (ion, radical-ion, or molecule) of an electroactive substance, whose identity must be specified.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C00995" ;
                                            rdfs:comment "Symbol n is commonly used when there is no risk of confusion with an amount of substance."@en ,
                                                         "The apparent number of electrons transferred, z_{app} , represents the experimentally measured number of electrons transferred between an electrode and one electroactive substance species, whose identity must be specified. When the electrooxidation or electroreduction of a substance B is accompanied by chemical processes, such as the catalyzed or induced reduction of a second substance, or a side reaction that consumes B or an intermediate, the value of z_{app} will differ from that of z."@en ;
@@ -764,7 +717,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Equilibrium electrode potential under conditions of unit concentration of species involved in the electrode reaction.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "E^{\\circ '}"@en ,
                                                         "E_{eq} = E^{\\circ '} - (R*T / (z*F)) * \\sum_i{\\nu_i * ln(c_i/c^{circ})}"@en ,
                                                         "It is E°′ which is calculated in electrochemical experiments when the concentrations of the various species are known, but their activities are not. Its value depends on the composi- tion of the electrolyte solution. The argument of ln is dimensionless, while the concentration ci is normalized through division by the standard concentration, usually c° = 1 mol dm^{−3} for soluble species."@en ;
@@ -783,7 +735,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 :EMMO_b7781ebc_90a7_4f19_997f_aed28dee1b01 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:altLabel "TheoreticalChargeCapacity"@en ;
                                            skos:prefLabel "TheoreticalCapacity"@en .
 
@@ -799,7 +750,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 :EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The area of the electrode material that is accessible to the electrolyte that is used for charge transfer and/or storage."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
                                            skos:altLabel "EASA"@en ,
                                                          "ECSA"@en ;
                                            skos:prefLabel "ElectrochemicallyActiveSurfaceArea"@en .
@@ -810,7 +760,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ,
                                                            :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of ElectronicConductivity"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectronicResistivity"@en .
 
 
@@ -818,7 +767,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 :EMMO_bfc8c075_246e_4633_ba8e_906a9f5f2e3a rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are electrons." ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-2 M0 I+1 Θ0 N0 J0" ;
                                            skos:prefLabel "ElectronicCurrentDensity"@en .
 
 
@@ -828,7 +776,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Range of electrode potentials of a given working electrode in a given electrolyte, where the electric current from reactions of the electrode or electrolyte is negligible compared with the current from reactions of the system under investigation.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "Because the working potential range is a function of a specific electrode/electrolyte system, only approximate ranges can be given for generic systems."@en ,
                                                         "The working potential range is usually limited by the stability of the electrolyte, itself affected by the catalytic properties of the electrode, or by the stability of the electrode."@en ;
                                            skos:prefLabel "WorkingPotentialRange"@en .
@@ -838,7 +785,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
 :EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_04cf0295_3e8f_4693_a87f_3130d125cf05 ,
                                                            :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+1 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "NominalWeight"@en .
 
 
@@ -867,7 +813,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ,
                                                            :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of IonicConductivity"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+3 M+1 I-2 Θ0 N0 J0" ;
                                            skos:prefLabel "IonicResistivity"@en .
 
 
@@ -876,7 +821,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf emmo:EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c ,
                                                            :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Weight of active material in an electrode per unit electrode area."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-2 M+1 I0 Θ0 N0 J0"@en ;
                                            skos:altLabel "ActiveElectrochemicalMaterialLoading"@en ;
                                            skos:prefLabel "ActiveMaterialLoading"@en .
 
@@ -886,7 +830,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The number of molecules and/or formula units that participate in the reaction as written"@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "StoichiometricCoefficient"@en .
 
 
@@ -923,7 +866,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 :EMMO_d62ff300_26ac_4b00_bfcd_04a68aff5dc3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Change in the Gibbs free energy between the products and reactants in a reaction."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M+1 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "GibbsFreeEnergyOfReaction"@en .
 
 
@@ -934,7 +876,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reversal_potential"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "Eeq is related to the standard electrode potential by the Nernst equation."@en ,
                                                         "Temperature and activities of relevant species must be specified."@en ;
                                            skos:altLabel "EquilibriumPotential"@en ,
@@ -961,7 +902,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 :EMMO_e8e41092_cc75_4952_bc54_af1a72d19fcd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A capacity measured under a given set of experimental conditions."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N0 J0" ;
                                            skos:altLabel "ExperimentalElectricChargeCapacity"@en ;
                                            skos:prefLabel "ExperimentalCapacity"@en .
 
@@ -971,7 +911,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Product of the stoichiometric coefficient and +1 for a product and -1 for a reactant."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L0 M0 I0 Θ0 N0 J0"@en ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S06025"@en ;
                                            skos:prefLabel "StoichiometricNumber"@en .
 
@@ -981,7 +920,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Defined by j0 = i0/A, where i0 is the exchange current of the electrode reaction and A is usually taken as the geometric area of the electrode."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Exchange_current_density" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L-2 M0 I+1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/M03777" ;
                                            skos:altLabel "MeanExchangeCurrentDensity"@en ;
                                            skos:prefLabel "ExchangeCurrentDensity"@en .
@@ -1001,7 +939,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrode_potential" ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01956" ;
                                            rdfs:comment "E, U"@en ,
                                                         "The absolute value of the electrode potential cannot be measured, so E is always reported relative to the potential of a reference electrode, e.g. that of a standard hydrogen electrode (SHE)."@en ;
@@ -1014,7 +951,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Difference of electric potentials measured between identical metallic leads to two electrodes of an electrochemical cell.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-3 L+2 M+1 I-1 Θ0 N0 J0" ;
                                            rdfs:comment "Single electrode potentials relative to hypothetical standards, such as vacuum zero, are not experimentally accessible."@en ,
                                                         "The applied potential is divided into a) two electrode potentials, each of which is the dif- ference of potential existing between the bulk of the solution and the interior of the con- ducting material of the electrode, b) an IR or ohmic potential drop through the solution of resistance R at electric current I, and c) another ohmic potential drop through each elec- trode and its metallic leads."@en ;
                                            skos:altLabel "Voltage"@en ;
@@ -1027,7 +963,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces.
 
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T0 L+2 M0 I0 Θ0 N0 J0" ;
                                            rdfs:comment "A_{geom}"@en ;
                                            skos:prefLabel "ElectrodeGeometricSurfaceArea"@en .
 
@@ -1035,7 +970,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_fb0b984f_5704_4716_9aaf_19235b032da3
 :EMMO_fb0b984f_5704_4716_9aaf_19235b032da3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T-2 L+2 M0 I0 Θ0 N0 J0" ;
                                            skos:prefLabel "SpecificEnergy"@en .
 
 

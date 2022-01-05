@@ -11,21 +11,17 @@
 @base <https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry> .
 
 <https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry> rdf:type owl:Ontology ;
-                                                      owl:versionIRI <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.1.0/electrochemistry/electrochemistry.ttl> ;
-                                                      owl:imports <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.1.0/electrochemicalquantities/electrochemicalquantities.ttl> ;
-                                                      dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
+                                                                                 owl:versionIRI <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.1.0/electrochemistry/electrochemistry.ttl> ;
+                                                                                 owl:imports <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.1.0/electrochemicalquantities/electrochemicalquantities.ttl> ;
+                                                                                 dcterms:abstract """Everything needed to describe fundamental concepts in electrochemistry common to all electrochemical systems.
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
-                                                      dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                                      owl:versionInfo "0.1.0" .
+                                                                                 dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+                                                                                 owl:versionInfo "0.1.0" .
 
 #################################################################
 #    Annotation properties
 #################################################################
-
-###  http://emmo.info/emmo#EMMO_de178b12_5d35_4bca_8efa_a4193162571d
-emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d rdf:type owl:AnnotationProperty .
-
 
 ###  http://purl.org/dc/terms/abstract
 dcterms:abstract rdf:type owl:AnnotationProperty .
@@ -99,6 +95,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
                                                              owl:someValuesFrom :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -114,15 +114,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
+                                                             owl:onProperty emmo:EMMO_9a084aa3_3d5a_4a62_9fc0_fd88937a19c5 ;
                                                              owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -560,7 +556,6 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 ;
                                            emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "Product of ElectronCharge and AvagadroConstant"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Fundamental physical constant representing molar elementary charge: F=9.648 533 99(24)×10^4 C mol−1."@en ;
-                                           emmo:EMMO_de178b12_5d35_4bca_8efa_a4193162571d "T+1 L0 M0 I+1 Θ0 N-1 J0" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/F02325" ;
                                            skos:prefLabel "FaradayConstant"@en .
 
@@ -604,7 +599,7 @@ Adapted from:
 :EMMO_4f3a2ba3-7abc-4150-ba98-3973d865690f rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_69b9aead-bb43-4bd5-9168-728cea2116b1 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d ;
+                                                             owl:onProperty emmo:EMMO_9a084aa3_3d5a_4a62_9fc0_fd88937a19c5 ;
                                                              owl:someValuesFrom :EMMO_3663991d-9319-4f7a-922b-f0e428b58801
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A pore that exists within an electrode host domain."@en ;
@@ -1166,6 +1161,18 @@ Conducting Additive"""@en ;
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1179,18 +1186,6 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation relating the limiting molar conductivity Λ_m^0 (see Kohlrausch's law) to the ionic diffusion coefficients."@en ;
                                            rdfs:comment "\\Lambda_m^0 = (F^2/(R*T)) * (v_{+} * z_{+}^2 * D_{+} + v_{–} * z_{–}^2 * D_{–})"@en ;
@@ -1301,6 +1296,10 @@ Conducting Additive"""@en ;
                                                            :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1310,10 +1309,6 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
                                                            ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-01"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A chemical reaction in an electrolyte involving a transfer of electrons between chemical components or between chemical components and an electrode.
@@ -1589,15 +1584,15 @@ of other configurations are used."""@en ;
                                            rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
                                                            ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Redox"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Chemical reactions in which the reactants exchange electrons between each other.
@@ -1620,6 +1615,14 @@ of other configurations are used."""@en ;
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1637,14 +1640,6 @@ of other configurations are used."""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The standard phenomenological model for electrode kinetics, describing the relation between the electrode current from an electrochemical charge-transfer reaction and the surface overpotential of the electrode."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Butler%E2%80%93Volmer_equation"@en ;
@@ -1922,6 +1917,14 @@ Adapted from:
                                            rdfs:subClassOf :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1939,14 +1942,6 @@ Adapted from:
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
                                                            ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Nernst_equation"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation that relates the reduction potential of an electrochemical reaction (half-cell or full cell reaction) to the standard electrode potential, temperature, and activities (often approximated by concentrations) of the chemical species undergoing reduction and oxidation."@en ;
