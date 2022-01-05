@@ -26,6 +26,7 @@ jobs:
       run: |
         emmocheck --verbose --check-imported --url-from-catalog \
           --skip test_namespace \
+          --skip test_quantity_dimension \
           --configfile=.github/utils/emmocheck_config.yml \
           battinfo.ttl
 
