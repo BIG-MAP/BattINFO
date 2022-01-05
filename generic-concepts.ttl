@@ -91,12 +91,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 #    Object Properties
 #################################################################
 
-###  http://emmo.info/emmo#EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d
-:EMMO_4d6504f1_c470_4ce9_b941_bbbebc9ab05d rdf:type owl:ObjectProperty .
-
-
-###  http://emmo.info/emmo#EMMO_c5aae418_1622_4d02_93c5_21159e28e6c1
-:EMMO_c5aae418_1622_4d02_93c5_21159e28e6c1 rdf:type owl:ObjectProperty .
 
 
 #################################################################
