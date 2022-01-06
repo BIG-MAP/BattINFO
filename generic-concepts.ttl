@@ -1438,6 +1438,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalConductance"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0030425b_5bce_4baf_b55e_7a1238b14614
+:EMMO_0030425b_5bce_4baf_b55e_7a1238b14614 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-3 L+1 M+1 I-1 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "ElectricFieldStrengthDimension"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_164b8937_b242_45d0_8839_3b0605f0a556
 :EMMO_164b8937_b242_45d0_8839_3b0605f0a556 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
@@ -1488,6 +1498,39 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "PerThermalTransmittanceDimension"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5afa28f0_8c9f_4fcd_8f67_805bd2f9c068
+:EMMO_5afa28f0_8c9f_4fcd_8f67_805bd2f9c068 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_be668b98_7f89_4e4c_8fb8_74e8d8d68eae
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-5" ;
+                                           skos:prefLabel "LinearDensityOfElectricCharge"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_64420439_5282_4996_b6e1_2044358ac899
+:EMMO_64420439_5282_4996_b6e1_2044358ac899 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_c9450d0b_caac_4de6_b4cf_a2141d71836f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-7" ;
+                                           skos:prefLabel "ElectricPolarization"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7e53a8b4_6e02_4e56_80d4_8683f92b9c77
+:EMMO_7e53a8b4_6e02_4e56_80d4_8683f92b9c77 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_9df135e7_12e3_42a1_8ea2_10e63ce22498
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-9" ;
+                                           skos:prefLabel "LinearElectricCurrentDensity"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_877491a2_c810_47d0_8187_e796e01bc562
 :EMMO_877491a2_c810_47d0_8187_e796e01bc562 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
@@ -1508,6 +1551,36 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "PowerDensityDimension"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_badeda5e_cf93_419c_9a16_2cca8fe6ef63
+:EMMO_badeda5e_cf93_419c_9a16_2cca8fe6ef63 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T+1 L-3 M0 I+1 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "ElectricChargeDensityDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_be668b98_7f89_4e4c_8fb8_74e8d8d68eae
+:EMMO_be668b98_7f89_4e4c_8fb8_74e8d8d68eae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T+1 L-1 M0 I+1 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "ElectricChargePerLengthDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c9450d0b_caac_4de6_b4cf_a2141d71836f
+:EMMO_c9450d0b_caac_4de6_b4cf_a2141d71836f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T+1 L-2 M0 I+1 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "ElectricDisplacementFieldDimension"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dff0d78c_27db_483a_9009_dd42ee6e465b
 :EMMO_dff0d78c_27db_483a_9009_dd42ee6e465b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
@@ -1526,6 +1599,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:hasValue "T+2 L+1 M-1 I0 Θ0 N0 J0"
                                                            ] ;
                                            skos:prefLabel "PerPressureDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f53bafb6_b17d_4eb9_ad58_9d209f70dbfd
+:EMMO_f53bafb6_b17d_4eb9_ad58_9d209f70dbfd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_0030425b_5bce_4baf_b55e_7a1238b14614
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-10" ;
+                                           skos:prefLabel "ElectricFieldStrength"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
