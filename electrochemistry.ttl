@@ -114,16 +114,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_9a084aa3_3d5a_4a62_9fc0_fd88937a19c5 ;
                                                              owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_dc57d998_23db_4d8e_b2cd_f346b195b846 ;
+                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
@@ -456,10 +456,6 @@ Aluminum foil"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
                                                              owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of an electrochemical cell."@en ;
                                            skos:prefLabel "ElectrochemicalComponent"@en .
@@ -1004,7 +1000,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
 :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_dc57d998_23db_4d8e_b2cd_f346b195b846 ;
+                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of multiple ElectrochemicalSubComponent"@en ;
                                            skos:prefLabel "CompositeElectrode"@en .
 
@@ -1839,6 +1840,11 @@ Adapted from:
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_dc57d998_23db_4d8e_b2cd_f346b195b846
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A subcomponent of an ElectrochemicalComponent."@en ;
                                            skos:prefLabel "ElectrochemicalSubcomponent"@en .
