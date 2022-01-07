@@ -1448,6 +1448,28 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ElectricFieldStrengthDimension"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_072bc73e_9167_49f5_a62c_612a52c74f50
+:EMMO_072bc73e_9167_49f5_a62c_612a52c74f50 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_120d86b6_d7c4_4490_8ef2_8a5f58403950
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-18" ;
+                                           skos:prefLabel "DisplacementCurrentDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_12f0b2eb_a7b2_4f87_8176_12748f415832
+:EMMO_12f0b2eb_a7b2_4f87_8176_12748f415832 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-15" ;
+                                           skos:prefLabel "RelativePermittivity"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_164b8937_b242_45d0_8839_3b0605f0a556
 :EMMO_164b8937_b242_45d0_8839_3b0605f0a556 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
@@ -1486,6 +1508,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:hasValue "T+3 L-1 M-1 I0 Θ+1 N0 J0"
                                                            ] ;
                                            skos:prefLabel "ThermalResistivityDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_4ef8c0e4_1b0b_4699_a135_8c89ca289802
+:EMMO_4ef8c0e4_1b0b_4699_a135_8c89ca289802 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_c9450d0b_caac_4de6_b4cf_a2141d71836f
+                                                           ] ;
+                                           skos:prefLabel "ElectricFluxDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_581e05bc_a4fe_494a_a85c_f2c4b4374e18
+:EMMO_581e05bc_a4fe_494a_a85c_f2c4b4374e18 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_1604f495_328a_4f28_9962_f4cc210739dd
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-17" ;
+                                           skos:prefLabel "ElectricFlux"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_58c31095_55ba_412d_8763_d768921e5f66
@@ -1599,6 +1642,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:hasValue "T+2 L+1 M-1 I0 Θ0 N0 J0"
                                                            ] ;
                                            skos:prefLabel "PerPressureDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_eead19f5_c0cd_4946_a501_c870bb50f3b1
+:EMMO_eead19f5_c0cd_4946_a501_c870bb50f3b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-16" ;
+                                           skos:prefLabel "ElectricSusceptibility"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f53bafb6_b17d_4eb9_ad58_9d209f70dbfd
