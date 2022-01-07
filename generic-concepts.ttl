@@ -2219,4 +2219,730 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalConductance"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_034bc7dd_a8c2_4ed0_8b51_66ac9b00342f
+:EMMO_034bc7dd_a8c2_4ed0_8b51_66ac9b00342f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-4" ;
+                                           skos:prefLabel "BraggAngle"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_03d32783_3780_43c3_8b73_7efe9aeeed54
+:EMMO_03d32783_3780_43c3_8b73_7efe9aeeed54 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-1.2" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "fundamental translation vectors for the crystal lattice"@en ;
+                                           skos:prefLabel "FundamentalLatticeVectors"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0a982eeb_e5ef_4828_93bc_53ece1b3f171
+:EMMO_0a982eeb_e5ef_4828_93bc_53ece1b3f171 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-5.3" ;
+                                           skos:prefLabel "AtomicScatteringFactor"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_126e57a9_0f9c_4315_a031_bc273a0f302b
+:EMMO_126e57a9_0f9c_4315_a031_bc273a0f302b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_365b6b4f_baa5_42d4_9e07_09f8ce6952c5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-29.3" ;
+                                           skos:prefLabel "IntrinsicCarrierDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_134b78a0_63f8_4f7f_8098_925d1d934e48
+:EMMO_134b78a0_63f8_4f7f_8098_925d1d934e48 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_608a1b30_df6f_4bbb_9dc3_5c0de92fd9cf
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-2.2" ;
+                                           skos:prefLabel "FundamentalReciprocalLatticeVectors"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_14b629dd_a753_49b2_b6c3_4908eb8b7131
+:EMMO_14b629dd_a753_49b2_b6c3_4908eb8b7131 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-3 L+2 M+1 I-1 Θ-1 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialPerTemperatureDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_1a4ed964_9ee4_44a9_b386_4b0f95cf6666
+:EMMO_1a4ed964_9ee4_44a9_b386_4b0f95cf6666 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-3" ;
+                                           skos:prefLabel "LatticePlaneSpacing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_1eb6b28e_f260_4f04_ada1_19c6dcb668d9
+:EMMO_1eb6b28e_f260_4f04_ada1_19c6dcb668d9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_359312ca_1d9d_4765_b20b_28d9f45d77e7
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-17" ;
+                                           skos:prefLabel "ResidualResistivity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_26c6f1b3_c33f_4804_a3e8_3c5c931582b3
+:EMMO_26c6f1b3_c33f_4804_a3e8_3c5c931582b3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_02e894c3_b793_4197_b120_3442e08f58d1
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-32.1" ;
+                                           skos:prefLabel "RelaxationTime"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2b0a1578_ae70_4cd1_940d_54d9c220d8f7
+:EMMO_2b0a1578_ae70_4cd1_940d_54d9c220d8f7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-31" ;
+                                           skos:prefLabel "MobilityRatio"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2fb9b3ca_a3ba_4176_b9dc_ce5449286195
+:EMMO_2fb9b3ca_a3ba_4176_b9dc_ce5449286195 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-5.2" ;
+                                           skos:prefLabel "LongRangeOrderParameter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_394390c8_7b29_4c0a_9104_2d2bc8780138
+:EMMO_394390c8_7b29_4c0a_9104_2d2bc8780138 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_918afe84_ccae_4d64_a793_ccf727f07887
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-18" ;
+                                           skos:altLabel "LorenzNumber"@en ;
+                                           skos:prefLabel "LorenzCoefficient"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3a713a3d_dee2_4acd_bc30_5d2b23f605cd
+:EMMO_3a713a3d_dee2_4acd_bc30_5d2b23f605cd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_ec903946_ddc9_464a_903c_7373e0d1eeb5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-36.1" ;
+                                           skos:prefLabel "ThermodynamicCriticalMagneticFluxDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3cae45cc_3b57_469c_a695_713735886f31
+:EMMO_3cae45cc_3b57_469c_a695_713735886f31 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-25" ;
+                                           skos:prefLabel "ElectronAffinity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3f7feefd_ac94_4208_8dfd_92bb50be30f3
+:EMMO_3f7feefd_ac94_4208_8dfd_92bb50be30f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_77e9dc31_5b19_463e_b000_44c6e79f98aa
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-30" ;
+                                           skos:prefLabel "EffectiveMass"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_40a1d85c_bcfe_48aa_89a2_79e8a8c82af1
+:EMMO_40a1d85c_bcfe_48aa_89a2_79e8a8c82af1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_365b6b4f_baa5_42d4_9e07_09f8ce6952c5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-29.1" ;
+                                           skos:prefLabel "ElectronDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_477042ef_3173_49b2_a264_0e3270733f8c
+:EMMO_477042ef_3173_49b2_a264_0e3270733f8c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-38.2" ;
+                                           skos:prefLabel "CoherenceLength"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_485720e7_b24a_4149_86eb_9985b2bea4da
+:EMMO_485720e7_b24a_4149_86eb_9985b2bea4da rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-8" ;
+                                           skos:prefLabel "DebyeWallerFactor"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_50717821_8d78_4695_95bd_5843aa8be915
+:EMMO_50717821_8d78_4695_95bd_5843aa8be915 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T0 L-2 M0 I+1 Θ-2 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "RichardsonConstantDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5186b2e6_f34f_46ee_b08e_ec517a1f43d2
+:EMMO_5186b2e6_f34f_46ee_b08e_ec517a1f43d2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-7.1" ;
+                                           skos:prefLabel "ParticlePositionVector"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_560d031f_cc8a_4f0d_a52b_039149fdc171
+:EMMO_560d031f_cc8a_4f0d_a52b_039149fdc171 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-37" ;
+                                           skos:prefLabel "SuperConductorEnergyGap"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6110af0a_bc82_4c9e_aa4b_b45d08d9c9e0
+:EMMO_6110af0a_bc82_4c9e_aa4b_b45d08d9c9e0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-7.2" ;
+                                           skos:prefLabel "EquilibriumPositionVector"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_65ec122c_b67f_4009_8b16_2df7dfae118a
+:EMMO_65ec122c_b67f_4009_8b16_2df7dfae118a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_515b5579_d526_4842_9e6f_ecc34db6f368
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-10" ;
+                                           skos:prefLabel "DebyeAngularFrequency"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_69164f9e_c75d_4fbc_a0f8_af7a81bbd128
+:EMMO_69164f9e_c75d_4fbc_a0f8_af7a81bbd128 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-27.2" ;
+                                           skos:prefLabel "GapEnergy"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_693c1c3c_d988_42c5_9d8f_ddf44f2100e8
+:EMMO_693c1c3c_d988_42c5_9d8f_ddf44f2100e8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T+1 L-3 M0 I0 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "TimePerVolumeDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6aad14ae_5ca1_4d19_aa6c_56448ff534b6
+:EMMO_6aad14ae_5ca1_4d19_aa6c_56448ff534b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_608a1b30_df6f_4bbb_9dc3_5c0de92fd9cf
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-9.2" ;
+                                           skos:altLabel "FermiAnglularRepetency"@en ;
+                                           skos:prefLabel "FermiAnglularWaveNumber"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6b5af5a8_a2d8_4353_a1d6_54c9f778343d
+:EMMO_6b5af5a8_a2d8_4353_a1d6_54c9f778343d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_a77a0a4b_6bd2_42b2_be27_4b63cebbb59e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-35.1" ;
+                                           skos:prefLabel "CurieTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6bfe6ad2_96ba_4478_81e5_d8881c550757
+:EMMO_6bfe6ad2_96ba_4478_81e5_d8881c550757 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_ec903946_ddc9_464a_903c_7373e0d1eeb5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-36.3" ;
+                                           skos:prefLabel "UpperCriticalMagneticFluxDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6d53d04c_07d3_4522_9181_92649ef78f86
+:EMMO_6d53d04c_07d3_4522_9181_92649ef78f86 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_365b6b4f_baa5_42d4_9e07_09f8ce6952c5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-29.4" ;
+                                           skos:prefLabel "DonorDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6f55a062_4a3b_4bb7_b2d3_54a4a93ce5cc
+:EMMO_6f55a062_4a3b_4bb7_b2d3_54a4a93ce5cc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_50717821_8d78_4695_95bd_5843aa8be915
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-26" ;
+                                           skos:prefLabel "RichardsonConstant"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_71a0d05d_4c29_4eae_aff1_fb34b8d36f96
+:EMMO_71a0d05d_4c29_4eae_aff1_fb34b8d36f96 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b6c60208_6552_4412_ae09_9c583d059084
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-16" ;
+                                           skos:prefLabel "EnergyDensityOfStates"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7254c8be_965d_4b3c_b3be_12c5578bee7c
+:EMMO_7254c8be_965d_4b3c_b3be_12c5578bee7c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_608a1b30_df6f_4bbb_9dc3_5c0de92fd9cf
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-2.1" ;
+                                           skos:prefLabel "AngularReciprocalLatticeVector"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_74cfc811_6e04_4fe4_aea5_6a5cc09f6571
+:EMMO_74cfc811_6e04_4fe4_aea5_6a5cc09f6571 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_a77a0a4b_6bd2_42b2_be27_4b63cebbb59e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-11" ;
+                                           skos:prefLabel "DebyeTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_76acb5d8_5ab8_484b_8354_7f7612f39c17
+:EMMO_76acb5d8_5ab8_484b_8354_7f7612f39c17 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_608a1b30_df6f_4bbb_9dc3_5c0de92fd9cf
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-9.3" ;
+                                           skos:altLabel "DebyeAngluarRepetency"@en ;
+                                           skos:prefLabel "DebyeAngularWaveNumber"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8219a082_9443_4374_8038_6459d5cf4ce9
+:EMMO_8219a082_9443_4374_8038_6459d5cf4ce9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_365b6b4f_baa5_42d4_9e07_09f8ce6952c5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-29.5" ;
+                                           skos:prefLabel "AcceptorDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_88bbdd04_908f_45f0_9ded_d73b430de3b1
+:EMMO_88bbdd04_908f_45f0_9ded_d73b430de3b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_693c1c3c_d988_42c5_9d8f_ddf44f2100e8
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-12" ;
+                                           skos:prefLabel "DensityOfVibrationalStates"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8dacb56f_5931_443b_8de6_f31aec44036c
+:EMMO_8dacb56f_5931_443b_8de6_f31aec44036c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-15.1" ;
+                                           skos:prefLabel "MeanFreePathOfPhonons"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8e08b6d4_da0f_4722_a69a_301f2246546c
+:EMMO_8e08b6d4_da0f_4722_a69a_301f2246546c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-15.2" ;
+                                           skos:prefLabel "MeanFreePathOfElectrons"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_918afe84_ccae_4d64_a793_ccf727f07887
+:EMMO_918afe84_ccae_4d64_a793_ccf727f07887 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-6 L+4 M+2 I-2 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "LorenzNumberDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_950256cd_c286_4793_b9f7_a3f922d0c354
+:EMMO_950256cd_c286_4793_b9f7_a3f922d0c354 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_14b629dd_a753_49b2_b6c3_4908eb8b7131
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-23" ;
+                                           skos:prefLabel "ThomsonCoefficient"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9d018f03_bbda_4ca5_bc4c_646e72651e53
+:EMMO_9d018f03_bbda_4ca5_bc4c_646e72651e53 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_365b6b4f_baa5_42d4_9e07_09f8ce6952c5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-29.2" ;
+                                           skos:prefLabel "HoleDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9eb2d590_2115_4edd_aa8e_345d60921765
+:EMMO_9eb2d590_2115_4edd_aa8e_345d60921765 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-27.1" ;
+                                           skos:prefLabel "FermiEnergy"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9ed4ea5a_42c4_48aa_bd59_c16c7d34e741
+:EMMO_9ed4ea5a_42c4_48aa_bd59_c16c7d34e741 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-5.4" ;
+                                           skos:prefLabel "StructureFactor"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a0c4322d_4de2_4770_991c_5fad4e6ec25b
+:EMMO_a0c4322d_4de2_4770_991c_5fad4e6ec25b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-24.1" ;
+                                           skos:prefLabel "WorkFunction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a1bd0bfc_5464_43ce_a1a2_947b58dc0f89
+:EMMO_a1bd0bfc_5464_43ce_a1a2_947b58dc0f89 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-1.1" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "translation vector that maps the crystal lattice on itself"@en ;
+                                           skos:prefLabel "LatticeVector"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a2641370_e4b8_4582_b4e0_fb389c8d8efb
+:EMMO_a2641370_e4b8_4582_b4e0_fb389c8d8efb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-33" ;
+                                           skos:prefLabel "DiffusionLength"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ad91ad62_ef79_42ad_8e15_34cbd95d69cb
+:EMMO_ad91ad62_ef79_42ad_8e15_34cbd95d69cb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-38.1" ;
+                                           skos:prefLabel "LondonPenetrationDepth"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b30d4f1c_61e3_4647_bae1_c0928acb2095
+:EMMO_b30d4f1c_61e3_4647_bae1_c0928acb2095 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_fa142978_8775_4afa_8a1d_fbbe56ccd616
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-19" ;
+                                           skos:prefLabel "HallCoefficient"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b3bf01d2_5d67_45d3_91e6_70abddae08a9
+:EMMO_b3bf01d2_5d67_45d3_91e6_70abddae08a9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_02e894c3_b793_4197_b120_3442e08f58d1
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-32.2" ;
+                                           skos:prefLabel "CarrierLifetime"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b6c60208_6552_4412_ae09_9c583d059084
+:EMMO_b6c60208_6552_4412_ae09_9c583d059084 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T+2 L-5 M-1 I0 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "EnergyDensityOfStatesDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b725aad8_55e2_430a_b2d2_f84b8333484e
+:EMMO_b725aad8_55e2_430a_b2d2_f84b8333484e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_14b629dd_a753_49b2_b6c3_4908eb8b7131
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-21" ;
+                                           skos:prefLabel "SeebeckCoefficient"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b94b3748_71c5_4de9_95e7_42586c3ed607
+:EMMO_b94b3748_71c5_4de9_95e7_42586c3ed607 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_a77a0a4b_6bd2_42b2_be27_4b63cebbb59e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-35.3" ;
+                                           skos:prefLabel "SuperConductionTransitionTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c5fcfb08_12a9_4030_925b_14e3a0eabd07
+:EMMO_c5fcfb08_12a9_4030_925b_14e3a0eabd07 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-7.3" ;
+                                           skos:prefLabel "DisplacementVector"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_da4ea7e3_6e60_410b_a209_6ea735a6b10c
+:EMMO_da4ea7e3_6e60_410b_a209_6ea735a6b10c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_b3600e73_3e05_479d_9714_c041c3acf5cc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-6" ;
+                                           skos:prefLabel "BurgersVector"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dc1370b5_3902_4652_8736_0804d88dd128
+:EMMO_dc1370b5_3902_4652_8736_0804d88dd128 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-14" ;
+                                           skos:prefLabel "GrueneisenParamter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dfcff795_0fe9_4eb7_8f8f_879bb50939c9
+:EMMO_dfcff795_0fe9_4eb7_8f8f_879bb50939c9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-22" ;
+                                           skos:prefLabel "PeltierCoefficient"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e4791212_5a13_4aa6_aac2_08704550dcc3
+:EMMO_e4791212_5a13_4aa6_aac2_08704550dcc3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_608a1b30_df6f_4bbb_9dc3_5c0de92fd9cf
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-9.1" ;
+                                           skos:altLabel "AngularRepetency"@en ;
+                                           skos:prefLabel "AngluarWaveNumber"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e5e17147_64a9_47c9_b3d1_2d4ab23eed54
+:EMMO_e5e17147_64a9_47c9_b3d1_2d4ab23eed54 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-34" ;
+                                           skos:prefLabel "ExchangeIntegral"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e6efd70d_87b4_4e18_a471_9b29c7a1fe16
+:EMMO_e6efd70d_87b4_4e18_a471_9b29c7a1fe16 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-5.1" ;
+                                           skos:prefLabel "ShortRangeOrderParameter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f0b8bace_151e_4f54_8129_c180fd83ae44
+:EMMO_f0b8bace_151e_4f54_8129_c180fd83ae44 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_a77a0a4b_6bd2_42b2_be27_4b63cebbb59e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-35.2" ;
+                                           skos:prefLabel "NeelTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f0b903be_d86f_4d28_9f42_b4d4753e2cf4
+:EMMO_f0b903be_d86f_4d28_9f42_b4d4753e2cf4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-24.2" ;
+                                           skos:prefLabel "IonizationEnergy"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fa142978_8775_4afa_8a1d_fbbe56ccd616
+:EMMO_fa142978_8775_4afa_8a1d_fbbe56ccd616 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-1 L+3 M0 I-1 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "ReciprocalElectricChargeDensityDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fd4a6307_f9f7_4b54_b044_caa04e620232
+:EMMO_fd4a6307_f9f7_4b54_b044_caa04e620232 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_ec903946_ddc9_464a_903c_7373e0d1eeb5
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-36.2" ;
+                                           skos:prefLabel "LowerCriticalMagneticFluxDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fdd744f7_72e5_4060_86a7_93ff361237d6
+:EMMO_fdd744f7_72e5_4060_86a7_93ff361237d6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_a77a0a4b_6bd2_42b2_be27_4b63cebbb59e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-28" ;
+                                           skos:prefLabel "FermiTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fec651dc_8962_48c3_8b30_1115b2dd7c16
+:EMMO_fec651dc_8962_48c3_8b30_1115b2dd7c16 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-20" ;
+                                           skos:prefLabel "ThermoelectricVoltage"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ff4dfc0f_6d79_41e1_9e32_68801bdea085
+:EMMO_ff4dfc0f_6d79_41e1_9e32_68801bdea085 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-13" ;
+                                           skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
+
+
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
