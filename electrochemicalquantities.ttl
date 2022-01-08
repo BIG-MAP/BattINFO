@@ -125,15 +125,6 @@ Newman and Thomas-Alyea, Electrochemical Systems, 3rd ed."""@en ;
                                            skos:prefLabel "DiffusionCurrent"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_17e305af_52a9_4255_a70f_700ba1088f13
-:EMMO_17e305af_52a9_4255_a70f_700ba1088f13 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Energy that can be absorbed or released due to a change of the particle number of the given species"@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Chemical_potential" ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01032" ;
-                                           skos:prefLabel "ChemicalPotential"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6
 :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
@@ -369,14 +360,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "NominalVolume"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc
-:EMMO_4ca08596_c873_4de1_8784_0cdf3fbcb4dc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Conductivity of an electrolyte solution divided by its molar concentration."@en ;
-                                           rdfs:comment "\\Lambda_m = \\kappa / c"@en ;
-                                           skos:prefLabel "MolarConductivity"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe
 :EMMO_4f1ed4ee_06ba_44a4_8ece_1ee56bf12afe rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_830b59f7_d047_438c_90cd_62845749efcb ,
@@ -403,18 +386,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which ions are the charge carrier."@en ;
                                            skos:prefLabel "IonicCurrent"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75
-:EMMO_5c0ad135_89ea_44da_8df7_f108f8ee1d75 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Quotient of the current carried by an ionic component and the total current. 
-
--- IUPAC, Compendium of Chemical Terminology, 2014. DOI: 10.1351/goldbook.I03352"""@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/T06489" ;
-                                           rdfs:comment "ISO recommends the name current fraction of ions B."@en ;
-                                           skos:altLabel "TransferrenceNumber"@en ;
-                                           skos:prefLabel "TransportNumber"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02
@@ -465,15 +436,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are ions." ;
                                            skos:prefLabel "IonicCurrentDensity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d
-:EMMO_68dc1bf8_9813_43c8_b428_6bd614c3161d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_17e305af_52a9_4255_a70f_700ba1088f13 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ChemicalPotential per mole."@en ;
-                                           skos:altLabel "PartialMolarFreeEnergy"@en ,
-                                                         "PartialMolarGibbsFreeEnergy"@en ;
-                                           skos:prefLabel "MolarChemicalPotential"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
@@ -825,14 +787,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "ActiveMaterialLoading"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
-:EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The number of molecules and/or formula units that participate in the reaction as written"@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
-                                           skos:prefLabel "StoichiometricCoefficient"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
 :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
@@ -904,15 +858,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A capacity measured under a given set of experimental conditions."@en ;
                                            skos:altLabel "ExperimentalElectricChargeCapacity"@en ;
                                            skos:prefLabel "ExperimentalCapacity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44
-:EMMO_e9136287_78a1_44df_aeb1_56e2dae88f44 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Product of the stoichiometric coefficient and +1 for a product and -1 for a reactant."@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Stoichiometry#Stoichiometric_coefficient_and_stoichimetric_number"@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/S06025"@en ;
-                                           skos:prefLabel "StoichiometricNumber"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7

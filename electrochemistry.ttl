@@ -1166,6 +1166,10 @@ Conducting Additive"""@en ;
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_9e955e04_2977_457e_a91a_bc6a541c9a9e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom emmo:EMMO_ad6c76cf_b400_423e_820f_cf0c4e77f455
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1183,10 +1187,6 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_cbc0116d_7cc5_4d09_aed7_963c1262a07a
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation relating the limiting molar conductivity Λ_m^0 (see Kohlrausch's law) to the ionic diffusion coefficients."@en ;
                                            rdfs:comment "\\Lambda_m^0 = (F^2/(R*T)) * (v_{+} * z_{+}^2 * D_{+} + v_{–} * z_{–}^2 * D_{–})"@en ;
