@@ -191,13 +191,6 @@ J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUP
                                            skos:prefLabel "MigrationCurrent"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_22fa1067_3964_4efd_8973_cc91eeb27451
-:EMMO_22fa1067_3964_4efd_8973_cc91eeb27451 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ,
-                                                           :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           skos:prefLabel "MinOperatingTemperature"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c
 :EMMO_25c5bd91_bbc4_40dd_8d54_1f817371b21c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
@@ -381,13 +374,6 @@ where symbols placed inside square brackets denote amount (or amount of substanc
                                            skos:prefLabel "ElectrolyteVolume"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347
-:EMMO_569a62a5_3b7e_4099_8a4c_f76e229a0347 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which ions are the charge carrier."@en ;
-                                           skos:prefLabel "IonicCurrent"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02
 :EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
@@ -423,29 +409,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            skos:prefLabel "SurfaceOverpotential"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3
-:EMMO_64e6ed6a_8d17_40ba_937f_f385a54a86c3 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ,
-                                                           :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           rdfs:comment "Measure of a material's ability to conduct an electric current by ions."@en ;
-                                           skos:prefLabel "IonicConductivity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8
-:EMMO_683e4991_38f3_42e1_84de_5ee25942d2e8 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are ions." ;
-                                           skos:prefLabel "IonicCurrentDensity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
-:EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ,
-                                                           :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           rdfs:comment "Measure of a material's ability to conduct an electric current by electrons."@en ;
-                                           skos:prefLabel "ElectronicConductivity"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932
 :EMMO_6d4f29e8_c0da_4c6e_93fc_ef422c0f9932 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
@@ -467,13 +430,6 @@ J. Newman and K. E. Thomas-Alyea, Electrochemical Systems, 3rd Edition, p. 204."
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Reaction_quotient" ;
                                            rdfs:comment "Q = \\sum_B{a_B^{{\\nu}_B}}" ;
                                            skos:prefLabel "ReactionQuotient"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_74293727_07f7_4b7b_9e23_bea328144ad7
-:EMMO_74293727_07f7_4b7b_9e23_bea328144ad7 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f ,
-                                                           :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           skos:prefLabel "MaxOperatingTemperature"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_791c1915_a791_4450_acd8_7f94764743b5
@@ -717,21 +673,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            skos:prefLabel "ElectrochemicallyActiveSurfaceArea"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa
-:EMMO_bbcafb37_ceec_436b_bb45_080a2bc656aa rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ,
-                                                           :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of ElectronicConductivity"@en ;
-                                           skos:prefLabel "ElectronicResistivity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_bfc8c075_246e_4633_ba8e_906a9f5f2e3a
-:EMMO_bfc8c075_246e_4633_ba8e_906a9f5f2e3a rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Current density in which the charge carriers are electrons." ;
-                                           skos:prefLabel "ElectronicCurrentDensity"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c39b2498_783e_48e1_9814_6164bd99823c
 :EMMO_c39b2498_783e_48e1_9814_6164bd99823c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
@@ -768,14 +709,6 @@ B' + A → B
 
 In either case, the magnitude of the catalytic current depends on the applied potential. If the current observed with a mixture of A and B is lower than the sum of the separate currents, the term non-additive current should be used."""@en ;
                                            skos:prefLabel "CatalyticCurrent"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03
-:EMMO_c90a4ca0_493f_4880_a838_3a2c4b808a03 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ,
-                                                           :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Inverse of IonicConductivity"@en ;
-                                           skos:prefLabel "IonicResistivity"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
@@ -843,13 +776,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/O04322" ;
                                            skos:prefLabel "ReactionRateConstant"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42
-:EMMO_e73063fe_30a4_4ed5_b9f6_11979f807a42 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier."@en ;
-                                           skos:prefLabel "ElectronicCurrent"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e8e41092_cc75_4952_bc54_af1a72d19fcd

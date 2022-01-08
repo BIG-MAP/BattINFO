@@ -2995,4 +2995,102 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_101a5ad8_d220_4c7c_a9fa_53b9a042fe93
+:EMMO_101a5ad8_d220_4c7c_a9fa_53b9a042fe93 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
+                                           skos:prefLabel "IonicResistivity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_135e2e88_7080_4a21_b411_66021cfdea47
+:EMMO_135e2e88_7080_4a21_b411_66021cfdea47 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electric current density in which the charge carriers are ions."@en ;
+                                           skos:prefLabel "IonicCurrentDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_275380f9_3579_483e_9202_21624307756b
+:EMMO_275380f9_3579_483e_9202_21624307756b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d35bee3e_3138_4eff_8c99_e90d873915b3 ;
+                                           skos:altLabel "MinimumConventionalOperatingTemperature"@en ;
+                                           skos:prefLabel "MinimumNominalOperatingTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3aff11e2_1253_4d01_9956_e4995c114536
+:EMMO_3aff11e2_1253_4d01_9956_e4995c114536 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1 ;
+                                           skos:prefLabel "IonicResistance"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3b838395_9d62_433b_bed0_41b161c83b85
+:EMMO_3b838395_9d62_433b_bed0_41b161c83b85 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ffb73b1e_5786_43e4_a964_cb32ac7affb7 ;
+                                           skos:prefLabel "IonicConductance"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6fbaa99c_54d6_41e2_8c60_0d38e8ef7f47
+:EMMO_6fbaa99c_54d6_41e2_8c60_0d38e8ef7f47 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier."@en ;
+                                           skos:prefLabel "ElectronicCurrent"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7ea55049_bd1a_46ee_98b4_04ec1c24c9b1
+:EMMO_7ea55049_bd1a_46ee_98b4_04ec1c24c9b1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electric current density in which the charge carriers are electrons."@en ;
+                                           skos:prefLabel "ElectronicCurrentDensity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_87f7ffba_148c_4be2_b03c_6b93d044e355
+:EMMO_87f7ffba_148c_4be2_b03c_6b93d044e355 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which ions are the charge carrier."@en ;
+                                           skos:prefLabel "IonicCurrent"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8b3c89c3_57a1_41fc_9c92_653f586a4074
+:EMMO_8b3c89c3_57a1_41fc_9c92_653f586a4074 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
+                                           skos:prefLabel "IonicConductivity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8ec0948b_2c21_4b50_a35f_4f9f8ad0f3d7
+:EMMO_8ec0948b_2c21_4b50_a35f_4f9f8ad0f3d7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e150fa8d_06dc_4bb8_bf95_04e2aea529c1 ;
+                                           skos:prefLabel "ElectronicResistivity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a65ffaf1_17f7_4938_a9c7_6943641184e4
+:EMMO_a65ffaf1_17f7_4938_a9c7_6943641184e4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d35bee3e_3138_4eff_8c99_e90d873915b3 ;
+                                           skos:altLabel "MaximumConventionalOperatingTemperature"@en ;
+                                           skos:prefLabel "MaximumNominalOperatingTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c0d5debc_41b8_4de9_888f_c4b4d86fcfc5
+:EMMO_c0d5debc_41b8_4de9_888f_c4b4d86fcfc5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ffb73b1e_5786_43e4_a964_cb32ac7affb7 ;
+                                           skos:prefLabel "ElectronicConductance"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_d35bee3e_3138_4eff_8c99_e90d873915b3
+:EMMO_d35bee3e_3138_4eff_8c99_e90d873915b3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_66bc9029_f473_45ff_bab9_c3509ff37a22 ,
+                                                           :EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
+                                           skos:altLabel "ConventionalOperatingTemperature"@en ;
+                                           skos:prefLabel "NominalOperatingTemperature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e3f47850_ac99_4c3e_a2da_ae92efda8126
+:EMMO_e3f47850_ac99_4c3e_a2da_ae92efda8126 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cde4368c_1d4d_4c94_8548_604749523c6d ;
+                                           skos:prefLabel "ElectronicConductivity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fce67a38_ed23_4bee_b2f9_23e15adc57f0
+:EMMO_fce67a38_ed23_4bee_b2f9_23e15adc57f0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1 ;
+                                           skos:prefLabel "ElectronicResistance"@en .
+
+
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

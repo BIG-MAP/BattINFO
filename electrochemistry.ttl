@@ -1146,11 +1146,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd
 :EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_6a28741c_ef47_4a11_ba3d_166aef581e86
-                                                           ] ;
+                                           rdfs:subClassOf :EMMO_f89bb8bc-ef9b-43d5-b5df-14e12b0d93b8 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalSubcomponent whose primary role is electronic."@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a """Current Collector
 Conducting Additive"""@en ;
