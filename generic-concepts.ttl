@@ -174,6 +174,20 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "IonicSpecies"@en .
 
 
+###  http://emmo.info/emmo#EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e
+:EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_e9348e5b_af4f_4898_bbfe_c4583cf44b80
+                                                           ] ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "for solutions, product for all substances B of concentration c_B of substance B in power of its stoichiometric number v_B: K_p = \\sum_B{c_B^{v_B}}."@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Equilibrium_constant"@en ;
+                                           rdfs:comment "The physical dimension can change based on the stoichiometric numbers of the substances involved."@en ;
+                                           skos:altLabel "EquilibriumConstantConcentrationBasis"@en ;
+                                           skos:prefLabel "EquilibriumConstant"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_06700060_1326_4478_be51_d8037b986230
 :EMMO_06700060_1326_4478_be51_d8037b986230 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_66305f3d_6eef_448a_953d_17abb87788ae ;
@@ -194,6 +208,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 ###  http://emmo.info/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
 :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-21" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """length in the direction regarded as vertical
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            skos:prefLabel "Height"@en .
 
 
@@ -303,6 +321,18 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                            ] ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equation that describes the transport of some conserved quantity."@en ;
                                            skos:prefLabel "ContinuityEquation"@en .
+
+
+###  http://emmo.info/emmo#EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c
+:EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_125e8614_0dad_4c04_9ac9_03317e63beec ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-20"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the product of ion molality b and a correction factor γ to the molality b° of the same ion in a standard solution under standardized conditions: a = bγ / b°
+
+International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "Normally a standard solution is a solution of the ion at a molality of 1 mol/kg (exactly). Standardized conditions are normally 1 013,25 hPa and 25 °C."@en ,
+                                                        "The correction factor is called activity coefficient and it is determined experimentally. See ActivityCoefficient"@en ;
+                                           skos:prefLabel "IonActivity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_12e2f253_caeb_4e3c_9749_edb3683ab732
@@ -522,6 +552,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "HelmholtzEnergy"@en .
 
 
+###  http://emmo.info/emmo#EMMO_26922e28_b266_46c1_b93e_4940633ba5e4
+:EMMO_26922e28_b266_46c1_b93e_4940633ba5e4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dc467621_3b49_4f31_9b09_82290f29da52 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-25"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """charge number that an atom within a molecule would have if all the ligands were removed along with the electron pairs that were shared
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "OxidationNumber"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_26c6f1b3_c33f_4804_a3e8_3c5c931582b3
 :EMMO_26c6f1b3_c33f_4804_a3e8_3c5c931582b3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -583,6 +623,29 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "MobilityRatio"@en .
 
 
+###  http://emmo.info/emmo#EMMO_2d206929_ff1d_4651_8823_daa860105a96
+:EMMO_2d206929_ff1d_4651_8823_daa860105a96 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-12"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """mark attributed to an instant by means of a specified timescale
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "In common language, the term “date” is mainly used when the timescale is a calendar as a sequence of days."@en ,
+                                                        "On a timescale consisting of successive steps, two distinct instants may be expressed by the same date"@en ,
+                                                        "With respect to the specified timescale, a date may also be considered as the duration between the origin of the timescale and the considered instant."@en ;
+                                           skos:prefLabel "Date"@en .
+
+
+###  http://emmo.info/emmo#EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811
+:EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-10"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the number of dissociated molecules of a specified type to the total number of dissolved molecules of this type
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "DissociationConstant"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_2ed364b1_affe_4711_a83f_74bfd57b94ad
 :EMMO_2ed364b1_affe_4711_a83f_74bfd57b94ad rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
@@ -617,6 +680,10 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 ###  http://emmo.info/emmo#EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12
 :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-25"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """distance from the centre of a circle to the circumference
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            skos:prefLabel "Radius"@en .
 
 
@@ -725,6 +792,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "IonicResistance"@en .
 
 
+###  http://emmo.info/emmo#EMMO_3b586409_b05e_4129_ab40_93768eef503f
+:EMMO_3b586409_b05e_4129_ab40_93768eef503f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aOH- of the hydroxide anion OH-
+
+pH = −10 log(a_OH-)"""@en ;
+                                           rdfs:comment "Written as pOH"@en ;
+                                           skos:prefLabel "POH"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_3b838395_9d62_433b_bed0_41b161c83b85
 :EMMO_3b838395_9d62_433b_bed0_41b161c83b85 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ffb73b1e_5786_43e4_a964_cb32ac7affb7 ;
@@ -790,6 +867,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-9.1" ;
                                            skos:prefLabel "ParticleConcentration"@en .
+
+
+###  http://emmo.info/emmo#EMMO_40989212_4866_41c0_8a20_84fd39540f29
+:EMMO_40989212_4866_41c0_8a20_84fd39540f29 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """product of the ion activities of the ions resulting from the dissociation of a solute in a saturated solution, raised to powers equal to their stoichiometric numbers
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "For the dissociation of a salt AmBn → mA + nB, the solubility product is KSP = am(A) ⋅ an(B), where a is ionic activity and m and n are the stoichiometric numbers."@en ;
+                                           skos:altLabel "SolubilityProductConstant"@en ;
+                                           skos:prefLabel "SolubilityProduct"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_40a1d85c_bcfe_48aa_89a2_79e8a8c82af1
@@ -1495,6 +1583,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "DebyeAngularWaveNumber"@en .
 
 
+###  http://emmo.info/emmo#EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204
+:EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-16"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quotient of the amount of substance nB of ions B, contained in a given volume V of a solution, by that volume: c_B = n_B / V
+
+International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "IonConcenration"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117
 :EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 ;
@@ -1602,6 +1700,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-35.3" ;
                                            skos:altLabel "GrandPartionFunction"@en ;
                                            skos:prefLabel "GrandCanonicalPartionFunction"@en .
+
+
+###  http://emmo.info/emmo#EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19
+:EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-21"@en ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "For more details, see ISO 80000-9:2009, Annex C"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aH+ of the hydrogen cation H+
+
+pH = −10 log(a_H+)
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """At about 25 °C aqueous solutions with:
+
+pH < 7 are acidic;
+pH = 7 are neutral;
+pH > 7 are alkaline.
+
+At temperatures far from 25 °C the pH of a neutral solution differs significantly from 7."""@en ,
+                                                        "Written as pH"@en ;
+                                           skos:prefLabel "PH"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_8168c707_1b2a_4c6f_8d2e_a4e8081fd276
@@ -2693,6 +2812,23 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "GrueneisenParamter"@en .
 
 
+###  http://emmo.info/emmo#EMMO_dc467621_3b49_4f31_9b09_82290f29da52
+:EMMO_dc467621_3b49_4f31_9b09_82290f29da52 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-05-17"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """for a particle, electric charge q divided by elementary charge e, thus e, soit c = q/e
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "The charge number of a particle may be presented as a superscript to the symbol of that particle, e.g. H+, He++, Al3+, Cl−, S=, N3−."@en ,
+                                                        "The charge number of an electrically charged particle can be positive or negative. The charge number of an electrically neutral particle is zero."@en ;
+                                           skos:altLabel "IonizationNumber"@en ;
+                                           skos:prefLabel "ChargeNumber"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac
 :EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b29fd350_39aa_4af7_9459_3faa0544cba6 ;
@@ -3164,132 +3300,245 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e
-:EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_125e1f48_1312_4dc4_b533_c3a4b6052a76
+:EMMO_125e1f48_1312_4dc4_b533_c3a4b6052a76 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3975ee51_cc8b_4356_8c5f_5cf2a0b20b10 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-14" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """sum of durations characterized by given conditions over a given time interval
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "The time intervals related to the different durations may overlap each other or not. Example for non-overlapping time intervals: accumulated down time. Example for overlapping time intervals: maintenance man-hours."@en ;
+                                           skos:altLabel "AccumulatedTime"@en ,
+                                                         "TotalDuration"@en ;
+                                           skos:prefLabel "AccumulatedDuration"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_17f298a6_306a_42b8_b98b_3930e58e617d
+:EMMO_17f298a6_306a_42b8_b98b_3930e58e617d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3f15d200_c97b_42c8_8ac0_d81d150361e2 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-02-09" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """fundamental physical constant equal to the product of the elementary electric charge e and the Avogadro constant NA, thus F = eNA
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """The Faraday constant is numerically equal to the electric charge of 1 mol of protons
+
+-- IEC Note 2"""@en ,
+                                                        """The value of the Faraday constant is 96 485,339 9(24) × 103 C/mol (CODATA 2006).
+
+-- IEC Note 1"""@en ;
+                                           skos:prefLabel "FaradayConstant"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_19d328fb_71d5_4143_b186_b26a4a44b6b9
+:EMMO_19d328fb_71d5_4143_b186_b26a4a44b6b9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_852b4ab8_fc29_4749_a8c7_b92d4fca7d5a ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-42" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "SpeedOfRotation"@en ,
+                                                                                      """magnitude of the angular velocity ω divided by the angle 2π, thus n = |ω|/2π
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """The rotational frequency is also the derivative of the absolute value of angle of rotation φ with respect to time t, divided by 2π
+
+-- IEC Note 1"""@en ;
+                                           skos:prefLabel "RotationalFrequency"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2407f94a_993f_4d27_871b_ae05c356a870
+:EMMO_2407f94a_993f_4d27_871b_ae05c356a870 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-28" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """length travelled by a moving point from its initial position to its final position
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "LengthOfPath"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3975ee51_cc8b_4356_8c5f_5cf2a0b20b10
+:EMMO_3975ee51_cc8b_4356_8c5f_5cf2a0b20b10 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-13" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """range of a time interval. See TimeInterval
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "For the term “duration”, the word expressions “time” or “time interval” are often used, but the term “time” is not recommended in this sense and the term “time interval” is deprecated in this sense to avoid confusion with the concept of “time interval”."@en ,
+                                                        "In common language, the word \"time\" is used with several different meanings. In technical language, however, more precise terms, e.g. \"date\", \"duration\", \"time interval\" should be used."@en ,
+                                                        "The coherent SI unit of duration and time is second, s (see IEC 60050-112). The units minute (1 min = 60 s), hour (1 h = 60 min = 3 600 s), and day (1 d = 24 h = 86 400 s) are accepted for use with the SI."@en ,
+                                                        "The duration is one of the base quantities in the International System of Quantities (ISQ) on which the International System of Units (SI) is based. The term “time” instead of “duration” is often used in this context and also for an infinitesimal duration."@en ,
+                                                        "The duration of a time interval is a non-negative quantity equal to the difference between the dates of the final instant and the initial instant of the time interval, when the dates are quantitative marks. Different time intervals may have the same duration, e.g. the period of a time-dependent periodic quantity is a duration that is independent of the choice of the initial instant."@en ;
+                                           skos:prefLabel "Duration"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_39f94f54_f1ab_4fd8_8922_4fb24e635ba8
+:EMMO_39f94f54_f1ab_4fd8_8922_4fb24e635ba8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6653f57d_efb9_4f14_ae2a_f4cf23f9cff1 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-15" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """time interval starting at midnight and ending at the next midnight
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "The duration of a calendar day is 24 h, except for special situations (daylight saving time, leap second)."@en ,
+                                                        "The ending midnight of a calendar day coincides with the starting midnight of the next day."@en ;
+                                           skos:prefLabel "CalendarDay"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3ce6f89a_04d8_4561_b569_3e16dc1dd93b
+:EMMO_3ce6f89a_04d8_4561_b569_3e16dc1dd93b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ecec2983_7c26_4f8d_a981_51ca29668baf ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-31" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """inverse of the radius of curvature ρ, thus κ = 1/ρ
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "Curvature is the limiting value of the quotient of the difference of the angles of the tangents in two neighbouring points on a curve by their distance, when this distance tends to zero"@en ;
+                                           skos:prefLabel "Curvature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_43003c86_9d15_433b_9789_ee2940920656
+:EMMO_43003c86_9d15_433b_9789_ee2940920656 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-24"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """shortest distance between two surfaces limiting a layer, when this distance can be considered to be constant over a region of a finite size
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "Thickness"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_565063d0_e8b7_45f4_8b84_0c9dfd8c3ebc
+:EMMO_565063d0_e8b7_45f4_8b84_0c9dfd8c3ebc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-18" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quantitative expression marking an instant within a calendar day by the duration elapsed after midnight in the local standard time
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "The duration used in the definition is modified for special situations (daylight saving time, leap second)."@en ,
+                                                        "Usually, clock time is represented by the number of hours elapsed after midnight, the number of minutes elapsed after the last full hour, and, if necessary, the number of seconds elapsed after the last full minute, possibly with decimal parts of a second. Examples of the standardized representation are 09:01; 09:01:12; 09:01:12,23. The combination of calendar date and clock time is denoted by inserting T; an example is 1998-11-15T09:01:12. (See ISO 8601)."@en ;
+                                           skos:altLabel "StandardTimeOfDay"@en ;
+                                           skos:prefLabel "ClockTime"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5773b9f0_9b71_489a_8ad9_3af63d5c757b
+:EMMO_5773b9f0_9b71_489a_8ad9_3af63d5c757b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-23" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """distance from the surface of a solid or liquid body to a point inwards
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org""" ;
+                                           skos:prefLabel "Depth"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6653f57d_efb9_4f14_ae2a_f4cf23f9cff1
+:EMMO_6653f57d_efb9_4f14_ae2a_f4cf23f9cff1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-10" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """part of the time axis limited by two instants
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "A time interval can be specified by the dates marking the initial instant and final instant or by one of these dates and the duration of the time interval."@en ,
+                                                        "A time interval comprises all instants between the two limiting instants and, unless otherwise stated, the limiting instants themselves."@en ,
+                                                        "For the term “time interval”, the word “time” is often used, but is not recommended in this sense. The expression “time interval” is often used in the sense of “duration” but this usage is deprecated to avoid confusion."@en ;
+                                           skos:prefLabel "TimeInterval"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_85bb3746_9000_443e_a225_7e44b5b19131
+:EMMO_85bb3746_9000_443e_a225_7e44b5b19131 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-30" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """at a point of a curve, radius of the osculating circle
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "The osculating circle is the circle tangent to a curve at a point that approaches at best the curve in the vicinity of the point."@en ;
+                                           skos:prefLabel "RadiusOfCurvature"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8f6090af_095c_4d07_ba4f_6d6ff00b0bf4
+:EMMO_8f6090af_095c_4d07_ba4f_6d6ff00b0bf4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-2 L0 M0 I0 Θ0 N0 J0"
+                                                           ] ;
+                                           skos:prefLabel "AngularFrequencyDimension"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b6d97ab3_463d_4884_82ad_09169fa50f36
+:EMMO_b6d97ab3_463d_4884_82ad_09169fa50f36 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-22" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """height above see level
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "Altitude"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b7383524_2a70_43c4_ab53_86c98ae072d7
+:EMMO_b7383524_2a70_43c4_ab53_86c98ae072d7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-26" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """shortest distance from a given point to a point on an axis Q
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "RadialDistance"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
+:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-27" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """maximal distance of two points of an object, in a given direction or along a straight line passing through the centre
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org""" ;
+                                           rdfs:comment "The diameter of a circle or a sphere is twice its radius." ;
+                                           skos:prefLabel "Diameter"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c65b3632_7120_4df7_9f54_e2fcdebaf30c
+:EMMO_c65b3632_7120_4df7_9f54_e2fcdebaf30c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_e9348e5b_af4f_4898_bbfe_c4583cf44b80
+                                                             owl:someValuesFrom :EMMO_8f6090af_095c_4d07_ba4f_6d6ff00b0bf4
                                                            ] ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "for solutions, product for all substances B of concentration c_B of substance B in power of its stoichiometric number v_B: K_p = \\sum_B{c_B^{v_B}}."@en ;
-                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Equilibrium_constant"@en ;
-                                           rdfs:comment "The physical dimension can change based on the stoichiometric numbers of the substances involved."@en ;
-                                           skos:altLabel "EquilibriumConstantConcentrationBasis"@en ;
-                                           skos:prefLabel "EquilibriumConstant"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c
-:EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_125e8614_0dad_4c04_9ac9_03317e63beec ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-20"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the product of ion molality b and a correction factor γ to the molality b° of the same ion in a standard solution under standardized conditions: a = bγ / b°
-
-International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment "Normally a standard solution is a solution of the ion at a molality of 1 mol/kg (exactly). Standardized conditions are normally 1 013,25 hPa and 25 °C."@en ,
-                                                        "The correction factor is called activity coefficient and it is determined experimentally. See ActivityCoefficient"@en ;
-                                           skos:prefLabel "IonActivity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_26922e28_b266_46c1_b93e_4940633ba5e4
-:EMMO_26922e28_b266_46c1_b93e_4940633ba5e4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_dc467621_3b49_4f31_9b09_82290f29da52 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-25"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """charge number that an atom within a molecule would have if all the ligands were removed along with the electron pairs that were shared
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-46" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """axial vector quantity given by the derivative of the angular velocity ω with respect to time t, thus α = dω/dt
 
 -- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "OxidationNumber"@en .
+                                           skos:prefLabel "AngularAcceleration"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2d206929_ff1d_4651_8823_daa860105a96
-:EMMO_2d206929_ff1d_4651_8823_daa860105a96 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-12"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """mark attributed to an instant by means of a specified timescale
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment "In common language, the term “date” is mainly used when the timescale is a calendar as a sequence of days."@en ,
-                                                        "On a timescale consisting of successive steps, two distinct instants may be expressed by the same date"@en ,
-                                                        "With respect to the specified timescale, a date may also be considered as the duration between the origin of the timescale and the considered instant."@en ;
-                                           skos:prefLabel "Date"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811
-:EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-10"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the number of dissociated molecules of a specified type to the total number of dissolved molecules of this type
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0
+:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-20" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """length in a given direction regarded as horizontal
 
 -- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "DissociationConstant"@en .
+                                           rdfs:comment "The terms breadth and width are often used by convention, as distinguished from length and from height or thickness."@en ;
+                                           skos:altLabel "Breadth"@en ;
+                                           skos:prefLabel "Width"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3b586409_b05e_4129_ab40_93768eef503f
-:EMMO_3b586409_b05e_4129_ab40_93768eef503f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aOH- of the hydroxide anion OH-
-
-pH = −10 log(a_OH-)"""@en ;
-                                           rdfs:comment "Written as pOH"@en ;
-                                           skos:prefLabel "POH"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_40989212_4866_41c0_8a20_84fd39540f29
-:EMMO_40989212_4866_41c0_8a20_84fd39540f29 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """product of the ion activities of the ions resulting from the dissociation of a solute in a saturated solution, raised to powers equal to their stoichiometric numbers
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment "For the dissociation of a salt AmBn → mA + nB, the solubility product is KSP = am(A) ⋅ an(B), where a is ionic activity and m and n are the stoichiometric numbers."@en ;
-                                           skos:altLabel "SolubilityProductConstant"@en ;
-                                           skos:prefLabel "SolubilityProduct"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204
-:EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-16"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quotient of the amount of substance nB of ions B, contained in a given volume V of a solution, by that volume: c_B = n_B / V
-
-International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "IonConcenration"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19
-:EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-21"@en ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "For more details, see ISO 80000-9:2009, Annex C"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aH+ of the hydrogen cation H+
-
-pH = −10 log(a_H+)
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment """At about 25 °C aqueous solutions with:
-
-pH < 7 are acidic;
-pH = 7 are neutral;
-pH > 7 are alkaline.
-
-At temperatures far from 25 °C the pH of a neutral solution differs significantly from 7."""@en ,
-                                                        "Written as pH"@en ;
-                                           skos:prefLabel "PH"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dc467621_3b49_4f31_9b09_82290f29da52
-:EMMO_dc467621_3b49_4f31_9b09_82290f29da52 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_eaf592ea_7761_4128_87a8_e643906258b4
+:EMMO_eaf592ea_7761_4128_87a8_e643906258b4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2946d40b_24a1_47fa_8176_e3f79bb45064 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                             owl:someValuesFrom :EMMO_515b5579_d526_4842_9e6f_ecc34db6f368
                                                            ] ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-05-17"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """for a particle, electric charge q divided by elementary charge e, thus e, soit c = q/e
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """axial vector quantity describing the rotation around an axis, with magnitude ω=|dφ/dt|, where dφ is the plane angle change during the infinitesimal time interval with duration dt, and with direction along the axis for which the rotation is clockwise
 
 -- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment "The charge number of a particle may be presented as a superscript to the symbol of that particle, e.g. H+, He++, Al3+, Cl−, S=, N3−."@en ,
-                                                        "The charge number of an electrically charged particle can be positive or negative. The charge number of an electrically neutral particle is zero."@en ;
-                                           skos:altLabel "IonizationNumber"@en ;
-                                           skos:prefLabel "ChargeNumber"@en .
+                                           rdfs:comment """In an inertial frame, the angular velocity does not depend on the chosen coordinate system provided that the orientation of space is kept (either right-handed or left-handed).
+
+-- IEC Note 1"""@en ;
+                                           skos:prefLabel "AngularVelocity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ff1cb30e_1490_474c_80db_81808a30e13f
+:EMMO_ff1cb30e_1490_474c_80db_81808a30e13f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-29" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """for a moving point, difference of the final position vector rf and the initial position vector ri, thus Δr = rf − ri
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "Displacement"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

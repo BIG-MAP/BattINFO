@@ -547,15 +547,6 @@ Adapted from:
                                            skos:prefLabel "OxidationReaction"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
-:EMMO_499a652b_5be6_4931_be7b_15d42e544b0b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 ;
-                                           emmo:EMMO_70fe84ff_99b6_4206_a9fc_9a8931836d84 "Product of ElectronCharge and AvagadroConstant"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Fundamental physical constant representing molar elementary charge: F=9.648 533 99(24)×10^4 C mol−1."@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/F02325" ;
-                                           skos:prefLabel "FaradayConstant"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4df84ec1_8a1a_4770_963f_bf48009bd043
 :EMMO_4df84ec1_8a1a_4770_963f_bf48009bd043 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
@@ -1174,10 +1165,6 @@ Conducting Additive"""@en ;
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1563,12 +1550,6 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "StrongAcid"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4
-:EMMO_cdaf1d61_b5df_43a9_91a4_a5b7f719e2b4 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_b953f2b1_c8d1_4dd9_b630_d3ef6580c2bb ;
-                                           skos:prefLabel "ElectrochemicalConstant"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ce548161_c987_4beb_9091_adcf80027310
 :EMMO_ce548161_c987_4beb_9091_adcf80027310 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e ;
@@ -1617,10 +1598,6 @@ of other configurations are used."""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
@@ -1928,10 +1905,6 @@ Adapted from:
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:someValuesFrom emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_499a652b_5be6_4931_be7b_15d42e544b0b
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
