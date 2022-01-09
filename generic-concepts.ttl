@@ -2844,6 +2844,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 ###  http://emmo.info/emmo#EMMO_e58bde09_bb09_4bd5_911f_c5d7fb3e5e46
 :EMMO_e58bde09_bb09_4bd5_911f_c5d7fb3e5e46 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """date on a timescale consisting of the origin of a calendar and a succession of calendar days
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "In the standardized calendar, a calendar date is expressed by a triple of numbers consisting of the number of the year relative to a conventional origin, the number of the month within this year and the number of the day within this month. The standardized representation (see ISO 8601) is in the order year-month-day"@en ,
+                                                        "In the standardized calendar, each calendar day extends from one midnight to the next midnight for the standard time at a given location. Consecutive calendar days are usually grouped together in various time intervals, i.e. calendar weeks, calendar months, calendar years."@en ;
                                            skos:prefLabel "CalendarDate"@en .
 
 
@@ -3195,6 +3200,19 @@ International Electrotechnical Commission (IEC), IEC 60050 - International Elect
                                            skos:prefLabel "OxidationNumber"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2d206929_ff1d_4651_8823_daa860105a96
+:EMMO_2d206929_ff1d_4651_8823_daa860105a96 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-01-12"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """mark attributed to an instant by means of a specified timescale
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "In common language, the term “date” is mainly used when the timescale is a calendar as a sequence of days."@en ,
+                                                        "On a timescale consisting of successive steps, two distinct instants may be expressed by the same date"@en ,
+                                                        "With respect to the specified timescale, a date may also be considered as the duration between the origin of the timescale and the considered instant."@en ;
+                                           skos:prefLabel "Date"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811
 :EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
@@ -3211,7 +3229,8 @@ International Electrotechnical Commission (IEC), IEC 60050 - International Elect
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aOH- of the hydroxide anion OH-
 
 pH = −10 log(a_OH-)"""@en ;
-                                           skos:prefLabel "pOH"@en .
+                                           rdfs:comment "Written as pOH"@en ;
+                                           skos:prefLabel "POH"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_40989212_4866_41c0_8a20_84fd39540f29
@@ -3251,8 +3270,9 @@ pH < 7 are acidic;
 pH = 7 are neutral;
 pH > 7 are alkaline.
 
-At temperatures far from 25 °C the pH of a neutral solution differs significantly from 7."""@en ;
-                                           skos:prefLabel "pH"@en .
+At temperatures far from 25 °C the pH of a neutral solution differs significantly from 7."""@en ,
+                                                        "Written as pH"@en ;
+                                           skos:prefLabel "PH"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dc467621_3b49_4f31_9b09_82290f29da52
