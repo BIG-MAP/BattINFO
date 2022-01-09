@@ -1121,6 +1121,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "MassFluxTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_5f4c38e2_6661_45c7_97fc_81d443560c1b
+:EMMO_5f4c38e2_6661_45c7_97fc_81d443560c1b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ;
+                                           skos:prefLabel "ReactionOrder"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_5fde0fa1_bbb3_42a9_ac2d_d144771aeb4b
 :EMMO_5fde0fa1_bbb3_42a9_ac2d_d144771aeb4b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -1430,7 +1436,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
                                                              owl:someValuesFrom :EMMO_1715e002_3f62_493a_8af4_74f273df2cd7
                                                            ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-24" ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-42" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """for all types of ions in a solution, half the sum of the products of their molality b_i and the square of their charge number z_i
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "Charge number is a quantity of dimension one defined in ChargeNumber."@en ;
                                            skos:prefLabel "IonicStrength"@en .
 
 
@@ -1533,6 +1544,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "LinearElectricCurrentDensity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a
+:EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-1 L0 M0 I0 Θ0 N+1 J0"
+                                                           ] ;
+                                           skos:prefLabel "AmountPerTimeDimension"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_7ea55049_bd1a_46ee_98b4_04ec1c24c9b1
 :EMMO_7ea55049_bd1a_46ee_98b4_04ec1c24c9b1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0 ;
@@ -1612,6 +1633,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "quotient of number of acceptor levels and volume"@en ,
                                                                                       "quotient of number of acceptor levels and volume (ISO 80000-3)"@en ;
                                            skos:prefLabel "AcceptorDensity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_83033b45_90fd_456b_92e3_c4abcefd0fa6
+:EMMO_83033b45_90fd_456b_92e3_c4abcefd0fa6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a
+                                                           ] ;
+                                           skos:prefLabel "ReactionRate"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_84d23674_b2d6_401a_9d4a_e718ee346baf
@@ -1927,6 +1958,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "EnergySourceTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324
+:EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a293f923_954c_4af5_9f97_9600ebd362cb ;
+                                           skos:prefLabel "ReactionQuotient"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_9bc6da11_528a_44e8_bd9e_c4154eae7e55
 :EMMO_9bc6da11_528a_44e8_bd9e_c4154eae7e55 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -1936,6 +1973,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-5.1" ;
                                            skos:prefLabel "IsothermalCompressibility"@en .
+
+
+###  http://emmo.info/emmo#EMMO_9cfa7f0a_8e3d_4980_bd32_13fed02f1710
+:EMMO_9cfa7f0a_8e3d_4980_bd32_13fed02f1710 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           skos:prefLabel "GibbsEnergyOfReaction"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_9d018f03_bbda_4ca5_bc4c_646e72651e53
@@ -2147,10 +2194,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-13"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Positively charged ion."@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Positively charged ion.
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           :EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C00907"@en ;
                                            rdfs:comment """A monoatomic or polyatomic species having one or more elementary charges of the proton.
 
-- IUPAC Gold Book"""@en ;
+-- IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
                                            skos:prefLabel "Cation"@en .
 
 
@@ -2503,10 +2553,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-12"@en ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Negatively charged ion.
 
---IEC60050"""@en ;
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           :EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/A00358"@en ;
                                            rdfs:comment """A monoatomic or polyatomic species having one or more elementary charges of the electron.
 
-- IUPAC Gold Book"""@en ;
+-- IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
                                            skos:prefLabel "Anion"@en .
 
 
@@ -2623,6 +2674,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-6" ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "closing vector in a sequence of vectors encircling a dislocation"@en ;
                                            skos:prefLabel "BurgersVector"@en .
+
+
+###  http://emmo.info/emmo#EMMO_daa6884a_d9ab_4433_b600_fcb44ef7ac63
+:EMMO_daa6884a_d9ab_4433_b600_fcb44ef7ac63 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ;
+                                           skos:prefLabel "ReactionRateConstant"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_dc1370b5_3902_4652_8736_0804d88dd128
@@ -2866,7 +2923,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
                                                              owl:someValuesFrom :EMMO_1715e002_3f62_493a_8af4_74f273df2cd7
                                                            ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-19"@en ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-15" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quotient of the amount of substance nB of solute B by the mass m of the solvent: bB = nB / m
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            skos:altLabel "AmountPerMass"@en ;
                                            skos:prefLabel "Molality"@en .
 
@@ -2974,7 +3035,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
                                                              owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
                                                            ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-09"@en ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-43" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the number of dissociation events to the maximum number of theoretically possible dissociation events.
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "Dissociation may occur stepwise."@en ;
                                            skos:altLabel "DissociationFraction"@en ;
                                            skos:prefLabel "DegreeOfDissociation"@en .
 
@@ -3093,52 +3159,117 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5f4c38e2_6661_45c7_97fc_81d443560c1b
-:EMMO_5f4c38e2_6661_45c7_97fc_81d443560c1b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ;
-                                           skos:prefLabel "ReactionOrder"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a
-:EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                             owl:hasValue "T-1 L0 M0 I0 Θ0 N+1 J0"
-                                                           ] ;
-                                           skos:prefLabel "AmountPerTimeDimension"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_83033b45_90fd_456b_92e3_c4abcefd0fa6
-:EMMO_83033b45_90fd_456b_92e3_c4abcefd0fa6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ,
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e
+:EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a
+                                                             owl:someValuesFrom :EMMO_e9348e5b_af4f_4898_bbfe_c4583cf44b80
                                                            ] ;
-                                           skos:prefLabel "ReactionRate"@en .
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "for solutions, product for all substances B of concentration c_B of substance B in power of its stoichiometric number v_B: K_p = \\sum_B{c_B^{v_B}}."@en ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Equilibrium_constant"@en ;
+                                           rdfs:comment "The physical dimension can change based on the stoichiometric numbers of the substances involved."@en ;
+                                           skos:altLabel "EquilibriumConstantConcentrationBasis"@en ;
+                                           skos:prefLabel "EquilibriumConstant"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324
-:EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a293f923_954c_4af5_9f97_9600ebd362cb ;
-                                           skos:prefLabel "ReactionQuotient"@en .
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c
+:EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_125e8614_0dad_4c04_9ac9_03317e63beec ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-20"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the product of ion molality b and a correction factor γ to the molality b° of the same ion in a standard solution under standardized conditions: a = bγ / b°
+
+International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "Normally a standard solution is a solution of the ion at a molality of 1 mol/kg (exactly). Standardized conditions are normally 1 013,25 hPa and 25 °C."@en ,
+                                                        "The correction factor is called activity coefficient and it is determined experimentally. See ActivityCoefficient"@en ;
+                                           skos:prefLabel "IonActivity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9cfa7f0a_8e3d_4980_bd32_13fed02f1710
-:EMMO_9cfa7f0a_8e3d_4980_bd32_13fed02f1710 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ,
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_26922e28_b266_46c1_b93e_4940633ba5e4
+:EMMO_26922e28_b266_46c1_b93e_4940633ba5e4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dc467621_3b49_4f31_9b09_82290f29da52 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-25"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """charge number that an atom within a molecule would have if all the ligands were removed along with the electron pairs that were shared
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "OxidationNumber"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811
+:EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-10"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ratio of the number of dissociated molecules of a specified type to the total number of dissolved molecules of this type
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "DissociationConstant"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_3b586409_b05e_4129_ab40_93768eef503f
+:EMMO_3b586409_b05e_4129_ab40_93768eef503f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aOH- of the hydroxide anion OH-
+
+pH = −10 log(a_OH-)"""@en ;
+                                           skos:prefLabel "pOH"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_40989212_4866_41c0_8a20_84fd39540f29
+:EMMO_40989212_4866_41c0_8a20_84fd39540f29 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """product of the ion activities of the ions resulting from the dissociation of a solute in a saturated solution, raised to powers equal to their stoichiometric numbers
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "For the dissociation of a salt AmBn → mA + nB, the solubility product is KSP = am(A) ⋅ an(B), where a is ionic activity and m and n are the stoichiometric numbers."@en ;
+                                           skos:altLabel "SolubilityProductConstant"@en ;
+                                           skos:prefLabel "SolubilityProduct"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204
+:EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-16"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quotient of the amount of substance nB of ions B, contained in a given volume V of a solution, by that volume: c_B = n_B / V
+
+International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "IonConcenration"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19
+:EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_12b2ec1e_fb89_468a_a51d_97c2a6db297c ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-21"@en ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "For more details, see ISO 80000-9:2009, Annex C"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """number quantifying the acidic or the alkaline character of a solution, equal to the negative of the decimal logarithm of ion activity aH+ of the hydrogen cation H+
+
+pH = −10 log(a_H+)
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """At about 25 °C aqueous solutions with:
+
+pH < 7 are acidic;
+pH = 7 are neutral;
+pH > 7 are alkaline.
+
+At temperatures far from 25 °C the pH of a neutral solution differs significantly from 7."""@en ;
+                                           skos:prefLabel "pH"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dc467621_3b49_4f31_9b09_82290f29da52
+:EMMO_dc467621_3b49_4f31_9b09_82290f29da52 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
                                                            ] ;
-                                           skos:prefLabel "GibbsEnergyOfReaction"@en .
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-05-17"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """for a particle, electric charge q divided by elementary charge e, thus e, soit c = q/e
 
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_daa6884a_d9ab_4433_b600_fcb44ef7ac63
-:EMMO_daa6884a_d9ab_4433_b600_fcb44ef7ac63 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_602397bd_e302_42a6_be33_fe67ea81933a ;
-                                           skos:prefLabel "ReactionRateConstant"@en .
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "The charge number of a particle may be presented as a superscript to the symbol of that particle, e.g. H+, He++, Al3+, Cl−, S=, N3−."@en ,
+                                                        "The charge number of an electrically charged particle can be positive or negative. The charge number of an electrically neutral particle is zero."@en ;
+                                           skos:altLabel "IonizationNumber"@en ;
+                                           skos:prefLabel "ChargeNumber"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
