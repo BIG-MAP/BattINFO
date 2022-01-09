@@ -409,7 +409,8 @@ Aluminum foil"""@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-15"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Accumulation or depletion of electric charges at an electrode, resulting in a difference between the electrode potential with current flow, and the potential without current flow or equilibrium electrode potential.
 
---IEC60050"""@en ;
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "ElectrodePolarizationProcess"@en ;
                                            skos:prefLabel "ElectrodePolarization"@en .
 
 
@@ -1294,14 +1295,18 @@ Conducting Additive"""@en ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
                                                            ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-01"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-01"@en ,
+                                                                                          "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-01" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A chemical reaction in an electrolyte involving a transfer of electrons between chemical components or between chemical components and an electrode.
 
---IEC60050"""@en ;
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            rdfs:comment """Any process either caused or accompanied by the passage of an electric current and involving in most cases the transfer of electrons between two substances.
 
 --Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemical reaction. Encyclopedia Britannica. https://www.britannica.com/science/electrochemical-reaction"""@en ,
-                                                        "Electrochemical reactions occur at electrochemical interfaces."@en ;
+                                                        "Electrochemical reactions occur at electrochemical interfaces."@en ,
+                                                        """The electrode reaction can also involve other chemical reactions including subreactions on a cell electrode.
+
+-- IEC Note 1"""@en ;
                                            skos:altLabel "ChargeTransferReaction"@en ;
                                            skos:prefLabel "ElectrochemicalReaction"@en .
 
@@ -1924,6 +1929,74 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_444992e5_43f8_44a1_9767_b408dbe54330
+:EMMO_444992e5_43f8_44a1_9767_b408dbe54330 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-27" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """phenomenon by which a cell or battery loses energy in other ways than by discharge into an external circuit
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "See also ChargeRetention"@en ;
+                                           skos:prefLabel "SelfDischarge"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_83d2c2d4_ffa9_42f4_9264_a0c59c657607
+:EMMO_83d2c2d4_ffa9_42f4_9264_a0c59c657607 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-03"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """reversing of the polarities of the electrodes of a cell, generally due to over-discharge of a low-capacity cell in a series arrangement
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "CellReversal"@en ;
+                                           skos:prefLabel "PolarityReversal"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_8c71739c_27c1_4d19_a0ff_02545296af43
+:EMMO_8c71739c_27c1_4d19_a0ff_02545296af43 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-41" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein the positive terminal of each cell or battery is connected to the negative terminal of the next cell or battery in sequence
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "SeriesConnection"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847
+:EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-42" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein in series connected cells or batteries are connected in parallel
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "SeriesParallelConnection"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_d5da9948_e95b_4f12_a2d2_10a48f390c52
+:EMMO_d5da9948_e95b_4f12_a2d2_10a48f390c52 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-40" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein parallel connected cells or batteries are connected in series
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "ParallelSeriesConnection"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_efc4f7ab_850d_443c_a17f_184983021f96
+:EMMO_efc4f7ab_850d_443c_a17f_184983021f96 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-39" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein all the positive terminals and all the negative terminals, respectively, are connected together
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "ParallelConnection"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4
+:EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
+                                           skos:prefLabel "IntentionalElectrochemicalProcess"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

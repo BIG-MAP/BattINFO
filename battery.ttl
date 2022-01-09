@@ -39,6 +39,16 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
+:EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-32" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """unplanned escape of electrolyte, gas or other material from a cell or battery	
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "Leakage"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b
 :EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c ;
@@ -585,6 +595,19 @@ Adapted from:
                                            skos:prefLabel "LithiumMetalReferenceElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1
+:EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-30" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """gradual and slow spreading of an electrolyte film on the external surface of a cell or battery
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """Electrolyte creep is sometimes indicated by the presence of a visible solid deposit or wet spots.
+
+-- IEC Note 1"""@en ;
+                                           skos:prefLabel "ElectrolyteCreep"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
@@ -666,33 +689,31 @@ Adapted from:
                                            skos:prefLabel "NMC111"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
-:EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-32" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """unplanned escape of electrolyte, gas or other material from a cell or battery	
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "Leakage"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1
-:EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-30" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """gradual and slow spreading of an electrolyte film on the external surface of a cell or battery
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment """Electrolyte creep is sometimes indicated by the presence of a visible solid deposit or wet spots.
-
--- IEC Note 1"""@en ;
-                                           skos:prefLabel "ElectrolyteCreep"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3
 :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_314d0bd5_67ed_437e_a609_36d46147cea7 ;
                                            skos:prefLabel "BatteryPhenomenon"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806
+:EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
+                                           skos:prefLabel "IntentionalBatteryProcess"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6
+:EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-23"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """operation by which a battery delivers, to an external electric circuit and under specified conditions, electric energy produced in the cells
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "BatteryDischarge"@en ;
+                                           skos:prefLabel "DischargeOfABattery"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

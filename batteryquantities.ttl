@@ -54,6 +54,9 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
                                                              owl:someValuesFrom emmo:EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
                                                            ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-25" ;
+                                           rdfs:comment "The discharge rate is calculated as the rated capacity divided by the corresponding discharge time which results in an electric current."@en ;
+                                           skos:altLabel "DischargeRate"@en ;
                                            skos:prefLabel "DRate"@en .
 
 
@@ -69,6 +72,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 -- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            skos:prefLabel "BatteryEnergy"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_886d2b91_ace9_4ff6_add5_001bef091334
+:EMMO_886d2b91_ace9_4ff6_add5_001bef091334 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-31" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ability of a cell or battery to contain its electrolyte under specified mechanical and environmental conditions
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "ElectrolyteContainment"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83
@@ -87,20 +100,57 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "CRate"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/batteryquantities#EMMO_886d2b91_ace9_4ff6_add5_001bef091334
-:EMMO_886d2b91_ace9_4ff6_add5_001bef091334 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-31" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """ability of a cell or battery to contain its electrolyte under specified mechanical and environmental conditions
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "ElectrolyteContainment"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/batteryquantities#EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae
 :EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
                                            skos:prefLabel "NominalBatteryProperty"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/batteryquantities#EMMO_8c3ef9da_ccb9_4097_bd62_b2a73eff34ca
+:EMMO_8c3ef9da_ccb9_4097_bd62_b2a73eff34ca rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-47" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """duration, under specific conditions, at the end of which a battery has retained the ability to perform a specified function
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "ShelfLife"@en ;
+                                           skos:prefLabel "StorageLife"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/batteryquantities#EMMO_b10c88d8_43d9_42dd_9f65_49ce2314513f
+:EMMO_b10c88d8_43d9_42dd_9f65_49ce2314513f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-38" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """total mass of a battery in its operational condition
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "ServiceMass"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/batteryquantities#EMMO_be5d1b4f_5579_4702_9dbb_6c15e577e8dc
+:EMMO_be5d1b4f_5579_4702_9dbb_6c15e577e8dc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """total period of useful life of a cell or a battery in operation
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """For primary batteries, service life relates to the total discharge time or capacity under specific conditions.
+
+-- IEC Note 1"""@en ,
+                                                        """For secondary cells and batteries, the service life may be expressed in time, number of charge/discharge cycles, or capacity in ampere hours (Ah).
+
+-- IEC Note 2"""@en ;
+                                           skos:prefLabel "ServiceLife"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/batteryquantities#EMMO_df6bdaa9_5275_4a02_a592_adafd4e5c3c3
+:EMMO_df6bdaa9_5275_4a02_a592_adafd4e5c3c3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ,
+                                                           electrochemistry:EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
+                                           skos:altLabel """capacity value of a battery determined under specified conditions and declared by the manufacturer
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ,
+                                                         "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-15" ;
+                                           skos:prefLabel "RatedCapacity"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
