@@ -161,6 +161,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryCycler"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_249848f9_308a_40aa_b560_e77cb167da50
+:EMMO_249848f9_308a_40aa_b560_e77cb167da50 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           skos:prefLabel "LFPReferenceElectrode"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
 :EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
@@ -573,6 +579,12 @@ Adapted from:
                                            skos:prefLabel "PositiveElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2
+:EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb ;
+                                           skos:prefLabel "LithiumMetalReferenceElectrode"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
@@ -594,6 +606,12 @@ Adapted from:
 :EMMO_da15df91_45aa_429c_a1e7_21f49a281f23 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "PrismaticCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb
+:EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           skos:prefLabel "MetalReferenceElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_de6f02d3_ea77_4e15_8e39_a066eb9d63cc
@@ -648,22 +666,33 @@ Adapted from:
                                            skos:prefLabel "NMC111"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_249848f9_308a_40aa_b560_e77cb167da50
-:EMMO_249848f9_308a_40aa_b560_e77cb167da50 rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           skos:prefLabel "LFPReferenceElectrode"@en .
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
+:EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-32" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """unplanned escape of electrolyte, gas or other material from a cell or battery	
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "Leakage"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2
-:EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb ;
-                                           skos:prefLabel "LithiumMetalReferenceElectrode"@en .
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1
+:EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-30" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """gradual and slow spreading of an electrolyte film on the external surface of a cell or battery
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment """Electrolyte creep is sometimes indicated by the presence of a visible solid deposit or wet spots.
+
+-- IEC Note 1"""@en ;
+                                           skos:prefLabel "ElectrolyteCreep"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb
-:EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
-                                           skos:prefLabel "MetalReferenceElectrode"@en .
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3
+:EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_314d0bd5_67ed_437e_a609_36d46147cea7 ;
+                                           skos:prefLabel "BatteryPhenomenon"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
