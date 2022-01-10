@@ -1,0 +1,5 @@
+# Configuration file for deploying ontologies on onto-ns.com
+ontology_dirs: ["."]
+avoid_namespaces: []
+catalog_file_dir: "."
+deploy_branch: "master"
