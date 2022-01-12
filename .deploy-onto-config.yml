@@ -1,0 +1,37 @@
+# Configuration file for deploying ontologies on onto-ns.com
+
+# Directories, in which ontology files are present that should be published.
+# It should be relative to the root of the repository, e.g., "." for the root
+# and "ontologies/publish" for the repository sub-directory `publish` under the
+# root repository directory of `ontologies`.
+ontology_dirs: ["."]
+
+# List of namespaces, which should not be published.
+# If it is a "top" namespace, e.g., `BattINFO`, then all ontologies under that
+# namespace will not be published (e.g., `BattINFO/battery`).
+# To define a sub-namespace, one must also supply the "top" namespace.
+# E.g., to avoid publishing `electrochemicalquantities`, but keep `electrochemistry`
+# one can write add "electrochemistry/electrochemicalquantities".
+avoid_namespaces: []
+
+# The directory in which the `catalog-v001.xml` file is found.
+# "." means the root directory of the repository.
+# This value should be relative to the root of the repository, similar to the values
+# of `ontology_dirs`.
+catalog_file_dir: "."
+
+# The branch to be used as the source of the ontologies to be published.
+# This value will be retrieved from the default branch (`master` for `BIG-MAP/BattINFO`)
+# and has no meaning in the actual branch of deployment.
+# This means that this configuration option is only respected by the Deploy Onto! App
+# when it is read from the project's default branch.
+#
+# The workflow is the following for the App:
+#   1. Detect a push
+#   2. Retrieve this config file from the default branch
+#      (`master` for `BIG-MAP/BattINFO`)
+#   3. Check whether the push was to the value of `deploy_branch`
+#      (defaults to "main" in the App)
+#   4. Retrieve and publish ontologies from the `deploy_branch`
+#      (or stop if the push was not to the `deploy_branch`)
+deploy_branch: "master"
