@@ -157,20 +157,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "Thermocell"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1150b4d8_1d86_496f_a154_731868f0b46d
-:EMMO_1150b4d8_1d86_496f_a154_731868f0b46d rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_7afbed84_7593_4a23_bd88_9d9c6b04e8f6 ;
-                                                             owl:someValuesFrom :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A chemical reaction for which the expression for the rate of disappearance of a reactant (or rate of appearance of a product) involves rate constants of more than a single elementary reaction. 
-
-IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C01211"@en ;
-                                           skos:prefLabel "CompositeReaction"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb
 :EMMO_1152ae6b_8b57_4d99_912e_40c6a29342fb rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_579eed46_6918_4275_9a70_dfd0409ab418 ;
@@ -208,31 +194,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An air electrode that is designed to perform both the oxygen reduction reaction (ORR) and the oxygen evolution reaction (OER)."@en ;
                                            skos:altLabel "BAE"@en ;
                                            skos:prefLabel "BifunctionalAirElectrode"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9
-:EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A reaction for which no reaction intermediates have been detected or need to be postulated in order to describe the chemical reaction on a molecular scale. An elementary reaction is assumed to occur in a single step and to pass through a single transition state.
-
-IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Elementary_reaction"@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.E02035"@en ;
-                                           skos:prefLabel "ElementaryReaction"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_142ec80c_ea80_423b_882b_e21f802316d4
-:EMMO_142ec80c_ea80_423b_882b_e21f802316d4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A rate-controlling (rate-determining or rate-limiting) step in a reaction occurring by a composite reaction sequence is an elementary reaction the rate constant for which exerts a strong effect — stronger than that of any other rate constant — on the overall rate.
-
-IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Rate-determining_step"@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.R05140"@en ;
-                                           rdfs:comment "It is recommended that the expressions rate-controlling, rate-determining and rate-limiting be regarded as synonymous, but some special meanings sometimes given to the last two expressions."@en ;
-                                           skos:altLabel "RateControllingStep"@en ,
-                                                         "RateLimitingStep"@en ;
-                                           skos:prefLabel "RateDeterminingStep"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be
@@ -338,15 +299,6 @@ Aluminum foil"""@en ;
                                            skos:prefLabel "IonicSubcomponent"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_26d8e2a6_10bb_4623_a79d_fd2d90cd1ea4
-:EMMO_26d8e2a6_10bb_4623_a79d_fd2d90cd1ea4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aea54471_e0d4_479c_8c11_fd0a4bfe276c ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-07"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An unwanted side reaction."@en ;
-                                           rdfs:comment "In a galvanic cell, parasitic reactions may cause inefficiencies or loss of performance."@en ;
-                                           skos:prefLabel "ParasiticReaction"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_279ecc9f_bfbc_4108_ae40_3c1c0f735e60
 :EMMO_279ecc9f_bfbc_4108_ae40_3c1c0f735e60 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
@@ -427,18 +379,6 @@ Aluminum foil"""@en ;
                                            skos:prefLabel "ElectrochemicalInsertionReaction"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2f7b7d01_f44f_448d_8ce1_86fc2b4dc60f
-:EMMO_2f7b7d01_f44f_448d_8ce1_86fc2b4dc60f rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-08"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Process where molecules split up into ions due to being dissolved.
-
---IEC60050"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Dissociation_(chemistry)"@en ;
-                                           rdfs:comment "The result of the dissociation is an electrolyte."@en ;
-                                           skos:prefLabel "Dissociation"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
 :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 ;
@@ -516,13 +456,6 @@ Adapted from:
                                            skos:prefLabel "PrimaryCell"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3bc9e1c2_b48c_468a_8441_126fb415db19
-:EMMO_3bc9e1c2_b48c_468a_8441_126fb415db19 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1409f2b5_2545_44fc_9b76_73c5434892c9 ;
-                                           skos:altLabel "ElectronTransferStep"@en ;
-                                           skos:prefLabel "ChargeTransferStep"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
 :EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_e5438930_04e7_4d42_ade5_3700d4a52ab7 ;
@@ -538,14 +471,15 @@ Adapted from:
                                            skos:prefLabel "IntercalationMaterial"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3f99828c_268a_442f_998d_15c89dc4c1b3
-:EMMO_3f99828c_268a_442f_998d_15c89dc4c1b3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A reaction in which a substance (molecule, atom or ion) loses electrons. 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_444992e5_43f8_44a1_9767_b408dbe54330
+:EMMO_444992e5_43f8_44a1_9767_b408dbe54330 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-27" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """phenomenon by which a cell or battery loses energy in other ways than by discharge into an external circuit
 
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           skos:altLabel "Oxidation"@en ;
-                                           skos:prefLabel "OxidationReaction"@en .
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           rdfs:comment "See also ChargeRetention"@en ;
+                                           skos:prefLabel "SelfDischarge"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4df84ec1_8a1a_4770_963f_bf48009bd043
@@ -610,17 +544,6 @@ Adapted from:
                                            rdfs:subClassOf emmo:EMMO_b17cd88e_9bb7_4d87_ade5_6e181d921f93 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The boundary between two electrochemical materials, at which electrochemical reactions normally take place."@en ;
                                            skos:prefLabel "ElectrochemicalInterface"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b
-:EMMO_504d2d4f_78c8_4ba4_927e_477fc371159b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """1. A type of redox reaction featuring the complete, net removal of one or more electrons from a molecular entity (also called 'de-electronation'). 
-2. An increase in the oxidation number of any atom within any substrate.
-
-IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Redox"@en ;
-                                           skos:prefLabel "OxidationReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
@@ -847,17 +770,6 @@ IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled
                                            skos:prefLabel "CompositeIonBridge"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6cb2f0d6_4925_427f_b33d_0c9a96166768
-:EMMO_6cb2f0d6_4925_427f_b33d_0c9a96166768 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The complete transfer of one or more electrons to a molecular entity (also called 'electronation'), and, more generally, the reverse of the processes described under oxidation (2) and (3).
-
-IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Redox"@en ;
-                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.R05222"@en ;
-                                           skos:prefLabel "ReductionReaction"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
 :EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca ,
@@ -1047,6 +959,17 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ConductiveAdditive"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_83d2c2d4_ffa9_42f4_9264_a0c59c657607
+:EMMO_83d2c2d4_ffa9_42f4_9264_a0c59c657607 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-03"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """reversing of the polarities of the electrodes of a cell, generally due to over-discharge of a low-capacity cell in a series arrangement
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "CellReversal"@en ;
+                                           skos:prefLabel "PolarityReversal"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306
 :EMMO_83ee23b3_2f5c_4afa_b972_ac85e91d7306 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
@@ -1114,6 +1037,16 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A gas diffusion electrode in which the gas is air."@en ;
                                            rdfs:comment "The reaction occuring in an air electrode is typically the oxygen reduction reaction (ORR)."@en ;
                                            skos:prefLabel "AirElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_8c71739c_27c1_4d19_a0ff_02545296af43
+:EMMO_8c71739c_27c1_4d19_a0ff_02545296af43 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-41" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein the positive terminal of each cell or battery is connected to the negative terminal of the next cell or battery in sequence
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "SeriesConnection"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
@@ -1217,8 +1150,7 @@ Conducting Additive"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a0580fa9_5073_44af_b33e_7adbc83892d0
 :EMMO_a0580fa9_5073_44af_b33e_7adbc83892d0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2e3e14f9_4cb8_45b2_908e_47eec893dec8 ,
-                                                           :EMMO_3f99828c_268a_442f_998d_15c89dc4c1b3 ;
+                                           rdfs:subClassOf :EMMO_2e3e14f9_4cb8_45b2_908e_47eec893dec8 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-09"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode reaction in which oxidation occurs at the anode.
 
@@ -1277,8 +1209,8 @@ Conducting Additive"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
 :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ,
-                                                           :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ,
+                                           rdfs:subClassOf emmo:EMMO_7278f78b_9f53_4b34_9a95_1be2d34c84d2 ,
+                                                           :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
@@ -1319,18 +1251,6 @@ Conducting Additive"""@en ;
 --J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Potentiostat"@en ;
                                            skos:prefLabel "Potentiostat"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_aea54471_e0d4_479c_8c11_fd0a4bfe276c
-:EMMO_aea54471_e0d4_479c_8c11_fd0a4bfe276c rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-06"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Chemical reaction which occurs in addition to the main process.
-
---IEC60050"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Side_reaction"@en ;
-                                           skos:altLabel "SecondaryReaction"@en ;
-                                           skos:prefLabel "SideReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_af499b32_68a7_4b8c_972e_4ebdba8b314e
@@ -1489,6 +1409,16 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "FuelCell"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847
+:EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-42" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein in series connected cells or batteries are connected in parallel
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "SeriesParallelConnection"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c2024587_3237_474e_8df9_91d10db2df47
 :EMMO_c2024587_3237_474e_8df9_91d10db2df47 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
@@ -1562,31 +1492,6 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "WeakBase"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d07d939a_7865_406d_867a_0500b02cba47
-:EMMO_d07d939a_7865_406d_867a_0500b02cba47 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_5562e8ed_b297_4fb4_8db8_a36b99fd53b1
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_e438f539_b8f5_41ae_b2a6_254a6c90414e
-                                                           ] ;
-                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Redox"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Chemical reactions in which the reactants exchange electrons between each other.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Redox"@en ;
-                                           skos:altLabel "OxidationReductionReaction"@en ,
-                                                         "ReductionOxidationReaction"@en ;
-                                           skos:prefLabel "RedoxReaction"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
 :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
@@ -1626,6 +1531,16 @@ of other configurations are used."""@en ;
                                            skos:altLabel "ButlerVolmerApproximation"@en ,
                                                          "ErdeyGruzVolmerEquation"@en ;
                                            skos:prefLabel "ButlerVolmerEquation"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d5da9948_e95b_4f12_a2d2_10a48f390c52
+:EMMO_d5da9948_e95b_4f12_a2d2_10a48f390c52 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-40" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein parallel connected cells or batteries are connected in series
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "ParallelSeriesConnection"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c
@@ -1756,6 +1671,16 @@ Adapted from:
                                            skos:prefLabel "SecondaryCell"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_efc4f7ab_850d_443c_a17f_184983021f96
+:EMMO_efc4f7ab_850d_443c_a17f_184983021f96 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-39" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein all the positive terminals and all the negative terminals, respectively, are connected together
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:prefLabel "ParallelConnection"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f0c24970_4c14_4207_bd78_5f2181a67085
 :EMMO_f0c24970_4c14_4207_bd78_5f2181a67085 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
@@ -1765,21 +1690,15 @@ Adapted from:
                                            skos:prefLabel "Electrodeposition"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f1f61589_831a_44a7_ad1f_246d8a029453
-:EMMO_f1f61589_831a_44a7_ad1f_246d8a029453 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_d07d939a_7865_406d_867a_0500b02cba47 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A reaction in which a substance gains electrons from another reagent called reductant which itself is oxidized.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
-                                           rdfs:comment "The opposite of an oxidation reaction."@en ;
-                                           skos:altLabel "Reduction"@en ;
-                                           skos:prefLabel "ReductionReaction"@en .
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4
+:EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
+                                           skos:prefLabel "IntentionalElectrochemicalProcess"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f4a1323a_ce2b_4c1a_b89d_c80170110ed6
 :EMMO_f4a1323a_ce2b_4c1a_b89d_c80170110ed6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2e3e14f9_4cb8_45b2_908e_47eec893dec8 ,
-                                                           :EMMO_f1f61589_831a_44a7_ad1f_246d8a029453 ;
+                                           rdfs:subClassOf :EMMO_2e3e14f9_4cb8_45b2_908e_47eec893dec8 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-10"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Electrode reaction in which reduction  occurs at the cathode.
 
@@ -1929,74 +1848,6 @@ Adapted from:
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_444992e5_43f8_44a1_9767_b408dbe54330
-:EMMO_444992e5_43f8_44a1_9767_b408dbe54330 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-27" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """phenomenon by which a cell or battery loses energy in other ways than by discharge into an external circuit
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           rdfs:comment "See also ChargeRetention"@en ;
-                                           skos:prefLabel "SelfDischarge"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_83d2c2d4_ffa9_42f4_9264_a0c59c657607
-:EMMO_83d2c2d4_ffa9_42f4_9264_a0c59c657607 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-03"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """reversing of the polarities of the electrodes of a cell, generally due to over-discharge of a low-capacity cell in a series arrangement
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:altLabel "CellReversal"@en ;
-                                           skos:prefLabel "PolarityReversal"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_8c71739c_27c1_4d19_a0ff_02545296af43
-:EMMO_8c71739c_27c1_4d19_a0ff_02545296af43 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-41" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein the positive terminal of each cell or battery is connected to the negative terminal of the next cell or battery in sequence
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "SeriesConnection"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847
-:EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-42" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein in series connected cells or batteries are connected in parallel
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "SeriesParallelConnection"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_d5da9948_e95b_4f12_a2d2_10a48f390c52
-:EMMO_d5da9948_e95b_4f12_a2d2_10a48f390c52 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-40" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein parallel connected cells or batteries are connected in series
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "ParallelSeriesConnection"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_efc4f7ab_850d_443c_a17f_184983021f96
-:EMMO_efc4f7ab_850d_443c_a17f_184983021f96 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-39" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """arrangement of cells or batteries wherein all the positive terminals and all the negative terminals, respectively, are connected together
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:prefLabel "ParallelConnection"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4
-:EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
-                                           skos:prefLabel "IntentionalElectrochemicalProcess"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

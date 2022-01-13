@@ -392,6 +392,12 @@ Adapted from:
                                            skos:prefLabel "Name"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806
+:EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
+                                           skos:prefLabel "IntentionalBatteryProcess"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
 :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ,
@@ -401,7 +407,7 @@ Adapted from:
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom emmo:EMMO_ebcd70ca_c439_46ab_8bcc_c77b3930d9d9
+                                                             owl:someValuesFrom emmo:EMMO_b2fc5d2f_2f24_4740_b9c8_1583e3ceeed0
                                                            ] ;
                                            skos:altLabel "Can"@en ;
                                            skos:prefLabel "CylindricalCellHousing"@en .
@@ -582,6 +588,21 @@ Adapted from:
                                            skos:prefLabel "ActiveElectrochemicalMaterialContinuumModel"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6
+:EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-23"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """operation by which a battery delivers, to an external electric circuit and under specified conditions, electric energy produced in the cells
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "BatteryDischarge"@en ;
+                                           skos:prefLabel "DischargeOfABattery"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa
 :EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
@@ -693,27 +714,6 @@ Adapted from:
 :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_314d0bd5_67ed_437e_a609_36d46147cea7 ;
                                            skos:prefLabel "BatteryPhenomenon"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806
-:EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
-                                           skos:prefLabel "IntentionalBatteryProcess"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6
-:EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
-                                                           ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-23"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """operation by which a battery delivers, to an external electric circuit and under specified conditions, electric energy produced in the cells
-
--- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
-                                           skos:altLabel "BatteryDischarge"@en ;
-                                           skos:prefLabel "DischargeOfABattery"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

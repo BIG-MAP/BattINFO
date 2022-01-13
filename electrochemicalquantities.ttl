@@ -369,13 +369,6 @@ The real (true) area, A_{real}, takes into account non-idealities of the interfa
                                            skos:prefLabel "ElectrochemicalTransportQuantity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9
-:EMMO_4aab7f4c_97a9_45ee_830a_8bb6521c80c9 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalVolume"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_526bf81a_0572_49ff_a8cc_85efc343c1c2
 :EMMO_526bf81a_0572_49ff_a8cc_85efc343c1c2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -807,13 +800,6 @@ R. Guidelli et al., “Defining the transfer coefficient in electrochemistry: An
                                            rdfs:comment "Because the working potential range is a function of a specific electrode/electrolyte system, only approximate ranges can be given for generic systems."@en ,
                                                         "The working potential range is usually limited by the stability of the electrolyte, itself affected by the catalytic properties of the electrode, or by the stability of the electrode."@en ;
                                            skos:prefLabel "WorkingPotentialRange"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4
-:EMMO_c41a9a98_cc1a_42ef_8d84_04e01ec582f4 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_04cf0295_3e8f_4693_a87f_3130d125cf05 ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalWeight"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf
