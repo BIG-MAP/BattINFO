@@ -231,12 +231,16 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom electrochemistry:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An battery that is not capable of being electrically recharged following discharge.
-
-Adapted from:
---IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An battery that is not capable of being electrically recharged following discharge."@en ;
                                            skos:altLabel "NonRechargeableBattery"@en ;
                                            skos:prefLabel "PrimaryBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_448de413_b4ed_43d0_941c_bf138167dcb9 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "An battery that is not capable of being electrically recharged following discharge."@en ;
+   dcterms:references "IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4682cec6_f601_40f0_b463_b5345efdda3e
@@ -273,13 +277,17 @@ Adapted from:
                                                              owl:someValuesFrom electrochemistry:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
                                                            ] ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Rechargeable_battery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An battery that is capable of being recharged following discharge.
-
-Adapted from:
---IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An battery that is capable of being recharged following discharge."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Rechargeable_battery"@en ;
                                            skos:altLabel "RechargeableBattery"@en ;
                                            skos:prefLabel "SecondaryBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_4eeaec00_3453_4ff0_83c4_d1649ad84fc1 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "An battery that is capable of being recharged following discharge."@en ;
+   dcterms:source "IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481
@@ -632,18 +640,33 @@ Adapted from:
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit.
-
---IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
-                                           rdfs:comment """Box or enclosure which contains the electrochemical cells, associated connectors and hardware.
-
---Crompton, Battery Reference Book, 3rd Edition"""@en ,
-                                                        """Container is preferred over jar or battery case. A battery container can be a single cell or multicell unit (also called a monoblock). The term jar sometimes implies that it is made of glass, which is rarely the case; the term jar is a slang term.
-
---IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"""@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit."@en ;
+                                           rdfs:comment "Box or enclosure which contains the electrochemical cells, associated connectors and hardware."@en ,
+                                                        "Container is preferred over jar or battery case. A battery container can be a single cell or multicell unit (also called a monoblock). The term jar sometimes implies that it is made of glass, which is rarely the case; the term jar is a slang term."@en ;
                                            skos:altLabel "BatteryCase"@en ,
                                                          "Jar"@en ;
                                            skos:prefLabel "Container"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit."@en ;
+   dcterms:source "IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"
+ ] .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+   owl:annotatedProperty rdfs:comment ;
+   owl:annotatedTarget "Box or enclosure which contains the electrochemical cells, associated connectors and hardware."@en ;
+   dcterms:references "Crompton, Battery Reference Book, 3rd Edition"
+ ] .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+   owl:annotatedProperty rdfs:comment ;
+   owl:annotatedTarget "Container is preferred over jar or battery case. A battery container can be a single cell or multicell unit (also called a monoblock). The term jar sometimes implies that it is made of glass, which is rarely the case; the term jar is a slang term."@en ;
+   dcterms:source "IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_da15df91_45aa_429c_a1e7_21f49a281f23
