@@ -75,11 +75,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 
 ###  http://purl.org/dc/terms/references
-dcterms:references rdf:type owl:AnnotationProperty .
+dcterms:references rdf:type owl:AnnotationProperty ;
+                   skos:prefLabel "dcterms:references" .
 
 
 ###  http://purl.org/dc/terms/source
-dcterms:source rdf:type owl:AnnotationProperty .
+dcterms:source rdf:type owl:AnnotationProperty ;
+               skos:prefLabel "dcterms:source" .
 
 
 ###  http://www.w3.org/2000/01/rdf-schema#isDefinedBy
@@ -328,6 +330,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
    owl:annotatedTarget "coefficient of heat transfer when heat exchange takes place between a body at thermodynamic temperature Ts and its surroundings that are at a reference temperature Tr."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef
+:EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
+                                           skos:prefLabel "Denominator"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_101a5ad8_d220_4c7c_a9fa_53b9a042fe93
@@ -896,6 +904,23 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalDiffusivity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f
+:EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-19"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "quantity represented by a single scalar which depends on the choice of a unit of measurement or on a reference to a measurement procedure."@en ;
+                                           rdfs:comment "In the usual three-dimensional space, a scalar quantity is independent of direction and of the choice of the coordinate frame. Examples are: mass, electric charge, thermodynamic temperature, Rockwell C hardness, Engler viscosity for transformer oil."@en ,
+                                                        "The concept of absolute value applies to real scalar quantities, the concepts of real part, imaginary part, modulus and argument apply to complex scalar quantities, and the concept of square root applies to both."@en ;
+                                           skos:prefLabel "ScalarQuantity"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "quantity represented by a single scalar which depends on the choice of a unit of measurement or on a reference to a measurement procedure."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_2a971203_58d5_4039_98ce_be7eafb2b14f
 :EMMO_2a971203_58d5_4039_98ce_be7eafb2b14f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ;
@@ -912,6 +937,28 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-18" ;
                                            skos:prefLabel "AbsoluteActivity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_2b020290_eae0_42ab_9a94_b95f2c58da4f
+:EMMO_2b020290_eae0_42ab_9a94_b95f2c58da4f rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Class ;
+                                                                 owl:unionOf ( :EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+                                                                               :EMMO_42acec23_ce3b_4f2f_b872_d8d35f1acb01
+                                                                             )
+                                                               ] ;
+                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-18" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "real or complex number."@en ;
+                                           rdfs:comment "By extension, a scalar is also an element of a set for which an addition and a commutative multiplication are defined, each with a neutral element, such that any element has an opposite and any element other than the neutral element for addition has an inverse."@en ,
+                                                        "Sets of scalars, including the extension of Note 1, are usually called fields in mathematics. The set of real numbers and the set of complex numbers are infinite fields. An example of a finite field is the set of two elements 0 and 1 subject to Boolean algebra (where 1 + 1 = 0)."@en ;
+                                           skos:prefLabel "Scalar"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_2b020290_eae0_42ab_9a94_b95f2c58da4f ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "real or complex number."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_2b0a1578_ae70_4cd1_940d_54d9c220d8f7
@@ -1492,6 +1539,25 @@ pH = −10 log(a_OH-)"""@en ;
                                                                ] .
 
 
+###  http://emmo.info/emmo#EMMO_427d553a_d220_46db_a0e5_9e31ebb79797
+:EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-03-21"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "quantity which can be represented by a vector multiplied by a scalar quantity."@en ;
+                                           :EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "velocity, force, electric field strength."@en ;
+                                           rdfs:comment "A vector quantity may be considered either as attached to a point of acting (localized or bound vector), or as having any point of acting on a straight line parallel to it (sliding vector), or as having any point of acting in the space (free vector)."@en ,
+                                                        "Operations defined for vectors apply to vector quantities. For example, the product of a scalar quantity p and the vector quantity Q=qe is the vector quantity pQ=pqe, where e is a unit vector."@en ,
+                                                        "The vector defining a vector quantity is generally a unit vector in the usual two- or three-dimensional geometrical space. A vector quantity can then be represented as an oriented line segment characterized by its point of acting, its direction and its magnitude, where the magnitude is a non-negative number multiplied by a unit of measurement. The components are also the product of a numerical value and the unit."@en ;
+                                           skos:prefLabel "VectorQuantity"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "quantity which can be represented by a vector multiplied by a scalar quantity."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_42acec23_ce3b_4f2f_b872_d8d35f1acb01
 :EMMO_42acec23_ce3b_4f2f_b872_d8d35f1acb01 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ,
@@ -1608,6 +1674,25 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
    owl:annotatedSource :EMMO_43b349fc_c7ed_480d_b0ca_9db84b700813 ;
    owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
    owl:annotatedTarget "at a point on the surface separating two media with different thermodynamic temperatures, magnitude of the density of heat flow rate φ divided by the absolute value of temperature difference ΔT."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  http://emmo.info/emmo#EMMO_456ece86_6605_445e_b25a_db3c41546463
+:EMMO_456ece86_6605_445e_b25a_db3c41546463 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "element of a set of mathematical entities that includes all integers and other entities, each defined as the quotient of two integers, such that the division is defined for any two entities, except zero as a divisor."@en ;
+                                           rdfs:comment "Any of the ordered pairs 2/1, 4/2, 6/3, ..., −2/(−1), −4/(−2), ... represents the rational number identified with the integer 2. Any of the ordered pairs 2/3, 4/6, 6/9, ... −2/(−3), −4/(−6), ... represents the rational number which is the quotient of the integer 2 by the integer 3, also denoted by \"0,666 6...\"."@en ,
+                                                        "In the decimal representation of a rational number other than an integer, the sequence of digits after the decimal sign is either finite or periodically repeated after some position."@en ,
+                                                        "The operations of addition, subtraction, multiplication and division, except the division by zero, are defined for any two rational numbers. Any rational number has a negative. Any non-zero rational number has an inverse."@en ,
+                                                        "The set of rational numbers is denoted by ℚ (Q with vertical bars in the left and right arcs), or Q, or sometimes Q with a vertical bar in the left arc. This set without zero is denoted by an asterisk to the symbol, for example ℚ*."@en ,
+                                                        "There is a total order on the set of rational numbers."@en ;
+                                           skos:prefLabel "RationalNumber"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_456ece86_6605_445e_b25a_db3c41546463 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "element of a set of mathematical entities that includes all integers and other entities, each defined as the quotient of two integers, such that the division is defined for any two entities, except zero as a divisor."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
@@ -1996,6 +2081,32 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-27" ;
                                            skos:prefLabel "RelativePermeability"@en .
+
+
+###  http://emmo.info/emmo#EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5
+:EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_456ece86_6605_445e_b25a_db3c41546463 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom :EMMO_adb62ad9_3fd7_4b8e_99ed_a495f593d0bf
+                                                           ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-04" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ordered pair of integers representing a rational number."@en ;
+                                           rdfs:comment "A rational number can be represented by an infinity of fractions."@en ,
+                                                        "For the ordered pair (p, q), the fraction is denoted by p/q."@en ,
+                                                        "In a fraction p/q, the first element p is called \"numerator\" and the second is called \"denominator\"."@en ;
+                                           skos:prefLabel "Fraction"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "ordered pair of integers representing a rational number."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_5afa28f0_8c9f_4fcd_8f67_805bd2f9c068
@@ -2920,6 +3031,24 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "ElectricChargeContinuityEquation"@en .
 
 
+###  http://emmo.info/emmo#EMMO_8855ee61_bd9d_40a5_a1b3_1bba1265997f
+:EMMO_8855ee61_bd9d_40a5_a1b3_1bba1265997f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-01" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "element of the unlimited sequence {0, 1, 2, 3,...}"@en ;
+                                           rdfs:comment "The operations of addition and multiplication are defined for any two natural numbers."@en ,
+                                                        "The set of natural numbers is denoted by ℕ (N with oblique bar doubled), or N, or sometimes N with left vertical bar doubled. This set without zero is denoted by an asterisk to the symbol, for example ℕ*."@en ,
+                                                        "There is a total order on the set of natural numbers."@en ;
+                                           skos:prefLabel "NaturalNumber"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_8855ee61_bd9d_40a5_a1b3_1bba1265997f ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "element of the unlimited sequence {0, 1, 2, 3,...}"@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_886437e2_9e44_4e7a_81cb_7404c8f76e8f
 :EMMO_886437e2_9e44_4e7a_81cb_7404c8f76e8f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b ;
@@ -3577,6 +3706,23 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_a79f905f_5b8c_486a_8ee8_5a2960adb8ac
+:EMMO_a79f905f_5b8c_486a_8ee8_5a2960adb8ac rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_06658d8d_dcde_4fc9_aae1_17f71c0bcdec ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-03-25" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "any vector of magnitude equal to one."@en ;
+                                           rdfs:comment "A unit vector is often denoted by the symbol e."@en ,
+                                                        "Unit vectors may have any directions."@en ;
+                                           skos:prefLabel "UnitVector"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_a79f905f_5b8c_486a_8ee8_5a2960adb8ac ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "any vector of magnitude equal to one."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4
 :EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
@@ -3684,6 +3830,12 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-6.4" ;
                                            skos:prefLabel "MolarGibbsEnergy"@en .
+
+
+###  http://emmo.info/emmo#EMMO_adb62ad9_3fd7_4b8e_99ed_a495f593d0bf
+:EMMO_adb62ad9_3fd7_4b8e_99ed_a495f593d0bf rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
+                                           skos:prefLabel "Numerator"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_adc5aa0d_9add_4c8a_aa81_b5798a654ca9
@@ -5368,156 +5520,6 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-13" ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef
-:EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
-                                           skos:prefLabel "Denominator"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f
-:EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-19"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "quantity represented by a single scalar which depends on the choice of a unit of measurement or on a reference to a measurement procedure."@en ;
-                                           rdfs:comment "In the usual three-dimensional space, a scalar quantity is independent of direction and of the choice of the coordinate frame. Examples are: mass, electric charge, thermodynamic temperature, Rockwell C hardness, Engler viscosity for transformer oil."@en ,
-                                                        "The concept of absolute value applies to real scalar quantities, the concepts of real part, imaginary part, modulus and argument apply to complex scalar quantities, and the concept of square root applies to both."@en ;
-                                           skos:prefLabel "ScalarQuantity"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "quantity represented by a single scalar which depends on the choice of a unit of measurement or on a reference to a measurement procedure."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_2b020290_eae0_42ab_9a94_b95f2c58da4f
-:EMMO_2b020290_eae0_42ab_9a94_b95f2c58da4f rdf:type owl:Class ;
-                                           owl:equivalentClass [ rdf:type owl:Class ;
-                                                                 owl:unionOf ( :EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-                                                                               :EMMO_42acec23_ce3b_4f2f_b872_d8d35f1acb01
-                                                                             )
-                                                               ] ;
-                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-18" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "real or complex number."@en ;
-                                           rdfs:comment "By extension, a scalar is also an element of a set for which an addition and a commutative multiplication are defined, each with a neutral element, such that any element has an opposite and any element other than the neutral element for addition has an inverse."@en ,
-                                                        "Sets of scalars, including the extension of Note 1, are usually called fields in mathematics. The set of real numbers and the set of complex numbers are infinite fields. An example of a finite field is the set of two elements 0 and 1 subject to Boolean algebra (where 1 + 1 = 0)."@en ;
-                                           skos:prefLabel "Scalar"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_2b020290_eae0_42ab_9a94_b95f2c58da4f ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "real or complex number."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_427d553a_d220_46db_a0e5_9e31ebb79797
-:EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-03-21"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "quantity which can be represented by a vector multiplied by a scalar quantity."@en ;
-                                           :EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "velocity, force, electric field strength."@en ;
-                                           rdfs:comment "A vector quantity may be considered either as attached to a point of acting (localized or bound vector), or as having any point of acting on a straight line parallel to it (sliding vector), or as having any point of acting in the space (free vector)."@en ,
-                                                        "Operations defined for vectors apply to vector quantities. For example, the product of a scalar quantity p and the vector quantity Q=qe is the vector quantity pQ=pqe, where e is a unit vector."@en ,
-                                                        "The vector defining a vector quantity is generally a unit vector in the usual two- or three-dimensional geometrical space. A vector quantity can then be represented as an oriented line segment characterized by its point of acting, its direction and its magnitude, where the magnitude is a non-negative number multiplied by a unit of measurement. The components are also the product of a numerical value and the unit."@en ;
-                                           skos:prefLabel "VectorQuantity"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "quantity which can be represented by a vector multiplied by a scalar quantity."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_456ece86_6605_445e_b25a_db3c41546463
-:EMMO_456ece86_6605_445e_b25a_db3c41546463 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "element of a set of mathematical entities that includes all integers and other entities, each defined as the quotient of two integers, such that the division is defined for any two entities, except zero as a divisor."@en ;
-                                           rdfs:comment "Any of the ordered pairs 2/1, 4/2, 6/3, ..., −2/(−1), −4/(−2), ... represents the rational number identified with the integer 2. Any of the ordered pairs 2/3, 4/6, 6/9, ... −2/(−3), −4/(−6), ... represents the rational number which is the quotient of the integer 2 by the integer 3, also denoted by \"0,666 6...\"."@en ,
-                                                        "In the decimal representation of a rational number other than an integer, the sequence of digits after the decimal sign is either finite or periodically repeated after some position."@en ,
-                                                        "The operations of addition, subtraction, multiplication and division, except the division by zero, are defined for any two rational numbers. Any rational number has a negative. Any non-zero rational number has an inverse."@en ,
-                                                        "The set of rational numbers is denoted by ℚ (Q with vertical bars in the left and right arcs), or Q, or sometimes Q with a vertical bar in the left arc. This set without zero is denoted by an asterisk to the symbol, for example ℚ*."@en ,
-                                                        "There is a total order on the set of rational numbers."@en ;
-                                           skos:prefLabel "RationalNumber"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_456ece86_6605_445e_b25a_db3c41546463 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "element of a set of mathematical entities that includes all integers and other entities, each defined as the quotient of two integers, such that the division is defined for any two entities, except zero as a divisor."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5
-:EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_456ece86_6605_445e_b25a_db3c41546463 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_adb62ad9_3fd7_4b8e_99ed_a495f593d0bf
-                                                           ] ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-04" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ordered pair of integers representing a rational number."@en ;
-                                           rdfs:comment "A rational number can be represented by an infinity of fractions."@en ,
-                                                        "For the ordered pair (p, q), the fraction is denoted by p/q."@en ,
-                                                        "In a fraction p/q, the first element p is called \"numerator\" and the second is called \"denominator\"."@en ;
-                                           skos:prefLabel "Fraction"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "ordered pair of integers representing a rational number."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8855ee61_bd9d_40a5_a1b3_1bba1265997f
-:EMMO_8855ee61_bd9d_40a5_a1b3_1bba1265997f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-02-01" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "element of the unlimited sequence {0, 1, 2, 3,...}"@en ;
-                                           rdfs:comment "The operations of addition and multiplication are defined for any two natural numbers."@en ,
-                                                        "The set of natural numbers is denoted by ℕ (N with oblique bar doubled), or N, or sometimes N with left vertical bar doubled. This set without zero is denoted by an asterisk to the symbol, for example ℕ*."@en ,
-                                                        "There is a total order on the set of natural numbers."@en ;
-                                           skos:prefLabel "NaturalNumber"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_8855ee61_bd9d_40a5_a1b3_1bba1265997f ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "element of the unlimited sequence {0, 1, 2, 3,...}"@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a79f905f_5b8c_486a_8ee8_5a2960adb8ac
-:EMMO_a79f905f_5b8c_486a_8ee8_5a2960adb8ac rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_06658d8d_dcde_4fc9_aae1_17f71c0bcdec ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-03-25" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "any vector of magnitude equal to one."@en ;
-                                           rdfs:comment "A unit vector is often denoted by the symbol e."@en ,
-                                                        "Unit vectors may have any directions."@en ;
-                                           skos:prefLabel "UnitVector"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_a79f905f_5b8c_486a_8ee8_5a2960adb8ac ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "any vector of magnitude equal to one."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_adb62ad9_3fd7_4b8e_99ed_a495f593d0bf
-:EMMO_adb62ad9_3fd7_4b8e_99ed_a495f593d0bf rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
-                                           skos:prefLabel "Numerator"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
