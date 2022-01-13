@@ -5934,6 +5934,22 @@ Q=qT"""@en ;
                                            skos:prefLabel "ModulusOfRigidity"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92
+:EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a15cea10_9946_4d2b_95c5_cfc333fd2abb ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-06-25" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "particle such as an electron, proton, ion, or, by extension, entity with particle-like characteristics, such as a hole, having non-zero electric charge."@en ;
+                                           rdfs:comment "The electric charge of a charge carrier is always an integral multiple, positive or negative, of the elementary electric charge, except for quarks and some particle-like entities in semiconductors."@en ;
+                                           skos:prefLabel "ChargeCarrier"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "particle such as an electron, proton, ion, or, by extension, entity with particle-like characteristics, such as a hole, having non-zero electric charge."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0
 :EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
