@@ -229,6 +229,18 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "DisplacementCurrentDensity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_08415c4f_58bf_4696_8581_f5f90fec24b7
+:EMMO_08415c4f_58bf_4696_8581_f5f90fec24b7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.4" ;
+                                           skos:altLabel "DragFactor"@en ;
+                                           skos:prefLabel "DragCoefficient"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
 :EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
@@ -296,6 +308,19 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_0ab4306c_ba36_4a6e_941e_474ed04e8ccf
+:EMMO_0ab4306c_ba36_4a6e_941e_474ed04e8ccf rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.5"@en ;
+                                           skos:altLabel "RollingDrag"@en ,
+                                                         "RollingFrictionForce"@en ;
+                                           skos:prefLabel "RollingResistance"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_0b080610_84a6_4a61_b44f_6c04b42f9563
 :EMMO_0b080610_84a6_4a61_b44f_6c04b42f9563 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_42acec23_ce3b_4f2f_b872_d8d35f1acb01 ;
@@ -330,6 +355,28 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
    owl:annotatedTarget "coefficient of heat transfer when heat exchange takes place between a body at thermodynamic temperature Ts and its surroundings that are at a reference temperature Tr."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_0dbdd7c5_86a5_4867_a396_2277e20fc4bc
+:EMMO_0dbdd7c5_86a5_4867_a396_2277e20fc4bc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.6" ;
+                                           skos:prefLabel "DragForce"@en .
+
+
+###  http://emmo.info/emmo#EMMO_0de3878e_7928_4ab6_bc6d_cf590b2d0e5b
+:EMMO_0de3878e_7928_4ab6_bc6d_cf590b2d0e5b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_e10b7f63_f14d_44d0_a241_449fe96686fc
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-20" ;
+                                           skos:prefLabel "Compressibility"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_0eda7ada_e2aa_4416_9a93_d56a4c4c61ef
@@ -528,6 +575,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ThermalConvection"@en .
 
 
+###  http://emmo.info/emmo#EMMO_14392682_b748_4ee9_868c_bb079fe80558
+:EMMO_14392682_b748_4ee9_868c_bb079fe80558 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-06-13" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """square matrix E the elements of which are the Kronecker deltas
+
+Eij = δij"""@en ;
+                                           rdfs:comment "The unit matrix is the unit element for the multiplication: AE = EA = A for every square matrix A of a given order."@en ,
+                                                        "The unit matrix of order n is denoted by En or In."@en ;
+                                           skos:prefLabel "UnitMatrix"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_14392682_b748_4ee9_868c_bb079fe80558 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget """square matrix E the elements of which are the Kronecker deltas
+
+Eij = δij"""@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_14b629dd_a753_49b2_b6c3_4908eb8b7131
 :EMMO_14b629dd_a753_49b2_b6c3_4908eb8b7131 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -686,6 +754,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
    owl:annotatedTarget "distance between successive lattice planes"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e
+:EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                                 owl:hasValue "T0 L+4 M0 I0 Θ0 N0 J0"
+                                                               ] ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
+                                           skos:prefLabel "QuarticLengthDimension"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_1b1557fe_f389_4e4e_8369_a61d74796812
@@ -864,6 +942,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
    owl:annotatedTarget "charge number that an atom within a molecule would have if all the ligands were removed along with the electron pairs that were shared."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_26b13395_0031_4da2_b4d0_55eca1792107
+:EMMO_26b13395_0031_4da2_b4d0_55eca1792107 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_9141801c_c539_4c72_b423_8c74ff6b8f05
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-22" ;
+                                           skos:prefLabel "SectionModulus"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_26c6f1b3_c33f_4804_a3e8_3c5c931582b3
@@ -1139,6 +1228,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_37bf7e74_6713_47fb_a9fa_93482526c84d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_43003c86_9d15_433b_9789_ee2940920656 ;
                                            skos:prefLabel "ConventionalThickness"@en .
+
+
+###  http://emmo.info/emmo#EMMO_38a53b33_0eda_45fd_b955_69d2f0d3f9de
+:EMMO_38a53b33_0eda_45fd_b955_69d2f0d3f9de rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-21.2" ;
+                                           skos:prefLabel "SecondPolarMomentOfArea"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_391d1929_1446_4030_b860_d95f6374d9c1
@@ -1504,6 +1604,16 @@ pH = −10 log(a_OH-)"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd
+:EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                                 owl:hasValue "T0 L+2 M+1 I0 Θ0 N0 J0"
+                                                               ] ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
+                                           skos:prefLabel "MassAreaDimension"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5
 :EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
@@ -1678,6 +1788,18 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_445d186f_1896_4752_8940_384f98440cfe
+:EMMO_445d186f_1896_4752_8940_384f98440cfe rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.3" ;
+                                           skos:altLabel "StaticFriction"@en ;
+                                           skos:prefLabel "StaticFrictionForce"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_456ece86_6605_445e_b25a_db3c41546463
 :EMMO_456ece86_6605_445e_b25a_db3c41546463 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21f56795_ee72_4858_b571_11cfaa59c1a8 ;
@@ -1773,6 +1895,16 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-23" ;
                                            skos:prefLabel "PlanckFunction"@en .
+
+
+###  http://emmo.info/emmo#EMMO_48007922_40a6_4f49_8410_cdce0adaefb7
+:EMMO_48007922_40a6_4f49_8410_cdce0adaefb7 rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                                 owl:hasValue "T-2 L0 M+1 I0 Θ0 N0 J0"
+                                                               ] ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
+                                           skos:prefLabel "ForcePerLengthDimension"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_485720e7_b24a_4149_86eb_9985b2bea4da
@@ -1906,6 +2038,18 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "MolarHeatCapacity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_50dbbf9a_ed96_486f_99f6_d8ba78a0047c
+:EMMO_50dbbf9a_ed96_486f_99f6_d8ba78a0047c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.3" ;
+                                           skos:altLabel "BulkModulus"@en ;
+                                           skos:prefLabel "ModulusOfCompression"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead
 :EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_314d0bd5_67ed_437e_a609_36d46147cea7 ;
@@ -1985,6 +2129,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "ThermalConduction"@en .
 
 
+###  http://emmo.info/emmo#EMMO_5574a8ed_5094_4d63_8d95_1c19cfd38409
+:EMMO_5574a8ed_5094_4d63_8d95_1c19cfd38409 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-17.2" ;
+                                           skos:prefLabel "RelativeLinearStrain"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_560d031f_cc8a_4f0d_a52b_039149fdc171
 :EMMO_560d031f_cc8a_4f0d_a52b_039149fdc171 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -2060,6 +2215,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "6-17" ;
                                            skos:prefLabel "ElectricFlux"@en .
+
+
+###  http://emmo.info/emmo#EMMO_58a85e5b_6526_484d_b080_e1059ce9994c
+:EMMO_58a85e5b_6526_484d_b080_e1059ce9994c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-7" ;
+                                           skos:prefLabel "MomentOfIntertia"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_58c31095_55ba_412d_8763_d768921e5f66
@@ -2213,6 +2379,18 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_62824128_35bd_45c4_9516_23f3f24c8332
+:EMMO_62824128_35bd_45c4_9516_23f3f24c8332 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.1" ;
+                                           skos:altLabel "YoungModulus"@en ;
+                                           skos:prefLabel "ModulusOfElasticity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_64420439_5282_4996_b6e1_2044358ac899
 :EMMO_64420439_5282_4996_b6e1_2044358ac899 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
@@ -2262,6 +2440,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
    owl:annotatedTarget "cut-off angular frequency in the Debye model of the vibrational spectrum of a solid"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_65efeec4_148f_4843_9954_fe52efff3441
+:EMMO_65efeec4_148f_4843_9954_fe52efff3441 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_eb868040_998a_41b3_bcad_5fb36681b326
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-30.3" ;
+                                           skos:prefLabel "MassChangeRate"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_661b9697_fefc_4389_85f2_9ebe4cfe0d21
@@ -2552,6 +2741,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_6d61ee3c_c5b6_4452_bc11_e9c33af992a7
+:EMMO_6d61ee3c_c5b6_4452_bc11_e9c33af992a7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_1c858a71_7078_4c00_8a98_ef883dd8bd9d
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-30.1" ;
+                                           skos:prefLabel "MassFlow"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
 :EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -2588,11 +2788,34 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_6f876e9d_c6c9_4cda_8c45_7052cca59e7d
+:EMMO_6f876e9d_c6c9_4cda_8c45_7052cca59e7d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f ,
+                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-16.2" ;
+                                           skos:prefLabel "ShearStress"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_6fbaa99c_54d6_41e2_8c60_0d38e8ef7f47
 :EMMO_6fbaa99c_54d6_41e2_8c60_0d38e8ef7f47 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow of electric charge, in which electrons are the charge carrier."@en ;
                                            skos:prefLabel "ElectronicCurrent"@en .
+
+
+###  http://emmo.info/emmo#EMMO_700cd058_a54d_4104_97ab_887ad865409e
+:EMMO_700cd058_a54d_4104_97ab_887ad865409e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-21.1" ;
+                                           skos:prefLabel "SecondAxialMomentOfArea"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_70cbd515_d278_4d47_9631_4b48931cc83b
@@ -2715,6 +2938,18 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "RadiationHeatFluxTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_7baaddc9_2d75_4681_b476_2a892107896c
+:EMMO_7baaddc9_2d75_4681_b476_2a892107896c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
+                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_ec987ba8_a548_4fc9_9df6_a834daebd140
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-10" ;
+                                           skos:prefLabel "Impulse"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_7c1dc325_109b_4735_b9ea_b33a0368446f
 :EMMO_7c1dc325_109b_4735_b9ea_b33a0368446f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -2787,6 +3022,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            rdfs:subClassOf :EMMO_faab3f84_e475_4a46_af9c_7d249f0b9aef ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Porosity or void fraction is a measure of the void (i.e. \"empty\") spaces in a material, and is a fraction of the volume of voids over the total volume, between 0 and 1, or as a percentage between 0% and 100%."@en ;
                                            skos:prefLabel "Porosity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_7f9b4abe_0bf1_48dc_9bd0_ea34e926ec85
+:EMMO_7f9b4abe_0bf1_48dc_9bd0_ea34e926ec85 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-29" ;
+                                           skos:prefLabel "MechanicalEfficiency"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_802c167d_b792_4cb8_a315_35797345c0e3
@@ -3059,6 +3305,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "EnergyFluxTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_8864793d_0f36_4fa3_b54a_90d0234f976a
+:EMMO_8864793d_0f36_4fa3_b54a_90d0234f976a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_48007922_40a6_4f49_8410_cdce0adaefb7
+                                                           ] ;
+                                           skos:altLabel "4-26" ;
+                                           skos:prefLabel "SurfaceTension"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_88bbdd04_908f_45f0_9ded_d73b430de3b1
 :EMMO_88bbdd04_908f_45f0_9ded_d73b430de3b1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -3076,6 +3333,18 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
    owl:annotatedTarget "quotient of the number of vibrational modes in an infinitesimal interval of angular frequency, and the product of the width of that interval and volume"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_89d04b65_5b11_4916_b606_0cf3f007fcd9
+:EMMO_89d04b65_5b11_4916_b606_0cf3f007fcd9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.2" ;
+                                           skos:altLabel "DynamicFrictionFactor"@en ;
+                                           skos:prefLabel "KineticFrictionFactor"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_89f827fa_f3c4_4071_a69c_084132f780a7
@@ -3227,6 +3496,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-16.3" ;
                                            skos:altLabel "SpecificHeatCapacityAtConstantVolume"@en ;
                                            skos:prefLabel "IsochoricHeatCapacity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_8fdabd25_01e0_4296_b82a_09d1c34e52d4
+:EMMO_8fdabd25_01e0_4296_b82a_09d1c34e52d4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-18" ;
+                                           skos:prefLabel "PoissonNumber"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_908da3d5_775e_425e_af96_33914618eb66
@@ -3485,6 +3765,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "QuasiStaticProcess"@en .
 
 
+###  http://emmo.info/emmo#EMMO_9e0891a6_4d87_4891_b557_69ab2bae1dae
+:EMMO_9e0891a6_4d87_4891_b557_69ab2bae1dae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-14.2" ;
+                                           skos:prefLabel "GaugePressure"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_9e2ab15a_f1c7_435b_91ff_bc774e6ba4e7
 :EMMO_9e2ab15a_f1c7_435b_91ff_bc774e6ba4e7 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
@@ -3617,6 +3908,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_a2682209_f9e2_4024_98dd_ed1f6c5699be
+:EMMO_a2682209_f9e2_4024_98dd_ed1f6c5699be rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-17.3" ;
+                                           skos:prefLabel "ShearStrain"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_a2f0a015_38ba_4030_8fbe_6d9904b735fc
 :EMMO_a2f0a015_38ba_4030_8fbe_6d9904b735fc rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -3688,6 +3990,18 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "PressureCoefficient"@en .
 
 
+###  http://emmo.info/emmo#EMMO_a5aa8d6b_5fe3_4b6f_91a4_930438f9611a
+:EMMO_a5aa8d6b_5fe3_4b6f_91a4_930438f9611a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f ,
+                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-16.1" ;
+                                           skos:prefLabel "NormalStress"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_a65ffaf1_17f7_4938_a9c7_6943641184e4
 :EMMO_a65ffaf1_17f7_4938_a9c7_6943641184e4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d35bee3e_3138_4eff_8c99_e90d873915b3 ;
@@ -3745,6 +4059,33 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "MassPerLengthTimeDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6
+:EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1cba0b27_15d0_4326_933f_379d0b3565b6 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "matrix having the same number of rows and columns."@en ;
+                                           rdfs:comment "A square matrix is often used to represent the components of a tensor of the second order."@en ;
+                                           skos:prefLabel "SquareMatrix"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "matrix having the same number of rows and columns."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  http://emmo.info/emmo#EMMO_aafe08e9_c3b5_4f7d_a951_06bb83f8b6ce
+:EMMO_aafe08e9_c3b5_4f7d_a951_06bb83f8b6ce rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
+                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_501f9b3a_c469_48f7_9281_2e6a8d805d7a
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-13" ;
+                                           skos:prefLabel "AngularImpulse"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ac3b327c_fc83_4aec_acd1_80ef3caaef5b
@@ -4130,6 +4471,19 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_b7229683_d2c5_4225_8e5f_7693744fd5a2
+:EMMO_b7229683_d2c5_4225_8e5f_7693744fd5a2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.1" ;
+                                           skos:altLabel "CoefficientOfStaticFriction"@en ,
+                                                         "StaticFrictionFactor"@en ;
+                                           skos:prefLabel "StaticFricionCoefficient"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_b725aad8_55e2_430a_b2d2_f84b8333484e
 :EMMO_b725aad8_55e2_430a_b2d2_f84b8333484e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -4241,6 +4595,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
    owl:annotatedTarget "The mass concentration of water at saturation is denoted usat." ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_bdb76b61_4bf6_44d6_9424_6cc073f964bc
+:EMMO_bdb76b61_4bf6_44d6_9424_6cc073f964bc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-17.4" ;
+                                           skos:prefLabel "RelativeVolumeStrain"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_be31e6c6_881f_41c4_8354_c05aac4d7c46
@@ -4436,10 +4801,41 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6
+:EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-03-40" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quantity Q which can be represented by a tensor of the second order T multiplied by a scalar quantity q:
+
+Q=qT"""@en ;
+                                           skos:prefLabel "TensorQuantity"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget """quantity Q which can be represented by a tensor of the second order T multiplied by a scalar quantity q:
+
+Q=qT"""@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3
 :EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b ;
                                            skos:prefLabel "EnergyAccumulationTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_c9354e77_e6c9_4a76_8571_2446bc934c94
+:EMMO_c9354e77_e6c9_4a76_8571_2446bc934c94 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.2" ;
+                                           skos:altLabel "ShearModulus"@en ;
+                                           skos:prefLabel "ModulusOfRigidity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_c9450d0b_caac_4de6_b4cf_a2141d71836f
@@ -4802,6 +5198,22 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "EquivalentCircuitModel"@en .
 
 
+###  http://emmo.info/emmo#EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92
+:EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a15cea10_9946_4d2b_95c5_cfc333fd2abb ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-06-25" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "particle such as an electron, proton, ion, or, by extension, entity with particle-like characteristics, such as a hole, having non-zero electric charge."@en ;
+                                           rdfs:comment "The electric charge of a charge carrier is always an integral multiple, positive or negative, of the elementary electric charge, except for quarks and some particle-like entities in semiconductors."@en ;
+                                           skos:prefLabel "ChargeCarrier"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "particle such as an electron, proton, ion, or, by extension, entity with particle-like characteristics, such as a hole, having non-zero electric charge."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_dd8f0409_bde4_4a6f_a130_7064ab904264
 :EMMO_dd8f0409_bde4_4a6f_a130_7064ab904264 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -5116,6 +5528,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "Solvent"@en .
 
 
+###  http://emmo.info/emmo#EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0
+:EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.3" ;
+                                           skos:prefLabel "RollingResistanceFactor"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_ea801e22_eb27_470a_9271_66861e175db3
 :EMMO_ea801e22_eb27_470a_9271_66861e175db3 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -5377,6 +5800,18 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "ElectricFieldStrength"@en .
 
 
+###  http://emmo.info/emmo#EMMO_f77a3eae_3e2a_498f_8a92_2e17cc9b45c7
+:EMMO_f77a3eae_3e2a_498f_8a92_2e17cc9b45c7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
+                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-12.1" ;
+                                           skos:prefLabel "MomentOfForce"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923
 :EMMO_f7dbce66_2822_4855_9f42_1da71aa9e923 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
@@ -5419,6 +5854,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-6.2"@en ;
                                            skos:prefLabel "LatentHeat"@en .
+
+
+###  http://emmo.info/emmo#EMMO_fc1987b2_afff_4dc6_a102_bdd9f024b03b
+:EMMO_fc1987b2_afff_4dc6_a102_bdd9f024b03b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_c8d084ad_f88e_4596_8e4d_982c6655ce6f
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-32" ;
+                                           skos:prefLabel "Action"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_fc4e0f47_ed67_4f27_ad2d_72312d9cc105
@@ -5471,6 +5917,18 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
    owl:annotatedTarget "in the free electron model, the Fermi energy divided by the Boltzmann constant"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_fe3eb868_8745_4fea_8370_4313d0531c18
+:EMMO_fe3eb868_8745_4fea_8370_4313d0531c18 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
+                                                           ] ;
+                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.4" ;
+                                           skos:altLabel "DynamicFrictionForce"@en ;
+                                           skos:prefLabel "KineticFrictionForce"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_fe573dc7_9aac_49f2_9390_02cf697bfe53
@@ -5538,462 +5996,14 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_08415c4f_58bf_4696_8581_f5f90fec24b7
-:EMMO_08415c4f_58bf_4696_8581_f5f90fec24b7 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.4" ;
-                                           skos:altLabel "DragFactor"@en ;
-                                           skos:prefLabel "DragCoefficient"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0ab4306c_ba36_4a6e_941e_474ed04e8ccf
-:EMMO_0ab4306c_ba36_4a6e_941e_474ed04e8ccf rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.5"@en ;
-                                           skos:altLabel "RollingDrag"@en ,
-                                                         "RollingFrictionForce"@en ;
-                                           skos:prefLabel "RollingResistance"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0dbdd7c5_86a5_4867_a396_2277e20fc4bc
-:EMMO_0dbdd7c5_86a5_4867_a396_2277e20fc4bc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.6" ;
-                                           skos:prefLabel "DragForce"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0de3878e_7928_4ab6_bc6d_cf590b2d0e5b
-:EMMO_0de3878e_7928_4ab6_bc6d_cf590b2d0e5b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_e10b7f63_f14d_44d0_a241_449fe96686fc
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-20" ;
-                                           skos:prefLabel "Compressibility"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_14392682_b748_4ee9_868c_bb079fe80558
-:EMMO_14392682_b748_4ee9_868c_bb079fe80558 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-06-13" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """square matrix E the elements of which are the Kronecker deltas
-
-Eij = δij"""@en ;
-                                           rdfs:comment "The unit matrix is the unit element for the multiplication: AE = EA = A for every square matrix A of a given order."@en ,
-                                                        "The unit matrix of order n is denoted by En or In."@en ;
-                                           skos:prefLabel "UnitMatrix"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_14392682_b748_4ee9_868c_bb079fe80558 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget """square matrix E the elements of which are the Kronecker deltas
-
-Eij = δij"""@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e
-:EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e rdf:type owl:Class ;
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ea246e79_022f_469d_be0b_576dea230c32
+:EMMO_ea246e79_022f_469d_be0b_576dea230c32 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
                                                                  owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                                 owl:hasValue "T0 L+4 M0 I0 Θ0 N0 J0"
+                                                                 owl:hasValue "T+1 L0 M-1 I+1 Θ0 N0 J0"
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
-                                           skos:prefLabel "QuarticLengthDimension"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_26b13395_0031_4da2_b4d0_55eca1792107
-:EMMO_26b13395_0031_4da2_b4d0_55eca1792107 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_9141801c_c539_4c72_b423_8c74ff6b8f05
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-22" ;
-                                           skos:prefLabel "SectionModulus"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_38a53b33_0eda_45fd_b955_69d2f0d3f9de
-:EMMO_38a53b33_0eda_45fd_b955_69d2f0d3f9de rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-21.2" ;
-                                           skos:prefLabel "SecondPolarMomentOfArea"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd
-:EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd rdf:type owl:Class ;
-                                           owl:equivalentClass [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                                 owl:hasValue "T0 L+2 M+1 I0 Θ0 N0 J0"
-                                                               ] ;
-                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
-                                           skos:prefLabel "MassAreaDimension"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_445d186f_1896_4752_8940_384f98440cfe
-:EMMO_445d186f_1896_4752_8940_384f98440cfe rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.3" ;
-                                           skos:altLabel "StaticFriction"@en ;
-                                           skos:prefLabel "StaticFrictionForce"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_48007922_40a6_4f49_8410_cdce0adaefb7
-:EMMO_48007922_40a6_4f49_8410_cdce0adaefb7 rdf:type owl:Class ;
-                                           owl:equivalentClass [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                                 owl:hasValue "T-2 L0 M+1 I0 Θ0 N0 J0"
-                                                               ] ;
-                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
-                                           skos:prefLabel "ForcePerLengthDimension"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_50dbbf9a_ed96_486f_99f6_d8ba78a0047c
-:EMMO_50dbbf9a_ed96_486f_99f6_d8ba78a0047c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.3" ;
-                                           skos:altLabel "BulkModulus"@en ;
-                                           skos:prefLabel "ModulusOfCompression"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5574a8ed_5094_4d63_8d95_1c19cfd38409
-:EMMO_5574a8ed_5094_4d63_8d95_1c19cfd38409 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-17.2" ;
-                                           skos:prefLabel "RelativeLinearStrain"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_58a85e5b_6526_484d_b080_e1059ce9994c
-:EMMO_58a85e5b_6526_484d_b080_e1059ce9994c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-7" ;
-                                           skos:prefLabel "MomentOfIntertia"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_62824128_35bd_45c4_9516_23f3f24c8332
-:EMMO_62824128_35bd_45c4_9516_23f3f24c8332 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.1" ;
-                                           skos:altLabel "YoungModulus"@en ;
-                                           skos:prefLabel "ModulusOfElasticity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_65efeec4_148f_4843_9954_fe52efff3441
-:EMMO_65efeec4_148f_4843_9954_fe52efff3441 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_eb868040_998a_41b3_bcad_5fb36681b326
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-30.3" ;
-                                           skos:prefLabel "MassChangeRate"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6d61ee3c_c5b6_4452_bc11_e9c33af992a7
-:EMMO_6d61ee3c_c5b6_4452_bc11_e9c33af992a7 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_1c858a71_7078_4c00_8a98_ef883dd8bd9d
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-30.1" ;
-                                           skos:prefLabel "MassFlow"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_6f876e9d_c6c9_4cda_8c45_7052cca59e7d
-:EMMO_6f876e9d_c6c9_4cda_8c45_7052cca59e7d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f ,
-                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-16.2" ;
-                                           skos:prefLabel "ShearStress"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_700cd058_a54d_4104_97ab_887ad865409e
-:EMMO_700cd058_a54d_4104_97ab_887ad865409e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_1adc70d7_dd52_4f21_83dd_25f0bc502d6e
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-21.1" ;
-                                           skos:prefLabel "SecondAxialMomentOfArea"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7baaddc9_2d75_4681_b476_2a892107896c
-:EMMO_7baaddc9_2d75_4681_b476_2a892107896c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
-                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_ec987ba8_a548_4fc9_9df6_a834daebd140
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-10" ;
-                                           skos:prefLabel "Impulse"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_7f9b4abe_0bf1_48dc_9bd0_ea34e926ec85
-:EMMO_7f9b4abe_0bf1_48dc_9bd0_ea34e926ec85 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-29" ;
-                                           skos:prefLabel "MechanicalEfficiency"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8864793d_0f36_4fa3_b54a_90d0234f976a
-:EMMO_8864793d_0f36_4fa3_b54a_90d0234f976a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_48007922_40a6_4f49_8410_cdce0adaefb7
-                                                           ] ;
-                                           skos:altLabel "4-26" ;
-                                           skos:prefLabel "SurfaceTension"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_89d04b65_5b11_4916_b606_0cf3f007fcd9
-:EMMO_89d04b65_5b11_4916_b606_0cf3f007fcd9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.2" ;
-                                           skos:altLabel "DynamicFrictionFactor"@en ;
-                                           skos:prefLabel "KineticFrictionFactor"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_8fdabd25_01e0_4296_b82a_09d1c34e52d4
-:EMMO_8fdabd25_01e0_4296_b82a_09d1c34e52d4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-18" ;
-                                           skos:prefLabel "PoissonNumber"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9e0891a6_4d87_4891_b557_69ab2bae1dae
-:EMMO_9e0891a6_4d87_4891_b557_69ab2bae1dae rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-14.2" ;
-                                           skos:prefLabel "GaugePressure"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a2682209_f9e2_4024_98dd_ed1f6c5699be
-:EMMO_a2682209_f9e2_4024_98dd_ed1f6c5699be rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-17.3" ;
-                                           skos:prefLabel "ShearStrain"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a5aa8d6b_5fe3_4b6f_91a4_930438f9611a
-:EMMO_a5aa8d6b_5fe3_4b6f_91a4_930438f9611a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f ,
-                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-16.1" ;
-                                           skos:prefLabel "NormalStress"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6
-:EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1cba0b27_15d0_4326_933f_379d0b3565b6 ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "matrix having the same number of rows and columns."@en ;
-                                           rdfs:comment "A square matrix is often used to represent the components of a tensor of the second order."@en ;
-                                           skos:prefLabel "SquareMatrix"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_a9d6ecb1_32ee_4b67_8913_493c0589a4e6 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "matrix having the same number of rows and columns."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_aafe08e9_c3b5_4f7d_a951_06bb83f8b6ce
-:EMMO_aafe08e9_c3b5_4f7d_a951_06bb83f8b6ce rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
-                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_501f9b3a_c469_48f7_9281_2e6a8d805d7a
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-13" ;
-                                           skos:prefLabel "AngularImpulse"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_b7229683_d2c5_4225_8e5f_7693744fd5a2
-:EMMO_b7229683_d2c5_4225_8e5f_7693744fd5a2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.1" ;
-                                           skos:altLabel "CoefficientOfStaticFriction"@en ,
-                                                         "StaticFrictionFactor"@en ;
-                                           skos:prefLabel "StaticFricionCoefficient"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_bdb76b61_4bf6_44d6_9424_6cc073f964bc
-:EMMO_bdb76b61_4bf6_44d6_9424_6cc073f964bc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-17.4" ;
-                                           skos:prefLabel "RelativeVolumeStrain"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6
-:EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=102-03-40" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """quantity Q which can be represented by a tensor of the second order T multiplied by a scalar quantity q:
-
-Q=qT"""@en ;
-                                           skos:prefLabel "TensorQuantity"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget """quantity Q which can be represented by a tensor of the second order T multiplied by a scalar quantity q:
-
-Q=qT"""@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c9354e77_e6c9_4a76_8571_2446bc934c94
-:EMMO_c9354e77_e6c9_4a76_8571_2446bc934c94 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53bd0c90_41c3_46e2_8779_cd2a80f7e18b
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.2" ;
-                                           skos:altLabel "ShearModulus"@en ;
-                                           skos:prefLabel "ModulusOfRigidity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92
-:EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a15cea10_9946_4d2b_95c5_cfc333fd2abb ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=113-06-25" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "particle such as an electron, proton, ion, or, by extension, entity with particle-like characteristics, such as a hole, having non-zero electric charge."@en ;
-                                           rdfs:comment "The electric charge of a charge carrier is always an integral multiple, positive or negative, of the elementary electric charge, except for quarks and some particle-like entities in semiconductors."@en ;
-                                           skos:prefLabel "ChargeCarrier"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "particle such as an electron, proton, ion, or, by extension, entity with particle-like characteristics, such as a hole, having non-zero electric charge."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0
-:EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.3" ;
-                                           skos:prefLabel "RollingResistanceFactor"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f77a3eae_3e2a_498f_8a92_2e17cc9b45c7
-:EMMO_f77a3eae_3e2a_498f_8a92_2e17cc9b45c7 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
-                                                           :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-12.1" ;
-                                           skos:prefLabel "MomentOfForce"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fc1987b2_afff_4dc6_a102_bdd9f024b03b
-:EMMO_fc1987b2_afff_4dc6_a102_bdd9f024b03b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_c8d084ad_f88e_4596_8e4d_982c6655ce6f
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-32" ;
-                                           skos:prefLabel "Action"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fe3eb868_8745_4fea_8370_4313d0531c18
-:EMMO_fe3eb868_8745_4fea_8370_4313d0531c18 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_53e825d9_1a09_483c_baa7_37501ebfbe1c
-                                                           ] ;
-                                           :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-9.4" ;
-                                           skos:altLabel "DynamicFrictionForce"@en ;
-                                           skos:prefLabel "KineticFrictionForce"@en .
+                                           skos:prefLabel "ElectricChargePerMassDimension"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
