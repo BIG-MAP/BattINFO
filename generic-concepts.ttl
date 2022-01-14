@@ -98,6 +98,25 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 
 #################################################################
+#    Object Properties
+#################################################################
+
+###  http://emmo.info/emmo#EMMO_59f9c4f6_1b4a_4bd2_8bf6_8fe200ffc0c9
+:EMMO_59f9c4f6_1b4a_4bd2_8bf6_8fe200ffc0c9 rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :EMMO_fee5e56c_021f_4591_bbf8_d693e3b498e0 ;
+                                           rdfs:domain :EMMO_650e024e_95cd_44a4_82f6_956387eb8a57 ;
+                                           rdfs:range :EMMO_ea737941_5adb_479b_9bdf_244425d024a7 ;
+                                           skos:prefLabel "hasSerialNumber"@en .
+
+
+###  http://emmo.info/emmo#EMMO_fee5e56c_021f_4591_bbf8_d693e3b498e0
+:EMMO_fee5e56c_021f_4591_bbf8_d693e3b498e0 rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
+                                           rdfs:range :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
+                                           skos:prefLabel "hasNominalProperty"@en .
+
+
+#################################################################
 #    Classes
 #################################################################
 
@@ -189,7 +208,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a
 :EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_cbcf8fe6_6da6_49e0_ab4d_00f737ea9689 ,
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_eb77076b_a104_42ac_a065_798b2d2809ad
@@ -604,6 +623,12 @@ Eij = δij"""@en ;
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "ElectricPotentialPerTemperatureDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_1546eaa7_4e6a_4d17_898b_01e639724fd8
+:EMMO_1546eaa7_4e6a_4d17_898b_01e639724fd8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_43cd9d34_466b_4914_9b07_7c0142590723 ;
+                                           skos:prefLabel "StrongAcid"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc
@@ -1143,7 +1168,16 @@ Eij = δij"""@en ;
 ###  http://emmo.info/emmo#EMMO_2fdff47e_e4db_4404_8eea_13a508ebf847
 :EMMO_2fdff47e_e4db_4404_8eea_13a508ebf847 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-08" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "process where molecules split up into ions due to being dissolved."@en ;
                                            skos:prefLabel "Dissociation"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_2fdff47e_e4db_4404_8eea_13a508ebf847 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "process where molecules split up into ions due to being dissolved."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_2ff4e3d6_34b3_4994_9f3f_184bfaffbb03
@@ -1521,7 +1555,17 @@ pH = −10 log(a_OH-)"""@en ;
 ###  http://emmo.info/emmo#EMMO_3f0b0bf1_4a54_4b7f_a18e_b03bb18aee58
 :EMMO_3f0b0bf1_4a54_4b7f_a18e_b03bb18aee58 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b291d078_b7c5_4e62_a0bf_dd7807a68386 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-07" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "unwanted side reaction."@en ;
+                                           rdfs:comment "Parasitic reactions may cause inefficiencies or loss of performance in reactors."@en ;
                                            skos:prefLabel "ParasiticReaction"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_3f0b0bf1_4a54_4b7f_a18e_b03bb18aee58 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "unwanted side reaction."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_3f7feefd_ac94_4208_8dfd_92bb50be30f3
@@ -1788,6 +1832,22 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_43cd9d34_466b_4914_9b07_7c0142590723
+:EMMO_43cd9d34_466b_4914_9b07_7c0142590723 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-17" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "substance that increases the concentration of hydrogen cations H+ when dissolved."@en ;
+                                           skos:altLabel "AcidicSubstance"@en ;
+                                           skos:prefLabel "Acid"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_43cd9d34_466b_4914_9b07_7c0142590723 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "substance that increases the concentration of hydrogen cations H+ when dissolved."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_445d186f_1896_4752_8940_384f98440cfe
 :EMMO_445d186f_1896_4752_8940_384f98440cfe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
@@ -1819,6 +1879,12 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_45fe8416_479f_4783_921a_3ad875a32b90
+:EMMO_45fe8416_479f_4783_921a_3ad875a32b90 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "Product"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_46406907_9afd_424e_934a_a523f9f9cc36
 :EMMO_46406907_9afd_424e_934a_a523f9f9cc36 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
@@ -1838,6 +1904,12 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:altLabel "StandardConcentration"@en ,
                                                          "StandardMolarConcentration"@en ;
                                            skos:prefLabel "StandardAmountConcentration"@en .
+
+
+###  http://emmo.info/emmo#EMMO_46ca7db1_b913_4bbd_bb79_1b1e8e2a8bd5
+:EMMO_46ca7db1_b913_4bbd_bb79_1b1e8e2a8bd5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_43cd9d34_466b_4914_9b07_7c0142590723 ;
+                                           skos:prefLabel "WeakAcid"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_46ef0f56_2b15_4fc5_83bd_79b58b996b93
@@ -2408,6 +2480,16 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "ConventionalWeight"@en .
 
 
+###  http://emmo.info/emmo#EMMO_650e024e_95cd_44a4_82f6_956387eb8a57
+:EMMO_650e024e_95cd_44a4_82f6_956387eb8a57 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_90ae56e4_d197_49b6_be1a_0049e4756606 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_59f9c4f6_1b4a_4bd2_8bf6_8fe200ffc0c9 ;
+                                                             owl:someValuesFrom :EMMO_ea737941_5adb_479b_9bdf_244425d024a7
+                                                           ] ;
+                                           skos:prefLabel "TraceableObject"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709
 :EMMO_65675235_9ba4_44cc_a1c3_244cd6ea6709 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
@@ -2577,6 +2659,22 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            ] ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A space within a solid host domain that is filled by a liquid, gas, or vacuum. The characteristic length of the pore is much less than the characteristic length of the host domain. An exception is possible for 1 dimension (e.g. long pores)."@en ;
                                            skos:prefLabel "Pore"@en .
+
+
+###  http://emmo.info/emmo#EMMO_6a490979_2226_47bb_a2b2_a7951c04cfc7
+:EMMO_6a490979_2226_47bb_a2b2_a7951c04cfc7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-18" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "substance that decreases the concentration of hydrogen cations H+ when dissolved."@en ;
+                                           skos:altLabel "AlkalineSubstance"@en ;
+                                           skos:prefLabel "Base"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_6a490979_2226_47bb_a2b2_a7951c04cfc7 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "substance that decreases the concentration of hydrogen cations H+ when dissolved."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_6aad14ae_5ca1_4d19_aa6c_56448ff534b6
@@ -2917,6 +3015,12 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_7753c2f3_3216_432e_85f4_a087c62b6dd7
+:EMMO_7753c2f3_3216_432e_85f4_a087c62b6dd7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "Oxidant"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204
 :EMMO_7875bce1_d340_421f_9a4b_c30d03fc0204 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f ;
@@ -3190,6 +3294,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
                                                              owl:someValuesFrom :EMMO_7e7ec754_074c_4664_864f_d55ef2f42f0a
                                                            ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-02" ;
                                            skos:prefLabel "ReactionRate"@en .
 
 
@@ -4045,10 +4150,15 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 :EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
                                            :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-05"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """Substance dissolved into another substance.
-
---IEC60050"""@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Substance dissolved into another substance."@en ;
                                            skos:prefLabel "Solute"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_a7c3542a_fe8a_480e_b6a9_364497d576d4 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "Substance dissolved into another substance."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_a919791c_2d25_4589_87eb_742b6134473d
@@ -4309,7 +4419,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 ###  http://emmo.info/emmo#EMMO_b291d078_b7c5_4e62_a0bf_dd7807a68386
 :EMMO_b291d078_b7c5_4e62_a0bf_dd7807a68386 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-06" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "chemical reaction which occurs in addition to the main process."@en ;
+                                           skos:altLabel "SecondaryReaction"@en ;
                                            skos:prefLabel "SideReaction"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b291d078_b7c5_4e62_a0bf_dd7807a68386 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "chemical reaction which occurs in addition to the main process."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_b2fc5d2f_2f24_4740_b9c8_1583e3ceeed0
@@ -4848,6 +4968,12 @@ Q=qT"""@en ;
                                            skos:prefLabel "ElectricDisplacementFieldDimension"@en .
 
 
+###  http://emmo.info/emmo#EMMO_ca77a260_3727_43f6_acc5_081d7e26ca6d
+:EMMO_ca77a260_3727_43f6_acc5_081d7e26ca6d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "Reactant"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_cac16ce6_2cef_405d_ac63_0f918db4875e
 :EMMO_cac16ce6_2cef_405d_ac63_0f918db4875e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -4917,6 +5043,12 @@ Q=qT"""@en ;
    owl:annotatedTarget "A monoatomic or polyatomic species having one or more elementary charges of the electron."@en ;
    dcterms:source "IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_cd741cf5_317b_425c_a8fb_d1f3574772f3
+:EMMO_cd741cf5_317b_425c_a8fb_d1f3574772f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6a490979_2226_47bb_a2b2_a7951c04cfc7 ;
+                                           skos:prefLabel "WeakBase"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_cdbf555a_6352_40b1_af1d_89eff215d506
@@ -5522,10 +5654,27 @@ Q=qT"""@en ;
 ###  http://emmo.info/emmo#EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0
 :EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06"@en ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-06" ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Substance into which another substance is dissolved."@en ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Solvent"@en ;
                                            skos:prefLabel "Solvent"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_e9dd942e_db98_4aad_b9c3_931dff6f13b0 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "Substance into which another substance is dissolved."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  http://emmo.info/emmo#EMMO_ea246e79_022f_469d_be0b_576dea230c32
+:EMMO_ea246e79_022f_469d_be0b_576dea230c32 rdf:type owl:Class ;
+                                           owl:equivalentClass [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                                 owl:hasValue "T+1 L0 M-1 I+1 Θ0 N0 J0"
+                                                               ] ;
+                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
+                                           skos:prefLabel "ElectricChargePerMassDimension"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ea47add2_8e93_4659_a5f0_e6879032dee0
@@ -5537,6 +5686,12 @@ Q=qT"""@en ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-23.3" ;
                                            skos:prefLabel "RollingResistanceFactor"@en .
+
+
+###  http://emmo.info/emmo#EMMO_ea737941_5adb_479b_9bdf_244425d024a7
+:EMMO_ea737941_5adb_479b_9bdf_244425d024a7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
+                                           skos:prefLabel "SerialNumber"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ea801e22_eb27_470a_9271_66861e175db3
@@ -5641,6 +5796,12 @@ Q=qT"""@en ;
 
 - IUPAC Gold Book"""@en ;
                                            skos:prefLabel "ChemicalReaction"@en .
+
+
+###  http://emmo.info/emmo#EMMO_edd129dd_a036_4091_9fab_2dd125256450
+:EMMO_edd129dd_a036_4091_9fab_2dd125256450 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "Salt"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ee7ddcb8_ad8e_4ff7_a09f_889d8edf8f8b
@@ -5767,6 +5928,12 @@ Q=qT"""@en ;
                                            skos:prefLabel "Microstate"@en .
 
 
+###  http://emmo.info/emmo#EMMO_f277c401_bd69_4260_b338_6e7b8db09c42
+:EMMO_f277c401_bd69_4260_b338_6e7b8db09c42 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6a490979_2226_47bb_a2b2_a7951c04cfc7 ;
+                                           skos:prefLabel "StrongBase"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_f4cce1ec_c7dd_4061_8c46_7a24fdcd07ca
 :EMMO_f4cce1ec_c7dd_4061_8c46_7a24fdcd07ca rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
@@ -5856,6 +6023,12 @@ Q=qT"""@en ;
                                            skos:prefLabel "LatentHeat"@en .
 
 
+###  http://emmo.info/emmo#EMMO_fbe3e96f_dd7a_4938_ad3d_15c554c91fa3
+:EMMO_fbe3e96f_dd7a_4938_ad3d_15c554c91fa3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_df96cbb6_b5ee_4222_8eab_b3675df24bea ;
+                                           skos:prefLabel "Reductant"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_fc1987b2_afff_4dc6_a102_bdd9f024b03b
 :EMMO_fc1987b2_afff_4dc6_a102_bdd9f024b03b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
@@ -5898,6 +6071,12 @@ Q=qT"""@en ;
    owl:annotatedTarget "for type II superconductors, the threshold magnetic flux density for magnetic flux entering the superconductor"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_fdbac382_c0d5_425e_b0ae_314bee975799
+:EMMO_fdbac382_c0d5_425e_b0ae_314bee975799 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
+                                           skos:prefLabel "Name"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_fdd744f7_72e5_4060_86a7_93ff361237d6
@@ -5996,14 +6175,68 @@ Q=qT"""@en ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ea246e79_022f_469d_be0b_576dea230c32
-:EMMO_ea246e79_022f_469d_be0b_576dea230c32 rdf:type owl:Class ;
-                                           owl:equivalentClass [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
-                                                                 owl:hasValue "T+1 L0 M-1 I+1 Θ0 N0 J0"
-                                                               ] ;
-                                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
-                                           skos:prefLabel "ElectricChargePerMassDimension"@en .
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39
+:EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-11" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "insertion or removal of electrons into or from ions to obtain particles having zero electric charge."@en ;
+                                           skos:prefLabel "Neutralization"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "insertion or removal of electrons into or from ions to obtain particles having zero electric charge."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_38d65ffa_353f_4820_8781_ff986b63e517
+:EMMO_38d65ffa_353f_4820_8781_ff986b63e517 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f
+                                                           ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-15" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "concentration of a solute in a saturated solution."@en ;
+                                           skos:prefLabel "Solubility"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_38d65ffa_353f_4820_8781_ff986b63e517 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "concentration of a solute in a saturated solution."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d
+:EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-07" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "needle-like or tree-like formation of crystalline growth formed during deposition of a material."@en ;
+                                           skos:prefLabel "Dendrite"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "needle-like or tree-like formation of crystalline growth formed during deposition of a material."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2
+:EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-14"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "solution which has the same concentration of a solute as one that is in equilibrium with undissolved solute at specified values of the temperature and pressure."@en ;
+                                           skos:prefLabel "SaturatedSolution"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "solution which has the same concentration of a solute as one that is in equilibrium with undissolved solute at specified values of the temperature and pressure."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
