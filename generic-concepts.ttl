@@ -6259,7 +6259,7 @@ Q=qT"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
                                                            ] ;
                                            skos:altLabel "Zinc(II)Molecule"@en ;
-                                           skos:prefLabel "Zn2+"@en .
+                                           skos:prefLabel "Zn(II)"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
