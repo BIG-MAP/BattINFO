@@ -132,7 +132,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dc57d998_23db_4d8e_b2cd_f346b195b846 ;
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -226,6 +226,21 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BifunctionalAirElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed
+:EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-14"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry used to separate by electrolyse ions of a substance and to derive the amount of this substance from the increase in mass of an electrode."@en ;
+                                           skos:prefLabel "Electrogravimetry"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "method of electroanalytical chemistry used to separate by electrolyse ions of a substance and to derive the amount of this substance from the increase in mass of an electrode."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be
 :EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
@@ -266,8 +281,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_19abaccd_43be_4048_965c_e4fb63c5951b
 :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ,
-                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
+                                           rdfs:subClassOf emmo:EMMO_50e36d79_b2dd_422d_81eb_a665028a1ead ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A chemical phenomenon that is accompanied by the flow of electric current"@en ;
                                            skos:prefLabel "ElectrochemicalPhenomenon"@en .
 
@@ -603,6 +617,37 @@ Aluminum foil"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e
+:EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-03" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "situation in which a material in a given environment undergoes negligible electrochemical corrosion."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "cathodic protection"@en ;
+                                           skos:prefLabel "ElectrochemicalImmunity"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "situation in which a material in a given environment undergoes negligible electrochemical corrosion."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4d6f7f50_b343_4bd6_8612_2b8521a99c9b
+:EMMO_4d6f7f50_b343_4bd6_8612_2b8521a99c9b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-15" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "increasing the rate of an electrode reaction by adding specific material to the electrode."@en ;
+                                           skos:prefLabel "Electrocatalysis"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_4d6f7f50_b343_4bd6_8612_2b8521a99c9b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "increasing the rate of an electrode reaction by adding specific material to the electrode."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4df84ec1_8a1a_4770_963f_bf48009bd043
 :EMMO_4df84ec1_8a1a_4770_963f_bf48009bd043 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
@@ -668,6 +713,21 @@ Aluminum foil"""@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_evolution"@en ;
                                            skos:altLabel "OER"@en ;
                                            skos:prefLabel "OxygenEvolutionReaction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325
+:EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-12" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry based on measurement of an electrode potential."@en ;
+                                           skos:prefLabel "Potentiometry"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "method of electroanalytical chemistry based on measurement of an electrode potential."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
@@ -821,6 +881,21 @@ Aluminum foil"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41
+:EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-13" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry in which the electric charge consumed or produced is measured and used to derive the amount-of-substance transformed."@en ;
+                                           skos:prefLabel "Coulometry"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "method of electroanalytical chemistry in which the electric charge consumed or produced is measured and used to derive the amount-of-substance transformed."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2
 :EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a ;
@@ -934,16 +1009,12 @@ Aluminum foil"""@en ;
 :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:someValuesFrom :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_20314893_9351_4e6e_ae58_fb22c6ae7dca
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
                                                            ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-01"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A system containing two electrodes that allow transport of electrons, separated by an electrolyte that allows movement of ions but blocks movement of electrons."@en ;
@@ -1044,6 +1115,21 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43
+:EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-11" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry in which the electric current resulting from the application of an electric potential at an electrode is measured."@en ;
+                                           skos:prefLabel "Voltammetry"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "method of electroanalytical chemistry in which the electric current resulting from the application of an electric potential at an electrode is measured."@en ;
+   emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7760b241_775f_4be1_b827_59f9bde9e5b2
 :EMMO_7760b241_775f_4be1_b827_59f9bde9e5b2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e931087f_7681_4096_b200_5223bcc47eb4 ;
@@ -1061,7 +1147,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_79d1b273-58cd-4be6-a250-434817f7c261
 :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73 ,
+                                           rdfs:subClassOf emmo:EMMO_68390bfb_e307_479d_8f78_d66d8773cb1d ,
                                                            :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-14"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Material that is oxidized or reduced at an electrode in an electrochemical cell."@en ;
@@ -1235,6 +1321,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_8ab1e656_38ff_48e6_ab09_293d76bc9044
+:EMMO_8ab1e656_38ff_48e6_ab09_293d76bc9044 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767 ;
+                                           skos:prefLabel "Catalyst"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_8b40856f_1ca2_4137_9616_7fb624671909
 :EMMO_8b40856f_1ca2_4137_9616_7fb624671909 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 ;
@@ -1285,6 +1377,25 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a """Current Collector
 Conducting Additive"""@en ;
                                            skos:prefLabel "ElectronicSubcomponent"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d
+:EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-05"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "interface between an electrolyte and an electrode where an electrode reaction takes place."@en ;
+                                           skos:prefLabel "ActiveSurfaceOfAnElectrode"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "interface between an electrolyte and an electrode where an electrode reaction takes place."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9d7e5fea_a49a_4a19_a8de_8e24c60e420c
@@ -1429,6 +1540,21 @@ Conducting Additive"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841
+:EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8ab1e656_38ff_48e6_ab09_293d76bc9044 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-16" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "material that can cause electrocatalysis."@en ;
+                                           skos:prefLabel "Electrocatalyst"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "material that can cause electrocatalysis."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a462859d_d8bd_48ea_8bde_1576f1248a1e
 :EMMO_a462859d_d8bd_48ea_8bde_1576f1248a1e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
@@ -1506,6 +1632,23 @@ Conducting Additive"""@en ;
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
    owl:annotatedTarget "Measuring instrument [VIM 3.1] for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ac9723d1_bac0_4109_874e_32849de9299b
+:EMMO_ac9723d1_bac0_4109_874e_32849de9299b rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-19" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "model representing the structure of an electrolyte at an electrode-electrolyte interface by a rigid layer formed by the charge carriers on the surface of the electrode and a diffuse layer formed by mobile ions in the electrolyte."@en ;
+                                           skos:altLabel "ElectricalDoubleLayer"@en ,
+                                                         "ElectricalPolarizationLayer"@en ;
+                                           skos:prefLabel "DoubleLayer"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_ac9723d1_bac0_4109_874e_32849de9299b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "model representing the structure of an electrolyte at an electrode-electrolyte interface by a rigid layer formed by the charge carriers on the surface of the electrode and a diffuse layer formed by mobile ions in the electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
 
@@ -1593,7 +1736,8 @@ of other configurations are used."""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
 :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
+                                           rdfs:subClassOf emmo:EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676 ,
+                                                           :EMMO_fa22874b_76a9_4043_8b8f_6086c88746de ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Aqueous_solution"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ion-transport medium, which may be immobilized, in which water is the solvent."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Aqueous_solution"@en ;
@@ -1763,7 +1907,8 @@ of other configurations are used."""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
 :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ;
+                                           rdfs:subClassOf emmo:EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ,
+                                                           emmo:EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 ;
                                            skos:prefLabel "ChargeCarrierIon"@en .
 
 
@@ -2199,152 +2344,40 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "NernstEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed
-:EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-14"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry used to separate by electrolyse ions of a substance and to derive the amount of this substance from the increase in mass of an electrode."@en ;
-                                           skos:prefLabel "Electrogravimetry"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "method of electroanalytical chemistry used to separate by electrolyse ions of a substance and to derive the amount of this substance from the increase in mass of an electrode."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e
-:EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-03" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "situation in which a material in a given environment undergoes negligible electrochemical corrosion."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "cathodic protection"@en ;
-                                           skos:prefLabel "ElectrochemicalImmunity"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "situation in which a material in a given environment undergoes negligible electrochemical corrosion."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_4d6f7f50_b343_4bd6_8612_2b8521a99c9b
-:EMMO_4d6f7f50_b343_4bd6_8612_2b8521a99c9b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-15" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "increasing the rate of an electrode reaction by adding specific material to the electrode."@en ;
-                                           skos:prefLabel "Electrocatalysis"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_4d6f7f50_b343_4bd6_8612_2b8521a99c9b ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "increasing the rate of an electrode reaction by adding specific material to the electrode."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325
-:EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-12" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry based on measurement of an electrode potential."@en ;
-                                           skos:prefLabel "Potentiometry"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "method of electroanalytical chemistry based on measurement of an electrode potential."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41
-:EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-13" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry in which the electric charge consumed or produced is measured and used to derive the amount-of-substance transformed."@en ;
-                                           skos:prefLabel "Coulometry"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "method of electroanalytical chemistry in which the electric charge consumed or produced is measured and used to derive the amount-of-substance transformed."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43
-:EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-11" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry in which the electric current resulting from the application of an electric potential at an electrode is measured."@en ;
-                                           skos:prefLabel "Voltammetry"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "method of electroanalytical chemistry in which the electric current resulting from the application of an electric potential at an electrode is measured."@en ;
-   emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_8ab1e656_38ff_48e6_ab09_293d76bc9044
-:EMMO_8ab1e656_38ff_48e6_ab09_293d76bc9044 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_d95e6e0d-e8eb-411a-b407-0d1a517e8767 ;
-                                           skos:prefLabel "Catalyst"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d
-:EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ,
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0
+:EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_bad1b6f4_1b26_40e2_b552_6d53873e3973
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
                                                            ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-05"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "interface between an electrolyte and an electrode where an electrode reaction takes place."@en ;
-                                           skos:prefLabel "ActiveSurfaceOfAnElectrode"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "interface between an electrolyte and an electrode where an electrode reaction takes place."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
+                                           skos:prefLabel "ElectroactiveMolecularEntity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841
-:EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_8ab1e656_38ff_48e6_ab09_293d76bc9044 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-16" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "material that can cause electrocatalysis."@en ;
-                                           skos:prefLabel "Electrocatalyst"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "material that can cause electrocatalysis."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
+:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5>
+                                                           ] ;
+                                           skos:prefLabel "ZincElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_ac9723d1_bac0_4109_874e_32849de9299b
-:EMMO_ac9723d1_bac0_4109_874e_32849de9299b rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-19" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "model representing the structure of an electrolyte at an electrode-electrolyte interface by a rigid layer formed by the charge carriers on the surface of the electrode and a diffuse layer formed by mobile ions in the electrolyte."@en ;
-                                           skos:altLabel "ElectricalDoubleLayer"@en ,
-                                                         "ElectricalPolarizationLayer"@en ;
-                                           skos:prefLabel "DoubleLayer"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_ac9723d1_bac0_4109_874e_32849de9299b ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "model representing the structure of an electrolyte at an electrode-electrolyte interface by a rigid layer formed by the charge carriers on the surface of the electrode and a diffuse layer formed by mobile ions in the electrolyte."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
+:EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c>
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Zn(s) -> Zn^{2+} + e^-" ;
+                                           skos:prefLabel "Zn(s)Zn2+"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

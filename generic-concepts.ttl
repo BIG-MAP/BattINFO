@@ -376,6 +376,21 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39
+:EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-11" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "insertion or removal of electrons into or from ions to obtain particles having zero electric charge."@en ;
+                                           skos:prefLabel "Neutralization"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "insertion or removal of electrons into or from ions to obtain particles having zero electric charge."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_0dbdd7c5_86a5_4867_a396_2277e20fc4bc
 :EMMO_0dbdd7c5_86a5_4867_a396_2277e20fc4bc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
@@ -1273,6 +1288,25 @@ Eij = δij"""@en ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-21.2" ;
                                            skos:prefLabel "SecondPolarMomentOfArea"@en .
+
+
+###  http://emmo.info/emmo#EMMO_38d65ffa_353f_4820_8781_ff986b63e517
+:EMMO_38d65ffa_353f_4820_8781_ff986b63e517 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f
+                                                           ] ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-15" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "concentration of a solute in a saturated solution."@en ;
+                                           skos:prefLabel "Solubility"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_38d65ffa_353f_4820_8781_ff986b63e517 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "concentration of a solute in a saturated solution."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  http://emmo.info/emmo#EMMO_391d1929_1446_4030_b860_d95f6374d9c1
@@ -2362,6 +2396,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 :EMMO_5bc88245_45a1_4163_b640_f8320cc780de rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_70cbd515_d278_4d47_9631_4b48931cc83b ;
                                            skos:prefLabel "MassFluxTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676
+:EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676 rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:someValuesFrom :EMMO_97a0b9c7_8568_4674_9bb7_938d5cd9f607
+                                                           ] .
 
 
 ###  http://emmo.info/emmo#EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017
@@ -4940,6 +4985,21 @@ Q=qT"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d
+:EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-07" ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "needle-like or tree-like formation of crystalline growth formed during deposition of a material."@en ;
+                                           skos:prefLabel "Dendrite"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "needle-like or tree-like formation of crystalline growth formed during deposition of a material."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3
 :EMMO_c8a4df75_3f22_416a_8507_c49e5b0804c3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3afd2a12_732e_4cdc_9312_9c93764b4d1b ;
@@ -5934,6 +5994,21 @@ Q=qT"""@en ;
                                            skos:prefLabel "StrongBase"@en .
 
 
+###  http://emmo.info/emmo#EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2
+:EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
+                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-14"@en ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "solution which has the same concentration of a solute as one that is in equilibrium with undissolved solute at specified values of the temperature and pressure."@en ;
+                                           skos:prefLabel "SaturatedSolution"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2 ;
+   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "solution which has the same concentration of a solute as one that is in equilibrium with undissolved solute at specified values of the temperature and pressure."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  http://emmo.info/emmo#EMMO_f4cce1ec_c7dd_4061_8c46_7a24fdcd07ca
 :EMMO_f4cce1ec_c7dd_4061_8c46_7a24fdcd07ca rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ,
@@ -6175,68 +6250,108 @@ Q=qT"""@en ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39
-:EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-11" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "insertion or removal of electrons into or from ions to obtain particles having zero electric charge."@en ;
-                                           skos:prefLabel "Neutralization"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_0b32c749_62d2_473b_bf45_c1a7893d9a39 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "insertion or removal of electrons into or from ions to obtain particles having zero electric charge."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_38d65ffa_353f_4820_8781_ff986b63e517
-:EMMO_38d65ffa_353f_4820_8781_ff986b63e517 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
+:EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e024544d_e374_45b7_9340_1982040bc6b7 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom :EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
                                                            ] ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-15" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "concentration of a solute in a saturated solution."@en ;
-                                           skos:prefLabel "Solubility"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_38d65ffa_353f_4820_8781_ff986b63e517 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "concentration of a solute in a saturated solution."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
+                                           skos:altLabel "Zinc(II)Molecule"@en ;
+                                           skos:prefLabel "Zn2+"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d
-:EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-07" ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "needle-like or tree-like formation of crystalline growth formed during deposition of a material."@en ;
-                                           skos:prefLabel "Dendrite"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_c863dfe7_a956_4e37_a00b_dbd4f6cd705d ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "needle-like or tree-like formation of crystalline growth formed during deposition of a material."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
+:EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e024544d_e374_45b7_9340_1982040bc6b7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
+                                                           ] ;
+                                           skos:altLabel "ZincMolecule"@en ;
+                                           skos:prefLabel "Zn"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2
-:EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
-                                           :EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-01-14"@en ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "solution which has the same concentration of a solute as one that is in equilibrium with undissolved solute at specified values of the temperature and pressure."@en ;
-                                           skos:prefLabel "SaturatedSolution"@en .
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5
+:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b ;
+                                                             owl:someValuesFrom :EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
+                                                           ] ;
+                                           skos:prefLabel "ZincMaterial"@en .
 
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_f3908466_9cdf_4b9c_a4df_0295150973e2 ;
-   owl:annotatedProperty :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "solution which has the same concentration of a solute as one that is in equilibrium with undissolved solute at specified values of the temperature and pressure."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c
+:EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_50967f46_51f9_462a_b1e4_e63365b4a184 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
+                                                           ] ;
+                                           skos:altLabel "WaterMolecule"@en ;
+                                           skos:prefLabel "H2O" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_97a0b9c7_8568_4674_9bb7_938d5cd9f607
+:EMMO_97a0b9c7_8568_4674_9bb7_938d5cd9f607 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b ;
+                                                             owl:someValuesFrom :EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b ;
+                                                             owl:someValuesFrom :EMMO_9895ee08_0a4f_46a5_8aee_f2f175bd686b
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b ;
+                                                             owl:someValuesFrom :EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
+                                                           ] ;
+                                           skos:prefLabel "WaterMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9895ee08_0a4f_46a5_8aee_f2f175bd686b
+:EMMO_9895ee08_0a4f_46a5_8aee_f2f175bd686b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e024544d_e374_45b7_9340_1982040bc6b7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
+                                                           ] ;
+                                           skos:altLabel "Proton"@en ;
+                                           skos:prefLabel "H+"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
+:EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_50967f46_51f9_462a_b1e4_e63365b4a184 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
+                                                           ] ;
+                                           skos:altLabel "HydroxideMolecule"@en ;
+                                           skos:prefLabel "OH-"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fbe23679_7d83_4056_acf3_9127d28120e2
+:EMMO_fbe23679_7d83_4056_acf3_9127d28120e2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ;
+                                           skos:prefLabel "Ion"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
