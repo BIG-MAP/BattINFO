@@ -6259,7 +6259,7 @@ Q=qT"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
                                                            ] ;
                                            skos:altLabel "Zinc(II)Molecule"@en ;
-                                           skos:prefLabel "Zn(II)"@en .
+                                           skos:prefLabel "Zn_2p"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
@@ -6328,7 +6328,7 @@ Q=qT"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
                                                            ] ;
                                            skos:altLabel "Proton"@en ;
-                                           skos:prefLabel "H+"@en .
+                                           skos:prefLabel "H_1p"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
@@ -6345,7 +6345,7 @@ Q=qT"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
                                                            ] ;
                                            skos:altLabel "HydroxideMolecule"@en ;
-                                           skos:prefLabel "OH-"@en .
+                                           skos:prefLabel "OH_1m"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_fbe23679_7d83_4056_acf3_9127d28120e2
