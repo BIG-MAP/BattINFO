@@ -1196,12 +1196,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d
 :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dc57d998_23db_4d8e_b2cd_f346b195b846 ;
-                                                             owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
-                                                           ] ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode consisting of multiple ElectrochemicalSubComponent"@en ;
                                            skos:prefLabel "CompositeElectrode"@en .
 
@@ -2239,11 +2234,6 @@ of other configurations are used."""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_dc57d998_23db_4d8e_b2cd_f346b195b846
-                                                                            ] ;
-                                                             owl:someValuesFrom :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A subcomponent of an ElectrochemicalComponent."@en ;
                                            skos:prefLabel "ElectrochemicalSubcomponent"@en .
