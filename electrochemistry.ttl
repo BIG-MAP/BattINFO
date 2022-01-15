@@ -212,6 +212,17 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "HybridCell"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0
+:EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
+                                                           ] ;
+                                           skos:prefLabel "ElectroactiveMolecularEntity"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
 :EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
@@ -418,6 +429,16 @@ Aluminum foil"""@en ;
    owl:annotatedTarget "For solutions in protic solvents, the universal reference electrode for which, under standard conditions, the standard electrode potential (H+ / H2) is zero at all temperatures."@en ;
    dcterms:source "IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
+:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:someValuesFrom emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5
+                                                           ] ;
+                                           skos:prefLabel "ZincElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f
@@ -1681,6 +1702,21 @@ Conducting Additive"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
+:EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Zn(s) -> Zn^{2+} + e^-" ;
+                                           skos:prefLabel "ZincOxidation"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b525a629_a679_464f_bc5b_b49d2fc82686
 :EMMO_b525a629_a679_464f_bc5b_b49d2fc82686 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
@@ -2342,42 +2378,6 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0
-:EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
-                                                                            ] ;
-                                                             owl:someValuesFrom :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914
-                                                           ] ;
-                                           skos:prefLabel "ElectroactiveMolecularEntity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
-:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5>
-                                                           ] ;
-                                           skos:prefLabel "ZincElectrode"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
-:EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c>
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Zn(s) -> Zn^{2+} + e^-" ;
-                                           skos:prefLabel "ZincOxidation"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
