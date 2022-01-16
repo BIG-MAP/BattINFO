@@ -124,12 +124,12 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_9a084aa3_3d5a_4a62_9fc0_fd88937a19c5 ;
-                                                             owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
+                                                             owl:onProperty emmo:EMMO_5ceab41b_2aea_4041_9e9c_a243f7562cee ;
+                                                             owl:someValuesFrom :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
-                                                             owl:someValuesFrom :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d
+                                                             owl:onProperty emmo:EMMO_9a084aa3_3d5a_4a62_9fc0_fd88937a19c5 ;
+                                                             owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
@@ -499,15 +499,13 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2e98bc8b_ffe9_4f0d_bfb9_4a4d71836ad5
 :EMMO_2e98bc8b_ffe9_4f0d_bfb9_4a4d71836ad5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1
-                                                           ] ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of electrochemical reaction in which a guest molecule (or ion) is inserted into a host lattice."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Li^+ + C_6 + e^- <--> LiC_6" ;
-                                           skos:altLabel "ElectrochemicalIntercalationReaction"@en ;
-                                           skos:prefLabel "ElectrochemicalInsertionReaction"@en .
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Li^+ + C_6 + e^- --> LiC_6" ;
+                                           skos:altLabel "ElectrochemicalInsertionReaction"@en ,
+                                                         "ElectrochemicalIntercalationReaction"@en ,
+                                                         "InsertionReaction"@en ;
+                                           skos:prefLabel "IntercalationReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
@@ -727,7 +725,7 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5
 :EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The OER is the back reaction of the ORR."@en ,
                                                                                           "The OER usually requires a catalyst in practical electrodes."@en ,
                                                                                           "The process of generating molecular oxygen (O2) by a chemical reaction, usually from water (H2O)."@en ;
@@ -1169,7 +1167,11 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_79d1b273-58cd-4be6-a250-434817f7c261
 :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_68390bfb_e307_479d_8f78_d66d8773cb1d ,
-                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ;
+                                                           :EMMO_ebdb68e9_c4b5_4d57_a042_c0f51d446755 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b ;
+                                                             owl:someValuesFrom :EMMO_1340dd0b_98cd_4e6a_bd77_1907e0fd57b0
+                                                           ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-14"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Material that is oxidized or reduced at an electrode in an electrochemical cell."@en ;
                                            rdfs:comment "If an electroactive substance B is formed, in the solution or at the electrode surface, by a chemical reaction from another substance C, the substance C should be called the precursor of B." ,
@@ -1483,7 +1485,7 @@ Conducting Additive"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4
 :EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process of generating molecular hydrogen (H2) by a chemical reaction, usually from water (H2O)."@en ;
                                            skos:altLabel "HER"@en ;
                                            skos:prefLabel "HydrogenEvolutionReaction"@en .
@@ -1602,6 +1604,10 @@ Conducting Additive"""@en ;
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_0f007072-a8dd-4798-b865-1bf9363be627
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -1611,6 +1617,10 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
                                                              owl:someValuesFrom :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48
                                                            ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-01"@en ,
                                                                                           "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-01" ;
@@ -1927,7 +1937,7 @@ of other configurations are used."""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854
 :EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6c1483a0_dcf1_4194_92fd_07e40c8da9ad ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The reduction half reaction whereby molecular oxygen (O2) is reduced to water (H2O) or hydrogen peroxide (H2O2)."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_reduction_reaction"@en ;
                                            rdfs:comment "The ORR is the dominant cathode reaction in metal-air batteries and hydrogen fuel cells."@en ,
@@ -2165,10 +2175,15 @@ of other configurations are used."""@en ;
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f0c24970_4c14_4207_bd78_5f2181a67085
 :EMMO_f0c24970_4c14_4207_bd78_5f2181a67085 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """The process of forming a film or a bulk material using an electrochemical process where the electrons are supplied by an external power supply.
-
---A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"""@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process of forming a film or a bulk material using an electrochemical process where the electrons are supplied by an external power supply."@en ;
                                            skos:prefLabel "Electrodeposition"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_f0c24970_4c14_4207_bd78_5f2181a67085 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "The process of forming a film or a bulk material using an electrochemical process where the electrons are supplied by an external power supply."@en ;
+   dcterms:source "A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4
@@ -2368,6 +2383,41 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db
+:EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
+                                           skos:prefLabel "IntercalationStep"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_6850b69e_fa15_40ac_8830_c4bbd2001efd
+:EMMO_6850b69e_fa15_40ac_8830_c4bbd2001efd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec
+                                                           ] ;
+                                           skos:altLabel "ElectrochemicalDeintercalationReaction"@en ,
+                                                         "ElectrochemicalRemovalReaction"@en ,
+                                                         "RemovalReaction"@en ;
+                                           skos:prefLabel "DeintercalationReaction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48
+:EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           skos:prefLabel "ElectronTransferStep"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec
+:EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
+                                           skos:prefLabel "DeintercalationStep"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
