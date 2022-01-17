@@ -36,6 +36,18 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 
 #################################################################
+#    Object Properties
+#################################################################
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_860aa941_5ff9_4452_8a16_7856fad07bee
+:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_0dd68b90_c27e_41dd_8fd0_5c9e9ca5563b> ;
+                                           rdfs:domain :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           rdfs:range :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 ;
+                                           skos:prefLabel "hasActiveMaterial"@en .
+
+
+#################################################################
 #    Classes
 #################################################################
 
@@ -132,7 +144,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:onProperty :EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
                                                              owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
@@ -435,7 +447,7 @@ Aluminum foil"""@en ;
 :EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:onProperty :EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
                                                              owl:someValuesFrom emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5
                                                            ] ;
                                            skos:prefLabel "ZincElectrode"@en .
@@ -634,6 +646,12 @@ Aluminum foil"""@en ;
    owl:annotatedTarget "phenomenon by which a cell or battery loses energy in other ways than by discharge into an external circuit."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db
+:EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
+                                           skos:prefLabel "IntercalationStep"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e
@@ -951,6 +969,19 @@ Aluminum foil"""@en ;
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode at which the predominant electrochemical reaction is a conversion."@en ;
                                            skos:prefLabel "ConversionElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6850b69e_fa15_40ac_8830_c4bbd2001efd
+:EMMO_6850b69e_fa15_40ac_8830_c4bbd2001efd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec
+                                                           ] ;
+                                           skos:altLabel "ElectrochemicalDeintercalationReaction"@en ,
+                                                         "ElectrochemicalRemovalReaction"@en ,
+                                                         "RemovalReaction"@en ;
+                                           skos:prefLabel "DeintercalationReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6ab1ca1a-3809-4e9a-aaf7-374915288f73
@@ -1946,6 +1977,16 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "OxygenReductionReaction"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48
+:EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           skos:prefLabel "ElectronTransferStep"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
 :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_04943e49_1304_4119_8a65_2e91a4f5f02a ,
@@ -2186,6 +2227,12 @@ of other configurations are used."""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec
+:EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
+                                           skos:prefLabel "DeintercalationStep"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4
 :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
@@ -2383,41 +2430,6 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db
-:EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
-                                           skos:prefLabel "IntercalationStep"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_6850b69e_fa15_40ac_8830_c4bbd2001efd
-:EMMO_6850b69e_fa15_40ac_8830_c4bbd2001efd rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec
-                                                           ] ;
-                                           skos:altLabel "ElectrochemicalDeintercalationReaction"@en ,
-                                                         "ElectrochemicalRemovalReaction"@en ,
-                                                         "RemovalReaction"@en ;
-                                           skos:prefLabel "DeintercalationReaction"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48
-:EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
-                                                           ] ;
-                                           skos:prefLabel "ElectronTransferStep"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec
-:EMMO_f12ad13c_7349_4d82_bf5d_38b51dabf9ec rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
-                                           skos:prefLabel "DeintercalationStep"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
