@@ -53,7 +53,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-10" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing manganese dioxide and a negative electrode of lithium."@en ;
                                            skos:prefLabel "LithiumManganeseDioxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing manganese dioxide and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0c1e58c3_83c1_4de8_8863_bc742cda5e3b
@@ -93,15 +101,31 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-05" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with a saline electrolyte and a negative electrode of zinc."@en ;
                                            skos:altLabel "NeutralElectrolyteZincAirElectrochemicalCell"@en ;
                                            skos:prefLabel "NearNeutralElectrolyteZincAirElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "metal air electrochemical cell with a saline electrolyte and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b
 :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-09" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing carbon monofluoride and a negative electrode of lithium."@en ;
                                            skos:prefLabel "LithiumCarbonMonofluorideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing carbon monofluoride and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_14113a11_a342_4bdd_a6b3_8a279ce9d49c
@@ -171,7 +195,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-08" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on ammonium chloride and zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
                                            skos:prefLabel "LeclancheElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a saline electrolyte based on ammonium chloride and zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d3ad695_4a44_47e7_ae3b_7f8a37a6ac6c
@@ -354,13 +386,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryEquivalentCircuitModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4ce0335a_5e04_42ae_b25f_0b7de008e307
-:EMMO_4ce0335a_5e04_42ae_b25f_0b7de008e307 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1d3ad695_4a44_47e7_ae3b_7f8a37a6ac6c ,
-                                                           :EMMO_b7091902_c136_455c_855c_8466c0b70256 ;
-                                           skos:prefLabel "LithiumIonBatteryNegativeElectrode"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481
 :EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ;
@@ -413,7 +438,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-06" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
                                            skos:prefLabel "ZincChlorideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a saline electrolyte based on zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
@@ -429,6 +462,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:someValuesFrom electrochemistry:EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
                                                            ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "an electrochemical cell with an aqueous electrolyte."@en ;
                                            skos:prefLabel "AqueousElectrochemicalCell"@en .
 
 
@@ -677,10 +711,10 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549
+                                                             owl:onProperty electrochemistry:EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98
                                                            ] ;
-                                           skos:prefLabel "LithiumIonCell"@en .
+                                           skos:prefLabel "LithiumIonElectrochemicalCell"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8
@@ -753,7 +787,16 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-07" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell such as Leclanché or zinc chloride."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "LeClanche electrochemical cell, zinc chloride electrochemical cell"@en ;
                                            skos:prefLabel "ZincCarbonElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell such as Leclanché or zinc chloride."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
@@ -822,36 +865,49 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:someValuesFrom electrochemistry:EMMO_615cff2a_be95_4e65_9471_98db23f4c878
                                                            ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-03" ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-03"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
                                            skos:prefLabel "AlkalineZincManganeseDioxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with an alkaline electrolyte, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5910d2f_3114_4663_8d46_e418ff859251
 :EMMO_b5910d2f_3114_4663_8d46_e418ff859251 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:onProperty electrochemistry:EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_5d299271_3f68_494f_ab96_3db9acdd3138 ;
                                                              owl:someValuesFrom electrochemistry:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:someValuesFrom electrochemistry:EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+                                                             owl:onProperty electrochemistry:EMMO_8e9cf965_9f92_46e8_b678_b50410ce3616 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_8b40856f_1ca2_4137_9616_7fb624671909
                                                            ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-02" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with an alkaline electrolyte and a negative electrode of zinc."@en ;
                                            skos:prefLabel "AlkalineZincAirElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b5910d2f_3114_4663_8d46_e418ff859251 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "metal air electrochemical cell with an alkaline electrolyte and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693
 :EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
                                            skos:prefLabel "Cylindrical21700CellHousing"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b7091902_c136_455c_855c_8466c0b70256
-:EMMO_b7091902_c136_455c_855c_8466c0b70256 rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the lowest electric potential in the cell."@en ;
-                                           skos:prefLabel "NegativeElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
@@ -877,7 +933,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-04" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing silver oxide and a negative electrode of zinc."@en ;
                                            skos:prefLabel "ZincSilverOxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with an alkaline electrolyte, a positive electrode containing silver oxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3
@@ -941,13 +1005,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
 -- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            skos:altLabel "BatteryDischarge"@en ;
                                            skos:prefLabel "DischargeOfABattery"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa
-:EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode with the highest electric potential in the cell."@en ;
-                                           skos:prefLabel "PositiveElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2
@@ -1045,13 +1102,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "MetalReferenceElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_de6f02d3_ea77_4e15_8e39_a066eb9d63cc
-:EMMO_de6f02d3_ea77_4e15_8e39_a066eb9d63cc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1d3ad695_4a44_47e7_ae3b_7f8a37a6ac6c ,
-                                                           :EMMO_d0af3c6d_45de_405f_94b9_a83f0bc4f1aa ;
-                                           skos:prefLabel "LithiumIonBatteryPositiveElectrode"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
 :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
@@ -1083,7 +1133,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-11" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing copper oxide and a negative electrode of lithium."@en ;
                                            skos:prefLabel "LithiumCopperOxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing copper oxide and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427
@@ -1108,7 +1166,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-13" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous inorganic electrolyte, a positive electrode containing thionyl chloride and a negative electrode of lithium."@en ;
                                            skos:prefLabel "LithiumThionylChlorideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous inorganic electrolyte, a positive electrode containing thionyl chloride and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f67b8129_8d47_4f02_be71_18cb482d2d57
@@ -1127,7 +1193,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-12" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing iron disulphide and a negative electrode of lithium."@en ;
                                            skos:prefLabel "LithiumIronDisulphideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing iron disulphide and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
