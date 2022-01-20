@@ -56,18 +56,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_057f3082_960a_4c68_8708_cbef88584e9f
-:EMMO_057f3082_960a_4c68_8708_cbef88584e9f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
-                                           skos:prefLabel "NominalElectrochemicalProperty"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa
-:EMMO_0605e641_1652_4575_b2fb_75f3de54a0aa rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalCycleLife"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_07e219c3_890f_488f_bd96_bee8e445d764
 :EMMO_07e219c3_890f_488f_bd96_bee8e445d764 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
@@ -122,7 +110,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd
 :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ;
+                                           rdfs:subClassOf :EMMO_2d896559_eee3_447c_9759_87c854a4266a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_f6070071_d054_4b17_9d2d_f446f7147d0f
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The electrochemical potential is the chemical potential of an ion in the presence of an electric potential."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electrochemical_potential"@en ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
@@ -156,6 +148,21 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
    owl:annotatedTarget "Algebraic sum of faradaic currents flowing through an electrode."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_16a5de33_a2ca_4563_80d4_6caeb08d97ca
+:EMMO_16a5de33_a2ca_4563_80d4_6caeb08d97ca rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_900e357f_2ee3_425a_a0b6_322661117787 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-14" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "nominal property of an electrode, having values negative or positive according to the sign of the electrode potential, or neutral when the electrode potential is zero."@en ;
+                                           skos:prefLabel "Polarity"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_16a5de33_a2ca_4563_80d4_6caeb08d97ca ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "nominal property of an electrode, having values negative or positive according to the sign of the electrode potential, or neutral when the electrode potential is zero."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
 
@@ -205,22 +212,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
    owl:annotatedSource :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
    owl:annotatedProperty rdfs:comment ;
    owl:annotatedTarget "difference between the electrode potential with current flow, and the electrode potential without current flow, i.e. the equilibrium potential."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136
-:EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845 ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-31" ;
-                                           emmo:EMMO_c7b62dd7_063a_4c2a_8504_42f7264ba83f "suitable approximate value of the voltage used to designate or identify a cell, a battery or an electrochemical system."@en ;
-                                           skos:prefLabel "NominalVoltage"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_1d7b0888_160c_4e24_9931_6ecec83ff136 ;
-   owl:annotatedProperty emmo:EMMO_c7b62dd7_063a_4c2a_8504_42f7264ba83f ;
-   owl:annotatedTarget "suitable approximate value of the voltage used to designate or identify a cell, a battery or an electrochemical system."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
@@ -374,13 +365,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_34ac04c1_7d3c_45b1_a06e_828df48e3efd
-:EMMO_34ac04c1_7d3c_45b1_a06e_828df48e3efd rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9 ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalSpecificEnergy"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05
 :EMMO_382b10dc_83aa_4e77_a1d5_1edd06fd1e05 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
@@ -475,6 +459,25 @@ The real (true) area, A_{real}, takes into account non-idealities of the interfa
                                            skos:prefLabel "ElectrochemicalTransportQuantity"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d
+:EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-10" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "voltage between the terminals of an electrochemical cell."@en ;
+                                           skos:prefLabel "CellVoltage"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "voltage between the terminals of an electrochemical cell."@en ;
+   emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_526bf81a_0572_49ff_a8cc_85efc343c1c2
 :EMMO_526bf81a_0572_49ff_a8cc_85efc343c1c2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
@@ -537,11 +540,25 @@ The real (true) area, A_{real}, takes into account non-idealities of the interfa
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02
-:EMMO_5d24e4e2_df0f_4407_9873_548e6a93ac02 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           :EMMO_9bf40017_3f58_4030_ada7_cb37a3dfda2d ;
-                                           skos:prefLabel "NominalInternalResistance"@en .
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5696453c_9da7_41e2_bbda_603c1b90a8fc
+:EMMO_5696453c_9da7_41e2_bbda_603c1b90a8fc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-07" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "fraction of the electric current passing through an electrochemical cell which accomplishes the desired chemical reaction."@en ;
+                                           skos:altLabel "CoulombicEfficiency"@en ,
+                                                         "FaradayEfficiency"@en ;
+                                           skos:prefLabel "CurrentEfficiency"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_5696453c_9da7_41e2_bbda_603c1b90a8fc ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "fraction of the electric current passing through an electrochemical cell which accomplishes the desired chemical reaction."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5fb7a03f_d6dd_47ee_9317_0629681c7d00
@@ -617,6 +634,25 @@ The real (true) area, A_{real}, takes into account non-idealities of the interfa
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_76e7e556_f47e_47e2_b2ef_67aeed09c63e
+:EMMO_76e7e556_f47e_47e2_b2ef_67aeed09c63e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_120d86b6_d7c4_4490_8ef2_8a5f58403950
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-13" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "maximum electric current density that can be achieved for an electrode reaction at a given concentration of a electrochemically active material in the presence of a large excess of supporting electrolyte."@en ;
+                                           skos:prefLabel "CurrentDensityLimit"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_76e7e556_f47e_47e2_b2ef_67aeed09c63e ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "maximum electric current density that can be achieved for an electrode reaction at a given concentration of a electrochemically active material in the presence of a large excess of supporting electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_791c1915_a791_4450_acd8_7f94764743b5
 :EMMO_791c1915_a791_4450_acd8_7f94764743b5 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_1604f495_328a_4f28_9962_f4cc210739dd ,
@@ -674,7 +710,11 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6
 :EMMO_7fe804b8_6126_4132_be8f_b4985d61b1f6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd ;
+                                           rdfs:subClassOf :EMMO_1422cde1_929e_46b6_b0dc_1010eebc5dfd ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_0972cb08_48bd_4524_ac03_8a2e7f30f02f
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "ElectrochemicalPotential per mole."@en ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/E01945" ;
                                            rdfs:comment "Of a substance in a specified phase, the partial molar Gibbs energy of the substance at the specified electric potential."@en ;
@@ -748,20 +788,6 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 :EMMO_900e357f_2ee3_425a_a0b6_322661117787 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
                                            skos:prefLabel "NominalElectrochemicalProperty"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df
-:EMMO_90b614bd_e09f_425d_b454_8f3cc4ab25df rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_686308bd_8ed6_49d0_a204_6487dbe56511 ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalEnergyDensity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a
-:EMMO_932a4121_9970_4cf0_a241_5cfdff79e54a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ,
-                                                           :EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
-                                           skos:prefLabel "NominalCapacity"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b
@@ -843,16 +869,13 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0
-:EMMO_9fedc1d7_133a_49b0_bff3_9996225b25a0 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ,
-                                                           :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalShelfLife"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d
 :EMMO_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ;
+                                           rdfs:subClassOf :EMMO_4a450a27_b84a_4c70_a3a9_15ec30e2f30b ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_84d23674_b2d6_401a_9d4a_e718ee346baf
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Molar conductivity at infinite dilution"@en ;
                                            skos:prefLabel "LimitingMolarConductivity"@en .
 
@@ -876,7 +899,11 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31
 :EMMO_a4dfa5c1_55a9_4285_b71d_90cf6613ca31 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
+                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The fraction of the electrostatic potential energy affecting the reduction rate in an electrode reaction, with the remaining fraction affecting the corresponding oxidation rate."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Charge_transfer_coefficient" ;
                                            rdfs:comment "The cathodic transfer coefficient αc is defined as –(RT/nF)(dlnkc /dE), where kc is the electroreduction rate constant, E is the applied potential, and R, T, and F have their usual significance. This definition is equivalent to the other, -(RT/nF)(dln|jc |/dE), where jc is the cathodic current density corrected for any changes in the reactant concentration at the electrode surface with respect to its bulk value."@en ;
@@ -930,7 +957,11 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae
 :EMMO_abfadc99_6e43_4d37_9b04_7fc5b0f327ae rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
+                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Number of electrons transferred in a charge transfer reaction between an electrode and a single entity (ion, radical-ion, or molecule) of an electroactive substance, whose identity must be specified."@en ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/C00995" ;
                                            rdfs:comment "Symbol n is commonly used when there is no risk of confusion with an amount of substance."@en ,
@@ -945,6 +976,17 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
    owl:annotatedTarget "Number of electrons transferred in a charge transfer reaction between an electrode and a single entity (ion, radical-ion, or molecule) of an electroactive substance, whose identity must be specified."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ae782b14_88ce_4cdd_9418_12aca00be937
+:EMMO_ae782b14_88ce_4cdd_9418_12aca00be937 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_3227b821_26a5_4c7c_9c01_5c24483e0bd0
+                                                           ] ;
+                                           skos:altLabel "ElectrochemicalCycleLife"@en ;
+                                           skos:prefLabel "CycleLife"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112
@@ -1152,9 +1194,32 @@ In either case, the magnitude of the catalytic current depends on the applied po
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759
+:EMMO_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-20" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "potential difference between the rigid layer and the diffuse layer of a double layer."@en ;
+                                           skos:prefLabel "DiffuseLayerPotential"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "potential difference between the rigid layer and the diffuse layer of a double layer."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e4d666ee_d637_45cd_a904_dc33941ead4f
 :EMMO_e4d666ee_d637_45cd_a904_dc33941ead4f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_d5f3e0e5_fc7d_4e64_86ad_555e74aaff84
+                                                           ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-24"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electric current delivered by a battery during its discharge."@en ;
                                            skos:prefLabel "DischargeCurrent"@en .
@@ -1198,18 +1263,16 @@ In either case, the magnitude of the catalytic current depends on the applied po
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7
 :EMMO_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ;
+                                           rdfs:subClassOf :EMMO_21745019_2830_4395_bca7_15ddfd266673 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_120d86b6_d7c4_4490_8ef2_8a5f58403950
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Defined by j0 = i0/A, where i0 is the exchange current of the electrode reaction and A is usually taken as the geometric area of the electrode."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Exchange_current_density" ;
                                            emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://goldbook.iupac.org/terms/view/M03777" ;
                                            skos:altLabel "MeanExchangeCurrentDensity"@en ;
                                            skos:prefLabel "ExchangeCurrentDensity"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ec40e6af_ab61_4086_973f_ccfda762627e
-:EMMO_ec40e6af_ab61_4086_973f_ccfda762627e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_057f3082_960a_4c68_8708_cbef88584e9f ;
-                                           skos:prefLabel "NominalParticleDiameter"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f4fadc4e_ca7d_4e4e_89cf_eacf45b4041e
@@ -1274,7 +1337,11 @@ In either case, the magnitude of the catalytic current depends on the applied po
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767
 :EMMO_fa01b7ce_c398_45f7_be8b_31a6f6533767 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Difference of electric potentials measured between identical metallic leads to two electrodes of an electrochemical cell."@en ;
                                            rdfs:comment "Single electrode potentials relative to hypothetical standards, such as vacuum zero, are not experimentally accessible."@en ,
                                                         "The applied potential is divided into a) two electrode potentials, each of which is the dif- ference of potential existing between the bulk of the solution and the interior of the con- ducting material of the electrode, b) an IR or ohmic potential drop through the solution of resistance R at electric current I, and c) another ohmic potential drop through each elec- trode and its metallic leads."@en ;
@@ -1301,95 +1368,6 @@ In either case, the magnitude of the catalytic current depends on the applied po
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
    owl:annotatedTarget "The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_16a5de33_a2ca_4563_80d4_6caeb08d97ca
-:EMMO_16a5de33_a2ca_4563_80d4_6caeb08d97ca rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_900e357f_2ee3_425a_a0b6_322661117787 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-14" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "nominal property of an electrode, having values negative or positive according to the sign of the electrode potential, or neutral when the electrode potential is zero."@en ;
-                                           skos:prefLabel "Polarity"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_16a5de33_a2ca_4563_80d4_6caeb08d97ca ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "nominal property of an electrode, having values negative or positive according to the sign of the electrode potential, or neutral when the electrode potential is zero."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d
-:EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                           ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-10" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "voltage between the terminals of an electrochemical cell."@en ;
-                                           skos:prefLabel "CellVoltage"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "voltage between the terminals of an electrochemical cell."@en ;
-   emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_5696453c_9da7_41e2_bbda_603c1b90a8fc
-:EMMO_5696453c_9da7_41e2_bbda_603c1b90a8fc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-07" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "fraction of the electric current passing through an electrochemical cell which accomplishes the desired chemical reaction."@en ;
-                                           skos:altLabel "CoulombicEfficiency"@en ,
-                                                         "FaradayEfficiency"@en ;
-                                           skos:prefLabel "CurrentEfficiency"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_5696453c_9da7_41e2_bbda_603c1b90a8fc ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "fraction of the electric current passing through an electrochemical cell which accomplishes the desired chemical reaction."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_76e7e556_f47e_47e2_b2ef_67aeed09c63e
-:EMMO_76e7e556_f47e_47e2_b2ef_67aeed09c63e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom emmo:EMMO_120d86b6_d7c4_4490_8ef2_8a5f58403950
-                                                           ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-13" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "maximum electric current density that can be achieved for an electrode reaction at a given concentration of a electrochemically active material in the presence of a large excess of supporting electrolyte."@en ;
-                                           skos:prefLabel "CurrentDensityLimit"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_76e7e556_f47e_47e2_b2ef_67aeed09c63e ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "maximum electric current density that can be achieved for an electrode reaction at a given concentration of a electrochemically active material in the presence of a large excess of supporting electrolyte."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemicalquantities#EMMO_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759
-:EMMO_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                           ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-20" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "potential difference between the rigid layer and the diffuse layer of a double layer."@en ;
-                                           skos:prefLabel "DiffuseLayerPotential"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "potential difference between the rigid layer and the diffuse layer of a double layer."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
 
