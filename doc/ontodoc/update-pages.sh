@@ -4,18 +4,22 @@ set -ex
 
 # Directories
 rootdir=$(git rev-parse --show-toplevel)
-ontodocdir=${rootdir}/doc/ontodoc
-tmpdir=${ontodocdir}/tmp
-pagesdir=${tmpdir}/gh-pages
+ontodocdir=${rootdir}/${ONTODOC_DIR}
+tmpdir=${ontodocdir}/${TMP_DIR}
+pagesdir=${tmpdir}/${PAGES_DIR}
 
 # Generate documentation
-${ontodocdir}/mkdoc.sh
+# ${ontodocdir}/mkdoc.sh
 
-# Check up gh-pages
+if [ "$1" = "TEST" ]; then
+    echo "Not publishing - just testing (for CI)."
+    exit
+fi
+
+# Checkout gh-pages
 if ! [ -d ${pagesdir} ]; then
     git clone --branch=gh-pages --single-branch \
-        git@github.com:BIG-MAP/OntoBATT.git ${pagesdir}
-    cd ${pagesdir}
+        git@github.com:BIG-MAP/BattINFO.git ${pagesdir}
     git config pull.rebase false
 fi
 
@@ -25,11 +29,11 @@ git pull origin gh-pages
 
 # Copy documentation to gh-pages
 # FIXME - generate separate index.html with links to versions
-cp -u ${tmpdir}/battinfo.html index.html
-cp -u ${tmpdir}/battinfo.pdf .
+# cp -u ${tmpdir}/battinfo.html index.html
+# cp -u ${tmpdir}/battinfo.pdf .
 
 # Update gh-pages
-if git add index.html battinfo.pdf; then
-    git commit -m "Update BattINFO reference documentation"
+if git add index.html battinfo.pdf ${PUBLISH_ONTOLOGIES_DIR}; then
+    git commit -m "Update BattINFO documentation & ontologies"
     git push origin gh-pages
 fi

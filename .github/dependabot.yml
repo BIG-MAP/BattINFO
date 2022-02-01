@@ -1,9 +1,20 @@
 version: 2
 updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: monday
+    time: "05:00"
+  # Should be bigger than or equal to the total number of dependencies (currently 2)
+  open-pull-requests-limit: 5
+  target-branch: master
+  labels:
+  - "CI/CD"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: daily
   target-branch: master
   labels:
-      - "GitHub Actions"
+  - "CI/CD"
