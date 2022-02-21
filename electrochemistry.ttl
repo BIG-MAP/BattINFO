@@ -303,7 +303,16 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
 :EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           skos:prefLabel "Potentiometer"@en .
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=313-01-03" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "instrument intended to measure the value of a voltage."@en ;
+                                           skos:prefLabel "Voltmeter"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "instrument intended to measure the value of a voltage."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1375560e_dec2_491c_93ac_613a1d905008
@@ -317,6 +326,25 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An air electrode that is designed to perform both the oxygen reduction reaction (ORR) and the oxygen evolution reaction (OER)."@en ;
                                            skos:altLabel "BAE"@en ;
                                            skos:prefLabel "BifunctionalAirElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee
+:EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom :EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-08"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell containing an alkaline electrolyte."@en ;
+                                           skos:prefLabel "AlkalineElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell containing an alkaline electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_14d0358f_f65d_44f9_8b85_40b38f17c4ed
@@ -599,6 +627,17 @@ Aluminum foil"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3462e175_be41_430b_9a1e_c7bef5775ea3
+:EMMO_3462e175_be41_430b_9a1e_c7bef5775ea3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom :EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "a cell with a near-neutral electrolyte."@en ;
+                                           skos:prefLabel "NearNeutralElectrochemicalCell"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94
 :EMMO_3597a1e0_09ef_48ad_b913_b3e71ea21c94 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
@@ -623,6 +662,17 @@ Aluminum foil"""@en ;
    owl:annotatedTarget "Electrode of an electrochemical cell through which net electric current flows and at which the predominating electrochemical reaction is a reduction."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15
+:EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "an electrochemical cell with an aqueous electrolyte."@en ;
+                                           skos:prefLabel "AqueousElectrochemicalCell"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3663991d-9319-4f7a-922b-f0e428b58801
@@ -694,6 +744,17 @@ Aluminum foil"""@en ;
 :EMMO_402598d9_0eea_405d_b0d0_3b8b79deba6f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0a0de817_addc_46a5_8ba2_255d48cdf366 ;
                                            skos:prefLabel "InterphaseGrowth"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_43a06daa_3644_429c_953c_4ee49aaf570a
+:EMMO_43a06daa_3644_429c_953c_4ee49aaf570a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom :EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell containing an acid electrolyte."@en ;
+                                           skos:prefLabel "AcidicElectrochemicalCell"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_444992e5_43f8_44a1_9767_b408dbe54330
@@ -843,7 +904,7 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325
 :EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           rdfs:subClassOf :EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-12" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry based on measurement of an electrode potential."@en ;
                                            skos:prefLabel "Potentiometry"@en .
@@ -1009,7 +1070,7 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41
 :EMMO_63fe114f_5803_4f2a_8d07_93d3be380e41 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           rdfs:subClassOf :EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-13" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry in which the electric charge consumed or produced is measured and used to derive the amount-of-substance transformed."@en ;
                                            skos:prefLabel "Coulometry"@en .
@@ -1277,7 +1338,7 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43
 :EMMO_7755ea90_ffeb_4d2e_8833_9e01b3daaf43 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           rdfs:subClassOf :EMMO_158ae038_c64b_4cc0_aa56_650475490705 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-04-11" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "method of electroanalytical chemistry in which the electric current resulting from the application of an electric potential at an electrode is measured."@en ;
                                            skos:prefLabel "Voltammetry"@en .
@@ -1507,6 +1568,25 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A gas diffusion electrode in which the gas is air."@en ;
                                            rdfs:comment "The reaction occuring in an air electrode is typically the oxygen reduction reaction (ORR)."@en ;
                                            skos:prefLabel "AirElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d
+:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom :EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-10"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell with a liquid electrolyte containing neither water nor other sources of reactive protons (H+)."@en ;
+                                           skos:prefLabel "NonAqueousElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell with a liquid electrolyte containing neither water nor other sources of reactive protons (H+)."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_8c71739c_27c1_4d19_a0ff_02545296af43
@@ -1838,14 +1918,14 @@ Conducting Additive"""@en ;
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
 :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Measuring instrument [VIM 3.1] for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode."@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Measuring instrument for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Potentiostat"@en ;
                                            skos:prefLabel "Potentiostat"@en .
 
 [ rdf:type owl:Axiom ;
    owl:annotatedSource :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6 ;
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "Measuring instrument [VIM 3.1] for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode."@en ;
+   owl:annotatedTarget "Measuring instrument for electric current that controls the potential difference between a working electrode and a reference electrode and measures the electric current between a working electrode and an auxiliary electrode."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
 
@@ -2619,7 +2699,7 @@ of other configurations are used."""@en ;
 :EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Voltmeter"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Measuring instrument [VIM 3.1] to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration."@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Measuring instrument to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Voltameter"@en ;
                                            rdfs:comment "Modern instruments for measuring trace water by Karl Fischer titration use the passage of a measured charge to produce iodine from iodide solution. They are known as Karl Fischer coulometers"@en ,
                                                         "The silver coulometer is a primary reference measurement procedure [VIM 2.8] for charge and current. By weighing the mass of silver deposited in a known time at constant current, the charge and current are calculated from Faraday’s laws of electrolysis"@en ;
@@ -2629,7 +2709,7 @@ of other configurations are used."""@en ;
 [ rdf:type owl:Axiom ;
    owl:annotatedSource :EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940 ;
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "Measuring instrument [VIM 3.1] to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration."@en ;
+   owl:annotatedTarget "Measuring instrument to obtain the electrical charge passed in an experiment, or to produce a known amount of substance in a titration."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
 
@@ -2669,75 +2749,298 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "NernstEquation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee
-:EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 ,
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc
+:EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
-                                                             owl:someValuesFrom :EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
                                                            ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-08"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell containing an alkaline electrolyte."@en ;
-                                           skos:prefLabel "AlkalineElectrochemicalCell"@en .
+                                           owl:disjointWith :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ;
+                                           skos:altLabel "ElectrochemicalDischarging"@en ;
+                                           skos:prefLabel "Discharging" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_0838f0b6_ca9a_4f76_9770_ca964617bf1b
+:EMMO_0838f0b6_ca9a_4f76_9770_ca964617bf1b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
+                                                           ] ;
+                                           skos:altLabel "IntermittentCurrentInterruptionMethod"@en ;
+                                           skos:prefLabel "ICI"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_0cc8f231_0ce5_467e_9c76_29b2c80349ad
+:EMMO_0cc8f231_0ce5_467e_9c76_29b2c80349ad rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+                                                           ] ;
+                                           skos:altLabel "CCCV"@en ;
+                                           skos:prefLabel "ConstantCurrentConstantVoltageCharging"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_11895d59_3f97_4bad_badf_1a90f2347c2a
+:EMMO_11895d59_3f97_4bad_badf_1a90f2347c2a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
+                                                           ] ;
+                                           skos:altLabel "GalvanostaticIntermittentTitrationTechnique"@en ;
+                                           skos:prefLabel "GITT"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_158ae038_c64b_4cc0_aa56_650475490705
+:EMMO_158ae038_c64b_4cc0_aa56_650475490705 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f
+                                                           ] ;
+                                           skos:prefLabel "ElectricCurrentMeasurement"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6
+:EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
+                                                           ] ;
+                                           owl:disjointWith :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f ;
+                                           skos:altLabel "FloatCharging"@en ,
+                                                         "PotentiostaticCharging"@en ;
+                                           skos:prefLabel "ConstantVoltageCharging"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6
+:EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialMeasuringSystem"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
+:EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_22725105_c941_4b14_a4a2_fcb627958607
+                                                           ] ;
+                                           owl:disjointWith :EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e ;
+                                           skos:altLabel "GalvanostaticDischarging"@en ;
+                                           skos:prefLabel "ConstantCurrentDischarging"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026
+:EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_fd689787_31b0_41cf_bf03_0d69af76469d ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d
+:EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialMeasurement"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_825a749f_dd07_46fb_947c_db286440911e
+:EMMO_825a749f_dd07_46fb_947c_db286440911e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ;
+                                           skos:altLabel "ElectrochemicalCellVoltageMeasurement"@en ;
+                                           skos:prefLabel "CellVoltageMeasurement"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+:EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_22725105_c941_4b14_a4a2_fcb627958607
+                                                           ] ;
+                                           skos:altLabel "GalvanostaticCharging"@en ;
+                                           skos:prefLabel "ConstantCurrentCharging"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e
+:EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
+                                                           ] ;
+                                           skos:altLabel "PotentiostaticDischarging"@en ;
+                                           skos:prefLabel "ConstantVoltageDischarging"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4
+:EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_fd689787_31b0_41cf_bf03_0d69af76469d ;
+                                                             owl:someValuesFrom emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88
+                                                           ] ;
+                                           skos:prefLabel "ElectricCurrentMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f
+:EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-05-27" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "operation during which a secondary cell or battery is supplied with electric energy from an external circuit which results in chemical changes within the cell and thus the storage of energy as chemical energy."@en ;
+                                           skos:altLabel "ElectrochemicalCharging"@en ;
+                                           skos:prefLabel "Charging"@en .
 
 [ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee ;
+   owl:annotatedSource :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ;
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "cell containing an alkaline electrolyte."@en ;
+   owl:annotatedTarget "operation during which a secondary cell or battery is supplied with electric energy from an external circuit which results in chemical changes within the cell and thus the storage of energy as chemical energy."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_3462e175_be41_430b_9a1e_c7bef5775ea3
-:EMMO_3462e175_be41_430b_9a1e_c7bef5775ea3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 ,
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_bea04148_10d9_4eda_9cd5_8f609d7e9ff8
+:EMMO_bea04148_10d9_4eda_9cd5_8f609d7e9ff8 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "TemperatureMeasurement"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
+:EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
-                                                             owl:someValuesFrom :EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "a cell with a near-neutral electrolyte."@en ;
-                                           skos:prefLabel "NearNeutralElectrochemicalCell"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15
-:EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
-                                                             owl:someValuesFrom :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "an electrochemical cell with an aqueous electrolyte."@en ;
-                                           skos:prefLabel "AqueousElectrochemicalCell"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_43a06daa_3644_429c_953c_4ee49aaf570a
-:EMMO_43a06daa_3644_429c_953c_4ee49aaf570a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_35cccde9_cb14_4b26_a324_aec97c4f9a15 ,
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
+                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
-                                                             owl:someValuesFrom :EMMO_6592d8cc_4ce4_42ca_b010_6bfc4a8444d2
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell containing an acid electrolyte."@en ;
-                                           skos:prefLabel "AcidicElectrochemicalCell"@en .
+                                           skos:altLabel "OCVHold"@en ;
+                                           skos:prefLabel "OpenCircuitVoltageHold"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d
-:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
+:EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_158ae038_c64b_4cc0_aa56_650475490705 ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
-                                                             owl:someValuesFrom :EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
                                                            ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-10"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell with a liquid electrolyte containing neither water nor other sources of reactive protons (H+)."@en ;
-                                           skos:prefLabel "NonAqueousElectrochemicalCell"@en .
+                                           skos:prefLabel "CellCurrentMeasurement"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69
+:EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-05-28" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "set of operations that is carried out on a secondary cell or battery and is repeated regularly in the same sequence."@en ;
+                                           skos:altLabel "ElectrochemicalCycling"@en ;
+                                           skos:prefLabel "Cycling"@en .
 
 [ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ;
+   owl:annotatedSource :EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69 ;
    owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "cell with a liquid electrolyte containing neither water nor other sources of reactive protons (H+)."@en ;
+   owl:annotatedTarget "set of operations that is carried out on a secondary cell or battery and is repeated regularly in the same sequence."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f
+:EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940
+                                                           ] ;
+                                           skos:prefLabel "ElectricCurrentMeasuringSystem"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

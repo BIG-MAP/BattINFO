@@ -61,6 +61,14 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            rdfs:subPropertyOf rdfs:isDefinedBy .
 
 
+###  http://emmo.info/emmo#EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844
+:EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 rdf:type owl:AnnotationProperty ;
+                                           rdfs:comment "URL to corresponding PubChem entry."@en ;
+                                           rdfs:seeAlso "https://pubchem.ncbi.nlm.nih.gov/" ;
+                                           skos:prefLabel "pubchemReference"@en ;
+                                           rdfs:subPropertyOf rdfs:seeAlso .
+
+
 ###  http://emmo.info/emmo#EMMO_63c041f0_4a46_4bc2_8cd7_5efebe4aa587
 :EMMO_63c041f0_4a46_4bc2_8cd7_5efebe4aa587 rdf:type owl:AnnotationProperty ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A unique seven-digit identifier that was assigned to substances for regulatory purposes within the European Union by the European Commission."@en ;
@@ -106,6 +114,12 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
 
 
+###  http://emmo.info/emmo#EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6
+:EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 rdf:type owl:AnnotationProperty ;
+                                           skos:prefLabel "iupacName"@en ;
+                                           rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
+
+
 ###  http://emmo.info/emmo#EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f
 :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f rdf:type owl:AnnotationProperty ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/PubChem"@en ;
@@ -135,6 +149,12 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
 
 ###  http://emmo.info/emmo#EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a
 :EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a rdfs:subPropertyOf rdfs:comment .
+
+
+###  http://emmo.info/emmo#EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac
+:EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac rdf:type owl:AnnotationProperty ;
+                                           skos:prefLabel "molecularFormula"@en ;
+                                           rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
 
 
 ###  http://emmo.info/emmo#EMMO_bcd90da9_b7ba_4aa1_9382_6f63c8a18461
@@ -193,26 +213,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                rdfs:subPropertyOf rdfs:label .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844
-:EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 rdf:type owl:AnnotationProperty ;
-                                           rdfs:comment "URL to corresponding PubChem entry."@en ;
-                                           rdfs:seeAlso "https://pubchem.ncbi.nlm.nih.gov/" ;
-                                           skos:prefLabel "pubchemReference"@en ;
-                                           rdfs:subPropertyOf rdfs:seeAlso .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6
-:EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 rdf:type owl:AnnotationProperty ;
-                                           skos:prefLabel "iupacName"@en ;
-                                           rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac
-:EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac rdf:type owl:AnnotationProperty ;
-                                           skos:prefLabel "molecularFormula"@en ;
-                                           rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
-
-
 #################################################################
 #    Object Properties
 #################################################################
@@ -221,6 +221,22 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_0dd68b90_c27e_41dd_8fd0_5c9e9ca5563b rdf:type owl:ObjectProperty ;
                                            rdfs:subPropertyOf :EMMO_5ceab41b_2aea_4041_9e9c_a243f7562cee ;
                                            skos:prefLabel "hasMaterial"@en .
+
+
+###  http://emmo.info/emmo#EMMO_11d42c64_1da1_4481_9c06_ae6bcbcef671
+:EMMO_11d42c64_1da1_4481_9c06_ae6bcbcef671 rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
+                                           rdfs:domain :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
+                                           rdfs:range :EMMO_59b3d6ee_7e5e_42d8_9b57_0d39b10d59db ;
+                                           skos:prefLabel "hasSolvent"@en .
+
+
+###  http://emmo.info/emmo#EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3
+:EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
+                                           rdfs:domain :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
+                                           rdfs:range :EMMO_3f5ed462_8988_4db1_8701_545e20328930 ;
+                                           skos:prefLabel "hasSolute"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_153f5dc9_aebc_42d1_a226_9f4f30212686
@@ -285,22 +301,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            rdfs:subPropertyOf :EMMO_e1097637_70d2_4895_973f_2396f04fa204 ;
                                            rdfs:range :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
                                            skos:prefLabel "hasNominalProperty"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_11d42c64_1da1_4481_9c06_ae6bcbcef671
-:EMMO_11d42c64_1da1_4481_9c06_ae6bcbcef671 rdf:type owl:ObjectProperty ;
-                                           rdfs:subPropertyOf :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
-                                           rdfs:domain :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
-                                           rdfs:range :EMMO_59b3d6ee_7e5e_42d8_9b57_0d39b10d59db ;
-                                           skos:prefLabel "hasSolvent"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3
-:EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 rdf:type owl:ObjectProperty ;
-                                           rdfs:subPropertyOf :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
-                                           rdfs:domain :EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe ;
-                                           rdfs:range :EMMO_3f5ed462_8988_4db1_8701_545e20328930 ;
-                                           skos:prefLabel "hasSolute"@en .
 
 
 #################################################################
@@ -402,6 +402,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 :EMMO_0466becd_3e08_436f_8412_e2eedbedfd39 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5bc88245_45a1_4163_b640_f8320cc780de ;
                                            skos:prefLabel "ChemicalSpeciesFluxTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_06156ae2_e0db_4c22_a013_5858946c8222
+:EMMO_06156ae2_e0db_4c22_a013_5858946c8222 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O=[Mn]=O" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Manganese-dioxide" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "dioxomanganese" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 14801 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO2" ;
+                                           skos:prefLabel "ManganeseDioxideMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e
@@ -523,11 +544,11 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[HH]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 783 ;
-                                           skos:prefLabel "HydrogenMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Hydrogen" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "molecular hydrogen" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "H2" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 783 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "H2" ;
+                                           skos:prefLabel "HydrogenMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_0ab4306c_ba36_4a6e_941e_474ed04e8ccf
@@ -647,6 +668,27 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "EntropyPerAmountDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_12227b8b_13f8_43cf_858a_db1f86ea3de5
+:EMMO_12227b8b_13f8_43cf_858a_db1f86ea3de5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_b92900ac-69b2-5a63-a9d5-4984ae20905a>
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "Cl[Zn]Cl" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/ZINC-chloride" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "dichlorozinc" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 5727 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "ZnCl2" ;
+                                           skos:prefLabel "ZincChlorideMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_125e1f48_1312_4dc4_b533_c3a4b6052a76
@@ -1033,11 +1075,11 @@ Eij = δij"""@en ;
                                                              owl:hasValue 2
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Zn+2]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 32051 ;
-                                           skos:prefLabel "ZincIon"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/ZINC-ion" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "zinc(2+)" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Zn(II)" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 32051 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Zn(II)" ;
+                                           skos:prefLabel "ZincIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_1b1557fe_f389_4e4e_8369_a61d74796812
@@ -1146,11 +1188,11 @@ Eij = δij"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Zn]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23994 ;
-                                           skos:prefLabel "ZincMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/zinc" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "zinc" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Zn" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23994 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Zn" ;
+                                           skos:prefLabel "ZincMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_23683780_ffda_447e_a40e_db0b0f96c6eb
@@ -1484,11 +1526,11 @@ Eij = δij"""@en ;
                                                              owl:hasValue 1
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Li+]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 28486 ;
-                                           skos:prefLabel "LithiumIon"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Lithium-ion" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "lithium(1+)" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Li+" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 28486 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Li+" ;
+                                           skos:prefLabel "LithiumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12
@@ -2163,6 +2205,27 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "ZincMaterial"@en .
 
 
+###  http://emmo.info/emmo#EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337
+:EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "3"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "N" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Ammonia" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "azane" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 222 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "NH3" ;
+                                           skos:prefLabel "AmmoniaMolecule"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_43b349fc_c7ed_480d_b0ca_9db84b700813
 :EMMO_43b349fc_c7ed_480d_b0ca_9db84b700813 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -2261,11 +2324,37 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O=O" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 977 ;
-                                           skos:prefLabel "OxygenMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Oxygen" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "molecular oxygen" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "O2" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 977 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "O2" ;
+                                           skos:prefLabel "OxygenMolecule"@en .
+
+
+###  http://emmo.info/emmo#EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21
+:EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_b92900ac-69b2-5a63-a9d5-4984ae20905a>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[NH4+].[Cl-]" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Ammonium-chloride" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "azanium;chloride" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 25517 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "NH4Cl" ;
+                                           skos:prefLabel "AmmoniumChlorideMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_46406907_9afd_424e_934a_a523f9f9cc36
@@ -2553,6 +2642,27 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b
+:EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 2
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Mn]" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Mn" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "manganese" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23930 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Mn(II)" ;
+                                           skos:prefLabel "ManganeseTwoIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_51e72318_0e25_42e8_b066_42aa69dc6e5e
 :EMMO_51e72318_0e25_42e8_b066_42aa69dc6e5e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9 ,
@@ -2787,10 +2897,6 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 
 ###  http://emmo.info/emmo#EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676
 :EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676 rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_11d42c64_1da1_4481_9c06_ae6bcbcef671 ;
                                                              owl:someValuesFrom :EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c
                                                            ] ,
@@ -2801,6 +2907,10 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 ;
                                                              owl:someValuesFrom :EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_80fe82d4_f4c1_43a1_98dc_ee5fc7927e19
                                                            ] .
 
 
@@ -2845,11 +2955,11 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_3bb84fc5-5cb4-5250-ba87-169ae90ec6d7>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Li]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 3028194 ;
-                                           skos:prefLabel "LithiumMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Lithium" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "lithium" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Li" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 3028194 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Li" ;
+                                           skos:prefLabel "LithiumMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_6110af0a_bc82_4c9e_aa4b_b45d08d9c9e0
@@ -2919,6 +3029,25 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "ModulusOfElasticity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
+:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ,
+                                                           :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_153f5dc9_aebc_42d1_a226_9f4f30212686 ;
+                                                             owl:someValuesFrom :EMMO_6077b877_8e26_4e07_b559_1869f5346b59
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_8b3a3647_44cf_4bdd_b6ce_9bc9da168012 ;
+                                                             owl:someValuesFrom :EMMO_abb46b94_0f24_4944_97e2_9e61965f4485
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
+                                                             owl:someValuesFrom :EMMO_8f0cb3b9_f29e_4a4b_905a_3b5a012466ec
+                                                           ] ;
+                                           skos:prefLabel "LithiumCobaltOxideMaterial"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_64420439_5282_4996_b6e1_2044358ac899
 :EMMO_64420439_5282_4996_b6e1_2044358ac899 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_af794e9d_dc7d_4756_83e1_2cd0e2ec864e ,
@@ -2934,6 +3063,23 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 :EMMO_644b10c5_8948_453e_a440_19c0509d4b5e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_04cf0295_3e8f_4693_a87f_3130d125cf05 ;
                                            skos:prefLabel "ConventionalWeight"@en .
+
+
+###  http://emmo.info/emmo#EMMO_648295d4_7c5a_4aaa_8347_e612dc133d00
+:EMMO_648295d4_7c5a_4aaa_8347_e612dc133d00 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_b92900ac-69b2-5a63-a9d5-4984ae20905a>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue -1
+                                                           ] ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Chloride-ion" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 312 ;
+                                           skos:prefLabel "ChlorideIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_650e024e_95cd_44a4_82f6_956387eb8a57
@@ -4230,11 +4376,11 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 962 ;
-                                           skos:prefLabel "WaterMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Water" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "oxidane" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "H2O" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 962 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "H2O" ;
+                                           skos:prefLabel "WaterMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_94857660_8739_4270_99a7_c388933fa17d
@@ -4375,10 +4521,10 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
                                                              owl:hasValue 1
                                                            ] ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Proton" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 5460653 ;
                                            skos:altLabel "H+" ;
-                                           skos:prefLabel "Proton"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Proton" .
+                                           skos:prefLabel "Proton"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_98e27347_42ca_4613_98c9_c573f199a50e
@@ -4391,6 +4537,32 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 :EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a293f923_954c_4af5_9f97_9600ebd362cb ;
                                            skos:prefLabel "ReactionQuotient"@en .
+
+
+###  http://emmo.info/emmo#EMMO_9a937ec4_0037_44ef_b734_965250c54186
+:EMMO_9a937ec4_0037_44ef_b734_965250c54186 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue -1
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[O-][Mn](=O)(=O)=O" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Permanganate" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "permanganate" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 24401 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO4-" ;
+                                           skos:prefLabel "PermanganateIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_9bc6da11_528a_44e8_bd9e_c4154eae7e55
@@ -4441,6 +4613,29 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 
 -- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
                                            skos:prefLabel "QuasiStaticProcess"@en .
+
+
+###  http://emmo.info/emmo#EMMO_9dc63b2d_08ff_41c8_9a94_f11feeec5c85
+:EMMO_9dc63b2d_08ff_41c8_9a94_f11feeec5c85 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 1
+                                                           ] ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Ammonium-ion" ;
+                                           :EMMO_a3ead06e_020f_4500_8251_80741a7ab7b6 223 ;
+                                           skos:altLabel "NH4+" ;
+                                           skos:prefLabel "AmmoniumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_9e0891a6_4d87_4891_b557_69ab2bae1dae
@@ -4519,8 +4714,8 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:qualifiedCardinality "6"^^xsd:nonNegativeInteger ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_0056cc2f-f2fe-558e-a65c-9a8fc5cea333>
                                                            ] ;
-                                           skos:prefLabel "LithiumGraphiteMolecule"@en ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "LiC6" .
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "LiC6" ;
+                                           skos:prefLabel "LithiumGraphiteMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_a0c4322d_4de2_4770_991c_5fad4e6ec25b
@@ -4671,11 +4866,11 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "N#N" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 947 ;
-                                           skos:prefLabel "NitrogenMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Nitrogen" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "molecular nitrogen" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "N2" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 947 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "N2" ;
+                                           skos:prefLabel "NitrogenMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_a43cb01a_beb0_46e1_ae6d_22236222e6a1
@@ -5713,13 +5908,13 @@ Q=qT"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Li+].[O-][Co]=O" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23670860 ;
-                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Lithium_cobalt_oxide"@en ;
-                                           skos:altLabel "LithiumCobalt(III)Oxide"@en ;
-                                           skos:prefLabel "LithiumCobaltOxideMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Lithium-cobalt_III_-oxide" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "lithium;oxido(oxo)cobalt" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "LiCoO2" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23670860 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "LiCoO2" ;
+                                           :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Lithium_cobalt_oxide"@en ;
+                                           skos:altLabel "LithiumCobalt(III)Oxide"@en ;
+                                           skos:prefLabel "LithiumCobaltOxideMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab
@@ -5849,6 +6044,27 @@ Q=qT"""@en ;
                                            rdfs:subClassOf :EMMO_ba4137a3_e467_4925_9bf7_3084ed733ac5 ;
                                            skos:altLabel "ChargeSourceEquation"@en ;
                                            skos:prefLabel "ChargeSourceTerm"@en .
+
+
+###  http://emmo.info/emmo#EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53
+:EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 3
+                                                           ] ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Mn+3]" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Manganese_3" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "manganese(3+)" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 105130 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Mn(III)" ;
+                                           skos:prefLabel "ManganeseThreeIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_d5c1857a_46bb_4826_92c8_44a37d6ec230
@@ -5985,6 +6201,16 @@ Q=qT"""@en ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-14" ;
                                            skos:prefLabel "GrueneisenParamter"@en .
+
+
+###  http://emmo.info/emmo#EMMO_dc33cea5_fe7f_4ad0_8aed_0bf92eee5df6
+:EMMO_dc33cea5_fe7f_4ad0_8aed_0bf92eee5df6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
+                                                             owl:someValuesFrom :EMMO_06156ae2_e0db_4c22_a013_5858946c8222
+                                                           ] ;
+                                           skos:prefLabel "ManganeseDioxideMaterial"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_dc467621_3b49_4f31_9b09_82290f29da52
@@ -6608,6 +6834,18 @@ Q=qT"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00
+:EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ;
+                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O[Mn](=O)[O-]" ;
+                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/hydroxy-oxido-oxomanganese" ;
+                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "hydroxy-oxido-oxomanganese" ;
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 164808 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO(OH)" ;
+                                           skos:altLabel "HydroxyOxidoOxoManganeseMolecule"@en ;
+                                           skos:prefLabel "ManganiteMolecule"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_f14ae884_9345_4de4_a322_362329517e3e
 :EMMO_f14ae884_9345_4de4_a322_362329517e3e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -6665,11 +6903,11 @@ Q=qT"""@en ;
                                                              owl:hasValue -1
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[OH-]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 961 ;
-                                           skos:prefLabel "HydroxideIon"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Hydroxide" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "hydroxide" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "HO-" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 961 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "HO-" ;
+                                           skos:prefLabel "HydroxideIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_f25f8eff_9570_4ecb_be51_64f1e6dd4ca2
@@ -6846,11 +7084,11 @@ Q=qT"""@en ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
                                                            ] ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "C(=O)=O" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 280 ;
-                                           skos:prefLabel "CarbonDioxideMolecule"@en ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Carbon-dioxide" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "carbon dioxide" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "CO2" .
+                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 280 ;
+                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "CO2" ;
+                                           skos:prefLabel "CarbonDioxideMolecule"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_fd4a6307_f9f7_4b54_b044_caa04e620232
@@ -6974,242 +7212,14 @@ Q=qT"""@en ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_06156ae2_e0db_4c22_a013_5858946c8222
-:EMMO_06156ae2_e0db_4c22_a013_5858946c8222 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O=[Mn]=O" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 14801 ;
-                                           skos:prefLabel "ManganeseDioxideMolecule"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Manganese-dioxide" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "dioxomanganese" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO2" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_12227b8b_13f8_43cf_858a_db1f86ea3de5
-:EMMO_12227b8b_13f8_43cf_858a_db1f86ea3de5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_f4fee945-1d4a-5158-b0ca-eaef9ad40502>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_b92900ac-69b2-5a63-a9d5-4984ae20905a>
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "Cl[Zn]Cl" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 5727 ;
-                                           skos:prefLabel "ZincChlorideMolecule"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/ZINC-chloride" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "dichlorozinc" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "ZnCl2" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337
-:EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "3"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "N" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 222 ;
-                                           skos:prefLabel "AmmoniaMolecule"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Ammonia" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "azane" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "NH3" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21
-:EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_b92900ac-69b2-5a63-a9d5-4984ae20905a>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[NH4+].[Cl-]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 25517 ;
-                                           skos:prefLabel "AmmoniumChlorideMolecule"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Ammonium-chloride" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "azanium;chloride" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "NH4Cl" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b
-:EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
-                                                             owl:hasValue 2
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Mn]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23930 ;
-                                           skos:prefLabel "ManganeseTwoIon"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Mn" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "manganese" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Mn(II)" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
-:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ,
-                                                           :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_153f5dc9_aebc_42d1_a226_9f4f30212686 ;
-                                                             owl:someValuesFrom :EMMO_6077b877_8e26_4e07_b559_1869f5346b59
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_8b3a3647_44cf_4bdd_b6ce_9bc9da168012 ;
-                                                             owl:someValuesFrom :EMMO_abb46b94_0f24_4944_97e2_9e61965f4485
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
-                                                             owl:someValuesFrom :EMMO_8f0cb3b9_f29e_4a4b_905a_3b5a012466ec
-                                                           ] ;
-                                           skos:prefLabel "LithiumCobaltOxideMaterial"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_648295d4_7c5a_4aaa_8347_e612dc133d00
-:EMMO_648295d4_7c5a_4aaa_8347_e612dc133d00 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_b92900ac-69b2-5a63-a9d5-4984ae20905a>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
-                                                             owl:hasValue -1
-                                                           ] ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 312 ;
-                                           skos:prefLabel "ChlorideIon"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Chloride-ion" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9a937ec4_0037_44ef_b734_965250c54186
-:EMMO_9a937ec4_0037_44ef_b734_965250c54186 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
-                                                             owl:hasValue -1
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[O-][Mn](=O)(=O)=O" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 24401 ;
-                                           skos:prefLabel "PermanganateIon"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Permanganate" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "permanganate" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO4-" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_9dc63b2d_08ff_41c8_9a94_f11feeec5c85
-:EMMO_9dc63b2d_08ff_41c8_9a94_f11feeec5c85 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_252f143a-2c00-5d9a-a551-c07daa22c5c0>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_5a4790e5-b11b-5a0c-80e4-81515c27a560>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
-                                                             owl:hasValue 1
-                                                           ] ;
-                                           :EMMO_a3ead06e_020f_4500_8251_80741a7ab7b6 223 ;
-                                           skos:altLabel "NH4+" ;
-                                           skos:prefLabel "AmmoniumIon"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Ammonium-ion" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53
-:EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
-                                                             owl:hasValue 3
-                                                           ] ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "[Mn+3]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 105130 ;
-                                           skos:prefLabel "ManganeseThreeIon"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/Manganese_3" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "manganese(3+)" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Mn(III)" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_dc33cea5_fe7f_4ad0_8aed_0bf92eee5df6
-:EMMO_dc33cea5_fe7f_4ad0_8aed_0bf92eee5df6 rdf:type owl:Class ;
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e4b5d63f_17ee_4751_bcd2_b47423ed6318
+:EMMO_e4b5d63f_17ee_4751_bcd2_b47423ed6318 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
-                                                             owl:someValuesFrom :EMMO_06156ae2_e0db_4c22_a013_5858946c8222
+                                                             owl:someValuesFrom :EMMO_edd129dd_a036_4091_9fab_2dd125256450
                                                            ] ;
-                                           skos:prefLabel "ManganeseDioxideMaterial"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00
-:EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ;
-                                           :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O[Mn](=O)[O-]" ;
-                                           :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 164808 ;
-                                           skos:altLabel "HydroxyOxidoOxoManganeseMolecule"@en ;
-                                           skos:prefLabel "ManganiteMolecule"@en ;
-                                           :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/hydroxy-oxido-oxomanganese" ;
-                                           :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "hydroxy-oxido-oxomanganese" ;
-                                           :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO(OH)" .
+                                           skos:prefLabel "SaltMaterial"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

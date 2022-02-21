@@ -420,32 +420,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_565deb3e_2c58_4aa7_9716_91662d788f7f
-:EMMO_565deb3e_2c58_4aa7_9716_91662d788f7f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:someValuesFrom :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "secondary battery with an organic solvent electrolyte and positive and negative electrodes which utilize an intercalation compound in which lithium is stored."@en ;
-                                           rdfs:comment "A lithium ion battery does not contain lithium metal."@en ;
-                                           skos:prefLabel "LithiumIonBatteryCell"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_565deb3e_2c58_4aa7_9716_91662d788f7f ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "secondary battery with an organic solvent electrolyte and positive and negative electrodes which utilize an intercalation compound in which lithium is stored."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_565deb3e_2c58_4aa7_9716_91662d788f7f ;
-   owl:annotatedProperty rdfs:comment ;
-   owl:annotatedTarget "A lithium ion battery does not contain lithium metal."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
 :EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
@@ -628,6 +602,11 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
                                                              owl:someValuesFrom emmo:EMMO_dc33cea5_fe7f_4ad0_8aed_0bf92eee5df6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_4292831f_dcea_498a_bcb4_4a93f4a09dbf
                                                            ] ;
                                            skos:prefLabel "ManganeseDioxideElectrode"@en .
 
@@ -991,7 +970,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_c7912e9e_7daa_4fea_80a9_35d1b0197eaa
 :EMMO_c7912e9e_7daa_4fea_80a9_35d1b0197eaa rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                           rdfs:subClassOf :EMMO_4292831f_dcea_498a_bcb4_4a93f4a09dbf ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -1012,8 +991,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                              owl:onClass emmo:EMMO_8f87e700_99a8_4427_8ffb_e493de05c217
                                                            ] ;
-                                           rdfs:comment "2MnO2 + 2H^+ + 2e^- --> 2MnO(OH)" ;
-                                           skos:altLabel "ManganeseDioxideReductionReaction"@en ;
+                                           rdfs:comment "MnO2 + H^+ + e^- --> MnO(OH)" ;
                                            skos:prefLabel "MnO2_H_e__MnOOH" .
 
 
@@ -1313,6 +1291,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
    owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing iron disulphide and a negative electrode of lithium."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#EMMO_4292831f_dcea_498a_bcb4_4a93f4a09dbf
+:EMMO_4292831f_dcea_498a_bcb4_4a93f4a09dbf rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
+                                           skos:prefLabel "ManganeseDioxideReductionReaction"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
