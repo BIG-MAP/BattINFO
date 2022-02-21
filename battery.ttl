@@ -1014,7 +1014,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] ;
                                            rdfs:comment "2MnO2 + 2H^+ + 2e^- --> 2MnO(OH)" ;
                                            skos:altLabel "ManganeseDioxideReductionReaction"@en ;
-                                           skos:prefLabel "MnO2.H.e_MnOOH" .
+                                           skos:prefLabel "MnO2_H_e_MnOOH" .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
