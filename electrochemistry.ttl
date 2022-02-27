@@ -17,7 +17,7 @@
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
                                                                                  dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                                                                 owl:versionInfo "0.1.0" .
+                                                                                 owl:versionInfo "1.0.0" .
 
 #################################################################
 #    Annotation properties
@@ -33,6 +33,10 @@ dcterms:license rdf:type owl:AnnotationProperty .
 
 ###  http://www.w3.org/2004/02/skos/core#prefLabel
 skos:prefLabel rdf:type owl:AnnotationProperty .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed
+<https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed> rdf:type owl:AnnotationProperty .
 
 
 #################################################################
@@ -133,6 +137,20 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
                                            skos:prefLabel "ElectrolyteConstituent"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_048130e3_7448_4c06_b3b3_d039a848aae3
+:EMMO_048130e3_7448_4c06_b3b3_d039a848aae3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_761d64bb_b13a_438c_b2cf_972938904e5d ;
+                                           skos:altLabel "OER"@en ,
+                                                         "OxygenOxidationReaction"@en ;
+                                           skos:prefLabel "OxygenEvolutionReaction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0484fe63_7c3f_4559_8747_c8995def0a66
+:EMMO_0484fe63_7c3f_4559_8747_c8995def0a66 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5c67952c_c5f3_4251_bb02_c99a7f5aedd9 ;
+                                           skos:prefLabel "HydrogenOxidationReaction"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0508a114_544a_4f54_a7de_9b947fb4b618
 :EMMO_0508a114_544a_4f54_a7de_9b947fb4b618 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59 ;
@@ -151,6 +169,49 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc
+:EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
+                                                           ] ;
+                                           owl:disjointWith :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ;
+                                           skos:altLabel "ElectrochemicalDischarging"@en ;
+                                           skos:prefLabel "Discharging" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0838f0b6_ca9a_4f76_9770_ca964617bf1b
+:EMMO_0838f0b6_ca9a_4f76_9770_ca964617bf1b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
+                                                           ] ;
+                                           skos:altLabel "IntermittentCurrentInterruptionMethod"@en ;
+                                           skos:prefLabel "ICI"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0a0de817_addc_46a5_8ba2_255d48cdf366
 :EMMO_0a0de817_addc_46a5_8ba2_255d48cdf366 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
@@ -167,6 +228,21 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A device whose primary function is facilitating the conversion between chemical and electrical energy."@en ;
                                            skos:prefLabel "ElectrochemicalDevice"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0cc8f231_0ce5_467e_9c76_29b2c80349ad
+:EMMO_0cc8f231_0ce5_467e_9c76_29b2c80349ad rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+                                                           ] ;
+                                           skos:altLabel "CCCV"@en ;
+                                           skos:prefLabel "ConstantCurrentConstantVoltageCharging"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_0d9ba00d_04bc_4bdc_85af_3380694f6f68
@@ -273,6 +349,61 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_11895d59_3f97_4bad_badf_1a90f2347c2a
+:EMMO_11895d59_3f97_4bad_badf_1a90f2347c2a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
+                                                           ] ;
+                                           skos:altLabel "GalvanostaticIntermittentTitrationTechnique"@en ;
+                                           skos:prefLabel "GITT"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1222f718_4205_4907_a96f_7d332d00ddd7
+:EMMO_1222f718_4205_4907_a96f_7d332d00ddd7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_048130e3_7448_4c06_b3b3_d039a848aae3 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_31319ed7_0834_43c1_b6ca_73b7d3812441
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_98ec09ed_d4ad_472d_8174_54f81fef2b6e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_f1a3a8b0_f812_43f1_accd_947e904125e6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{H2O --> O2(g) + 4H+ + 4e-}" ;
+                                           skos:altLabel "AcidicFourElectronOxygenEvolutionReaction"@en ;
+                                           skos:prefLabel "TwoLiquidWaterYieldsOneGaseousOxygenAndFourAqueousProtonAndFourElectron"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1259d305_349a_4c91_9490_c494c12d1e2c
 :EMMO_1259d305_349a_4c91_9490_c494c12d1e2c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
@@ -360,6 +491,20 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
    owl:annotatedTarget "method of electroanalytical chemistry used to separate by electrolyse ions of a substance and to derive the amount of this substance from the increase in mass of an electrode."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_158ae038_c64b_4cc0_aa56_650475490705
+:EMMO_158ae038_c64b_4cc0_aa56_650475490705 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f
+                                                           ] ;
+                                           skos:prefLabel "ElectricCurrentMeasurement"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be
@@ -476,6 +621,13 @@ Aluminum foil"""@en ;
    owl:annotatedTarget "A good electron conductor support designed to transfer electrons from the external circuit to the active materials of the cell."@en ;
    dcterms:source "A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_213ac5da_3931_43a4_a1ce_fd0a8b42ae58
+:EMMO_213ac5da_3931_43a4_a1ce_fd0a8b42ae58 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrochemical reaction involving zinc."@en ;
+                                           skos:prefLabel "ZincElectrochemicalReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_22725105_c941_4b14_a4a2_fcb627958607
@@ -610,6 +762,69 @@ Aluminum foil"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_31187293_5f00_4a36_b469_e16a83652b09
+:EMMO_31187293_5f00_4a36_b469_e16a83652b09 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_761d64bb_b13a_438c_b2cf_972938904e5d ;
+                                           skos:altLabel "ORR"@en ;
+                                           skos:prefLabel "OxygenReductionReaction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_31319ed7_0834_43c1_b6ca_73b7d3812441
+:EMMO_31319ed7_0834_43c1_b6ca_73b7d3812441 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_31187293_5f00_4a36_b469_e16a83652b09 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_98ec09ed_d4ad_472d_8174_54f81fef2b6e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_f1a3a8b0_f812_43f1_accd_947e904125e6
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{O2(g) + 4H+ + 4e- --> 2H2O}" ;
+                                           skos:altLabel "AcidicFourElectronOxygenReductionReaction" ;
+                                           skos:prefLabel "OneGaseousOxygenAndFourAqueousProtonAndFourElectronYieldsTwoLiquidWater"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_32ab98e1_6d72_4a3b_9e4e_197cf7fdc714
+:EMMO_32ab98e1_6d72_4a3b_9e4e_197cf7fdc714 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3eec5411_c402_4d8e_b231_96a490516454 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_631f315a_4096_44e4_a30a_44d108c53756
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{2H2O+2e- ->H2(g)+2OH-}" ;
+                                           skos:altLabel "AlkalineHydrogenEvolutionReaction" ;
+                                           skos:prefLabel "TwoLiquidWaterAndTwoElectronYieldsOneGaseousHydrogenAndTwoAqueousHydroxideIon"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0
 :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
@@ -732,12 +947,42 @@ Aluminum foil"""@en ;
                                            skos:prefLabel "ElectrochemicalRelation"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6
+:EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
+                                                           ] ;
+                                           owl:disjointWith :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f ;
+                                           skos:altLabel "FloatCharging"@en ,
+                                                         "PotentiostaticCharging"@en ;
+                                           skos:prefLabel "ConstantVoltageCharging"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3eec5411_c402_4d8e_b231_96a490516454
+:EMMO_3eec5411_c402_4d8e_b231_96a490516454 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5c67952c_c5f3_4251_bb02_c99a7f5aedd9 ;
+                                           skos:altLabel "HER"@en ;
+                                           skos:prefLabel "HydrogenEvolutionReaction"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1
 :EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_79d1b273-58cd-4be6-a250-434817f7c261 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical material that can act as a host lattice in an electrochemical intercalation reaction."@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Graphite"@en ;
                                            skos:prefLabel "ElectrochemicalIntercalationMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6
+:EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialMeasuringSystem"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_402598d9_0eea_405d_b0d0_3b8b79deba6f
@@ -762,7 +1007,7 @@ Aluminum foil"""@en ;
                                            rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-27" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "phenomenon by which a cell or battery loses energy in other ways than by discharge into an external circuit."@en ;
-                                           rdfs:comment "See also ChargeRetention"@en ;
+                                           rdfs:seeAlso "ChargeRetention"@en ;
                                            skos:prefLabel "SelfDischarge"@en .
 
 [ rdf:type owl:Axiom ;
@@ -777,6 +1022,16 @@ Aluminum foil"""@en ;
 :EMMO_459688a8_0f36_4259_9fb2_98af08d7f9db rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_5eb09a10_1b4f_410f_9911_b3e3342d6017 ;
                                            skos:prefLabel "IntercalationStep"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4a21f141_64ff_4524_8c2c_93073ee9e364
+:EMMO_4a21f141_64ff_4524_8c2c_93073ee9e364 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_91ccf64e_9865_4543_824c_9546ccabf551 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_75f89f06_1c23_4e40_8654_403c21e5a66f
+                                                           ] ;
+                                           skos:prefLabel "LithiumPlatingReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4bc38e99_1978_4143_a766_fbb57f2cf46e
@@ -868,7 +1123,7 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5
 :EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                           rdfs:subClassOf :EMMO_048130e3_7448_4c06_b3b3_d039a848aae3 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
                                                              owl:someValuesFrom :EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854
@@ -876,12 +1131,12 @@ Aluminum foil"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_4639e0e4_5539_445a_8c7f_e27c2654bf41
+                                                             owl:onClass emmo:EMMO_98ec09ed_d4ad_472d_8174_54f81fef2b6e
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c
+                                                             owl:onClass emmo:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
@@ -891,15 +1146,15 @@ Aluminum foil"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
+                                                             owl:onClass emmo:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The OER is the back reaction of the ORR."@en ,
-                                                                                          "The OER usually requires a catalyst in practical electrodes."@en ,
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "4OH^- --> O2 + 2H2O + 4e^-" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The OER usually requires a catalyst in practical electrodes."@en ,
                                                                                           "The process of generating molecular oxygen (O2) by a chemical reaction, usually from water (H2O)."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_evolution"@en ;
-                                           rdfs:comment "4OH^- --> O2 + 2H2O + 4e^-" ;
-                                           skos:altLabel "OER"@en ;
-                                           skos:prefLabel "OxygenEvolutionReaction"@en .
+                                           skos:altLabel "AlkalineFourElectronOxygenEvolutionReaction"@en ,
+                                                         "OER"@en ;
+                                           skos:prefLabel "FourAqueousHydroxideIonYieldsOneGaseousOxygenAndTwoLiquidWaterAndFourElectron"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4f51db30_bed6_4b6e_86ae_191abbe6a325
@@ -924,6 +1179,18 @@ Aluminum foil"""@en ;
                                            skos:prefLabel "ElectrochemicalInterface"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
+:EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_22725105_c941_4b14_a4a2_fcb627958607
+                                                           ] ;
+                                           owl:disjointWith :EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e ;
+                                           skos:altLabel "GalvanostaticDischarging"@en ;
+                                           skos:prefLabel "ConstantCurrentDischarging"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5641910f_6e69_4ce4_be84_4b1bf14b8916
 :EMMO_5641910f_6e69_4ce4_be84_4b1bf14b8916 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
@@ -946,6 +1213,61 @@ Aluminum foil"""@en ;
                                            skos:prefLabel "FaradaysLawsOfElectrolysis"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_57f7ed5a_0b47_4f62_89c0_dd492b147db3
+:EMMO_57f7ed5a_0b47_4f62_89c0_dd492b147db3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_75f89f06_1c23_4e40_8654_403c21e5a66f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_ec2e5ffa_64cd_49db_ab49_90c49a231c4b
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Li(s) --> Li+(sln) + e-}" ;
+                                           skos:prefLabel "OneSolidLithiumYieldsOneNonAqueousLithiumIonAndOneElectron"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026
+:EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_fd689787_31b0_41cf_bf03_0d69af76469d ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_596ff637_06bd_43fd_a5d0_70856f8c6d6d
+:EMMO_596ff637_06bd_43fd_a5d0_70856f8c6d6d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_a3d185ff_1c28_4fe8_87dd_6316fccb454e ,
+                                                           :EMMO_80384f43_8818_42c6_9b1d_7747389a3554 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_9ed6d1e2_0930_4713_aa6d_fd97480f9c43
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{LiC6 --> Li+(sln) + e-}" ;
+                                           skos:prefLabel "OneSolidLithiumGraphiteYieldsOneNonAqueousLithiumIonAndOneSolidGraphiteAndOneElectron"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574
 :EMMO_598ae3d0_76e9_429c_a0e1_8694525cb574 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f19ff3b4_6bfe_4c41_a2b2_9affd39c140b ;
@@ -961,6 +1283,13 @@ Aluminum foil"""@en ;
                                            skos:prefLabel "MetalElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5c67952c_c5f3_4251_bb02_c99a7f5aedd9
+:EMMO_5c67952c_c5f3_4251_bb02_c99a7f5aedd9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical reaction involving hydrogen."@en ;
+                                           skos:prefLabel "HydrogenElectrochemicalReaction"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5cb5548f_f774_4668_ad02_f0742581f2f1
 :EMMO_5cb5548f_f774_4668_ad02_f0742581f2f1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ;
@@ -974,6 +1303,20 @@ Aluminum foil"""@en ;
    owl:annotatedTarget "Change of the mechanical stress at the surface separating two bodies due to the presence of electric charges at the interface."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d
+:EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026
+                                                           ] ;
+                                           skos:prefLabel "ElectricPotentialMeasurement"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98
@@ -1110,6 +1453,12 @@ Aluminum foil"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841
+:EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_91ccf64e_9865_4543_824c_9546ccabf551 ;
+                                           skos:prefLabel "LithiumCobaltOxideReaction"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88
 :EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
@@ -1119,6 +1468,12 @@ Aluminum foil"""@en ;
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode at which the predominant electrochemical reaction is a conversion."@en ;
                                            skos:prefLabel "ConversionElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6731f325_dfb4_4dfb_b458_c30508f7e0b7
+:EMMO_6731f325_dfb4_4dfb_b458_c30508f7e0b7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_213ac5da_3931_43a4_a1ce_fd0a8b42ae58 ;
+                                           skos:prefLabel "ZincStrippingReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_68eb5e35_5bd8_47b1_9b7f_f67224fa291e
@@ -1171,7 +1526,7 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6d23c695_f016_48fe_bad5_a134d4b3cbec
 :EMMO_6d23c695_f016_48fe_bad5_a134d4b3cbec rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                           rdfs:subClassOf :EMMO_d8413c07_1c47_4450_ac05_e3350b4c7600 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
                                                              owl:someValuesFrom :EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
@@ -1179,20 +1534,21 @@ Aluminum foil"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
+                                                             owl:onClass emmo:EMMO_39a6962f_0af9_4ce5_89bf_a5cb767a15df
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
+                                                             owl:onClass emmo:EMMO_27825059_2c09_47f4_b927_35897c0238ea
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
                                                              owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Zn^{2+} + 2e^- --> Zn(s)"@en ;
-                                           skos:prefLabel "ZincReductionReaction"@en .
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Zn^{2+} + 2e- --> Zn(s)}"@en ;
+                                           skos:altLabel "AcidicZincPlatingReaction"@en ;
+                                           skos:prefLabel "OneAqueousZincIonAndTwoElectronYieldsOneSolidZinc"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_6e4f4681-f327-4300-96e4-5905fcea36e3
@@ -1306,6 +1662,19 @@ The reason for this is that combining the transitivity property of hasPart with 
                                            skos:prefLabel "IntercalationElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_75f89f06_1c23_4e40_8654_403c21e5a66f
+:EMMO_75f89f06_1c23_4e40_8654_403c21e5a66f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_91ccf64e_9865_4543_824c_9546ccabf551 ;
+                                           skos:prefLabel "LithiumStrippingReaction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_761d64bb_b13a_438c_b2cf_972938904e5d
+:EMMO_761d64bb_b13a_438c_b2cf_972938904e5d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrochemical reaction involving oxygen."@en ;
+                                           skos:prefLabel "OxygenElectrochemicalReaction"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7729c34e_1ae9_403d_b933_1765885e7f29
 :EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
@@ -1405,6 +1774,38 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "CompositeElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7b63e126_281c_4521_a62d_095d5f593051
+:EMMO_7b63e126_281c_4521_a62d_095d5f593051 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d8413c07_1c47_4450_ac05_e3350b4c7600 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_b7cc8365_6f5a_4524_9ee3_3ab8d66f2340
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_39a6962f_0af9_4ce5_89bf_a5cb767a15df
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_874ed64f_7343_4550_8207_d41e0a220925
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Zn(OH)4^{2-} + 2e- --> Zn(s) + 4OH-}"@en ;
+                                           skos:altLabel "AlkalineZincPlatingReaction"@en ;
+                                           skos:prefLabel "OneAqueousZincateIonAndTwoElectronYieldsOneSolidZincAndFourAqueousHydroxideIon"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917
 :EMMO_7f4d74cd_d0a5_4908_9da9_7629fe419917 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6c421175_477f_45e0_8b6c_c3464f5351c5 ,
@@ -1422,6 +1823,23 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
    owl:annotatedTarget "A second annular working electrode positioned concentric with a rotating disc electrode to make a rotating ring-disc electrode (RRDE)."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_80384f43_8818_42c6_9b1d_7747389a3554
+:EMMO_80384f43_8818_42c6_9b1d_7747389a3554 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_91ccf64e_9865_4543_824c_9546ccabf551 ;
+                                           skos:prefLabel "LithiumGraphiteReaction"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_825a749f_dd07_46fb_947c_db286440911e
+:EMMO_825a749f_dd07_46fb_947c_db286440911e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ;
+                                           skos:altLabel "ElectrochemicalCellVoltageMeasurement"@en ;
+                                           skos:prefLabel "CellVoltageMeasurement"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_82b66bfe_ec25_417b_ba65_b631ddaaca0e
@@ -1466,6 +1884,17 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Potential of a platinum electrode in 1 M acid solution."@en ;
                                            skos:altLabel "NHE"@en ;
                                            skos:prefLabel "NormalHydrogenElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
+:EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_22725105_c941_4b14_a4a2_fcb627958607
+                                                           ] ;
+                                           skos:altLabel "GalvanostaticCharging"@en ;
+                                           skos:prefLabel "ConstantCurrentCharging"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_865a40fc_2187_4549_a7e1_37aa2458448f
@@ -1604,6 +2033,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_91ccf64e_9865_4543_824c_9546ccabf551
+:EMMO_91ccf64e_9865_4543_824c_9546ccabf551 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ;
+                                           skos:prefLabel "LithiumElectrochemicalReaction"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
 :EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
@@ -1635,6 +2070,17 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                                              owl:someValuesFrom :EMMO_1e3dc60d_dd6b_47d6_8161_70004fc5ee30
                                                            ] ;
                                            skos:prefLabel "ManufacturedActiveMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e
+:EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
+                                                           ] ;
+                                           skos:altLabel "PotentiostaticDischarging"@en ;
+                                           skos:prefLabel "ConstantVoltageDischarging"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_99f21272_3aba_4dab_a9b7_63e5e1116beb
@@ -1738,11 +2184,15 @@ Conducting Additive"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4
 :EMMO_9ffd191e_8ee2_46ca_aa94_f2dcdd9fc3b4 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                           rdfs:subClassOf :EMMO_3eec5411_c402_4d8e_b231_96a490516454 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_f8b45e9a_a4cb_4c91_9793_3e980d79c922
+                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_0a9b2f78_baa8_4d3f_ac11_a95d53f07fe0
+                                                             owl:onClass emmo:EMMO_631f315a_4096_44e4_a30a_44d108c53756
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
@@ -1752,12 +2202,12 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_8f87e700_99a8_4427_8ffb_e493de05c217
+                                                             owl:onClass emmo:EMMO_f1a3a8b0_f812_43f1_accd_947e904125e6
                                                            ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{2H+ + 2e- --> H2(g)}" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The process of generating molecular hydrogen (H2) by a chemical reaction, usually from water (H2O)."@en ;
-                                           rdfs:comment "2H^+ + 2e^- --> H2" ;
-                                           skos:altLabel "HER"@en ;
-                                           skos:prefLabel "HydrogenEvolutionReaction"@en .
+                                           skos:altLabel "AcidicHydrogenEvolutionReaction"@en ;
+                                           skos:prefLabel "TwoProtonAndTwoElectronYieldOneGaseousHydrogen"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a0580fa9_5073_44af_b33e_7adbc83892d0
@@ -1870,6 +2320,7 @@ Conducting Additive"""@en ;
                                                                              )
                                                                ] ;
                                            rdfs:subClassOf emmo:EMMO_7278f78b_9f53_4b34_9a95_1be2d34c84d2 ,
+                                                           emmo:EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ,
                                                            :EMMO_19abaccd_43be_4048_965c_e4fb63c5951b ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
@@ -1912,6 +2363,70 @@ Conducting Additive"""@en ;
    owl:annotatedProperty rdfs:comment ;
    owl:annotatedTarget "Any process either caused or accompanied by the passage of an electric current and involving in most cases the transfer of electrons between two substances."@en ;
    dcterms:source "Bockris, J. O'M. and Despić, . Aleksandar R. (2011, December 15). Electrochemical reaction. Encyclopedia Britannica. https://www.britannica.com/science/electrochemical-reaction"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a7f0127a_9753_4b09_82ac_9a58a6dea3cb
+:EMMO_a7f0127a_9753_4b09_82ac_9a58a6dea3cb rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4a21f141_64ff_4524_8c2c_93073ee9e364 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_57f7ed5a_0b47_4f62_89c0_dd492b147db3
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_ec2e5ffa_64cd_49db_ab49_90c49a231c4b
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Li+(sln) + e- --> Li(s)}" ;
+                                           skos:prefLabel "OneNonAqueousLithiumAndOneElectronYieldsOneSolidLithium"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4
+:EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_fd689787_31b0_41cf_bf03_0d69af76469d ;
+                                                             owl:someValuesFrom emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88
+                                                           ] ;
+                                           skos:prefLabel "ElectricCurrentMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f
+:EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-05-27" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "operation during which a secondary cell or battery is supplied with electric energy from an external circuit which results in chemical changes within the cell and thus the storage of energy as chemical energy."@en ;
+                                           skos:altLabel "ElectrochemicalCharging"@en ;
+                                           skos:prefLabel "Charging"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "operation during which a secondary cell or battery is supplied with electric energy from an external circuit which results in chemical changes within the cell and thus the storage of energy as chemical energy."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
 
 
@@ -1969,6 +2484,38 @@ Conducting Additive"""@en ;
                                            skos:prefLabel "IntercalationCell"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b07ae264_719c_4830_b31b_59e1b893d900
+:EMMO_b07ae264_719c_4830_b31b_59e1b893d900 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_2575d741_972b_446e_90ec_c7805a132ecc ,
+                                                           :EMMO_80384f43_8818_42c6_9b1d_7747389a3554 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_596ff637_06bd_43fd_a5d0_70856f8c6d6d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_9ed6d1e2_0930_4713_aa6d_fd97480f9c43
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_49d2b2f3_a487_43d8_a585_71592da4e747
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Li+(sln) + C6 + e- --> LiC6}" ;
+                                           skos:prefLabel "OneNonAqueousLithiumIonAndOneSolidGraphiteAndOneElectronYieldOneLithiumGraphite"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1
 :EMMO_b0a0dddb_d942_4af2_b6a7_d7165f4253f1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
@@ -1988,7 +2535,7 @@ Conducting Additive"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
 :EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                           rdfs:subClassOf :EMMO_6731f325_dfb4_4dfb_b458_c30508f7e0b7 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
                                                              owl:someValuesFrom :EMMO_6d23c695_f016_48fe_bad5_a134d4b3cbec
@@ -1996,7 +2543,7 @@ Conducting Additive"""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
+                                                             owl:onClass emmo:EMMO_27825059_2c09_47f4_b927_35897c0238ea
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
@@ -2004,12 +2551,13 @@ Conducting Additive"""@en ;
                                                              owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
+                                                             owl:onClass emmo:EMMO_39a6962f_0af9_4ce5_89bf_a5cb767a15df
                                                            ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Zn(s) -> Zn^{2+} + 2e^-" ;
-                                           skos:prefLabel "ZincOxidationReaction"@en .
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Zn(s) -> Zn^{2+} + 2e-}" ;
+                                           skos:altLabel "ZincOxidationReaction"@en ;
+                                           skos:prefLabel "OneSolidZincYieldsOneAqueousZincIonAndTwoElectron"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b525a629_a679_464f_bc5b_b49d2fc82686
@@ -2065,6 +2613,34 @@ of other configurations are used."""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b7cc8365_6f5a_4524_9ee3_3ab8d66f2340
+:EMMO_b7cc8365_6f5a_4524_9ee3_3ab8d66f2340 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6731f325_dfb4_4dfb_b458_c30508f7e0b7 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_874ed64f_7343_4550_8207_d41e0a220925
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_39a6962f_0af9_4ce5_89bf_a5cb767a15df
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Zn(s) + 4OH- --> Zn(OH)4^{2-} + 2e-}" ;
+                                           skos:altLabel "AlkalineZincStrippingReaction"@en ;
+                                           skos:prefLabel "OneSolidZincAndFourAqueousHydroxideIonYieldsOneAqueousZincateIonAndTwoElectron"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a
 :EMMO_b812e9d0_7c58_4455_b3e7_6847f10c8e8a rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676 ,
@@ -2097,6 +2673,38 @@ of other configurations are used."""@en ;
    owl:annotatedTarget "Device that stores electrical energy using a double layer in an electrochemical cell."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b9b1bce0_a28e_4397_9454_689dbf00bfcc
+:EMMO_b9b1bce0_a28e_4397_9454_689dbf00bfcc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0484fe63_7c3f_4559_8747_c8995def0a66 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_32ab98e1_6d72_4a3b_9e4e_197cf7fdc714
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_631f315a_4096_44e4_a30a_44d108c53756
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{H2(g)+2OH-  -> 2H2O+2e-}" ;
+                                           skos:altLabel "AlkalineHydrogenReductionReaction"@en ;
+                                           skos:prefLabel "OneGaseousHydrogenAndTwoAqueousHydroxideIonYieldsTwoLiquidWaterAndTwoElectron"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b9bece97_a511_4cb9_88a2_b5bd5c5e5d74
@@ -2159,6 +2767,12 @@ of other configurations are used."""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_bea04148_10d9_4eda_9cd5_8f609d7e9ff8
+:EMMO_bea04148_10d9_4eda_9cd5_8f609d7e9ff8 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "TemperatureMeasurement"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847
 :EMMO_bed5b5f9_b89d_45e3_a8c2_81b70ae21847 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
@@ -2172,6 +2786,39 @@ of other configurations are used."""@en ;
    owl:annotatedTarget "arrangement of cells or batteries wherein in series connected cells or batteries are connected in parallel."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c066c562_906a_4372_843a_036b587a597e
+:EMMO_c066c562_906a_4372_843a_036b587a597e rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_2575d741_972b_446e_90ec_c7805a132ecc ,
+                                                           :EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_cb335e1a_54ee_491f_9fb7_22b2a026db2e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_1c0feec6_aaec_418c_8501_88c27d3e2bb0
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_9f20440f_f1e9_4c9e_987d_a7af7763af27
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{Li+(sln) + CoO2 + e- --> LiCoO2}" ;
+                                           skos:altLabel "LithiumCobaltOxideIntercalationReaction"@en ;
+                                           skos:prefLabel "OneNonAqueousLithiumIonAndOneSolidCobaltOxideAndOneElectronYieldsOneSolidLithiumCobaltOxide"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c2024587_3237_474e_8df9_91d10db2df47
@@ -2223,7 +2870,7 @@ of other configurations are used."""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854
 :EMMO_c5e5ce2f_6dd5_4b42_97ea_0eb12ff03854 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a6a69e90_06b5_45b1_83cf_7c0bf39b2914 ,
+                                           rdfs:subClassOf :EMMO_31187293_5f00_4a36_b469_e16a83652b09 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
                                                              owl:someValuesFrom :EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5
@@ -2231,30 +2878,30 @@ of other configurations are used."""@en ;
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
                                                              owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
+                                                             owl:onClass emmo:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_4639e0e4_5539_445a_8c7f_e27c2654bf41
+                                                             owl:onClass emmo:EMMO_98ec09ed_d4ad_472d_8174_54f81fef2b6e
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass emmo:EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c
+                                                             owl:onClass emmo:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
                                                              owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
                                                              owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
                                                            ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "O2 + 2H2O + 4e^- --> 4OH^-" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The reduction half reaction whereby molecular oxygen (O2) is reduced to water (H2O) or hydrogen peroxide (H2O2)."@en ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Oxygen_reduction_reaction"@en ;
-                                           rdfs:comment "O2 + 2H2O + 4e^- --> 4OH^-" ,
-                                                        "The ORR is the dominant cathode reaction in metal-air batteries and hydrogen fuel cells."@en ,
+                                           rdfs:comment "The ORR is the dominant cathode reaction in metal-air batteries and hydrogen fuel cells."@en ,
                                                         "The ORR usually requires a catalyst in practical electrodes."@en ;
-                                           skos:altLabel "ORR"@en ;
-                                           skos:prefLabel "OxygenReductionReaction"@en .
+                                           skos:altLabel "AlkalineFourElectronOxygenReductionReaction"@en ;
+                                           skos:prefLabel "OneGaseousOxygenAndTwoLiquidWaterAndFourElectronYieldsFourAqueousHydroxideIon"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c8a12e66_aef4_4051_bef9_082ffc8ade48
@@ -2273,6 +2920,64 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "NegativeElectrode"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_cb335e1a_54ee_491f_9fb7_22b2a026db2e
+:EMMO_cb335e1a_54ee_491f_9fb7_22b2a026db2e rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_a3d185ff_1c28_4fe8_87dd_6316fccb454e ,
+                                                           :EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_9f20440f_f1e9_4c9e_987d_a7af7763af27
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_1c0feec6_aaec_418c_8501_88c27d3e2bb0
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{LiCoO2 --> Li+(sln) + CoO2 + e-}" ;
+                                           skos:altLabel "LithiumCobaltOxideDeintercalationReaction"@en ;
+                                           skos:prefLabel "OneSolidLithiumCobaltOxideYieldsOneNonAqueousLithiumIonAndOneSolidCobaltOxideAndOneElectron"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
+:EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
+                                                           ] ;
+                                           skos:altLabel "OCVHold"@en ;
+                                           skos:prefLabel "OpenCircuitVoltageHold"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
+:EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_158ae038_c64b_4cc0_aa56_650475490705 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ;
+                                           skos:prefLabel "CellCurrentMeasurement"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c
 :EMMO_d1042a12_e4be_4992_86cb_59420ef4e05c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_dcfe156b_ec72_48a3_b89f_2ac5b9b91e92 ,
@@ -2284,6 +2989,30 @@ of other configurations are used."""@en ;
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "charge carrier ion in an electrolyte of an electrochemical cell."@en ;
                                            skos:prefLabel "ElectrochemicalChargeCarrierIon"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69
+:EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
+                                                             owl:someValuesFrom :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-05-28" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "set of operations that is carried out on a secondary cell or battery and is repeated regularly in the same sequence."@en ;
+                                           skos:altLabel "ElectrochemicalCycling"@en ;
+                                           skos:prefLabel "Cycling"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "set of operations that is carried out on a secondary cell or battery and is repeated regularly in the same sequence."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d48ea516_5cac_4f86_bc88_21b6276c0938
@@ -2334,6 +3063,16 @@ of other configurations are used."""@en ;
    owl:annotatedTarget "arrangement of cells or batteries wherein parallel connected cells or batteries are connected in series."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d8413c07_1c47_4450_ac05_e3350b4c7600
+:EMMO_d8413c07_1c47_4450_ac05_e3350b4c7600 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_213ac5da_3931_43a4_a1ce_fd0a8b42ae58 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_4e365fff_2400_4d69_8340_b13ed1fc14ce ;
+                                                             owl:someValuesFrom :EMMO_6731f325_dfb4_4dfb_b458_c30508f7e0b7
+                                                           ] ;
+                                           skos:prefLabel "ZincPlatingReaction"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c
@@ -2581,6 +3320,16 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "ActiveMaterialParticleCracking"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f
+:EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940
+                                                           ] ;
+                                           skos:prefLabel "ElectricCurrentMeasuringSystem"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f6fcd255_248d_4603_b128_04dab960a676
 :EMMO_f6fcd255_248d_4603_b128_04dab960a676 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
@@ -2615,6 +3364,29 @@ of other configurations are used."""@en ;
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A subcomponent of an ElectrochemicalComponent."@en ;
                                            skos:prefLabel "ElectrochemicalSubcomponent"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f8b45e9a_a4cb_4c91_9793_3e980d79c922
+:EMMO_f8b45e9a_a4cb_4c91_9793_3e980d79c922 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0484fe63_7c3f_4559_8747_c8995def0a66 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_8043d3c6_a4c1_4089_ba34_9744e28e5b3d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_1abd3ca5_06ab_49a8_8bc9_42aa5d77dcb7 ;
+                                                             owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_f1a3a8b0_f812_43f1_accd_947e904125e6
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_a4c90ba9_70da_48cd_b8db_af9ca89cfe62 ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass emmo:EMMO_631f315a_4096_44e4_a30a_44d108c53756
+                                                           ] ;
+                                           emmo:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed "\\ce{H2(g) --> 2H+ + 2e-}" ;
+                                           skos:altLabel "AcidicHydrogenOxidationReaction"@en ;
+                                           skos:prefLabel "OneGaseousHydrogenYieldsTwoAqueousProtonAndTwoElectron"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_fa22874b_76a9_4043_8b8f_6086c88746de
@@ -2747,300 +3519,6 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc
-:EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
-                                                           ] ;
-                                           owl:disjointWith :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ;
-                                           skos:altLabel "ElectrochemicalDischarging"@en ;
-                                           skos:prefLabel "Discharging" .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_0838f0b6_ca9a_4f76_9770_ca964617bf1b
-:EMMO_0838f0b6_ca9a_4f76_9770_ca964617bf1b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
-                                                           ] ;
-                                           skos:altLabel "IntermittentCurrentInterruptionMethod"@en ;
-                                           skos:prefLabel "ICI"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_0cc8f231_0ce5_467e_9c76_29b2c80349ad
-:EMMO_0cc8f231_0ce5_467e_9c76_29b2c80349ad rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
-                                                           ] ;
-                                           skos:altLabel "CCCV"@en ;
-                                           skos:prefLabel "ConstantCurrentConstantVoltageCharging"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_11895d59_3f97_4bad_badf_1a90f2347c2a
-:EMMO_11895d59_3f97_4bad_badf_1a90f2347c2a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
-                                                           ] ;
-                                           skos:altLabel "GalvanostaticIntermittentTitrationTechnique"@en ;
-                                           skos:prefLabel "GITT"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_158ae038_c64b_4cc0_aa56_650475490705
-:EMMO_158ae038_c64b_4cc0_aa56_650475490705 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f
-                                                           ] ;
-                                           skos:prefLabel "ElectricCurrentMeasurement"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6
-:EMMO_3e7fe02d_c888_4c49_8e05_ccd9785607a6 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
-                                                           ] ;
-                                           owl:disjointWith :EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f ;
-                                           skos:altLabel "FloatCharging"@en ,
-                                                         "PotentiostaticCharging"@en ;
-                                           skos:prefLabel "ConstantVoltageCharging"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6
-:EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_1355816f_a2b5_4800_8001_fc888f5d6b1b
-                                                           ] ;
-                                           skos:prefLabel "ElectricPotentialMeasuringSystem"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30
-:EMMO_53fe3f58_0802_41cf_af69_4784fc42cc30 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_22725105_c941_4b14_a4a2_fcb627958607
-                                                           ] ;
-                                           owl:disjointWith :EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e ;
-                                           skos:altLabel "GalvanostaticDischarging"@en ;
-                                           skos:prefLabel "ConstantCurrentDischarging"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026
-:EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_fd689787_31b0_41cf_bf03_0d69af76469d ;
-                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
-                                                           ] ;
-                                           skos:prefLabel "ElectricPotentialMeasurementResult"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d
-:EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_3f9b2956_1465_4fe0_b0df_5e4784dac3b6
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_58143f50_c3c1_4cba_b8eb_577282b4b026
-                                                           ] ;
-                                           skos:prefLabel "ElectricPotentialMeasurement"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_825a749f_dd07_46fb_947c_db286440911e
-:EMMO_825a749f_dd07_46fb_947c_db286440911e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5dc0c44e_6fdc_49fc_8654_b8b2d75d0d2d ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ;
-                                           skos:altLabel "ElectrochemicalCellVoltageMeasurement"@en ;
-                                           skos:prefLabel "CellVoltageMeasurement"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f
-:EMMO_83f2b1e9_cb67_4dbf_977f_ba54bbae374f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_22725105_c941_4b14_a4a2_fcb627958607
-                                                           ] ;
-                                           skos:altLabel "GalvanostaticCharging"@en ;
-                                           skos:prefLabel "ConstantCurrentCharging"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e
-:EMMO_9865e4f9_756d_4d94_a6fd_4102ab795f9e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_a9fc3f77_e48e_4bce_b118_044d608722f6
-                                                           ] ;
-                                           skos:altLabel "PotentiostaticDischarging"@en ;
-                                           skos:prefLabel "ConstantVoltageDischarging"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4
-:EMMO_a8e42b90_7838_460c_8f27_7b5d4238b7a4 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_fd689787_31b0_41cf_bf03_0d69af76469d ;
-                                                             owl:someValuesFrom emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88
-                                                           ] ;
-                                           skos:prefLabel "ElectricCurrentMeasurementResult"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f
-:EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
-                                                           ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-05-27" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "operation during which a secondary cell or battery is supplied with electric energy from an external circuit which results in chemical changes within the cell and thus the storage of energy as chemical energy."@en ;
-                                           skos:altLabel "ElectrochemicalCharging"@en ;
-                                           skos:prefLabel "Charging"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "operation during which a secondary cell or battery is supplied with electric energy from an external circuit which results in chemical changes within the cell and thus the storage of energy as chemical energy."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_bea04148_10d9_4eda_9cd5_8f609d7e9ff8
-:EMMO_bea04148_10d9_4eda_9cd5_8f609d7e9ff8 rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
-                                           skos:prefLabel "TemperatureMeasurement"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977
-:EMMO_cb3c0663_5962_4b79_8e72_1e8242af3977 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_825a749f_dd07_46fb_947c_db286440911e
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
-                                                           ] ;
-                                           skos:altLabel "OCVHold"@en ;
-                                           skos:prefLabel "OpenCircuitVoltageHold"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3
-:EMMO_cf596ea1_c313_4fe1_bd7f_c18afc8a24e3 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_158ae038_c64b_4cc0_aa56_650475490705 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
-                                                             owl:someValuesFrom :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
-                                                           ] ;
-                                           skos:prefLabel "CellCurrentMeasurement"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69
-:EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_06d8e1ee_924a_4915_998d_33a69f41dadc
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_d43af210_f854_4432_a891_ce3022e3b558 ;
-                                                             owl:someValuesFrom :EMMO_a9873d3d_945b_40ba_b9cd_8dfb64cec88f
-                                                           ] ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-05-28" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "set of operations that is carried out on a secondary cell or battery and is repeated regularly in the same sequence."@en ;
-                                           skos:altLabel "ElectrochemicalCycling"@en ;
-                                           skos:prefLabel "Cycling"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_d3e2d213_d078_4b9a_8beb_62f063e57d69 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "set of operations that is carried out on a secondary cell or battery and is repeated regularly in the same sequence."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f
-:EMMO_f693b744_930c_42ac_8e6f_627b22c6da3f rdf:type owl:Class ;
-                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_fb9bf7cb_dd4b_4391_99a1_628263dd6940
-                                                           ] ;
-                                           skos:prefLabel "ElectricCurrentMeasuringSystem"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

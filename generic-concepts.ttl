@@ -16,7 +16,7 @@
 
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
                                                                      dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
-                                                                     owl:versionInfo "1.0.0-beta" .
+                                                                     owl:versionInfo "1.0.0" .
 
 #################################################################
 #    Annotation properties
@@ -29,6 +29,13 @@ Released under the Creative Commons license Attribution 4.0 International (CC BY
                                            rdfs:seeAlso "https://www.inchi-trust.org/" ;
                                            skos:altLabel "InternationalChemicalIdentifier"@en ;
                                            skos:prefLabel "inchl"@en ;
+                                           rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
+
+
+###  http://emmo.info/emmo#EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed
+:EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed rdf:type owl:AnnotationProperty ;
+                                           rdfs:seeAlso "https://ctan.org/pkg/mhchem" ;
+                                           skos:prefLabel "mhchem"@en ;
                                            rdfs:subPropertyOf :EMMO_6e71666b_01ad_47d9_8a27_50422566dada .
 
 
@@ -288,6 +295,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "hasReactionReactant"@en .
 
 
+###  http://emmo.info/emmo#EMMO_a6e7a841_bb69_4227_b0e1_2216014b5b6a
+:EMMO_a6e7a841_bb69_4227_b0e1_2216014b5b6a rdf:type owl:ObjectProperty ;
+                                           rdfs:subPropertyOf :EMMO_53e5b1e1_6026_4ddc_8a4a_3aaaa5fdbdb7 ;
+                                           rdfs:domain :EMMO_ecb0395f_ee1e_4e9a_bf5c_d8e56eee2d18 ;
+                                           rdfs:range :EMMO_8b0923ab_b500_477b_9ce9_8b3a3e4dc4f2 ;
+                                           skos:prefLabel "hasChemicalPhase"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f
 :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f rdf:type owl:ObjectProperty ;
                                            rdfs:subPropertyOf :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b ;
@@ -326,6 +341,16 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "ElectricFieldStrengthDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_01f08dd8_6823_44bc_a54b_9c6ce6ff1079
+:EMMO_01f08dd8_6823_44bc_a54b_9c6ce6ff1079 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ddd41546_2acf_4e1f_a548_d9ef41fada32 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 3
+                                                           ] ;
+                                           skos:prefLabel "IronThreeIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e
@@ -406,7 +431,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_06156ae2_e0db_4c22_a013_5858946c8222
 :EMMO_06156ae2_e0db_4c22_a013_5858946c8222 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -422,7 +447,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "dioxomanganese" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 14801 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO2" ;
-                                           skos:prefLabel "ManganeseDioxideMolecule"@en .
+                                           skos:prefLabel "ManganeseDioxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_066937f0_ea5c_4b06_8739_53f66d5ef89e
@@ -537,7 +562,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_0a9b2f78_baa8_4d3f_ac11_a95d53f07fe0
 :EMMO_0a9b2f78_baa8_4d3f_ac11_a95d53f07fe0 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
@@ -548,7 +573,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "molecular hydrogen" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 783 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "H2" ;
-                                           skos:prefLabel "HydrogenMolecule"@en .
+                                           skos:prefLabel "HydrogenMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_0ab4306c_ba36_4a6e_941e_474ed04e8ccf
@@ -672,7 +697,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
 
 ###  http://emmo.info/emmo#EMMO_12227b8b_13f8_43cf_858a_db1f86ea3de5
 :EMMO_12227b8b_13f8_43cf_858a_db1f86ea3de5 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -688,7 +713,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "dichlorozinc" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 5727 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "ZnCl2" ;
-                                           skos:prefLabel "ZincChlorideMolecule"@en .
+                                           skos:prefLabel "ZincChlorideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_125e1f48_1312_4dc4_b533_c3a4b6052a76
@@ -891,6 +916,13 @@ Eij = δij"""@en ;
                                            skos:prefLabel "StrongAcid"@en .
 
 
+###  http://emmo.info/emmo#EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a
+:EMMO_1556787d_2b87_4dec_b0f4_dee6f9d0b47a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a ;
+                                           skos:prefLabel "AqueousHydroxideIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc
 :EMMO_15699598_29e3_4c8d_b016_c7254df8f2bc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9c32fd69_f480_4130_83b3_fb25d9face14 ;
@@ -914,6 +946,13 @@ Eij = δij"""@en ;
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "DiffusivityDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_15cdfac4_02c4_4582_8dee_339a6a3daffa
+:EMMO_15cdfac4_02c4_4582_8dee_339a6a3daffa rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00 ;
+                                           skos:prefLabel "SolidManganiteMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_164b8937_b242_45d0_8839_3b0605f0a556
@@ -985,6 +1024,13 @@ Eij = δij"""@en ;
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "ThermalTransmittanceDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_18de7494_05e2_4689_bcb4_2dded32af055
+:EMMO_18de7494_05e2_4689_bcb4_2dded32af055 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_31f35d09_f483_4c12_ba49_b7581c5891e8 ,
+                                                           :EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b ;
+                                           skos:prefLabel "NonAqueousLithiumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_19c5c2b2_463b_4e41_bd50_4f7239aa62d9
@@ -1063,8 +1109,7 @@ Eij = δij"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
 :EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -1108,6 +1153,13 @@ Eij = δij"""@en ;
                                                              owl:someValuesFrom :EMMO_c611d72b_0921_4c93_ab42_43b30084283e
                                                            ] ;
                                            skos:prefLabel "FiniteVolumeCell"@en .
+
+
+###  http://emmo.info/emmo#EMMO_1c0feec6_aaec_418c_8501_88c27d3e2bb0
+:EMMO_1c0feec6_aaec_418c_8501_88c27d3e2bb0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_ccb3f624_3d96_4c64_91e1_7f1382d56fe1 ;
+                                           skos:prefLabel "SolidLithiumCobaltOxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_1c1ec02e_4def_4979_aff9_572c06a95391
@@ -1160,6 +1212,17 @@ Eij = δij"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549
+:EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c244bae_4611_427d_9c60_d48469fc3656 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b
+                                                                            ] ;
+                                                             owl:allValuesFrom :EMMO_a2b006f2_bbfd_4dba_bcaa_3fca20cd6be1
+                                                           ] ;
+                                           skos:prefLabel "SolidMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_1eb6b28e_f260_4f04_ada1_19c6dcb668d9
 :EMMO_1eb6b28e_f260_4f04_ada1_19c6dcb668d9 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -1179,9 +1242,31 @@ Eij = δij"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe
+:EMMO_2031516a_2be7_48e8_9af7_7e1270e308fe rdfs:subClassOf :EMMO_23b9d75b_2fdb_4bef_b839_202c026f88f9 .
+
+
+###  http://emmo.info/emmo#EMMO_2036c85b_413e_4a57_814c_e51fc114592b
+:EMMO_2036c85b_413e_4a57_814c_e51fc114592b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_c8c711d0_3101_4562_953c_3c5b498f0a6c ;
+                                           skos:prefLabel "AqueousPotassiumIon"@en .
+
+
+###  http://emmo.info/emmo#EMMO_2286c65e_20ca_490d_9e4d_a37d197b2147
+:EMMO_2286c65e_20ca_490d_9e4d_a37d197b2147 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_caacc634-4328-5d9d-a8e8-1c25a2557e94>
+                                                           ] ;
+                                           skos:prefLabel "NickelIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c
 :EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -1192,7 +1277,7 @@ Eij = δij"""@en ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "zinc" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 23994 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Zn" ;
-                                           skos:prefLabel "ZincMolecule"@en .
+                                           skos:prefLabel "ZincMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_23683780_ffda_447e_a40e_db0b0f96c6eb
@@ -1211,6 +1296,12 @@ Eij = δij"""@en ;
    owl:annotatedTarget "the part a of a complex number c=a+jb, where a and b are real numbers."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_23b9d75b_2fdb_4bef_b839_202c026f88f9
+:EMMO_23b9d75b_2fdb_4bef_b839_202c026f88f9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8b0923ab_b500_477b_9ce9_8b3a3e4dc4f2 ;
+                                           skos:prefLabel "StateOfAggregation"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_2407f94a_993f_4d27_871b_ae05c356a870
@@ -1335,6 +1426,13 @@ Eij = δij"""@en ;
                                            skos:prefLabel "ThermalDiffusivity"@en .
 
 
+###  http://emmo.info/emmo#EMMO_27825059_2c09_47f4_b927_35897c0238ea
+:EMMO_27825059_2c09_47f4_b927_35897c0238ea rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9 ,
+                                                           :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ;
+                                           skos:prefLabel "AqueousZincIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f
 :EMMO_2a4dd78e_69c4_4221_98ca_29ec03f8d46f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
@@ -1392,6 +1490,16 @@ Eij = δij"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488
+:EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3d893112_1554_4427_b953_10a9a17a75f3 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_a6e7a841_bb69_4227_b0e1_2216014b5b6a ;
+                                                             owl:allValuesFrom :EMMO_5cb107ba_7daa_46dd_8f9f_da22a6eac676
+                                                           ] ;
+                                           skos:prefLabel "AqueousMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_2b0a1578_ae70_4cd1_940d_54d9c220d8f7
 :EMMO_2b0a1578_ae70_4cd1_940d_54d9c220d8f7 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -1411,6 +1519,13 @@ Eij = δij"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_2d022880_ec5d_434a_b7da_13ce121bf034
+:EMMO_2d022880_ec5d_434a_b7da_13ce121bf034 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_9ed6d1e2_0930_4713_aa6d_fd97480f9c43 ;
+                                           skos:prefLabel "SolidLithiumGraphiteMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_2d206929_ff1d_4651_8823_daa860105a96
 :EMMO_2d206929_ff1d_4651_8823_daa860105a96 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
@@ -1427,6 +1542,13 @@ Eij = δij"""@en ;
    owl:annotatedTarget "mark attributed to an instant by means of a specified timescale."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_2dba411a_a6bd_474d_af1f_ad64d63e7c97
+:EMMO_2dba411a_a6bd_474d_af1f_ad64d63e7c97 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_06156ae2_e0db_4c22_a013_5858946c8222 ,
+                                                           :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ;
+                                           skos:prefLabel "SolidManganeseDioxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_2e19759a_b728_4a42_8a0c_5e6c57ea4811
@@ -1514,8 +1636,7 @@ Eij = δij"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_31f35d09_f483_4c12_ba49_b7581c5891e8
 :EMMO_31f35d09_f483_4c12_ba49_b7581c5891e8 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -1734,6 +1855,13 @@ Eij = δij"""@en ;
                                            skos:prefLabel "LinearExpansionCoefficient"@en .
 
 
+###  http://emmo.info/emmo#EMMO_39a6962f_0af9_4ce5_89bf_a5cb767a15df
+:EMMO_39a6962f_0af9_4ce5_89bf_a5cb767a15df rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_23070eb5_8034_44a5_8e36_a6f1cf26034c ;
+                                           skos:prefLabel "SolidZincMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_39f94f54_f1ab_4fd8_8922_4fb24e635ba8
 :EMMO_39f94f54_f1ab_4fd8_8922_4fb24e635ba8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6653f57d_efb9_4f14_ae2a_f4cf23f9cff1 ;
@@ -1903,6 +2031,17 @@ pH = −10 log(a_OH-)"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_3d893112_1554_4427_b953_10a9a17a75f3
+:EMMO_3d893112_1554_4427_b953_10a9a17a75f3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c244bae_4611_427d_9c60_d48469fc3656 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b
+                                                                            ] ;
+                                                             owl:allValuesFrom :EMMO_4b3e2374_52a1_4420_8e3f_3ae6b9bf7dff
+                                                           ] ;
+                                           skos:prefLabel "DissolvedMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679
 :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
@@ -1964,7 +2103,7 @@ pH = −10 log(a_OH-)"""@en ;
 ###  http://emmo.info/emmo#EMMO_3f5ed462_8988_4db1_8701_545e20328930
 :EMMO_3f5ed462_8988_4db1_8701_545e20328930 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ;
-                                           skos:prefLabel "SoluteMolecule"@en .
+                                           skos:prefLabel "SoluteMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_3f7feefd_ac94_4208_8dfd_92bb50be30f3
@@ -2045,6 +2184,13 @@ pH = −10 log(a_OH-)"""@en ;
    owl:annotatedTarget "quotient of number of electrons in conduction band and volume"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_4112f40c_9979_4765_b036_968ebaa3253f
+:EMMO_4112f40c_9979_4765_b036_968ebaa3253f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337 ;
+                                           skos:prefLabel "AqueousAmmoniaMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_412d650e_7118_4d9c_be5b_ff8f2c0e6ccd
@@ -2207,7 +2353,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 
 ###  http://emmo.info/emmo#EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337
 :EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -2223,7 +2369,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "azane" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 222 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "NH3" ;
-                                           skos:prefLabel "AmmoniaMolecule"@en .
+                                           skos:prefLabel "AmmoniaMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_43b349fc_c7ed_480d_b0ca_9db84b700813
@@ -2311,13 +2457,20 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 
 ###  http://emmo.info/emmo#EMMO_45fe8416_479f_4783_921a_3ad875a32b90
 :EMMO_45fe8416_479f_4783_921a_3ad875a32b90 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ;
+                                           rdfs:subClassOf :EMMO_9c244bae_4611_427d_9c60_d48469fc3656 ;
                                            skos:prefLabel "ChemicalReactionProduct"@en .
+
+
+###  http://emmo.info/emmo#EMMO_462ddd42_0acf_4548_8718_b93b319feddc
+:EMMO_462ddd42_0acf_4548_8718_b93b319feddc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_65fc6cb7_eec0_4491_861f_f6adff4359a3 ,
+                                                           :EMMO_fd22cc71_7746_46a8_8ea0_42c06ff02d30 ;
+                                           skos:prefLabel "GaseousCarbonDioxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_4639e0e4_5539_445a_8c7f_e27c2654bf41
 :EMMO_4639e0e4_5539_445a_8c7f_e27c2654bf41 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
@@ -2328,12 +2481,12 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "molecular oxygen" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 977 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "O2" ;
-                                           skos:prefLabel "OxygenMolecule"@en .
+                                           skos:prefLabel "OxygenMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21
 :EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -2354,7 +2507,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "azanium;chloride" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 25517 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "NH4Cl" ;
-                                           skos:prefLabel "AmmoniumChlorideMolecule"@en .
+                                           skos:prefLabel "AmmoniumChlorideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_46406907_9afd_424e_934a_a523f9f9cc36
@@ -2527,13 +2680,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 
 ###  http://emmo.info/emmo#EMMO_49d2b2f3_a487_43d8_a585_71592da4e747
 :EMMO_49d2b2f3_a487_43d8_a585_71592da4e747 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "6"^^xsd:nonNegativeInteger ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_0056cc2f-f2fe-558e-a65c-9a8fc5cea333>
                                                            ] ;
-                                           skos:prefLabel "GraphiteMolecule"@en .
+                                           skos:prefLabel "GraphiteMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_4a9030bd_a1b2_45ac_909b_f98257c2b355
@@ -2568,6 +2721,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 :EMMO_4d255b9c_43bc_4c11_b68b_0e98274eb34f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ad97ebdc_6ec1_473c_adf0_bfe3e62c529c ;
                                            skos:prefLabel "DiscretizationElementary"@en .
+
+
+###  http://emmo.info/emmo#EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc
+:EMMO_4e621aee_e278_453b_b104_3f57ddd95bfc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_90e934e5_634e_4821_80f8_998b1291a9ef ,
+                                                           :EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c ;
+                                           skos:prefLabel "LiquidWaterMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_4ef8c0e4_1b0b_4699_a135_8c89ca289802
@@ -2644,13 +2804,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 
 ###  http://emmo.info/emmo#EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b
 :EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
-                                                           ] ,
+                                           rdfs:subClassOf :EMMO_dcbc6bec_d372_4cef_a116_3f7fdb5d391c ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
                                                              owl:hasValue 2
@@ -2788,6 +2942,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_574549f5_1dbf_4f12_8a78_047cbb39bfb9
+:EMMO_574549f5_1dbf_4f12_8a78_047cbb39bfb9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_99f9c4e3_3079_4d10_bb81_a8138e27193e ,
+                                                           :EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b ;
+                                           skos:prefLabel "NonAqueousZincateIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_5773b9f0_9b71_489a_8ad9_3af63d5c757b
 :EMMO_5773b9f0_9b71_489a_8ad9_3af63d5c757b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac ;
@@ -2849,7 +3010,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 ###  http://emmo.info/emmo#EMMO_59b3d6ee_7e5e_42d8_9b57_0d39b10d59db
 :EMMO_59b3d6ee_7e5e_42d8_9b57_0d39b10d59db rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ;
-                                           skos:prefLabel "SolventMolecule"@en .
+                                           skos:prefLabel "SolventMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_5a377aa6_f466_42a8_a566_d13eb7e5a3c5
@@ -2948,7 +3109,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
 
 ###  http://emmo.info/emmo#EMMO_6077b877_8e26_4e07_b559_1869f5346b59
 :EMMO_6077b877_8e26_4e07_b559_1869f5346b59 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -2959,7 +3120,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "lithium" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 3028194 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "Li" ;
-                                           skos:prefLabel "LithiumMolecule"@en .
+                                           skos:prefLabel "LithiumMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_6110af0a_bc82_4c9e_aa4b_b45d08d9c9e0
@@ -2979,6 +3140,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
    owl:annotatedTarget "position vector of an ion or atom in equilibrium"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_6129867e_e3e6_4538_a8ad_2cd921321ce2
+:EMMO_6129867e_e3e6_4538_a8ad_2cd921321ce2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_c3ba45d3_3cf8_4305_af3f_49103c51f200 ;
+                                           skos:prefLabel "AqueousSilverIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_61b69d7d_ae90_44d0_b78f_5bde7ad1a326
@@ -3027,6 +3195,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "4-19.1" ;
                                            skos:altLabel "YoungModulus"@en ;
                                            skos:prefLabel "ModulusOfElasticity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_631f315a_4096_44e4_a30a_44d108c53756
+:EMMO_631f315a_4096_44e4_a30a_44d108c53756 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0a9b2f78_baa8_4d3f_ac11_a95d53f07fe0 ,
+                                                           :EMMO_65fc6cb7_eec0_4491_861f_f6adff4359a3 ;
+                                           skos:prefLabel "GaseousHydrogenMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
@@ -3137,6 +3312,17 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "MassChangeRate"@en .
 
 
+###  http://emmo.info/emmo#EMMO_65fc6cb7_eec0_4491_861f_f6adff4359a3
+:EMMO_65fc6cb7_eec0_4491_861f_f6adff4359a3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c244bae_4611_427d_9c60_d48469fc3656 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b
+                                                                            ] ;
+                                                             owl:allValuesFrom :EMMO_04f2a2d5_e799_4692_a654_420e76f5acc1
+                                                           ] ;
+                                           skos:prefLabel "GaseousMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_661b9697_fefc_4389_85f2_9ebe4cfe0d21
 :EMMO_661b9697_fefc_4389_85f2_9ebe4cfe0d21 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 ;
@@ -3202,6 +3388,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "9-32" ;
                                            skos:altLabel "ThermodynamicEquilibriumConstant" ;
                                            skos:prefLabel "StandardEquilibriumConstant"@en .
+
+
+###  http://emmo.info/emmo#EMMO_67ba8fb3_6c8a_4122_9c1b_9aa15837bc6a
+:EMMO_67ba8fb3_6c8a_4122_9c1b_9aa15837bc6a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b ,
+                                                           :EMMO_c3ba45d3_3cf8_4305_af3f_49103c51f200 ;
+                                           skos:prefLabel "NonAqueousSilverIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_686308bd_8ed6_49d0_a204_6487dbe56511
@@ -3452,6 +3645,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "MassFlow"@en .
 
 
+###  http://emmo.info/emmo#EMMO_6d663cf1_40c6_4a3f_9916_02530c8a9bd8
+:EMMO_6d663cf1_40c6_4a3f_9916_02530c8a9bd8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_78f7c8ec_538c_4bf9_b2ff_afc7269d0742 ;
+                                           skos:prefLabel "AqueousMagnesiumIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f
 :EMMO_6e9aef15_272b_4eea_aaa9_2f38b8ae951f rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -3586,6 +3786,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                            skos:prefLabel "RedoxReaction"@en .
 
 
+###  http://emmo.info/emmo#EMMO_72a6d6b1_04c9_4255_96b8_8dc5b28afb10
+:EMMO_72a6d6b1_04c9_4255_96b8_8dc5b28afb10 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_78f7c8ec_538c_4bf9_b2ff_afc7269d0742 ,
+                                                           :EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b ;
+                                           skos:prefLabel "NonAqueousMagnesiumIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_74cfc811_6e04_4fe4_aea5_6a5cc09f6571
 :EMMO_74cfc811_6e04_4fe4_aea5_6a5cc09f6571 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -3595,6 +3802,12 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-11" ;
                                            skos:prefLabel "DebyeTemperature"@en .
+
+
+###  http://emmo.info/emmo#EMMO_75fd98fe_ed8f_4abc_9afd_b4b99503c541
+:EMMO_75fd98fe_ed8f_4abc_9afd_b4b99503c541 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f66c2152_0c22_4139_a3ca_f43ff4b8c02a ;
+                                           skos:prefLabel "AqueousSodiumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_764898fa_6d10_40e4_af00_1a62cb2c0311
@@ -3670,6 +3883,21 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_78f7c8ec_538c_4bf9_b2ff_afc7269d0742
+:EMMO_78f7c8ec_538c_4bf9_b2ff_afc7269d0742 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_ff5e8306-8e33-5305-84aa-d99055d34e0c>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 2
+                                                           ] ;
+                                           skos:prefLabel "MagnesiumIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117
 :EMMO_78fb85da_e6d2_4a3e_8fae_e21e63c7b117 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_89f827fa_f3c4_4071_a69c_084132f780a7 ;
@@ -3697,6 +3925,13 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-34" ;
                                            skos:prefLabel "RelativeMassConcentrationOfVapour"@en .
+
+
+###  http://emmo.info/emmo#EMMO_7c622a76_3822_443d_a96d_e530f75d5cda
+:EMMO_7c622a76_3822_443d_a96d_e530f75d5cda rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_31f35d09_f483_4c12_ba49_b7581c5891e8 ;
+                                           skos:prefLabel "AqueousLithiumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
@@ -3976,6 +4211,13 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_874ed64f_7343_4550_8207_d41e0a220925
+:EMMO_874ed64f_7343_4550_8207_d41e0a220925 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_99f9c4e3_3079_4d10_bb81_a8138e27193e ;
+                                           skos:prefLabel "AqueousZincateIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783
 :EMMO_8758dcf9_df3c_42cb_954a_98c17ace5783 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b37a09e6_2193_43e5_9081_327d3fe2fcb2 ;
@@ -3990,6 +4232,10 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "ThermalResistanceDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_87ac88ff_8379_4f5a_8c7b_424a8fff1ee8
+:EMMO_87ac88ff_8379_4f5a_8c7b_424a8fff1ee8 rdfs:subClassOf :EMMO_23b9d75b_2fdb_4bef_b839_202c026f88f9 .
 
 
 ###  http://emmo.info/emmo#EMMO_87f7ffba_148c_4be2_b03c_6b93d044e355
@@ -4298,6 +4544,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "MicrocanonicalPartitionFunction"@en .
 
 
+###  http://emmo.info/emmo#EMMO_90e934e5_634e_4821_80f8_998b1291a9ef
+:EMMO_90e934e5_634e_4821_80f8_998b1291a9ef rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9c244bae_4611_427d_9c60_d48469fc3656 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b
+                                                                            ] ;
+                                                             owl:allValuesFrom :EMMO_7509da43_56b1_4d7f_887a_65d1663df4ba
+                                                           ] ;
+                                           skos:prefLabel "LiquidMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_90fa8b63_e59d_4c71_b245_6bb759a22e26
 :EMMO_90fa8b63_e59d_4c71_b245_6bb759a22e26 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -4364,7 +4621,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 
 ###  http://emmo.info/emmo#EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c
 :EMMO_9439cc75_48ea_444e_a7b9_7842e1bb034c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -4380,7 +4637,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "oxidane" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 962 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "H2O" ;
-                                           skos:prefLabel "WaterMolecule"@en .
+                                           skos:prefLabel "WaterMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_94857660_8739_4270_99a7_c388933fa17d
@@ -4533,6 +4790,33 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "EnergySourceTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_98ec09ed_d4ad_472d_8174_54f81fef2b6e
+:EMMO_98ec09ed_d4ad_472d_8174_54f81fef2b6e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4639e0e4_5539_445a_8c7f_e27c2654bf41 ,
+                                                           :EMMO_65fc6cb7_eec0_4491_861f_f6adff4359a3 ;
+                                           skos:prefLabel "GaseousOxygenMolecularEntity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_99f9c4e3_3079_4d10_bb81_a8138e27193e
+:EMMO_99f9c4e3_3079_4d10_bb81_a8138e27193e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass :EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue -2
+                                                           ] ;
+                                           skos:prefLabel "ZincateIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324
 :EMMO_9a4271fc_98de_49a9_9eda_598afb8c5324 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a293f923_954c_4af5_9f97_9600ebd362cb ;
@@ -4541,8 +4825,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 
 ###  http://emmo.info/emmo#EMMO_9a937ec4_0037_44ef_b734_965250c54186
 :EMMO_9a937ec4_0037_44ef_b734_965250c54186 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
+                                           rdfs:subClassOf :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -4574,6 +4857,18 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-5.1" ;
                                            skos:prefLabel "IsothermalCompressibility"@en .
+
+
+###  http://emmo.info/emmo#EMMO_9c244bae_4611_427d_9c60_d48469fc3656
+:EMMO_9c244bae_4611_427d_9c60_d48469fc3656 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf :EMMO_8e52c42b_e879_4473_9fa1_4b23428b392b
+                                                                            ] ;
+                                                             owl:someValuesFrom :EMMO_23b9d75b_2fdb_4bef_b839_202c026f88f9
+                                                           ] ;
+                                           skos:prefLabel "MolecularEntityInStateOfAggregation"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_9cfa7f0a_8e3d_4980_bd32_13fed02f1710
@@ -4703,7 +4998,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 
 ###  http://emmo.info/emmo#EMMO_9ed6d1e2_0930_4713_aa6d_fd97480f9c43
 :EMMO_9ed6d1e2_0930_4713_aa6d_fd97480f9c43 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -4715,7 +5010,14 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_0056cc2f-f2fe-558e-a65c-9a8fc5cea333>
                                                            ] ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "LiC6" ;
-                                           skos:prefLabel "LithiumGraphiteMolecule"@en .
+                                           skos:prefLabel "LithiumGraphiteMolecularEntity"@en .
+
+
+###  http://emmo.info/emmo#EMMO_9f20440f_f1e9_4c9e_987d_a7af7763af27
+:EMMO_9f20440f_f1e9_4c9e_987d_a7af7763af27 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_abb46b94_0f24_4944_97e2_9e61965f4485 ;
+                                           skos:prefLabel "SolidCobaltOxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_a0c4322d_4de2_4770_991c_5fad4e6ec25b
@@ -4813,6 +5115,10 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "ShearStrain"@en .
 
 
+###  http://emmo.info/emmo#EMMO_a2b006f2_bbfd_4dba_bcaa_3fca20cd6be1
+:EMMO_a2b006f2_bbfd_4dba_bcaa_3fca20cd6be1 rdfs:subClassOf :EMMO_23b9d75b_2fdb_4bef_b839_202c026f88f9 .
+
+
 ###  http://emmo.info/emmo#EMMO_a2f0a015_38ba_4030_8fbe_6d9904b735fc
 :EMMO_a2f0a015_38ba_4030_8fbe_6d9904b735fc rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -4859,7 +5165,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
 
 ###  http://emmo.info/emmo#EMMO_a416e35d_f12c_4aa6_94c9_e8df0ebf860e
 :EMMO_a416e35d_f12c_4aa6_94c9_e8df0ebf860e rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
@@ -4870,7 +5176,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "molecular nitrogen" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 947 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "N2" ;
-                                           skos:prefLabel "NitrogenMolecule"@en .
+                                           skos:prefLabel "NitrogenMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_a43cb01a_beb0_46e1_ae6d_22236222e6a1
@@ -4904,6 +5210,13 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "5-4" ;
                                            skos:prefLabel "PressureCoefficient"@en .
+
+
+###  http://emmo.info/emmo#EMMO_a573eefb_3e2e_4cd8_a7e4_bf22a3636b85
+:EMMO_a573eefb_3e2e_4cd8_a7e4_bf22a3636b85 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_9a937ec4_0037_44ef_b734_965250c54186 ;
+                                           skos:prefLabel "AqueousPermanganateIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_a5aa8d6b_5fe3_4b6f_91a4_930438f9611a
@@ -5019,9 +5332,16 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "AngularImpulse"@en .
 
 
+###  http://emmo.info/emmo#EMMO_ab17745b_bb69_4b2f_9e73_0110a5c357e5
+:EMMO_ab17745b_bb69_4b2f_9e73_0110a5c357e5 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53 ;
+                                           skos:prefLabel "AqueousManganeseThreeIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_abb46b94_0f24_4944_97e2_9e61965f4485
 :EMMO_abb46b94_0f24_4944_97e2_9e61965f4485 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -5032,7 +5352,7 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                                              owl:qualifiedCardinality "2"^^xsd:nonNegativeInteger ;
                                                              owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_48be0f49-9e7f-51c1-96ce-88e7794a13b0>
                                                            ] ;
-                                           skos:prefLabel "CobaltOxideMolecule"@en .
+                                           skos:prefLabel "CobaltOxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ac3b327c_fc83_4aec_acd1_80ef3caaef5b
@@ -5222,6 +5542,12 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b
+:EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3d893112_1554_4427_b953_10a9a17a75f3 ;
+                                           skos:prefLabel "NonAqueousMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_b0be5187_181f_44c1_b3a8_9d0c3ca6ec91
 :EMMO_b0be5187_181f_44c1_b3a8_9d0c3ca6ec91 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_135ab8ea_e028_439e_be64_3e0f9734ea2b ;
@@ -5354,6 +5680,16 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
    owl:annotatedTarget "time constant for recombination or trapping of minority charge carriers in semiconductors"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_b4b30b0a_05f7_45ea_8f1c_218cc4abc0e0
+:EMMO_b4b30b0a_05f7_45ea_8f1c_218cc4abc0e0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ddd41546_2acf_4e1f_a548_d9ef41fada32 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 2
+                                                           ] ;
+                                           skos:prefLabel "IronTwoIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca
@@ -5693,6 +6029,17 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
                                            skos:prefLabel "MassieuFunction"@en .
 
 
+###  http://emmo.info/emmo#EMMO_c3ba45d3_3cf8_4305_af3f_49103c51f200
+:EMMO_c3ba45d3_3cf8_4305_af3f_49103c51f200 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_36ab7281-0187-568f-b0b4-61e33dc08cfc>
+                                                           ] ;
+                                           skos:prefLabel "SilverIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_c4c104dc_b354_4da8_89de_b3174bed162e
 :EMMO_c4c104dc_b354_4da8_89de_b3174bed162e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d983cb20_3c6d_4fb9_a81a_0d2686222b4c ;
@@ -5774,6 +6121,19 @@ At temperatures far from 25 °C the pH of a neutral solution differs significant
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_c72ee662_0d46_40f2_b23b_c14bc1781aa4
+:EMMO_c72ee662_0d46_40f2_b23b_c14bc1781aa4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_9dc63b2d_08ff_41c8_9a94_f11feeec5c85 ;
+                                           skos:prefLabel "AqueousAmmoniumIon"@en .
+
+
+###  http://emmo.info/emmo#EMMO_c7597353_8223_4d77_866c_963fbb58923d
+:EMMO_c7597353_8223_4d77_866c_963fbb58923d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f66c2152_0c22_4139_a3ca_f43ff4b8c02a ;
+                                           skos:prefLabel "NonAqueousSodiumIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6
 :EMMO_c7ad2455_1bbf_4299_ba2e_101a553496a6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f658c301_ce93_46cf_9639_4eace2c5d1d5 ;
@@ -5814,6 +6174,21 @@ Q=qT"""@en ;
                                            skos:prefLabel "EnergyAccumulationTerm"@en .
 
 
+###  http://emmo.info/emmo#EMMO_c8c711d0_3101_4562_953c_3c5b498f0a6c
+:EMMO_c8c711d0_3101_4562_953c_3c5b498f0a6c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_d7c9e90e-ba46-55b2-9671-43408f6a1d74>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 1
+                                                           ] ;
+                                           skos:prefLabel "PotassiumIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_c9354e77_e6c9_4a76_8571_2446bc934c94
 :EMMO_c9354e77_e6c9_4a76_8571_2446bc934c94 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
@@ -5838,7 +6213,7 @@ Q=qT"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_ca77a260_3727_43f6_acc5_081d7e26ca6d
 :EMMO_ca77a260_3727_43f6_acc5_081d7e26ca6d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ;
+                                           rdfs:subClassOf :EMMO_9c244bae_4611_427d_9c60_d48469fc3656 ;
                                            skos:prefLabel "ChemicalReactionReactant"@en .
 
 
@@ -5891,7 +6266,7 @@ Q=qT"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_ccb3f624_3d96_4c64_91e1_7f1382d56fe1
 :EMMO_ccb3f624_3d96_4c64_91e1_7f1382d56fe1 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -5914,7 +6289,7 @@ Q=qT"""@en ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "LiCoO2" ;
                                            :EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Lithium_cobalt_oxide"@en ;
                                            skos:altLabel "LithiumCobalt(III)Oxide"@en ;
-                                           skos:prefLabel "LithiumCobaltOxideMolecule"@en .
+                                           skos:prefLabel "LithiumCobaltOxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab
@@ -6048,13 +6423,7 @@ Q=qT"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53
 :EMMO_d566e523_5de6_4a75_9d52_a0f1fbc0fd53 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
-                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
-                                                           ] ,
+                                           rdfs:subClassOf :EMMO_dcbc6bec_d372_4cef_a116_3f7fdb5d391c ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
                                                              owl:hasValue 3
@@ -6071,6 +6440,13 @@ Q=qT"""@en ;
 :EMMO_d5c1857a_46bb_4826_92c8_44a37d6ec230 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
                                            skos:prefLabel "FiniteDifferenceModel"@en .
+
+
+###  http://emmo.info/emmo#EMMO_d65cd6ce_26aa_4472_8e0b_887c613be705
+:EMMO_d65cd6ce_26aa_4472_8e0b_887c613be705 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b03f7843_a332_4bbf_a4fa_dfa24d9cf33b ,
+                                                           :EMMO_c8c711d0_3101_4562_953c_3c5b498f0a6c ;
+                                           skos:prefLabel "NonAqueousPotassiumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_d722016a_4907_497b_b0d3_cfd10adfef26
@@ -6249,6 +6625,17 @@ Q=qT"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_dcbc6bec_d372_4cef_a116_3f7fdb5d391c
+:EMMO_dcbc6bec_d372_4cef_a116_3f7fdb5d391c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_2c701f72-a859-5e33-9552-b6bdbcbd28d9>
+                                                           ] ;
+                                           skos:prefLabel "ManganeseIon"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac
 :EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b29fd350_39aa_4af7_9459_3faa0544cba6 ;
@@ -6281,6 +6668,17 @@ Q=qT"""@en ;
                                                                ] ;
                                            rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc ;
                                            skos:prefLabel "VolumePerAmountDimension"@en .
+
+
+###  http://emmo.info/emmo#EMMO_ddd41546_2acf_4e1f_a548_d9ef41fada32
+:EMMO_ddd41546_2acf_4e1f_a548_d9ef41fada32 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_a4839f08-1080-53bf-9cb3-101e20c2656b>
+                                                           ] ;
+                                           skos:prefLabel "IronIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_df8b283c_c02a_4158_b65e_60de7bb0b550
@@ -6446,6 +6844,23 @@ Q=qT"""@en ;
    owl:annotatedTarget "quotient of momentum and the reduced Planck constant"@en ;
    dcterms:source "International Organization for Standardization. (2019). Quantities and units — Part 12: Condensed matter physics (ISO 800000-12:2019(en)). Retrieved from https://www.iso.org/obp/ui/#iso:std:iso:80000:-12:ed-2:v2:en"
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_e490793f_9999_402e_8ea2_86c3ba16c4c1
+:EMMO_e490793f_9999_402e_8ea2_86c3ba16c4c1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_648295d4_7c5a_4aaa_8347_e612dc133d00 ;
+                                           skos:prefLabel "AqueousChlorideIon"@en .
+
+
+###  http://emmo.info/emmo#EMMO_e4b5d63f_17ee_4751_bcd2_b47423ed6318
+:EMMO_e4b5d63f_17ee_4751_bcd2_b47423ed6318 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
+                                                             owl:someValuesFrom :EMMO_edd129dd_a036_4091_9fab_2dd125256450
+                                                           ] ;
+                                           skos:prefLabel "SaltMaterial"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0
@@ -6694,6 +7109,13 @@ Q=qT"""@en ;
                                            skos:prefLabel "HomogeneousMaterial"@en .
 
 
+###  http://emmo.info/emmo#EMMO_ec2e5ffa_64cd_49db_ab49_90c49a231c4b
+:EMMO_ec2e5ffa_64cd_49db_ab49_90c49a231c4b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_6077b877_8e26_4e07_b559_1869f5346b59 ;
+                                           skos:prefLabel "SolidLithiumMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_ec767367_a773_4935_80ea_dd6a5eaefb54
 :EMMO_ec767367_a773_4935_80ea_dd6a5eaefb54 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_be76ad52_2e29_4202_be6f_0a15eb9c1817 ,
@@ -6737,6 +7159,13 @@ Q=qT"""@en ;
    owl:annotatedTarget "A process that results in the interconversion of chemical species. Chemical reactions may be elementary reactions or stepwise reactions. (It should be noted that this definition includes experimentally observable interconversions of conformers.) Detectable chemical reactions normally involve sets of molecular entities as indicated by this definition, but it is often conceptually convenient to use the term also for changes involving single molecular entities (i.e. 'microscopic chemical events')."@en ;
    dcterms:source "IUPAC. Compendium of Chemical Terminology, 2nd ed. (the \"Gold Book\"). Compiled by A. D. McNaught and A. Wilkinson. Blackwell Scientific Publications, Oxford (1997). Online version (2019-) created by S. J. Chalk. ISBN 0-9678550-9-8. https://doi.org/10.1351/goldbook."
  ] .
+
+
+###  http://emmo.info/emmo#EMMO_ed9b672a_cb98_44b2_8704_f88a25a7ab1d
+:EMMO_ed9b672a_cb98_44b2_8704_f88a25a7ab1d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_51a8adc5_aa32_4b48_8447_42a6c0f24e4b ;
+                                           skos:prefLabel "AqueousManganeseTwoIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_edd129dd_a036_4091_9fab_2dd125256450
@@ -6836,14 +7265,14 @@ Q=qT"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00
 :EMMO_f0c23636_edf4_4303_a1fb_cd238b618e00 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ;
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ;
                                            :EMMO_3acf3a7e_af12_427a_a21a_68d9ff4afa27 "O[Mn](=O)[O-]" ;
                                            :EMMO_5cbfe520_e453_4c80_a4f0_af594cd1b844 "https://pubchem.ncbi.nlm.nih.gov/compound/hydroxy-oxido-oxomanganese" ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "hydroxy-oxido-oxomanganese" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 164808 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "MnO(OH)" ;
                                            skos:altLabel "HydroxyOxidoOxoManganeseMolecule"@en ;
-                                           skos:prefLabel "ManganiteMolecule"@en .
+                                           skos:prefLabel "ManganiteMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_f14ae884_9345_4de4_a322_362329517e3e
@@ -6873,6 +7302,13 @@ Q=qT"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_f1a3a8b0_f812_43f1_accd_947e904125e6
+:EMMO_f1a3a8b0_f812_43f1_accd_947e904125e6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2b039054_e7a2_4f7a_8d59_54cb598e4488 ,
+                                                           :EMMO_8f87e700_99a8_4427_8ffb_e493de05c217 ;
+                                           skos:prefLabel "AqueousProton"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_f1be7d92_c57d_4698_a0ba_968130a3f9e1
 :EMMO_f1be7d92_c57d_4698_a0ba_968130a3f9e1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dae32a4a_d8da_4047_81b0_36a9713fdce1 ,
@@ -6886,8 +7322,7 @@ Q=qT"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a
 :EMMO_f2481039_319f_4703_bf75_5ae969a7dc4a rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
-                                                           :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
+                                           rdfs:subClassOf :EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -6977,6 +7412,28 @@ Q=qT"""@en ;
                                            skos:prefLabel "ElectricFieldStrength"@en .
 
 
+###  http://emmo.info/emmo#EMMO_f66c2152_0c22_4139_a3ca_f43ff4b8c02a
+:EMMO_f66c2152_0c22_4139_a3ca_f43ff4b8c02a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_dea931ca-1ec7-58f8-88e5-fb5615d8b214>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_bc307cfa_fa18_4e1c_ae93_ef169ffa86f4 ;
+                                                             owl:hasValue 1
+                                                           ] ;
+                                           skos:prefLabel "SodiumIon"@en .
+
+
+###  http://emmo.info/emmo#EMMO_f6ec0f5a_b7a2_47c3_a22f_8b8b4e9a4ce9
+:EMMO_f6ec0f5a_b7a2_47c3_a22f_8b8b4e9a4ce9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_463a251a_3df2_4096_8a65_28e59d3f2b21 ;
+                                           skos:prefLabel "SolidAmmouniumChlorideMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_f77a3eae_3e2a_498f_8a92_2e17cc9b45c7
 :EMMO_f77a3eae_3e2a_498f_8a92_2e17cc9b45c7 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_427d553a_d220_46db_a0e5_9e31ebb79797 ,
@@ -7004,6 +7461,18 @@ Q=qT"""@en ;
                                            rdfs:subClassOf :EMMO_06658d8d_dcde_4fc9_aae1_17f71c0bcdec ;
                                            :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A vector whose spatial direct parts have a physical dimension some time dimension."@en ;
                                            skos:prefLabel "TimeVector"@en .
+
+
+###  http://emmo.info/emmo#EMMO_f994ff77_692a_4a89_a495_ef972a3c7e48
+:EMMO_f994ff77_692a_4a89_a495_ef972a3c7e48 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                             owl:onClass <http://emmo.info/emmo/domain/periodic-table#EMMO_7e8f9419-0bda-5aa3-ba88-00b2be6ca69e>
+                                                           ] ;
+                                           skos:altLabel "AluminumIon"@en ;
+                                           skos:prefLabel "AluminiumIon"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_fa142978_8775_4afa_8a1d_fbbe56ccd616
@@ -7072,7 +7541,7 @@ Q=qT"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_fd22cc71_7746_46a8_8ea0_42c06ff02d30
 :EMMO_fd22cc71_7746_46a8_8ea0_42c06ff02d30 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3397f270_dfc1_4500_8f6f_4d0d85ac5f71 ,
+                                           rdfs:subClassOf :EMMO_21205421_5783_4d3e_81e5_10c5d894a88a ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty :EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -7088,7 +7557,7 @@ Q=qT"""@en ;
                                            :EMMO_77009747_9bf4_4746_9762_8e91aeb70ab6 "carbon dioxide" ;
                                            :EMMO_83df0ce6_ae53_4c35_97e3_20ee4e23833f 280 ;
                                            :EMMO_ba4237ba_e1c3_451d_9785_23d50a242aac "CO2" ;
-                                           skos:prefLabel "CarbonDioxideMolecule"@en .
+                                           skos:prefLabel "CarbonDioxideMolecularEntity"@en .
 
 
 ###  http://emmo.info/emmo#EMMO_fd4a6307_f9f7_4b54_b044_caa04e620232
@@ -7167,6 +7636,13 @@ Q=qT"""@en ;
  ] .
 
 
+###  http://emmo.info/emmo#EMMO_fe5ab340_ba17_46d8_935b_ab43f2e9470c
+:EMMO_fe5ab340_ba17_46d8_935b_ab43f2e9470c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_1e1a627e_24c9_43bd_bb1c_4f8ffabd1549 ,
+                                                           :EMMO_49d2b2f3_a487_43d8_a585_71592da4e747 ;
+                                           skos:prefLabel "SolidGraphiteMolecularEntity"@en .
+
+
 ###  http://emmo.info/emmo#EMMO_fec651dc_8962_48c3_8b30_1115b2dd7c16
 :EMMO_fec651dc_8962_48c3_8b30_1115b2dd7c16 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_c29603f5_95e8_42f5_ab0c_f3bcf3166d53 ,
@@ -7210,16 +7686,6 @@ Q=qT"""@en ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-13" ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_e4b5d63f_17ee_4751_bcd2_b47423ed6318
-:EMMO_e4b5d63f_17ee_4751_bcd2_b47423ed6318 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
-                                                             owl:someValuesFrom :EMMO_edd129dd_a036_4091_9fab_2dd125256450
-                                                           ] ;
-                                           skos:prefLabel "SaltMaterial"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
