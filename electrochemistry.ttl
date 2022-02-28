@@ -35,10 +35,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
 skos:prefLabel rdf:type owl:AnnotationProperty .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed
-<https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_133c2169_c0cc_460b_971d_6cb4e22338ed> rdf:type owl:AnnotationProperty .
-
-
 #################################################################
 #    Object Properties
 #################################################################
