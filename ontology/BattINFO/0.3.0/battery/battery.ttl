@@ -1,0 +1,1146 @@
+@prefix : <https://big-map.github.io/BattINFO/ontology/BattINFO#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix emmo: <http://emmo.info/emmo#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix annotations: <http://emmo.info/emmo/top/annotations#> .
+@prefix electrochemistry: <https://big-map.github.io/BattINFO/ontology/electrochemistry#> .
+@base <https://big-map.github.io/BattINFO/ontology/BattINFO/battery> .
+
+<https://big-map.github.io/BattINFO/ontology/BattINFO/battery> rdf:type owl:Ontology ;
+                                                                owl:versionIRI <https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/battery/battery.ttl> ;
+                                                                owl:imports <https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/batteryquantities/batteryquantities.ttl> ,
+                                                                            <https://big-map.github.io/BattINFO/ontology/electrochemistry/0.3.0/electrochemistry/electrochemistry.ttl> ;
+                                                                dcterms:abstract """A toplevel battery interface domain ontology based on EMMO.
+
+This file is intended to contain information on the whole battery, excluding quantites..
+
+Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0).""" ;
+                                                                dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+                                                                owl:versionInfo "0.3.0" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/terms/abstract
+dcterms:abstract rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/license
+dcterms:license rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
+:EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-32" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "unplanned escape of electrolyte, gas or other material from a cell or battery."@en ;
+                                           skos:prefLabel "Leakage"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_0176cabb_4c83_4079_b26c_334892bddcae ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "unplanned escape of electrolyte, gas or other material from a cell or battery."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363
+:EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-10" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing manganese dioxide and a negative electrode of lithium."@en ;
+                                           skos:prefLabel "LithiumManganeseDioxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing manganese dioxide and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2
+:EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
+                                           skos:prefLabel "P3DModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8
+:EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
+                                           skos:prefLabel "Cylindrical4680CellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde
+:EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-05" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with a saline electrolyte and a negative electrode of zinc."@en ;
+                                           skos:altLabel "NeutralElectrolyteZincAirElectrochemicalCell"@en ;
+                                           skos:prefLabel "NearNeutralElectrolyteZincAirElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "metal air electrochemical cell with a saline electrolyte and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b
+:EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 ,
+                                                           electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-09" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing carbon monofluoride and a negative electrode of lithium."@en ;
+                                           skos:prefLabel "LithiumCarbonMonofluorideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing carbon monofluoride and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
+:EMMO_149bb81f_e724_42f0_9560_184ff916bdba rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "ReactiveSubcomponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce
+:EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
+                                           skos:prefLabel "BatteryMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
+:EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectronicComponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60
+:EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+                                           skos:prefLabel "PouchCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497
+:EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-12" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery supplied to an original equipment manufacturer (OEM) for use only with or in new equipment."@en ;
+                                           skos:prefLabel "OEMBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "battery supplied to an original equipment manufacturer (OEM) for use only with or in new equipment."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28
+:EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6c481323_498b_42c6_915a_53490f409430 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b
+                                                           ] ;
+                                           skos:prefLabel "BatteryCycling"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab
+:EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 ,
+                                                           electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom :EMMO_bae12d7c_2d81_4a86_994a_11f584b91486
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_5d299271_3f68_494f_ab96_3db9acdd3138 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_8e9cf965_9f92_46e8_b678_b50410ce3616 ;
+                                                             owl:someValuesFrom :EMMO_882ce749_9869_450d_8563_cb86670e720f
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-08" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on ammonium chloride and zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Leclanch%C3%A9_cell"@en ;
+                                           skos:prefLabel "LeclancheElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a saline electrolyte based on ammonium chloride and zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
+:EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce ;
+                                           skos:prefLabel "BatteryCyclingMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_21d2a7a1_2fc0_4f7a_85ad_6451df187767
+:EMMO_21d2a7a1_2fc0_4f7a_85ad_6451df187767 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-19" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "final process by which electrochemical active components of a cell are brought to functional completion in order to deliver electrical energy."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "The introduction of electrolyte or liquid or gaseous active materials by pyrotechnic or other means."@en ;
+                                           skos:prefLabel "Activation"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_21d2a7a1_2fc0_4f7a_85ad_6451df187767 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "final process by which electrochemical active components of a cell are brought to functional completion in order to deliver electrical energy."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
+:EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b ;
+                                           skos:prefLabel "SeparatorContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_23e6170d_a70b_4de9_a4db_458e24a327ac
+:EMMO_23e6170d_a70b_4de9_a4db_458e24a327ac rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A device for performing cycling measurements of a battery."@en ;
+                                           skos:prefLabel "BatteryCycler"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_249848f9_308a_40aa_b560_e77cb167da50
+:EMMO_249848f9_308a_40aa_b560_e77cb167da50 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           skos:prefLabel "LFPReferenceElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce
+:EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-15" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery which supplies electric energy to an electric circuit when the normal power supply of this electric circuit is interrupted."@en ;
+                                           skos:altLabel "BackUpBattery"@en ;
+                                           skos:prefLabel "EmergencyBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "battery which supplies electric energy to an electric circuit when the normal power supply of this electric circuit is interrupted."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
+:EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectrochemicalCellContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
+:EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
+                                           skos:prefLabel "ElectrochemicalSubcomponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f
+:EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-13"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery for use in place of an existing battery, giving the same or similar operating and performance characteristics."@en ;
+                                           skos:prefLabel "ReplacementBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "battery for use in place of an existing battery, giving the same or similar operating and performance characteristics."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549
+:EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c
+                                                           ] ;
+                                           skos:prefLabel "LithiumIntercalationElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_382fc4de_b961_42ee_a787_27bbcc647481
+:EMMO_382fc4de_b961_42ee_a787_27bbcc647481 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
+                                           skos:prefLabel "Binder"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a
+:EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60
+                                                           ] ;
+                                           skos:altLabel "PouchBatteryCell"@en ;
+                                           skos:prefLabel "PouchCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567
+:EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-17" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell having, at a specified temperature, an invariant and specific open-circuit voltage, used as a reference voltage."@en ;
+                                           skos:prefLabel "StandardVoltageCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell having, at a specified temperature, an invariant and specific open-circuit voltage, used as a reference voltage."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
+:EMMO_470d4c68_21b3_4405_ac3f_9588c4152437 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 ;
+                                           skos:prefLabel "CurrentCollectorContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f
+:EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
+                                           skos:prefLabel "BatteryEquivalentCircuitModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481
+:EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical interface within a battery cell."@en ;
+                                           skos:prefLabel "BatteryInterface"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_520c9e35_2556_462f_97f1_64750cef37ae
+:EMMO_520c9e35_2556_462f_97f1_64750cef37ae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_5d299271_3f68_494f_ab96_3db9acdd3138 ;
+                                                             owl:someValuesFrom :EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_8e9cf965_9f92_46e8_b678_b50410ce3616 ;
+                                                             owl:someValuesFrom :EMMO_b35895a0_7670_487b_9b39_db9360b7d907
+                                                           ] ;
+                                           skos:prefLabel "LithiumCobaltOxideGraphiteElectrochemicalCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_52ed5408_da62_483d_97d5_a45755022582
+:EMMO_52ed5408_da62_483d_97d5_a45755022582 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
+                                           skos:altLabel "DFNModel"@en ,
+                                                         "DoyleFullerNewmanModel"@en ,
+                                                         "NewmanModel"@en ;
+                                           skos:prefLabel "P2DModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_54d48300_242b_4af8_96b4_d3436450e094
+:EMMO_54d48300_242b_4af8_96b4_d3436450e094 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-18" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "standard voltage cell with a saline electrolyte saturated with cadmium sulphate, a positive electrode of mercury and solid mercurous sulphate, and a negative electrode of amalgamated cadmium and solid cadmium sulphate."@en ;
+                                           skos:prefLabel "WestonStandardVoltageCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_54d48300_242b_4af8_96b4_d3436450e094 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "standard voltage cell with a saline electrolyte saturated with cadmium sulphate, a positive electrode of mercury and solid mercurous sulphate, and a negative electrode of amalgamated cadmium and solid cadmium sulphate."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_55a8a42d_0f83_473d_82b0_32640114b7db
+:EMMO_55a8a42d_0f83_473d_82b0_32640114b7db rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-06" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+                                           skos:prefLabel "ZincChlorideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a saline electrolyte based on zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
+:EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "IonicSubcomponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6256b4c7_243f_4067_a081_dd1eb2160036
+:EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-11" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "selected cell of a battery which is used to assess or represent the average state of parameters of the battery."@en ;
+                                           skos:prefLabel "PilotBatteryCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "selected cell of a battery which is used to assess or represent the average state of parameters of the battery."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
+:EMMO_679f6984_e0dc_4285_9dbb_429c5779590c rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
+                                           skos:prefLabel "ElectrochemicalEquivalentCircuitModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+:EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:someValuesFrom :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-01" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "basic functional unit, consisting of an assembly of electrodes, electrolyte, container, terminals and usually separators, that is a source of electric energy obtained by direct conversion of chemical energy."@en ;
+                                           skos:altLabel "Cell"@en ;
+                                           skos:prefLabel "BatteryCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "basic functional unit, consisting of an assembly of electrodes, electrolyte, container, terminals and usually separators, that is a source of electric energy obtained by direct conversion of chemical energy."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_69173be9_7105_43da_8635_033364616783
+:EMMO_69173be9_7105_43da_8635_033364616783 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-16" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary cell wherein the separator is a starch gel wet with electrolyte."@en ;
+                                           skos:prefLabel "PasteLinedCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_69173be9_7105_43da_8635_033364616783 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "primary cell wherein the separator is a starch gel wet with electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6c481323_498b_42c6_915a_53490f409430
+:EMMO_6c481323_498b_42c6_915a_53490f409430 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
+                                           skos:prefLabel "BatteryMeasurement"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
+:EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc
+                                                           ] ;
+                                           skos:altLabel "SwagelokBatteryCell"@en ;
+                                           skos:prefLabel "SwagelokCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+:EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
+                                                           electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-04" ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electric_battery"@en ;
+                                           skos:altLabel "ElectricBattery"@en ;
+                                           skos:prefLabel "Battery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc
+:EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+                                           skos:prefLabel "SwagelokCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
+:EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "StructuralSubcomponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_78826076_05d5_4cc8_b46b_93418a67c91b
+:EMMO_78826076_05d5_4cc8_b46b_93418a67c91b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-15" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary cell wherein the separator is paper impregnated with electrolyte."@en ;
+                                           skos:prefLabel "PaperLinedCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_78826076_05d5_4cc8_b46b_93418a67c91b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "primary cell wherein the separator is paper impregnated with electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_798806c2_9423_486a_b414_d1e49603c8cd
+:EMMO_798806c2_9423_486a_b414_d1e49603c8cd rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-14" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell stored in a dry state in which the necessary electrolyte is held separately and which may be transferred for activation to the cell, immediately prior to use, by priming or other means."@en ;
+                                           skos:prefLabel "ReserveBatteryCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_798806c2_9423_486a_b414_d1e49603c8cd ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell stored in a dry state in which the necessary electrolyte is held separately and which may be transferred for activation to the cell, immediately prior to use, by priming or other means."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806
+:EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
+                                           skos:prefLabel "IntentionalBatteryProcess"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
+:EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
+                                                           ] ;
+                                           skos:altLabel "Can"@en ;
+                                           skos:prefLabel "CylindricalCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c
+:EMMO_80964bbe_8efd_44d0_b8c8_4939b9dee25c rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Active electrochemical materials suitable for intercalating Li/Li+."@en ;
+                                           skos:prefLabel "LithiumIntercalationMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_882ce749_9869_450d_8563_cb86670e720f
+:EMMO_882ce749_9869_450d_8563_cb86670e720f rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                             owl:someValuesFrom emmo:EMMO_dc33cea5_fe7f_4ad0_8aed_0bf92eee5df6
+                                                           ] ;
+                                           skos:prefLabel "ManganeseDioxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_889c1c23_1d0c_49b6_af52_3ce9644dd2a1
+:EMMO_889c1c23_1d0c_49b6_af52_3ce9644dd2a1 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_22522299_4091_4d1f_82a2_3890492df6db ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-45" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "test carried out to measure the loss of capacity, open-circuit voltage, short-circuit current or other quantities after storage under specified conditions."@en ;
+                                           skos:prefLabel "StorageTest"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_889c1c23_1d0c_49b6_af52_3ce9644dd2a1 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "test carried out to measure the loss of capacity, open-circuit voltage, short-circuit current or other quantities after storage under specified conditions."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0
+:EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-14" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary battery containing an immobilized electrolyte"@en ;
+                                           skos:prefLabel "DryBatteryCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "primary battery containing an immobilized electrolyte"@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
+:EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc ,
+                                                           electrochemistry:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_5f9a9411_05f9_4576_acd3_81d7d41cfe98
+                                                           ] ;
+                                           skos:prefLabel "LithiumIonElectrochemicalCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8
+:EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_22522299_4091_4d1f_82a2_3890492df6db ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-48" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "service test with an uninterrupted discharge."@en ;
+                                           skos:prefLabel "ContinuousServiceTest"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "service test with an uninterrupted discharge."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
+:EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+                                                           ] ;
+                                           skos:prefLabel "BatteryModule"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0
+:EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-01" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery in which atmospheric oxygen serves as the active material at the positive electrode and a metal as the active material of the negative electrode."@en ;
+                                           rdfs:comment "Can be primary or secondary, depending on the design."@en ;
+                                           skos:altLabel "AirMetalElectrochemicalCell"@en ;
+                                           skos:prefLabel "MetalAirElectrochemicalCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2
+:EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
+                                                           ] ;
+                                           skos:prefLabel "Cylindrical18650Cell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71
+:EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
+                                           skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a
+:EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-07" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell such as Leclanché or zinc chloride."@en ;
+                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "LeClanche electrochemical cell, zinc chloride electrochemical cell"@en ;
+                                           skos:prefLabel "ZincCarbonElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell such as Leclanché or zinc chloride."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
+:EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
+                                           skos:prefLabel "Cylindrical18650CellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40
+:EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
+                                                           ] ;
+                                           skos:altLabel "CylindricalBatteryCell"@en ;
+                                           skos:prefLabel "CylindricalCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b
+:EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                                           electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                             owl:someValuesFrom emmo:EMMO_3f183593_33da_44f1_861d_765669f26ce2
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
+                                                                            ] ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_80384f43_8818_42c6_9b1d_7747389a3554
+                                                           ] ;
+                                           skos:prefLabel "LithiumGraphiteElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ada13509_4eed_4e40_a7b1_4cc488144154
+:EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-06" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell containing a non-aqueous electrolyte and a negative electrode of lithium or containing lithium."@en ;
+                                           rdfs:comment "Depending on the design features chosen, a lithium cell may be primary or secondary."@en ;
+                                           skos:prefLabel "LithiumElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell containing a non-aqueous electrolyte and a negative electrode of lithium or containing lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
+:EMMO_b1921f7b_afac_465a_a275_26f929f7f936 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_02ae528a_fe38_4e62_8eb1_64d02354901e
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_52ad5472_29eb_49d5_bff3_bb354a656020
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_7d20b67d_3565_492e_9d59_f29c2c525276
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
+                                                             owl:someValuesFrom emmo:EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
+                                                           ] ;
+                                           skos:prefLabel "BatteryContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b35895a0_7670_487b_9b39_db9360b7d907
+:EMMO_b35895a0_7670_487b_9b39_db9360b7d907 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                                           electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                             owl:someValuesFrom emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
+                                                                            ] ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841
+                                                           ] ;
+                                           skos:prefLabel "LithiumCobaltOxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b
+:EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 ,
+                                                           electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_5d299271_3f68_494f_ab96_3db9acdd3138 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-03"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+                                           skos:prefLabel "AlkalineZincManganeseDioxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with an alkaline electrolyte, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5910d2f_3114_4663_8d46_e418ff859251
+:EMMO_b5910d2f_3114_4663_8d46_e418ff859251 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_615cff2a_be95_4e65_9471_98db23f4c878
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_5d299271_3f68_494f_ab96_3db9acdd3138 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_8e9cf965_9f92_46e8_b678_b50410ce3616 ;
+                                                             owl:someValuesFrom electrochemistry:EMMO_8b40856f_1ca2_4137_9616_7fb624671909
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-02" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with an alkaline electrolyte and a negative electrode of zinc."@en ;
+                                           skos:prefLabel "AlkalineZincAirElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b5910d2f_3114_4663_8d46_e418ff859251 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "metal air electrochemical cell with an alkaline electrolyte and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693
+:EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
+                                           skos:prefLabel "Cylindrical21700CellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
+:EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
+                                           skos:prefLabel "ElectrodeContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124
+:EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427
+                                                           ] ;
+                                           skos:altLabel "ButtonBatteryCell"@en ,
+                                                         "ButtonCell"@en ,
+                                                         "CoinBatteryCell"@en ;
+                                           skos:prefLabel "CoinCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab
+:EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-04" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing silver oxide and a negative electrode of zinc."@en ;
+                                           skos:prefLabel "ZincSilverOxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with an alkaline electrolyte, a positive electrode containing silver oxide and a negative electrode of zinc."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3
+:EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-09" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell with an ionically conducting solid as electrolyte."@en ;
+                                           rdfs:comment "This electrolyte may be for example silver iodide or a polymer salt."@en ;
+                                           skos:prefLabel "SolidElectrolyteElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell with an ionically conducting solid as electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_bae12d7c_2d81_4a86_994a_11f584b91486
+:EMMO_bae12d7c_2d81_4a86_994a_11f584b91486 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 ;
+                                                             owl:someValuesFrom emmo:EMMO_1b0f38b3_2897_42b4_a09e_c04977717bf9
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 ;
+                                                             owl:someValuesFrom emmo:EMMO_432f5038_ab96_4d80_930a_fc5c8baa2337
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 ;
+                                                             owl:someValuesFrom emmo:EMMO_648295d4_7c5a_4aaa_8347_e612dc133d00
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_130997c3_501e_41c0_b4f7_fe4936ff88e3 ;
+                                                             owl:someValuesFrom emmo:EMMO_9dc63b2d_08ff_41c8_9a94_f11feeec5c85
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "a near-neutral aqueous electrolyte containing a mixture of dissolved ammounium chloride and zinc chloride."@en ;
+                                           skos:prefLabel "LeclancheElectrolyte"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b
+:EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_23e6170d_a70b_4de9_a4db_458e24a327ac
+                                                           ] ;
+                                           skos:prefLabel "BatteryCyclerSystem"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236
+:EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
+                                           skos:prefLabel "SaltBridgeContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00
+:EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+                                                           ] ;
+                                           skos:prefLabel "BatteryPack"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
+:EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_149bb81f_e724_42f0_9560_184ff916bdba ;
+                                           skos:prefLabel "ActiveElectrochemicalMaterialContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6
+:EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a ;
+                                                             owl:someValuesFrom :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+                                                           ] ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-23"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """operation by which a battery delivers, to an external electric circuit and under specified conditions, electric energy produced in the cells
+
+-- International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"""@en ;
+                                           skos:altLabel "BatteryDischarge"@en ;
+                                           skos:prefLabel "DischargeOfABattery"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2
+:EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb ;
+                                           skos:prefLabel "LithiumMetalReferenceElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1
+:EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-30" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "gradual and slow spreading of an electrolyte film on the external surface of a cell or battery."@en ;
+                                           rdfs:comment "Electrolyte creep is sometimes indicated by the presence of a visible solid deposit or wet spots."@en ;
+                                           skos:prefLabel "ElectrolyteCreep"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "gradual and slow spreading of an electrolyte film on the external surface of a cell or battery."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
+:EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit."@en ;
+                                           rdfs:comment "Box or enclosure which contains the electrochemical cells, associated connectors and hardware."@en ,
+                                                        "Container is preferred over jar or battery case. A battery container can be a single cell or multicell unit (also called a monoblock). The term jar sometimes implies that it is made of glass, which is rarely the case; the term jar is a slang term."@en ;
+                                           skos:altLabel "BatteryCase"@en ,
+                                                         "Jar"@en ;
+                                           skos:prefLabel "BatteryCellContainer"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit."@en ;
+   dcterms:source "IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"
+ ] .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+   owl:annotatedProperty rdfs:comment ;
+   owl:annotatedTarget "Box or enclosure which contains the electrochemical cells, associated connectors and hardware."@en ;
+   dcterms:references "Crompton, Battery Reference Book, 3rd Edition"
+ ] .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+   owl:annotatedProperty rdfs:comment ;
+   owl:annotatedTarget "Container is preferred over jar or battery case. A battery container can be a single cell or multicell unit (also called a monoblock). The term jar sometimes implies that it is made of glass, which is rarely the case; the term jar is a slang term."@en ;
+   dcterms:source "IEEE Standard Glossary of Stationary Battery Terminology (2016), https://doi.org/10.1109/IEEESTD.2016.7552407"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_da15df91_45aa_429c_a1e7_21f49a281f23
+:EMMO_da15df91_45aa_429c_a1e7_21f49a281f23 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+                                           skos:prefLabel "PrismaticCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dae4c0f0_c3eb_4662_a0df_767e02014053
+:EMMO_dae4c0f0_c3eb_4662_a0df_767e02014053 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-07" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell with an electrolyte consisting of one or more anhydrous molten salts."@en ;
+                                           rdfs:comment "The molten salt may be in a solid (inactivated) state and is activated by heat."@en ;
+                                           skos:prefLabel "MoltenSaltElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_dae4c0f0_c3eb_4662_a0df_767e02014053 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell with an electrolyte consisting of one or more anhydrous molten salts."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883
+:EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-16" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery connected across a direct current supply in order to reduce the effects of power variations of the source."@en ;
+                                           skos:altLabel "BackUpBattery"@en ;
+                                           skos:prefLabel "BufferBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "battery connected across a direct current supply in order to reduce the effects of power variations of the source."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb
+:EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
+                                           skos:prefLabel "MetalReferenceElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
+:EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
+                                           skos:prefLabel "ElectrochemicalContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f
+:EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           skos:prefLabel "ZincAirElectrochemicalCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e939a312_661c_4b21_9651_06f34659e20a
+:EMMO_e939a312_661c_4b21_9651_06f34659e20a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Randles_circuit"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An equivalent electrical circuit that consists of an active electrolyte resistance RS in series with the parallel combination of the double-layer capacitance Cdl and an impedance of a faradaic reaction."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Randles_circuit"@en ;
+                                           skos:prefLabel "RandlesCircuitModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc
+:EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-11" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing copper oxide and a negative electrode of lithium."@en ;
+                                           skos:prefLabel "LithiumCopperOxideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing copper oxide and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427
+:EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
+                                           skos:prefLabel "CoinCellHousing"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2
+:EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
+                                           skos:prefLabel "P4DModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469
+:EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 ;
+                                           skos:prefLabel "ElectrolyteContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f5fea163_410c_4e35_9408_15d5732c9f32
+:EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-13" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous inorganic electrolyte, a positive electrode containing thionyl chloride and a negative electrode of lithium."@en ;
+                                           skos:prefLabel "LithiumThionylChlorideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous inorganic electrolyte, a positive electrode containing thionyl chloride and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3
+:EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_314d0bd5_67ed_437e_a609_36d46147cea7 ;
+                                           skos:prefLabel "BatteryPhenomenon"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847
+:EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-12" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing iron disulphide and a negative electrode of lithium."@en ;
+                                           skos:prefLabel "LithiumIronDisulphideElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing iron disulphide and a negative electrode of lithium."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
