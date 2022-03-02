@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup Python 3.7
       uses: actions/setup-python@v3
@@ -55,7 +55,7 @@ jobs:
         git config pull.rebase false
 
     - name: Checkout GitHub Pages for BattINFO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: gh-pages
         path: ${{ env.ONTODOC_DIR }}/${{ env.TMP_DIR }}/${{ env.PAGES_DIR }}
