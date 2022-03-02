@@ -23,23 +23,18 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Setup Python 3.7
       uses: actions/setup-python@v3
       with:
-        python-version: 3.7
+        python-version: "3.7"
 
-    - name: Install pandoc 2.1.2
+    - name: Install general dependencies
       run: |
         sudo apt-get update
-        #sudo apt-get install pandoc  # we need v2.1.2
-        wget https://github.com/jgm/pandoc/releases/download/2.1.2/pandoc-2.1.2-1-amd64.deb
-        sudo apt-get install -y ./pandoc-2.1.2-1-amd64.deb
-
-    - name: Install other dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y graphviz texlive-xetex texlive-latex-extra
+        sudo apt-get install -y pandoc graphviz texlive-xetex texlive-latex-extra
 
     - name: Install Python dependencies
       run: |
@@ -49,21 +44,16 @@ jobs:
 
     - name: Setup git identity
       run: |
-        cd ${GITHUB_WORKSPACE}
         git config --global user.email "${GIT_USER_EMAIL}"
         git config --global user.name "${GIT_USER_NAME}"
-        git config pull.rebase false
 
-    - name: Checkout GitHub Pages for BattINFO
-      uses: actions/checkout@v3
-      with:
-        ref: gh-pages
-        path: ${{ env.ONTODOC_DIR }}/${{ env.TMP_DIR }}/${{ env.PAGES_DIR }}
-        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        ssh-strict: no
+    - name: Test building GitHub Pages documentation
+      run: |
+        chmod 755 ${GITHUB_WORKSPACE}/${ONTODOC_DIR}/*
+        ${GITHUB_WORKSPACE}/${ONTODOC_DIR}/update-pages.sh TEST
 
     - name: Publish ontologies
       run: python ${GITHUB_WORKSPACE}/.github/utils/publish_ontologies.py
 
     - name: Update GitHub Pages
-      run: ${GITHUB_WORKSPACE}/${ONTODOC_DIR}/update-pages.sh
+      run: ${GITHUB_WORKSPACE}/${ONTODOC_DIR}/update-pages.sh ALREADY_BUILT
