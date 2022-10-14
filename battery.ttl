@@ -39,6 +39,10 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
+###  http://emmo.info/emmo#EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
+emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
 :EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
@@ -775,6 +779,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                                             ] ;
                                                              owl:someValuesFrom electrochemistry:EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841
                                                            ] ;
+                                           skos:altLabel "LCO" ;
                                            skos:prefLabel "LithiumCobaltOxideElectrode"@en .
 
 
@@ -1143,7 +1148,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#PrismaticCell
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#PrismaticCell
 :PrismaticCell rdf:type owl:Class ;
                rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                [ rdf:type owl:Restriction ;
@@ -1151,6 +1156,142 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                  owl:someValuesFrom :EMMO_da15df91_45aa_429c_a1e7_21f49a281f23
                                ] ;
                skos:prefLabel "PrismaticCell"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickel1Manganese1Cobalt1OxideElectrode
+:LithiumNickel1Manganese1Cobalt1OxideElectrode rdf:type owl:Class ;
+                                               rdfs:subClassOf :LithiumNickelManganeseCobaltOxideElectrode ,
+                                                               [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                                 owl:someValuesFrom :LithiumNickel1Manganese1Cobalt1OxideMaterial
+                                                               ] ;
+                                               skos:altLabel "NCM111" ,
+                                                             "NMC111" ;
+                                               skos:prefLabel "LithiumNickel1Manganese1Cobalt1OxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickel1Manganese1Cobalt1OxideMaterial
+:LithiumNickel1Manganese1Cobalt1OxideMaterial rdf:type owl:Class ;
+                                              rdfs:subClassOf :LithiumNickelManganeseCobaltOxideMaterial ;
+                                              skos:altLabel "NCM111" ,
+                                                            "NMC111" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickel6Manganese2Cobalt2OxideElectrode
+:LithiumNickel6Manganese2Cobalt2OxideElectrode rdf:type owl:Class ;
+                                               rdfs:subClassOf :LithiumNickelManganeseCobaltOxideElectrode ,
+                                                               [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                                 owl:someValuesFrom :LithiumNickel6Manganese2Cobalt2OxideMaterial
+                                                               ] ;
+                                               skos:altLabel "NCM622" ,
+                                                             "NMC622" ;
+                                               skos:prefLabel "LithiumNickel6Manganese2Cobalt2OxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickel6Manganese2Cobalt2OxideMaterial
+:LithiumNickel6Manganese2Cobalt2OxideMaterial rdf:type owl:Class ;
+                                              rdfs:subClassOf :LithiumNickelManganeseCobaltOxideMaterial ;
+                                              skos:altLabel "NCM622" ,
+                                                            "NMC622" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickel8Manganese1Cobalt1OxideElectrode
+:LithiumNickel8Manganese1Cobalt1OxideElectrode rdf:type owl:Class ;
+                                               rdfs:subClassOf :LithiumNickelManganeseCobaltOxideElectrode ,
+                                                               [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                                 owl:someValuesFrom :LithiumNickel8Manganese1Cobalt1OxideMaterial
+                                                               ] ;
+                                               skos:altLabel "NCM811" ,
+                                                             "NMC811" ;
+                                               skos:prefLabel "LithiumNickel8Manganese1Cobalt1OxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickel8Manganese1Cobalt1OxideMaterial
+:LithiumNickel8Manganese1Cobalt1OxideMaterial rdf:type owl:Class ;
+                                              rdfs:subClassOf :LithiumNickelManganeseCobaltOxideMaterial ;
+                                              skos:altLabel "NCM811" ,
+                                                            "NMC811" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelCobaltAluminumOxideElectrode
+:LithiumNickelCobaltAluminumOxideElectrode rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                                           electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                             owl:someValuesFrom :LithiumNickelCobaltAluminumOxideMaterial
+                                                           ] ;
+                                           skos:altLabel "NCA" ;
+                                           skos:prefLabel "LithiumNickelCobaltAluminumOxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelCobaltAluminumOxideMaterial
+:LithiumNickelCobaltAluminumOxideMaterial rdf:type owl:Class ;
+                                          rdfs:subClassOf emmo:EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                          skos:altLabel "NCA" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelManganeseCobaltOxideElectrode
+:LithiumNickelManganeseCobaltOxideElectrode rdf:type owl:Class ;
+                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                                            electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                                            [ rdf:type owl:Restriction ;
+                                                              owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                              owl:someValuesFrom :LithiumNickelManganeseCobaltOxideMaterial
+                                                            ] ;
+                                            skos:altLabel "NCM"@en ,
+                                                          "NMC" ;
+                                            skos:prefLabel "LithiumNickelManganeseCobaltOxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelManganeseCobaltOxideMaterial
+:LithiumNickelManganeseCobaltOxideMaterial rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                           skos:altLabel "NCM" ,
+                                                         "NMC" .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelOxideElectrode
+:LithiumNickelOxideElectrode rdf:type owl:Class ;
+                             rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                             electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                             [ rdf:type owl:Restriction ;
+                                               owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                               owl:someValuesFrom :LithiumNickelOxideMaterial
+                                             ] ;
+                             skos:altLabel "LNO" ;
+                             skos:prefLabel "LithiumNickelOxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelOxideMaterial
+:LithiumNickelOxideMaterial rdf:type owl:Class ;
+                            rdfs:subClassOf emmo:EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                            skos:altLabel "LNO" ;
+                            skos:prefLabel "LithiumNickelOxideMaterial"@en .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( emmo:EMMO_3f183593_33da_44f1_861d_765669f26ce2
+                emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
+                :LithiumNickelCobaltAluminumOxideMaterial
+                :LithiumNickelManganeseCobaltOxideMaterial
+                :LithiumNickelOxideMaterial
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :LithiumNickel1Manganese1Cobalt1OxideMaterial
+                :LithiumNickel6Manganese2Cobalt2OxideMaterial
+                :LithiumNickel8Manganese1Cobalt1OxideMaterial
+              )
+] .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
