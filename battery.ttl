@@ -1253,6 +1253,25 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
                                                          "NMC" .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelManganeseOxideElectrode
+:LithiumNickelManganeseOxideElectrode rdf:type owl:Class ;
+                                      rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                                      electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                                      [ rdf:type owl:Restriction ;
+                                                        owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                        owl:someValuesFrom :LithiumNickelManganeseOxideMaterial
+                                                      ] ;
+                                      skos:altLabel "LNMO" ;
+                                      skos:prefLabel "LithiumNickelManganeseOxideElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelManganeseOxideMaterial
+:LithiumNickelManganeseOxideMaterial rdf:type owl:Class ;
+                                     rdfs:subClassOf emmo:EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                     skos:altLabel "LNMO" ;
+                                     skos:prefLabel "LithiumNickelManganeseOxideMaterial"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumNickelOxideElectrode
 :LithiumNickelOxideElectrode rdf:type owl:Class ;
                              rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
@@ -1270,6 +1289,21 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
                             rdfs:subClassOf emmo:EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
                             skos:altLabel "LNO" ;
                             skos:prefLabel "LithiumNickelOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumSiliconGraphiteBlendMaterial
+:LithiumSiliconGraphiteBlendMaterial rdf:type owl:Class ;
+                                     rdfs:subClassOf emmo:EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO/battery#LithiumSiliconGraphiteElectrode
+:LithiumSiliconGraphiteElectrode rdf:type owl:Class ;
+                                 rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
+                                                 electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ,
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty electrochemistry:EMMO_860aa941_5ff9_4452_8a16_7856fad07bee ;
+                                                   owl:someValuesFrom :LithiumSiliconGraphiteBlendMaterial
+                                                 ] .
 
 
 #################################################################
