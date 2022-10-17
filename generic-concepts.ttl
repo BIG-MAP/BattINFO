@@ -3220,6 +3220,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                              owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
                                                              owl:someValuesFrom :EMMO_8f0cb3b9_f29e_4a4b_905a_3b5a012466ec
                                                            ] ;
+                                           skos:altLabel "LCO"@en ;
                                            skos:prefLabel "LithiumCobaltOxideMaterial"@en .
 
 
@@ -7688,19 +7689,81 @@ Q=qT"""@en ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#ActivationEnergy
-<https://big-map.github.io/BattINFO/ontology/BattINFO#ActivationEnergy> rdf:type owl:Class .
-
-
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EnergyPerAmountDimension
+###  http://emmo.info/emmo#EnergyPerAmountDimension
 :EnergyPerAmountDimension rdf:type owl:Class ;
                           rdfs:subClassOf :EMMO_9895a1b4_f0a5_4167_ac5e_97db40b8bfcc .
 
 
-###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#MeanParticleRadius
+###  http://emmo.info/emmo#MeanParticleRadius
 :MeanParticleRadius rdf:type owl:Class ;
                     rdfs:subClassOf :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 ;
                     skos:prefLabel "MeanParticleRadius"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#ActivationEnergy
+<https://big-map.github.io/BattINFO/ontology/BattINFO#ActivationEnergy> rdf:type owl:Class .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumIronPhosphateMaterial
+:LithiumIronPhosphateMaterial rdf:type owl:Class ;
+                              rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                              skos:altLabel "LFP"@en ;
+                              skos:prefLabel "LithiumIronPhosphateMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumMetalMaterial
+:LithiumMetalMaterial rdf:type owl:Class ;
+                      rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
+                      skos:prefLabel "LithiumMetalMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickel1Manganese1Cobalt1OxideMaterial
+:LithiumNickel1Manganese1Cobalt1OxideMaterial rdf:type owl:Class ;
+                                              rdfs:subClassOf :LithiumNickelManganeseCobaltOxideMaterial .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickel6Manganese2Cobalt2OxideMaterial
+:LithiumNickel6Manganese2Cobalt2OxideMaterial rdf:type owl:Class ;
+                                              rdfs:subClassOf :LithiumNickelManganeseCobaltOxideMaterial .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickel8Manganese1Cobalt1OxideMaterial
+:LithiumNickel8Manganese1Cobalt1OxideMaterial rdf:type owl:Class ;
+                                              rdfs:subClassOf :LithiumNickelManganeseCobaltOxideMaterial .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickelCobaltAluminumOxideMaterial
+:LithiumNickelCobaltAluminumOxideMaterial rdf:type owl:Class ;
+                                          rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                          skos:altLabel "NCM"@en ,
+                                                        "NMC"@en ;
+                                          skos:prefLabel "LithiumNickelCobaltAluminumOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickelManganeseCobaltOxideMaterial
+:LithiumNickelManganeseCobaltOxideMaterial rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickelManganeseOxideMaterial
+:LithiumNickelManganeseOxideMaterial rdf:type owl:Class ;
+                                     rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                     skos:altLabel "LNMO"@en ;
+                                     skos:prefLabel "LithiumNickelManganeseOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumNickelOxideMaterial
+:LithiumNickelOxideMaterial rdf:type owl:Class ;
+                            rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                            skos:altLabel "LNO"@en ;
+                            skos:prefLabel "LithiumNickelOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#LithiumTitaniumOxideMaterial
+:LithiumTitaniumOxideMaterial rdf:type owl:Class ;
+                              rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                              skos:altLabel "LTO"@en ;
+                              skos:prefLabel "LithiumTitaniumOxideMaterial"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
