@@ -3516,5 +3516,53 @@ of other configurations are used."""@en ;
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15325775_6d4c_4192_82f1_e4feca9de426
+:EMMO_15325775_6d4c_4192_82f1_e4feca9de426 rdf:type owl:Class ;
+                                           rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0> ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "IonExchangeMembrane"@en .
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_58413d4e_2885_459e_ac06_8d45e661cf91
+:EMMO_58413d4e_2885_459e_ac06_8d45e661cf91 rdf:type owl:Class ;
+                                           rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0> ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "PorousSeparator"@en .
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b2d11f0d_c1b0_4476_8d17_03b73d31e01f
+:EMMO_b2d11f0d_c1b0_4476_8d17_03b73d31e01f rdf:type owl:Class ;
+                                           rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0> ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "AsymmetricMembrane"@en .
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f1c7eacb_9f21_4100_925c_3974f266e06f
+:EMMO_f1c7eacb_9f21_4100_925c_3974f266e06f rdf:type owl:Class ;
+                                           rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0> ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "BilayerMembrane"@en .
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f54474fc_5d07_474b_97ae_f5d0349363b4
+:EMMO_f54474fc_5d07_474b_97ae_f5d0349363b4 rdf:type owl:Class ;
+                                           rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/electrochemistry#ElectrochemicalFlowCell> ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "HybridFlowCell"@en .
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#ElectrochemicalFlowCell
+<https://big-map.github.io/BattINFO/ontology/electrochemistry#ElectrochemicalFlowCell> rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0> ,
+                                                                                                       [ rdf:type owl:Restriction ;
+                                                                                                         owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                                                                         owl:someValuesFrom :EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514
+                                                                                                       ] ,
+                                                                                                       [ rdf:type owl:Restriction ;
+                                                                                                         owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                                                                         owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be>
+                                                                                                       ] ,
+                                                                                                       [ rdf:type owl:Restriction ;
+                                                                                                         owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                                                                         owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706>
+                                                                                                       ] ,
+                                                                                                       [ rdf:type owl:Restriction ;
+                                                                                                         owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                                                                         owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0>
+                                                                                                       ] ,
+                                                                                                       [ rdf:type owl:Restriction ;
+                                                                                                         owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                                                                         owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_865a40fc_2187_4549_a7e1_37aa2458448f>
+                                                                                                       ] .
+
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

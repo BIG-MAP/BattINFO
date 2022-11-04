@@ -7702,5 +7702,91 @@ Q=qT"""@en ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-13" ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
 
+###  http://emmo.info/emmo#EMMO_2efd86cf_1144_4f75_9e69_83e8de73f37a
+:EMMO_2efd86cf_1144_4f75_9e69_83e8de73f37a rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514 ,
+                                                           <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb> ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> "component located on each of the two ends of the fuel cell stack, serving to transmit the required compression to the stacked cells" ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "EndPlate"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_2efd86cf_1144_4f75_9e69_83e8de73f37a ;
+   owl:annotatedProperty <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> ;
+   owl:annotatedTarget "component located on each of the two ends of the fuel cell stack, serving to transmit the required compression to the stacked cells" ;
+   <http://emmo.info/emmo#EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f> "485-06-06" ;
+   <http://purl.org/dc/terms/source> "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=485-06-06"
+ ] .
+
+
+###  http://emmo.info/emmo#EMMO_2ffed6eb_483a_4eec_8a35_966e705312e7
+:EMMO_2ffed6eb_483a_4eec_8a35_966e705312e7 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514 ,
+                                                           <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb> ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> "A thick metallic plate having seals built into its faces, a very short waveguide section normal to those faces, and locating bolt holes normal to those faces to allow for mounting between mating waveguide flanges" ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "Gasket"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_2ffed6eb_483a_4eec_8a35_966e705312e7 ;
+   owl:annotatedProperty <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> ;
+   owl:annotatedTarget "A thick metallic plate having seals built into its faces, a very short waveguide section normal to those faces, and locating bolt holes normal to those faces to allow for mounting between mating waveguide flanges" ;
+   <http://emmo.info/emmo#EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f> "726-08-18" ;
+   <http://purl.org/dc/terms/source> "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=726-08-18"
+ ] .
+
+###  http://emmo.info/emmo#EMMO_50734932_c127_41ec_98a3_9b9b48af9c1c
+:EMMO_50734932_c127_41ec_98a3_9b9b48af9c1c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> "Machine which circulates electrolytes between the cell stack and the resevoirs." ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "Pump"@en .
+
+###  http://emmo.info/emmo#EMMO_1b530fc6_dcfc_4ef2_aa72_1f115a02cb51
+:EMMO_1b530fc6_dcfc_4ef2_aa72_1f115a02cb51 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e7b7c17a_2f9b_4e2e_b4b1_0c5f281654b9 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                             owl:someValuesFrom <http://emmo.info/emmo#EMMO_ad3b994f_0ea6_4529_b863_3ff9110d6abe>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be>
+                                                           ] ;
+                                           owl:disjointWith :EMMO_c9c213cb_778c_4fa6_813e_4e8602f629fc ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> "Tank to store the catholyte" ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "CatholyteTank"@en .
+
+
+###  http://emmo.info/emmo#EMMO_c9c213cb_778c_4fa6_813e_4e8602f629fc
+:EMMO_c9c213cb_778c_4fa6_813e_4e8602f629fc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_e7b7c17a_2f9b_4e2e_b4b1_0c5f281654b9 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                             owl:someValuesFrom <http://emmo.info/emmo#EMMO_ccca85a5_8a24_4591_93ee_1f137a386bab>
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty <http://emmo.info/emmo#EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f> ;
+                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_865a40fc_2187_4549_a7e1_37aa2458448f>
+                                                           ] ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> "Tank to store the anolyte." ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "AnolyteTank"@en .
+
+
+###  http://emmo.info/emmo#EMMO_e7b7c17a_2f9b_4e2e_b4b1_0c5f281654b9
+:EMMO_e7b7c17a_2f9b_4e2e_b4b1_0c5f281654b9 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> "Tank to store the anolyte and catolyte." ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "EnergyStorageTank"@en .
+
+
+###  http://emmo.info/emmo#EMMO_ebcd4c44_d594_42a5_8cfa_03af8651c343
+:EMMO_ebcd4c44_d594_42a5_8cfa_03af8651c343 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514 ;
+                                           <http://emmo.info/emmo#EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9> """3D Pattern in wich electrolyte is distributed over space and time trough the electrochemical flowcell. 
+
+See
+https://doi.org/10.1016/j.jpowsour.2018.09.09334""" ;
+                                           <http://www.w3.org/2004/02/skos/core#prefLabel> "Flowfield"@en .
+
+
+
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
