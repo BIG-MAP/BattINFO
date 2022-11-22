@@ -15,9 +15,7 @@
                                                         owl:versionIRI <https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/battinfo.ttl> ;
                                                         owl:imports <https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/battery/battery.ttl> ;
                                                         dcterms:abstract """A battery interface domain ontology based on EMMO.
-
 This file is intended to be empty and merely collecting the other ontologies.
-
 Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
                                                         dcterms:contributor "Denmark Technical University (DTU), DK"@en ,
                                                                             "EPFL, CH"@en ,
