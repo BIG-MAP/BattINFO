@@ -39,10 +39,6 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  http://emmo.info/emmo#EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb
-emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
 :EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
@@ -81,7 +77,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0ee5a1ee_2684_4adb_bee1_5b542665ba3c
 :EMMO_0ee5a1ee_2684_4adb_bee1_5b542665ba3c rdf:type owl:Class ;
-                                           rdfs:subClassOf electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
+                                           rdfs:subClassOf electrochemistry:EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
                                            skos:prefLabel "LithiumMetalElectrode"@en .
 
 
@@ -302,8 +298,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_35622b13_7ebb_4b29_9d05_0f0f5cc063f2
 :EMMO_35622b13_7ebb_4b29_9d05_0f0f5cc063f2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 ;
-                                           skos:altLabel "NCM811" ,
-                                                         "NMC811" ;
+                                           skos:altLabel "NCM811Electrode" ;
                                            skos:prefLabel "LithiumNickel8Manganese1Cobalt1OxideElectrode"@en .
 
 
@@ -311,7 +306,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 :EMMO_3574fc7e_b831_4fda_a765_5ae109633926 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           skos:altLabel "NCA" ;
+                                           skos:altLabel "NCAElectrode" ;
                                            skos:prefLabel "LithiumNickelCobaltAluminumOxideElectrode"@en .
 
 
@@ -335,8 +330,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3cfe22eb_f29c_4df9_b53a_f636ab371ff0
 :EMMO_3cfe22eb_f29c_4df9_b53a_f636ab371ff0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 ;
-                                           skos:altLabel "NCM622" ,
-                                                         "NMC622" ;
+                                           skos:altLabel "NCM622Electrode" ;
                                            skos:prefLabel "LithiumNickel6Manganese2Cobalt2OxideElectrode"@en .
 
 
@@ -344,8 +338,8 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           skos:altLabel "NCM"@en ,
-                                                         "NMC" ;
+                                           skos:altLabel "NCMElectrode"@en ,
+                                                         "NMCElectrode" ;
                                            skos:prefLabel "LithiumNickelManganeseCobaltOxideElectrode"@en .
 
 
@@ -505,7 +499,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88
 :EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           skos:altLabel "LTO"@en ;
+                                           skos:altLabel "LTOElectrode"@en ;
                                            skos:prefLabel "LithiumTitaniumOxideElectrode"@en .
 
 
@@ -616,7 +610,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 :EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           skos:altLabel "LNMO" ;
+                                           skos:altLabel "LNMOElectrode" ;
                                            skos:prefLabel "LithiumNickelManganeseOxideElectrode"@en .
 
 
@@ -656,7 +650,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 :EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           skos:altLabel "LFP"@en ;
+                                           skos:altLabel "LFPElectrode"@en ;
                                            skos:prefLabel "LithiumIronPhosphateElectrode"@en .
 
 
@@ -837,7 +831,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
                                                                             ] ;
                                                              owl:someValuesFrom electrochemistry:EMMO_66c74bec_dbfb_43c2_a23a_5b6000f1b841
                                                            ] ;
-                                           skos:altLabel "LCO" ;
+                                           skos:altLabel "LCOElectrode" ;
                                            skos:prefLabel "LithiumCobaltOxideElectrode"@en .
 
 
@@ -1000,8 +994,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_be91105d_952e_4f84_b91a_087b92448e6d
 :EMMO_be91105d_952e_4f84_b91a_087b92448e6d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 ;
-                                           skos:altLabel "NCM111" ,
-                                                         "NMC111" ;
+                                           skos:altLabel "NCM111Electrode" ;
                                            skos:prefLabel "LithiumNickel1Manganese1Cobalt1OxideElectrode"@en .
 
 
@@ -1134,7 +1127,7 @@ emmo:EMMO_63c34c0a_83c7_4afb_b23e_27f332223dfb skos:altLabel "LCO" .
 :EMMO_e390be61_f813_400b_8b12_22f55b63f1da rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            electrochemistry:EMMO_7aa79b12-6b34-4724-9728-f31b5f7ed83d ;
-                                           skos:altLabel "LNO" ;
+                                           skos:altLabel "LNOElectrode" ;
                                            skos:prefLabel "LithiumNickelOxideElectrode"@en .
 
 
