@@ -254,23 +254,15 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_47ab1dad_cc09_4fd8_af23_acb36fb680dd
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
+                                                             owl:someValuesFrom emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c45315c9_f0a0_4a73_87bf_70ed22bf6642>
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_5ceab41b_2aea_4041_9e9c_a243f7562cee ;
@@ -279,10 +271,6 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_9a084aa3_3d5a_4a62_9fc0_fd88937a19c5 ;
                                                              owl:someValuesFrom :EMMO_fb0d9eef_92af_4628_8814_e065ca255d59
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
-                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
@@ -440,19 +428,6 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
    owl:annotatedTarget "instrument intended to measure the value of a voltage."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1375560e_dec2_491c_93ac_613a1d905008
-:EMMO_1375560e_dec2_491c_93ac_613a1d905008 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_8b40856f_1ca2_4137_9616_7fb624671909 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
-                                                                            ] ;
-                                                             owl:someValuesFrom :EMMO_4f4c61a2_b823_4c36_ace2_141fcb9355d5
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An air electrode that is designed to perform both the oxygen reduction reaction (ORR) and the oxygen evolution reaction (OER)."@en ;
-                                           skos:altLabel "BAE"@en ;
-                                           skos:prefLabel "BifunctionalAirElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee
@@ -691,17 +666,6 @@ Aluminum foil"""@en ;
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
-:EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty [ owl:inverseOf emmo:EMMO_ae2d1a96_bfa1_409a_a7d2_03d69e8a125a
-                                                                            ] ;
-                                                             owl:someValuesFrom :EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
-                                                           ] ;
-                                           skos:prefLabel "ZincElectrode"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f
 :EMMO_2d32a81a_2148_41bd_84fb_467aa8de4a8f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
@@ -918,22 +882,6 @@ Aluminum foil"""@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A working electrode in the shape of a ring used in a rotating ring disk electrode (RRDE)."@en ;
                                            skos:altLabel "RingElectrode"@en ;
                                            skos:prefLabel "AnnularWorkingElectrode"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
-:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-02" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell which is not designed to be electrically recharged."@en ;
-                                           skos:altLabel "PrimaryCell"@en ;
-                                           skos:prefLabel "PrimaryElectrochemicalCell"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "An electrochemical cell which is not designed to be electrically recharged."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3d805c2a_4801_440e_9e4d_0fa5585c76ae
@@ -1457,7 +1405,7 @@ Aluminum foil"""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88
 :EMMO_670360fd_7cf9_4fe7_a9b5_c966f668ec88 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                           rdfs:subClassOf :EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_99f21272_3aba_4dab_a9b7_63e5e1116beb
@@ -1649,13 +1597,14 @@ The reason for this is that combining the transitivity property of hasPart with 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c
 :EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                           rdfs:subClassOf :EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
                                                              owl:someValuesFrom :EMMO_3f0a19ba_d90c_4ed3_b2e6_b5e16d594af1
                                                            ] ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrode at which the predominant electrochemical reaction is an intercalation."@en ;
-                                           skos:prefLabel "IntercalationElectrode"@en .
+                                           skos:altLabel "IntercalationElectrode"@en ;
+                                           skos:prefLabel "InsertionElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_75f89f06_1c23_4e40_8654_403c21e5a66f
@@ -2105,7 +2054,8 @@ Conducting Additive"""@en ;
                                                            ] ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-05"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "interface between an electrolyte and an electrode where an electrode reaction takes place."@en ;
-                                           skos:prefLabel "ActiveSurfaceOfAnElectrode"@en .
+                                           skos:altLabel "ActiveSurfaceOfAnElectrode"@en ;
+                                           skos:prefLabel "ElectrodeElectrolyteInterface"@en .
 
 [ rdf:type owl:Axiom ;
    owl:annotatedSource :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d ;
@@ -2150,10 +2100,6 @@ Conducting Additive"""@en ;
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c
 :EMMO_9da958fc_f76d_4654_8a78_99b5f98c118c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
-                                                             owl:someValuesFrom :EMMO_637c576e_a50e_47ae_8c74_2024ce4c6d0f
-                                                           ] ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_b2282816_b7a3_44c6_b2cb_3feff1ceb7fe ;
                                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -2239,9 +2185,10 @@ Conducting Additive"""@en ;
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543
 :EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           owl:disjointWith :EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-08"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode that serves only as a source or sink for electrons without playing a chemical role in the electrode reaction."@en ;
-                                           rdfs:comment "Noble metals, mercury, and carbon are typically used as inert electrodes."@en ;
+                                           rdfs:comment "Noble metals, mercury, and carbon are typically used as (nearly) inert electrodes."@en ;
                                            skos:prefLabel "InertElectrode"@en .
 
 [ rdf:type owl:Axiom ;
@@ -2462,22 +2409,6 @@ Conducting Additive"""@en ;
 :EMMO_aff732a9_238a_4734_977c_b2ba202af126 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
                                            skos:prefLabel "PositiveElectrode"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc
-:EMMO_b0413a83_d22f_48a4_b5f4_e4a7d88765bc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_5d299271_3f68_494f_ab96_3db9acdd3138 ;
-                                                             owl:someValuesFrom :EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_8e9cf965_9f92_46e8_b678_b50410ce3616 ;
-                                                             owl:someValuesFrom :EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell in which the predominant reaction mechanisms at both electrodes are intercalations."@en ;
-                                           emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Li-ion cell"@en ;
-                                           skos:prefLabel "IntercalationCell"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b07ae264_719c_4830_b31b_59e1b893d900
@@ -2723,9 +2654,26 @@ of other configurations are used."""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3
+:EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-09" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell with an ionically conducting solid as electrolyte."@en ;
+                                           rdfs:comment "This electrolyte may be for example silver iodide or a polymer salt."@en ;
+                                           skos:prefLabel "SolidElectrolyteElectrochemicalCell"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_baa09ba6_d214_4a8a_808a_5bcbd46e52c3 ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "cell with an ionically conducting solid as electrolyte."@en ;
+   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215
 :EMMO_bbb1d95b_72d1_44f6_b07e_a3d7d41ac215 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 ,
+                                                           :EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543 ,
                                                            [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec ;
                                                              owl:someValuesFrom :EMMO_a3b53904_22b1_42a9_a515_c8a3aed7e841
@@ -2850,7 +2798,7 @@ of other configurations are used."""@en ;
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_c4a778c7_33da_4e1a_960e_402a210bfeff
 :EMMO_c4a778c7_33da_4e1a_960e_402a210bfeff rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
+                                           rdfs:subClassOf :EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-03-16"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Platinized platinum electrode saturated by a stream of pure gaseous hydrogen."@en ;
                                            rdfs:comment "A platinized platinum electrode consists of a platinum rod covered by compact platinum powder called platinum black."@en ;
@@ -3224,21 +3172,6 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "SolidElectrolyteInterphase"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
-:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell which is designed to be electrically recharged."@en ;
-                                           skos:altLabel "SecondaryCell"@en ;
-                                           skos:prefLabel "SecondaryElectrochemicalCell"@en .
-
-[ rdf:type owl:Axiom ;
-   owl:annotatedSource :EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 ;
-   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
-   owl:annotatedTarget "An electrochemical cell which is designed to be electrically recharged."@en ;
-   dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
- ] .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_efc4f7ab_850d_443c_a17f_184983021f96
 :EMMO_efc4f7ab_850d_443c_a17f_184983021f96 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_52bbaaee_1145_4be3_8a5c_b366851ea1b9 ;
@@ -3515,6 +3448,43 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_403c300e_09b9_400b_943b_04e82a3cfb56
+:EMMO_403c300e_09b9_400b_943b_04e82a3cfb56 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A porous electrode which is coated onto a non-porous substrate, typically a metallic foil current collector."@en ;
+                                           skos:prefLabel "PorousElectrodeCoating"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_92147e31_d015_4889_a092_04fbab033f15
+:EMMO_92147e31_d015_4889_a092_04fbab033f15 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
+                                                             owl:someValuesFrom :EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode which consists of an active material coating on one or more sides a current collector substrate."@en ;
+                                           skos:prefLabel "CoatedElectrode"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc
+:EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
+                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
+                                                           ] ;
+                                           skos:altLabel "ReactiveElectrode" ;
+                                           skos:prefLabel "NonInertElectrode"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
