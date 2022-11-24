@@ -529,6 +529,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty ;
                                            skos:prefLabel "ElectricResistorModel"@en .
 
 
+###  http://emmo.info/emmo#EMMO_0972cb08_48bd_4524_ac03_8a2e7f30f02f
+:EMMO_0972cb08_48bd_4524_ac03_8a2e7f30f02f rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_23b579e1_8088_45b5_9975_064014026c42 ;
+                                                             owl:hasValue "T-2 L+2 M+1 I0 Θ-1 N-1 J0"
+                                                           ] .
+
+
 ###  http://emmo.info/emmo#EMMO_09f0619a_d584_4747_b0a1_e53f729e2460
 :EMMO_09f0619a_d584_4747_b0a1_e53f729e2460 rdf:type owl:Class ;
                                            owl:equivalentClass [ rdf:type owl:Restriction ;
@@ -1609,9 +1616,8 @@ Eij = δij"""@en ;
 
 ###  http://emmo.info/emmo#EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56
 :EMMO_2f761aff_88d1_4e79_a85e_09d6f400de56 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ,
-                                                           :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ;
-                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The energy barrier for diffusion of a given component."@en ;
+                                           rdfs:subClassOf :EMMO_a06e3d38_1aa8_4f45_89a8_722dbacfda24 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The energy barrier for diffusion of a particle within a given component."@en ;
                                            skos:prefLabel "SingleComponentActivationEnergyOfDiffusion"@en .
 
 
@@ -3272,6 +3278,7 @@ a multiplication is defined by (a1, b1)×(a2, b2)=(a1a2−b1b2, a1b2+a2b1)
                                                              owl:onProperty :EMMO_b3ccab7f_f748_4940_b37e_ffb40a8d219f ;
                                                              owl:someValuesFrom :EMMO_8f0cb3b9_f29e_4a4b_905a_3b5a012466ec
                                                            ] ;
+                                           skos:altLabel "LCO"@en ;
                                            skos:prefLabel "LithiumCobaltOxideMaterial"@en .
 
 
@@ -7754,6 +7761,86 @@ https://doi.org/10.1016/j.jpowsour.2018.09.09334""" ;
                                                            ] ;
                                            :EMMO_8de5d5bf_db1c_40ac_b698_095ba3b18578 "12-13" ;
                                            skos:prefLabel "ThermodynamicGrueneisenParameter"@en .
+
+
+###  http://emmo.info/emmo#MeanParticleRadius
+:MeanParticleRadius rdf:type owl:Class ;
+                    rdfs:subClassOf :EMMO_32dcd601_47c7_4028_b7fa_5e972ae57f12 ;
+                    skos:prefLabel "MeanParticleRadius"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3202d960_ad76_4f76_bc1b_406154d4907f
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3202d960_ad76_4f76_bc1b_406154d4907f> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                                                                                 skos:altLabel "LTO"@en ;
+                                                                                                 skos:prefLabel "LithiumTitaniumOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4398a570_26b3_4eca_ab72_92c69053438e
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4398a570_26b3_4eca_ab72_92c69053438e> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bbae61c_ef63_462c_80c6_e00b633c5377> ;
+                                                                                                 skos:prefLabel "LithiumNickel6Manganese2Cobalt2OxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bbae61c_ef63_462c_80c6_e00b633c5377
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bbae61c_ef63_462c_80c6_e00b633c5377> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                                                                                 skos:prefLabel "LithiumNickelManganeseCobaltOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_665afe01_c639_4d5c_a92f_b84efb94552a
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_665afe01_c639_4d5c_a92f_b84efb94552a> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bbae61c_ef63_462c_80c6_e00b633c5377> ;
+                                                                                                 skos:prefLabel "LithiumNickel8Manganese1Cobalt1OxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6735320f_7c74_430f_a92c_791d5400f1ab
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6735320f_7c74_430f_a92c_791d5400f1ab> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                                                                                 skos:altLabel "LNMO"@en ;
+                                                                                                 skos:prefLabel "LithiumNickelManganeseOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6820fb31_4f37_49cf_9c13_a1f35d9f8314
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6820fb31_4f37_49cf_9c13_a1f35d9f8314> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_4207e895_8b83_4318_996a_72cfb32acd94 ;
+                                                                                                 skos:altLabel "Li"@en ;
+                                                                                                 skos:prefLabel "LithiumMetalMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_919653fc_1fb4_4482_8086_cb09e34b991e
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_919653fc_1fb4_4482_8086_cb09e34b991e> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                                                                                 skos:altLabel "LNO"@en ;
+                                                                                                 skos:prefLabel "LithiumNickelOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_920422ff_ddb5_4adc_a176_dbb5b06a4577
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_920422ff_ddb5_4adc_a176_dbb5b06a4577> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                                                                                 skos:altLabel "NCM"@en ,
+                                                                                                               "NMC"@en ;
+                                                                                                 skos:prefLabel "LithiumNickelCobaltAluminumOxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f1f71e8d_471b_4d92_9906_5a94807a207b
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f1f71e8d_471b_4d92_9906_5a94807a207b> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf :EMMO_3e66ee3d_056d_48a5_b85e_48ebbeb8d679 ;
+                                                                                                 skos:altLabel "LFP"@en ;
+                                                                                                 skos:prefLabel "LithiumIronPhosphateMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f81322b2_63a3_41e4_bf8d_79d899222e3d
+<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f81322b2_63a3_41e4_bf8d_79d899222e3d> rdf:type owl:Class ;
+                                                                                                 rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bbae61c_ef63_462c_80c6_e00b633c5377> ;
+                                                                                                 skos:prefLabel "LithiumNickel1Manganese1Cobalt1OxideMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c45315c9_f0a0_4a73_87bf_70ed22bf6642
+:EMMO_c45315c9_f0a0_4a73_87bf_70ed22bf6642 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890 ;
+                                           :EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Projected area of a face of a 3D object."@en ;
+                                           skos:prefLabel "FaceArea"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
