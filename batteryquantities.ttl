@@ -1,4 +1,4 @@
-@prefix : <https://big-map.github.io/BattINFO/ontology/BattINFO#> .
+@prefix : <https://big-map.github.io/BattINFO/ontology/battery#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -40,7 +40,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0c31eae9_725c_4ff3_bfda_ce0124ec0f26
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_0c31eae9_725c_4ff3_bfda_ce0124ec0f26
 :EMMO_0c31eae9_725c_4ff3_bfda_ce0124ec0f26 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ,
                                                            [ rdf:type owl:Restriction ;
@@ -50,7 +50,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "CycleNumber"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_17591da0_34ec_41b9_b3c1_3a4446dc6f0a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_17591da0_34ec_41b9_b3c1_3a4446dc6f0a
 :EMMO_17591da0_34ec_41b9_b3c1_3a4446dc6f0a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/State_of_charge"@en ;
@@ -58,7 +58,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "StateOfCharge"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_22353114_9b0a_42d1_b96c_3a702c273e2d
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_22353114_9b0a_42d1_b96c_3a702c273e2d
 :EMMO_22353114_9b0a_42d1_b96c_3a702c273e2d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
                                            emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Depth_of_discharge"@en ;
@@ -66,14 +66,14 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "DepthOfDischarge"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1
 :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Physical quantities defined within the domain of batteries."@en ;
                                            skos:prefLabel "BatteryQuantity"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_25e20915_c35d_4bee_ad31_736235a79780
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_25e20915_c35d_4bee_ad31_736235a79780
 :EMMO_25e20915_c35d_4bee_ad31_736235a79780 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ,
                                                            [ rdf:type owl:Restriction ;
@@ -86,7 +86,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "DRate"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_87bb15ff_4fc2_4929_9938_0b31d9166001
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_87bb15ff_4fc2_4929_9938_0b31d9166001
 :EMMO_87bb15ff_4fc2_4929_9938_0b31d9166001 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ,
                                                            [ rdf:type owl:Restriction ;
@@ -105,7 +105,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_886d2b91_ace9_4ff6_add5_001bef091334
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_886d2b91_ace9_4ff6_add5_001bef091334
 :EMMO_886d2b91_ace9_4ff6_add5_001bef091334 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-31" ;
@@ -120,7 +120,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8c3ef9da_ccb9_4097_bd62_b2a73eff34ca
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_8c3ef9da_ccb9_4097_bd62_b2a73eff34ca
 :EMMO_8c3ef9da_ccb9_4097_bd62_b2a73eff34ca rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-47" ;
@@ -136,7 +136,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b10c88d8_43d9_42dd_9f65_49ce2314513f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b10c88d8_43d9_42dd_9f65_49ce2314513f
 :EMMO_b10c88d8_43d9_42dd_9f65_49ce2314513f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-38" ;
@@ -151,7 +151,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_be5d1b4f_5579_4702_9dbb_6c15e577e8dc
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_be5d1b4f_5579_4702_9dbb_6c15e577e8dc
 :EMMO_be5d1b4f_5579_4702_9dbb_6c15e577e8dc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-46" ;
@@ -168,13 +168,13 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83
 :EMMO_c2ea0cf5_3698_4479_a034_394a271a7c83 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456 ;
                                            skos:prefLabel "ConventionalBatteryProperty"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_df6bdaa9_5275_4a02_a592_adafd4e5c3c3
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_df6bdaa9_5275_4a02_a592_adafd4e5c3c3
 :EMMO_df6bdaa9_5275_4a02_a592_adafd4e5c3c3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ,
                                                            electrochemistry:EMMO_791c1915_a791_4450_acd8_7f94764743b5 ;
@@ -190,7 +190,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e090f4d0_2143_4e96_8c5d_c1180ab36135
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e090f4d0_2143_4e96_8c5d_c1180ab36135
 :EMMO_e090f4d0_2143_4e96_8c5d_c1180ab36135 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_cbba91a7_d639_461f_ae23_d021751029e4 ,
                                                            :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ;
@@ -199,7 +199,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "IntercalantStoichiometry"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee
 :EMMO_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_230809da_bc18_42ec_ac94_4ca6a86292d1 ,
                                                            [ rdf:type owl:Restriction ;
@@ -209,7 +209,7 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "CRate"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae
 :EMMO_fb9baf9b_680e_493e_a755_da9bb1fc9fae rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66 ;
                                            skos:prefLabel "NominalBatteryProperty"@en .

@@ -39,116 +39,6 @@ skos:prefLabel rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_06de7376_d2f9_4b6b_9612_68357f94b312
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_06de7376_d2f9_4b6b_9612_68357f94b312> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
-                                                                                                                 ] ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                                                                                 ] ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Quantity the gradient of which is equal to the negative of the electric field strength within the phase concerned."@en ;
-                                                                                                 emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.I03046"@en ;
-                                                                                                 skos:altLabel "GalvaniPotential"@en ;
-                                                                                                 skos:prefLabel "InnerElectrodePotential"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2c54edb4_457d_4680_a2de_ca02b564f1e9
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2c54edb4_457d_4680_a2de_ca02b564f1e9> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395 ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Average of diffusion coefficients from multiple phases of a system."@en ;
-                                                                                                 skos:prefLabel "EffectiveDiffusionCoefficient"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bf9b1c9_8736_44f8_aee3_fad01df231ed
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4bf9b1c9_8736_44f8_aee3_fad01df231ed> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf <https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ebcbc590_7782_4fe5_b2bf_a1103a898d7a> ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_0972cb08_48bd_4524_ac03_8a2e7f30f02f
-                                                                                                                 ] ;
-                                                                                                 skos:prefLabel "MolarActivationEnergy"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_89c6f2e1_8ef6_41c5_b83f_1eeed6ff0adc
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_89c6f2e1_8ef6_41c5_b83f_1eeed6ff0adc> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
-                                                                                                                 ] ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                                                                                 ] ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The reduction/oxidation potential of a compound measured under standards conditions against a standard reference half-cell."@en ;
-                                                                                                 emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.RT06783"@en ;
-                                                                                                 rdfs:comment "In biological systems the standard redox potential is defined at pH – 7.0 versus the hydrogen electrode and partial pressure of hydrogen = 1 bar."@en ;
-                                                                                                 skos:prefLabel "RedoxPotential"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_cb02e9b9_b541_43a9_8454_14220a7b4973
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_cb02e9b9_b541_43a9_8454_14220a7b4973> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
-                                                                                                                 ] ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                                                                                 ] ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Difference between outer and inner electric potentials of a phase."@en ;
-                                                                                                 emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.S06170"@en ;
-                                                                                                 skos:prefLabel "SurfaceElectricPotential"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d8fbb6a9_57e0_483e_900e_b863e7e73646
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d8fbb6a9_57e0_483e_900e_b863e7e73646> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
-                                                                                                                 ] ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                                                                                 ] ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric potential outside the phase concerned."@en ;
-                                                                                                 emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.O04349"@en ;
-                                                                                                 skos:prefLabel "OuterElectricPotential"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ebcbc590_7782_4fe5_b2bf_a1103a898d7a
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ebcbc590_7782_4fe5_b2bf_a1103a898d7a> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf emmo:EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An empirical parameter characterizing the exponential temperature dependence of the rate coefficient. The term is also used for threshold energies
-in electronic potential surfaces, in which case the term requires careful definition."""@en ;
-                                                                                                 emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.A00102"@en ;
-                                                                                                 skos:prefLabel "ActivationEnergy"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fb5b31f2_875d_4c98_84ee_2414d9fcdf6d
-<https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fb5b31f2_875d_4c98_84ee_2414d9fcdf6d> rdf:type owl:Class ;
-                                                                                                 rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
-                                                                                                                 ] ,
-                                                                                                                 [ rdf:type owl:Restriction ;
-                                                                                                                   owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
-                                                                                                                   owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
-                                                                                                                 ] ;
-                                                                                                 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Potential drop across the mobile part of the double layer, that is responsible for electrokinetic phenomena."@en ;
-                                                                                                 emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.E01968"@en ;
-                                                                                                 rdfs:comment "The value of the electrokinetic potential is positive if the potential increases from the bulk of the liquid phase towards the interface."@en ;
-                                                                                                 skos:altLabel "ZettaPotential"@en ;
-                                                                                                 skos:prefLabel "ElectroKineticPotential"@en .
-
-
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_03a6ce70_5085_4683_bb4e_fc3c18f7143a
 :EMMO_03a6ce70_5085_4683_bb4e_fc3c18f7143a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
@@ -164,6 +54,23 @@ in electronic potential surfaces, in which case the term requires careful defini
    owl:annotatedTarget "part of the electrode polarization arising from an electric current through an ohmic resistance within the electrode or the electrolyte."@en ;
    dcterms:source "International Electrotechnical Commission (IEC), IEC 60050 - International Electrotechnical Vocabulary, retrieved from: https://www.electropedia.org"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_06de7376_d2f9_4b6b_9612_68357f94b312
+:EMMO_06de7376_d2f9_4b6b_9612_68357f94b312 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Quantity the gradient of which is equal to the negative of the electric field strength within the phase concerned."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.I03046"@en ;
+                                           skos:altLabel "GalvaniPotential"@en ;
+                                           skos:prefLabel "InnerElectrodePotential"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_07e219c3_890f_488f_bd96_bee8e445d764
@@ -450,6 +357,13 @@ in electronic potential surfaces, in which case the term requires careful defini
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2c54edb4_457d_4680_a2de_ca02b564f1e9
+:EMMO_2c54edb4_457d_4680_a2de_ca02b564f1e9 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_498d80ae_9339_49c7_8c74_44aa704e0395 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Average of diffusion coefficients from multiple phases of a system."@en ;
+                                           skos:prefLabel "EffectiveDiffusionCoefficient"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_2d896559_eee3_447c_9759_87c854a4266a
 :EMMO_2d896559_eee3_447c_9759_87c854a4266a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
@@ -567,6 +481,16 @@ The real (true) area, A_{real}, takes into account non-idealities of the interfa
                                            rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An ElectrochemicalQuantity related to the transport of mass, charge, or energy."@en ;
                                            skos:prefLabel "ElectrochemicalTransportQuantity"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4bf9b1c9_8736_44f8_aee3_fad01df231ed
+:EMMO_4bf9b1c9_8736_44f8_aee3_fad01df231ed rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_ebcbc590_7782_4fe5_b2bf_a1103a898d7a ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_0972cb08_48bd_4524_ac03_8a2e7f30f02f
+                                                           ] ;
+                                           skos:prefLabel "MolarActivationEnergy"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_4ebe2ef1_eea8_4b10_822d_7a68215bd24d
@@ -849,6 +773,23 @@ G° or ΔrG , written as a reduction with respect to that of the standard hydrog
    owl:annotatedTarget "ElectricCurrent that flows in a constant direction, i.e. a current with a constant sign."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_89c6f2e1_8ef6_41c5_b83f_1eeed6ff0adc
+:EMMO_89c6f2e1_8ef6_41c5_b83f_1eeed6ff0adc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "The reduction/oxidation potential of a compound measured under standards conditions against a standard reference half-cell."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.RT06783"@en ;
+                                           rdfs:comment "In biological systems the standard redox potential is defined at pH – 7.0 versus the hydrogen electrode and partial pressure of hydrogen = 1 bar."@en ;
+                                           skos:prefLabel "RedoxPotential"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_8de9735b_374a_4a0f_b29f_71a50794cf94
@@ -1226,6 +1167,22 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "ActiveMaterialLoading"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_cb02e9b9_b541_43a9_8454_14220a7b4973
+:EMMO_cb02e9b9_b541_43a9_8454_14220a7b4973 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Difference between outer and inner electric potentials of a phase."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.S06170"@en ;
+                                           skos:prefLabel "SurfaceElectricPotential"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ccde24bb_790a_40ca_a06e_cea156a61031
 :EMMO_ccde24bb_790a_40ca_a06e_cea156a61031 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88 ,
@@ -1273,6 +1230,22 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            rdfs:subClassOf emmo:EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7 ,
                                                            :EMMO_b6da9be9_aa1d_4044_b030_4fcfefff5bf3 ;
                                            skos:prefLabel "MaxPulseDischargeTime"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d8fbb6a9_57e0_483e_900e_b863e7e73646
+:EMMO_d8fbb6a9_57e0_483e_900e_b863e7e73646 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electric potential outside the phase concerned."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.O04349"@en ;
+                                           skos:prefLabel "OuterElectricPotential"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
@@ -1385,6 +1358,15 @@ In either case, the magnitude of the catalytic current depends on the applied po
                                            skos:prefLabel "ExchangeCurrentDensity"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_ebcbc590_7782_4fe5_b2bf_a1103a898d7a
+:EMMO_ebcbc590_7782_4fe5_b2bf_a1103a898d7a rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_31ec09ba_1713_42cb_83c7_b38bf6f9ced2 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 """An empirical parameter characterizing the exponential temperature dependence of the rate coefficient. The term is also used for threshold energies
+in electronic potential surfaces, in which case the term requires careful definition."""@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.A00102"@en ;
+                                           skos:prefLabel "ActivationEnergy"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f4fadc4e_ca7d_4e4e_89cf_eacf45b4041e
 :EMMO_f4fadc4e_ca7d_4e4e_89cf_eacf45b4041e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_1cd1d777_e67b_47eb_81f1_edac35d9f2c6 ;
@@ -1479,6 +1461,24 @@ In either case, the magnitude of the catalytic current depends on the applied po
    owl:annotatedTarget "The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_fb5b31f2_875d_4c98_84ee_2414d9fcdf6d
+:EMMO_fb5b31f2_875d_4c98_84ee_2414d9fcdf6d rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aecc6094_c6a5_4a36_a825_8a497a2ae112 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569 ;
+                                                             owl:someValuesFrom emmo:EMMO_2e7e5796_4a80_4d73_bb84_f31138446c0c
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Potential drop across the mobile part of the double layer, that is responsible for electrokinetic phenomena."@en ;
+                                           emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 "https://doi.org/10.1351/goldbook.E01968"@en ;
+                                           rdfs:comment "The value of the electrokinetic potential is positive if the potential increases from the bulk of the liquid phase towards the interface."@en ;
+                                           skos:altLabel "ZettaPotential"@en ;
+                                           skos:prefLabel "ElectroKineticPotential"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
