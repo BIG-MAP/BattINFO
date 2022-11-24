@@ -460,6 +460,12 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_15325775_6d4c_4192_82f1_e4feca9de426
+:EMMO_15325775_6d4c_4192_82f1_e4feca9de426 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 ;
+                                           skos:prefLabel "IonExchangeMembrane"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_158ae038_c64b_4cc0_aa56_650475490705
 :EMMO_158ae038_c64b_4cc0_aa56_650475490705 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ,
@@ -872,6 +878,13 @@ Aluminum foil"""@en ;
  ] .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_38755e67_9d3b_4a82_bd8d_ef40a70379c1
+:EMMO_38755e67_9d3b_4a82_bd8d_ef40a70379c1 rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_e7b7c17a_2f9b_4e2e_b4b1_0c5f281654b9 ;
+                                           owl:disjointWith :EMMO_9b6853e7_3412_463d_b5a9_82c14acebf7d ;
+                                           skos:prefLabel "AnolyteTank"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3
 :EMMO_3a77b5e7_9646_4154_bf8f_5f798989e5f3 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_fb988878_ee54_4350_9ee9_228c00c3ad35 ;
@@ -1190,6 +1203,12 @@ Aluminum foil"""@en ;
                                                              owl:someValuesFrom emmo:EMMO_4f2d3939_91b1_4001_b8ab_7d19074bf845
                                                            ] ;
                                            skos:prefLabel "ElectricPotentialMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_58413d4e_2885_459e_ac06_8d45e661cf91
+:EMMO_58413d4e_2885_459e_ac06_8d45e661cf91 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 ;
+                                           skos:prefLabel "PorousSeparator"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_596ff637_06bd_43fd_a5d0_70856f8c6d6d
@@ -2054,6 +2073,12 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "ElectrochemicalConversionMaterial"@en .
 
 
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9b6853e7_3412_463d_b5a9_82c14acebf7d
+:EMMO_9b6853e7_3412_463d_b5a9_82c14acebf7d rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_e7b7c17a_2f9b_4e2e_b4b1_0c5f281654b9 ;
+                                           skos:prefLabel "CatholyteTank"@en .
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc
 :EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
@@ -2491,6 +2516,12 @@ Conducting Additive"""@en ;
    owl:annotatedTarget "Electrode of a composite of carbon powder and a pasting liquid (including mineral oil, Nujol, bromoform, bromonaphthalene)."@en ;
    dcterms:source "J. M. Pingarrón et al., Terminology of electrochemical methods of analysis (IUPAC Recommendations 2019), Pure and Applied Chemistry, 4, 92, 2020, 641-694. https://doi.org/10.1515/pac-2018-0109"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b2d11f0d_c1b0_4476_8d17_03b73d31e01f
+:EMMO_b2d11f0d_c1b0_4476_8d17_03b73d31e01f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 ;
+                                           skos:prefLabel "AsymmetricMembrane"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_b47ee173_965d_4763_8cd9_eda179ea1e2c
@@ -3240,6 +3271,12 @@ of other configurations are used."""@en ;
                                            skos:prefLabel "DeintercalationStep"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f1c7eacb_9f21_4100_925c_3974f266e06f
+:EMMO_f1c7eacb_9f21_4100_925c_3974f266e06f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_331e6cca_f260_4bf8_af55_35304fe1bbe0 ;
+                                           skos:prefLabel "BilayerMembrane"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4
 :EMMO_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
@@ -3274,6 +3311,12 @@ of other configurations are used."""@en ;
    owl:annotatedTarget "Electrode reaction, where the energy of electrons in the working electrode is higher than the LUMO orbital of the substrate."@en ;
    dcterms:source "A. J. Bard, G. Inzelt, and F. Scholz, Eds., Electrochemical Dictionary, 2nd Edition. Berlin: Springer-Verlag, 2012. DOI: https://doi.org/10.1007/978-3-642-29551-5"
  ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f54474fc_5d07_474b_97ae_f5d0349363b4
+:EMMO_f54474fc_5d07_474b_97ae_f5d0349363b4 rdf:type owl:Class ;
+                                           rdfs:subClassOf :ElectrochemicalFlowCell ;
+                                           skos:prefLabel "HybridFlowCell"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_f6341d7d_7620_48f5_97b2_99b55c349169
@@ -3481,6 +3524,19 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#ElectrochemicalFlowCell
+:ElectrochemicalFlowCell rdf:type owl:Class ;
+                         rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                           owl:someValuesFrom :EMMO_15b852b5_19cc_49ab_849f_7df6175fb2be
+                                         ] ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty :EMMO_3bd08946_4e81_455d_9fca_dc7a5ead9315 ;
+                                           owl:someValuesFrom :EMMO_865a40fc_2187_4549_a7e1_37aa2458448f
+                                         ] .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

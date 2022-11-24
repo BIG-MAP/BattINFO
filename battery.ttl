@@ -52,6 +52,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_061a14c4_fb66_4f64_bf4a_289f5824a433
+:EMMO_061a14c4_fb66_4f64_bf4a_289f5824a433 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
+                                           skos:prefLabel "MetalCarbondioxideFlowBattery"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2
 :EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
@@ -68,6 +74,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
                                            skos:prefLabel "Cylindrical4680CellContainer"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1191d114_5aec_4167_97b1_c0bca9414c49
+:EMMO_1191d114_5aec_4167_97b1_c0bca9414c49 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with non-aqueous electrolytes that contain metallic species as the active components." ;
+                                           skos:prefLabel "NonAqueousMetallicFlowBattery"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde
@@ -103,6 +116,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
                                            skos:prefLabel "BatteryMeasurementResult"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1564363d_78ea_45be_a82f_2d12e40022ab
+:EMMO_1564363d_78ea_45be_a82f_2d12e40022ab rdf:type owl:Class ;
+                                           rdfs:subClassOf electrochemistry:ElectrochemicalFlowCell ;
+                                           skos:prefLabel "FullFlowCell"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
@@ -280,10 +299,31 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2
+:EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Alternatives to full and hybride redox flow batteries." ;
+                                           skos:prefLabel "AlternativeFullFlowBattery"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
 :EMMO_470d4c68_21b3_4405_ac3f_9588c4152437 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 ;
                                            skos:prefLabel "CurrentCollectorContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4a620a13_ef9f_40c7_8833_c6e0720ce3ca
+:EMMO_4a620a13_ef9f_40c7_8833_c6e0720ce3ca rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with aqueous electrolytes that contain organic species as the active components." ;
+                                           skos:prefLabel "AqueousOrganicFlowBattery"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514
+:EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of a Electrchemical Flow cell." ;
+                                           skos:prefLabel "ElectrochemicalFlowCellComponent"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f
@@ -326,9 +366,30 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5555b4bc_216e_4772_a914_b66b6e783079
+:EMMO_5555b4bc_216e_4772_a914_b66b6e783079 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with non-aqueous electrolytes that contain metallic species as the active components." ;
+                                           skos:prefLabel "NonAqueousOrganicFlowBattery"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_55a8a42d_0f83_473d_82b0_32640114b7db
 :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5ae0d63a_51a9_433f_b92b_da7fd66ace6e
+:EMMO_5ae0d63a_51a9_433f_b92b_da7fd66ace6e rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A redox flow battery that separates electrolytes by leveraging laminar flow, rather than using a typical ion-perm-selective membrane."@en ;
+                                           skos:prefLabel "MembranelessFlowBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_5ae0d63a_51a9_433f_b92b_da7fd66ace6e ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "A redox flow battery that separates electrolytes by leveraging laminar flow, rather than using a typical ion-perm-selective membrane."@en ;
+   dcterms:source "https://tlo.mit.edu/technologies/membrane-less-flow-battery"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
@@ -397,6 +458,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "SwagelokCellContainer"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7641e8f5_9432_4a6d_80ac_58aa5253a889
+:EMMO_7641e8f5_9432_4a6d_80ac_58aa5253a889 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa ;
+                                           owl:disjointWith :EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c ;
+                                           skos:prefLabel "MetalAir"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
@@ -478,9 +546,50 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8c808507_976a_4225_8099_604dc7abc5ea
+:EMMO_8c808507_976a_4225_8099_604dc7abc5ea rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_17e27c22_37e1_468c_9dd7_95e137f73e7f ;
+                                                             owl:someValuesFrom electrochemistry:ElectrochemicalFlowCell
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of Redox flow batteries. Full flow batteries store electroactive material only in outer tanks and flown through the cell n its reduced and oxidized states." ;
+                                           skos:prefLabel "FullFlowBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "A type of Redox flow batteries. Full flow batteries store electroactive material only in outer tanks and flown through the cell n its reduced and oxidized states." ;
+   dcterms:source "https://doi.org/10.1016/j.jpowsour.2020.228804"
+ ] .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef
+:EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Flow_battery" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A flow battery is a rechargeable battery in which electrolyte flows through one or more electrochemical cells from one or more tanks."@en ;
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Flow_battery" ;
+                                           skos:prefLabel "RedoxFlowBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "A flow battery is a rechargeable battery in which electrolyte flows through one or more electrochemical cells from one or more tanks."@en ;
+   dcterms:source "https://flowbatteryforum.com/what-is-a-flow-battery/"
+ ] .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0
 :EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee
+:EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee rdf:type owl:Class ;
+                                           rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of a Flow Battery." ;
+                                           skos:prefLabel "FlowBatteryComponent"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
@@ -538,9 +647,29 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c
+:EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa ;
+                                           skos:prefLabel "MetalSolution"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a
 :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa
+:EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of Redox flow batteries. Hybdrid flow batteries comprising at least one solid electroactive material that is deposited or stripped within the stack." ;
+                                           skos:prefLabel "HybridFlowBattery"@en .
+
+[ rdf:type owl:Axiom ;
+   owl:annotatedSource :EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa ;
+   owl:annotatedProperty emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ;
+   owl:annotatedTarget "A type of Redox flow batteries. Hybdrid flow batteries comprising at least one solid electroactive material that is deposited or stripped within the stack." ;
+   dcterms:source "https://doi.org/10.1016/j.jpowsour.2020.228804"
+ ] .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
@@ -602,6 +731,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom emmo:EMMO_8836f42d_7cf3_4f26_ad15_4798261f26c0
                                                            ] ;
                                            skos:prefLabel "BatteryContinuumModel"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b199577a_455d_4fef_bb96_add662689d73
+:EMMO_b199577a_455d_4fef_bb96_add662689d73 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
+                                           skos:prefLabel "SolarFlowBattery"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b35895a0_7670_487b_9b39_db9360b7d907
@@ -838,6 +973,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                              owl:someValuesFrom emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
                                                            ] ;
                                            skos:prefLabel "CoinCellContainer"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_edc98332_248a_436a_a352_5a7897150c4f
+:EMMO_edc98332_248a_436a_a352_5a7897150c4f rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with aqueous electrolytes that contain metallic species as the active components." ;
+                                           skos:prefLabel "AqueousMetallicFlowBattery"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2
