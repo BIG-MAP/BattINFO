@@ -261,10 +261,6 @@ emmo:EMMO_4320c72e_312e_494b_9dcd_edbaa397ceb5 rdfs:subClassOf :EMMO_98652dd1_04
                                                              owl:someValuesFrom :EMMO_d91940f0_c8b6_4505_9b68_6bf6cfc5c544
                                                            ] ,
                                                            [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom <https://big-map.github.io/BattINFO/ontology/emmo/generic-concepts#EMMO_c45315c9_f0a0_4a73_87bf_70ed22bf6642>
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
                                                              owl:onProperty emmo:EMMO_5ceab41b_2aea_4041_9e9c_a243f7562cee ;
                                                              owl:someValuesFrom :EMMO_9c73aff8_1c82_4116_a6be_78e21982b69d
                                                            ] ,
@@ -933,6 +929,13 @@ Aluminum foil"""@en ;
 :EMMO_402598d9_0eea_405d_b0d0_3b8b79deba6f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0a0de817_addc_46a5_8ba2_255d48cdf366 ;
                                            skos:prefLabel "InterphaseGrowth"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_403c300e_09b9_400b_943b_04e82a3cfb56
+:EMMO_403c300e_09b9_400b_943b_04e82a3cfb56 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A porous electrode which is coated onto a non-porous substrate, typically a metallic foil current collector."@en ;
+                                           skos:prefLabel "PorousElectrodeCoating"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_43a06daa_3644_429c_953c_4ee49aaf570a
@@ -1984,6 +1987,21 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            skos:prefLabel "LithiumElectrochemicalReaction"@en .
 
 
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_92147e31_d015_4889_a092_04fbab033f15
+:EMMO_92147e31_d015_4889_a092_04fbab033f15 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
+                                                             owl:someValuesFrom :EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706
+                                                           ] ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode which consists of an active material coating on one or more sides a current collector substrate."@en ;
+                                           skos:prefLabel "CoatedElectrode"@en .
+
+
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe
 :EMMO_9679fc51_d9c2_484a_9dba_d86ab407fcbe rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
@@ -2034,6 +2052,22 @@ Cl2, Hg | Hg2SO4, and Hg | HgO, can be used as reference electrodes in aqueous s
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical material that participates in an electrochemical conversion reaction."@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "Lithium metal"@en ;
                                            skos:prefLabel "ElectrochemicalConversionMaterial"@en .
+
+
+###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc
+:EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
+                                                             owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
+                                                           ] ,
+                                                           [ rdf:type owl:Restriction ;
+                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
+                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
+                                                           ] ;
+                                           owl:disjointWith :EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543 ;
+                                           skos:altLabel "ReactiveElectrode" ;
+                                           skos:prefLabel "NonInertElectrode"@en .
 
 
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_9c4e61c6-4a7b-41c2-9133-e780e144ddcd
@@ -2185,7 +2219,6 @@ Conducting Additive"""@en ;
 ###  https://big-map.github.io/BattINFO/ontology/electrochemistry#EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543
 :EMMO_a0a619d7_da95_41f0_8bc3_9c19d636d543 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ;
-                                           owl:disjointWith :EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=114-02-08"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode that serves only as a source or sink for electrons without playing a chemical role in the electrode reaction."@en ;
                                            rdfs:comment "Noble metals, mercury, and carbon are typically used as (nearly) inert electrodes."@en ;
@@ -3448,43 +3481,6 @@ of other configurations are used."""@en ;
                                            rdfs:comment "An expression of the Law of Mass Action."@en ,
                                                         "E_{eq} = E^0 - (R*T/(z*F))*ln(Q)" ;
                                            skos:prefLabel "NernstEquation"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_403c300e_09b9_400b_943b_04e82a3cfb56
-:EMMO_403c300e_09b9_400b_943b_04e82a3cfb56 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_3663991d-9319-4f7a-922b-f0e428b58801 ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A porous electrode which is coated onto a non-porous substrate, typically a metallic foil current collector."@en ;
-                                           skos:prefLabel "PorousElectrodeCoating"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_92147e31_d015_4889_a092_04fbab033f15
-:EMMO_92147e31_d015_4889_a092_04fbab033f15 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_c955c089_6ee1_41a2_95fc_d534c5cfd3d5
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
-                                                             owl:someValuesFrom :EMMO_212af058_3bbb_419f_a9c6_90ba9ebb3706
-                                                           ] ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Electrode which consists of an active material coating on one or more sides a current collector substrate."@en ;
-                                           skos:prefLabel "CoatedElectrode"@en .
-
-
-###  https://big-map.github.io/BattINFO/ontology/electrochemistry/electrochemistry#EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc
-:EMMO_9a823d64_9d10_4a29_9cbd_9bbdad7985bc rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty emmo:EMMO_16b510a6_0584_4134_bdb6_3bc185c17860 ;
-                                                             owl:someValuesFrom :EMMO_791c1915_a791_4450_acd8_7f94764743b5
-                                                           ] ,
-                                                           [ rdf:type owl:Restriction ;
-                                                             owl:onProperty :EMMO_6bf73b4c_bc73_4db1_bf51_12628ce9ea3b ;
-                                                             owl:someValuesFrom :EMMO_79d1b273-58cd-4be6-a250-434817f7c261
-                                                           ] ;
-                                           skos:altLabel "ReactiveElectrode" ;
-                                           skos:prefLabel "NonInertElectrode"@en .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
