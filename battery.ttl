@@ -1,4 +1,4 @@
-@prefix : <https://big-map.github.io/BattINFO/ontology/BattINFO#> .
+@prefix : <https://big-map.github.io/BattINFO/ontology/battery#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
@@ -39,7 +39,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Classes
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_0176cabb_4c83_4079_b26c_334892bddcae
 :EMMO_0176cabb_4c83_4079_b26c_334892bddcae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-32" ;
@@ -47,53 +47,53 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "Leakage"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363
 :EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_061a14c4_fb66_4f64_bf4a_289f5824a433
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_061a14c4_fb66_4f64_bf4a_289f5824a433
 :EMMO_061a14c4_fb66_4f64_bf4a_289f5824a433 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
                                            skos:prefLabel "MetalCarbondioxideFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2
 :EMMO_0e9e80a1_1fb6_45d9_a1dd_d18ebfc48ae2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
                                            skos:prefLabel "P3DModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_0ee5a1ee_2684_4adb_bee1_5b542665ba3c
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_0ee5a1ee_2684_4adb_bee1_5b542665ba3c
 :EMMO_0ee5a1ee_2684_4adb_bee1_5b542665ba3c rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
                                            skos:prefLabel "LithiumMetalElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8
 :EMMO_10f58ac2_ad4b_44c2_9d82_db154cdfeef8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
                                            skos:prefLabel "Cylindrical4680CellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1191d114_5aec_4167_97b1_c0bca9414c49
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1191d114_5aec_4167_97b1_c0bca9414c49
 :EMMO_1191d114_5aec_4167_97b1_c0bca9414c49 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with non-aqueous electrolytes that contain metallic species as the active components." ;
                                            skos:prefLabel "NonAqueousMetallicFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde
 :EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b
 :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1375560e_dec2_491c_93ac_613a1d905008
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1375560e_dec2_491c_93ac_613a1d905008
 :EMMO_1375560e_dec2_491c_93ac_613a1d905008 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_8b40856f_1ca2_4137_9616_7fb624671909 ,
                                                            [ rdf:type owl:Restriction ;
@@ -106,42 +106,42 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BifunctionalAirElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_149bb81f_e724_42f0_9560_184ff916bdba
 :EMMO_149bb81f_e724_42f0_9560_184ff916bdba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
                                            skos:prefLabel "ReactiveSubcomponentContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce
 :EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e ;
                                            skos:prefLabel "BatteryMeasurementResult"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1564363d_78ea_45be_a82f_2d12e40022ab
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1564363d_78ea_45be_a82f_2d12e40022ab
 :EMMO_1564363d_78ea_45be_a82f_2d12e40022ab rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:ElectrochemicalFlowCell ;
                                            skos:prefLabel "FullFlowCell"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e
 :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
                                            skos:prefLabel "ElectronicComponentContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60
 :EMMO_17e530cf_739c_4171_8a1d_8fe58625fc60 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "PouchCellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497
 :EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28
 :EMMO_1d33b96d_f362_41e5_b670_d33cd6a7ab28 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_6c481323_498b_42c6_915a_53490f409430 ,
                                                            [ rdf:type owl:Restriction ;
@@ -159,7 +159,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryCycling"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab
 :EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a ,
@@ -174,13 +174,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065
 :EMMO_2198cf67_b5d2_4325_9b6a_dde0a26fd065 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_14ea92c1_2682_4c52_83a5_632adcfdb1ce ;
                                            skos:prefLabel "BatteryCyclingMeasurementResult"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_21d2a7a1_2fc0_4f7a_85ad_6451df187767
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_21d2a7a1_2fc0_4f7a_85ad_6451df187767
 :EMMO_21d2a7a1_2fc0_4f7a_85ad_6451df187767 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-19" ;
@@ -189,85 +189,85 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "Activation"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc
 :EMMO_21d661a7_73de_4ee6_8bd5_53a948eda8cc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b ;
                                            skos:prefLabel "SeparatorContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_23e6170d_a70b_4de9_a4db_458e24a327ac
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_23e6170d_a70b_4de9_a4db_458e24a327ac
 :EMMO_23e6170d_a70b_4de9_a4db_458e24a327ac rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A device for performing cycling measurements of a battery."@en ;
                                            skos:prefLabel "BatteryCycler"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_249848f9_308a_40aa_b560_e77cb167da50
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_249848f9_308a_40aa_b560_e77cb167da50
 :EMMO_249848f9_308a_40aa_b560_e77cb167da50 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
                                            skos:prefLabel "LFPReferenceElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce
 :EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8
 :EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
                                            skos:prefLabel "ElectrochemicalCellContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d
 :EMMO_2cc8ac82_21a3_4d70_94a5_66b85b45df7d rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_5adb91e0_ffe1_41f3_b779_c6966f65fb0e ;
                                            skos:prefLabel "ZincElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae
 :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f ;
                                            skos:prefLabel "ElectrochemicalSubcomponentContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f
 :EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549
 :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_757eae08_4d43_42d4_8b4e_8a0bfd2f9a1c ;
                                            skos:altLabel "LithiumIntercalationElectrode"@en ;
                                            skos:prefLabel "LithiumInsertionElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_355deb8d_4e68_48b6_9628_8bb7536aba7a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_355deb8d_4e68_48b6_9628_8bb7536aba7a
 :EMMO_355deb8d_4e68_48b6_9628_8bb7536aba7a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427 ;
                                            skos:prefLabel "CoinCellContainer2032"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_35622b13_7ebb_4b29_9d05_0f0f5cc063f2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_35622b13_7ebb_4b29_9d05_0f0f5cc063f2
 :EMMO_35622b13_7ebb_4b29_9d05_0f0f5cc063f2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 ;
                                            skos:altLabel "NCM811Electrode" ;
                                            skos:prefLabel "LithiumNickel8Manganese1Cobalt1OxideElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3574fc7e_b831_4fda_a765_5ae109633926
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3574fc7e_b831_4fda_a765_5ae109633926
 :EMMO_3574fc7e_b831_4fda_a765_5ae109633926 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_382fc4de_b961_42ee_a787_27bbcc647481
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_382fc4de_b961_42ee_a787_27bbcc647481
 :EMMO_382fc4de_b961_42ee_a787_27bbcc647481 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
                                            skos:prefLabel "Binder"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a
 :EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -276,70 +276,70 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
 :EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            electrochemistry:EMMO_e248373f_294f_4ca4_9edf_0ad6653bb64f .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3cfe22eb_f29c_4df9_b53a_f636ab371ff0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3cfe22eb_f29c_4df9_b53a_f636ab371ff0
 :EMMO_3cfe22eb_f29c_4df9_b53a_f636ab371ff0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 ;
                                            skos:altLabel "NCM622Electrode" ;
                                            skos:prefLabel "LithiumNickel6Manganese2Cobalt2OxideElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1
 :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567
 :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2
 :EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Alternatives to full and hybride redox flow batteries." ;
                                            skos:prefLabel "AlternativeFullFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_470d4c68_21b3_4405_ac3f_9588c4152437
 :EMMO_470d4c68_21b3_4405_ac3f_9588c4152437 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 ;
                                            skos:prefLabel "CurrentCollectorContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4a620a13_ef9f_40c7_8833_c6e0720ce3ca
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_4a620a13_ef9f_40c7_8833_c6e0720ce3ca
 :EMMO_4a620a13_ef9f_40c7_8833_c6e0720ce3ca rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with aqueous electrolytes that contain organic species as the active components." ;
                                            skos:prefLabel "AqueousOrganicFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514
 :EMMO_4c51fcff_7fc5_4a7f_994e_52d21ec3d514 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of a Electrchemical Flow cell." ;
                                            skos:prefLabel "ElectrochemicalFlowCellComponent"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f
 :EMMO_4c78a492_b14d_4005_b555_d3c92e8def0f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
                                            skos:prefLabel "BatteryEquivalentCircuitModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481
 :EMMO_5129704d_3e08_4bee_b2d3_7b9e193cb481 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_50044b99_b858_433b_a32d_23d1e1cf88b2 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical interface within a battery cell."@en ;
                                            skos:prefLabel "BatteryInterface"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_520c9e35_2556_462f_97f1_64750cef37ae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_520c9e35_2556_462f_97f1_64750cef37ae
 :EMMO_520c9e35_2556_462f_97f1_64750cef37ae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f ,
                                                            [ rdf:type owl:Restriction ;
@@ -352,7 +352,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_52ed5408_da62_483d_97d5_a45755022582
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_52ed5408_da62_483d_97d5_a45755022582
 :EMMO_52ed5408_da62_483d_97d5_a45755022582 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
                                            skos:altLabel "DFNModel"@en ,
@@ -361,24 +361,24 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "P2DModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_54d48300_242b_4af8_96b4_d3436450e094
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_54d48300_242b_4af8_96b4_d3436450e094
 :EMMO_54d48300_242b_4af8_96b4_d3436450e094 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5555b4bc_216e_4772_a914_b66b6e783079
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_5555b4bc_216e_4772_a914_b66b6e783079
 :EMMO_5555b4bc_216e_4772_a914_b66b6e783079 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with non-aqueous electrolytes that contain metallic species as the active components." ;
                                            skos:prefLabel "NonAqueousOrganicFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_55a8a42d_0f83_473d_82b0_32640114b7db
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_55a8a42d_0f83_473d_82b0_32640114b7db
 :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5ae0d63a_51a9_433f_b92b_da7fd66ace6e
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_5ae0d63a_51a9_433f_b92b_da7fd66ace6e
 :EMMO_5ae0d63a_51a9_433f_b92b_da7fd66ace6e rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_4292acfe_0e4b_4559_87ca_f5a4617f14b2 ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A redox flow battery that separates electrolytes by leveraging laminar flow, rather than using a typical ion-perm-selective membrane."@en ;
@@ -392,24 +392,24 @@ dcterms:license rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86
 :EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
                                            skos:prefLabel "IonicSubcomponentContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6256b4c7_243f_4067_a081_dd1eb2160036
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_6256b4c7_243f_4067_a081_dd1eb2160036
 :EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_679f6984_e0dc_4285_9dbb_429c5779590c
 :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_dcc692cf_0e03_45ee_9d52_763b9e208dac ;
                                            skos:prefLabel "ElectrochemicalEquivalentCircuitModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
 :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
                                                            electrochemistry:EMMO_6f2c88c9_5c04_4953_a298_032cc3ab9b77 ,
@@ -419,23 +419,23 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_69173be9_7105_43da_8635_033364616783
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_69173be9_7105_43da_8635_033364616783
 :EMMO_69173be9_7105_43da_8635_033364616783 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88
 :EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6c481323_498b_42c6_915a_53490f409430
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_6c481323_498b_42c6_915a_53490f409430
 :EMMO_6c481323_498b_42c6_915a_53490f409430 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_463bcfda_867b_41d9_a967_211d4d437cfb ;
                                            skos:prefLabel "BatteryMeasurement"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
 :EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -444,7 +444,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
 :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ,
                                                            electrochemistry:EMMO_0acd0fc2_1048_4604_8e90_bf4e84bd87df ,
@@ -454,42 +454,42 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc
 :EMMO_7528b81a_97dd_47a3_86b1_128f285b5ffc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "SwagelokCellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7641e8f5_9432_4a6d_80ac_58aa5253a889
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7641e8f5_9432_4a6d_80ac_58aa5253a889
 :EMMO_7641e8f5_9432_4a6d_80ac_58aa5253a889 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa ;
                                            owl:disjointWith :EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c ;
                                            skos:prefLabel "MetalAir"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b
 :EMMO_7649a57c_d842_429f_97a1_b9612a8fdb2b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
                                            skos:prefLabel "StructuralSubcomponentContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_78826076_05d5_4cc8_b46b_93418a67c91b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_78826076_05d5_4cc8_b46b_93418a67c91b
 :EMMO_78826076_05d5_4cc8_b46b_93418a67c91b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_798806c2_9423_486a_b414_d1e49603c8cd
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_798806c2_9423_486a_b414_d1e49603c8cd
 :EMMO_798806c2_9423_486a_b414_d1e49603c8cd rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806
 :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_bafc17b5_9be4_4823_8bbe_ab4e90b6738c ;
                                            skos:prefLabel "IntentionalBatteryProcess"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f
 :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ,
                                                            [ rdf:type owl:Restriction ;
@@ -504,17 +504,17 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "CylindricalCellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322
 :EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_834c96d6_4986_4766_9d96_58fc643144e0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_834c96d6_4986_4766_9d96_58fc643144e0
 :EMMO_834c96d6_4986_4766_9d96_58fc643144e0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d
 :EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -523,7 +523,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_882ce749_9869_450d_8563_cb86670e720f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_882ce749_9869_450d_8563_cb86670e720f
 :EMMO_882ce749_9869_450d_8563_cb86670e720f rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_0f007072-a8dd-4798-b865-1bf9363be627 ,
                                                            [ rdf:type owl:Restriction ;
@@ -533,7 +533,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ManganeseDioxideElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_889c1c23_1d0c_49b6_af52_3ce9644dd2a1
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_889c1c23_1d0c_49b6_af52_3ce9644dd2a1
 :EMMO_889c1c23_1d0c_49b6_af52_3ce9644dd2a1 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_22522299_4091_4d1f_82a2_3890492df6db ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-45" ;
@@ -541,12 +541,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "StorageTest"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550
-:EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550 rdf:type owl:Class ;
-                                           rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
-
-
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8c808507_976a_4225_8099_604dc7abc5ea
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_8c808507_976a_4225_8099_604dc7abc5ea
 :EMMO_8c808507_976a_4225_8099_604dc7abc5ea rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ,
                                                            [ rdf:type owl:Restriction ;
@@ -564,7 +559,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef
 :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Flow_battery" ;
@@ -580,19 +575,24 @@ dcterms:license rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550
+:EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550 rdf:type owl:Class ;
+                                           rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
+
+
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0
 :EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee
 :EMMO_9389ea28_9ce5_4abd_a078_8ce2b0c91eee rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_038e37a3_1684_4980_b5e4_67ab34cd5bdb ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A component that is essential to the function of a Flow Battery." ;
                                            skos:prefLabel "FlowBatteryComponent"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
 :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            electrochemistry:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ,
@@ -606,7 +606,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8
 :EMMO_99578b76_7fdc_4a4a_b4fb_9f6ba6b227a8 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_22522299_4091_4d1f_82a2_3890492df6db ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-03-48" ;
@@ -614,7 +614,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ContinuousServiceTest"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
 :EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
                                                            [ rdf:type owl:Restriction ;
@@ -623,7 +623,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0
 :EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -632,7 +632,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2
 :EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 ,
                                                            [ rdf:type owl:Restriction ;
@@ -641,24 +641,24 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71
 :EMMO_a0070f31_7895_46cd_8d62_e53bf39a1e71 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_2d7ba193_b4be_40fc_9131_d1a91068aeae ;
                                            skos:prefLabel "ElectronicSubcomponentContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c
 :EMMO_a8d7e181_945d_4a26_a4b0_15688566df8c rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa ;
                                            skos:prefLabel "MetalSolution"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a
 :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa
 :EMMO_aaac65cb_050c_407a_953a_f3ad3b675baa rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A type of Redox flow batteries. Hybdrid flow batteries comprising at least one solid electroactive material that is deposited or stripped within the stack." ;
@@ -672,13 +672,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
  ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba
 :EMMO_aafe33ca_3fe3_4ff0_bed0_e7c925e26eba rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
                                            skos:prefLabel "Cylindrical18650CellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40
 :EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -687,7 +687,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b
 :EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            [ rdf:type owl:Restriction ;
@@ -701,7 +701,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ada13509_4eed_4e40_a7b1_4cc488144154
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ada13509_4eed_4e40_a7b1_4cc488144154
 :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            electrochemistry:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ,
@@ -711,7 +711,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b1921f7b_afac_465a_a275_26f929f7f936
 :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_29b06e6d_d154_470a_aeed_efb96b0f69b8 ,
                                                            [ rdf:type owl:Restriction ;
@@ -733,13 +733,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b199577a_455d_4fef_bb96_add662689d73
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b199577a_455d_4fef_bb96_add662689d73
 :EMMO_b199577a_455d_4fef_bb96_add662689d73 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8f363e2e_8258_415d_8784_9a60fce9aeef ;
                                            skos:prefLabel "SolarFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b35895a0_7670_487b_9b39_db9360b7d907
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b35895a0_7670_487b_9b39_db9360b7d907
 :EMMO_b35895a0_7670_487b_9b39_db9360b7d907 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                            [ rdf:type owl:Restriction ;
@@ -753,33 +753,33 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b
 :EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 ,
                                                            electrochemistry:EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5910d2f_3114_4663_8d46_e418ff859251
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b5910d2f_3114_4663_8d46_e418ff859251
 :EMMO_b5910d2f_3114_4663_8d46_e418ff859251 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 ,
                                                            electrochemistry:EMMO_1401844f_2ad7_4e01_a7c4_ba575ded1fee .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693
 :EMMO_b5b8ac18_170a_4c95_a9a3_9bf3bbce0693 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c2a1d4d_e622_41f2_b978_49e4fbdca82f ;
                                            skos:prefLabel "Cylindrical21700CellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2
 :EMMO_b72eb3ad_8935_4420_a64e_6218de31c0d2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
                                            skos:prefLabel "ElectrodeContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124
 :EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -788,12 +788,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab
 :EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_bae12d7c_2d81_4a86_994a_11f584b91486
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_bae12d7c_2d81_4a86_994a_11f584b91486
 :EMMO_bae12d7c_2d81_4a86_994a_11f584b91486 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dc205ac2_314e_415c_a2b6_b12e8359d54c ,
                                                            [ rdf:type owl:Restriction ;
@@ -816,7 +816,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "LeclancheElectrolyte"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b
 :EMMO_bc033b97_a5b7_455c_94ce_e95676cb816b rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_7dea2572_ab42_45bd_9fd7_92448cec762a ,
                                                            [ rdf:type owl:Restriction ;
@@ -826,13 +826,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryCyclerSystem"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236
 :EMMO_bc9b6500_60bb_434f_bf29_ea3b189c7236 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_17b3beaa_6f91_4f73_8a9a_d960eb542b7e ;
                                            skos:prefLabel "SaltBridgeContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00
 :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 ,
                                                            [ rdf:type owl:Restriction ;
@@ -841,20 +841,20 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_be91105d_952e_4f84_b91a_087b92448e6d
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_be91105d_952e_4f84_b91a_087b92448e6d
 :EMMO_be91105d_952e_4f84_b91a_087b92448e6d rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 ;
                                            skos:altLabel "NCM111Electrode" ;
                                            skos:prefLabel "LithiumNickel1Manganese1Cobalt1OxideElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9
 :EMMO_ccbaf3d8_6c17_4e3c_9c91_4deecf827aa9 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_149bb81f_e724_42f0_9560_184ff916bdba ;
                                            skos:prefLabel "ActiveElectrochemicalMaterialContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6
 :EMMO_cf82025d_925d_46dd_abf5_4c3c8b0ab3b6 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_7c072505_7ea6_4bfd_8403_7133b3a4b806 ,
                                                            [ rdf:type owl:Restriction ;
@@ -869,13 +869,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "DischargeOfABattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2
 :EMMO_d38f2125_115e_4df5_a8a0_bdb4b88940c2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb ;
                                            skos:prefLabel "LithiumMetalReferenceElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1
 :EMMO_d7a46826_ab60_47e7_99b2_a9d6c3b495c1 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-02-30" ;
@@ -884,7 +884,7 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "ElectrolyteCreep"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e
 :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_dd15b4b0-11e7-4900-b379-9702a8caa6bb ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A receptacle or vessel that holds the plates, electrolyte, and other elements of a single cell or multi-cell unit."@en ;
@@ -895,13 +895,13 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "BatteryCellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_da15df91_45aa_429c_a1e7_21f49a281f23
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_da15df91_45aa_429c_a1e7_21f49a281f23
 :EMMO_da15df91_45aa_429c_a1e7_21f49a281f23 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ;
                                            skos:prefLabel "PrismaticCellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dae4c0f0_c3eb_4662_a0df_767e02014053
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_dae4c0f0_c3eb_4662_a0df_767e02014053
 :EMMO_dae4c0f0_c3eb_4662_a0df_767e02014053 rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_8c18d60b_c5df_45ce_b64a_91c9b53d322d ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-07" ;
@@ -910,18 +910,18 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "MoltenSaltElectrochemicalCell"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883
 :EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb
 :EMMO_dceedbd8_abac_4fb2_932f_41369a69b9cb rdf:type owl:Class ;
                                            rdfs:subClassOf electrochemistry:EMMO_7729c34e_1ae9_403d_b933_1765885e7f29 ;
                                            skos:prefLabel "MetalReferenceElectrode"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11
 :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -930,24 +930,24 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                            ] .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f
 :EMMO_e1fa5985_f5a7_4637_ae1c_d6e9db45d22f rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_4456a5d2_16a6_4ee1_9a8e_5c75956b28ea ;
                                            skos:prefLabel "ElectrochemicalContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e390be61_f813_400b_8b12_22f55b63f1da
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e390be61_f813_400b_8b12_22f55b63f1da
 :EMMO_e390be61_f813_400b_8b12_22f55b63f1da rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f
 :EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 ,
                                                            :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e939a312_661c_4b21_9651_06f34659e20a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e939a312_661c_4b21_9651_06f34659e20a
 :EMMO_e939a312_661c_4b21_9651_06f34659e20a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_679f6984_e0dc_4285_9dbb_429c5779590c ;
                                            emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Randles_circuit"@en ;
@@ -956,12 +956,12 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "RandlesCircuitModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc
 :EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427
 :EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_d9ebf2cd_a020_46b4_b91a_9a6402736b9e ,
                                                            [ rdf:type owl:Restriction ;
@@ -975,53 +975,53 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "CoinCellContainer"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_edc98332_248a_436a_a352_5a7897150c4f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_edc98332_248a_436a_a352_5a7897150c4f
 :EMMO_edc98332_248a_436a_a352_5a7897150c4f rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_8c808507_976a_4225_8099_604dc7abc5ea ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "A full redox flow battery with aqueous electrolytes that contain metallic species as the active components." ;
                                            skos:prefLabel "AqueousMetallicFlowBattery"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2
 :EMMO_ef791f05_41d4_4bdb_a1fc_fd455ed0ecb2 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_b1921f7b_afac_465a_a275_26f929f7f936 ;
                                            skos:prefLabel "P4DModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
 :EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469
 :EMMO_f1b2437a_fdf5_43fe_a26d_d9cf296ff469 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_5f918eae_2666_47dc_8ca8_c79fbcce3b86 ;
                                            skos:prefLabel "ElectrolyteContinuumModel"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f59da904_9c18_4e7b_9ac4_3e2b6aa3836a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_f59da904_9c18_4e7b_9ac4_3e2b6aa3836a
 :EMMO_f59da904_9c18_4e7b_9ac4_3e2b6aa3836a rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ebaac955_1664_4de8_a9ae_a3868a7d8427 ;
                                            skos:prefLabel "CoinCellCotainer2016"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f5fea163_410c_4e35_9408_15d5732c9f32
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_f5fea163_410c_4e35_9408_15d5732c9f32
 :EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3
 :EMMO_f768ea27_09ba_4875_a5cc_2c644b0753a3 rdf:type owl:Class ;
                                            rdfs:subClassOf emmo:EMMO_314d0bd5_67ed_437e_a609_36d46147cea7 ;
                                            skos:prefLabel "BatteryPhenomenon"@en .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847
 :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507
 :EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507 rdf:type owl:Class ;
                                            rdfs:subClassOf :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 ,
                                                            [ rdf:type owl:Restriction ;
@@ -1038,258 +1038,258 @@ dcterms:license rdf:type owl:AnnotationProperty .
 #    Individuals
 #################################################################
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363
 :EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 rdf:type owl:NamedIndividual ,
                                                     :EMMO_05adf5d2_0fbd_4c58_906e_4b875a7f2363 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde
 :EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde rdf:type owl:NamedIndividual ,
                                                     :EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b
 :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b rdf:type owl:NamedIndividual ,
                                                     :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497
 :EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497 rdf:type owl:NamedIndividual ,
                                                     :EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab
 :EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab rdf:type owl:NamedIndividual ,
                                                     :EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce
 :EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce rdf:type owl:NamedIndividual ,
                                                     :EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f
 :EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f rdf:type owl:NamedIndividual ,
                                                     :EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3574fc7e_b831_4fda_a765_5ae109633926
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3574fc7e_b831_4fda_a765_5ae109633926
 :EMMO_3574fc7e_b831_4fda_a765_5ae109633926 rdf:type owl:NamedIndividual ,
                                                     :EMMO_3574fc7e_b831_4fda_a765_5ae109633926 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a
 :EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a rdf:type owl:NamedIndividual ,
                                                     :EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69
 :EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 rdf:type owl:NamedIndividual ,
                                                     :EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1
 :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 rdf:type owl:NamedIndividual ,
                                                     :EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567
 :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 rdf:type owl:NamedIndividual ,
                                                     :EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_520c9e35_2556_462f_97f1_64750cef37ae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_520c9e35_2556_462f_97f1_64750cef37ae
 :EMMO_520c9e35_2556_462f_97f1_64750cef37ae rdf:type owl:NamedIndividual ,
                                                     :EMMO_347a15e7_1cc2_4508_b972_1ab7240d5549 ,
                                                     :EMMO_520c9e35_2556_462f_97f1_64750cef37ae .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_54d48300_242b_4af8_96b4_d3436450e094
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_54d48300_242b_4af8_96b4_d3436450e094
 :EMMO_54d48300_242b_4af8_96b4_d3436450e094 rdf:type owl:NamedIndividual ,
                                                     :EMMO_54d48300_242b_4af8_96b4_d3436450e094 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_55a8a42d_0f83_473d_82b0_32640114b7db
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_55a8a42d_0f83_473d_82b0_32640114b7db
 :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db rdf:type owl:NamedIndividual ,
                                                     :EMMO_55a8a42d_0f83_473d_82b0_32640114b7db .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_6256b4c7_243f_4067_a081_dd1eb2160036
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_6256b4c7_243f_4067_a081_dd1eb2160036
 :EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 rdf:type owl:NamedIndividual ,
                                                     :EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_68ed592a_7924_45d0_a108_94d6275d57f0
 :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 rdf:type owl:NamedIndividual ,
                                                     :EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_69173be9_7105_43da_8635_033364616783
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_69173be9_7105_43da_8635_033364616783
 :EMMO_69173be9_7105_43da_8635_033364616783 rdf:type owl:NamedIndividual ,
                                                     :EMMO_69173be9_7105_43da_8635_033364616783 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88
 :EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88 rdf:type owl:NamedIndividual ,
                                                     :EMMO_69aef12f_3af9_4fa7_9d0c_bf4bcaf2dc88 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae
 :EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae rdf:type owl:NamedIndividual ,
                                                     :EMMO_74d6a5a9_efd6_43de_ad4b_e7b5f6b64aae .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17
 :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 rdf:type owl:NamedIndividual ,
                                                     :EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_78826076_05d5_4cc8_b46b_93418a67c91b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_78826076_05d5_4cc8_b46b_93418a67c91b
 :EMMO_78826076_05d5_4cc8_b46b_93418a67c91b rdf:type owl:NamedIndividual ,
                                                     :EMMO_78826076_05d5_4cc8_b46b_93418a67c91b .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_798806c2_9423_486a_b414_d1e49603c8cd
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_798806c2_9423_486a_b414_d1e49603c8cd
 :EMMO_798806c2_9423_486a_b414_d1e49603c8cd rdf:type owl:NamedIndividual ,
                                                     :EMMO_798806c2_9423_486a_b414_d1e49603c8cd .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322
 :EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322 rdf:type owl:NamedIndividual ,
                                                     :EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_834c96d6_4986_4766_9d96_58fc643144e0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_834c96d6_4986_4766_9d96_58fc643144e0
 :EMMO_834c96d6_4986_4766_9d96_58fc643144e0 rdf:type owl:NamedIndividual ,
                                                     :EMMO_834c96d6_4986_4766_9d96_58fc643144e0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d
 :EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d rdf:type owl:NamedIndividual ,
                                                     :EMMO_86c9ca80-de6f-417f-afdc-a7e52fa6322d .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550
 :EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550 rdf:type owl:NamedIndividual ,
                                                     :EMMO_8ff88776_0730_4e00_a4c2_ae3be0b16550 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0
 :EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 rdf:type owl:NamedIndividual ,
                                                     :EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f
 :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f rdf:type owl:NamedIndividual ,
                                                     :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec
 :EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec rdf:type owl:NamedIndividual ,
                                                     :EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0
 :EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 rdf:type owl:NamedIndividual ,
                                                     :EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2
 :EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2 rdf:type owl:NamedIndividual ,
                                                     :EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a
 :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a rdf:type owl:NamedIndividual ,
                                                     :EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40
 :EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 rdf:type owl:NamedIndividual ,
                                                     :EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b
 :EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b rdf:type owl:NamedIndividual ,
                                                     :EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ada13509_4eed_4e40_a7b1_4cc488144154
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ada13509_4eed_4e40_a7b1_4cc488144154
 :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 rdf:type owl:NamedIndividual ,
                                                     :EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b35895a0_7670_487b_9b39_db9360b7d907
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b35895a0_7670_487b_9b39_db9360b7d907
 :EMMO_b35895a0_7670_487b_9b39_db9360b7d907 rdf:type owl:NamedIndividual ,
                                                     :EMMO_b35895a0_7670_487b_9b39_db9360b7d907 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b
 :EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b rdf:type owl:NamedIndividual ,
                                                     :EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b5910d2f_3114_4663_8d46_e418ff859251
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b5910d2f_3114_4663_8d46_e418ff859251
 :EMMO_b5910d2f_3114_4663_8d46_e418ff859251 rdf:type owl:NamedIndividual ,
                                                     :EMMO_b5910d2f_3114_4663_8d46_e418ff859251 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124
 :EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 rdf:type owl:NamedIndividual ,
                                                     :EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab
 :EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab rdf:type owl:NamedIndividual ,
                                                     :EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00
 :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 rdf:type owl:NamedIndividual ,
                                                     :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883
 :EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 rdf:type owl:NamedIndividual ,
                                                     :EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11
 :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 rdf:type owl:NamedIndividual ,
                                                     :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e390be61_f813_400b_8b12_22f55b63f1da
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e390be61_f813_400b_8b12_22f55b63f1da
 :EMMO_e390be61_f813_400b_8b12_22f55b63f1da rdf:type owl:NamedIndividual ,
                                                     :EMMO_e390be61_f813_400b_8b12_22f55b63f1da .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f
 :EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f rdf:type owl:NamedIndividual ,
                                                     :EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc
 :EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc rdf:type owl:NamedIndividual ,
                                                     :EMMO_eb37da80_4500_49c6_ac9b_da2b3d810efc .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098
 :EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 rdf:type owl:NamedIndividual ,
                                                     :EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_f5fea163_410c_4e35_9408_15d5732c9f32
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_f5fea163_410c_4e35_9408_15d5732c9f32
 :EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 rdf:type owl:NamedIndividual ,
                                                     :EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847
 :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 rdf:type owl:NamedIndividual ,
                                                     :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 .
 
 
-###  https://big-map.github.io/BattINFO/ontology/BattINFO#EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507
+###  https://big-map.github.io/BattINFO/ontology/battery#EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507
 :EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507 rdf:type owl:NamedIndividual ,
                                                     :EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507 .
 
@@ -1303,15 +1303,15 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "LithiumManganeseDioxideBattery"@en .
 
 
-:EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde skos:prefLabel "NeutralElectrolyteZincAirBattery"@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-05" ;
-                                           skos:altLabel "NeutralElectrolyteZincAirElectrochemicalCell"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with a saline electrolyte and a negative electrode of zinc."@en .
+:EMMO_1251f69a_6aab_41df_8e68_eabfcca43bde emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-05" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with a saline electrolyte and a negative electrode of zinc."@en ;
+                                           skos:prefLabel "NeutralElectrolyteZincAirBattery"@en ;
+                                           skos:altLabel "NeutralElectrolyteZincAirElectrochemicalCell"@en .
 
 
 :EMMO_126e9af4_41b4_45b8_81ca_b36af2841d5b emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-09" ;
-                                           skos:prefLabel "LithiumCarbonMonofluorideBattery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing carbon monofluoride and a negative electrode of lithium."@en .
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing carbon monofluoride and a negative electrode of lithium."@en ;
+                                           skos:prefLabel "LithiumCarbonMonofluorideBattery"@en .
 
 
 :EMMO_1c8e08a6_8542_432a_9bd3_9474df55d497 skos:prefLabel "OEMBattery"@en ;
@@ -1319,44 +1319,44 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery supplied to an original equipment manufacturer (OEM) for use only with or in new equipment."@en .
 
 
-:EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Leclanch%C3%A9_cell"@en ;
+:EMMO_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab skos:prefLabel "LeclancheBattery"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-08" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on ammonium chloride and zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
-                                           skos:prefLabel "LeclancheBattery"@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-08" .
+                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Leclanch%C3%A9_cell"@en .
 
 
-:EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce skos:prefLabel "EmergencyBattery"@en ;
+:EMMO_27e2df40_b85d_4cdb_8469_b3b61b18e4ce skos:altLabel "BackUpBattery"@en ;
+                                           skos:prefLabel "EmergencyBattery"@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-15" ;
-                                           skos:altLabel "BackUpBattery"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery which supplies electric energy to an electric circuit when the normal power supply of this electric circuit is interrupted."@en .
 
 
 :EMMO_33d5e843_dcef_4b7b_97ec_bd902c9d950f emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery for use in place of an existing battery, giving the same or similar operating and performance characteristics."@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-13"@en ;
-                                           skos:prefLabel "ReplacementBattery"@en .
+                                           skos:prefLabel "ReplacementBattery"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-13"@en .
 
 
-:EMMO_3574fc7e_b831_4fda_a765_5ae109633926 skos:altLabel "NCAElectrode" ;
-                                           skos:prefLabel "LithiumNickelCobaltAluminumOxideElectrode"@en .
+:EMMO_3574fc7e_b831_4fda_a765_5ae109633926 skos:prefLabel "LithiumNickelCobaltAluminumOxideElectrode"@en ;
+                                           skos:altLabel "NCAElectrode" .
 
 
 :EMMO_392b3f47_d62a_4bd4_a819_b58b09b8843a skos:altLabel "PouchBatteryCell"@en ;
                                            skos:prefLabel "PouchCell"@en .
 
 
-:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 skos:altLabel "PrimaryCell"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell which is not designed to be electrically recharged."@en ;
+:EMMO_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell which is not designed to be electrically recharged."@en ;
                                            skos:prefLabel "PrimaryBattery"@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-02" .
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-02" ;
+                                           skos:altLabel "PrimaryCell"@en .
 
 
-:EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 skos:altLabel "NCMElectrode"@en ,
-                                                         "NMCElectrode" ;
-                                           skos:prefLabel "LithiumNickelManganeseCobaltOxideElectrode"@en .
+:EMMO_3df7ea3e_870b_40ca_bdbf_ddb6ef5c13d1 skos:prefLabel "LithiumNickelManganeseCobaltOxideElectrode"@en ;
+                                           skos:altLabel "NCMElectrode"@en ,
+                                                         "NMCElectrode" .
 
 
-:EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-17" ;
-                                           skos:prefLabel "StandardVoltageCell"@en ;
+:EMMO_3fcdc2ab_f458_4940_b218_6a10d1764567 skos:prefLabel "StandardVoltageCell"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-17" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell having, at a specified temperature, an invariant and specific open-circuit voltage, used as a reference voltage."@en .
 
 
@@ -1364,25 +1364,25 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                                           "LCOGraphiteBattery"@en .
 
 
-:EMMO_54d48300_242b_4af8_96b4_d3436450e094 emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-18" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "standard voltage cell with a saline electrolyte saturated with cadmium sulphate, a positive electrode of mercury and solid mercurous sulphate, and a negative electrode of amalgamated cadmium and solid cadmium sulphate."@en ;
-                                           skos:prefLabel "WestonStandardVoltageCell"@en .
+:EMMO_54d48300_242b_4af8_96b4_d3436450e094 skos:prefLabel "WestonStandardVoltageCell"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-18" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "standard voltage cell with a saline electrolyte saturated with cadmium sulphate, a positive electrode of mercury and solid mercurous sulphate, and a negative electrode of amalgamated cadmium and solid cadmium sulphate."@en .
 
 
-:EMMO_55a8a42d_0f83_473d_82b0_32640114b7db emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-06" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
-                                           skos:prefLabel "ZincChlorideBattery"@en .
+:EMMO_55a8a42d_0f83_473d_82b0_32640114b7db skos:prefLabel "ZincChlorideBattery"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-06" ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a saline electrolyte based on zinc chloride, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en .
 
 
-:EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-11" ;
-                                           skos:prefLabel "PilotBatteryCell"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "selected cell of a battery which is used to assess or represent the average state of parameters of the battery."@en .
+:EMMO_6256b4c7_243f_4067_a081_dd1eb2160036 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "selected cell of a battery which is used to assess or represent the average state of parameters of the battery."@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-11" ;
+                                           skos:prefLabel "PilotBatteryCell"@en .
 
 
-:EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "basic functional unit, consisting of an assembly of electrodes, electrolyte, container, terminals and usually separators, that is a source of electric energy obtained by direct conversion of chemical energy."@en ;
+:EMMO_68ed592a_7924_45d0_a108_94d6275d57f0 skos:prefLabel "BatteryCell"@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-01" ;
-                                           skos:prefLabel "BatteryCell"@en ;
-                                           skos:altLabel "Cell"@en .
+                                           skos:altLabel "Cell"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "basic functional unit, consisting of an assembly of electrodes, electrolyte, container, terminals and usually separators, that is a source of electric energy obtained by direct conversion of chemical energy."@en .
 
 
 :EMMO_69173be9_7105_43da_8635_033364616783 emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-16" ;
@@ -1398,26 +1398,26 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:prefLabel "SwagelokCell"@en .
 
 
-:EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices."@en ;
-                                           skos:prefLabel "Battery"@en ;
-                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
-                                           skos:altLabel "ElectricBattery"@en ;
+:EMMO_74ed2670_657d_4f0b_b0a6_3f13bc2e9c17 emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electric_battery"@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-04" ;
-                                           emmo:EMMO_c84c6752_6d64_48cc_9500_e54a3c34898d "https://en.wikipedia.org/wiki/Electric_battery"@en .
+                                           skos:prefLabel "Battery"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "One or more cells fitted with devices necessary for use, for example case, terminals, marking and protective devices."@en ;
+                                           emmo:EMMO_6dd685dd_1895_46e4_b227_be9f7d643c25 "https://dbpedia.org/page/Electric_battery"@en ;
+                                           skos:altLabel "ElectricBattery"@en .
 
 
-:EMMO_78826076_05d5_4cc8_b46b_93418a67c91b skos:prefLabel "PaperLinedCell"@en ;
+:EMMO_78826076_05d5_4cc8_b46b_93418a67c91b emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary cell wherein the separator is paper impregnated with electrolyte."@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-15" ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary cell wherein the separator is paper impregnated with electrolyte."@en .
+                                           skos:prefLabel "PaperLinedCell"@en .
 
 
 :EMMO_798806c2_9423_486a_b414_d1e49603c8cd emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell stored in a dry state in which the necessary electrolyte is held separately and which may be transferred for activation to the cell, immediately prior to use, by priming or other means."@en ;
-                                           skos:prefLabel "ReserveBatteryCell"@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-14" .
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-14" ;
+                                           skos:prefLabel "ReserveBatteryCell"@en .
 
 
-:EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322 skos:altLabel "LNMOElectrode" ;
-                                           skos:prefLabel "LithiumNickelManganeseOxideElectrode"@en .
+:EMMO_7c7aee42_86b2_413a_bdcb_971455cc0322 skos:prefLabel "LithiumNickelManganeseOxideElectrode"@en ;
+                                           skos:altLabel "LNMOElectrode" .
 
 
 :EMMO_834c96d6_4986_4766_9d96_58fc643144e0 skos:prefLabel "LithiumSiliconGraphiteElectrode"@en .
@@ -1430,9 +1430,9 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:altLabel "LFPElectrode"@en .
 
 
-:EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary battery containing an immobilized electrolyte"@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-14" ;
-                                           skos:prefLabel "DryBatteryCell"@en .
+:EMMO_92bc9b20_5de1_40f8_9b55_aff6c3f5e7b0 skos:prefLabel "DryBatteryCell"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "primary battery containing an immobilized electrolyte"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-14" .
 
 
 :EMMO_96addc62_ea04_449a_8237_4cd541dd8e5f skos:prefLabel "LithiumIonBattery"@en .
@@ -1441,32 +1441,32 @@ dcterms:license rdf:type owl:AnnotationProperty .
 :EMMO_9acfeea6_ca7f_4b97_9844_c38edf6387ec skos:prefLabel "BatteryModule"@en .
 
 
-:EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery in which atmospheric oxygen serves as the active material at the positive electrode and a metal as the active material of the negative electrode."@en ;
-                                           skos:prefLabel "MetalAirBattery"@en ;
+:EMMO_9cfcb1d3_ed39_476a_9300_47ffb6de6cf0 rdfs:comment "Can be primary or secondary, depending on the design."@en ;
                                            skos:altLabel "AirMetalElectrochemicalCell"@en ;
+                                           skos:prefLabel "MetalAirBattery"@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-01" ;
-                                           rdfs:comment "Can be primary or secondary, depending on the design."@en .
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery in which atmospheric oxygen serves as the active material at the positive electrode and a metal as the active material of the negative electrode."@en .
 
 
 :EMMO_9fb1ae03_6ae2_4bfb_b69e_fd6f88788ef2 skos:prefLabel "Cylindrical18650Cell"@en .
 
 
-:EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-07" ;
+:EMMO_aaaa6f4b_435b_425b_acb1_e8a427c3489a skos:prefLabel "ZincCarbonBattery"@en ;
                                            emmo:EMMO_b432d2d5_25f4_4165_99c5_5935a7763c1a "LeClanche electrochemical cell, zinc chloride electrochemical cell"@en ;
-                                           skos:prefLabel "ZincCarbonBattery"@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-07" ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell such as Leclanché or zinc chloride."@en .
 
 
-:EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 skos:altLabel "CylindricalBatteryCell"@en ;
-                                           skos:prefLabel "CylindricalCell"@en .
+:EMMO_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40 skos:prefLabel "CylindricalCell"@en ;
+                                           skos:altLabel "CylindricalBatteryCell"@en .
 
 
 :EMMO_ac7039df_3505_4355_aa52_41b4b5c2263b skos:prefLabel "LithiumGraphiteElectrode"@en .
 
 
-:EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 skos:prefLabel "LithiumMetalBattery"@en ;
+:EMMO_ada13509_4eed_4e40_a7b1_4cc488144154 rdfs:comment "Depending on the design features chosen, a lithium cell may be primary or secondary."@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-06" ;
-                                           rdfs:comment "Depending on the design features chosen, a lithium cell may be primary or secondary."@en ;
+                                           skos:prefLabel "LithiumMetalBattery"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "cell containing a non-aqueous electrolyte and a negative electrode of lithium or containing lithium."@en .
 
 
@@ -1474,42 +1474,42 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            skos:altLabel "LCOElectrode" .
 
 
-:EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b skos:altLabel "AlkalineBattery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en ;
+:EMMO_b572826a_b4e4_4986_b57d_f7b945061f8b skos:prefLabel "AlkalineZincManganeseDioxideBattery"@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-03"@en ;
-                                           skos:prefLabel "AlkalineZincManganeseDioxideBattery"@en .
+                                           skos:altLabel "AlkalineBattery"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing manganese dioxide and a negative electrode of zinc."@en .
 
 
-:EMMO_b5910d2f_3114_4663_8d46_e418ff859251 emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-02" ;
-                                           skos:prefLabel "AlkalineZincAirBattery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with an alkaline electrolyte and a negative electrode of zinc."@en .
+:EMMO_b5910d2f_3114_4663_8d46_e418ff859251 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "metal air electrochemical cell with an alkaline electrolyte and a negative electrode of zinc."@en ;
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-02" ;
+                                           skos:prefLabel "AlkalineZincAirBattery"@en .
 
 
-:EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 skos:altLabel "ButtonCell"@en ;
-                                           skos:prefLabel "CoinCell"@en ;
-                                           skos:altLabel "CoinBatteryCell"@en ,
-                                                         "ButtonBatteryCell"@en .
+:EMMO_b7fdab58_6e91_4c84_b097_b06eff86a124 skos:altLabel "ButtonBatteryCell"@en ,
+                                                         "ButtonCell"@en ,
+                                                         "CoinBatteryCell"@en ;
+                                           skos:prefLabel "CoinCell"@en .
 
 
-:EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-04" ;
+:EMMO_b81610fd_0bce_411b_986e_f3b4f3f562ab skos:prefLabel "ZincSilverOxideBattery"@en ;
                                            emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with an alkaline electrolyte, a positive electrode containing silver oxide and a negative electrode of zinc."@en ;
-                                           skos:prefLabel "ZincSilverOxideBattery"@en .
+                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-04" .
 
 
 :EMMO_be3b35a7_75a3_4be0_9265_beb178ea7b00 skos:prefLabel "BatteryPack"@en .
 
 
-:EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 skos:altLabel "BackUpBattery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery connected across a direct current supply in order to reduce the effects of power variations of the source."@en ;
+:EMMO_dbc86554_1a2a_4f2b_b8c2_e793fa219883 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "battery connected across a direct current supply in order to reduce the effects of power variations of the source."@en ;
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-01-16" ;
+                                           skos:altLabel "BackUpBattery"@en ;
                                            skos:prefLabel "BufferBattery"@en .
 
 
 :EMMO_e1d7fb00_03b9_46ea_90c9_501f538dfc11 skos:prefLabel "ZincBattery"@en .
 
 
-:EMMO_e390be61_f813_400b_8b12_22f55b63f1da skos:prefLabel "LithiumNickelOxideElectrode"@en ;
-                                           skos:altLabel "LNOElectrode" .
+:EMMO_e390be61_f813_400b_8b12_22f55b63f1da skos:altLabel "LNOElectrode" ;
+                                           skos:prefLabel "LithiumNickelOxideElectrode"@en .
 
 
 :EMMO_e8eada73_3811_4bbe_8f65_f6ee089d439f skos:prefLabel "ZincAirBattery"@en .
@@ -1520,14 +1520,14 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-11" .
 
 
-:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell which is designed to be electrically recharged."@en ;
-                                           skos:prefLabel "SecondaryBattery"@en ;
+:EMMO_efc38420_ecbb_42e4_bb3f_208e7c417098 skos:prefLabel "SecondaryBattery"@en ;
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "An electrochemical cell which is designed to be electrically recharged."@en ;
                                            skos:altLabel "SecondaryCell"@en .
 
 
-:EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous inorganic electrolyte, a positive electrode containing thionyl chloride and a negative electrode of lithium."@en ;
+:EMMO_f5fea163_410c_4e35_9408_15d5732c9f32 emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-13" ;
                                            skos:prefLabel "LithiumThionylChlorideBattery"@en ;
-                                           emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-13" .
+                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous inorganic electrolyte, a positive electrode containing thionyl chloride and a negative electrode of lithium."@en .
 
 
 :EMMO_fcbbda5e_7ba3_4355_8817_b90159e59847 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "electrochemical cell with a non-aqueous electrolyte, a positive electrode containing iron disulphide and a negative electrode of lithium."@en ;
@@ -1535,10 +1535,10 @@ dcterms:license rdf:type owl:AnnotationProperty .
                                            emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f "https://www.electropedia.org/iev/iev.nsf/display?openform&ievref=482-04-12" .
 
 
-:EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507 skos:altLabel "InsertionBattery"@en ;
-                                           emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Secondary battery containing two insertion electrodes in which the guest ion is transferred between the cathode and anode host compounds."@en ;
-                                           skos:altLabel "SwingCell"@en ,
-                                                         "ShuttlecockBattery"@en ;
+:EMMO_ffe472c5_8e0d_49d6_b2be_9453145b4507 emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 "Secondary battery containing two insertion electrodes in which the guest ion is transferred between the cathode and anode host compounds."@en ;
+                                           skos:altLabel "InsertionBattery"@en ,
+                                                         "ShuttlecockBattery"@en ,
+                                                         "SwingCell"@en ;
                                            skos:prefLabel "RockingChairBattery"@en .
 
 
