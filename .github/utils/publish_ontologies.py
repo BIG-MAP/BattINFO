@@ -48,7 +48,6 @@ def main() -> None:
     - PAGES_DIR
     - ROOT_DIR
     - VERSION_IRI_REGEX
-    - PUBLISH_URL
     - PUBLISH_DIR
 
     Outline:
@@ -63,6 +62,14 @@ def main() -> None:
     local_ontologies = list(ROOT_DIR.glob("*.ttl"))
 
     catalog_file = sorted(ROOT_DIR.glob("catalog-*.xml"), reverse=True)[0]
+
+    print("Prepare catalog file")
+    catalog_file_content = []
+    for line in catalog_file.read_text("utf8").splitlines():
+        if "<uri" in line:
+            catalog_file_content.append(re.sub(r'" uri=.*', '"/>', line))
+        else:
+            catalog_file_content.append(line)
 
     print("Publishing ontologies:")
     for ontology_file in local_ontologies:
@@ -90,9 +97,10 @@ def main() -> None:
             src=ontology_file,
             dst=absolute_publish_dir / relative_destination_dir / ontology_file.name,
         )
-        shutil.copyfile(
-            src=catalog_file,
-            dst=absolute_publish_dir / relative_destination_dir / catalog_file.name,
+
+        # catalog file
+        (absolute_publish_dir / relative_destination_dir / catalog_file.name).write_text(
+            "\n".join(catalog_file_content) + "\n", encoding="utf8"
         )
 
 
@@ -105,7 +113,6 @@ if __name__ == "__main__":
     ROOT_DIR = Path(__file__).resolve().parent.parent.parent
     PAGES_DIR = ROOT_DIR / os.environ["ONTODOC_DIR"] / os.environ["TMP_DIR"] / os.environ["PAGES_DIR"]
     PUBLISH_DIR = Path(os.environ["PUBLISH_ONTOLOGIES_DIR"])
-    PUBLISH_URL = f"https://big-map.github.io/BattINFO/{PUBLISH_DIR}"
     VERSION_IRI_REGEX = re.compile(
         r"https?://(?P<domain>[a-zA-Z._-]+)/(?P<path>[a-zA-Z_-]+(/[a-zA-Z_-]+)*)"
         r"/(?P<version>[0-9a-zA-Z._-]+)(/(?P<name>[a-zA-Z_-]+))?(/(?P<filename>[a-zA-Z_.-]+))?"
