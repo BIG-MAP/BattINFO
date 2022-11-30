@@ -35,7 +35,7 @@ git clone https://github.com/BIG-MAP/BattINFO.git
 When opening BattINFO.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
 
 In python, the ontology can be handled with the pacakge [EMMOntoPy][2] (formerly EMMO-python). This
-package can be installed with `pip install emmontopy` (not to be confused with ontopy pn pypi).
+package can be installed with `pip install emmontopy` (not to be confused with ontopy on pypi).
 
 Correct import is obtained with:
 
