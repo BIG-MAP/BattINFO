@@ -34,7 +34,10 @@ git clone https://github.com/BIG-MAP/BattINFO.git
 
 When opening BattINFO.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
 
-In EMMO-python, correct import is obtained with:
+In python, the ontology can be handled with the pacakge [EMMOntoPy][2] (formerly EMMO-python). This
+package can be installed with `pip install emmontopy` (not to be confused with ontopy pn pypi).
+
+Correct import is obtained with:
 
 ```python
 from ontopy import get_ontology
@@ -75,3 +78,4 @@ battinfo = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/mast
 The Battery Interface Domain Ontology is released under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode) license (CC BY 4.0).
 
 [1]: https://github.com/emmo-repo/EMMO
+[2]: https://emmo-repo.github.io/EMMOntoPy
