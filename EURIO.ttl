@@ -1,0 +1,2135 @@
+@prefix : <http://data.europa.eu/s66#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dg: <https://w3id.org/dingo#> .
+@prefix dct: <http://purl.org/dc/elements/1.1/> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix oegp: <webode://droz.dia.fi.upm.es/Project+Ontology#> .
+@prefix owl2: <http://www.w3.org/2006/12/owl2#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix cerif: <http://eurocris.org/ontology/cerif#> .
+@prefix frapo: <http://purl.org/cerif/frapo/> .
+@prefix schema: <http://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@base <http://data.europa.eu/s66#> .
+
+<http://data.europa.eu/s66#> rdf:type owl:Ontology ;
+                              owl:versionIRI <http://data.europa.eu/s66/v1.1#> ;
+                              dct:creator "everis Spain, S.L.U"@en ;
+                              dct:description "The EUropean Research Information Ontology (EURIO) conceptualises, formally encodes and makes available in an open, structured and machine-readable format data about resarch projects funded by the EU's framework programmes for research and innovation."@en ;
+                              dct:publisher "Publications Office of the European Commission."@en ;
+                              dct:title "EURIO: EUropean Research Information Ontology"@en ;
+                              dcterms:contributor [ ] ;
+dcterms:modified "2021-08-20" ;
+owl:versionInfo "v1.1 - 15 October 2021"@en ;
+dcat:distribution [ ] .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/elements/1.1/creator
+dct:creator rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/description
+dct:description rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/publisher
+dct:publisher rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/title
+dct:title rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/contributor
+dcterms:contributor rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/modified
+dcterms:modified rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#definition
+skos:definition rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#note
+skos:note rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/dcat#accessURL
+dcat:accessURL rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/dcat#distribution
+dcat:distribution rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/dcat#downloadURL
+dcat:downloadURL rdf:type owl:AnnotationProperty .
+
+
+###  http://xmlns.com/foaf/0.1/mbox
+foaf:mbox rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://data.europa.eu/s66#address
+:address rdf:type owl:ObjectProperty ;
+         rdfs:range :PostalAddress ;
+         rdfs:comment "Physical address of a location."@en ;
+         rdfs:isDefinedBy schema: ;
+         rdfs:label "address"@en ;
+         skos:definition "Physical address of a location."@en ;
+         skos:note "SCHEMA's definition: Physical address of the item."@en .
+
+
+###  http://data.europa.eu/s66#disburses
+:disburses rdf:type owl:ObjectProperty ;
+           owl:inverseOf :isDisbursedBy ;
+           rdfs:domain :FundingAgency ;
+           rdfs:range :Grant ;
+           rdfs:comment "Relates the funding agency to the grant(s) that it disburses."@en ;
+           rdfs:isDefinedBy dg: ;
+           rdfs:label "disburses"@en ;
+           skos:definition "Relates the funding agency to the grant(s) that it disburses."@en ;
+           skos:note "DINGO's definition: The relation between the funding agency (subject) and the disbursed grant (object)."@en ,
+                     "Inverse of disbursedBy."@en .
+
+
+###  http://data.europa.eu/s66#employs
+:employs rdf:type owl:ObjectProperty ;
+         owl:inverseOf :isEmployedBy ;
+         rdfs:domain :Organisation ;
+         rdfs:range :PersonRole ;
+         rdfs:comment "Relates the organisation to the role representing a person that the organisation employs during a project in which both participate. "@en ;
+         rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+         rdfs:label "employs"@en ;
+         skos:definition "Relates the organisation to the role representing a person that the organisation employs during a project in which both participate. "@en .
+
+
+###  http://data.europa.eu/s66#funds
+:funds rdf:type owl:ObjectProperty ;
+       owl:inverseOf :isFundedBy ;
+       rdfs:domain :Grant ;
+       rdfs:range :Project ;
+       rdfs:comment "Relates the grant with the project(s) that are completely or partially funded by it."@en ;
+       rdfs:isDefinedBy dg: ;
+       rdfs:label "funds"@en ;
+       skos:definition "Relates the grant with the project(s) that are completely or partially funded by it."@en ;
+       skos:note "DINGO's definition: The relation between the Grant (subject) and the Project (object)."@en ,
+                 "Inverse property of fundedBy."@en .
+
+
+###  http://data.europa.eu/s66#hasAcronym
+:hasAcronym rdf:type owl:ObjectProperty ;
+            owl:inverseOf :isAcronymOf ;
+            rdfs:range :Acronym ;
+            rdfs:comment "Relates an entity (e.g. project, grant, event, etc.) with its acronym(s). This includes acronyms representing the entity’s title as well as any additional acronyms extracted from other attributes of the entity."@en ;
+            rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+            rdfs:label "has Acronym"@en ;
+            skos:definition "Relates an entity (e.g. project, grant, event, etc.) with its acronym(s). This includes acronyms representing the entity’s title as well as any additional acronyms extracted from other attributes of the entity."@en ;
+            skos:note "Inverse property of acronymOf"@en .
+
+
+###  http://data.europa.eu/s66#hasAddress
+:hasAddress rdf:type owl:ObjectProperty ;
+            rdfs:range :PostalAddress ;
+            rdfs:comment "Relates the office to its office registered address."@en ;
+            rdfs:isDefinedBy org: ;
+            rdfs:label "has address"@en ;
+            skos:definition "Relates the office to its office registered address."@en ;
+            skos:note "ORG's definition: Indicates an address for the site in a suitable encoding. Use of a well known address encoding such as the vCard [vcard-rdf] vocabulary is encouraged but the range is left open to allow other encodings to be used. The address may include email, telephone, and geo-location information and is not restricted to a physical address."@en .
+
+
+###  http://data.europa.eu/s66#hasBeneficiary
+:hasBeneficiary rdf:type owl:ObjectProperty ;
+                owl:inverseOf :isBeneficiaryOf ;
+                rdfs:domain :Grant ;
+                rdfs:range :Role ;
+                rdfs:comment "Relates the grant to the organisation or person role(s) that are a beneficiary of the grant. "@en ;
+                rdfs:isDefinedBy dg: ;
+                rdfs:label "has Beneficiary"@en ;
+                skos:definition "Relates the grant to the organisation or person role(s) that are a beneficiary of the grant. "@en ;
+                skos:note "DINGO's definition: The relation between the Grant (subject) and a (one of the) person(s) or organisation(s) receiving benefits from it identified by his/her/its role."@en ,
+                          "Inverse of beneficiaryOf."@en .
+
+
+###  http://data.europa.eu/s66#hasBusinessSector
+:hasBusinessSector rdf:type owl:ObjectProperty ;
+                   rdfs:domain :Project ;
+                   rdfs:range skos:Concept ;
+                   rdfs:comment "One or more values from the NACE taxonomy that represent the main business sectors of the project."@en ;
+                   rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                   rdfs:label "has Business Sector"@en ;
+                   skos:definition "One or more values from the NACE taxonomy that represent the main business sectors of the project."@en .
+
+
+###  http://data.europa.eu/s66#hasContactDetails
+:hasContactDetails rdf:type owl:ObjectProperty ;
+                   rdfs:domain :Role ;
+                   rdfs:range :ContactPoint ;
+                   rdfs:comment "Relates the role to the contact details of the entity taking the role (person or organisation) which are valid during the project of which the role forms a part."@en ;
+                   rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                   rdfs:label "has Contact Details"@en ;
+                   skos:definition "Relates the role to the contact details of the entity taking the role (person or organisation) which are valid during the project of which the role forms a part."@en .
+
+
+###  http://data.europa.eu/s66#hasCoordinates
+:hasCoordinates rdf:type owl:ObjectProperty ;
+                rdfs:range :Coordinates ;
+                rdfs:comment "The numerical coordinates of a place"@en ;
+                rdfs:isDefinedBy "http://schema.org/"@en ;
+                rdfs:label "has Coordinates"@en ;
+                skos:definition "The numerical coordinates of a place"@en .
+
+
+###  http://data.europa.eu/s66#hasEUCountryCode
+:hasEUCountryCode rdf:type owl:ObjectProperty ;
+                  rdfs:domain :Country ;
+                  rdfs:range skos:Concept ;
+                  rdfs:comment "The country code of the location or address according to the EU country codes."@en ;
+                  rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                  rdfs:label "has EU Country Code"@en ;
+                  skos:definition "The country code of the location or address according to the EU country codes."@en .
+
+
+###  http://data.europa.eu/s66#hasEuroSciVocClassification
+:hasEuroSciVocClassification rdf:type owl:ObjectProperty ;
+                             rdfs:range skos:Concept ;
+                             rdfs:comment "One or more values from the EuroSciVoc taxonomy that represent the main fields of science of the project."@en ;
+                             rdfs:isDefinedBy dg: ;
+                             rdfs:label "has EuroSciVoc Classification"@en ;
+                             skos:definition "One or more values from the EuroSciVoc taxonomy that represent the main fields of science of the project."@en .
+
+
+###  http://data.europa.eu/s66#hasEvent
+:hasEvent rdf:type owl:ObjectProperty ;
+          owl:inverseOf :isEventOf ;
+          rdfs:domain :Project ;
+          rdfs:range :Event ;
+          rdfs:comment "Relates the project with its event(s)."@en ;
+          rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+          rdfs:label "has Event"@en ;
+          skos:definition "Relates the project with its event(s)."@en ;
+          skos:note "Inverse property of eventOf."@en .
+
+
+###  http://data.europa.eu/s66#hasEventType
+:hasEventType rdf:type owl:ObjectProperty ;
+              rdfs:domain :Event ;
+              rdfs:range skos:Concept ;
+              rdfs:comment "This is a controlled list of types of events."@en ;
+              rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+              rdfs:label "has Event Type"@en ;
+              skos:definition "This is a controlled list of types of events."@en .
+
+
+###  http://data.europa.eu/s66#hasFundingAmount
+:hasFundingAmount rdf:type owl:ObjectProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( :FundingScheme
+                                              :Grant
+                                            )
+                              ] ;
+                  rdfs:range :MonetaryAmount ;
+                  rdfs:comment "Relates the grant or funding scheme to the amount of money available for funding."@en ;
+                  rdfs:isDefinedBy dg: ;
+                  rdfs:label "has Funding Amount"@en ;
+                  skos:definition "Relates the grant or funding scheme to the amount of money available for funding."@en ;
+                  skos:note "DINGO's definition: Amount in a specific currency (relationship between the item and a value expressed in a currency unit)."@en .
+
+
+###  http://data.europa.eu/s66#hasFundingScheme
+:hasFundingScheme rdf:type owl:ObjectProperty ;
+                  owl:inverseOf :hasGrant ;
+                  rdfs:domain :Grant ;
+                  rdfs:range :FundingScheme ;
+                  rdfs:comment "Relates the grant to the funding scheme of which the grant forms a part."@en ;
+                  rdfs:isDefinedBy dg: ;
+                  rdfs:label "has Funding Scheme"@en ;
+                  skos:definition "Relates the grant to the funding scheme of which the grant forms a part."@en ;
+                  skos:note "DINGO's definition: The relationship between the grant (subject) and the decision, plan, program (object) that the grant is the concrete realisation of."@en ,
+                            "Inverse property of grant"@en .
+
+
+###  http://data.europa.eu/s66#hasFundingSchemeCategory
+:hasFundingSchemeCategory rdf:type owl:ObjectProperty ;
+                          rdfs:domain :FundingScheme ;
+                          rdfs:range skos:Concept ;
+                          rdfs:comment "A list of terms specifying the different categories / types of funding schemes."@en ;
+                          rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                          rdfs:label "has Funding Scheme Category"@en ;
+                          skos:definition "A list of terms specifying the different categories / types of funding schemes."@en .
+
+
+###  http://data.europa.eu/s66#hasGeographicalLocation
+:hasGeographicalLocation rdf:type owl:ObjectProperty ;
+                         rdfs:domain :Site ;
+                         rdfs:range :AdministrativeArea ;
+                         rdfs:comment "The basic containment relation between a place and one that contains it"@en ;
+                         rdfs:isDefinedBy "http://schema.org/"@en ;
+                         rdfs:label "has Geographical Location"@en ;
+                         skos:definition "The basic containment relation between a place and one that contains it"@en ;
+                         skos:note "The basic containment relation between a place and one that contains it"@en .
+
+
+###  http://data.europa.eu/s66#hasGrant
+:hasGrant rdf:type owl:ObjectProperty ;
+          rdfs:domain :FundingScheme ;
+          rdfs:range :Grant ;
+          rdfs:comment "Relates a funding scheme with the grants that form part of it. "@en ;
+          rdfs:isDefinedBy dg: ;
+          rdfs:label "has Grant"@en ;
+          skos:definition "Relates a funding scheme with the grants that form part of it. "@en ;
+          skos:note "DINGO's definition: The relationship between the decision, plan, program (subject) and the grant (object) that the grant is the concrete realisation of."@en ,
+                    "Inverse property of fundingScheme"@en .
+
+
+###  http://data.europa.eu/s66#hasIdentifier
+:hasIdentifier rdf:type owl:ObjectProperty ;
+               rdfs:range :PropertyValue ;
+               rdfs:comment "A character string used to establish the identity of, and distinguish uniquely, one instance of an object within an identification scheme from all other objects within the same scheme."@en ;
+               rdfs:isDefinedBy <http://www.unece.org/cefact#> ;
+               rdfs:label "has Identifier"@en ;
+               skos:definition "A character string used to establish the identity of, and distinguish uniquely, one instance of an object within an identification scheme from all other objects within the same scheme."@en ;
+               skos:note "SCHEMA's definition: The identifier property represents any kind of identifier for any kind of Thing, such as ISBNs, GTIN codes, UUIDs etc."@en .
+
+
+###  http://data.europa.eu/s66#hasInvolvedParty
+:hasInvolvedParty rdf:type owl:ObjectProperty ;
+                  owl:inverseOf :isInvolvedIn ;
+                  rdfs:range :Role ;
+                  rdfs:comment "Relates the Project or Project Division to the roles that are involved in the project."@en ;
+                  rdfs:isDefinedBy dg: ;
+                  rdfs:label "has Involved Party"@en ;
+                  skos:definition "Relates the Project or Project Division to the roles that are involved in the project."@en ;
+                  skos:note "DINGO's definition: The relation between the Project (subject) and a (one of the) person(s) or organisation(s) contributing to or taking part in it identified by his/her/its role."@en ,
+                            "Inverse of involvedIn."@en .
+
+
+###  http://data.europa.eu/s66#hasNUTSCode
+:hasNUTSCode rdf:type owl:ObjectProperty ;
+             rdfs:domain :AdministrativeArea ;
+             rdfs:range skos:Concept ;
+             rdfs:comment "A PropertyValue pair representing the NUTS-2 or NUTS-3 code of the place or address."@en ;
+             rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+             rdfs:label "has NUTS Code"@en ;
+             skos:definition "A PropertyValue pair representing the NUTS-2 or NUTS-3 code of the place or address."@en .
+
+
+###  http://data.europa.eu/s66#hasOrganisationCategory
+:hasOrganisationCategory rdf:type owl:ObjectProperty ;
+                         rdfs:domain :Organisation ;
+                         rdfs:range skos:Concept ;
+                         rdfs:comment "A list of terms specifying the different types of organisations."@en ;
+                         rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                         rdfs:label "has Organisation Category"@en ;
+                         skos:definition "A list of terms specifying the different types of organisations."@en .
+
+
+###  http://data.europa.eu/s66#hasPayment
+:hasPayment rdf:type owl:ObjectProperty ;
+            owl:inverseOf :isPaymentOf ;
+            rdfs:domain :Grant ;
+            rdfs:range :GrantPayment ;
+            rdfs:comment "Relates the grant to its payment(s)."@en ;
+            rdfs:isDefinedBy dg: ;
+            rdfs:label "has Payment"@en ;
+            skos:definition "Relates the grant to its payment(s)."@en ;
+            skos:note " Inverse of isPaymentOf."@en ,
+                      "DINGO's definition: The relation between a superset and its direct subset(s). Indicates an item that is a part (also in generalised sense) of the subject item."@en .
+
+
+###  http://data.europa.eu/s66#hasPaymentAmount
+:hasPaymentAmount rdf:type owl:ObjectProperty ;
+                  rdfs:domain :GrantPayment ;
+                  rdfs:range :MonetaryAmount ;
+                  rdfs:comment "Relates the payment to the amount of money that was given to the beneficiary of the payment."@en ;
+                  rdfs:isDefinedBy dg: ;
+                  rdfs:label "has Payment Amount"@en ;
+                  skos:definition "Relates the payment to the amount of money that was given to the beneficiary of the payment."@en ;
+                  skos:note "DINGO's definition: Amount in a specific currency (relationship between the item and a value expressed in a currency unit)."@en .
+
+
+###  http://data.europa.eu/s66#hasProjectDivision
+:hasProjectDivision rdf:type owl:ObjectProperty ;
+                    owl:inverseOf :isDivisionOf ;
+                    rdfs:domain :Project ;
+                    rdfs:range :ProjectDivision ;
+                    rdfs:comment "Relates the project with its division(s)."@en ;
+                    rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                    rdfs:label "has Project Division"@en ;
+                    skos:definition "Relates the project with its division(s)."@en ;
+                    skos:note "Inverse property of divisionOf."@en .
+
+
+###  http://data.europa.eu/s66#hasRecipient
+:hasRecipient rdf:type owl:ObjectProperty ;
+              owl:inverseOf :isRecipientOf ;
+              rdfs:domain :GrantPayment ;
+              rdfs:range :Role ;
+              rdfs:comment "Relates the grant payment to the organisation or person role(s) which have received the grant payment. Inverse property of isRecipientOf."@en ;
+              rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+              rdfs:label "has Recipient"@en ;
+              skos:note "Relates the grant payment to the organisation or person role(s) which have received the grant payment. Inverse property of isRecipientOf."@en .
+
+
+###  http://data.europa.eu/s66#hasRelatedProject
+:hasRelatedProject rdf:type owl:ObjectProperty ,
+                            owl:SymmetricProperty ;
+                   rdfs:domain :Project ;
+                   rdfs:range :Project ;
+                   rdfs:comment "Represents a generic non parent-child relation between two CORDIS projects."@en ;
+                   rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                   rdfs:label "has Related Project"@en ;
+                   skos:definition "Represents a generic non parent-child relation between two CORDIS projects."@en .
+
+
+###  http://data.europa.eu/s66#hasRelatedScheme
+:hasRelatedScheme rdf:type owl:ObjectProperty ,
+                           owl:SymmetricProperty ;
+                  rdfs:domain :FundingScheme ;
+                  rdfs:range :FundingScheme ;
+                  rdfs:comment "Represents a generic non parent-child relation between two funding schemes."@en ;
+                  rdfs:isDefinedBy dg: ;
+                  rdfs:label "has Related Scheme"@en ;
+                  skos:definition "Represents a generic non parent-child relation between two funding schemes."@en .
+
+
+###  http://data.europa.eu/s66#hasResult
+:hasResult rdf:type owl:ObjectProperty ;
+           owl:inverseOf :isResultOf ;
+           rdfs:domain [ rdf:type owl:Class ;
+                         owl:unionOf ( :Project
+                                       :ProjectDivision
+                                     )
+                       ] ;
+           rdfs:range :Result ;
+           rdfs:comment "Relates the project with its result(s). For the project division, Relates the project division to the result(s) stemming from the work contained in the division. "@en ;
+           rdfs:isDefinedBy dg: ;
+           rdfs:label "has Result"@en ;
+           skos:definition "Relates the project with its result(s). For the project division, Relates the project division to the result(s) stemming from the work contained in the division."@en ;
+           skos:note "DINGO's definition: Material, product or outcome produced by a Project."@en ,
+                     "Inverse of resultOf."@en .
+
+
+###  http://data.europa.eu/s66#hasResultType
+:hasResultType rdf:type owl:ObjectProperty ;
+               rdfs:domain :Result ;
+               rdfs:range skos:Concept ;
+               rdfs:comment "A list of terms specifying the types of results that can have a project."@en ;
+               rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+               rdfs:label "has Result Type"@en ;
+               skos:definition "A list of terms specifying the types of results that can have a project."@en .
+
+
+###  http://data.europa.eu/s66#hasRole
+:hasRole rdf:type owl:ObjectProperty ;
+         owl:inverseOf :isRoleOf ;
+         rdfs:domain [ rdf:type owl:Class ;
+                       owl:unionOf ( :Organisation
+                                     :Person
+                                   )
+                     ] ;
+         rdfs:range :Role ;
+         rdfs:comment "Relates the person/organisation to the roles that the person/organisation takes."@en ;
+         rdfs:isDefinedBy dg: ;
+         rdfs:label "has Role"@en ;
+         skos:definition "Relates the person/organisation to the roles that the person/organisation takes."@en ;
+         skos:note "DINGO's definition: The person or organisation or entity (object) assuming or to whom is assigned the role (subject)."@en .
+
+
+###  http://data.europa.eu/s66#hasSite
+:hasSite rdf:type owl:ObjectProperty ;
+         rdfs:domain :Organisation ;
+         rdfs:range :Site ;
+         rdfs:comment "relates an organisation to its physical site"@en ;
+         rdfs:isDefinedBy "http://www.w3.org/ns/org#"@en ;
+         rdfs:label "has Site"@en ;
+         skos:definition "relates an organisation to its physical site"@en .
+
+
+###  http://data.europa.eu/s66#hasSubDivision
+:hasSubDivision rdf:type owl:ObjectProperty ;
+                owl:inverseOf :isSubDivisionOf ;
+                rdfs:range :ProjectDivision ;
+                rdfs:comment "Relates a project division with its subdivisions."@en ;
+                rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                rdfs:label "has SubDivision"@en ;
+                skos:definition "Relates a project division with its subdivisions."@en .
+
+
+###  http://data.europa.eu/s66#hasSubOrganisation
+:hasSubOrganisation rdf:type owl:ObjectProperty ;
+                    owl:inverseOf :isSubOrganisationOf ;
+                    rdfs:domain :Organisation ;
+                    rdfs:range :Organisation ;
+                    rdfs:comment "Relates the organisation with another organisation which is a sub-part or child of it."@en ;
+                    rdfs:isDefinedBy org: ;
+                    rdfs:label "has subOrganisation"@en ;
+                    skos:definition "Relates the organisation with another organisation which is a sub-part or child of it."@en ;
+                    skos:note "ORG's definition: Represents hierarchical containment of Organizations or OrganizationalUnits; indicates an organization which is a sub-part or child of this organization."@en .
+
+
+###  http://data.europa.eu/s66#hasSubScheme
+:hasSubScheme rdf:type owl:ObjectProperty ;
+              owl:inverseOf :isSubSchemeOf ;
+              rdfs:domain :FundingScheme ;
+              rdfs:range :FundingScheme ;
+              rdfs:comment "Relates the funding scheme to its sub-schemes."@en ;
+              rdfs:isDefinedBy dg: ;
+              rdfs:label "has SubScheme"@en ;
+              skos:definition "Relates the funding scheme to its sub-schemes."@en ;
+              skos:note "DINGO's definition: The relation between a superset and its direct subset(s). Indicates an item that is a part (also in generalised sense) of the subject item."@en .
+
+
+###  http://data.europa.eu/s66#hasTask
+:hasTask rdf:type owl:ObjectProperty ;
+         owl:inverseOf :isTaskOf ;
+         rdfs:domain :WorkPackage ;
+         rdfs:range :Task ;
+         rdfs:comment "Relates the work package to the task(s) that make up the package."@en ;
+         rdfs:isDefinedBy oegp: ;
+         rdfs:label "has Task"@en ;
+         skos:definition "Relates the work package to the task(s) that make up the package."@en ;
+         skos:note "Inverse property of taskOf"@en .
+
+
+###  http://data.europa.eu/s66#hasTotalCost
+:hasTotalCost rdf:type owl:ObjectProperty ;
+              rdfs:domain :Project ;
+              rdfs:range :MonetaryAmount ;
+              rdfs:comment "Relates the project with the amount of money expected, required, or given in payment for the project."@en ;
+              rdfs:isDefinedBy dg: ;
+              rdfs:label "has Total Cost"@en ;
+              skos:definition "Relates the project with the amount of money expected, required, or given in payment for the project."@en ;
+              skos:note "DINGO's definition: Amount of money necessary or planned for a determined project/activity."@en .
+
+
+###  http://data.europa.eu/s66#hasUnit
+:hasUnit rdf:type owl:ObjectProperty ;
+         owl:inverseOf :isUnitOf ;
+         rdfs:domain :Organisation ;
+         rdfs:range :OrganisationUnit ;
+         rdfs:comment "Relates the organisation with a unit or department that forms part of the organisation."@en ;
+         rdfs:isDefinedBy org: ;
+         rdfs:label "has Unit"@en ;
+         skos:definition "Relates the organisation with a unit or department that forms part of the organisation."@en ;
+         skos:note "ORG's definition: Indicates a unit which is part of this Organization, e.g. a Department within a larger Organization."@en .
+
+
+###  http://data.europa.eu/s66#implements
+:implements rdf:type owl:ObjectProperty ;
+            owl:inverseOf :isImplementedBy ;
+            rdfs:domain :FundingAgency ;
+            rdfs:range :FundingScheme ;
+            rdfs:comment "Relates a funding agency to the funding schemes that it implements and administers."@en ;
+            rdfs:isDefinedBy dg: ;
+            rdfs:label "implements"@en ;
+            skos:definition "Relates a funding agency to the funding schemes that it implements and administers."@en ;
+            skos:note "DINGO's definition: The relationship between the funding agency (subject) and the decision, plan, program (object) that the funding agency implements and administers."@en .
+
+
+###  http://data.europa.eu/s66#isAcronymOf
+:isAcronymOf rdf:type owl:ObjectProperty ;
+             rdfs:domain :Acronym ;
+             rdfs:comment "Relates the acronym to the entity or entities to which it belongs."@en ;
+             rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+             rdfs:label "is Acronym Of"@en ;
+             skos:definition "Relates the acronym to the entity or entities to which it belongs."@en ;
+             skos:note "Inverse property of acronym."@en .
+
+
+###  http://data.europa.eu/s66#isBeneficiaryOf
+:isBeneficiaryOf rdf:type owl:ObjectProperty ;
+                 rdfs:domain :Role ;
+                 rdfs:range :Grant ;
+                 rdfs:comment "Relates the role to the grant(s) of which the role is a beneficiary."@en ;
+                 rdfs:isDefinedBy dg: ;
+                 rdfs:label "is Beneficiary Of"@en ;
+                 skos:definition "Relates the role to the grant(s) of which the role is a beneficiary."@en ;
+                 skos:note "DINGO's definition: The relation between a (one of the) person(s) or organisation(s) receiving benefits from a Grant identified by his/her/its role (subject), and the Grant."@en ,
+                           "Inverse of beneficiary."@en .
+
+
+###  http://data.europa.eu/s66#isDisbursedBy
+:isDisbursedBy rdf:type owl:ObjectProperty ;
+               rdfs:domain :Grant ;
+               rdfs:range :FundingAgency ;
+               rdfs:comment "Relates the grant to the funding agency that disburses the grant."@en ;
+               rdfs:isDefinedBy dg: ;
+               rdfs:label "is Disbursed By"@en ;
+               skos:definition "Relates the grant to the funding agency that disburses the grant."@en ;
+               skos:note "DINGO's definition: The relation between the disbursed grant (subject) and the funding agency (object)."@en ,
+                         "Inverse of disburses."@en .
+
+
+###  http://data.europa.eu/s66#isDivisionOf
+:isDivisionOf rdf:type owl:ObjectProperty ;
+              rdfs:domain :ProjectDivision ;
+              rdfs:comment "Relates the project division to the project of which it forms a part"@en ;
+              rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+              rdfs:label "is Division Of"@en ;
+              skos:definition "Relates the project division to the project of which it forms a part."@en ;
+              skos:note "Inverse of divisionOf."@en .
+
+
+###  http://data.europa.eu/s66#isEmployedBy
+:isEmployedBy rdf:type owl:ObjectProperty ;
+              rdfs:domain :PersonRole ;
+              rdfs:range :Organisation ;
+              rdfs:comment "Relates the person role to the organisation in which the person holding the role is employed during the project."@en ;
+              rdfs:isDefinedBy dg: ;
+              rdfs:label "is Employed By"@en ;
+              skos:definition "Relates the person role to the organisation in which the person holding the role is employed during the project."@en ;
+              skos:note "DINGO's definition: A person or company that provides a job (possibly paying wages or a salary) to the person taking the role."@en .
+
+
+###  http://data.europa.eu/s66#isEventOf
+:isEventOf rdf:type owl:ObjectProperty ;
+           rdfs:domain :Event ;
+           rdfs:range :Project ;
+           rdfs:comment "Relates the event to the project to which it belongs."@en ;
+           rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+           rdfs:label "is Event Of"@en ;
+           skos:definition "Relates the event to the project to which it belongs."@en ;
+           skos:note "Inverse property of event."@en .
+
+
+###  http://data.europa.eu/s66#isFundedBy
+:isFundedBy rdf:type owl:ObjectProperty ;
+            rdfs:domain :Project ;
+            rdfs:range :Grant ;
+            rdfs:comment "Relates the project with the grant(s) that completely or partially fund the project."@en ;
+            rdfs:isDefinedBy dg: ;
+            rdfs:label "is Funded By"@en ;
+            skos:definition "Relates the project with the grant(s) that completely or partially fund the project."@en ;
+            skos:note "DINGO's definition: The relation between the Grant (subject) and the Project (object)."@en ,
+                      "Inverse property of funds."@en .
+
+
+###  http://data.europa.eu/s66#isHeldAt
+:isHeldAt rdf:type owl:ObjectProperty ;
+          rdfs:range :Site ;
+          rdfs:comment "The location where the event is happening."@en ;
+          rdfs:isDefinedBy schema: ;
+          rdfs:label "is Held At"@en ;
+          skos:definition "The location where the event is happening."@en ;
+          skos:note "SCHEMA's definition: The location of for example where the event is happening, an organization is located, or where an action takes place."@en .
+
+
+###  http://data.europa.eu/s66#isImplementedBy
+:isImplementedBy rdf:type owl:ObjectProperty ;
+                 rdfs:domain :FundingScheme ;
+                 rdfs:range :FundingAgency ;
+                 rdfs:comment "Relates the funding scheme with the funding agency that implements and administers the scheme."@en ;
+                 rdfs:isDefinedBy dg: ;
+                 rdfs:label "is Implemented By"@en ;
+                 skos:definition "Relates the funding scheme with the funding agency that implements and administers the scheme."@en ;
+                 skos:note "DINGO's definition: The relationship between the decision, plan, program (subject) and the funding agency (object) that the funding agency implements and administers."@en .
+
+
+###  http://data.europa.eu/s66#isInvolvedIn
+:isInvolvedIn rdf:type owl:ObjectProperty ;
+              rdfs:domain :Role ;
+              rdfs:range [ rdf:type owl:Class ;
+                           owl:unionOf ( :Project
+                                         :ProjectDivision
+                                       )
+                         ] ;
+              rdfs:comment "Relates the role to the Project or Project Division in which it is involved."@en ;
+              rdfs:isDefinedBy dg: ;
+              rdfs:label "is Involved In"@en ;
+              skos:definition "Relates the role to the Project or Project Division in which it is involved."@en ;
+              skos:note "DINGO's definition: The relation between a (one of the) person(s) or organisation(s) participant of a Project identified by his/her/its role (subject), and the Project."@en ,
+                        "Inverse of involvedParty"@en .
+
+
+###  http://data.europa.eu/s66#isPaymentOf
+:isPaymentOf rdf:type owl:ObjectProperty ;
+             rdfs:domain :GrantPayment ;
+             rdfs:range :Grant ;
+             rdfs:comment "Relates a payment to the grant of which it is a part."@en ;
+             rdfs:isDefinedBy dg: ;
+             rdfs:label "is Payment Of"@en ;
+             skos:definition "Relates a payment to the grant of which it is a part."@en ;
+             skos:note "DINGO's definition: The relation between a subset and its direct superset(s). Indicates an item that is a part (also in generalised sense) of the object item."@en ,
+                       "Inverse of payment."@en .
+
+
+###  http://data.europa.eu/s66#isRecipientOf
+:isRecipientOf rdf:type owl:ObjectProperty ;
+               rdfs:domain :Role ;
+               rdfs:range :GrantPayment ;
+               rdfs:comment "Relates the organisation or person role with the grant payment(s) which they have received. Inverse property of hasRecipient."@en ;
+               rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+               rdfs:label "is Recipient Of"@en ;
+               skos:note "Relates the organisation or person role with the grant payment(s) which they have received. Inverse property of hasRecipient."@en .
+
+
+###  http://data.europa.eu/s66#isResultOf
+:isResultOf rdf:type owl:ObjectProperty ;
+            rdfs:domain :Result ;
+            rdfs:range [ rdf:type owl:Class ;
+                         owl:unionOf ( :Project
+                                       :ProjectDivision
+                                     )
+                       ] ;
+            rdfs:comment "Relates the results with the Project(s) involved."@en ;
+            rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+            rdfs:label "is Result Of"@en ;
+            skos:note "Inverse property of result"@en .
+
+
+###  http://data.europa.eu/s66#isRoleOf
+:isRoleOf rdf:type owl:ObjectProperty ;
+          rdfs:domain :Role ;
+          rdfs:range [ rdf:type owl:Class ;
+                       owl:unionOf ( :Organisation
+                                     :Person
+                                   )
+                     ] ;
+          rdfs:comment "Relates the person/organisation role to the person/organisation which assumes the role. ."@en ;
+          rdfs:isDefinedBy dg: ;
+          rdfs:label "is Role Of"@en ;
+          skos:definition "Relates the person/organisation role to the person/organisation which assumes the role."@en ;
+          skos:note "DINGO's definition: The person or organisation or entity (object) assuming or to whom is assigned the role (subject)."@en .
+
+
+###  http://data.europa.eu/s66#isSiteOf
+:isSiteOf rdf:type owl:ObjectProperty ;
+          rdfs:domain :Site ;
+          rdfs:range :Organisation ;
+          rdfs:comment "Inidicates an entity which has presence at the given site"@en ;
+          rdfs:isDefinedBy "http://www.w3.org/ns/org#"@en ;
+          rdfs:label "is Site Of"@en ;
+          skos:definition "Inidicates an entity which has presence at the given site"@en .
+
+
+###  http://data.europa.eu/s66#isSubDivisionOf
+:isSubDivisionOf rdf:type owl:ObjectProperty ;
+                 rdfs:domain :ProjectDivision ;
+                 rdfs:range :ProjectDivision ;
+                 rdfs:comment "Relates a project division with its parent division."@en ;
+                 rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                 rdfs:label "is SubDivision Of"@en ;
+                 skos:definition "Relates a project division with its parent division."@en .
+
+
+###  http://data.europa.eu/s66#isSubOrganisationOf
+:isSubOrganisationOf rdf:type owl:ObjectProperty ;
+                     rdfs:domain :Organisation ;
+                     rdfs:range :Organisation ;
+                     rdfs:comment "Relates the organisation with another organisation of which it is a sub-part."@en ;
+                     rdfs:isDefinedBy org: ;
+                     rdfs:label "is subOrganisation Of"@en ;
+                     skos:definition "Relates the organisation with another organisation of which it is a sub-part."@en ;
+                     skos:note "ORG's definition: Represents hierarchical containment of Organizations or OrganizationalUnits; indicates an Organization which contains this Organization."@en .
+
+
+###  http://data.europa.eu/s66#isSubSchemeOf
+:isSubSchemeOf rdf:type owl:ObjectProperty ;
+               rdfs:domain :FundingScheme ;
+               rdfs:range :FundingScheme ;
+               rdfs:comment "Relates the funding scheme to its parent scheme of which this funding scheme forms a part. "@en ;
+               rdfs:isDefinedBy dg: ;
+               rdfs:label "is SubScheme Of"@en ;
+               skos:definition "Relates the funding scheme to its parent scheme of which this funding scheme forms a part. "@en ;
+               skos:note "DINGO's definition: The relation between a subset and its direct superset(s). Indicates an item that is a part (also in generalised sense) of the object item."@en .
+
+
+###  http://data.europa.eu/s66#isTaskOf
+:isTaskOf rdf:type owl:ObjectProperty ;
+          rdfs:domain :Task ;
+          rdfs:range :WorkPackage ;
+          rdfs:comment "Relates the task to the work package of which it is a part."@en ;
+          rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+          rdfs:label "is Task Of"@en ;
+          skos:definition "Relates the task to the work package of which it is a part."@en ;
+          skos:note "Inverse property of task"@en .
+
+
+###  http://data.europa.eu/s66#isUnitOf
+:isUnitOf rdf:type owl:ObjectProperty ;
+          rdfs:domain :OrganisationUnit ;
+          rdfs:range :Organisation ;
+          rdfs:comment "Relates the unit to the organisation of which the unit forms a part. "@en ;
+          rdfs:isDefinedBy org: ;
+          rdfs:label "is Unit Of"@en ;
+          skos:definition "Relates the unit to the organisation of which the unit forms a part. "@en ;
+          skos:note "ORG's definition: Indicates an Organization of which this Unit is a part, e.g. a Department within a larger Organization."@en .
+
+
+###  http://data.europa.eu/s66#refersTo
+:refersTo rdf:type owl:ObjectProperty ;
+          rdfs:domain :Acronym ;
+          rdfs:comment "The entity to which this acronym refers. This can either be an entity inside of the knowledge graph or an external entity of any type."@en ;
+          rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+          rdfs:label "refersTo"@en ;
+          skos:definition "The entity to which this acronym refers. This can either be an entity inside of the knowledge graph or an external entity of any type."@en .
+
+
+###  http://data.europa.eu/s66#refersToEntityType
+:refersToEntityType rdf:type owl:ObjectProperty ;
+                    rdfs:domain :Acronym ;
+                    rdfs:comment "The type of the entity to which this acronym refers. The type can be expressed as an IRI of the class or a string that represents the label or name of the type."@en ;
+                    rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                    rdfs:label "refersToEntityType"@en ;
+                    skos:definition "The type of the entity to which this acronym refers. The type can be expressed as an IRI of the class or a string that represents the label or name of the type."@en .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://data.europa.eu/s66#abstract
+:abstract rdf:type owl:DatatypeProperty ;
+          rdfs:range xsd:string ;
+          rdfs:comment "The general summary and ideas of a CORDIS project."@en ;
+          rdfs:isDefinedBy dg: ;
+          rdfs:label "abstract"@en ;
+          skos:definition "The general summary and ideas of a CORDIS project."@en ;
+          skos:note "DINGO's definition: Short summary description of a project."@en .
+
+
+###  http://data.europa.eu/s66#additionalName
+:additionalName rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Person ;
+                rdfs:range xsd:string ;
+                rdfs:comment "An additional name for a Person, can be used for a middle name."@en ;
+                rdfs:isDefinedBy schema: ;
+                rdfs:label "additional Name"@en ;
+                skos:definition "An additional name for a Person, can be used for a middle name."@en ;
+                skos:note "SCHEMA's definition: An additional name for a Person, can be used for a middle name."@en .
+
+
+###  http://data.europa.eu/s66#addressCountry
+:addressCountry rdf:type owl:DatatypeProperty ;
+                rdfs:domain :PostalAddress ;
+                rdfs:range xsd:string ;
+                rdfs:comment "The country of the place or address. You can also provide the two-letter ISO 3166-1 alpha-2 country code."@en ;
+                rdfs:isDefinedBy schema: ;
+                rdfs:label "address Country"@en ;
+                skos:definition "The country of the place or address. You can also provide the two-letter ISO 3166-1 alpha-2 country code."@en ;
+                skos:note "SCHEMA's definition: The country. For example, USA. You can also provide the two-letter ISO 3166-1 alpha-2 country code."@en .
+
+
+###  http://data.europa.eu/s66#addressLocality
+:addressLocality rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :PostalAddress ;
+                 rdfs:range xsd:string ;
+                 rdfs:comment "The locality, town or city of the place or address."@en ;
+                 rdfs:isDefinedBy schema: ;
+                 rdfs:label "address Locality"@en ;
+                 skos:definition "The locality, town or city of the place or address."@en ;
+                 skos:note "SCHEMA's definition:  The locality in which the street address is, and which is in the region. For example, Mountain View."@en .
+
+
+###  http://data.europa.eu/s66#addressRegion
+:addressRegion rdf:type owl:DatatypeProperty ;
+               rdfs:domain :PostalAddress ;
+               rdfs:range xsd:string ;
+               rdfs:comment "The administrative area, region or state of the place or address."@en ;
+               rdfs:isDefinedBy schema: ;
+               rdfs:label "address Region"@en ;
+               skos:definition "The administrative area, region or state of the place or address."@en ;
+               skos:note "SCHEMA's definition: The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division"@en .
+
+
+###  http://data.europa.eu/s66#currency
+:currency rdf:type owl:DatatypeProperty ;
+          rdfs:domain :MonetaryAmount ;
+          rdfs:range xsd:string ;
+          rdfs:comment "The currency in which the monetary amount is expressed."@en ;
+          rdfs:isDefinedBy schema: ;
+          rdfs:label "currency"@en ;
+          skos:definition "The currency in which the monetary amount is expressed."@en ;
+          skos:note "SCHEMA's definition: The currency in which the monetary amount is expressed."@en .
+
+
+###  http://data.europa.eu/s66#date
+:date rdf:type owl:DatatypeProperty ;
+      rdfs:domain :GrantPayment ;
+      rdfs:range xsd:dateTime ;
+      rdfs:comment "The date in which the grant payment took place."@en ;
+      rdfs:isDefinedBy dg: ;
+      rdfs:label "date"@en ;
+      skos:definition "The date in which the grant payment took place."@en ;
+      skos:note "DINGO's definition: The moment in time when an event occurs."@en .
+
+
+###  http://data.europa.eu/s66#definition
+:definition rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Acronym ;
+            rdfs:range xsd:string ;
+            rdfs:comment "The definition of the acronym."@en ;
+            rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+            rdfs:label "definition"@en ;
+            skos:definition "The definition of the acronym."@en .
+
+
+###  http://data.europa.eu/s66#description
+:description rdf:type owl:DatatypeProperty ;
+             rdfs:range xsd:string ;
+             rdfs:comment "A brief summary of the entity (project, event, etc.)."@en ;
+             rdfs:isDefinedBy schema: ;
+             rdfs:label "description"@en ;
+             skos:definition "A brief summary of the entity (project, event, etc.)."@en ;
+             skos:note "SCHEMA's description: A description of the item"@en .
+
+
+###  http://data.europa.eu/s66#duration
+:duration rdf:type owl:DatatypeProperty ;
+          rdfs:range xsd:integer ;
+          rdfs:comment "The period of time an entity (e.g. project, grant, event, etc.) has taken (use ISO 8601 duration format)."@en ;
+          rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+          rdfs:label "duration"@en ;
+          skos:definition "The period of time an entity (e.g. project, grant, event, etc.) has taken (use ISO 8601 duration format)."@en .
+
+
+###  http://data.europa.eu/s66#email
+:email rdf:type owl:DatatypeProperty ;
+       rdfs:domain :ContactPoint ;
+       rdfs:range xsd:anyURI ;
+       rdfs:comment "Email address."@en ;
+       rdfs:isDefinedBy schema: ;
+       rdfs:label "email"@en ;
+       skos:definition "Email address."@en ;
+       skos:note "SCHEMA's description: Email address."@en .
+
+
+###  http://data.europa.eu/s66#endDate
+:endDate rdf:type owl:DatatypeProperty ;
+         rdfs:range xsd:dateTime ;
+         rdfs:comment "The date on which an entity (e.g. project, grant, event, etc.) is finalized or ceases to exist."@en ;
+         rdfs:isDefinedBy dg: ;
+         rdfs:label "end Date"@en ;
+         skos:definition "The date on which an entity (e.g. project, grant, event, etc.) is finalized or ceases to exist."@en ;
+         skos:note "DINGO's definition: The time an item ceases to exist or a statement stops being valid."@en .
+
+
+###  http://data.europa.eu/s66#familyName
+:familyName rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Person ;
+            rdfs:range xsd:string ;
+            rdfs:comment "The family name (last name) of the person."@en ;
+            rdfs:isDefinedBy schema: ;
+            rdfs:label "family Name"@en ;
+            skos:definition "The family name (last name) of the person."@en ;
+            skos:note "SCHEMA's definition: Family name. In the U.S., the last name of an Person. This can be used along with givenName instead of the name property."@en .
+
+
+###  http://data.europa.eu/s66#faxNumber
+:faxNumber rdf:type owl:DatatypeProperty ;
+           rdfs:domain :ContactPoint ;
+           rdfs:range xsd:string ;
+           rdfs:comment "The fax number."@en ;
+           rdfs:isDefinedBy schema: ;
+           rdfs:label "fax Number"@en ;
+           skos:definition "The fax number."@en ;
+           skos:note "SCHEMA's description: The fax number."@en .
+
+
+###  http://data.europa.eu/s66#fullAddress
+:fullAddress rdf:type owl:DatatypeProperty ;
+             rdfs:domain :PostalAddress ;
+             rdfs:range xsd:string ;
+             rdfs:comment "The full address of a physical location of an entity"@en ;
+             rdfs:label "full Address"@en ;
+             skos:definition "The full address of a physical location of an entity"@en .
+
+
+###  http://data.europa.eu/s66#fullText
+:fullText rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Result ;
+          rdfs:range xsd:anyURI ;
+          rdfs:comment "Represents the location of the full text of the Result online."@en ;
+          rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+          rdfs:label "full Text"@en ;
+          skos:definition "Represents the location of the full text of the Result online."@en .
+
+
+###  http://data.europa.eu/s66#givenName
+:givenName rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Person ;
+           rdfs:range xsd:string ;
+           rdfs:comment "The given name (first name) of the person."@en ;
+           rdfs:isDefinedBy schema: ;
+           rdfs:label "given Name"@en ;
+           skos:definition "The given name (first name) of the person."@en ;
+           skos:note "SCHEMA's definition:  Given name. In the U.S., the first name of a Person. This can be used along with familyName instead of the name property."@en .
+
+
+###  http://data.europa.eu/s66#hasAuthor
+:hasAuthor rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Result ;
+           rdfs:range xsd:string ;
+           rdfs:comment "Represents the list of authors that have contributed to the creation of the Result."@en ;
+           rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+           rdfs:label "has Author"@en ;
+           skos:definition "the list of authors that have contributed to the creation of the Result."@en .
+
+
+###  http://data.europa.eu/s66#hasJournalNumber
+:hasJournalNumber rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :Result ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Represents the journal number of the Result."@en ;
+                  rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                  rdfs:label "has Journal Number"@en ;
+                  skos:definition "Represents the journal number of the Result."@en .
+
+
+###  http://data.europa.eu/s66#hasJournalTitle
+:hasJournalTitle rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :Result ;
+                 rdfs:range xsd:string ;
+                 rdfs:comment "Represents the title of the journal where the information about the result can be located."@en ;
+                 rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                 rdfs:label "has Journal Title"@en ;
+                 skos:definition "Represents the title of the journal where the information about the result can be located."@en .
+
+
+###  http://data.europa.eu/s66#hasKeyword
+:hasKeyword rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Project ;
+            rdfs:range xsd:string ;
+            rdfs:comment "Word or words that represent the main idea of the project."@en ;
+            rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+            rdfs:label "keyword"@en ;
+            skos:definition "Word or words that represent the main idea of the project."@en .
+
+
+###  http://data.europa.eu/s66#hasProjectStatus
+:hasProjectStatus rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :Project ;
+                  rdfs:range [ rdf:type rdfs:Datatype ;
+                               owl:oneOf [ rdf:type rdf:List ;
+                                           rdf:first "CANCEL" ;
+                                           rdf:rest [ rdf:type rdf:List ;
+                                                      rdf:first "CLOSED" ;
+                                                      rdf:rest [ rdf:type rdf:List ;
+                                                                 rdf:first "ONGOING" ;
+                                                                 rdf:rest [ rdf:type rdf:List ;
+                                                                            rdf:first "SIGNED" ;
+                                                                            rdf:rest [ rdf:type rdf:List ;
+                                                                                       rdf:first "TERMINATED" ;
+                                                                                       rdf:rest rdf:nil
+                                                                                     ]
+                                                                          ]
+                                                               ]
+                                                    ]
+                                         ]
+                             ] ;
+                  rdfs:comment "The current situation or progress of the project."@en ;
+                  rdfs:isDefinedBy "http://data.europa.eu/s66#"@en ;
+                  rdfs:label "has Project Status"@en ;
+                  skos:definition "The current situation or progress of the project."@en .
+
+
+###  http://data.europa.eu/s66#hasPublishedPages
+:hasPublishedPages rdf:type owl:DatatypeProperty ;
+                   rdfs:domain :Result ;
+                   rdfs:range xsd:string ;
+                   rdfs:comment "Represents the number of pages that this Result is published under."@en ;
+                   rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                   rdfs:label "has Published Pages"@en ;
+                   skos:definition "Represents the number of pages that this Result is published under."@en .
+
+
+###  http://data.europa.eu/s66#hasPublishedYear
+:hasPublishedYear rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :Result ;
+                  rdfs:range xsd:nonNegativeInteger ;
+                  rdfs:comment "Represents the year when this Result was published."@en ;
+                  rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                  rdfs:label "has Published Year"@en ;
+                  skos:definition "Represents the year when this Result was published."@en .
+
+
+###  http://data.europa.eu/s66#hasPublisher
+:hasPublisher rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Result ;
+              rdfs:range xsd:string ;
+              rdfs:comment "Represents the publishing body of this Result."@en ;
+              rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+              rdfs:label "has Publisher"@en ;
+              skos:definition "Represents the publishing body of this Result."@en .
+
+
+###  http://data.europa.eu/s66#hasResultCategory
+:hasResultCategory rdf:type owl:DatatypeProperty ;
+                   rdfs:domain :Result ;
+                   rdfs:range xsd:string ;
+                   rdfs:comment "Represents the category of a given Result"@en ;
+                   rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                   rdfs:label "has Result Category"@en ;
+                   skos:definition "Represents the category of a given Result"@en .
+
+
+###  http://data.europa.eu/s66#honorificTitle
+:honorificTitle rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Person ;
+                rdfs:range xsd:string ;
+                rdfs:comment "An honorific prefix preceding a Person's name such as Dr, Mrs, Mr."@en ;
+                rdfs:isDefinedBy schema: ;
+                rdfs:label "honorific Title"@en ;
+                skos:definition "An honorific prefix preceding a Person's name such as Dr, Mrs, Mr."@en ;
+                skos:note "SCHEMA's definition: An honorific prefix preceding a Person's name such as Dr/Mrs/Mr."@en .
+
+
+###  http://data.europa.eu/s66#language
+:language rdf:type owl:DatatypeProperty ;
+          rdfs:range xsd:string ;
+          rdfs:comment "A language someone may use with or at the item, service or place. Please use one of the language codes from the IETF BCP 47 standard."@en ;
+          rdfs:label "has language"@en ;
+          skos:definition "A language someone may use with or at the item, service or place. Please use one of the language codes from the IETF BCP 47 standard."@en ;
+          skos:note "SCHEMA's description: A language someone may use with or at the item, service or place. Please use one of the language codes from the IETF BCP 47 standard."@en .
+
+
+###  http://data.europa.eu/s66#latitude
+:latitude rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Coordinates ;
+          rdfs:range xsd:decimal ;
+          rdfs:comment "The latitude of a location. For example 37.42242 (WGS 84)."@en ;
+          rdfs:isDefinedBy schema: ;
+          rdfs:label "latitude"@en ;
+          skos:definition "The latitude of a location. For example 37.42242 (WGS 84)."@en ;
+          skos:note "SCHEMA's definition: The latitude of a location. For example 37.42242 (WGS 84)."@en .
+
+
+###  http://data.europa.eu/s66#legalName
+:legalName rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Organisation ;
+           rdfs:range xsd:string ;
+           rdfs:comment "The official name of the organization, e.g. the registered company name."@en ;
+           rdfs:isDefinedBy schema: ;
+           rdfs:label "legal Name"@en ;
+           skos:definition "The official name of the organization, e.g. the registered company name."@en ;
+           skos:note "SCHEMA's definition: The official name of the organization, e.g. the registered company name."@en .
+
+
+###  http://data.europa.eu/s66#longitude
+:longitude rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Coordinates ;
+           rdfs:range xsd:decimal ;
+           rdfs:comment "The longitude of a location. For example -122.08585 (WGS 84)."@en ;
+           rdfs:isDefinedBy schema: ;
+           rdfs:label "longitude"@en ;
+           skos:definition "The longitude of a location. For example -122.08585 (WGS 84)."@en ;
+           skos:note "SCHEMA's definition: The longitude of a location. For example -122.08585 (WGS 84)."@en .
+
+
+###  http://data.europa.eu/s66#name
+:name rdf:type owl:DatatypeProperty ;
+      rdfs:range xsd:string ;
+      rdfs:comment "The name of the property in the pair."@en ;
+      rdfs:isDefinedBy schema: ;
+      rdfs:label "name"@en ;
+      skos:definition "The name of the property in the pair."@en ;
+      skos:note "SCHEMA's definition: The name of the item."@en .
+
+
+###  http://data.europa.eu/s66#officeName
+:officeName rdf:type owl:DatatypeProperty ;
+            rdfs:range xsd:string ;
+            rdfs:comment "The name or title of the office."@en ;
+            rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+            rdfs:label "office Name"@en ;
+            skos:definition "The name or title of the office."@en .
+
+
+###  http://data.europa.eu/s66#personMonths
+:personMonths rdf:type owl:DatatypeProperty ;
+              rdfs:domain :ProjectDivision ;
+              rdfs:range xsd:nonNegativeInteger ;
+              rdfs:comment "The effort needed to carry out work contained in the project division, estimated in person-months."@en ;
+              rdfs:isDefinedBy oegp: ;
+              rdfs:label "person Months"@en ;
+              skos:definition "The effort needed to carry out work contained in the project division, estimated in person-months."@en .
+
+
+###  http://data.europa.eu/s66#postOfficeBoxNumber
+:postOfficeBoxNumber rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :PostalAddress ;
+                     rdfs:range xsd:string ;
+                     rdfs:comment "The post office box number for PO box addresses."@en ;
+                     rdfs:isDefinedBy schema: ;
+                     rdfs:label "post Office Box Number"@en ;
+                     skos:definition "The post office box number for PO box addresses."@en ;
+                     skos:note "SCHEMA's definition: The post office box number for PO box addresses."@en .
+
+
+###  http://data.europa.eu/s66#postalCode
+:postalCode rdf:type owl:DatatypeProperty ;
+            rdfs:domain :PostalAddress ;
+            rdfs:range xsd:string ;
+            rdfs:comment "The postal code of the place or address."@en ;
+            rdfs:isDefinedBy schema: ;
+            rdfs:label "postal Code"@en ;
+            skos:definition "The postal code of the place or address."@en ;
+            skos:note "SCHEMA's definition: The postal code. For example, 94043."@en .
+
+
+###  http://data.europa.eu/s66#profession
+:profession rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Person ;
+            rdfs:range xsd:string ;
+            rdfs:comment "The Person's occupation. In CORDIS, the values of this property may come from the NACE taxonomy."@en ;
+            rdfs:isDefinedBy schema: ;
+            rdfs:label "profession"@en ;
+            skos:definition "The Person's occupation. In CORDIS, the values of this property may come from the NACE taxonomy."@en ;
+            skos:note "SCHEMA's definition: The Person's occupation. For past professions, use Role for expressing dates."@en .
+
+
+###  http://data.europa.eu/s66#shortForm
+:shortForm rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Acronym ;
+           rdfs:range xsd:string ;
+           rdfs:comment "The value of the acronym."@en ;
+           rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+           rdfs:label "has short form"@en ;
+           skos:definition "The value of the acronym."@en .
+
+
+###  http://data.europa.eu/s66#startDate
+:startDate rdf:type owl:DatatypeProperty ;
+           rdfs:range xsd:dateTime ;
+           rdfs:comment "The time an entity (e.g. project, grant, event, etc.) is initialized or starts to take effect."@en ;
+           rdfs:isDefinedBy dg: ;
+           rdfs:label "start Date"@en ;
+           skos:definition "The time an entity (e.g. project, grant, event, etc.) is initialized or starts to take effect."@en ;
+           skos:note "DINGO's definition: The time an item starts to exist/operate or a statement starts being valid."@en .
+
+
+###  http://data.europa.eu/s66#streetAddress
+:streetAddress rdf:type owl:DatatypeProperty ;
+               rdfs:domain :PostalAddress ;
+               rdfs:range xsd:string ;
+               rdfs:comment "The street name and number of the place or address."@en ;
+               rdfs:isDefinedBy schema: ;
+               rdfs:label "street Address"@en ;
+               skos:definition "The street name and number of the place or address."@en ;
+               skos:note "SCHEMA's definition: The street address. For example, 1600 Amphitheatre Pkwy."@en .
+
+
+###  http://data.europa.eu/s66#subject
+:subject rdf:type owl:DatatypeProperty ;
+         rdfs:domain :Project ;
+         rdfs:range xsd:string ;
+         rdfs:comment "One word or phrase that describes the main subject, topic or area of the project."@en ;
+         rdfs:isDefinedBy dg: ;
+         rdfs:label "subject"@en ;
+         skos:definition "One word or phrase that describes the main subject, topic or area of the project."@en ;
+         skos:note "DINGO's definition: "@en .
+
+
+###  http://data.europa.eu/s66#telephone
+:telephone rdf:type owl:DatatypeProperty ;
+           rdfs:domain :ContactPoint ;
+           rdfs:range xsd:string ;
+           rdfs:comment "The telephone number."@en ;
+           rdfs:isDefinedBy schema: ;
+           rdfs:label "telephone"@en ;
+           skos:definition "The telephone number."@en ;
+           skos:note "SCHEMA's definition: The telephone number."@en .
+
+
+###  http://data.europa.eu/s66#title
+:title rdf:type owl:DatatypeProperty ;
+       rdfs:range xsd:string ;
+       rdfs:comment "The entity’s (e.g. project, work package, etc.) official name or title."@en ;
+       rdfs:isDefinedBy dg: ;
+       rdfs:label "title"@en ;
+       skos:definition "The entity’s (e.g. project, work package, etc.) official name or title."@en ;
+       skos:note "DINGO's definition: the title of a project (original or translated)."@en .
+
+
+###  http://data.europa.eu/s66#value
+:value rdf:type owl:DatatypeProperty ;
+       rdfs:comment "The value of amount being expressed."@en ;
+       rdfs:isDefinedBy schema: ;
+       rdfs:label "value"@en ;
+       skos:definition "The value of amount being expressed."@en ;
+       skos:note "SCHEMA's definition: The value of the quantitative value or property value node."@en .
+
+
+###  http://data.europa.eu/s66#vatNumber
+:vatNumber rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Organisation ;
+           rdfs:range xsd:string ;
+           rdfs:comment "The unique number that identifies a taxable organisation or non-taxable legal entity that is registered for VAT."@en ;
+           rdfs:isDefinedBy schema: ;
+           rdfs:label "VAT Number"@en ;
+           skos:definition "The unique number that identifies a taxable organisation or non-taxable legal entity that is registered for VAT."@en ;
+           skos:note "SCHEMA's definition: The Value-added Tax ID of the organization or person."@en .
+
+
+###  http://data.europa.eu/s66#webLink
+:webLink rdf:type owl:DatatypeProperty ;
+         rdfs:range xsd:anyURI ;
+         rdfs:isDefinedBy "https://w3id.org/dingo#"@en ;
+         rdfs:label "web Link"@en ;
+         skos:definition "A URL that links to other internet resources outside CORDIS environment that are related with the project"@en .
+
+
+###  http://data.europa.eu/s66#webResource
+:webResource rdf:type owl:DatatypeProperty ;
+             rdfs:range xsd:anyURI ;
+             rdfs:comment "A URL that links to resources other than webpages (e.g. document, image) that are related with the project."@en ;
+             rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+             rdfs:label "web Resource"@en ;
+             skos:definition "A URL that links to resources other than webpages (e.g. document, image) that are related with the project."@en .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://data.europa.eu/s66#Acronym
+:Acronym rdf:type owl:Class ;
+         rdfs:subClassOf [ rdf:type owl:Restriction ;
+                           owl:onProperty :definition ;
+                           owl:someValuesFrom xsd:string
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :shortForm ;
+                           owl:someValuesFrom xsd:string
+                         ] ;
+         rdfs:comment "An abbreviation formed from the initial letters of other words and pronounced as a word. It can refer to any type of entities in the CORDIS conceptual framework, and may be stated explicitly or extracted automatically from text."@en ;
+         rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+         rdfs:label "Acronym"@en ;
+         skos:definition "An abbreviation formed from the initial letters of other words and pronounced as a word. It can refer to any type of entities in the CORDIS conceptual framework, and may be stated explicitly or extracted automatically from text."@en .
+
+
+###  http://data.europa.eu/s66#AdministrativeArea
+:AdministrativeArea rdf:type owl:Class ;
+                    owl:equivalentClass schema:AdministrativeArea ;
+                    rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                      owl:onProperty :hasNUTSCode ;
+                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onClass :PropertyValue
+                                    ] ,
+                                    [ rdf:type owl:Restriction ;
+                                      owl:onProperty :name ;
+                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onDataRange xsd:string
+                                    ] ;
+                    rdfs:comment "An administrative geographical area that is typically managed by a public body. It can be a country, a region, a municipality, a province, a sub-municipality area, etc."@en ;
+                    rdfs:isDefinedBy "http://schema.org/"@en ;
+                    rdfs:label "Administrative Area"@en ;
+                    skos:definition "An administrative geographical area that is typically managed by a public body. It can be a country, a region, a municipality, a province, a sub-municipality area, etc."@en ;
+                    skos:note "SCHEMA's definition: a geographical region, typically under the jurisdiction of a particular government"@en .
+
+
+###  http://data.europa.eu/s66#ContactPoint
+:ContactPoint rdf:type owl:Class ;
+              rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                owl:onProperty :email ;
+                                owl:someValuesFrom xsd:anyURI
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :faxNumber ;
+                                owl:someValuesFrom xsd:string
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :telephone ;
+                                owl:someValuesFrom xsd:string
+                              ] ;
+              rdfs:comment "A contact point of an organisation or a person."@en ;
+              rdfs:isDefinedBy schema: ;
+              rdfs:label "Contact Point"@en ;
+              skos:definition "A contact point of an organisation or a person."@en ;
+              skos:note "SCHEMA's definition: The mailing address."@en .
+
+
+###  http://data.europa.eu/s66#Coordinates
+:Coordinates rdf:type owl:Class ;
+             owl:equivalentClass schema:GeoCoordinates ;
+             rdfs:subClassOf [ rdf:type owl:Restriction ;
+                               owl:onProperty :latitude ;
+                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:decimal
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty :longitude ;
+                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:decimal
+                             ] ;
+             rdfs:comment "The geo coordinates for a location of entities that participate in or form part of research projects."@en ;
+             rdfs:isDefinedBy schema: ;
+             rdfs:label "Coordinates"@en ;
+             skos:definition "The geo coordinates for a location of entities that participate in or form part of research projects."@en ;
+             skos:note "Schema's definition: The geographic coordinates of a place or event."@en .
+
+
+###  http://data.europa.eu/s66#Country
+:Country rdf:type owl:Class ;
+         owl:equivalentClass schema:Country ;
+         rdfs:subClassOf :AdministrativeArea ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasEUCountryCode ;
+                           owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onClass skos:Concept
+                         ] ;
+         rdfs:comment "A country"@en ;
+         rdfs:isDefinedBy "http://schema.org/"@en ;
+         rdfs:label "Country"@en ;
+         skos:definition "A country"@en ;
+         skos:note "SCHEMA's definition: a country." .
+
+
+###  http://data.europa.eu/s66#DetectedAcronym
+:DetectedAcronym rdf:type owl:Class ;
+                 rdfs:subClassOf :Acronym ;
+                 owl:disjointWith :TitleAcronym ;
+                 rdfs:comment "Any acronym that has been detected, automatically or manually, from the description of an entity or from any other form of natural language text."@en ;
+                 rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                 rdfs:label "Detected Acronym"@en ;
+                 skos:definition "Any acronym that has been detected, automatically or manually, from the description of an entity or from any other form of natural language text."@en .
+
+
+###  http://data.europa.eu/s66#Event
+:Event rdf:type owl:Class ;
+       rdfs:subClassOf [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasIdentifier ;
+                         owl:someValuesFrom :PropertyValue
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :description ;
+                         owl:someValuesFrom xsd:string
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :title ;
+                         owl:someValuesFrom xsd:string
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :endDate ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:dateTime
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :startDate ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:dateTime
+                       ] ;
+       owl:disjointWith :Result ;
+       rdfs:comment "An event happening at a certain time and location, such as a meeting, lecture, or conference. In CORDIS, it represents the events are organized as part of or are related to research projects."@en ;
+       rdfs:isDefinedBy schema: ;
+       rdfs:label "Event"@en ;
+       skos:definition "An event happening at a certain time and location, such as a meeting, lecture, or conference. In CORDIS, it represents the events that are organized as part of or are related to research projects."@en ;
+       skos:note "SCHEMA's definition: An event happening at a certain time and location, such as a concert, lecture, or festival."@en .
+
+
+###  http://data.europa.eu/s66#FundingAgency
+:FundingAgency rdf:type owl:Class ;
+               owl:equivalentClass dg:FundingAgency ;
+               rdfs:subClassOf :Organisation ;
+               rdfs:comment "An organisation that materially administrates funding schemes and disburses related grants. In the context of CORDIS, it represents the various European agencies responsible for funding research projects (e.g. ERC, EASME, REA, etc.)."@en ;
+               rdfs:isDefinedBy dg: ;
+               rdfs:label "Funding Agency"@en ;
+               skos:definition "An organisation that materially administrates funding schemes and disburses related grants. In the context of CORDIS, it represents the various European agencies responsible for funding research projects (e.g. ERC, EASME, REA, etc.)."@en ;
+               skos:note "DINGO's definition: The class for funding agencies: organisation that materially disburse and administer the Grant process."@en .
+
+
+###  http://data.europa.eu/s66#FundingScheme
+:FundingScheme rdf:type owl:Class ;
+               owl:equivalentClass dg:FundingScheme ;
+               rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasGrant ;
+                                 owl:someValuesFrom :Grant
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasIdentifier ;
+                                 owl:someValuesFrom :PropertyValue
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasFundingAmount ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass :MonetaryAmount
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasFundingSchemeCategory ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass skos:Concept
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :isImplementedBy ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass :FundingAgency
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :isSubSchemeOf ;
+                                 owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass :FundingScheme
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :webLink ;
+                                 owl:allValuesFrom xsd:anyURI
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :endDate ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:dateTime
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :startDate ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:dateTime
+                               ] ;
+               owl:disjointWith :Grant ;
+               rdfs:comment "Set of rules and conditions which forms the basis for public funding of European research. In CORDIS, they represent the different legal frameworks (e.g. FP6, FP7, H2020). They can also be used to represent the different calls inside each framework by using the recursive relation “partOfScheme”."@en ;
+               rdfs:isDefinedBy dg: ;
+               rdfs:label "Funding Scheme"@en ;
+               skos:definition "Set of rules and conditions which forms the basis for public funding of European research. In CORDIS, they represent the different legal frameworks (e.g. FP6, FP7, H2020). They can also be used to represent the different calls inside each framework by using the recursive relation “partOfScheme”."@en ;
+               skos:note "DINGO's definition: The class for funding schemes: plans, designs, and/or programs that determines and organizes the funding."@en .
+
+
+###  http://data.europa.eu/s66#Grant
+:Grant rdf:type owl:Class ;
+       owl:equivalentClass dg:Grant ;
+       rdfs:subClassOf [ rdf:type owl:Restriction ;
+                         owl:onProperty :funds ;
+                         owl:someValuesFrom :Project
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasBeneficiary ;
+                         owl:someValuesFrom :Role
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasFundingScheme ;
+                         owl:someValuesFrom :FundingScheme
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasIdentifier ;
+                         owl:someValuesFrom :PropertyValue
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasPayment ;
+                         owl:someValuesFrom :GrantPayment
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasFundingAmount ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onClass :MonetaryAmount
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :isDisbursedBy ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onClass :FundingAgency
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :endDate ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:dateTime
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :startDate ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:dateTime
+                       ] ;
+       rdfs:comment "A disbursed fund paid to a recipient or beneficiary within the context of a funded research project. In the context of CORDIS, it represents a grant of a specific EU programme (e.g. an H2020 grant)."@en ;
+       rdfs:isDefinedBy dg: ;
+       rdfs:label "Grant"@en ;
+       skos:definition "A disbursed fund paid to a recipient or beneficiary within the context of a funded research project. In the context of CORDIS, it represents a grant of a specific EU programme (e.g. an H2020 grant)."@en ;
+       skos:note "DINGO's definition: The class for grant: a disbursed fund paid to a recipient or beneficiary (a Participant) and the process for it."@en .
+
+
+###  http://data.europa.eu/s66#GrantPayment
+:GrantPayment rdf:type owl:Class ;
+              owl:equivalentClass dg:GrantPayment ;
+              rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasIdentifier ;
+                                owl:someValuesFrom :PropertyValue
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasRecipient ;
+                                owl:someValuesFrom :Role
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasPaymentAmount ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onClass :MonetaryAmount
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :date ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:dateTime
+                              ] ;
+              rdfs:comment "A single payment to a recipient or beneficiary of a Grant within a research project."@en ;
+              rdfs:isDefinedBy dg: ;
+              rdfs:label "Grant Payment"@en ;
+              skos:definition "A single payment to a recipient or beneficiary of a Grant within a research project."@en ;
+              skos:note "DINGO's definition: The class for grant payments: a single payment to a recipient or beneficiary within a Grant."@en .
+
+
+###  http://data.europa.eu/s66#MonetaryAmount
+:MonetaryAmount rdf:type owl:Class ;
+                owl:equivalentClass schema:MonetaryAmount ;
+                rdfs:comment "A monetary value or range. This type can be used to describe an amount of money such as $50 USD, or a range as in describing a bank account being suitable for a balance between £1,000 and £1,000,000 GBP, or the value of a salary, etc."@en ;
+                rdfs:isDefinedBy schema: ;
+                rdfs:label "Monetary Amount"@en ;
+                skos:definition "A monetary value or range. This type can be used to describe an amount of money such as $50 USD, or a range as in describing a bank account being suitable for a balance between £1,000 and £1,000,000 GBP, or the value of a salary, etc."@en ;
+                skos:note "SCHEMA's definition: A monetary value or range. This type can be used to describe an amount of money such as $50 USD, or a range as in describing a bank account being suitable for a balance between £1,000 and £1,000,000 GBP, or the value of a salary, etc."@en .
+
+
+###  http://data.europa.eu/s66#Organisation
+:Organisation rdf:type owl:Class ;
+              owl:equivalentClass org:Organization ;
+              rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasIdentifier ;
+                                owl:someValuesFrom :PropertyValue
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasRole ;
+                                owl:allValuesFrom :OrganisationRole
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasSite ;
+                                owl:allValuesFrom :Site
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasOrganisationCategory ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onClass skos:Concept
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :legalName ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:string
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :vatNumber ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:string
+                              ] ;
+              owl:disjointWith :Person ;
+              rdfs:comment "Represents a group of people, with the same purpose, organized together into a community or other social, commercial or political structure that participate in CORDIS projects."@en ;
+              rdfs:isDefinedBy org: ;
+              rdfs:label "Organisation"@en ;
+              skos:definition "Represents a group of people, with the same purpose, organized together into a community or other social, commercial or political structure that participate in CORDIS projects."@en ;
+              skos:note "ORG's definition: Represents a collection of people organized together into a community or other social, commercial or political structure. The group has some common purpose or reason for existence which goes beyond the set of people belonging to it and can act as an Agent. Organizations are often decomposable into hierarchical structures."@en .
+
+
+###  http://data.europa.eu/s66#OrganisationRole
+:OrganisationRole rdf:type owl:Class ;
+                  owl:equivalentClass dg:OrganisationRole ;
+                  rdfs:subClassOf :Role ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty :isRoleOf ;
+                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onClass :Organisation
+                                  ] ;
+                  owl:disjointWith :PersonRole ;
+                  rdfs:comment "Function assumed by or ascribed to an organisation that takes part in a particular project. In CORDIs, it represents roles such as coordinator, partner, consortium member, etc."@en ;
+                  rdfs:isDefinedBy dg: ;
+                  rdfs:label "Organisation Role"@en ;
+                  skos:definition "Function assumed by or ascribed to an organisation that takes part in a particular project. In CORDIs, it represents roles such as coordinator, partner, consortium member, etc."@en ;
+                  skos:note "DINGO's definition: The class for organisation roles: function assumed by or ascribed to an organisation that takes part in something."@en .
+
+
+###  http://data.europa.eu/s66#OrganisationUnit
+:OrganisationUnit rdf:type owl:Class ;
+                  owl:equivalentClass org:OrganizationalUnit ;
+                  rdfs:subClassOf :Organisation ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty :isUnitOf ;
+                                    owl:someValuesFrom :Organisation
+                                  ] ;
+                  rdfs:comment "A department or unit which is part of some larger Organization and only has full recognition within the context of that Organization. In CORDIS, it represents for instance the different departments of a university that participate in a particular project."@en ;
+                  rdfs:isDefinedBy org: ;
+                  rdfs:label "Organisation Unit"@en ;
+                  skos:definition "A department or unit which is part of some larger Organization and only has full recognition within the context of that Organization. In CORDIS, it represents for instance the different departments of a university that participate in a particular project."@en ;
+                  skos:note "ORG's definition: An Organization such as a department or support unit which is part of some larger Organization and only has full recognition within the context of that Organization."@en .
+
+
+###  http://data.europa.eu/s66#Person
+:Person rdf:type owl:Class ;
+        owl:equivalentClass dg:Person ;
+        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasIdentifier ;
+                          owl:someValuesFrom :PropertyValue
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasRole ;
+                          owl:someValuesFrom :PersonRole
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :additionalName ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :profession ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :familyName ;
+                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                          owl:onDataRange xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :givenName ;
+                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                          owl:onDataRange xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :honorificTitle ;
+                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                          owl:onDataRange xsd:string
+                        ] ;
+        rdfs:comment "A physical person. In CORDIS, it represents the different people assuming roles in research projects (e.g. PhD students, PIs, administrative contacts, etc.)."@en ;
+        rdfs:isDefinedBy dg: ;
+        rdfs:label "Person"@en ;
+        skos:definition "A physical person. In CORDIS, it represents the different people assuming roles in research projects (e.g. PhD students, PIs, administrative contacts, etc.)."@en ;
+        skos:note "DINGO's definition: The class for persons: alive, dead, undead, or fictional."@en .
+
+
+###  http://data.europa.eu/s66#PersonRole
+:PersonRole rdf:type owl:Class ;
+            owl:equivalentClass dg:PersonRole ;
+            rdfs:subClassOf :Role ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty :isRoleOf ;
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onClass :Person
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty :isEmployedBy ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onClass :Organisation
+                            ] ;
+            rdfs:comment "Function assumed by or ascribed to a person that takes part in a particular project. In CORDIS, it represents roles such as contact person, PI, etc."@en ;
+            rdfs:isDefinedBy dg: ;
+            rdfs:label "Person Role"@en ;
+            skos:definition "Function assumed by or ascribed to a person that takes part in a particular project. In CORDIS, it represents roles such as contact person, PI, etc."@en ;
+            skos:note "DINGO's definition: The class for person roles: function assumed by or ascribed to a person that takes part in something."@en .
+
+
+###  http://data.europa.eu/s66#PostalAddress
+:PostalAddress rdf:type owl:Class ;
+               owl:equivalentClass schema:PostalAddress ;
+               rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                 owl:onProperty :addressCountry ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:string
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :addressLocality ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:string
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :addressRegion ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:string
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :fullAddress ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:string
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :postalCode ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:string
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :streetAddress ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:string
+                               ] ;
+               rdfs:comment "The postal address of entities that participate in or form part of research projects."@en ;
+               rdfs:isDefinedBy schema: ;
+               rdfs:label "Postal Address"@en ;
+               skos:definition "The postal address of entities that participate in or form part of research projects."@en ;
+               skos:note "SCHEMA's definition: The mailing address."@en .
+
+
+###  http://data.europa.eu/s66#Project
+:Project rdf:type owl:Class ;
+         owl:equivalentClass dg:Project ;
+         rdfs:subClassOf [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasEvent ;
+                           owl:someValuesFrom :Event
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasIdentifier ;
+                           owl:someValuesFrom :PropertyValue
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasInvolvedParty ;
+                           owl:someValuesFrom :Role
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasProjectDivision ;
+                           owl:someValuesFrom :ProjectDivision
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasResult ;
+                           owl:someValuesFrom :Result
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :isFundedBy ;
+                           owl:someValuesFrom :Grant
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasEuroSciVocClassification ;
+                           owl:allValuesFrom skos:Concept
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :description ;
+                           owl:someValuesFrom xsd:string
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :duration ;
+                           owl:someValuesFrom xsd:integer
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasKeyword ;
+                           owl:someValuesFrom xsd:string
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :abstract ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:string
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :endDate ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:dateTime
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :hasProjectStatus ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:string
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :startDate ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:dateTime
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :subject ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:string
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :title ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:string
+                         ] ;
+         owl:disjointWith :ProjectDivision ;
+         rdfs:comment "A planned research work that has one or more objectives (divided or not into tasks) and is conducted by one or more organisations. In CORDIS, it represents a project funded by an EU programme."@en ;
+         rdfs:isDefinedBy frapo: ,
+                          dg: ;
+         rdfs:label "Project"@en ;
+         skos:definition "A planned research work that has one or more objectives (divided or not into tasks) and is conducted by one or more organisations. In CORDIS, it represents a project funded by an EU programme."@en ;
+         skos:note "DINGO's definition: The class for projects: an organised endeavour (collective or individual) planned to reach a particular aim or achieve a result."@en .
+
+
+###  http://data.europa.eu/s66#ProjectDivision
+:ProjectDivision rdf:type owl:Class ;
+                 rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                   owl:onProperty :hasIdentifier ;
+                                   owl:someValuesFrom :PropertyValue
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty :personMonths ;
+                                   owl:someValuesFrom xsd:nonNegativeInteger
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty :description ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:string
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty :endDate ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:dateTime
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty :startDate ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:dateTime
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty :title ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:string
+                                 ] ;
+                 rdfs:comment "An abstract entity that represents a part of the work and activities that need to be carried out within a project. This entity can be specialized through different sub-entities to represent the different types of project divisions."@en ;
+                 rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+                 rdfs:label "Project Division"@en ;
+                 skos:definition "An abstract entity that represents a part of the work and activities that need to be carried out within a project."@en .
+
+
+###  http://data.europa.eu/s66#PropertyValue
+:PropertyValue rdf:type owl:Class ;
+               owl:equivalentClass schema:PropertyValue ;
+               rdfs:comment "A property-value pair, e.g. representing a feature of a product or place. Use the 'name' property for the name of the property."@en ;
+               rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+               rdfs:label "Property Value"@en ;
+               skos:definition "A property-value pair, e.g. representing a feature of a product or place. Use the 'name' property for the name of the property."@en ;
+               skos:note "SCHEMA's definition: A property-value pair, e.g. representing a feature of a product or place. Use the 'name' property for the name of the property."@en .
+
+
+###  http://data.europa.eu/s66#Result
+:Result rdf:type owl:Class ;
+        owl:equivalentClass frapo:Output ;
+        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasIdentifier ;
+                          owl:someValuesFrom :PropertyValue
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :description ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasAuthor ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasJournalNumber ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasJournalTitle ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasPublishedPages ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasPublisher ;
+                          owl:someValuesFrom xsd:string
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasPublishedYear ;
+                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                          owl:onDataRange xsd:nonNegativeInteger
+                        ] ,
+                        [ rdf:type owl:Restriction ;
+                          owl:onProperty :title ;
+                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                          owl:onDataRange xsd:string
+                        ] ;
+        rdfs:comment "Any tangible or intangible output of the project (such as data, knowledge and information, whatever their form or nature, whether or not they can be protected), which are generated in the project."@en ;
+        rdfs:isDefinedBy frapo: ;
+        rdfs:label "Result"@en ;
+        skos:definition "Any tangible or intangible output of the project (such as data, knowledge and information, whatever their form or nature, whether or not they can be protected), which are generated in the project."@en ;
+        skos:note "FRAPO's definition: Something that is created or produced as a result of a project or an endeavour. Examples include a building resulting from a building project, educated students graduating from an educational programme, and a journal article published as a result of a research project."@en .
+
+
+###  http://data.europa.eu/s66#Role
+:Role rdf:type owl:Class ;
+      owl:equivalentClass dg:Role ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ;
+                        owl:onProperty :isInvolvedIn ;
+                        owl:someValuesFrom :Project
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :hasContactDetails ;
+                        owl:allValuesFrom :ContactPoint
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :endDate ;
+                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                        owl:onDataRange xsd:dateTime
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :startDate ;
+                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                        owl:onDataRange xsd:dateTime
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :title ;
+                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                        owl:onDataRange xsd:string
+                      ] ;
+      rdfs:comment "The function assumed by or ascribed to an entity (typically a person or organisation) in a particular project. It can be used to precise or represent additional information about a relationship or property such as participation or membership. In CORDIS, it represents the participation of a person or organisation in a research project."@en ;
+      rdfs:isDefinedBy dg: ;
+      rdfs:label "Role"@en ;
+      skos:definition "The function assumed by or ascribed to an entity (typically a person or organisation) in a particular project. It can be used to precise or represent additional information about a relationship or property such as participation or membership. In CORDIS, it represents the participation of a person or organisation in a research project."@en ;
+      skos:note "DINGO's definition: the function assumed by or ascribed to an entity (typically person, group of persons or organisation) in a particular situation."@en .
+
+
+###  http://data.europa.eu/s66#Site
+:Site rdf:type owl:Class ;
+      owl:equivalentClass org:Site ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ;
+                        owl:onProperty :hasGeographicalLocation ;
+                        owl:someValuesFrom :AdministrativeArea
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :isSiteOf ;
+                        owl:someValuesFrom :Organisation
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :hasAddress ;
+                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                        owl:onClass :PostalAddress
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :hasCoordinates ;
+                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                        owl:onClass :Coordinates
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :name ;
+                        owl:allValuesFrom xsd:string
+                      ] ;
+      rdfs:comment "The physical extension of entities that participate in or form part of research projects."@en ;
+      rdfs:isDefinedBy org: ;
+      rdfs:label "Site"@en ;
+      skos:definition "The physical extension of entities that participate in or form part of research projects."@en ;
+      skos:note "ORG's definition: An office or other premise at which the organization is located. Many organizations are spread across multiple sites and many sites will host multiple locations. In most cases a Site will be a physical location. However, we don't exclude the possibility of non-physical sites such as a virtual office with an associated post box and phone reception service. Extensions may provide sub-classes to denote particular types of site."@en .
+
+
+###  http://data.europa.eu/s66#Task
+:Task rdf:type owl:Class ;
+      owl:equivalentClass oegp:Task ;
+      rdfs:subClassOf :ProjectDivision ;
+      owl:disjointWith :WorkPackage ;
+      rdfs:comment "A sub-division of a Work Package. Different tasks can proceed in parallel, within a work package, and cover one or more reporting periods of the project. A task must start and end with the time range of its parent Work Package."@en ;
+      rdfs:isDefinedBy oegp: ;
+      rdfs:label "Task"@en ;
+      skos:definition "A sub-division of a Work Package. Different tasks can proceed in parallel, within a work package, and cover one or more reporting periods of the project. A task must start and end with the time range of its parent Work Package."@en .
+
+
+###  http://data.europa.eu/s66#TitleAcronym
+:TitleAcronym rdf:type owl:Class ;
+              rdfs:subClassOf :Acronym ;
+              rdfs:comment "An acronym explicitly defined as the title or name of another entity (e.g. Project, Organisation, Funding Scheme, etc.)."@en ;
+              rdfs:isDefinedBy <http://data.europa.eu/s66#> ;
+              rdfs:label "Title Acronym"@en ;
+              skos:definition "An acronym explicitly defined as the title or name of another entity (e.g. Project, Organisation, Funding Scheme, etc.)."@en .
+
+
+###  http://data.europa.eu/s66#WorkPackage
+:WorkPackage rdf:type owl:Class ;
+             owl:equivalentClass oegp:Workpackage ;
+             rdfs:subClassOf :ProjectDivision ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty :hasTask ;
+                               owl:someValuesFrom :Task
+                             ] ;
+             rdfs:comment "A major subdivision of a project which leads to the completion of one of the goals, objectives or major deliverables within the project. Different work packages can proceed in parallel within a project."@en ;
+             rdfs:isDefinedBy oegp: ;
+             rdfs:label "Work Package"@en ;
+             skos:definition "A major subdivision of a project which leads to the completion of one of the goals, objectives or major deliverables within the project. Different work packages can proceed in parallel within a project."@en .
+
+
+###  http://purl.org/cerif/frapo/Output
+frapo:Output rdf:type owl:Class .
+
+
+###  http://schema.org/AdministrativeArea
+schema:AdministrativeArea rdf:type owl:Class .
+
+
+###  http://schema.org/Country
+schema:Country rdf:type owl:Class .
+
+
+###  http://schema.org/Event
+schema:Event rdf:type owl:Class .
+
+
+###  http://schema.org/GeoCoordinates
+schema:GeoCoordinates rdf:type owl:Class .
+
+
+###  http://schema.org/MonetaryAmount
+schema:MonetaryAmount rdf:type owl:Class .
+
+
+###  http://schema.org/PostalAddress
+schema:PostalAddress rdf:type owl:Class .
+
+
+###  http://schema.org/PropertyValue
+schema:PropertyValue rdf:type owl:Class .
+
+
+###  http://www.w3.org/2004/02/skos/core#Concept
+skos:Concept rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/org#Organization
+org:Organization rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/org#OrganizationalUnit
+org:OrganizationalUnit rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/org#Site
+org:Site rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#FundingAgency
+dg:FundingAgency rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#FundingScheme
+dg:FundingScheme rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#Grant
+dg:Grant rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#GrantPayment
+dg:GrantPayment rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#OrganisationRole
+dg:OrganisationRole rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#Person
+dg:Person rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#PersonRole
+dg:PersonRole rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#Project
+dg:Project rdf:type owl:Class .
+
+
+###  https://w3id.org/dingo#Role
+dg:Role rdf:type owl:Class .
+
+
+###  webode://droz.dia.fi.upm.es/Project+Ontology#Task
+oegp:Task rdf:type owl:Class .
+
+
+###  webode://droz.dia.fi.upm.es/Project+Ontology#Workpackage
+oegp:Workpackage rdf:type owl:Class .
+
+
+[ dcat:accessURL <http://data.europa.eu/s66#> ;
+  dcat:downloadURL <http://data.europa.eu/s66#>
+] .
+
+[ foaf:mbox "..."
+ ] .
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
