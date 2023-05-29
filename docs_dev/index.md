@@ -1,5 +1,5 @@
 
-| [![BattINFO Github](https://badgen.net/badge/icon/github?icon=github&label)](https://github.com/BIG-MAP/BattINFO)  | [**About**](./about.md) | [**Contribute**](./contribute.md) |
+| [![BattINFO Github](https://badgen.net/badge/icon/github?icon=github&label)](https://github.com/BIG-MAP/BattINFO)  | [**About**](./about.html) | [**Contribute**](./contribute.html) |
 
 
 The **Batt**ery **IN**ter**F**ace **O**ntology is a digital resource to support interoperability of battery data.   
@@ -12,8 +12,8 @@ The same applies to documents, persons, organizations, equipment, samples... any
 
 
 ## List of Entities
-[**Batteries**](./batteries.md)   
-[**Battery Quantities**](./batteryquantties.md)  
-[**Electrochemistry**](./electrochemistry.md)  
-[**Electrochemical Quantities**](./electrochemicalquantities.md)
+[**Batteries**](./batteries.html)   
+[**Battery Quantities**](./batteryquantities.html)  
+[**Electrochemistry**](./electrochemistry.html)  
+[**Electrochemical Quantities**](./electrochemicalquantities.html)
 

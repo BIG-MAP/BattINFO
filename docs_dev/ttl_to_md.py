@@ -100,7 +100,7 @@ if __name__ == "__main__":
          "page intro": "",
          "url ttl":"https://raw.githubusercontent.com/emmo-repo/domain-battery/master/battery.ttl"},
 
-         {"filename":"batteryquantties.md", 
+         {"filename":"batteryquantities.md", 
          "page title":"Battery Quantities",
          "page intro": "",
          "url ttl":"https://raw.githubusercontent.com/emmo-repo/domain-battery/master/batteryquantities.ttl"},
