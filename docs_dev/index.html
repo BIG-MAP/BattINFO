@@ -1,77 +1,25 @@
-<head><style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 40px auto;
-    max-width: 800px;
-    padding: 0 20px;
-}
 
-.banner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0 auto;
-    max-width: 100%;
-    overflow: hidden;
-}
-
-
-h1, h2, h3 {
-    color: #333;
-}
-
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-h2 {
-    font-size: 20px;
-    margin-bottom: 15px;
-}
-
-h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-p {
-    line-height: 1.5;
-}
-
-a {
-    color: #007bff;
-}
-
-code {
-    background-color: #f8f8f8;
-    padding: 2px 4px;
-    font-family: Consolas, Monaco, monospace;
-}
-
-blockquote {
-    border-left: 3px solid #333;
-    margin: 0;
-    padding-left: 10px;
-    color: #777;
-}
-
-hr {
-    border: none;
-    border-top: 1px solid #ccc;
-    margin: 20px 0;
-}
-</style></head><body>
-<div class="banner">
-<img alt="Banner Image" src="banner.jpg"/>
-</div>
-<p>| <a href="https://github.com/BIG-MAP/BattINFO"><img alt="BattINFO Github" src="https://badgen.net/badge/icon/github?icon=github&amp;label"/></a>  | <a href="./about.html"><strong>About</strong></a> | <a href="./contribute.html"><strong>Contribute</strong></a> |</p>
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>BattINFO</title>
+                <link rel="stylesheet" type="text/css" href="./css/style.css">
+                <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+        </head>  
+        <body>      
+        
+        <div class="banner">
+            <a href="index.html">
+                <img src="./assets/banner.jpg" alt="Banner Image">
+            </a>
+        </div>
+        <p>| <a href="https://github.com/BIG-MAP/BattINFO"><img alt="BattINFO Github" src="https://badgen.net/badge/icon/github?icon=github&amp;label" /></a>  | <a href="./about.html"><strong>About</strong></a> | <a href="./contribute.html"><strong>Contribute</strong></a> |</p>
 <p>The <strong>Batt</strong>ery <strong>IN</strong>ter<strong>F</strong>ace <strong>O</strong>ntology is a digital resource to support interoperability of battery data.   </p>
-<p>BattINFO consists of a list of entities representing concepts used in batteries and electrochemistry. Each entity has a unique identifier (IRI) and is annotated with additional information, such as its preferred name ("prefLabel"), alternative names, definition, references, etc. In addition, the entities are connected via links that make explicit the relation between them, e.g. an ElectrochemicalCell --hasPart--&gt; PositiveElectrode.</p>
-<p>As users link their resources to BattINFO entities, they are effectively describing their resource using a common vocabulary. If the "Corriente" column in a tabular Dataset A, and the "Current" column in a tabular Dataset B, are both connected to the "Current" entity in BattINFO, then users have made explicit that both columns report the same quantity, enven if these quantities are named in different language. </p>
-<p>The same applies to documents, persons, organizations, equipment, samples... anything that has a unique identifier, and is linked to the common vocabulary described in BattINFO, becomes part of an ecosystem of Findable resources.</p>
+<p>BattINFO consists of a list of entities representing concepts used in batteries and electrochemistry. Each entity has a unique identifier (IRI) and is annotated with additional information, such as its preferred name ("prefLabel"), alternative names, definition, references, etc. As users link their resources to BattINFO entities, they are effectively describing their resource using a common vocabulary. Resources can be datasets, documents, persons, organizations, equipment, samples... anything linked to the common vocabulary described in BattINFO, becomes part of an ecosystem of Findable resources.</p>
 <h2>List of Entities</h2>
-<p><a href="./batteries.html"><strong>Batteries</strong></a> <br/>
-<a href="./batteryquantities.html"><strong>Battery Quantities</strong></a><br/>
-<a href="./electrochemistry.html"><strong>Electrochemistry</strong></a><br/>
-<a href="./electrochemicalquantities.html"><strong>Electrochemical Quantities</strong></a></p></body>
+<p>Here you can find the entities described in BattINFO, classified in four domains.  </p>
+<p>| <a href="./batteries.html"><strong>Batteries</strong></a> | <a href="./batteryquantities.html"><strong>Battery Quantities</strong></a>  | <a href="./electrochemistry.html"><strong>Electrochemistry</strong></a>  |  <a href="./electrochemicalquantities.html"><strong>Electrochemical Quantities</strong></a> |</p>
+            </body>
+        </html>
+        
