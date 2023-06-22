@@ -79,6 +79,6 @@ namespace.
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %HEADER "Appendix"    level=1
 
-%BRANCHFIG EMMO namespaces=BattINFO terminated=0 caption="All classes defined with the BattINFO namespace, except physical quantities.  In addition parent classes belonging to EMMO are shown in gray." leafs=PhysicalQuantity,PhysicalDimension
+%BRANCHFIG EMMO namespaces=BattINFO terminated=0 caption="All classes defined with the BattINFO namespace, except physical quantities.  In addition parent classes belonging to EMMO are shown in gray." leaves=PhysicalQuantity,PhysicalDimension
 
 %BRANCHFIG PhysicalQuantity namespaces=BattINFO terminated=0 caption="All physical quantities defined with the BattINFO namespace.  In addition parent classes belonging to EMMO are shown in gray."
