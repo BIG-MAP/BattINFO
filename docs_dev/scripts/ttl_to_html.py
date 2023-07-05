@@ -63,8 +63,11 @@ def entities_to_html(entities: list[dict]) -> str:
 
     for item in entities:
 
-        html += f"""<h3 id="{item['IRI']}">{item['prefLabel']}</h3>"""
-        html += f"""<p class="entity"><a href=#'{item['IRI']}'>{item['IRI']}</a></p>"""
+        iri_prefix, iri_suffix = item['IRI'].split("#")
+
+        html += f"""<h3 id="{iri_suffix}">{item['prefLabel']}</h3>"""
+        #html += f"""<p class="entity"><a href=#'{item['IRI']}'>{item['IRI']}</a></p>"""
+        html += f"""<p class="entity"><i>{item['IRI']}</i></p>"""
 
         for key, value in item.items():
 

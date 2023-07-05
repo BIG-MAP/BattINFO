@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri id="Imports Wizard Entry" name="http://emmo.info/emmo/domain/chameo/chameo" uri="file:/C:/Users/eibarc/OneDrive%20-%20SINTEF/Documents/Project%20BIGMAP/Repos/domain-characterisation-methodology/chameo.ttl"/>
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
         <uri name="https://big-map.github.io/BattINFO/ontology/emmo/1.0.0-beta3/generic-concepts/generic-concepts.ttl" uri="generic-concepts.ttl"/>
-	    <uri name="https://big-map.github.io/BattINFO/ontology/electrochemistry/0.3.0/electrochemistry/electrochemistry.ttl" uri="electrochemistry.ttl"/>
-        <uri name="https://big-map.github.io/BattINFO/ontology/electrochemistry/0.3.0/electrochemicalquantities/electrochemicalquantities.ttl" uri="electrochemicalquantities.ttl"/> 
+        <uri name="https://big-map.github.io/BattINFO/ontology/electrochemistry/0.3.0/electrochemistry/electrochemistry.ttl" uri="electrochemistry.ttl"/>
+        <uri name="https://big-map.github.io/BattINFO/ontology/electrochemistry/0.3.0/electrochemicalquantities/electrochemicalquantities.ttl" uri="electrochemicalquantities.ttl"/>
         <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/battery/battery.ttl" uri="battery.ttl"/>
         <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/batteryquantities/batteryquantities.ttl" uri="batteryquantities.ttl"/>
         <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.3.0/battinfo.ttl" uri="battinfo.ttl"/>
