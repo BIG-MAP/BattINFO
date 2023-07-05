@@ -1,6 +1,4 @@
 from rdflib import Graph
-from html_styling import render_html_top, render_html_bottom
-
 
 
 
@@ -11,6 +9,8 @@ def load_ttl_from_url(url:str)->Graph:
     g = Graph()
     g.parse(url, format="turtle")
     return g
+
+
 
 
 ########## QUERY TLL ################
@@ -55,6 +55,37 @@ def extract_terms_info_sparql(g: Graph)-> list:
 
 
 
+
+
+########## RENDER HTML TOP ################
+
+def render_html_top() -> str:
+
+    top_html = """
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>BattINFO</title>
+                <link rel="stylesheet" type="text/css" href="./css/style.css">
+                <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+        </head>  
+        <body>      
+        """
+
+    banner =  '''
+        <div class="banner">
+            <a href="index.html">
+                <img src="./assets/banner.jpg" alt="Banner Image">
+            </a>
+        </div>
+        '''
+    
+    return top_html + banner
+
+
+
+
 ########## RENDER ENTITIES ################
 
 def entities_to_html(entities: list[dict]) -> str:
@@ -85,11 +116,22 @@ def entities_to_html(entities: list[dict]) -> str:
 
 
 
+########## RENDER HTML BOTTOM ################
+
+def render_html_bottom() -> str:
+    return """
+            </body>
+        </html>
+        """
+
+
+
 ########### RUN THE RENDERING WORKFLOW ##############
 
 def rendering_workflow():
 
-     ########## PAGES 
+    # PAGES 
+    
     pages = [
         {"filename":"electrochemicalquantities.html", 
          "page title":"Quantities used in Electrochemistry",
@@ -112,7 +154,9 @@ def rendering_workflow():
          "path":"https://raw.githubusercontent.com/emmo-repo/domain-battery/master/batteryquantities.ttl"},
     ]
 
-    ########## GENERATE PAGES 
+
+
+    # GENERATE PAGES 
 
     for page in pages:
 
