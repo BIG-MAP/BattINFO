@@ -9,10 +9,10 @@ The Battery Interface Domain Ontology is released under the [Creative Commons At
 ### Contributors
 
 - Simon Clark, SINTEF, Norway
-- Francesca Lønstad Bleken, SINTEF, Norway
 - Jesper Friis, SINTEF, Norway
-- Casper Welzel Andersen, EPFL, Switzerland
 - Eibar Flores, SINTEF, Norway
+- Casper Welzel Andersen, SINTEF, Norway
+- Francesca Lønstad Bleken, SINTEF, Norway
 - Martin Uhrin, DTU, Denmark
 - Simon Stier, Fraunhofer, Germany
 - Marek Marcinek, Warsaw University of Technology, Poland
