@@ -15,7 +15,7 @@ See the following table for version compatibilies:
 
 | Imported Ontologies      | Version           |
 | ------------------------ | ----------------- |
-| emmo-inferred-chemistry  | 1.0.0-beta3        |
+| domain-battery-inferred  | 0.6.0             |
 
 The import structure is shown in the figure below.
 
@@ -68,30 +68,7 @@ Here is the "Specified IRI" for you to copy: ```https://big-map.github.io/BattIN
 * We will merge the request after assessing it.
 
 
-
-
 ## Attributions and credits
-
-### Contributors
-
-- Simon Clark, SINTEF, Norway
-- Francesca Lønstad Bleken, SINTEF, Norway
-- Jesper Friis, SINTEF, Norway
-- Casper Welzel Andersen, EPFL, Switzerland
-- Eibar Flores, SINTEF, Norway
-- Martin Uhrin, DTU, Denmark
-- Simon Stier, Fraunhofer, Germany
-- Marek Marcinek, Warsaw University of Technology, Poland
-- Anna Szczesna, Warsaw University of Technology, Poland
-- Miran Gaberscek, National Institute of Chemistry, Slovenia
-- Deyana Stoytcheva, ICMAB, Spain
-- Rosa Palacin, ICMAB, Spain
-- Ingeborg-Helene Svenum, SINTEF, Norway
-- Inga Gudem Ringdalen, SINTEF, Norway
-- Emanuele Farhi, SOLEIL synchrotron, France
-
-### Projects
-
 - [BIG-MAP](http://www.big-map.eu/); Grant Agreement No: 957189 <img src="bigmap.png" alt="BIG-MAP" width="30">
 
 ## License
