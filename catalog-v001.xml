@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-    <uri id="Imports Wizard Entry" name="http://emmo.info/battery/0.6.0/battery-inferred" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/dev_simon/inferred_version/battery-inferred.ttl"/>
-    <group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
-        <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.5.0/battinfo" uri="./battinfo.ttl"/>
-        <uri name="http://emmo.info/battery/0.5.0/battery" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/master/battery.ttl"/>
-        <uri name="http://emmo.info/battery/0.5.0/batteryquantities" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/master/batteryquantities.ttl"/>
-        <uri name="http://emmo.info/electrochemistry/0.5.0/electrochemistry" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/electrochemistry.ttl"/>
-        <uri name="http://emmo.info/electrochemistry/0.5.0/electrochemicalquantities" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/electrochemicalquantities.ttl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-beta4" uri="https://raw.githubusercontent.com/emmo-repo/emmo-repo.github.io/master/versions/1.0.0-beta4/emmo-inferred.ttl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-beta4/temp/isq_bigmap" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/isq_bigmap.ttl"/>
-        <uri name="http://emmo.info/emmo/1.0.0-beta4/temp/unitsextension_bigmap" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/unitsextension_bigmap.ttl"/>
-        <uri name="http://emmo.info/material/0.1.0/material" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/material_bigmap_temp.ttl"/>
+	<group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
+        <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.6.0/battinfo" uri="./battinfo.ttl"/>
+	<uri name="http://emmo.info/battery/0.6.0/battery-inferred"    			uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/0.6.0/inferred_version/battery-inferred.ttl"/>
+	
     </group>
 </catalog>
