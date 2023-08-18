@@ -15,7 +15,7 @@ See the following table for version compatibilies:
 
 | Imported Ontologies      | Version           |
 | ------------------------ | ----------------- |
-| emmo-inferred-chemistry  | 1.0.0-beta3        |
+| domain-battery-inferred  | 0.6.0             |
 
 The import structure is shown in the figure below.
 
