@@ -9,12 +9,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v4
       with:
-        python-version: 3.7
+        python-version: "3.7"
 
     - name: Install EMMOntoPy
       run: |
@@ -36,7 +36,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup Python 3.10
       uses: actions/setup-python@v4
@@ -47,13 +47,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -U setuptools wheel
-        pip install Markdown==3.4.3 rdflib==6.3.2
+        pip install -r requirements_docs.txt
 
-    - name: Render documentation from md
-      run: python docs/scripts/md_to_html.py
+    - name: Build documentation
+      run: python ${GITHUB_WORKSPACE}/docs/scripts/build.py site
 
     - name: Publish ontologies
       run: python ${GITHUB_WORKSPACE}/.github/utils/publish_ontologies.py
-
-    - name: Update GitHub Pages
-      run: ${GITHUB_WORKSPACE}/${ONTODOC_DIR}/update-pages.sh TEST
