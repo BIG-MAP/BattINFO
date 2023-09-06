@@ -14,10 +14,19 @@ Examples:
 
 """
 from pathlib import Path
+import shutil
 import sys
+
+from md_to_html import rendering_workflow
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.resolve()
 KNOWN_REPO_FOLDERS = [".git", ".github", "docs"]
+
+STATIC_DOCS_FOLDERS = ["assets", "css"]
+
+
+class Abort(Exception):
+    """Abort execution with 0 exit code."""
 
 
 def _remove_folder(folder: Path) -> None:
@@ -35,13 +44,16 @@ def build(output_folder: Path) -> None:
     # Check output folder
     if output_folder.exists():
         if any(output_folder.as_posix().startswith(_) for _ in KNOWN_REPO_FOLDERS):
-            print(f"Output folder {output_folder} is either a core repository folder or a subfolder in a core repository folder.")
+            print(
+                f"Output folder {output_folder} is either a core repository folder or "
+                "a subfolder in a core repository folder."
+            )
             try:
                 continue_input = input("Continue (folder will be overwritten)? [y/N] ")
             except (KeyboardInterrupt, EOFError):
-                sys.exit("Exiting...")
+                raise Abort("User aborted.")
             if continue_input.lower() not in ["y", "yes"]:
-                sys.exit("Exiting...")
+                raise Abort("User aborted.")
         else:
             print(f"Output folder {output_folder} already exists - will overwrite it.")
         _remove_folder(output_folder)
@@ -49,12 +61,14 @@ def build(output_folder: Path) -> None:
     # (Re)create output folder
     output_folder.mkdir(parents=True)
 
-    # Copy assets and css folders
-    for folder in ["assets", "css"]:
+    # Copy static folders
+    for folder in STATIC_DOCS_FOLDERS:
         (output_folder / folder).mkdir()
         for child in (REPO_ROOT / "docs" / folder).iterdir():
-            child.replace(output_folder / folder / child.name)
+            shutil.copyfile(child, output_folder / folder / child.name)
 
+    # Run md_to_html.py
+    rendering_workflow(output_folder)
 
 
 if __name__ == "__main__":
@@ -66,5 +80,8 @@ if __name__ == "__main__":
         build(Path(sys.argv[1]).resolve().relative_to(REPO_ROOT).resolve())
     except KeyboardInterrupt:
         sys.exit("Keyboard interrupt. Exiting...")
+    except Abort as exc:
+        print(f"Aborting: {exc}")
+        sys.exit()
     except Exception as exc:
         sys.exit(f"Error: {exc}")

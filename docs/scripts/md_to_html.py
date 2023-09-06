@@ -9,6 +9,9 @@ if TYPE_CHECKING:
     from typing import Union
 
 
+NON_DOCS_FOLDERS = ["assets", "css", "scripts"]
+
+
 def render_html_top() -> str:
     """Render the top of the HTML page."""
     top_html = """<!DOCTYPE html>
@@ -60,8 +63,8 @@ def rendering_workflow(
 
     # Get all Markdown files NOT in the assets, css, or scripts directories
     md_files = [
-        md_file for md_file in (docs_dir).rglob("*.md")
-        if md_file.relative_to(docs_dir).parts[0] not in ["assets", "css", "scripts"]
+        md_file for md_file in (docs_dir).rglob("**/*.md")
+        if md_file.relative_to(docs_dir).parts[0] not in NON_DOCS_FOLDERS
     ]
 
     pages: "dict[str, Union[str, Path]]" = [
@@ -95,8 +98,13 @@ def rendering_workflow(
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        output_path = sys.argv[1]
+    else:
+        output_path = "site"
+
     try:
-        rendering_workflow()
+        rendering_workflow(output_path)
     except KeyboardInterrupt:
         sys.exit("Keyboard interrupt. Exiting...")
     except Exception as exc:

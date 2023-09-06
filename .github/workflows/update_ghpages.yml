@@ -27,13 +27,8 @@ jobs:
         pip install -U setuptools wheel
         pip install -r requirements_docs.txt
 
-    - name: Render documentation from md
-      run: python docs/scripts/md_to_html.py
-
-    - name: Build the documentation
-      run: |
-        cd ${GITHUB_WORKSPACE}/docs
-        make html
+    - name: Build documentation
+      run: python docs/scripts/build.py site
 
     - name: Commit updated documentation
       run: |
