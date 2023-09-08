@@ -1,5 +1,5 @@
 """Build documentation from Markdown files."""
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import sys
 from typing import TYPE_CHECKING
 
@@ -54,12 +54,15 @@ def load_md_into_html(path: "Union[str, Path]") -> str:
 
 
 def rendering_workflow(
-    output_path: "Union[str, Path]" = Path("site"),
+    output_path: Path = Path("site"),
 ) -> None:
     """Workflow for rendering the HTML pages."""
     repo_dir = Path(__file__).resolve().parent.parent.parent.resolve()
     docs_dir = repo_dir / "docs"
-    output_path = Path(output_path).resolve().relative_to(repo_dir)
+
+    if not output_path.is_absolute():
+        # Relative path - Must be relative to the repository root
+        output_path = (repo_dir / output_path).resolve()
 
     # Get all Markdown files NOT in the assets, css, or scripts directories
     md_files = [
@@ -89,7 +92,7 @@ def rendering_workflow(
 
         # Write HTML to file
         # The new file's folder is created if it doesn't already exist.
-        html_file_folder = repo_dir / output_path / page["output_dir"]
+        html_file_folder = output_path / page["output_dir"]
         html_file_folder.mkdir(parents=True, exist_ok=True)
 
         # The new file will be created relative to the output path similar to the
@@ -102,6 +105,8 @@ if __name__ == "__main__":
         output_path = sys.argv[1]
     else:
         output_path = "site"
+
+    output_path = Path(PurePosixPath(output_path))
 
     try:
         rendering_workflow(output_path)

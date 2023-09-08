@@ -3,11 +3,14 @@ name: Update GitHub Pages
 on:
   push:
     branches:
-      - master  # Replace with the branch name you want to trigger the workflow on
+      - master
+  workflow_call:  # Allows manual triggering of the workflow from other workflows
 
 env:
   GIT_USER_NAME: BattINFO Developers
   GIT_USER_EMAIL: "BattINFO@big-map.org"
+  PUBLISH_DOCS_DIR: /tmp/site
+  PUBLISH_ONTOLOGIES_DIR: ontology
 
 jobs:
   updatepages:
@@ -15,6 +18,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v4 #Uses python install action from here: https://github.com/marketplace?type=actions
@@ -28,14 +33,30 @@ jobs:
         pip install -r requirements_docs.txt
 
     - name: Build documentation
-      run: python docs/scripts/build.py site
+      run: python docs/scripts/build.py ${PUBLISH_DOCS_DIR}
 
-    - name: Commit updated documentation
+    - name: Publish ontologies
+      run: python .github/utils/publish_ontologies.py
+
+    - name: Publish full documentation to gh-pages
       run: |
-        cd ${GITHUB_WORKSPACE}
+        # Set up git
         git config --global user.email "${GIT_USER_EMAIL}"
         git config --global user.name "${GIT_USER_NAME}"
-        git config pull.rebase false
-        git add .
-        git commit -m "Automatic update of github pages"
-        git push origin master
+
+        # Checkout gh-pages branch
+        git branch gh-pages origin/gh-pages
+        git checkout gh-pages
+
+        # Copy documentation to gh-pages branch
+        cp -fr ${PUBLISH_DOCS_DIR}/* .
+
+        # Commit and push changes - if there are changes
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Updating documentation..."
+          git add --all .
+          git commit -m "Automatic update of github pages"
+          git push origin gh-pages
+        else
+          echo "No changes in the documentation detected; exiting."
+        fi

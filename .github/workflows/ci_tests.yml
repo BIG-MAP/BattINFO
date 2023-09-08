@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PAGES_DIR: site
+      PUBLISH_DOCS_DIR: site
 
     steps:
     - name: Checkout repository
@@ -53,11 +53,9 @@ jobs:
         pip install -r requirements_docs.txt -r requirements.txt
 
     - name: Build documentation
-      run: python ${GITHUB_WORKSPACE}/docs/scripts/build.py ${PAGES_DIR} && ls -lahR ${PAGES_DIR}
+      run: python docs/scripts/build.py ${PUBLISH_DOCS_DIR} && ls -lahR ${PUBLISH_DOCS_DIR}
 
-    - name: Publish ontologies
-      run: python ${GITHUB_WORKSPACE}/.github/utils/publish_ontologies.py && ls -lahR ${PAGES_DIR}
+    - name: \"Publish\" ontologies
+      run: python .github/utils/publish_ontologies.py && ls -lahR ${PUBLISH_DOCS_DIR}
       env:
-        ONTODOC_DIR: '.'
-        TMP_DIR: '.'
         PUBLISH_ONTOLOGIES_DIR: ontology
