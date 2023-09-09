@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
 	<group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
-        <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.6.0/battinfo" uri="./battinfo.ttl"/>
-	<uri name="http://emmo.info/battery/0.6.0/battery-inferred"    			uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/0.6.0/inferred_version/battery-inferred.ttl"/>
-	
+        <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.6.0/battinfo.ttl" uri="./battinfo.ttl"/>
+	    <uri name="http://emmo.info/battery/0.6.0/battery-inferred" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/0.6.0/inferred_version/battery-inferred.ttl"/>
     </group>
 </catalog>

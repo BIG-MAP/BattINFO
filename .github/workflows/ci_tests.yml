@@ -55,7 +55,7 @@ jobs:
     - name: Build documentation
       run: python docs/scripts/build.py ${PUBLISH_DOCS_DIR} && ls -lahR ${PUBLISH_DOCS_DIR}
 
-    - name: \"Publish\" ontologies
+    - name: '"Publish" ontologies'
       run: python .github/utils/publish_ontologies.py && ls -lahR ${PUBLISH_DOCS_DIR}
       env:
         PUBLISH_ONTOLOGIES_DIR: ontology

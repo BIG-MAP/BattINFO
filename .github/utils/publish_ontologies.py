@@ -46,21 +46,21 @@ class VersionIRI(str):
     """
 
     _VERSION_IRI_REGEX = re.compile(
-        r"https?://(?P<domain>[a-zA-Z._-]+)/(?P<path>[a-zA-Z_-]+(/[a-zA-Z_-]+)*)"
-        r"/(?P<version>[0-9a-zA-Z._-]+)(/(?P<name>[a-zA-Z_-]+))?(/(?P<filename>[a-zA-Z_.-]+))?"
+        r"https?://(?P<domain>[a-zA-Z._-]+)/(?P<path>[a-zA-Z_-]+(?:/[a-zA-Z_-]+)*)"
+        r"/(?P<version>[0-9a-zA-Z._-]+)(?:/(?P<name>[a-zA-Z_-]+))?(?:/(?P<filename>[a-zA-Z_.-]+))?"
     )
     
     def __init__(self, version_iri: str) -> None:
         match = self._VERSION_IRI_REGEX.fullmatch(version_iri)
         if match is None:
             raise ValueError(f"Could not parse versionIRI {version_iri!r}")
-        domain, path, version, name, filename = match.groups()
-        self._domain = domain
-        self._path = path
-        self._top_name = path.rsplit("/", 1)[-1]
-        self._version = version
-        self._name = name if name else None
-        self._filename = filename if filename else None
+        parts = match.groupdict()
+        self._domain = parts["domain"]
+        self._path = parts["path"]
+        self._top_name = parts["path"].rsplit("/", 1)[-1]
+        self._version = parts["version"]
+        self._name = parts.get("name", None)
+        self._filename = parts.get("filename", None)
 
     @property
     def domain(self) -> str:

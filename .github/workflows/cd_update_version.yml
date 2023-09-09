@@ -9,7 +9,8 @@ env:
   GIT_USER_EMAIL: "BattINFO@big-map.org"
 
 jobs:
-  update_version:
+  update-version:
+    name: Update version
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +29,23 @@ jobs:
 
     - name: Update version
       run: |
+        # Update BattINFO versions in battinfo.ttl versionIRI and versionInfo as well as the reference in catalog-v001.xml
+        sed -i "s|BattINFO/[0-9]\.[0-9]\.[0-9]/battinfo|BattINFO/${GITHUB_REF#refs/tags/v}/battinfo|g" battinfo.ttl
+        sed -i "s|versionInfo \".*\"|versionInfo \"${GITHUB_REF#refs/tags/v}\"|g" battinfo.ttl
+        sed -i "s|BattINFO/[0-9]\.[0-9]\.[0-9]/battinfo|BattINFO/${GITHUB_REF#refs/tags/v}/battinfo|g" catalog-v001.xml
+
+    - name: Commit changes
+      run: |
+        # Set up git
+        git config --local user.name "${GIT_USER_NAME}"
+        git config --local user.email "${GIT_USER_EMAIL}"
+
+        # Commit and push changes
+        git add battinfo.ttl catalog-v001.xml
+        git commit -m "Update version to ${GITHUB_REF#refs/tags/v}"
+        git push origin master
+
+  update-docs:
+    name: Update documentation
+    needs: update-version
+    uses: ./.github/workflows/update_ghpages.yml
