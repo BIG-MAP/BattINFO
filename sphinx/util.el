@@ -21,7 +21,7 @@
   (let ((outputbuffer (get-buffer-create "*buildoutput*")))
     (pop-to-buffer outputbuffer)
     (cd docdir)
-    (pyvenv-activate "~/Python/battinfo-doc-3.7-env/")
+    (pyvenv-activate "~/Python/battinfodoc.env/")
     (erase-buffer)
     (start-process "battinfo-build" outputbuffer "make" "html")
     )
