@@ -14,6 +14,6 @@ ecosystem of Findable resources.
 
 Here you can find the entities described in BattINFO, classified in two domains.
 
-* `Battery Domain <http://emmo.info/battery>`__
-* `Electrochemistry Domain <http://emmo.info/electrochemistry>`__
-* `Chemical Substance Domain <http://emmo.info/chemicalsubstance>`__
+* `Battery Domain <https://w3id.org/emmo/domain/battery>`__
+* `Electrochemistry Domain <https://w3id.org/emmo/domain/electrochemistry>`__
+* `Chemical Substance Domain <https://w3id.org/emmo/domain/chemicalsubstance>`__
