@@ -4,6 +4,7 @@
 
    About <about>
    self
+   Class Index <battinfo>
    Contribute <contribute>
 
    
@@ -25,7 +26,8 @@ Here you can find the entities described in BattINFO, classified in two domains.
 
 * `Battery Domain <http://emmo.info/battery>`__
 * `Electrochemistry Domain <http://emmo.info/electrochemistry>`__
-
+* `Chemical Substance Domain <http://emmo.info/chemicalsubstance>`__
+  
 
 
 

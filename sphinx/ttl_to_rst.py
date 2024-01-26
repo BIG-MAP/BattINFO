@@ -136,11 +136,11 @@ def rendering_workflow():
     # PAGES
     ttl_modules = [
         {"section title": "BattINFO",
-         "path": "./battery.ttl"}
+         "path": "./battinfo-inferred.ttl"}
     ]
 
     # GENERATE PAGES
-    rst_filename = "battery.rst"
+    rst_filename = "battinfo.rst"
 
     rst = render_rst_top()
 
