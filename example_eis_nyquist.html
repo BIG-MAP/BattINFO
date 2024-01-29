@@ -30,6 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -42,6 +43,7 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'example_eis_nyquist';</script>
     <link rel="shortcut icon" href="_static/battinfologo.ico"/>
     <link rel="author" title="About these documents" href="about.html" />
@@ -355,6 +357,78 @@ document.write(`
   <section id="cyclic-voltammetry-data">
 <h1>Cyclic Voltammetry Data<a class="headerlink" href="#cyclic-voltammetry-data" title="Permalink to this heading">#</a></h1>
 <p>This example, let’s describe an instance of some data describing an Nyquist plot from an EIS measurement. The JSON-LD description of the material is given below:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-0">
+Raw Data</label><div class="sd-tab-content docutils">
+<p>Here is a sample of the raw data. The full dataset is available <a class="reference external" href="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/sphinx/assets/data/example-cyclic-voltammetry.csv">here</a>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Z_real (Ohm),        Z_imag (Ohm)
+0.697447795823666,   0.0594427244582042
+0.703016241299304,   0.02786377708978327
+0.7122969837587008,  0.0018575851393187737
+0.7178654292343388, -0.022291021671826727
+0.7290023201856148, -0.05015479876161011
+0.7549883990719257, -0.07987616099071215
+0.7735498839907193, -0.10030959752321988
+0.8013921113689095, -0.11888544891640884
+0.8348027842227379, -0.13003095975232204
+...
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-1">
+JSON</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/context.json&quot;</span><span class="p">,</span>
+<span class="linenos"> 3</span><span class="w">   </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MeasurementResult&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">   </span><span class="nt">&quot;csvw:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://archive.big-map.eu/records/24mdd-z2x02/files/LNO%20CV.csv&quot;</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">   </span><span class="nt">&quot;dc:title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example EIS Nyquist Plot Data&quot;</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">   </span><span class="nt">&quot;dcat:keyword&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;EIS&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Nyquist&quot;</span><span class="p">],</span>
+<span class="linenos"> 7</span><span class="w">   </span><span class="nt">&quot;dc:license&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BIG-MAP Archive License&quot;</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">   </span><span class="nt">&quot;dc:modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;@value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-29&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xsd:date&quot;</span><span class="p">},</span>
+<span class="linenos"> 9</span><span class="w">   </span><span class="nt">&quot;dc:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://dx.doi.org/10.1149/2.0321816jes&quot;</span><span class="p">,</span>
+<span class="linenos">10</span><span class="w">   </span><span class="nt">&quot;dc:contributor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://orcid.org/0000-0002-8758-6109&quot;</span><span class="p">,</span>
+<span class="linenos">12</span><span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Simon Clark&quot;</span>
+<span class="linenos">13</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos">14</span><span class="w">   </span><span class="nt">&quot;@reverse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">15</span><span class="w">      </span><span class="nt">&quot;hasOutput&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">16</span><span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrochemicalImpedanceSpectroscopy&quot;</span>
+<span class="linenos">17</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">18</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos">19</span><span class="w">   </span><span class="nt">&quot;csvw:tableSchema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">20</span><span class="w">      </span><span class="nt">&quot;csvw:columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="linenos">21</span><span class="w">         </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;real&quot;</span><span class="p">,</span>
+<span class="linenos">22</span><span class="w">         </span><span class="nt">&quot;csvw:titles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Z_real (Ohm)&quot;</span><span class="p">,</span>
+<span class="linenos">23</span><span class="w">         </span><span class="nt">&quot;csvw:propertyUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">24</span><span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ElectricImpedance&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Real&quot;</span><span class="p">]</span>
+<span class="linenos">25</span><span class="w">         </span><span class="p">},</span>
+<span class="linenos">26</span><span class="w">         </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:Ohm&quot;</span><span class="p">,</span>
+<span class="linenos">27</span><span class="w">         </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="linenos">28</span><span class="w">         </span><span class="nt">&quot;csvw:required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="linenos">29</span><span class="w">      </span><span class="p">},</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">30</span><span class="w">         </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;imaginary&quot;</span><span class="p">,</span>
+<span class="linenos">31</span><span class="w">         </span><span class="nt">&quot;csvw:titles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Z_imag (Ohm)&quot;</span><span class="p">,</span>
+<span class="linenos">32</span><span class="w">         </span><span class="nt">&quot;csvw:propertyUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">33</span><span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ElectricImpedance&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Imaginary&quot;</span><span class="p">]</span>
+<span class="linenos">34</span><span class="w">         </span><span class="p">},</span>
+<span class="linenos">35</span><span class="w">         </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:Ohm&quot;</span><span class="p">,</span>
+<span class="linenos">36</span><span class="w">         </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="linenos">37</span><span class="w">      </span><span class="p">}],</span>
+<span class="linenos">38</span><span class="w">      </span><span class="nt">&quot;csvw:primaryKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;real&quot;</span>
+<span class="linenos">39</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">40</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD Playground</label><div class="sd-tab-content docutils">
+<div style="position: relative; padding-top: 56.25%; height: 0;">
+   <iframe src="https://json-ld.org/playground/#startTab=tab-table&json-ld=%7B%22%40context%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2Femmo-repo%2Fdomain-electrochemistry%2Fmaster%2Fcontext.json%22%2C%22%40type%22%3A%22MeasurementResult%22%2C%22csvw%3Aurl%22%3A%22https%3A%2F%2Farchive.big-map.eu%2Frecords%2F24mdd-z2x02%2Ffiles%2FLNO%2520CV.csv%22%2C%22dc%3Atitle%22%3A%22Example%20EIS%20Nyquist%20Plot%20Data%22%2C%22dcat%3Akeyword%22%3A%5B%22EIS%22%2C%22Nyquist%22%5D%2C%22dc%3Alicense%22%3A%22BIG-MAP%20Archive%20License%22%2C%22dc%3Amodified%22%3A%7B%22%40value%22%3A%222024-01-29%22%2C%22%40type%22%3A%22xsd%3Adate%22%7D%2C%22dc%3Asource%22%3A%22http%3A%2F%2Fdx.doi.org%2F10.1149%2F2.0321816jes%22%2C%22dc%3Acontributor%22%3A%7B%22%40id%22%3A%22https%3A%2F%2Forcid.org%2F0000-0002-8758-6109%22%2C%22schema%3Aname%22%3A%22Simon%20Clark%22%7D%2C%22%40reverse%22%3A%7B%22hasOutput%22%3A%7B%22%40type%22%3A%22ElectrochemicalImpedanceSpectroscopy%22%7D%7D%2C%22csvw%3AtableSchema%22%3A%7B%22csvw%3Acolumns%22%3A%5B%7B%22csvw%3Aname%22%3A%22real%22%2C%22csvw%3Atitles%22%3A%22Z_real%20(Ohm)%22%2C%22csvw%3ApropertyUrl%22%3A%7B%22%40type%22%3A%5B%22ElectricImpedance%22%2C%22Real%22%5D%7D%2C%22hasMeasurementUnit%22%3A%22emmo%3AOhm%22%2C%22csvw%3Adatatype%22%3A%22number%22%2C%22csvw%3Arequired%22%3Atrue%7D%2C%7B%22csvw%3Aname%22%3A%22imaginary%22%2C%22csvw%3Atitles%22%3A%22Z_imag%20(Ohm)%22%2C%22csvw%3ApropertyUrl%22%3A%7B%22%40type%22%3A%5B%22ElectricImpedance%22%2C%22Imaginary%22%5D%7D%2C%22hasMeasurementUnit%22%3A%22emmo%3AOhm%22%2C%22csvw%3Adatatype%22%3A%22number%22%7D%5D%2C%22csvw%3AprimaryKey%22%3A%22real%22%7D%7D" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allowfullscreen></iframe>
+</div></div>
+</div>
 <p>This example highlights a few things:</p>
 <ol class="arabic simple">
 <li><p><strong>EMMO distinguishes properties according to how they were determined.</strong> In this example, a <code class="docutils literal notranslate"><span class="pre">ConventionalProperty</span></code> is a property whose value is assigned by convention (e.g. from a technical specification sheet, handbook, etc.). EMMO also provides terms for <code class="docutils literal notranslate"><span class="pre">MeasuredProperty</span></code> for properties which were actually determined by some measurement and <code class="docutils literal notranslate"><span class="pre">ModelledProperty</span></code> for properties that were obtained from some model.</p></li>

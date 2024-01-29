@@ -30,6 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -42,6 +43,7 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/design-tabs.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'getstarted';</script>
     <link rel="shortcut icon" href="_static/battinfologo.ico"/>
     <link rel="author" title="About these documents" href="about.html" />
@@ -390,12 +392,73 @@ document.write(`
 <section id="step-5-make-your-own-linked-data">
 <h2>Step 5: Make your own linked data!<a class="headerlink" href="#step-5-make-your-own-linked-data" title="Permalink to this heading">#</a></h2>
 <p>Now you can make your own piece of linked data using ontology terms and JSON-LD. Let’s make a linked data description of a simple electrochemical cell consisting of a zinc negative electrode, a manganese dioxide positive electrode, and an alkaline electrolyte. This is expressed in JSON-LD as:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-0">
+JSON</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/context.json&quot;</span><span class="p">,</span>
+<span class="linenos"> 3</span><span class="w">   </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrochemicalCell&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">   </span><span class="nt">&quot;hasNegativeElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 5</span><span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ZincElectrode&quot;</span>
+<span class="linenos"> 6</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos"> 7</span><span class="w">   </span><span class="nt">&quot;hasPositiveElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 8</span><span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ManganeseDioxideElectrode&quot;</span>
+<span class="linenos"> 9</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos">10</span><span class="w">   </span><span class="nt">&quot;hasElectrolyte&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AlkalineElectrolyte&quot;</span>
+<span class="linenos">12</span><span class="w">   </span><span class="p">}</span>
+<span class="linenos">13</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-1">
+JSON-LD Playground</label><div class="sd-tab-content docutils">
+<div style="position: relative; padding-top: 56.25%; height: 0;">
+   <iframe src="https://json-ld.org/playground/#startTab=tab-table&json-ld=%7B%22%40context%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2Femmo-repo%2Fdomain-electrochemistry%2Fmaster%2Fcontext.json%22%2C%22%40type%22%3A%22ElectrochemicalCell%22%2C%22hasNegativeElectrode%22%3A%7B%22%40type%22%3A%22ZincElectrode%22%7D%2C%22hasPositiveElectrode%22%3A%7B%22%40type%22%3A%22ManganeseDioxideElectrode%22%7D%2C%22hasElectrolyte%22%3A%7B%22%40type%22%3A%22AlkalineElectrolyte%22%7D%7D" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allowfullscreen></iframe>
+</div></div>
+</div>
 <p>First, we use the <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> keyword to establish the context for machines to process the file by pointing to our pre-inferred context file on GitHub.</p>
 <p>Then, we use the keyword <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> to describe what type of thing we are describing, in this case an <code class="docutils literal notranslate"><span class="pre">ElectrochemicalCell</span></code>. When a machine processes this file, it is going to check in the context and retrieve the IRI that is associated to the label <code class="docutils literal notranslate"><span class="pre">ElectrochemicalCell</span></code>.</p>
 <p>Next, we use object properties that are defined in the ontology like <code class="docutils literal notranslate"><span class="pre">hasNegativeElectrode</span></code>, <code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode</span></code>, and <code class="docutils literal notranslate"><span class="pre">hasElectrolyte</span></code> to define links to other things. In this example, we say that our electrochemical cell has a ngeative electrode, and that electrode is of the type <code class="docutils literal notranslate"><span class="pre">ZincElectrode</span></code>.</p>
 <p>Finally, you can use the <a class="reference external" href="https://json-ld.org/playground/">JSON-LD Playground</a> to see how machines can process the linked data file.</p>
 <p>And that’s it! You did it! Check out our examples to see some more advanced topics.</p>
 <p>We’ve provided some recommendations for tools and examples that you are free to re-use or modify for your own needs.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-header docutils">
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-tools sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M5.433 2.304A4.494 4.494 0 003.5 6c0 1.598.832 3.002 2.09 3.802.518.328.929.923.902 1.64v.008l-.164 3.337a.75.75 0 11-1.498-.073l.163-3.33c.002-.085-.05-.216-.207-.316A5.996 5.996 0 012 6a5.994 5.994 0 012.567-4.92 1.482 1.482 0 011.673-.04c.462.296.76.827.76 1.423v2.82c0 .082.041.16.11.206l.75.51a.25.25 0 00.28 0l.75-.51A.25.25 0 009 5.282V2.463c0-.596.298-1.127.76-1.423a1.482 1.482 0 011.673.04A5.994 5.994 0 0114 6a5.996 5.996 0 01-2.786 5.068c-.157.1-.209.23-.207.315l.163 3.33a.75.75 0 11-1.498.074l-.164-3.345c-.027-.717.384-1.312.902-1.64A4.496 4.496 0 0012.5 6a4.494 4.494 0 00-1.933-3.696c-.024.017-.067.067-.067.16v2.818a1.75 1.75 0 01-.767 1.448l-.75.51a1.75 1.75 0 01-1.966 0l-.75-.51A1.75 1.75 0 015.5 5.282V2.463c0-.092-.043-.142-.067-.159zm.01-.005z"></path></svg>  Tools</p>
+</div>
+<div class="sd-card-body docutils">
+<p class="sd-card-text">The right tool for the right job. Here are some tools that can help you work with ontologies, knowledge graphs, and linked data.</p>
+</div>
+<a class="sd-stretched-link reference external" href="tools.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-header docutils">
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-book sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M0 1.75A.75.75 0 01.75 1h4.253c1.227 0 2.317.59 3 1.501A3.744 3.744 0 0111.006 1h4.245a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-4.507a2.25 2.25 0 00-1.591.659l-.622.621a.75.75 0 01-1.06 0l-.622-.621A2.25 2.25 0 005.258 13H.75a.75.75 0 01-.75-.75V1.75zm8.755 3a2.25 2.25 0 012.25-2.25H14.5v9h-3.757c-.71 0-1.4.201-1.992.572l.004-7.322zm-1.504 7.324l.004-5.073-.002-2.253A2.25 2.25 0 005.003 2.5H1.5v9h3.757a3.75 3.75 0 011.994.574z"></path></svg>  Resources</p>
+</div>
+<div class="sd-card-body docutils">
+<p class="sd-card-text">Here are some other resources and best practices for creating linked data on the web.</p>
+</div>
+<a class="sd-stretched-link reference external" href="resources.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-header docutils">
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-pencil sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>  Examples</p>
+</div>
+<div class="sd-card-body docutils">
+<p class="sd-card-text">Here are some examples that demonstrate basic usage of the ontology</p>
+</div>
+<a class="sd-stretched-link reference external" href="examples.html"></a></div>
+</div>
+</div>
+</div>
 </section>
 </section>
 
