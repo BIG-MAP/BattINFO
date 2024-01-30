@@ -66,3 +66,9 @@ hr {
     border-top: 1px solid #ccc;
     margin: 20px 0;
 }
+
+/* this fixes darkmode within the json-ld playground iframe
+by inverting all colors if darkmode is active */
+html[data-theme="dark"] iframe[src*="json-ld.org/playground"] {
+   filter: invert(0.9);
+}
