@@ -35,8 +35,8 @@ autodoc_member_order = 'bysource'
 extensions = ['sphinxcontrib.globalsubs',
               'sphinx.ext.intersphinx',
               'sphinx.ext.autosectionlabel',
-              'sphinx_design'
-              ]
+              'sphinx_design',
+              'nbsphinx']
 
 autosectionlabel_prefix_document = True
 
