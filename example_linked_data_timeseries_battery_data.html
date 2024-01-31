@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Describe the csv file using ontology terms in JSON-LD format &#8212; BattInfo  documentation</title>
+    <title>Example: Timeseries Battery Data &#8212; BattInfo  documentation</title>
   
   
   
@@ -318,9 +318,7 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_linked_data_battery_cell_metadata.html">Example: Simple Battery Cell Metadata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_linked_data_custom_battery_cell_metadata.html">Example: Custom Battery Cell Metadata</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Describe the csv file using ontology terms in JSON-LD format</a></li>
-
-
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example: Timeseries Battery Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_linked_data_zinc_powder.html">Example: Zinc Powder from a Supplier</a></li>
 </ul>
 </div>
@@ -362,7 +360,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="examples.html" class="nav-link">Examples</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Describe the csv file using ontology terms in JSON-LD format</li>
+    <li class="breadcrumb-item active" aria-current="page">Example: Timeseries Battery Data</li>
   </ul>
 </nav>
 </div>
@@ -379,7 +377,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <p># Example: Timeseries Battery Data</p>
+  <section id="Example:-Timeseries-Battery-Data">
+<h1>Example: Timeseries Battery Data<a class="headerlink" href="#Example:-Timeseries-Battery-Data" title="Permalink to this heading">#</a></h1>
 <p>Let’s describe a csv file containing some timeseries battery data and then anaylze it using the ontology!</p>
 <p>This example covers a few topics:</p>
 <ul class="simple">
@@ -405,7 +404,7 @@ import matplotlib.pyplot as plt
 </div>
 </div>
 <section id="Describe-the-csv-file-using-ontology-terms-in-JSON-LD-format">
-<h1>Describe the csv file using ontology terms in JSON-LD format<a class="headerlink" href="#Describe-the-csv-file-using-ontology-terms-in-JSON-LD-format" title="Permalink to this heading">#</a></h1>
+<h2>Describe the csv file using ontology terms in JSON-LD format<a class="headerlink" href="#Describe-the-csv-file-using-ontology-terms-in-JSON-LD-format" title="Permalink to this heading">#</a></h2>
 <p>The JSON-LD data that we will use is:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
@@ -461,7 +460,7 @@ import matplotlib.pyplot as plt
 </div>
 </section>
 <section id="Parse-this-description-into-a-graph">
-<h1>Parse this description into a graph<a class="headerlink" href="#Parse-this-description-into-a-graph" title="Permalink to this heading">#</a></h1>
+<h2>Parse this description into a graph<a class="headerlink" href="#Parse-this-description-into-a-graph" title="Permalink to this heading">#</a></h2>
 <p>Now let’s see how a machine would process this data by reading it into a Graph!</p>
 <p>We create the graph using a very handy python package called <a class="reference external" href="https://rdflib.readthedocs.io/en/stable/">rdflib</a>, which provides us a way to parse our json-ld data, run some queries using the language <a class="reference external" href="https://en.wikipedia.org/wiki/SPARQL">SPARQL</a>, and serialize the graph in any RDF compatible format (e.g. JSON-LD, Turtle, etc.).</p>
 <div class="nbinput docutils container">
@@ -537,7 +536,7 @@ import matplotlib.pyplot as plt
 <p>You can see that our human-readable JSON-LD file has been transformed into some nasty looking (but machine-readable!) triples.</p>
 </section>
 <section id="Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]">
-<h1>Query the Graph to select instances with certain properties [Advanced]<a class="headerlink" href="#Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]" title="Permalink to this heading">#</a></h1>
+<h2>Query the Graph to select instances with certain properties [Advanced]<a class="headerlink" href="#Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]" title="Permalink to this heading">#</a></h2>
 <p>Now, let’s write a SPARQL query to first get the location where the raw data is stored…</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
@@ -682,6 +681,7 @@ https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/sphinx/assets/data/dis
 </div>
 </div>
 </section>
+</section>
 
 
                 </article>
@@ -730,11 +730,10 @@ https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/sphinx/assets/data/dis
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Describe the csv file using ontology terms in JSON-LD format</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Parse-this-description-into-a-graph">Parse this description into a graph</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]">Query the Graph to select instances with certain properties [Advanced]</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Describe-the-csv-file-using-ontology-terms-in-JSON-LD-format">Describe the csv file using ontology terms in JSON-LD format</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Parse-this-description-into-a-graph">Parse this description into a graph</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]">Query the Graph to select instances with certain properties [Advanced]</a></li>
 </ul>
-
   </nav></div>
 
   <div class="sidebar-secondary-item">
