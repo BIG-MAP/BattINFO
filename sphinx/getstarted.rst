@@ -15,9 +15,9 @@ Step 2: Download the pre-inferred version of the ontology
 
 Ontologies within the EMMO universe import many different modules to try to re-use knowledge and terms from other domains. We then run a tool called a "reasoner" to make logical inferrences about how terms from different domains are connected, and lump them into one ontology. 
 
-We make it easy for you by providing a pre-inferred version in advance. You can `download it from the GitHub repository <https://github.com/emmo-repo/domain-electrochemistry/blob/master/electrochemistry-inferred.ttl>`__  or access it at anytime using this URL:
+We make it easy for you by providing a pre-inferred version in advance. You can `download it from the GitHub repository <https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo-inferred.ttl>`__  or access it at anytime using this URL:
 
-https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/electrochemistry-inferred.ttl
+https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo-inferred.ttl
 
 Step 3: Open and explore the ontology file in Protégé
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

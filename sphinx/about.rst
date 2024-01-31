@@ -1,14 +1,9 @@
-.. toctree::
-   :hidden:
-      
-   example_person_jsonld_nb.ipynb
-
-About the Battery Ontology
+About the Battery Interface Ontology
 ==========================
 
-The EMMO Battery Domain Ontology is a semantic resource for the terms and relations needed to describe things, processes, and data in the battery domain. It can be used to **generate linked data** for the Semantic Web, **comply with the FAIR data guidelines**, support **interoperaility of data** among different systems, and more!
+The Battery Interface Ontology (BattINFO) is a semantic resource for the terms and relations needed to describe things, processes, and data in the battery domain. It can be used to **generate linked data** for the Semantic Web, **comply with the FAIR data guidelines**, support **interoperaility of data** among different systems, and more!
 
-The Battery Ontology is intended to support researchers, engineers, and developers within the electrochemical
+BattINFO is intended to support researchers, engineers, and developers within the electrochemical
 communitiy with activities like:
 
 -  Incorporating consistent and standardized information into their modeling and simulation activities.
@@ -61,7 +56,7 @@ The import structure is summarized in the following table:
 
 The onotlogy exists in two forms: (i) the asserted source files and (ii) the pre-inferred version. 
 
-The asserted source consists of two files: - ``battery.ttl``: describes terms and object properties for the electrochemistry domain. - ``batteryquantities.ttl``: describes the quantities related to the electrochemistry domain. It is encapsulated to allow it to be imported by other EMMO domains without needing to import the entire ontology.
+The asserted source consists of two files: - ``battinfo.ttl``: describes terms and object properties for the battery and electrochemistry domain. ``battinfo-inferred.ttl``: is the pre-inferred version of the ontology.
 
 The pre-inferred ontology runs the reasoner on the source files and their imports and complies them into a `pre-inferred ontology file <inferred_version/battery-inferred.ttl>`__. This provides a simpler reference for users of the ontology and removes the barrier of needed to run the reasoner themselves. 
 

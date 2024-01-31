@@ -22,16 +22,20 @@ Welcome to the **Battery Interface Ontology (BattINFO)**, a semantic resource wi
          :linenos:
 
          {
-            "@context": "https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/context.json",
-            "@type": "ElectrochemicalCell",
-            "hasNegativeElectrode": {
-               "@type": "ZincElectrode"
+            "@context": "https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json",
+            "@type": "CR2032",
+            "schema:name": "My CR2032 Coin Cell",
+            "schema:manufacturer": {
+               "@id": "https://www.wikidata.org/wiki/Q3041255",
+               "schema:name": "SINTEF"
             },
-            "hasPositiveElectrode": {
-               "@type": "ManganeseDioxideElectrode"
-            },
-            "hasElectrolyte": {
-               "@type": "AlkalineElectrolyte"
+            "hasProperty": {
+               "@type": ["NominalCapacity", "ConventionalProperty"],
+               "hasNumericalPart": {
+                     "@type": "Real",
+                     "hasNumericalValue": 230
+               },
+               "hasMeasurementUnit": "emmo:MilliAmpereHour"
             }
          }
 
@@ -40,7 +44,7 @@ Welcome to the **Battery Interface Ontology (BattINFO)**, a semantic resource wi
       .. raw:: html
          
          <div style="position: relative; padding-top: 56.25%; height: 0;">
-            <iframe src="https://json-ld.org/playground/#startTab=tab-table&json-ld=%7B%22%40context%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2Femmo-repo%2Fdomain-electrochemistry%2Fmaster%2Fcontext.json%22%2C%22%40type%22%3A%22ElectrochemicalCell%22%2C%22hasNegativeElectrode%22%3A%7B%22%40type%22%3A%22ZincElectrode%22%7D%2C%22hasPositiveElectrode%22%3A%7B%22%40type%22%3A%22ManganeseDioxideElectrode%22%7D%2C%22hasElectrolyte%22%3A%7B%22%40type%22%3A%22AlkalineElectrolyte%22%7D%7D" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allowfullscreen></iframe>
+            <iframe src="https://json-ld.org/playground/#startTab=tab-table&json-ld=%7B%22%40context%22%3A%22https%3A%2F%2Fraw.githubusercontent.com%2Femmo-repo%2Fdomain-battery%2Fmaster%2Fcontext.json%22%2C%22%40type%22%3A%22CR2032%22%2C%22schema%3Aname%22%3A%22My%20CR2032%20Coin%20Cell%22%2C%22schema%3Amanufacturer%22%3A%7B%22%40id%22%3A%22https%3A%2F%2Fwww.wikidata.org%2Fwiki%2FQ3041255%22%2C%22schema%3Aname%22%3A%22SINTEF%22%7D%2C%22hasProperty%22%3A%7B%22%40type%22%3A%5B%22NominalCapacity%22%2C%22ConventionalProperty%22%5D%2C%22hasNumericalPart%22%3A%7B%22%40type%22%3A%22Real%22%2C%22hasNumericalValue%22%3A230%7D%2C%22hasMeasurementUnit%22%3A%22emmo%3AMilliAmpereHour%22%7D%7D" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allowfullscreen></iframe>
          </div>
 
 

@@ -32,3 +32,8 @@ html[data-theme=dark] table.element-table tr:nth-child(odd) td{
 html[data-theme=dark] table.element-table tr:nth-child(even) td{
    background-color: black;
 }
+/* this fixes darkmode within the json-ld playground iframe
+by inverting all colors if darkmode is active */
+html[data-theme="dark"] iframe[src*="json-ld.org/playground"] {
+   filter: invert(0.9);
+}
