@@ -26,6 +26,8 @@ Here are some examples to help you get started. You are free to re-use or modify
         ^^^^^^^^^^^
         Metadata for custom R2032 coin cells with different materials. Also includes exercises for filtering data from the graph and querying the PubChem API.
     
+.. grid::
+
     .. grid-item-card::
         :link: example_linked_data_zinc_powder.html
 

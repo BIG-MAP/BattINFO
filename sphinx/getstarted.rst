@@ -15,7 +15,7 @@ Step 2: Download the pre-inferred version of the ontology
 
 Ontologies within the EMMO universe import many different modules to try to re-use knowledge and terms from other domains. We then run a tool called a "reasoner" to make logical inferrences about how terms from different domains are connected, and lump them into one ontology. 
 
-We make it easy for you by providing a pre-inferred version in advance. You can `download it from the GitHub repository <https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo-inferred.ttl>`__  or access it at anytime using this URL:
+We make it easy for you by providing a pre-inferred version in advance. You can `download it from the GitHub repository <https://github.com/BIG-MAP/BattINFO/blob/master/battinfo-inferred.ttl>`__  or access it at anytime using this URL:
 
 https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo-inferred.ttl
 
@@ -40,9 +40,9 @@ Within Protégé, you can explore the class hierarchy that contains all the "thi
 Step 4: Explore the JSON-LD context file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-JSON-LD is one of the easiest and most common file formats for creating linked data. JSON-LD uses the same key-value pair structure of traditional JSON, but adds a few keywords to support semantic linked data. One of these is the @context keyword, which points to a dictionary that pairs human readable term labels with machine readable IRIs. For convenience, we provide a JSON-LD context file that is generated from the pre-inferred version of the ontology that pairs prefLabels with IRIs. You can find the `context file on the GitHub repository <https://github.com/emmo-repo/domain-electrochemistry/blob/master/context.json>`__  or access it anytime using this URL:
+JSON-LD is one of the easiest and most common file formats for creating linked data. JSON-LD uses the same key-value pair structure of traditional JSON, but adds a few keywords to support semantic linked data. One of these is the @context keyword, which points to a dictionary that pairs human readable term labels with machine readable IRIs. For convenience, we provide a JSON-LD context file that is generated from the pre-inferred version of the ontology that pairs prefLabels with IRIs. You can find the `context file on the GitHub repository <https://github.com/BIG-MAP/BattINFO/blob/master/context.json>`__  or access it anytime using this URL:
 
-https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/context.json
+https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/context.json
 
 Step 5: Make your own linked data!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

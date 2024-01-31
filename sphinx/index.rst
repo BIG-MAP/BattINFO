@@ -9,7 +9,7 @@
    About <about>
    FAQ <faq>
 
-Battery Ontology
+Battery Interface Ontology
 ================================
 
 Welcome to the **Battery Interface Ontology (BattINFO)**, a semantic resource with essential terms and relationships to describe battery cells, materials, methods, and data. **Here's a simple example:**
