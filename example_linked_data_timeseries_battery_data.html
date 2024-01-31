@@ -1,0 +1,800 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Describe the csv file using ontology terms in JSON-LD format &#8212; BattInfo  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_linked_data_timeseries_battery_data';</script>
+    <link rel="shortcut icon" href="_static/battinfologo.ico"/>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Example: Zinc Powder from a Supplier" href="example_linked_data_zinc_powder.html" />
+    <link rel="prev" title="Example: Custom Battery Cell Metadata" href="example_linked_data_custom_battery_cell_metadata.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/battinfologo.jpg" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/battinfologo.jpg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getstarted.html">
+                        Get Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="examples.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="battinfo.html">
+                        Class Index
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="about.html">
+                        About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="faq.html">
+                        FAQ
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getstarted.html">
+                        Get Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="examples.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="battinfo.html">
+                        Class Index
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="about.html">
+                        About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="faq.html">
+                        FAQ
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="example_linked_data_battery_cell_metadata.html">Example: Simple Battery Cell Metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_linked_data_custom_battery_cell_metadata.html">Example: Custom Battery Cell Metadata</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Describe the csv file using ontology terms in JSON-LD format</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="example_linked_data_zinc_powder.html">Example: Zinc Powder from a Supplier</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="examples.html" class="nav-link">Examples</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Describe the csv file using ontology terms in JSON-LD format</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <p># Example: Timeseries Battery Data</p>
+<p>Let’s describe a csv file containing some timeseries battery data and then anaylze it using the ontology!</p>
+<p>This example covers a few topics:</p>
+<ul class="simple">
+<li><p>How to describe tabular data using ontology terms and JSON-LD</p></li>
+<li><p>How machines convert JSON-LD into triples</p></li>
+<li><p>How to process tabular data using its ontology metadata <strong>[Advanced]</strong></p></li>
+</ul>
+<p>A live version of this notebook is available on Google Colab <a class="reference external" href="https://colab.research.google.com/drive/1i-z6m6MEtQw_MG0Ypn37i0jfySYwize3?usp=sharing">here</a></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span># Install and import dependencies
+!pip install jsonschema rdflib requests matplotlib &gt; /dev/null
+
+import json
+import rdflib
+import requests
+import sys
+import pandas as pd
+import matplotlib.pyplot as plt
+</pre></div>
+</div>
+</div>
+<section id="Describe-the-csv-file-using-ontology-terms-in-JSON-LD-format">
+<h1>Describe the csv file using ontology terms in JSON-LD format<a class="headerlink" href="#Describe-the-csv-file-using-ontology-terms-in-JSON-LD-format" title="Permalink to this heading">#</a></h1>
+<p>The JSON-LD data that we will use is:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;@context&quot;</span><span class="p">:</span> <span class="s2">&quot;https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;MeasurementResult&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;csvw:url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/sphinx/assets/data/discharge_timeseries.csv&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dc:title&quot;</span><span class="p">:</span> <span class="s2">&quot;Synthetic Discharge Curve Demo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dcat:keyword&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;battery&quot;</span><span class="p">,</span> <span class="s2">&quot;li-ion&quot;</span><span class="p">,</span> <span class="s2">&quot;discharge&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;dc:license&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;http://opendefinition.org/licenses/cc-by/&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;dc:modified&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;@value&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-01-10&quot;</span><span class="p">,</span> <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;xsd:date&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;csvw:tableSchema&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;csvw:columns&quot;</span><span class="p">:</span> <span class="p">[{</span>
+                  <span class="s2">&quot;csvw:name&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:titles&quot;</span><span class="p">:</span> <span class="s2">&quot;Time / s&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:propertyUrl&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;Time&quot;</span>
+                  <span class="p">},</span>
+                  <span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;Second&quot;</span>
+                  <span class="p">},</span>
+                  <span class="s2">&quot;csvw:datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:required&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span>
+                <span class="p">},</span> <span class="p">{</span>
+                  <span class="s2">&quot;csvw:name&quot;</span><span class="p">:</span> <span class="s2">&quot;voltage&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:titles&quot;</span><span class="p">:</span> <span class="s2">&quot;Voltage / V&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:propertyUrl&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;CellVoltage&quot;</span>
+                  <span class="p">},</span>
+                  <span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;Volt&quot;</span>
+                  <span class="p">},</span>
+                  <span class="s2">&quot;csvw:datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span>
+                <span class="p">},</span> <span class="p">{</span>
+                  <span class="s2">&quot;csvw:name&quot;</span><span class="p">:</span> <span class="s2">&quot;current&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:titles&quot;</span><span class="p">:</span> <span class="s2">&quot;Current / A&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;csvw:propertyUrl&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;CellCurrent&quot;</span>
+                  <span class="p">},</span>
+                  <span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="s2">&quot;Ampere&quot;</span>
+                  <span class="p">},</span>
+                  <span class="s2">&quot;csvw:datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span>
+                <span class="p">}],</span>
+                <span class="s2">&quot;csvw:primaryKey&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;csvw:aboutUrl&quot;</span><span class="p">:</span> <span class="s2">&quot;#time-</span><span class="si">{time}</span><span class="s2">&quot;</span>
+              <span class="p">}</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Parse-this-description-into-a-graph">
+<h1>Parse this description into a graph<a class="headerlink" href="#Parse-this-description-into-a-graph" title="Permalink to this heading">#</a></h1>
+<p>Now let’s see how a machine would process this data by reading it into a Graph!</p>
+<p>We create the graph using a very handy python package called <a class="reference external" href="https://rdflib.readthedocs.io/en/stable/">rdflib</a>, which provides us a way to parse our json-ld data, run some queries using the language <a class="reference external" href="https://en.wikipedia.org/wiki/SPARQL">SPARQL</a>, and serialize the graph in any RDF compatible format (e.g. JSON-LD, Turtle, etc.).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a new graph</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">rdflib</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+
+<span class="c1"># Parse our json-ld data into the graph</span>
+<span class="n">g</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">metadata</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;json-ld&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a SPARQL query to return all the triples in the graph</span>
+<span class="n">query_all</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT ?subject ?predicate ?object</span>
+<span class="s2">WHERE {</span>
+<span class="s2">  ?subject ?predicate ?object</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1"># Execute the SPARQL query</span>
+<span class="n">all_the_things</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_all</span><span class="p">)</span>
+
+<span class="c1"># Print the results</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">all_the_things</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#name&#39;), rdflib.term.Literal(&#39;time&#39;))
+(rdflib.term.BNode(&#39;Nd0887b1b0a7741c588e7c70dc5b3f56b&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#datatype&#39;), rdflib.term.Literal(&#39;number&#39;))
+(rdflib.term.BNode(&#39;Ncc179b393bc14fdeae7d2a34157c3cd2&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#columns&#39;), rdflib.term.BNode(&#39;Naeb689e13f9f40dc844f61a331ed2efd&#39;))
+(rdflib.term.BNode(&#39;Nd0887b1b0a7741c588e7c70dc5b3f56b&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#name&#39;), rdflib.term.Literal(&#39;voltage&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://purl.org/dc/elements/1.1/license&#39;), rdflib.term.URIRef(&#39;http://opendefinition.org/licenses/cc-by/&#39;))
+(rdflib.term.BNode(&#39;Nef364aad4f0d4e27ae47eab2a5adffe0&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/electrochemistry#electrochemistry_4ebe2ef1_eea8_4b10_822d_7a68215bd24d&#39;))
+(rdflib.term.BNode(&#39;Naeb689e13f9f40dc844f61a331ed2efd&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#propertyUrl&#39;), rdflib.term.BNode(&#39;Ncbe52273771f43b78902b14aba5e4399&#39;))
+(rdflib.term.BNode(&#39;Ne5682488d92144b699711e9a9a180e1f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#Second&#39;))
+(rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#titles&#39;), rdflib.term.Literal(&#39;Time / s&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#tableSchema&#39;), rdflib.term.BNode(&#39;Ncc179b393bc14fdeae7d2a34157c3cd2&#39;))
+(rdflib.term.BNode(&#39;Ncc179b393bc14fdeae7d2a34157c3cd2&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#aboutUrl&#39;), rdflib.term.Literal(&#39;#time-{time}&#39;))
+(rdflib.term.BNode(&#39;Naeb689e13f9f40dc844f61a331ed2efd&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#datatype&#39;), rdflib.term.Literal(&#39;number&#39;))
+(rdflib.term.BNode(&#39;N7343ef083a5f479081b727ba2218c90d&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#Ampere&#39;))
+(rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569&#39;), rdflib.term.BNode(&#39;Ne5682488d92144b699711e9a9a180e1f&#39;))
+(rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#required&#39;), rdflib.term.Literal(&#39;true&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/dcat#keyword&#39;), rdflib.term.Literal(&#39;li-ion&#39;))
+(rdflib.term.BNode(&#39;Nd0887b1b0a7741c588e7c70dc5b3f56b&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#propertyUrl&#39;), rdflib.term.BNode(&#39;Nef364aad4f0d4e27ae47eab2a5adffe0&#39;))
+(rdflib.term.BNode(&#39;Nd0887b1b0a7741c588e7c70dc5b3f56b&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#titles&#39;), rdflib.term.Literal(&#39;Voltage / V&#39;))
+(rdflib.term.BNode(&#39;Naeb689e13f9f40dc844f61a331ed2efd&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#titles&#39;), rdflib.term.Literal(&#39;Current / A&#39;))
+(rdflib.term.BNode(&#39;Naeb689e13f9f40dc844f61a331ed2efd&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569&#39;), rdflib.term.BNode(&#39;N7343ef083a5f479081b727ba2218c90d&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://purl.org/dc/elements/1.1/modified&#39;), rdflib.term.Literal(&#39;2024-01-10&#39;, datatype=rdflib.term.URIRef(&#39;http://www.w3.org/2001/XMLSchema#date&#39;)))
+(rdflib.term.BNode(&#39;Nd0887b1b0a7741c588e7c70dc5b3f56b&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569&#39;), rdflib.term.BNode(&#39;N81642f0d2e964e659bde47bbcc3332e6&#39;))
+(rdflib.term.BNode(&#39;N81642f0d2e964e659bde47bbcc3332e6&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#Volt&#39;))
+(rdflib.term.BNode(&#39;Naeb689e13f9f40dc844f61a331ed2efd&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#name&#39;), rdflib.term.Literal(&#39;current&#39;))
+(rdflib.term.BNode(&#39;Ncbe52273771f43b78902b14aba5e4399&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/electrochemistry#electrochemistry_637ee9c4_4b3f_4d3a_975b_c0572dfe53ce&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/dcat#keyword&#39;), rdflib.term.Literal(&#39;discharge&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/dcat#keyword&#39;), rdflib.term.Literal(&#39;battery&#39;))
+(rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#datatype&#39;), rdflib.term.Literal(&#39;number&#39;))
+(rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#propertyUrl&#39;), rdflib.term.BNode(&#39;N15e90897cf4b4ad1b7a0f9d170a4a9f1&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://purl.org/dc/elements/1.1/title&#39;), rdflib.term.Literal(&#39;Synthetic Discharge Curve Demo&#39;))
+(rdflib.term.BNode(&#39;Ncc179b393bc14fdeae7d2a34157c3cd2&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#primaryKey&#39;), rdflib.term.Literal(&#39;time&#39;))
+(rdflib.term.BNode(&#39;Ncc179b393bc14fdeae7d2a34157c3cd2&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#columns&#39;), rdflib.term.BNode(&#39;Ne0e29b515ec84d53800f1108468b85fc&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#EMMO_0f6f0120_c079_4d95_bb11_4ddee05e530e&#39;))
+(rdflib.term.BNode(&#39;Nb673f4e33722411498ab1687a094142f&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#url&#39;), rdflib.term.Literal(&#39;https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/sphinx/assets/data/discharge_timeseries.csv&#39;))
+(rdflib.term.BNode(&#39;N15e90897cf4b4ad1b7a0f9d170a4a9f1&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&#39;), rdflib.term.URIRef(&#39;http://emmo.info/emmo#EMMO_d4f7d378_5e3b_468a_baa1_a7e98358cda7&#39;))
+(rdflib.term.BNode(&#39;Ncc179b393bc14fdeae7d2a34157c3cd2&#39;), rdflib.term.URIRef(&#39;http://www.w3.org/ns/csvw#columns&#39;), rdflib.term.BNode(&#39;Nd0887b1b0a7741c588e7c70dc5b3f56b&#39;))
+</pre></div></div>
+</div>
+<p>You can see that our human-readable JSON-LD file has been transformed into some nasty looking (but machine-readable!) triples.</p>
+</section>
+<section id="Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]">
+<h1>Query the Graph to select instances with certain properties [Advanced]<a class="headerlink" href="#Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]" title="Permalink to this heading">#</a></h1>
+<p>Now, let’s write a SPARQL query to first get the location where the raw data is stored…</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a SPARQL query to return url of the raw data</span>
+<span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">PREFIX csvw: &lt;http://www.w3.org/ns/csvw#&gt;</span>
+
+<span class="s2">SELECT ?url WHERE {</span>
+<span class="s2">    ?measurement csvw:url ?url.</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1"># Execute the SPARQL query</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+<span class="c1"># Print the results</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+    <span class="n">csv_url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Convert the Literal to a string</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">csv_url</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/sphinx/assets/data/discharge_timeseries.csv
+</pre></div></div>
+</div>
+<p>Now we will read it into a pandas dataframe.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read the CSV file into a pandas DataFrame</span>
+<span class="c1"># You may need to adjust this based on the specifics of your CSV file</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv_url</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+    Time / s  Voltage / V  Current / A
+0    0.00000     4.200000          0.0
+1    0.84375     4.100028          2.0
+2    2.53125     4.096626          2.0
+3    5.90625     4.091473          2.0
+4   12.65625     4.084031          2.0
+5   26.15625     4.073751          2.0
+6   53.15625     4.060383          2.0
+7  107.15625     4.044397          2.0
+8  161.15625     4.034244          2.0
+9  215.15625     4.027523          2.0
+</pre></div></div>
+</div>
+<p>Finally, we can query the metadata in the Graph to check if certain quantities are present (using ontology terms for Time and CellVoltage) and if so, plot them together…</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[69]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract column names for &#39;Time&#39; and &#39;CellVoltage&#39; based on propertyUrl</span>
+<span class="n">time_column</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">voltage_column</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Get the relevant IRIs from the context</span>
+<span class="n">context_url</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json&#39;</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">context_url</span><span class="p">)</span>
+<span class="n">context_data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+<span class="n">time_iri</span> <span class="o">=</span> <span class="n">context_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;@context&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+<span class="n">voltage_iri</span> <span class="o">=</span> <span class="n">context_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;@context&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CellVoltage&#39;</span><span class="p">)</span>
+
+<span class="c1"># Get the time column label</span>
+<span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">PREFIX csvw: &lt;http://www.w3.org/ns/csvw#&gt;</span>
+
+<span class="s2">SELECT ?columnName WHERE </span><span class="se">{{</span>
+<span class="s2">    ?table csvw:tableSchema ?schema.</span>
+<span class="s2">    ?schema csvw:columns ?column.</span>
+
+<span class="s2">    ?column csvw:propertyUrl ?propertynode.</span>
+<span class="s2">    ?propertynode a &lt;</span><span class="si">{</span><span class="n">time_iri</span><span class="si">}</span><span class="s2">&gt;.</span>
+<span class="s2">    ?column csvw:titles ?columnName.</span>
+<span class="se">}}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1"># Execute the SPARQL query</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+<span class="c1"># Print the results</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+    <span class="n">time_column</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Convert the Literal to a string</span>
+
+<span class="c1"># Get the voltage column label</span>
+<span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">PREFIX csvw: &lt;http://www.w3.org/ns/csvw#&gt;</span>
+
+<span class="s2">SELECT ?columnName WHERE </span><span class="se">{{</span>
+<span class="s2">    ?table csvw:tableSchema ?schema.</span>
+<span class="s2">    ?schema csvw:columns ?column.</span>
+
+<span class="s2">    ?column csvw:propertyUrl ?propertynode.</span>
+<span class="s2">    ?propertynode a &lt;</span><span class="si">{</span><span class="n">voltage_iri</span><span class="si">}</span><span class="s2">&gt;.</span>
+<span class="s2">    ?column csvw:titles ?columnName.</span>
+<span class="se">}}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="c1"># Execute the SPARQL query</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+<span class="c1"># Print the results</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+    <span class="n">voltage_column</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Convert the Literal to a string</span>
+
+<span class="c1"># Check if columns are found</span>
+<span class="k">if</span> <span class="n">time_column</span> <span class="ow">and</span> <span class="n">voltage_column</span><span class="p">:</span>
+    <span class="c1"># Plot Voltage vs Time</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">time_column</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">voltage_column</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Voltage vs Time&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">time_column</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">voltage_column</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Voltage vs Time&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Required columns not found in metadata.&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_linked_data_timeseries_battery_data_12_0.png" src="_images/example_linked_data_timeseries_battery_data_12_0.png" />
+</div>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="example_linked_data_custom_battery_cell_metadata.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Example: Custom Battery Cell Metadata</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="example_linked_data_zinc_powder.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Example: Zinc Powder from a Supplier</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Describe the csv file using ontology terms in JSON-LD format</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Parse-this-description-into-a-graph">Parse this description into a graph</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Query-the-Graph-to-select-instances-with-certain-properties-[Advanced]">Query the Graph to select instances with certain properties [Advanced]</a></li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/example_linked_data_timeseries_battery_data.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2021-2023.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

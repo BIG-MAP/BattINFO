@@ -3,6 +3,7 @@
       
    example_linked_data_battery_cell_metadata.ipynb
    example_linked_data_custom_battery_cell_metadata.ipynb
+   example_linked_data_timeseries_battery_data.ipynb
    example_linked_data_zinc_powder.ipynb
 
 Examples
@@ -29,18 +30,18 @@ Here are some examples to help you get started. You are free to re-use or modify
 .. grid::
 
     .. grid-item-card::
+        :link: example_linked_data_timeseries_battery_data.html
+
+        :octicon:`graph;1em;sd-text-info`  Time Series Battery Data
+        ^^^^^^^^^^^
+        Metadata for a csv file containing timeseries battery data. Also includes examples of how to read and process it based on understanding from ontology terms.
+
+    .. grid-item-card::
         :link: example_linked_data_zinc_powder.html
 
         :octicon:`ruby;1em;sd-text-info`  Zinc Powder
         ^^^^^^^^^^^
         A zinc powder material from a manufacturer with properties defined in a specification sheet.
-
-    .. grid-item-card::
-        :link: example_zinc_electrode.html
-
-        :octicon:`plus;1em;sd-text-info`  Zinc Electrode
-        ^^^^^^^^^^^
-        A zinc foil electrode manufactured by a person at a research institute with a mix of properties from a specification sheet and measured.
 
 .. grid::
 
