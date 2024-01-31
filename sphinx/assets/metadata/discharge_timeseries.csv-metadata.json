@@ -1,0 +1,30 @@
+{
+    "@context": "https://wwww.battinfo.org",
+    "@type": "MeasurementResult",
+    "dc:title": "Synthetic Discharge Curve Demo",
+    "dcat:keyword": ["battery", "li-ion", "discharge"],
+    "dc:license": {"@id": "http://opendefinition.org/licenses/cc-by/"},
+    "dc:modified": {"@value": "2024-01-10", "@type": "xsd:date"},
+    "csvw:tableSchema": {
+        "csvw:columns": [{
+          "csvw:name": "time",
+          "csvw:titles": "Time / s",
+          "csvw:propertyUrl": "Time",
+          "hasMeasurementUnit": "Second",
+          "csvw:datatype": "number",
+          "csvw:required": true
+        }, {
+          "csvw:name": "voltage",
+          "csvw:titles": "Voltage / V",
+          "csvw:propertyUrl": "CellVoltage",
+          "csvw:datatype": "number"
+        }, {
+          "csvw:name": "current",
+          "csvw:titles": "Current / A",
+          "csvw:propertyUrl": "CellCurrent",
+          "csvw:datatype": "number"
+        }],
+        "csvw:primaryKey": "time",
+        "csvw:aboutUrl": "#time-{time}"
+      }
+}
