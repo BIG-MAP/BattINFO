@@ -1,5 +1,5 @@
 {
-    "@context": "https://wwww.battinfo.org",
+    "@context": "https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json",
     "@type": "MeasurementResult",
     "dc:title": "Synthetic Discharge Curve Demo",
     "dcat:keyword": ["battery", "li-ion", "discharge"],
@@ -9,19 +9,33 @@
         "csvw:columns": [{
           "csvw:name": "time",
           "csvw:titles": "Time / s",
-          "csvw:propertyUrl": "Time",
-          "hasMeasurementUnit": "Second",
+          "csvw:propertyUrl": {
+            "@type": "Time"
+          },
+          "hasMeasurementUnit": {
+            "@type": "Second"
+          },
           "csvw:datatype": "number",
-          "csvw:required": true
+          "csvw:required": "true"
         }, {
           "csvw:name": "voltage",
           "csvw:titles": "Voltage / V",
-          "csvw:propertyUrl": "CellVoltage",
+          "csvw:propertyUrl": {
+            "@type": "CellVoltage"
+          },
+          "hasMeasurementUnit": {
+            "@type": "Volt"
+          },
           "csvw:datatype": "number"
         }, {
           "csvw:name": "current",
           "csvw:titles": "Current / A",
-          "csvw:propertyUrl": "CellCurrent",
+          "csvw:propertyUrl": {
+            "@type": "CellCurrent"
+          },
+          "hasMeasurementUnit": {
+            "@type": "Ampere"
+          },
           "csvw:datatype": "number"
         }],
         "csvw:primaryKey": "time",
