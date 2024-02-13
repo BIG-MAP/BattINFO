@@ -49,23 +49,30 @@ The BattINFO documentation provides some guidelines on:
 - [Tools for Ontology Users and Developers](https://big-map.github.io/BattINFO/tools.html)
 - [Examples of the Ontology in Action!](https://big-map.github.io/BattINFO/examples.html)
 
-### Quick Start in Python
+### A Simple Example in JSON-LD
 
-In python, the ontology can be handled with the pacakge [EMMOntoPy][2]. This
-package can be installed with `pip install emmontopy`.
+Here is a simple example for describing a CR2032 Coin Cell in [JSON-LD](https://json-ld.org/) using ontology terms:
 
-BattINFO can then be loaded using the following commands:
-
-```python
-from ontopy import get_ontology
-
-# Loading from local repository
-battinfo = get_ontology('/path/to/BattINFO/battinfo.ttl').load(url_from_catalog=True)
-
-# Loading from web
-battinfo = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl').load()
-```= get_ontology('https://raw.githubusercontent.com/emmo-repo/domain-battery/master/inferred_version/battery-inferred.ttl').load()
+```json
+{
+   "@context": "https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json",
+   "@type": "CR2032",
+   "schema:name": "My CR2032 Coin Cell",
+   "schema:manufacturer": {
+      "@id": "https://www.wikidata.org/wiki/Q3041255",
+      "schema:name": "SINTEF"
+   },
+   "hasProperty": {
+      "@type": ["NominalCapacity", "ConventionalProperty"],
+      "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 230
+      },
+      "hasMeasurementUnit": "emmo:MilliAmpereHour"
+   }
+}
 ```
+
 ## License
 
 The Battery Interface Domain Ontology is released under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode) license (CC BY 4.0).
