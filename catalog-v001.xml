@@ -1,8 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-	<group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
-        <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.6.0/battinfo" uri="./battinfo.ttl"/>
-	<uri name="http://emmo.info/battery/0.6.0/battery-inferred"    			uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/0.6.0/inferred_version/battery-inferred.ttl"/>
-	
+    <uri name="https://w3id.org/emmo/domain/electrochemistry/0.10.0-beta/electrochemistry" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/electrochemistry.ttl"/>
+    <uri name="https://w3id.org/emmo/domain/electrochemistry/0.10.0-beta/electrochemicalquantities" uri="https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/electrochemicalquantities.ttl"/>
+    <uri name="https://w3id.org/emmo/domain/battery/0.8.0-beta/battery" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/master/battery.ttl"/>
+    <uri name="https://w3id.org/emmo/domain/battery/0.8.0-beta/batteryquantities" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/master/batteryquantities.ttl"/>
+    
+    <uri name="https://w3id.org/emmo/domain/chemicalsubstance/0.4.0-beta/chemicalsubstance" uri="https://raw.githubusercontent.com/emmo-repo/domain-chemicalsubstance/main/chemicalsubstance.ttl"/>
+    <uri name="https://w3id.org/emmo/domain/chameo/1.0.0-beta3/chameo" uri="https://raw.githubusercontent.com/emmo-repo/domain-characterisation-methodology/version-update-emmo-1.0.0-beta7/chameo.ttl"/>
+
+    <uri name="https://w3id.org/emmo/1.0.0-beta7" uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/emmo.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/mereocausality"                  uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/mereocausality/mereocausality.ttl"/>
+
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives"                    uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/perspectives.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/perspective"        uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/perspective.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/semiotics"          uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/semiotics.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/perceptual"         uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/perceptual.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/reductionistic"     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/reductionistic.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/holistic"           uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/holistic.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/persistence"        uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/persistence.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/physicalistic"      uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/physicalistic.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/standardmodel"      uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/standardmodel.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/perspectives/data"               uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/perspectives/data.ttl"/>
+
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/multiperspective"                uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/multiperspective/multiperspective.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/multiperspective/persholistic"   uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/multiperspective/persholistic.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/multiperspective/properties"     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/multiperspective/properties.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/multiperspective/symbolic"       uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/multiperspective/symbolic.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/multiperspective/information"    uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/multiperspective/information.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/multiperspective/workflow"       uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/multiperspective/workflow.ttl"/>
+
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines"                     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/disciplines.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/chemistry"           uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/chemistry.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/computerscience"     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/computerscience.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/manufacturing"       uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/manufacturing.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/materials"           uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/materials.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/math"                uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/math.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/models"              uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/models.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/periodictable"       uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/periodictable.ttl"/>
+
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/metrology"           uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/metrology.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/isq"                 uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/isq.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/sisystem"            uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/sisystem.ttl"/>
+
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units"                     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/units.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/sidimensionalunits"  uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/sidimensionalunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/siunits"             uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/siunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/coherentsiunits"     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/coherentsiunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/noncoherentsiunits"  uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/noncoherentsiunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/prefixedsiunits"     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/prefixedsiunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/siacceptedunits"     uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/siacceptedunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/units/unclassifiedunits"   uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/unclassifiedunits.ttl"/>
+
+    <!-- to be removed -->
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/unitsextension"      uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/unitsextension.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/prefixedunits"       uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/prefixedunits.ttl"/>
+    <uri name="https://w3id.org/emmo/1.0.0-beta7/disciplines/deprecated"          uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/disciplines/units/deprecated.ttl"/>
+
+<group id="Folder Repository, directory=, recursive=true, Auto-Update=false, version=2" prefer="public" xml:base="">
+        <uri name="https://big-map.github.io/BattINFO/ontology/BattINFO/0.7.0/battinfo" uri="./battinfo.ttl"/>
     </group>
 </catalog>
