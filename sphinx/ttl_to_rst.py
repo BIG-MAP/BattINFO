@@ -84,7 +84,12 @@ def entities_to_rst(entities: list[dict]) -> str:
 
     for item in entities:
 
-        iri_prefix, iri_suffix = item['IRI'].split("#")
+        try:
+            iri_prefix, iri_suffix = item['IRI'].split("#")
+        except ValueError:
+            print("Error splitting string:", item['IRI'])
+            # Handle the error or continue with the next item
+            continue
 
         rst += ".. raw:: html\n\n"
         rst += "   <div id=\"" + iri_suffix + "\"></div>\n\n"
