@@ -21,7 +21,7 @@ def extract_terms_info_sparql(g: Graph)-> list:
 
     # SPARQL QUERY #
     PREFIXES = """
-        PREFIX emmo: <http://emmo.info/emmo#>
+        PREFIX emmo: <https://w3id.org/emmo#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         """
