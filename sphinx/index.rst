@@ -60,7 +60,7 @@ Check out these resources to get started!
         Let's go! Here is some information to help you get started
 
     .. grid-item-card::
-        :link: electrochemistry.html
+        :link: battinfo.html
 
         :octicon:`book;1em;sd-text-info`  Class Index
         ^^^^^^^^^^^
