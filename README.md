@@ -1,79 +1,93 @@
 <!-- markdownlint-disable MD033 -->
 
-# Battery INterFace Ontology (BattINFO)
+# Battery Interface Ontology (BattINFO)
 
-[![CI tests](https://github.com/BIG-MAP/BattINFO/workflows/CI%20tests/badge.svg)](https://github.com/BIG-MAP/BattINFO/actions/)
+Welcome to the Battery Interface Ontology (BattINFO): a semantic resource for describing knowledge about batteries and creating [Linked Data][1]! 
 
-A battery interface domain ontology based on [EMMO][1].
+BattINFO is a foundational resource for harmonizing battery knowledge representation and enhancing data interoperability. The primary objective is to provide the necessary tools to create [FAIR (Findable, Accessible, Interoperable, Reusable)][2] battery data that can be integrated into the [Semantic Web][3].
 
-A reference documentation of the individual classes is available in [html](https://big-map.github.io/BattINFO/index.html) and [pdf](https://big-map.github.io/BattINFO/battinfo.pdf) formats.
+## Usage
 
-## Imported ontologies
+The Battery Interface Ontology is aimed at developers, engineers, researchers, and other professionals in the battery domain who would like to:
 
-This ontology builds on top of [EMMO][1].
-See the following table for version compatibilies:
+- Assign meaning to their data in a way that can be understood by both machines and humans;
+- Enhance data interoperability between different databases and tools;
+- Standardize representation of battery knowledge;
+- Enable semantic queries of (meta)data;
+- Comply with FAIR data guidelines.
 
-| Imported Ontologies      | Version           |
-| ------------------------ | ----------------- |
-| domain-battery-inferred  | 0.6.0             |
+## Key Features
 
-The import structure is shown in the figure below.
+### Persistent Identifiers
 
-![BattINFO import structure.](doc/battinfo-structure.png)
+This ontology assigns persistent machine-readable identifiers to concepts from the battery domain. These identifiers facilitate data exchange and interoperability for both humans and machines. The ontology uses the w3id.org Permanent Uniform Resource Locator (PURL) service to ensure that the identifiers are robust and permanent. It includes annotations to other sources of information including [DBPedia](https://www.dbpedia.org/) and [Wikidata](https://www.wikidata.org/). 
 
-## Obtaining BattINFO
+### Standardized Nomenclature
 
-This ontology builds on top of [EMMO][1].
-The correct path to the inferred verion `emmo-inferred` is specified in the catalog file, [`catalog-v001.xml`](catalog-v001.xml).
+The ontology builds on standardized nomenclature for batteries, relying on recognized authorities including [IUPAC](https://iupac.org/what-we-do/nomenclature/) and the [IEC](https://www.electropedia.org/). IUPAC is the universally-recognized authority on chemical nomenclature and terminology, and IEC is the the world's leading organization that prepares and publishes International Standards for all electrical, electronic and related technologies. This consistency in naming conventions enhances collaboration and data sharing.
 
-The domain ontology is obtained with:
+### Integration with the EMMO Universe
+
+BattINFO is defined under the recommendations of the [Elementary Multiperspective Materials Ontology (EMMO)][4]. The EMMO provides a top-level ontology, with a focus on describing knowledge related to the natural sciences and engineering. It hosts a variety of domain ontologies on a wide range of topics including characterization methodology, crystallography, electrochemistry, and more. By defining BattINFO according to the recommendations of the EMMO, we can establish interoperability with all other resources in the EMMO Universe.
+
+### Compliance with W3C Standards and Best Practices
+
+The World Wide Web Consortium (W3C) is the organization responsible for maintaining the standards that form the foundation for the Web. To streamline the exchange and interpretation of Web-based data, they have created a set of standards that form the basis for the Semantic Web: an extension of the World Wide Web that is centered around data and designed to be navigated by machines. The Resource Description Framework (RDF) is one of the cornerstone standards for the Semantic Web that provides a standard model for data exchange. 
+
+BattINFO is defined within these W3C recommendations to allow for easy integration of data into the Semantic Web. Furthermore, we provide examples of data annotation in some of the most common RDF formats like JSON-LD.
+
+## Getting Started
+
+The best way to stay up to date with the latest version of the ontology is to clone this repository.
 
 ```console
 git clone https://github.com/BIG-MAP/BattINFO.git
 ```
 
-When opening BattINFO.ttl in Protégé, the correct version of emmo-inferred will be downloaded and imported.
+The BattINFO documentation provides some guidelines on:
+- [How to Get Started](https://big-map.github.io/BattINFO/getstarted.html)
+- [Tools for Ontology Users and Developers](https://big-map.github.io/BattINFO/tools.html)
+- [Examples of the Ontology in Action!](https://big-map.github.io/BattINFO/examples.html)
 
-In python, the ontology can be handled with the pacakge [EMMOntoPy][2] (formerly EMMO-python). This
-package can be installed with `pip install emmontopy` (not to be confused with ontopy on pypi).
+### A Simple Example in JSON-LD
 
-Correct import is obtained with:
+Here is a simple example for describing a CR2032 Coin Cell in [JSON-LD](https://json-ld.org/) using ontology terms:
 
-```python
-from ontopy import get_ontology
-
-# Loading from local repository
-battinfo = get_ontology('/path/to/BattINFO/battinfo.ttl').load(url_from_catalog=True)
-
-# Loading from web
-battinfo = get_ontology('https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl').load()
+```json
+{
+   "@context": "https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json",
+   "@type": "CR2032",
+   "schema:name": "My CR2032 Coin Cell",
+   "schema:manufacturer": {
+      "@id": "https://www.wikidata.org/wiki/Q3041255",
+      "schema:name": "SINTEF"
+   },
+   "hasProperty": {
+      "@type": ["NominalCapacity", "ConventionalProperty"],
+      "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 230
+      },
+      "hasMeasurementUnit": "emmo:MilliAmpereHour"
+   }
+}
 ```
-
-## Contributing to BattINFO
-There are two ways you can contribute to BattINFO.
-### Suggest minor changes on existing elements
-Create a [Feature request in a Github Issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-an-issue) to suggest edits to names, defintions, references on existing classes and properties. 
-### Propose additions/deletion of elements
-> **_NOTE:_**  We recommend contacting some of BattINFO contributors in advance to discuss which additions deletions you wish to make.  
-
-We recoommend using the [forking workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow) to contribute additions/deletions. Fork this repository, clone the fork on you local PC, create your branch based on the existing ```dev``` branch (e.g. ```dev_john_doe```) and work on the editions in you local copy. You can edit ontologes in two main ways. One is programmatically, using for instance [EMMOntoPy](https://github.com/emmo-repo/EMMOntoPy). The second and more common is using the interface provided by the Protege software. In case of the latter, [install Protege](https://protege.stanford.edu/) and use it to open the ontology file you wish to edit. Before adding elements, ensure Protege is configured to create IRIs in the right format:  
-* Open Protégé
-* Go to File/Open and load the ontology file you wish to modify
-* Go to File/Preferences and there go to the New Entities Tab
-* Ensure you have configured the preferences as shown below:
-![Protege config.](doc/protege_config_contribute.png)  
-Here is the "Specified IRI" for you to copy: ```https://big-map.github.io/BattINFO/ontology/BattINFO#```
-
-* Once you have made your changes, commit them to your fork and [create a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
-* We will merge the request after assessing it.
-
-
-## Attributions and credits
-- [BIG-MAP](http://www.big-map.eu/); Grant Agreement No: 957189 <img src="bigmap.png" alt="BIG-MAP" width="30">
 
 ## License
 
 The Battery Interface Domain Ontology is released under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode) license (CC BY 4.0).
 
-[1]: https://github.com/emmo-repo/EMMO
-[2]: https://emmo-repo.github.io/EMMOntoPy
+## Acknowledgements
+
+<img src="sphinx/img/EU_Flag.jpg" alt="EU-Flag" width="100">
+
+This project has received support from European Union research and innovation programs, under grant agreement numbers:
+
+* 957189 - [BIG-MAP](http://www.big-map.eu/) 
+
+[1]: https://www.w3.org/wiki/LinkedData 
+[2]: https://www.go-fair.org/fair-principles/
+[3]: https://en.wikipedia.org/wiki/Semantic_Web
+[4]: https://big-map.github.io/BattINFO/index.html
+[5]: https://github.com/emmo-repo/EMMO
+[6]: https://www.big-map.eu

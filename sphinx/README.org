@@ -1,0 +1,47 @@
+#+TITLE: Documentation generation for BattInfo
+* Requirements
+** sphinx
+   installation instruction described [[https://www.sphinx-doc.org/en/master/usage/installation.html][here]]
+   #+begin_src
+     pip install sphinx
+   #+end_src
+** install sphinx pydata theme
+   https://pydata-sphinx-theme.readthedocs.io/en/latest/index.html
+   #+begin_src
+     pip install pydata-sphinx-theme
+   #+end_src
+** globabsubs extension
+   #+begin_src
+     pip install sphinxcontrib-globalsubs
+   #+end_src
+** autosectionlabel
+   - part of default distribution
+   - We use ~autosectionlabel_prefix_document = True~ which means that the internal link must be prefixed by the file
+     name and a semi-column, see [[https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html][here]].
+   
+* Workflow for editing
+
+  In the ~Documentation~ directory, run from terminal
+  #+BEGIN_SRC sh
+  make html
+  #+END_SRC
+
+  The command generates all the files for a static website and writes them in ~Documentation/_build/html~
+
+  All the files in this directory must then be copied to the ~BattInfo-doc~ [[https://github.com/BattMoTeam/BattMo-doc][repo]]. From there, make a *force* push. We do
+  not keep track of the history of the ouput files (html), but we of course keep track of the documentation source, directly in the
+  main repo ~BattInfo~.
+
+  The deployment of the webpage can be followed from the [[https://github.com/BattMoTeam/BattMo-doc/actions][github pages section]]
+
+  The result can be view at
+
+  https://battmoteam.github.io/Battinfo-doc/
+
+* Interesting Manuals
+** sphinx manual
+   https://www.sphinx-doc.org/en/master/contents.html
+** reStucturedText (rst) format
+   https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+* Configuration file
+  - ~conf.py~ see https://www.sphinx-doc.org/en/master/usage/configuration.html
