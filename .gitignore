@@ -1,6 +1,6 @@
+# Python
+__pycache__
+*.py[cod]
+
 # Documentation
 site
-
-# Python
-**/__pycache__/
-**/*.py[cod]
