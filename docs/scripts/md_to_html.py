@@ -24,7 +24,7 @@ def render_html_top() -> str:
             </a>
         </div>
         '''
-    
+
     return top_html + banner
 
 ########## RENDER HTML BOTTOM ################
@@ -39,7 +39,7 @@ def render_html_bottom() -> str:
 ########## LOAD MD INTO HTML  ################
 
 def load_md_into_html(path:str)-> str:
-    
+
     with open(path, 'r', encoding="utf-8") as file:
         markdown_text = file.read()
 

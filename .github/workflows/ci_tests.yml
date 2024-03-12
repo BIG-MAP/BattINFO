@@ -14,7 +14,7 @@ jobs:
     - name: Set up Python 3.7
       uses: actions/setup-python@v5
       with:
-        python-version: 3.7
+        python-version: '3.7'
 
     - name: Install EMMOntoPy
       run: |
@@ -29,5 +29,3 @@ jobs:
           --skip test_quantity_dimension \
           --configfile=.github/utils/emmocheck_config.yml \
           battinfo.ttl
-
-
