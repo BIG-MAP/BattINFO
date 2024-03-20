@@ -6,7 +6,7 @@
     <uri name="https://w3id.org/emmo/domain/battery/0.8.0-beta/batteryquantities" uri="https://raw.githubusercontent.com/emmo-repo/domain-battery/master/batteryquantities.ttl"/>
     
     <uri name="https://w3id.org/emmo/domain/chemicalsubstance/0.4.0-beta/chemicalsubstance" uri="https://raw.githubusercontent.com/emmo-repo/domain-chemicalsubstance/main/chemicalsubstance.ttl"/>
-    <uri name="https://w3id.org/emmo/domain/chameo/1.0.0-beta3/chameo" uri="https://raw.githubusercontent.com/emmo-repo/domain-characterisation-methodology/version-update-emmo-1.0.0-beta7/chameo.ttl"/>
+    <uri name="https://w3id.org/emmo/domain/chameo/1.0.0-beta3/chameo" uri="https://raw.githubusercontent.com/emmo-repo/domain-characterisation-methodology/main/chameo.ttl"/>
 
     <uri name="https://w3id.org/emmo/1.0.0-beta7" uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/emmo.ttl"/>
     <uri name="https://w3id.org/emmo/1.0.0-beta7/mereocausality"                  uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.0-beta7/mereocausality/mereocausality.ttl"/>
