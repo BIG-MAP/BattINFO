@@ -14,7 +14,7 @@ nbsphinx==0.9.3
 packaging==24.1
 pandoc==2.3
 pydata-sphinx-theme==0.13.3
-Pygments==2.17.2
+Pygments==2.18.0
 pytz==2024.1
 requests==2.31.0
 snowballstemmer==2.2.0
