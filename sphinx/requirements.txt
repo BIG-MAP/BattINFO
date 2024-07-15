@@ -16,7 +16,7 @@ pandoc
 pydata-sphinx-theme==0.13.3
 Pygments==2.18.0
 pytz==2024.1
-requests==2.31.0
+requests==2.32.3
 snowballstemmer==2.2.0
 soupsieve==2.4.1
 Sphinx==5.3.0
