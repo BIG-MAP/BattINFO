@@ -44,6 +44,10 @@ jobs:
     - name: Build HTML
       run: make html
       working-directory: sphinx
+      env:
+        # -v: Verbose
+        # -W: Turn warnings into errors
+        SPHINXOPTS: "-v -W"
 
     # Still upload built documentation as an artifact if not deploying
     # This is to provide the opportunity to download the built documentation
