@@ -1,10 +1,19 @@
 .. toctree::
    :hidden:
       
-   example_linked_data_battery_cell_metadata.ipynb
-   example_linked_data_custom_battery_cell_metadata.ipynb
-   example_linked_data_timeseries_battery_data.ipynb
-   example_linked_data_zinc_powder.ipynb
+   example_linked_data_battery_cell_metadata
+   example_linked_data_custom_battery_cell_metadata
+   example_linked_data_timeseries_battery_data
+   example_linked_data_zinc_powder
+   example_aqueous_electrolyte_KOH
+   example_alkaline_electrochemical_cell
+   example_cyclic_voltammetry
+   example_eis_nyquist
+
+   example_zinc_electrode
+   example_zinc_powder
+
+   example_person_jsonld_nb
 
 Examples
 ========

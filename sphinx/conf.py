@@ -120,6 +120,8 @@ html_theme = 'pydata_sphinx_theme'
 
 html_theme_options = {
   # "show_nav_level": 4
+  "header_links_before_dropdown": 5, # show 5 links before "More" dropdown
+  "primary_sidebar_end": [],
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -161,7 +163,14 @@ html_css_files = ['css/custom.css']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+html_sidebars = {
+    "**": ["sidebar-nav-bs"],
+    "about": [],
+    "battinfo": [],
+    "contribute": [],
+    "faq": [],
+    "getstarted": [],
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -299,4 +308,10 @@ add_module_names = False
 
 # MatAttributeDocumenter.add_directive_header = _add_directive_header
 
+suppress_warnings = [
+    # Suppress "duplicate label" warnings in `battinfo.rst`.
+    #   These are due to similarly named (prefLabel) concepts in the ontology,
+    #   as the prefLabel is used as the section title.
+    "autosectionlabel.battinfo",
+  ]
 
