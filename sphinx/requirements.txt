@@ -1,6 +1,6 @@
 accessible-pygments==0.0.4
 alabaster==0.7.13
-Babel==2.15.0
+Babel==2.16.0
 beautifulsoup4==4.12.2
 certifi==2023.11.17
 charset-normalizer==3.3.2
