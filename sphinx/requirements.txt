@@ -20,7 +20,7 @@ requests==2.32.3
 snowballstemmer==2.2.0
 soupsieve==2.4.1
 Sphinx==5.3.0
-sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-applehelp==2.0.0
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-globalsubs==0.1.1
 sphinxcontrib-htmlhelp==2.0.1
