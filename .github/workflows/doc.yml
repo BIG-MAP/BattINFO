@@ -38,14 +38,14 @@ jobs:
     - name: Render documentation from ttl
       run: python docs/scripts/ttl_to_rst.py
 
+    - name: Create context file from ttl
+      run: python docs/scripts/ttl_to_context.py
+
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
         pre-build-command: "apt-get update -y; apt-get install -y pandoc"
-
-    - name: Create context file from ttl
-      run: python docs/scripts/ttl_to_context.py
 
     - name: Check if HTML context directory exists
       run: |
