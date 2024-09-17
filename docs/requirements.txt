@@ -1,1 +1,4 @@
-rdflib==7.0.0
+rdflib==6.3.2 
+pandoc
+sphinxcontrib-globalsubs
+Markdown==3.4.3

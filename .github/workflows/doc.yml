@@ -5,35 +5,36 @@ on:
     branches:
       - 'master'
   pull_request:
+    branches:
+      - '*'  # To ensure it runs on all PRs
 
 env:
   GIT_USER_NAME: BattINFO Developers
   GIT_USER_EMAIL: "BattINFO@big-map.org"
-
+    
 jobs:
 
   updatepages:
-
+    
     runs-on: ubuntu-latest
-
+    
     permissions:
       contents: write
-
+      
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -U setuptools wheel
-        pip install -r docs/requirements.txt
-
+          pip install --upgrade pip
+          pip install -r docs/requirements.txt
+        
     - name: Render documentation from ttl
       run: python docs/scripts/ttl_to_rst.py
 
@@ -43,18 +44,73 @@ jobs:
         docs-folder: "docs/"
         pre-build-command: "apt-get update -y; apt-get install -y pandoc"
 
-    # Still upload built documentation as an artifact if not deploying
-    # This is to provide the opportunity to download the built documentation
+    - name: Create context file from ttl
+      run: python docs/scripts/ttl_to_context.py
+
+    - name: Check if HTML context directory exists
+      run: |
+        if [ ! -d "docs/_build/html/context/" ]; then
+          sudo mkdir -p docs/_build/html/context/
+        fi
+        if [ ! -d "docs/_build/html/assets/" ]; then
+          sudo mkdir -p docs/_build/html/assets/
+        fi
+        if [ ! -d "docs/_build/html/versions/" ]; then
+          sudo mkdir -p docs/_build/html/versions/
+        fi
+
+    - name: Copy assets directory to HTML directory
+      run: sudo cp -r docs/assets/* docs/_build/html/assets/
+    
+    - name: Copy context file to HTML directory
+      run: sudo cp context/context.json docs/_build/html/context/
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "${{ env.GIT_USER_EMAIL }}"
+        git config --local user.name "${{ env.GIT_USER_NAME }}"
+        git add context/context.json
+        git diff --staged --quiet || git commit -m "Update context.json file"
+
+    - name: Pull latest changes
+      if: github.event_name == 'push'  # Only pull changes during push events
+      run: git pull origin master --rebase
+
+    - name: Push changes
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'  # Only push during push events on master
+      run: git push origin HEAD:master
+
+    - name: Fetch all tags and create version directories
+      run: |
+        git fetch --tags
+        git tag | while read TAG; do
+          sudo mkdir -p "docs/_build/html/versions/$TAG"
+          
+          python docs/scripts/apply_foops_recommendations.py battinfo.ttl battinfo-foops.ttl
+          sudo cp "battinfo-foops.ttl" "docs/_build/html/versions/$TAG/battinfo.ttl"
+          sudo cp "battinfo-inferred.ttl" "docs/_build/html/versions/$TAG/"
+
+          if [ -d "context" ]; then
+            sudo mkdir -p "docs/_build/html/versions/$TAG/context"
+            sudo cp "context/context.json" "docs/_build/html/versions/$TAG/context"
+          fi
+        done
+
+    - name: Copy TTL files to HTML directory
+      run: |    
+        python docs/scripts/apply_foops_recommendations.py battinfo.ttl battinfo-foops.ttl
+        sudo cp "battinfo-foops.ttl" "docs/_build/html/battinfo.ttl"
+        sudo cp "battinfo-inferred.ttl" "docs/_build/html/battinfo-inferred.ttl"
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: documentationHTML
         path: docs/_build/html/
-
-    # Only deploy if pushing to 'master'
+        
     - name: Deploy
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'  # Only deploy during push events on master
       uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/_build/html
