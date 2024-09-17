@@ -38,6 +38,9 @@ jobs:
     - name: Render documentation from ttl
       run: python docs/scripts/ttl_to_rst.py
 
+    - name: Create context directory
+      run: sudo mkdir -p context
+
     - name: Create context file from ttl
       run: python docs/scripts/ttl_to_context.py
 
