@@ -16,7 +16,7 @@ packaging==23.2
 pandoc
 pydata-sphinx-theme==0.13.3
 Pygments==2.17.2
-pytz==2023.3.
+pytz==2023.3.post1
 rdflib==6.3.2
 requests==2.31.0
 snowballstemmer==2.2.0
