@@ -9,6 +9,10 @@
    About <about>
    FAQ <faq>
 
+   Contribute <contribute>
+   tools
+   resources
+
 Battery Interface Ontology
 ================================
 

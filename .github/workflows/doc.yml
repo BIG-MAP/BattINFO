@@ -30,18 +30,24 @@ jobs:
 
     - name: Install dependencies
       run: |
+        # System dependencies
+        sudo apt-get update && sudo apt-get install -y pandoc
+
+        # Python dependencies
         python -m pip install --upgrade pip
         pip install -U setuptools wheel
-        pip install -r requirements_docs.txt
+        pip install -r requirements_docs.txt -r sphinx/requirements.txt
 
     - name: Render documentation from ttl
       run: python sphinx/ttl_to_rst.py
 
     - name: Build HTML
-      uses: ammaraskar/sphinx-action@master
-      with:
-        docs-folder: "sphinx/"
-        pre-build-command: "apt-get update -y; apt-get install -y pandoc"
+      run: make html
+      working-directory: sphinx
+      env:
+        # -v: Verbose
+        # -W: Turn warnings into errors
+        SPHINXOPTS: "-v -W"
 
     # Still upload built documentation as an artifact if not deploying
     # This is to provide the opportunity to download the built documentation

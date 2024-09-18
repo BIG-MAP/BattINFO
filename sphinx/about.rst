@@ -1,5 +1,5 @@
 About the Battery Interface Ontology
-==========================
+====================================
 
 The Battery Interface Ontology (BattINFO) is a semantic resource for the terms and relations needed to describe things, processes, and data in the battery domain. It can be used to **generate linked data** for the Semantic Web, **comply with the FAIR data guidelines**, support **interoperaility of data** among different systems, and more!
 
