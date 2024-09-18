@@ -1,0 +1,47 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+dcterms:abstract a owl:AnnotationProperty .
+
+dcterms:contributor a owl:AnnotationProperty .
+
+dcterms:creator a owl:AnnotationProperty .
+
+dcterms:license a owl:AnnotationProperty .
+
+dcterms:title a owl:AnnotationProperty .
+
+<https://w3id.org/battinfo> a owl:Ontology ;
+    dcterms:abstract """A battery interface domain ontology based on EMMO.
+This file is intended to be empty and merely collecting the other ontologies.
+Released under the Creative Commons license Attribution 4.0 International (CC BY 4.0)."""@en ;
+    dcterms:contributor "Anna Szczesna"@en,
+        "Denmark Technical University (DTU), DK"@en,
+        "Deyana Stoytcheva"@en,
+        "EPFL, CH"@en,
+        "Fraunhofer ISC, DE"@en,
+        "ICMAB, ES"@en,
+        "Marek Marcinek"@en,
+        "Martin Uhrin"@en,
+        "Miran Gaberscek"@en,
+        "National Institute of Chemistry, SI"@en,
+        "Rosa Palacin"@en,
+        "Simon Stier"@en,
+        "Warsaw University of Technology, PL"@en ;
+    dcterms:creator "Casper Welzel Andersen"@en,
+        "Eibar Flores"@en,
+        "Francesca Lønstad Bleken"@en,
+        "Jesper Friis"@en,
+        "SINTEF, NO"@en,
+        "Simon Clark"@en ;
+    dcterms:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+    dcterms:title "Battery Interface Ontology (BattINFO)"@en ;
+    rdfs:comment """Contacts:
+Simon Clark
+SINTEF Industry
+email: simon.clark@sintef.no"""@en ;
+    owl:imports <https://w3id.org/emmo/domain/battery/0.13.0-beta/battery> ;
+    owl:versionIRI <https://w3id.org/battinfo/0.8.0-beta/battinfo> ;
+    owl:versionInfo "0.8.0" .
+

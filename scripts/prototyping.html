@@ -1,0 +1,1523 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>&lt;no title&gt; &#8212; BattInfo  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'scripts/prototyping';</script>
+    <link rel="shortcut icon" href="../_static/battinfologo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/battinfologo.jpg" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/battinfologo.jpg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../pages/getstarted.html">
+                        Get Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../pages/about.html">
+                        About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../pages/faq.html">
+                        FAQ
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../pages/getstarted.html">
+                        Get Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../pages/about.html">
+                        About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../pages/faq.html">
+                        FAQ
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">&lt;no title&gt;</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ttl_to_html import load_ttl_from_url
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>path = &quot;https://raw.githubusercontent.com/emmo-repo/domain-electrochemistry/master/electrochemicalquantities.ttl&quot;
+g = load_ttl_from_url(path)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>PREFIXES = &quot;&quot;&quot;
+        PREFIX emmo: &lt;http://emmo.info/emmo#&gt;
+        PREFIX skos: &lt;http://www.w3.org/2004/02/skos/core#&gt;
+        &quot;&quot;&quot;
+
+
+query =  PREFIXES  + &quot;&quot;&quot;
+        SELECT ?iri ?prefLabel ?elucidation (GROUP_CONCAT(?altLabel; SEPARATOR=&quot;, &quot;) AS ?altLabels) ?iecref ?iupacref ?wikipediaref
+        WHERE {
+            ?iri skos:prefLabel ?prefLabel.
+
+            OPTIONAL { ?iri emmo:EMMO_967080e5_2f42_4eb2_a3a9_c58143e835f9 ?elucidation . }
+            OPTIONAL { ?iri skos:altLabel ?altLabel . }
+            OPTIONAL { ?iri emmo:EMMO_50c298c2_55a2_4068_b3ac_4e948c33181f ?iecref . }
+            OPTIONAL { ?iri emmo:EMMO_fe015383_afb3_44a6_ae86_043628697aa2 ?iupacref . }
+        }
+
+        GROUP BY ?iri ?prefLabel ?elucidation
+
+        &quot;&quot;&quot;
+
+list_entity_types = [&quot;IRI&quot;, &quot;prefLabel&quot;, &quot;Elucidation&quot;, &quot;Alternative Label(s)&quot;, &quot;IEC Reference&quot;, &quot;IUPAC Reference&quot;, &quot;Wikipedia Reference&quot;]
+text_entities = []
+
+qres = g.query(query)
+
+for hit in qres:
+    hit_dict = {entity_type:str(entity) for entity_type, entity in zip(list_entity_types, hit)}
+    text_entities.append(hit_dict)
+
+    text_entities.sort(key=lambda e: e[&quot;prefLabel&quot;])
+text_entities
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[{&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_7fa406b0_512a_4d59_9e0c_5d8aba0103ae&#39;,
+  &#39;prefLabel&#39;: &#39;ActivationOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;Part of the electrode polarization arising from a charge-transfer step of the electrode reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ActivationPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-05&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5&#39;,
+  &#39;prefLabel&#39;: &#39;ActiveMaterialLoading&#39;,
+  &#39;Elucidation&#39;: &#39;Mass of active material in an electrode per unit electrode area.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ActiveElectrochemicalMaterialLoading&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_214d925c_76c4_4f69_9afc_056a1ea82fc6&#39;,
+  &#39;prefLabel&#39;: &#39;AdsorptionCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Electric current that accompanies the adsorption of a species.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/A00159&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_26c84165_e6e3_47f6_8433_e04e755a4751&#39;,
+  &#39;prefLabel&#39;: &#39;AlternatingCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Electric current having a sinusoidal wave form that changes direction during a cycle.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;AC&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/A00252&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_39a44af0_0e1a_4859_b550_bdabad64386e&#39;,
+  &#39;prefLabel&#39;: &#39;AmbientThermodynamicTemperature&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_6e7c2081_284f_48f5_88fb_7d517243d4fa&#39;,
+  &#39;prefLabel&#39;: &#39;AmountPerAreaDimension&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_10eb778d_da60_4832_a355_4ee74baea650&#39;,
+  &#39;prefLabel&#39;: &#39;AmplitudeOfAlternatingCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Half the peak-to-peak amplitude of a sinusoidal alternating current.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.A00310&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;https://emmo.info/electrochemistry#electrochemistry_f591a444_89d6_4093_836d_7d53895edce4&#39;,
+  &#39;prefLabel&#39;: &#39;AmplitudeOfAlternatingVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;Half of the peak-to-peak amplitude of a periodic voltage perturbation within a single time period, with respect to a reference potential value.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.A00311&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_565c0b10_70fe_441a_b76a_b9a8e08ca7b7&#39;,
+  &#39;prefLabel&#39;: &#39;AnodicOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;electrode polarization associated with an electrochemical oxidation reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;AnodicPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-06&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_fa01b7ce_c398_45f7_be8b_31a6f6533767&#39;,
+  &#39;prefLabel&#39;: &#39;AppliedPotential&#39;,
+  &#39;Elucidation&#39;: &#39;Difference of electric potentials measured between identical metallic leads to two electrodes of an electrochemical cell.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;Voltage&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a&#39;,
+  &#39;prefLabel&#39;: &#39;AreicCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;Quotient of the capacity of a battery cell or battery by its plane area.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ArealCapacity&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-20&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_269ddd97_1437_4545_b272_0df75a12c68a&#39;,
+  &#39;prefLabel&#39;: &#39;BaselineCellVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;In electrochemical measurements, the voltage of an electrochemical cell to which a voltage signal is superimposed.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_c55bcb85_b7b8_4e67_8a78_9a42fe25b6cf&#39;,
+  &#39;prefLabel&#39;: &#39;CatalyticCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Faradaic current measured in a solution containing two electroactive substances, A and B, that exceeds the sum of the faradaic currents that would be obtained for A and B separately under the same experimental conditions.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_0853b072_3b80_4864_8147_24ce35407ade&#39;,
+  &#39;prefLabel&#39;: &#39;CathodicOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;electrode polarization associated with an electrochemical reduction reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;CathodicPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-07&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_637ee9c4_4b3f_4d3a_975b_c0572dfe53ce&#39;,
+  &#39;prefLabel&#39;: &#39;CellCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_4ebe2ef1_eea8_4b10_822d_7a68215bd24d&#39;,
+  &#39;prefLabel&#39;: &#39;CellVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;Voltage between the terminals of an electrochemical cell.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-03-10&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ce4126c1_a7a8_41ce_aff0_5bfb91d2ecea&#39;,
+  &#39;prefLabel&#39;: &#39;CellVolume&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_49efb72a_f8e6_4f50_acac_975302200d47&#39;,
+  &#39;prefLabel&#39;: &#39;ChargeRetention&#39;,
+  &#39;Elucidation&#39;: &#39;ability of a cell or battery to retain capacity on open circuit under specified conditions.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;CapacityRetention&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-35&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_a4dfa5c1_55a9_4285_b71d_90cf6613ca31&#39;,
+  &#39;prefLabel&#39;: &#39;ChargeTransferCoefficient&#39;,
+  &#39;Elucidation&#39;: &#39;The fraction of the electrostatic potential energy affecting the reduction rate in an electrode reaction, with the remaining fraction affecting the corresponding oxidation rate.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600&#39;,
+  &#39;prefLabel&#39;: &#39;ChargingCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Electric current applied to a battery during its charge.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_9ed7210c_c4fa_467b_822d_ba12f885bdf4&#39;,
+  &#39;prefLabel&#39;: &#39;ConcentrationOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;The concentration overpotential of an electrode reaction at a given electrode current density (c.d.) is basically the difference in equilibrium potentials across the diffusion layer. More precisely, it is the potential of a reference electrode (of the same electrode reaction as the working electrode ) with the interfacial concentrations which establish themselves at c.d., relative to the potential of a similar reference electrode with the concentrations of the bulk solution. From such a measured potential difference, with c.d. flowing, one needs to subtract the ohmic potential drop prevailing between the two electrodes.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ConcentrationPolarization, MassTransferOverpotential, MassTransferPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-08&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/C01230&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_8de9735b_374a_4a0f_b29f_71a50794cf94&#39;,
+  &#39;prefLabel&#39;: &#39;CrystalizationOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;part of the electrode polarization arising from crystal nucleation and growth phenomena.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;CrystalizationPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-04&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_71f10616_15eb_4dc4_bc8d_ffaac3838af2&#39;,
+  &#39;prefLabel&#39;: &#39;CurrentChangeLimit&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_76e7e556_f47e_47e2_b2ef_67aeed09c63e&#39;,
+  &#39;prefLabel&#39;: &#39;CurrentDensityLimit&#39;,
+  &#39;Elucidation&#39;: &#39;Maximum electric current density that can be achieved for an electrode reaction at a given concentration of a electrochemically active material in the presence of a large excess of supporting electrolyte.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-03-13&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_5696453c_9da7_41e2_bbda_603c1b90a8fc&#39;,
+  &#39;prefLabel&#39;: &#39;CurrentEfficiency&#39;,
+  &#39;Elucidation&#39;: &#39;Fraction of the electric current passing through an electrochemical cell which accomplishes the desired chemical reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;CoulombicEfficiency, FaradayEfficiency&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-03-07&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_f046d602_22ea_4f9b_9101_319f510d39f0&#39;,
+  &#39;prefLabel&#39;: &#39;CurrentScanRate&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937&#39;,
+  &#39;prefLabel&#39;: &#39;CycleLife&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ElectrochemicalCycleLife&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_e38f11d0_a16f_4fe8_8ec5_3fe4493b7759&#39;,
+  &#39;prefLabel&#39;: &#39;DiffuseLayerPotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential difference between the rigid layer and the diffuse layer of a double layer.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-02-20&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_17626b8e_dfce_4d3a_ae6c_5a7215d43a90&#39;,
+  &#39;prefLabel&#39;: &#39;DiffusionCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Faradaic current that is controlled by the rate at which electroactive species diffuse toward (or away from) and electrode-solution interface.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/D01722&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_5fb7a03f_d6dd_47ee_9317_0629681c7d00&#39;,
+  &#39;prefLabel&#39;: &#39;DiffusionLimitedCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Diffusion current of the potential-independent value that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;LimitingDiffusionCurrent&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/L03534&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607&#39;,
+  &#39;prefLabel&#39;: &#39;Diffusivity&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_885b462e_f6bc_412d_8b94_9425e13af0c7&#39;,
+  &#39;prefLabel&#39;: &#39;DirectCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;ElectricCurrent that flows in a constant direction, i.e. a current with a constant sign.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;DC&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/D01767&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f&#39;,
+  &#39;prefLabel&#39;: &#39;DischargeCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Electric current delivered by a battery during its discharge.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-24&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_a56fc557_9dea_42e6_b936_e9d62dcaf84f&#39;,
+  &#39;prefLabel&#39;: &#39;DoubleLayerCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Non-faradaic current associated with the charging of the electrical double layer at the electrode-solution interface.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/D01847&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_4b18c3f9_df10_4259_adb4_cd10842ff0be&#39;,
+  &#39;prefLabel&#39;: &#39;DropTimeInPolarography&#39;,
+  &#39;Elucidation&#39;: &#39;The time that elapses between the instants at which two successive drops of liquid metal are detached from the tip of the capillary.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.D01862&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_791c1915_a791_4450_acd8_7f94764743b5&#39;,
+  &#39;prefLabel&#39;: &#39;ElectricChargeCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;Amount of electric charge that can be stored.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;Capacity, ChargeCapacity&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_578dca29_729c_4131_8e37_a187472b1c37&#39;,
+  &#39;prefLabel&#39;: &#39;ElectricChargeCapacityDimension&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_061fd188_0552_4a53_8eb3_845aacc1bb5d&#39;,
+  &#39;prefLabel&#39;: &#39;ElectricChargeCapacityPerAreaDimension&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_38ee287e_ff33_49b7_8841_bfac8eff5d49&#39;,
+  &#39;prefLabel&#39;: &#39;ElectricPotentialPerTimeDimension&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_c5047d29_4e68_43ee_8355_3e8f05dc70a5&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalControlQuantity&#39;,
+  &#39;Elucidation&#39;: &#39;Quantities that control electroanalytical measurements.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_21745019_2830_4395_bca7_15ddfd266673&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalKineticQuantity&#39;,
+  &#39;Elucidation&#39;: &#39;An ElectrochemicalQuantity that relates to the kinetics of a reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_02eb0465_4f94_453c_8c1f_5ddf80134634&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalPerformanceQuantity&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_1422cde1_929e_46b6_b0dc_1010eebc5dfd&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalPotential&#39;,
+  &#39;Elucidation&#39;: &#39;The electrochemical potential is the chemical potential of an ion in the presence of an electric potential.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/E01945&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_900e357f_2ee3_425a_a0b6_322661117787&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalProperty&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_aecc6094_c6a5_4a36_a825_8a497a2ae112&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalQuantity&#39;,
+  &#39;Elucidation&#39;: &#39;Physical quantities defined within the domain of electrochemistry.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_8f4b90ef_fea4_47c9_99f5_a9b3290a505d&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalStabilityLimit&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential at which a material undergoes an oxidation or reduction decomposition.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_2d896559_eee3_447c_9759_87c854a4266a&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalThermodynamicQuantity&#39;,
+  &#39;Elucidation&#39;: &#39;A thermodynamically derived ElectrochemicalQuantity.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_4a450a27_b84a_4c70_a3a9_15ec30e2f30b&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalTransportQuantity&#39;,
+  &#39;Elucidation&#39;: &#39;An ElectrochemicalQuantity related to the transport of mass, charge, or energy.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_129926b6_fc30_441d_b359_29b44c988514&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicalWindow&#39;,
+  &#39;Elucidation&#39;: &#39;The electrode electric potential range between which the substance is neither oxidized nor reduced.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ElectrochemicalStabilityWindow&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_bad1b6f4_1b26_40e2_b552_6d53873e3973&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrochemicallyActiveSurfaceArea&#39;,
+  &#39;Elucidation&#39;: &#39;The area of the electrode material that is accessible to the electrolyte that is used for charge transfer and/or storage.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;EASA, ECSA&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_63a8f9d2_0cf6_484d_b996_2e5c3f0a3c73&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrodeCoverageDensity&#39;,
+  &#39;Elucidation&#39;: &#39;Amount of a chemical modifier at an electrode surface per unit area.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ElectrodeCoverage&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_fa7790d6_07bb_4b0f_9965_55966828f5f3&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrodeGeometricSurfaceArea&#39;,
+  &#39;Elucidation&#39;: &#39;The interfacial area, determined on the assumption that the interface is truly flat (2-dimensional) and calculated using the geometric data of the involved surfaces.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_f509645f_eb27_470e_9112_7ab828ed40d3&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrodePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential at an electrode, reported as the difference in potential relative to a reference electrode.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-02-11&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/E01956&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_a82e16c3_b766_482f_be94_b8e9af37f6fc&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrodeRealSurfaceArea&#39;,
+  &#39;Elucidation&#39;: &#39;Surface area of an electrode that takes into account non-idealities of the interface (roughness, porosity, etc.) and can be measured by a variety of electrochemical methods. The electroactive area is the area calculated from experiments with model electroactive species and may be different from the real surface area in cases where not all of the surface is electrochemically active or accessible.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_47ab1dad_cc09_4fd8_af23_acb36fb680dd&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrodeSurfaceArea&#39;,
+  &#39;Elucidation&#39;: &#39;Area of electrode - solution interface.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_54e8cef6_b4cb_4560_947a_50811fa0f177&#39;,
+  &#39;prefLabel&#39;: &#39;ElectrolyteVolume&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_abfadc99_6e43_4d37_9b04_7fc5b0f327ae&#39;,
+  &#39;prefLabel&#39;: &#39;ElectronNumberOfAnElectrochemicalReaction&#39;,
+  &#39;Elucidation&#39;: &#39;Number of electrons transferred in a charge transfer reaction between an electrode and a single entity (ion, radical-ion, or molecule) of an electroactive substance, whose identity must be specified.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ChargeNumber, NumberOfElectronsTransferred&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/C00995&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744&#39;,
+  &#39;prefLabel&#39;: &#39;ElectronicConductivity&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_d91940f0_c8b6_4505_9b68_6bf6cfc5c544&#39;,
+  &#39;prefLabel&#39;: &#39;EquilibriumElectrodePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Potential of an electrode when no electric current flows through the cell and all local charge transfer equilibria across phase boundaries that are represented in the cell diagram (except at possible electrolyte-electrolyte junctions) and local chemical equilibria are established.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;EquilibriumPotential, NernstPotential, ReversiblePotential&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-02-12&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ccde24bb_790a_40ca_a06e_cea156a61031&#39;,
+  &#39;prefLabel&#39;: &#39;ExchangeCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;The common value (i0) of the anodic and cathodic partial currents when the reaction is at equilibrium.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/E02238&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_e9fd9ef9_adfe_46cb_b2f9_4558468a25e7&#39;,
+  &#39;prefLabel&#39;: &#39;ExchangeCurrentDensity&#39;,
+  &#39;Elucidation&#39;: &#39;Defined by j0 = i0/A, where i0 is the exchange current of the electrode reaction and A is usually taken as the geometric area of the electrode.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;MeanExchangeCurrentDensity&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/M03777&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_05cf26ef_782a_4f66_a196_7004dd973f8e&#39;,
+  &#39;prefLabel&#39;: &#39;ExternalSurfaceArea&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_2a2f59b7_aa16_40aa_9c8b_0de8a2720456&#39;,
+  &#39;prefLabel&#39;: &#39;FaradaicCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Electric current that results from the electrooxidation or electroreduction of an electroactive substance.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/F02321&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_77f9d496_555e_4ae2_ae80_f297ef8335ca&#39;,
+  &#39;prefLabel&#39;: &#39;FaradayConstant&#39;,
+  &#39;Elucidation&#39;: &#39;Fundamental physical constant representing molar elementary charge.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.F02325&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_b21de1ef_6c15_4d63_b320_c9b96fbf186f&#39;,
+  &#39;prefLabel&#39;: &#39;FormalElectrodePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Equilibrium electrode potential under conditions of unit concentration of species involved in the electrode reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;FormalPotential&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_c4d551db_db17_4c33_92e6_aec71638afbc&#39;,
+  &#39;prefLabel&#39;: &#39;HalfPeakPotential&#39;,
+  &#39;Elucidation&#39;: &#39;For dynamic voltammetric techniques, the electric potential of the working electrode at which the current is equal to one-half of the peak current.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.H02720&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_2ae53fc6_d44d_41c9_acaf_c5606e6a981d&#39;,
+  &#39;prefLabel&#39;: &#39;HalfWavePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential of a steady-state voltammetric working electrode at the point, on the rising part of the voltammetric wave, where the current is equal to one-half of the limiting current.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_74861991_7da2_4e0f_b6c1_b16713f538bf&#39;,
+  &#39;prefLabel&#39;: &#39;InitialDischargeVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;Discharge voltage of a cell or battery at the beginning of the discharge immediately after any transients have subsided.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;InitialClosedCircuitVoltage&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-29&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_9c9b80a4_a00b_4b91_8e17_3a7831f2bf2f&#39;,
+  &#39;prefLabel&#39;: &#39;InititalThermodynamicTemperature&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_a24f8581_a5a4_41a4_bb45_d0fdd5c0d810&#39;,
+  &#39;prefLabel&#39;: &#39;InstantaneousCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Value of an electric current at an instant in time, t.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/I03062&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_f94678d6_1386_48fc_8e54_024921924401&#39;,
+  &#39;prefLabel&#39;: &#39;InternalApparentResistance&#39;,
+  &#39;Elucidation&#39;: &#39;quotient of change of voltage of a battery by the corresponding change in discharge current under specified conditions.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-36&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_0c9655c6_6b0b_4819_a219_f286ad196fa9&#39;,
+  &#39;prefLabel&#39;: &#39;InternalConductance&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d&#39;,
+  &#39;prefLabel&#39;: &#39;InternalResistance&#39;,
+  &#39;Elucidation&#39;: &#39;Impetance associated with a power source.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_25dabdc2_68bf_4a38_8cbe_11be017358bc&#39;,
+  &#39;prefLabel&#39;: &#39;IonicConductivity&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ff7797ed_9ef7_40d0_872b_2c215cd54578&#39;,
+  &#39;prefLabel&#39;: &#39;IsopotentialPoint&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential of an ion-selective electrode (ISE) and activity of an analyte ion at which the potential of the ISE is independent of temperature.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.I03304&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_98b6e9d7_d5df_46a5_87dd_79642b8b2e4b&#39;,
+  &#39;prefLabel&#39;: &#39;KineticCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Faradaic current of an electroactive substance B formed by a prior chemical reaction from another substance Y that is no electroactive at the potential at which B is electrochemically transformed.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/K03399&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_d5ac8868_d318_4065_aa23_72140ae888ae&#39;,
+  &#39;prefLabel&#39;: &#39;LimitingCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Faradaic current that is approached as the rate of the charge-transfer process is increased by varying the applied potential, being greater than the rate of mass transport controlled by diffusion.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/L03532&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_a17ee4e0_c81a_4a64_9ecb_9c6fa022cf4d&#39;,
+  &#39;prefLabel&#39;: &#39;LimitingMolarConductivity&#39;,
+  &#39;Elucidation&#39;: &#39;Molar conductivity at infinite dilution&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9&#39;,
+  &#39;prefLabel&#39;: &#39;LowerCutoffVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;Specified voltage of a battery at which the battery discharge is terminated.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;CutOffVoltage, DischargeCutoffVoltage, EndOfDischargeVoltage, EndPointVoltage, FinalVoltage, LowerVoltageLimit&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-30&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_b66d6553_6136_4754_902a_707e414210c2&#39;,
+  &#39;prefLabel&#39;: &#39;LowerFrequencyLimit&#39;,
+  &#39;Elucidation&#39;: &#39;The lower end of the interval of frequencies tested in impedimetry and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_7e53fa42_cf93_4d6e_b753_6f0ef3034648&#39;,
+  &#39;prefLabel&#39;: &#39;LowerVoltageLimit&#39;,
+  &#39;Elucidation&#39;: &#39;Minimum cell voltage limit at which an applied signal is reversed or terminated.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5&#39;,
+  &#39;prefLabel&#39;: &#39;MaxContinuousDischargeCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b&#39;,
+  &#39;prefLabel&#39;: &#39;MaxPulseDischargeCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_d5dc0c1d_0926_4268_89f0_4519a326eabc&#39;,
+  &#39;prefLabel&#39;: &#39;MaxPulseDischargeTime&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e&#39;,
+  &#39;prefLabel&#39;: &#39;MaximumConcentration&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8&#39;,
+  &#39;prefLabel&#39;: &#39;MaximumStoichiometry&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_e8e41092_cc75_4952_bc54_af1a72d19fcd&#39;,
+  &#39;prefLabel&#39;: &#39;MeasuredCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;An electric charge capacity measured under a given set of experimental conditions.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;MeasuredElectricChargeCapacity&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_601ff226_59b9_460b_90f5_2593450d96fa&#39;,
+  &#39;prefLabel&#39;: &#39;MembranePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential difference between two solutions separated by an ion-selective membrane in the absence of any electric current flowing through the membrane.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;Donnan potential, Membrane electromotive force&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.M03825&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_22cec04f_c7f3_4ff8_a34b_e512379c9dcb&#39;,
+  &#39;prefLabel&#39;: &#39;MigrationCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Component of electric current due to transport of ions in the electric field between the electrodes.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/M03921&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b&#39;,
+  &#39;prefLabel&#39;: &#39;MinimumStoichiometry&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_7fe804b8_6126_4132_be8f_b4985d61b1f6&#39;,
+  &#39;prefLabel&#39;: &#39;MolarElectrochemicalPotential&#39;,
+  &#39;Elucidation&#39;: &#39;ElectrochemicalPotential per mole.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/E01945&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_14577b99_a8a9_4358_9bc5_ab8c401dd34b&#39;,
+  &#39;prefLabel&#39;: &#39;NetFaradaicCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Algebraic sum of faradaic currents flowing through an electrode.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_870c5c54_0764_454b_b43c_35cefd00d42c&#39;,
+  &#39;prefLabel&#39;: &#39;NominalConcentration&#39;,
+  &#39;Elucidation&#39;: &#39;The set concentration.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_482173dc_7779_4f12_982c_b19f2cda2dac&#39;,
+  &#39;prefLabel&#39;: &#39;NumberOfCellsConnectedInParallel&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_9d6a52ed_a53d_4327_a391_f173677a4b1d&#39;,
+  &#39;prefLabel&#39;: &#39;NumberOfCellsConnectedInSeries&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_03a6ce70_5085_4683_bb4e_fc3c18f7143a&#39;,
+  &#39;prefLabel&#39;: &#39;OhmicOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;part of the electrode polarization arising from an electric current through an ohmic resistance within the electrode or the electrolyte.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;OhmicOvervoltage, OhmicPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-09&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b&#39;,
+  &#39;prefLabel&#39;: &#39;OpenCircuitVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;Electrode potential of working electrode relative to the reference electrode when no potential or electric current is being applied to the electrochemical cell.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;OpenCircuitPotential&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-32&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_1cd1d777_e67b_47eb_81f1_edac35d9f2c6&#39;,
+  &#39;prefLabel&#39;: &#39;Overpotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electrode potential (E) minus the equilibrium electrode potential (Eeq) of an electrochemical reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ElectrodePolarization, Overvoltage, PolarizationPotential&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-02&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/O04358&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9&#39;,
+  &#39;prefLabel&#39;: &#39;ParticleRadius&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_382b10dc_83aa_4e77_a1d5_1edd06fd1e05&#39;,
+  &#39;prefLabel&#39;: &#39;PeakCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;In dynamic voltammetric techniques, the maximum value of the faradaic current attained by varying the applied potential in the current-potential or I-E curve.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/P04457&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_e4a221e0_afc9_4464_91d4_e0c8ecdf79e8&#39;,
+  &#39;prefLabel&#39;: &#39;PeakPotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electrode potential of the working electrode at which the peak current is attained.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.P04464&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_16a5de33_a2ca_4563_80d4_6caeb08d97ca&#39;,
+  &#39;prefLabel&#39;: &#39;Polarity&#39;,
+  &#39;Elucidation&#39;: &#39;nominal property of an electrode, having values negative or positive according to the sign of the electrode potential, or neutral when the electrode potential is zero.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-02-14&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_264f40d1_17c9_4bc7_9c47_5cfb18132278&#39;,
+  &#39;prefLabel&#39;: &#39;PotentialScanRate&#39;,
+  &#39;Elucidation&#39;: &#39;The rate of change of applied potential with time.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;PotentialSweepRate, ScanRate, SweepRate&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_136744ff_0563_4df7_aa03_4219d70392a0&#39;,
+  &#39;prefLabel&#39;: &#39;PotentiometricSelectivityCoefficient&#39;,
+  &#39;Elucidation&#39;: &#39;Parameter defining the ability of an ion-selective electrode to distinguish a particular ion, i.e., a primary ion A from an interfering ion B.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;SelectivityCoefficient, SelectivityConstant, SelectivityFactor&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.P04791&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_3cd0e74e_292c_48ed_a831_4cb8753d9a56&#39;,
+  &#39;prefLabel&#39;: &#39;PulseDuration&#39;,
+  &#39;Elucidation&#39;: &#39;Time interval during which the excitation signal deviates from the base line in normal pulse voltamme- try, differential pulse voltammetry, and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.P04947&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_762ba55f_9b56_4c31_865f_cff2e7d0a94b&#39;,
+  &#39;prefLabel&#39;: &#39;PulseMagnitude&#39;,
+  &#39;Elucidation&#39;: &#39;A single value, for instance a mean, root mean square or peak value characterizing the aggregate instantaneous values of a unidirectional pulse with respect to the common initial and final value.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=702-03-03&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_346519a4_006c_496d_8f36_74e38814ed2d&#39;,
+  &#39;prefLabel&#39;: &#39;PulseMagnitudeCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;The magnitude of a current pulse applied to an electrochemical cell during pulsed potentiometry and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;https://emmo.info/electrochemistry#electrochemistry_4d2b102b_3515_4591_b079_69232c44f9dc&#39;,
+  &#39;prefLabel&#39;: &#39;PulseMagnitudePotential&#39;,
+  &#39;Elucidation&#39;: &#39;The magnitude of a voltage pulse applied to an electrochemical cell during pulsed amperometry and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_2705525b_7512_48bf_825b_f2d0409bede4&#39;,
+  &#39;prefLabel&#39;: &#39;QuarterTransitionTimePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Electric potential of the indicator electrode, in chronopotentiometry at constant current, at the instant when the time that has elapsed since the application of current is equal to one-fourth of the transition time.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_f4fadc4e_ca7d_4e4e_89cf_eacf45b4041e&#39;,
+  &#39;prefLabel&#39;: &#39;ReactionOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;part of the electrode polarization arising from a chemical reaction impeding the electrode reaction.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;ReactionOvervoltage, ReactionPolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-10&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1&#39;,
+  &#39;prefLabel&#39;: &#39;ReactionRateConstant&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_db40df7e_1aa5_49a7_85cb_2aa2c1c70489&#39;,
+  &#39;prefLabel&#39;: &#39;ReferenceThermodynamicTemperature&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_526bf81a_0572_49ff_a8cc_85efc343c1c2&#39;,
+  &#39;prefLabel&#39;: &#39;ResidualActiveMass&#39;,
+  &#39;Elucidation&#39;: &#39;charged active material remaining in a cell following a discharge to a specified end-of-discharge voltage.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-37&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_d47985f1_6bd7_4c4f_894f_13a6cab38bb5&#39;,
+  &#39;prefLabel&#39;: &#39;ResidualCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;Electric charge capacity remaining in a cell or battery following a discharge, operation or storage under specific test conditions.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-16&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_07e219c3_890f_488f_bd96_bee8e445d764&#39;,
+  &#39;prefLabel&#39;: &#39;ResidualCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Electric current that flows, at a particular value of the applied potential, in the absence of the substance whose electrode behaviour is being investigated, i.e. a &#34;blank&#34; solution.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;BackgroundCurrent&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/R05311&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_1a104474_c326_4a29_ac26_26a05ac8f72c&#39;,
+  &#39;prefLabel&#39;: &#39;ResponseTimeAtAnISE&#39;,
+  &#39;Elucidation&#39;: &#39;Duration between the time when an ion-selective electrode and an external reference electrode (the two completing the ion-selective electrode cell) are brought into contact with a sample solution (or the time at which the activity of the ion of interest in solution is changed) and the first time at which the slope of the cell potential vs. time plot (ΔE/Δt) becomes equal to a limiting value selected on the basis of the experimental conditions and/or requirements concerning accuracy.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_2678a656_4a27_4706_8dde_b0a93e9b92fa&#39;,
+  &#39;prefLabel&#39;: &#39;RestingTime&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_1900143f_cbc0_415f_9057_9382022a7bfe&#39;,
+  &#39;prefLabel&#39;: &#39;RotatingDiskSpeed&#39;,
+  &#39;Elucidation&#39;: &#39;Rotational frequency of a rotating component in a rotating disk electrode.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_52ac73c7_763c_4fda_93cd_a2db9dfc2dab&#39;,
+  &#39;prefLabel&#39;: &#39;SamplingInterval&#39;,
+  &#39;Elucidation&#39;: &#39;Time interval during which the current is measured in pulse voltammetry.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.S05465&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ecb6dfdf_bd3d_4339_8a1c_d32abbef30ba&#39;,
+  &#39;prefLabel&#39;: &#39;SamplingTime&#39;,
+  &#39;Elucidation&#39;: &#39;Duration of the sampling interval in pulse voltammetry.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.S05467&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_4b62d40a_8e17_47cb_b169_32e7c48233fc&#39;,
+  &#39;prefLabel&#39;: &#39;SetCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_8427071b_3a01_44b8_9090_5ae0d98675b5&#39;,
+  &#39;prefLabel&#39;: &#39;SetVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;https://emmo.info/electrochemistry#electrochemistry_68059d94_4c21_4065_b329_07faeebc7e87&#39;,
+  &#39;prefLabel&#39;: &#39;SignalReferencePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Potential to which the magnitude of an excitation signal is compared to.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;BaselinePotential&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30&#39;,
+  &#39;prefLabel&#39;: &#39;SpecificCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;quotient of the capacity of a battery, cell, electrode, or active material by its mass.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;GravimetricCapacity, SpecificChargeCapacity, SpecificElectricChargeCapacity&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-19&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_327eb3e1_f74a_4076_96de_5a2e3f63cb65&#39;,
+  &#39;prefLabel&#39;: &#39;SquareWaveCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;Component of an electric current that is associated with the presence of an analyate in square-wave voltammetry.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/S05897&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_7fc10197_41d9_4c1e_a107_928f03eb2d36&#39;,
+  &#39;prefLabel&#39;: &#39;StandardElectrodePotential&#39;,
+  &#39;Elucidation&#39;: &#39;Equilibrium electrode potential of an electrode under standard conditions.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;StandardPotential&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=114-02-13&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://goldbook.iupac.org/terms/view/S05912&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_85e39686_9658_4c74_bb91_a935704c174a&#39;,
+  &#39;prefLabel&#39;: &#39;StepDuration&#39;,
+  &#39;Elucidation&#39;: &#39;The duration between two consecutive steps in a staircase signal.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_d78b696d_9832_4352_a264_28a2ea7d82e4&#39;,
+  &#39;prefLabel&#39;: &#39;StepIndex&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_6769536b_5320_4b48_a2d8_ac285ec635a8&#39;,
+  &#39;prefLabel&#39;: &#39;StepSignalCurrent&#39;,
+  &#39;Elucidation&#39;: &#39;The magnitude of the current step in chronopotentiometry and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_0bf1ed19_2fc9_4e6d_87ec_62015985a9a6&#39;,
+  &#39;prefLabel&#39;: &#39;StepSignalVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;The magnitude of the voltage step in step voltammetry and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_f0667139_6428_4e3d_ac0d_08c1dd7f36ea&#39;,
+  &#39;prefLabel&#39;: &#39;Stoichiometry&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_7f381c19_cf07_47a8_ab10_0b14d46901e8&#39;,
+  &#39;prefLabel&#39;: &#39;SurfaceAreaPerVolume&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_60741c58_a10d_4aa6_bb68_0066a6ff8e30&#39;,
+  &#39;prefLabel&#39;: &#39;SurfaceOverpotential&#39;,
+  &#39;Elucidation&#39;: &#39;The potential of a working electrode relative to a reference electrode of the same kinds placed in the solution adjacent to the surface of the working electrode (just outside the double layer).&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;SurfacePolarization&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_8f3ab19f_ce22_424e_a9bf_d5cedb815374&#39;,
+  &#39;prefLabel&#39;: &#39;TemperatureCoefficientOfTheCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;quotient of the change in capacity of a cell by the corresponding change in temperature.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-18&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_3bb5ae23_59fa_4bc7_9495_803eb6719f28&#39;,
+  &#39;prefLabel&#39;: &#39;TemperatureCoefficientOfTheOpenCircuitVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;quotient of change in open-circuit voltage of a cell or battery by the corresponding change in temperature.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-33&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_27b3799c_250c_4332_8b71_7992c4a7bb05&#39;,
+  &#39;prefLabel&#39;: &#39;TestTime&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_b7781ebc_90a7_4f19_997f_aed28dee1b01&#39;,
+  &#39;prefLabel&#39;: &#39;TheoreticalCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;TheoreticalChargeCapacity&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_ae9882de_d6a2_4525_a84f_80947c10f1cb&#39;,
+  &#39;prefLabel&#39;: &#39;TransitionTime&#39;,
+  &#39;Elucidation&#39;: &#39;In chronopotentiometry and related techniques, the duration between the application of current and when the concentration of an electroactive substance at the electrode-solution interface becomes indistinguishable from zero.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;https://doi.org/10.1351/goldbook.T06472&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_0ffa4bda_8a52_471a_a59d_f27cf8caecbb&#39;,
+  &#39;prefLabel&#39;: &#39;TransportEfficiency&#39;,
+  &#39;Elucidation&#39;: &#39;None&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88&#39;,
+  &#39;prefLabel&#39;: &#39;UpperCutoffVoltage&#39;,
+  &#39;Elucidation&#39;: &#39;voltage attained at the end of a charging step, at a specified constant current .&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;EndOfChargeVoltage&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-05-55&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_666f0b69_9c74_49a3_80b3_96a188332462&#39;,
+  &#39;prefLabel&#39;: &#39;UpperFrequencyLimit&#39;,
+  &#39;Elucidation&#39;: &#39;The higher end of the interval of frequencies tested in impedimetry and related techniques.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_88d6d177_4b76_4b0a_9a65_aef6592cdb8f&#39;,
+  &#39;prefLabel&#39;: &#39;UpperVoltageLimit&#39;,
+  &#39;Elucidation&#39;: &#39;Maximum cell voltage limit at which an applied signal is reversed or terminated.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_09e64707_a17d_4405_84cc_ee9d91ed32ef&#39;,
+  &#39;prefLabel&#39;: &#39;VoltageChangeLimit&#39;,
+  &#39;Elucidation&#39;: &#39;In CCCV methods, the cell voltage at which the constant current mode switches to constant voltage mode.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_e6b63190_acac_4e78_9cba_fb2b10bbe910&#39;,
+  &#39;prefLabel&#39;: &#39;VolumetricCapacity&#39;,
+  &#39;Elucidation&#39;: &#39;quotient of the capacity of a cell or battery by its volume.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;VolumetricChargeCapacity, VolumetricElectricChargeCapacity&#39;,
+  &#39;IEC Reference&#39;: &#39;https://www.electropedia.org/iev/iev.nsf/display?openform&amp;ievref=482-03-17&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;},
+ {&#39;IRI&#39;: &#39;http://emmo.info/electrochemistry#electrochemistry_c39b2498_783e_48e1_9814_6164bd99823c&#39;,
+  &#39;prefLabel&#39;: &#39;WorkingPotentialRange&#39;,
+  &#39;Elucidation&#39;: &#39;Range of electrode potentials of a given working electrode in a given electrolyte, where the electric current from reactions of the electrode or electrolyte is negligible compared with the current from reactions of the system under investigation.&#39;,
+  &#39;Alternative Label(s)&#39;: &#39;&#39;,
+  &#39;IEC Reference&#39;: &#39;None&#39;,
+  &#39;IUPAC Reference&#39;: &#39;None&#39;,
+  &#39;Wikipedia Reference&#39;: &#39;None&#39;}]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>tata = list(qres)[2]
+str(tata[3])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;OhmicOvervoltage, OhmicPolarization&#39;
+</pre></div></div>
+</div>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/scripts/prototyping.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2021-2023.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
