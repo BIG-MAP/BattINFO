@@ -164,7 +164,7 @@ def rendering_workflow():
 
     rst += render_rst_bottom()
 
-    with open("./sphinx/"+ rst_filename, "w+", encoding="utf-8") as f:
+    with open("./docs/"+ rst_filename, "w+", encoding="utf-8") as f:
         f.write(rst)
 
 
