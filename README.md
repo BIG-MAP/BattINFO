@@ -2,84 +2,89 @@
 
 # Battery Interface Ontology (BattINFO)
 
-Welcome to the Battery Interface Ontology (BattINFO): a semantic resource for describing knowledge about batteries and creating [Linked Data][1]! 
+BattINFO is a domain of the [Elementary Multiperspective Materials Ontology (EMMO)][1], for describing battery systems, materials, methods, and data. Its primary objective is to support the creation of [FAIR](https://www.go-fair.org/fair-principles/), [Linked Data](https://en.wikipedia.org/wiki/Linked_data). This ontology serves as a foundational resource for harmonizing battery knowledge representation, enhancing data interoperability, and accelerating progress in battery research and innovation.
 
-BattINFO is a foundational resource for harmonizing battery knowledge representation and enhancing data interoperability. The primary objective is to provide the necessary tools to create [FAIR (Findable, Accessible, Interoperable, Reusable)][2] battery data that can be integrated into the [Semantic Web][3].
+Reference documentation is available [here](https://emmo-repo.github.io/domain-battery/index.html).
+ 
+# Quick Start
+
+Here is some information to help you get started working with the ontology in python and creating you own instances of Linked Data. For more information, please see the [Getting Started](https://emmo-repo.github.io/domain-battery/pages/getstarted.html) and [Examples](https://emmo-repo.github.io/domain-battery/pages/examples.html) section of the documentation. 
+
+## Reference IRIs
+
+The table below contains a quick cheat sheet of IRIs for accessing different files from the ontology
+The import structure is summarized in the following table:
+
+| IRI                                        | Description                   |
+| ------------------------------------------ | ----------------------------- |
+| `https://w3id.org/battinfo`                | Base Asserted Ontology*       |
+| `https://w3id.org/battinfo/inferred`       | Base Pre-Inferred Ontology*   |
+| `https://w3id.org/battinfo/latest`         | Latest Asserted Ontology*     |
+| `https://w3id.org/battinfo/source`         | Source of Asserted Ontology*  |
+| `https://w3id.org/battinfo/context`        | Latest JSON-LD Context File   |
+| `https://w3id.org/battinfo/{VERSION}`      | Version of Asserted Ontology* |
+| `https://w3id.org/battinfo/{VERSION}/...`  | ... follows same logic above  |
+
+*IRI directs to human readable documentation if called from the web browser and to the source .ttl file if called from an application
+
+## Python
+There are two common ways to work with the ontology in python: loading the ontology as a graph using [rdflib](https://rdflib.readthedocs.io/en/stable/) or exploring the content of the ontology using [EMMOntoPy](https://github.com/emmo-repo/EMMOntoPy). Examples of both are provided below.
+
+### rdflib
+In [rdflib](https://rdflib.readthedocs.io/en/stable/), you can import the ontology as a graph, e.g. to run SPARQL queries:
+
+```python
+from rdflib import Graph
+
+# Define the IRI of the ontology
+battinfo = "https://w3id.org/battinfo"
+
+# Create an empty graph
+g = Graph()
+
+# Load the ontology from the IRI
+g.parse(battinfo, format="ttl")
+
+# Print the number of triples in the graph
+print(f"Graph has {len(g)} triples.")
+```
+### EMMOntoPy
+In [EMMOntoPy](https://github.com/emmo-repo/EMMOntoPy), you can choose to import the ontology directly from the web:
+
+```python
+from ontopy import get_ontology
+
+# Loading from web
+battinfo = get_ontology('https://w3id.org/battinfo').load()
+```
 
 ## Usage
 
-The Battery Interface Ontology is aimed at developers, engineers, researchers, and other professionals in the battery domain who would like to:
-
-- Assign meaning to their data in a way that can be understood by both machines and humans;
-- Enhance data interoperability between different databases and tools;
-- Standardize representation of battery knowledge;
-- Enable semantic queries of (meta)data;
-- Comply with FAIR data guidelines.
-
-## Key Features
-
-### Persistent Identifiers
-
-This ontology assigns persistent machine-readable identifiers to concepts from the battery domain. These identifiers facilitate data exchange and interoperability for both humans and machines. The ontology uses the w3id.org Permanent Uniform Resource Locator (PURL) service to ensure that the identifiers are robust and permanent. It includes annotations to other sources of information including [DBPedia](https://www.dbpedia.org/) and [Wikidata](https://www.wikidata.org/). 
-
-### Standardized Nomenclature
-
-The ontology builds on standardized nomenclature for batteries, relying on recognized authorities including [IUPAC](https://iupac.org/what-we-do/nomenclature/) and the [IEC](https://www.electropedia.org/). IUPAC is the universally-recognized authority on chemical nomenclature and terminology, and IEC is the the world's leading organization that prepares and publishes International Standards for all electrical, electronic and related technologies. This consistency in naming conventions enhances collaboration and data sharing.
-
-### Integration with the EMMO Universe
-
-BattINFO is defined under the recommendations of the [Elementary Multiperspective Materials Ontology (EMMO)][4]. The EMMO provides a top-level ontology, with a focus on describing knowledge related to the natural sciences and engineering. It hosts a variety of domain ontologies on a wide range of topics including characterization methodology, crystallography, electrochemistry, and more. By defining BattINFO according to the recommendations of the EMMO, we can establish interoperability with all other resources in the EMMO Universe.
-
-### Compliance with W3C Standards and Best Practices
-
-The World Wide Web Consortium (W3C) is the organization responsible for maintaining the standards that form the foundation for the Web. To streamline the exchange and interpretation of Web-based data, they have created a set of standards that form the basis for the Semantic Web: an extension of the World Wide Web that is centered around data and designed to be navigated by machines. The Resource Description Framework (RDF) is one of the cornerstone standards for the Semantic Web that provides a standard model for data exchange. 
-
-BattINFO is defined within these W3C recommendations to allow for easy integration of data into the Semantic Web. Furthermore, we provide examples of data annotation in some of the most common RDF formats like JSON-LD.
-
-## Getting Started
-
-The best way to stay up to date with the latest version of the ontology is to clone this repository.
-
-```console
-git clone https://github.com/BIG-MAP/BattINFO.git
-```
-
-The BattINFO documentation provides some guidelines on:
-- [How to Get Started](https://big-map.github.io/BattINFO/getstarted.html)
-- [Tools for Ontology Users and Developers](https://big-map.github.io/BattINFO/tools.html)
-- [Examples of the Ontology in Action!](https://big-map.github.io/BattINFO/examples.html)
-
-### A Simple Example in JSON-LD
-
-Here is a simple example for describing a CR2032 Coin Cell in [JSON-LD](https://json-ld.org/) using ontology terms:
+This domain ontology supports the creation of Linked Data in any RDF-supported format. Below is an example using [JSON-LD](https://json-ld.org/) to desecribe a zinc foil electrode with some creator information and properties. Please see the documentation for [more examples](https://emmo-repo.github.io/domain-battery/pages/examples.html). 
 
 ```json
 {
-   "@context": "https://raw.githubusercontent.com/emmo-repo/domain-battery/master/context.json",
-   "@type": "CR2032",
-   "schema:name": "My CR2032 Coin Cell",
-   "schema:manufacturer": {
-      "@id": "https://www.wikidata.org/wiki/Q3041255",
-      "schema:name": "SINTEF"
-   },
-   "hasProperty": {
-      "@type": ["NominalCapacity", "ConventionalProperty"],
-      "hasNumericalPart": {
-            "@type": "Real",
-            "hasNumericalValue": 230
-      },
-      "hasMeasurementUnit": "emmo:MilliAmpereHour"
-   }
+    "@context": "https://w3id.org/emmo/domain/battery/context",
+    "@type": "CR2032",
+    "schema:name": "My CR2032 Coin Cell",
+    "schema:manufacturer": {
+       "@id": "https://www.wikidata.org/wiki/Q3041255",
+       "schema:name": "SINTEF"
+    },
+    "hasProperty": {
+       "@type": ["NominalCapacity", "ConventionalProperty"],
+       "hasNumericalPart": {
+          "@type": "Real",
+          "hasNumericalValue": 230
+        },
+        "hasMeasurementUnit": "emmo:MilliAmpereHour"
+     }
 }
 ```
 
-## License
-
-The Battery Interface Domain Ontology is released under the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode) license (CC BY 4.0).
-
 ## Acknowledgements
 
-<img src="sphinx/img/EU_Flag.jpg" alt="EU-Flag" width="100">
+<img src="docs/assets/img/EU_Flag.jpg" alt="EU-Flag" width="100">
 
 This project has received support from European Union research and innovation programs, under grant agreement numbers:
 
