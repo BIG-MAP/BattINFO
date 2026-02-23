@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "ANR26650M1-B.datasheet.json",
+    "source_id": "ANR26650M1-B",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.544177+00:00"
+  },
+  "cell": {
+    "model_name": "ANR26650M1-B",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "LFP",
+    "size_code": "26650",
+    "id": "https://w3id.org/battinfo/cell-type/pkr8-4y7r-774a-sr8v"
+  },
+  "specs": {
+    "minimum_capacity": {
+      "value": 2.4,
+      "unit": "Ah",
+      "raw": {
+        "text": "+ Telecom backup Cell Capacity (nominal/minimum) (0.5C Rate) 2.5/2.4 Ah",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.3,
+      "unit": "V",
+      "raw": {
+        "text": "+ Autonomously guided vehicles (AGVs) Voltage (nominal) 3.3V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "impedance": {
+      "value": 6.0,
+      "unit": "mΩ",
+      "raw": {
+        "text": "+ Medical devices Internal Impedance (1kHz AC typical) 6mΩ",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "storage_temperature_range": {
+      "min": {
+        "value": -40.0,
+        "unit": "°C",
+        "raw": {
+          "text": "TRANSPORTATION SOLUTIONS Storage Temperature -40°C to 60°C",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 60.0,
+        "unit": "°C",
+        "raw": {
+          "text": "TRANSPORTATION SOLUTIONS Storage Temperature -40°C to 60°C",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "TRANSPORTATION SOLUTIONS Storage Temperature -40°C to 60°C",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

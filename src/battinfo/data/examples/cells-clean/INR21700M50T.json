@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR21700M50T.datasheet.json",
+    "source_id": "INR21700M50T",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.511133+00:00"
+  },
+  "cell": {
+    "model_name": "INR21700M50T",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "21700",
+    "id": "https://w3id.org/battinfo/cell-type/bdwe-w88b-jxfn-z5v5"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.63,
+      "unit": "V",
+      "raw": {
+        "text": "2.2 Nominal Voltage Average by Std. Charge / Discharge 3.63V",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "weight": {
+      "value": 70.0,
+      "unit": "g",
+      "raw": {
+        "text": "2.11 Weight Without washer Max. 70.0 g (",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Eagle_Picher_Technologies_LLC_LP_32770.curated.json",
+    "source_id": "cellinfo:Eagle_Picher_Technologies_LLC_LP_32770",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:49.079476+00:00"
+  },
+  "cell": {
+    "model_name": "Eagle_Picher_Technologies_LLC_LP_32770",
+    "manufacturer": "Eagle Picher Technologies LLC",
+    "format": "prismatic",
+    "chemistry": "NCA",
+    "size_code": "32770",
+    "id": "https://w3id.org/battinfo/cell-type/4xfv-s1ja-fknz-zcbc"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 2000.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.1,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 3.0,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 11.0,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 440.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 440.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 11.0,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 27.5,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.034,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.1377,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.141,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 55.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.7,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 1.68,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1.0",
+  "dataset": {
+    "id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+    "short_id": "1f8r6v",
+    "title": "Cell cycling run for BattINFO cell 3m6k9t",
+    "description": "Raw cycling and metadata export for one physical cell.",
+    "license": "CC-BY-4.0",
+    "format": "application/x-hdf5",
+    "access_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "download_url": null,
+    "created_at": "2026-02-22T00:00:00Z",
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "8fbf34bd0f8a0caef6f5ce6cc1f8e6a2d8f0123982fc624d6f7f3f7e27b95a89"
+    },
+    "related_entities": {
+      "cell_ids": [
+        "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+      ]
+    }
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "retrieved_at": "2026-02-22T00:00:00Z",
+    "curated_by": "BattINFO Maintainers"
+  }
+}

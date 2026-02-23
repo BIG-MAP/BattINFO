@@ -1,0 +1,36 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR21700M50T.pdf",
+    "model_name": "INR21700M50T",
+    "file_hash": "c90ea9f29c4dc7384067827d9e407e84279234ee5ce602095622e53fb7114b52",
+    "page_count": 8,
+    "extracted_at": "2026-01-27T17:39:49.511133+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR21700M50T",
+    "size_code": "21700"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.63,
+      "unit": "V",
+      "raw": {
+        "text": "2.2 Nominal Voltage Average by Std. Charge / Discharge 3.63V",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "weight": {
+      "value": 70.0,
+      "unit": "g",
+      "raw": {
+        "text": "2.11 Weight Without washer Max. 70.0 g (",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  }
+}

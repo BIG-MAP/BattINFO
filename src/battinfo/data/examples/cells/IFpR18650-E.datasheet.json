@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "IFpR18650-E.pdf",
+    "model_name": "IFpR18650-E",
+    "file_hash": "ad8141f4340b59c6691d5409477c02f3191bfe0ca87de32ab3597aa64c22eb0c",
+    "page_count": 3,
+    "extracted_at": "2026-01-27T17:39:49.677445+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "LFP",
+    "model_name": "IFpR18650-E",
+    "size_code": "18650"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Recommended Charge Voltage 3.6 V Number of Cycles",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "mass": {
+      "value": 43.4,
+      "unit": "g",
+      "raw": {
+        "text": "Mass 43.4 g +/- 1.0 g 2.4 0.5 C-Rate Discharge",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "diameter": {
+      "value": 0.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter Ø18.5 +/- 0.1 mm 2.7",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "length": {
+      "value": 0.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Length 64.95 +/- 0.2 mm 2.5",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "max_charge_current": {
+      "value": 5.4,
+      "unit": "A",
+      "raw": {
+        "text": "Max Continuous Discharge Current 5.4 A (3C)",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "max_discharge_current": {
+      "value": 5.4,
+      "unit": "A",
+      "raw": {
+        "text": "Max Continuous Discharge Current 5.4 A (3C)",
+        "confidence": 0.6,
+        "page": 2
+      }
+    }
+  }
+}

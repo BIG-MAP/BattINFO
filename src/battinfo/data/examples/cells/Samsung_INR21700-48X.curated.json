@@ -1,0 +1,112 @@
+{
+  "battinfo_version": "0.1.0",
+  "profile": "curated",
+  "record": {
+    "id": "cellinfo:Samsung_INR21700-48X",
+    "title": "INR21700-48X",
+    "source": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+  },
+  "battery": {
+    "id": "Samsung_INR21700-48X",
+    "type": "cell",
+    "chemistry": "Li-ion",
+    "manufacturer": {
+      "name": "Samsung"
+    },
+    "nominal_capacity": {
+      "value": 4.8,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.072,
+      "unit": "kg"
+    }
+  },
+  "measurements": [
+    {
+      "name": "CycleLife",
+      "property": "CycleLife",
+      "quantity": {
+        "value": 500.0,
+        "unit": "count"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "UpperVoltageLimit",
+      "property": "UpperVoltageLimit",
+      "quantity": {
+        "value": 4.2,
+        "unit": "V"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "LowerVoltageLimit",
+      "property": "LowerVoltageLimit",
+      "quantity": {
+        "value": 2.5,
+        "unit": "V"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "DischargingCurrent",
+      "property": "DischargingCurrent",
+      "quantity": {
+        "value": 0.96,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "MaximumContinuousDischargingCurrent",
+      "property": "MaximumContinuousDischargingCurrent",
+      "quantity": {
+        "value": 4.8,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "ChargingCurrent",
+      "property": "ChargingCurrent",
+      "quantity": {
+        "value": 1.584,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "MaximumContinuousChargingCurrent",
+      "property": "MaximumContinuousChargingCurrent",
+      "quantity": {
+        "value": 4.8,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "Height",
+      "property": "Height",
+      "quantity": {
+        "value": 0.07,
+        "unit": "m"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "Diameter",
+      "property": "Diameter",
+      "quantity": {
+        "value": 0.021,
+        "unit": "m"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    }
+  ]
+}

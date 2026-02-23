@@ -1,0 +1,63 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "NCR18650BD.pdf",
+    "model_name": "NCR18650BD",
+    "file_hash": "81bd6b0a531d31c969428717300c9df1aa56dc9f9be6ed75592d3d15779947da",
+    "page_count": 3,
+    "extracted_at": "2026-01-27T17:39:49.743751+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NCA",
+    "model_name": "NCR18650BD",
+    "size_code": "18650"
+  },
+  "specs": {
+    "weight": {
+      "value": 49.0,
+      "unit": "g",
+      "raw": {
+        "text": "Weight: 49g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.5,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.5mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.3,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.3mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 10A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 10A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  }
+}

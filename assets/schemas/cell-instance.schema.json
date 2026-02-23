@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/cell-instance.schema.json",
+  "title": "BattINFO Cell Instance",
+  "description": "Physical cell instance derived from a cell type.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "cell_instance", "provenance"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "cell_instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type_id"],
+      "properties": {
+        "id": { "$ref": "#/$defs/CellIri" },
+        "type_id": { "$ref": "#/$defs/CellTypeIri" },
+        "short_id": { "$ref": "#/$defs/ShortId" },
+        "serial_number": { "type": "string" },
+        "batch_id": { "type": "string" },
+        "manufactured_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "measured": {
+      "$ref": "cell-canonical.schema.json#/$defs/SpecSet"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type"],
+      "properties": {
+        "source_type": { "type": "string", "enum": ["measurement", "lab", "bms", "other"] },
+        "dataset_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/DatasetIri" },
+            { "type": "null" }
+          ]
+        },
+        "dataset_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DatasetIri" },
+          "uniqueItems": true
+        },
+        "source_url": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "retrieved_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "datasets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/DatasetLink" },
+      "uniqueItems": true
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "CellIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "CellTypeIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "DatasetIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "DatasetLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "$ref": "#/$defs/DatasetIri" },
+        "role": {
+          "type": "string",
+          "enum": ["raw", "processed", "report", "metadata", "other"]
+        }
+      }
+    }
+  }
+}

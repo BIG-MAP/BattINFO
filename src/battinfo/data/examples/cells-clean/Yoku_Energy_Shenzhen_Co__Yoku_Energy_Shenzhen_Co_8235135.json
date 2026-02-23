@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Yoku_Energy_Shenzhen_Co_8235135.curated.json",
+    "source_id": "cellinfo:Yoku_Energy_(Shenzhen)_Co_8235135",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:55.626027+00:00"
+  },
+  "cell": {
+    "model_name": "Yoku_Energy_(Shenzhen)_Co_8235135",
+    "manufacturer": "Yoku Energy (Shenzhen) Co",
+    "format": "prismatic",
+    "chemistry": "Li-ion",
+    "size_code": "82351",
+    "id": "https://w3id.org/battinfo/cell-type/hd4a-6ewr-69d5-rpmx"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 300.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.75,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 0.7,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 0.72,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 1.75,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.008199999999999999,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.0355,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.136,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 3.5,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.7,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.071,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.chemistry"
+    ],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": [
+      "Removed NaN-valued specs during cleanup: continuous_discharge_current, max_discharge_current"
+    ]
+  }
+}

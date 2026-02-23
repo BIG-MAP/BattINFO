@@ -1,0 +1,112 @@
+{
+  "battinfo_version": "0.1.0",
+  "profile": "curated",
+  "record": {
+    "id": "cellinfo:LG_Chem_INR20650_M42",
+    "title": "INR20650 M42",
+    "source": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+  },
+  "battery": {
+    "id": "LG_Chem_INR20650_M42",
+    "type": "cell",
+    "chemistry": "NMC",
+    "manufacturer": {
+      "name": "LG Chem"
+    },
+    "nominal_capacity": {
+      "value": 4.15,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.63,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.058,
+      "unit": "kg"
+    }
+  },
+  "measurements": [
+    {
+      "name": "CycleLife",
+      "property": "CycleLife",
+      "quantity": {
+        "value": 400.0,
+        "unit": "count"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "UpperVoltageLimit",
+      "property": "UpperVoltageLimit",
+      "quantity": {
+        "value": 4.2,
+        "unit": "V"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "LowerVoltageLimit",
+      "property": "LowerVoltageLimit",
+      "quantity": {
+        "value": 2.5,
+        "unit": "V"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "DischargingCurrent",
+      "property": "DischargingCurrent",
+      "quantity": {
+        "value": 0.804,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "MaximumContinuousDischargingCurrent",
+      "property": "MaximumContinuousDischargingCurrent",
+      "quantity": {
+        "value": 12.0,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "ChargingCurrent",
+      "property": "ChargingCurrent",
+      "quantity": {
+        "value": 2.01,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "MaximumContinuousChargingCurrent",
+      "property": "MaximumContinuousChargingCurrent",
+      "quantity": {
+        "value": 4.02,
+        "unit": "A"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "Height",
+      "property": "Height",
+      "quantity": {
+        "value": 0.0655,
+        "unit": "m"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    },
+    {
+      "name": "Diameter",
+      "property": "Diameter",
+      "quantity": {
+        "value": 0.0205,
+        "unit": "m"
+      },
+      "method": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx"
+    }
+  ]
+}

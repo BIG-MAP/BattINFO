@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "ICR18650-26V.datasheet.json",
+    "source_id": "ICR18650-26V",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.826961+00:00"
+  },
+  "cell": {
+    "model_name": "ICR18650-26V",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "LCO",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/pqgx-y3pv-abdk-44j8"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "3.2 Nominal Voltage 3.60V",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "weight": {
+      "value": 47.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.8 Cell Weight 47.0g Max.",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "max_charge_current": {
+      "value": 5.2,
+      "unit": "A",
+      "raw": {
+        "text": "Maximum charge means charging the cell CCCV with charge current 5.2A (2C), constant voltage",
+        "confidence": 0.6,
+        "page": 7
+      }
+    },
+    "diameter": {
+      "value": 0.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.35±0.10mm",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "height": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.00±0.15mm",
+        "confidence": 0.6,
+        "page": 6
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

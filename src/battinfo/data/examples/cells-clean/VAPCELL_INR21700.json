@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "VAPCELL_INR21700.curated.json",
+    "source_id": "cellinfo:VAPCELL_INR21700",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:55.142066+00:00"
+  },
+  "cell": {
+    "model_name": "VAPCELL_INR21700",
+    "manufacturer": "VAPCELL",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "21700",
+    "id": "https://w3id.org/battinfo/cell-type/ed8w-ztte-6yd7-yjsz"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 0.9,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 20.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 20.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 1.5,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 3.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.07,
+      "unit": "m"
+    },
+    "diameter": {
+      "value": 0.021,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 4.5,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.072,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [],
+    "warnings": [
+      "Removed NaN-valued specs during cleanup: cycle_life"
+    ]
+  }
+}

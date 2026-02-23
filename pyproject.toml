@@ -1,0 +1,39 @@
+[project]
+name = "battinfo"
+version = "0.1.0"
+description = "Implementation and interoperability layer for the domain-battery ontology."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "BattINFO Team" }
+]
+dependencies = [
+  "pydantic>=2.7",
+  "typer>=0.12",
+  "rich>=13.7",
+  "jsonschema>=4.21",
+  "pandas>=2.2",
+  "pyarrow>=15.0",
+  "openpyxl>=3.1",
+  "rdflib>=7.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "datamodel-code-generator>=0.25",
+  "ruff>=0.6",
+  "pytest>=8.0"
+]
+
+[project.scripts]
+battinfo = "battinfo.cli:app"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+battinfo = ["data/**/*"]

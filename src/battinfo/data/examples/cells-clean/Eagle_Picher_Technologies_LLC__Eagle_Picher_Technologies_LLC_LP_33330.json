@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Eagle_Picher_Technologies_LLC_LP_33330.curated.json",
+    "source_id": "cellinfo:Eagle_Picher_Technologies_LLC_LP_33330",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:49.160556+00:00"
+  },
+  "cell": {
+    "model_name": "Eagle_Picher_Technologies_LLC_LP_33330",
+    "manufacturer": "Eagle Picher Technologies LLC",
+    "format": "prismatic",
+    "chemistry": "NCA",
+    "size_code": "33330",
+    "id": "https://w3id.org/battinfo/cell-type/d45y-jvbk-aycg-c8q3"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.1,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 3.0,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 1.2,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 24.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 24.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.0222,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.0498,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.0778,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 6.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.222,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": [
+      "Removed NaN-valued specs during cleanup: charging_current, cycle_life, max_charge_current"
+    ]
+  }
+}

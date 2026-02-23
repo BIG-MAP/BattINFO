@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/cell-datasheet.schema.json",
+  "title": "BattINFO Cell Datasheet Extraction",
+  "description": "Schema for extracting machine-readable cell specifications from datasheets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source", "cell"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "cell": {
+      "$ref": "#/$defs/Cell"
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename"],
+      "properties": {
+        "filename": { "type": "string" },
+        "source_url": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "model_name": { "type": "string" },
+        "document_title": { "type": "string" },
+        "document_date": { "type": "string" },
+        "language": { "type": "string" },
+        "file_hash": { "type": "string" },
+        "page_count": { "type": "integer", "minimum": 1 },
+        "extracted_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "chemistry"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["cylindrical", "prismatic", "pouch", "coin", "other"]
+        },
+        "size_code": { "type": "string" },
+        "chemistry": { "type": "string" },
+        "model_name": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "datasheet_revision": { "type": "string" },
+        "specs": { "$ref": "#/$defs/SpecSet" }
+      }
+    },
+    "SpecSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nominal_capacity": { "$ref": "#/$defs/SpecItem" },
+        "minimum_capacity": { "$ref": "#/$defs/SpecItem" },
+        "rated_capacity": { "$ref": "#/$defs/SpecItem" },
+        "nominal_voltage": { "$ref": "#/$defs/SpecItem" },
+        "charge_voltage": { "$ref": "#/$defs/SpecItem" },
+        "discharge_cutoff_voltage": { "$ref": "#/$defs/SpecItem" },
+        "max_charge_voltage": { "$ref": "#/$defs/SpecItem" },
+        "min_discharge_voltage": { "$ref": "#/$defs/SpecItem" },
+        "energy_density_gravimetric": { "$ref": "#/$defs/SpecItem" },
+        "energy_density_volumetric": { "$ref": "#/$defs/SpecItem" },
+        "internal_resistance": { "$ref": "#/$defs/SpecItem" },
+        "impedance": { "$ref": "#/$defs/SpecItem" },
+        "weight": { "$ref": "#/$defs/SpecItem" },
+        "mass": { "$ref": "#/$defs/SpecItem" },
+        "diameter": { "$ref": "#/$defs/SpecItem" },
+        "height": { "$ref": "#/$defs/SpecItem" },
+        "width": { "$ref": "#/$defs/SpecItem" },
+        "length": { "$ref": "#/$defs/SpecItem" },
+        "thickness": { "$ref": "#/$defs/SpecItem" },
+        "standard_charge": { "$ref": "#/$defs/ConditionedSpec" },
+        "standard_discharge": { "$ref": "#/$defs/ConditionedSpec" },
+        "max_charge_current": { "$ref": "#/$defs/ConditionedSpec" },
+        "max_discharge_current": { "$ref": "#/$defs/ConditionedSpec" },
+        "continuous_discharge_current": { "$ref": "#/$defs/ConditionedSpec" },
+        "pulse_discharge_current": { "$ref": "#/$defs/ConditionedSpec" },
+        "charge_time": { "$ref": "#/$defs/SpecItem" },
+        "charge_temperature_range": { "$ref": "#/$defs/RangeSpec" },
+        "discharge_temperature_range": { "$ref": "#/$defs/RangeSpec" },
+        "storage_temperature_range": { "$ref": "#/$defs/RangeSpec" },
+        "cycle_life": { "$ref": "#/$defs/CycleLife" }
+      }
+    },
+    "CycleLife": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cycles": { "$ref": "#/$defs/SpecItem" },
+        "capacity_retention": { "$ref": "#/$defs/SpecItem" },
+        "conditions": { "$ref": "#/$defs/Conditions" }
+      }
+    },
+    "RangeSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min": { "$ref": "#/$defs/SpecItem" },
+        "max": { "$ref": "#/$defs/SpecItem" },
+        "raw": { "$ref": "#/$defs/RawExtraction" }
+      }
+    },
+    "ConditionedSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "spec": { "$ref": "#/$defs/SpecItem" },
+        "conditions": { "$ref": "#/$defs/Conditions" }
+      }
+    },
+    "SpecItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "value_min": { "type": "number" },
+        "value_max": { "type": "number" },
+        "value_typical": { "type": "number" },
+        "value_text": { "type": "string" },
+        "unit": { "type": "string" },
+        "tolerance": { "type": "string" },
+        "raw": { "$ref": "#/$defs/RawExtraction" }
+      },
+      "anyOf": [
+        { "required": ["value"] },
+        { "required": ["value_min"] },
+        { "required": ["value_max"] },
+        { "required": ["value_typical"] },
+        { "required": ["value_text"] }
+      ]
+    },
+    "Conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temperature": { "$ref": "#/$defs/SpecItem" },
+        "c_rate": { "$ref": "#/$defs/SpecItem" },
+        "current": { "$ref": "#/$defs/SpecItem" },
+        "voltage": { "$ref": "#/$defs/SpecItem" },
+        "cutoff_voltage": { "$ref": "#/$defs/SpecItem" },
+        "time": { "$ref": "#/$defs/SpecItem" },
+        "method": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "RawExtraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "page": { "type": "integer", "minimum": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

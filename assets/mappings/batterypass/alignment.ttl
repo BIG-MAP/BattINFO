@@ -1,0 +1,4 @@
+@prefix battinfo: <https://w3id.org/battinfo#> .
+@prefix batterypass: <https://w3id.org/batterypass#> .
+
+# Placeholder alignment file. Populate with exact mappings for v1.2.0.

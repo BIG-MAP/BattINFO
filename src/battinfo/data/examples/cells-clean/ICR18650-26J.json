@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "ICR18650-26J.datasheet.json",
+    "source_id": "ICR18650-26J",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.464606+00:00"
+  },
+  "cell": {
+    "model_name": "ICR18650-26J",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "LCO",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/5tng-zpxs-zzcm-g7hp"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.63,
+      "unit": "V",
+      "raw": {
+        "text": "3.3 Nominal Voltage 3.63V",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.75,
+      "unit": "V",
+      "raw": {
+        "text": "3.9 Discharge Cut-off Voltage 2.75V (End of discharge)",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "weight": {
+      "value": 46.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.12 Cell Weight 46g max",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "max_charge_current": {
+      "value": 2600.0,
+      "unit": "mA",
+      "raw": {
+        "text": "3.7 Max. Charge Current 2,600mA (not for cycle life)",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "max_discharge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "3.8 Max. Discharge Current 10A (Continuous discharge @RT)",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "diameter": {
+      "value": 18.4,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter : Max.18.4 mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "height": {
+      "value": 65.0,
+      "unit": "mm",
+      "raw": {
+        "text": "Height : Max. 65.0 mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

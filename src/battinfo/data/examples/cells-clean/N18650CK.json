@@ -1,0 +1,55 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "N18650CK.datasheet.json",
+    "source_id": "N18650CK",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.560766+00:00"
+  },
+  "cell": {
+    "model_name": "N18650CK",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/mwsn-nqyt-cc1t-3bmm"
+  },
+  "specs": {
+    "max_charge_current": {
+      "value": 1.0,
+      "unit": "C",
+      "raw": {
+        "text": "Max charge current 1C （3050mA） 10℃≤T≤45℃",
+        "confidence": 0.6,
+        "page": 4
+      }
+    },
+    "diameter": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "电池尺寸 Diameter: 18.35±0.15mm 直径：18.35±0.15mm",
+        "confidence": 0.6,
+        "page": 5
+      }
+    },
+    "height": {
+      "value": 0.25,
+      "unit": "mm",
+      "raw": {
+        "text": "Battery dimension Height: 64.85±0.25mm 高度：64.85±0.25mm",
+        "confidence": 0.6,
+        "page": 5
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer",
+      "cell.chemistry"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

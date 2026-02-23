@@ -1,0 +1,54 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR18650-25P.pdf",
+    "model_name": "INR18650-25P",
+    "file_hash": "6c2b03b1e38a0678c1065ad59e3cb011915d8bff6affc35147d30427ed5b0a5c",
+    "page_count": 18,
+    "extracted_at": "2026-01-27T17:39:49.811223+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR18650-25P",
+    "size_code": "18650"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "3.2 Nominal Voltage 3.60V",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "weight": {
+      "value": 48.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.8 Cell Weight 48.0g Max",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "diameter": {
+      "value": 0.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.35±0.10mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "height": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.00±0.15mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  }
+}

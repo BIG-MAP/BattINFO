@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "N18650CH-26S.datasheet.json",
+    "source_id": "N18650CH-26S",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.743751+00:00"
+  },
+  "cell": {
+    "model_name": "N18650CH-26S",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/dkb8-b0hs-s3ec-fgnz"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V",
+      "raw": {
+        "text": "followed by 4.20V constant voltage charge",
+        "confidence": 0.6,
+        "page": 10
+      }
+    },
+    "internal_resistance": {
+      "value": 20.0,
+      "unit": "mΩ",
+      "raw": {
+        "text": "Internal resistance ≤ 20 mΩ(AC Impedance, 1000 Hz)",
+        "confidence": 0.6,
+        "page": 8
+      }
+    },
+    "impedance": {
+      "value": 20.0,
+      "unit": "mΩ",
+      "raw": {
+        "text": "Internal resistance ≤ 20 mΩ(AC Impedance, 1000 Hz)",
+        "confidence": 0.6,
+        "page": 8
+      }
+    },
+    "diameter": {
+      "value": 32.0,
+      "unit": "mm",
+      "raw": {
+        "text": "be applied by a hydraulic ram with a 32mm diameter",
+        "confidence": 0.6,
+        "page": 14
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer",
+      "cell.chemistry"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

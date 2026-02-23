@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR18650-H26.pdf",
+    "model_name": "INR18650-H26",
+    "file_hash": "e643785b94a68c30552480656b44510f706ac95e15cc139f66cb471dbf62ebe1",
+    "page_count": 3,
+    "extracted_at": "2026-01-27T17:39:49.729850+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR18650-H26",
+    "size_code": "18650"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 2600.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Nominal capacity: 2600 mAh",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal voltage: 3.6V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 45.4,
+      "unit": "g",
+      "raw": {
+        "text": "Approximate weight: 45.4 g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  }
+}

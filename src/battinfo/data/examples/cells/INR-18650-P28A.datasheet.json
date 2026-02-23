@@ -1,0 +1,118 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR-18650-P28A.pdf",
+    "model_name": "INR-18650-P28A",
+    "file_hash": "1f06727c38d3c91b41cfcd831fc4123c051e3bafc9922450c0b891aeab0af61a",
+    "page_count": 2,
+    "extracted_at": "2026-01-27T17:39:49.777338+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR-18650-P28A",
+    "size_code": "18650"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V",
+      "raw": {
+        "text": "Cell Voltage Charge 4.2 V 2.0 1.0",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 46.0,
+      "unit": "g",
+      "raw": {
+        "text": "Weight 46 g (Typical) 0 300 600 900 1200 1500 1800 2100 2400 2700 3000",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.6,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter 18.6 mm (Max) 1.0 23oC",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Height 65.2 mm (Max) Discharge: 2.8A, Cut off at 2.5V. 60oC",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 35.0,
+      "unit": "A",
+      "raw": {
+        "text": "Discharge Current Maximum 35 A 4.0",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 35.0,
+      "unit": "A",
+      "raw": {
+        "text": "Discharge Current Maximum 35 A 4.0",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_temperature_range": {
+      "min": {
+        "value": -40.0,
+        "unit": "°C",
+        "raw": {
+          "text": "Temperature Discharge -40°C to 60°C",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 60.0,
+        "unit": "°C",
+        "raw": {
+          "text": "Temperature Discharge -40°C to 60°C",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Temperature Discharge -40°C to 60°C",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "discharge_temperature_range": {
+      "min": {
+        "value": -40.0,
+        "unit": "°C",
+        "raw": {
+          "text": "Temperature Discharge -40°C to 60°C",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 60.0,
+        "unit": "°C",
+        "raw": {
+          "text": "Temperature Discharge -40°C to 60°C",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Temperature Discharge -40°C to 60°C",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  }
+}

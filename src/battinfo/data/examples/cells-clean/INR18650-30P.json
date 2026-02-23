@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR18650-30P.datasheet.json",
+    "source_id": "INR18650-30P",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.794116+00:00"
+  },
+  "cell": {
+    "model_name": "INR18650-30P",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/k2a3-rpfg-wfby-qwm8"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "3.2 Nominal Voltage 3.60V",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "weight": {
+      "value": 48.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.8 Cell Weight 48.0g Max.",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "max_charge_current": {
+      "value": 4.0,
+      "unit": "A",
+      "raw": {
+        "text": "Maximum Charge means charging the cell CCCV with charge current 4.0A (1.3C), constant voltage",
+        "confidence": 0.6,
+        "page": 7
+      }
+    },
+    "diameter": {
+      "value": 0.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.35±0.10mm",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "height": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.15±0.15mm",
+        "confidence": 0.6,
+        "page": 6
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

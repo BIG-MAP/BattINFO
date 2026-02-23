@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR-18650-P30B.datasheet.json",
+    "source_id": "INR-18650-P30B",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.777338+00:00"
+  },
+  "cell": {
+    "model_name": "INR-18650-P30B",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/4yec-kwxy-9qhj-zn46"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V",
+      "raw": {
+        "text": "Cell Voltage Charge 4.2 V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 47.0,
+      "unit": "g",
+      "raw": {
+        "text": "Weight 47 g (Max)",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 9.0,
+      "unit": "A",
+      "raw": {
+        "text": "Charge Current Maximum 9A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.6,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter 18.6 mm (Max)",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Height 65.2 mm (Max)",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

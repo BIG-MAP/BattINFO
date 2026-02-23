@@ -1,0 +1,54 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR18650-H26.datasheet.json",
+    "source_id": "INR18650-H26",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.729850+00:00"
+  },
+  "cell": {
+    "model_name": "INR18650-H26",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/2t9f-0d7a-4nrw-sj14"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 2600.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Nominal capacity: 2600 mAh",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal voltage: 3.6V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 45.4,
+      "unit": "g",
+      "raw": {
+        "text": "Approximate weight: 45.4 g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

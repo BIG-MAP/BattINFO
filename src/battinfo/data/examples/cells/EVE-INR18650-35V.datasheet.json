@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "EVE-INR18650-35V.pdf",
+    "model_name": "EVE-INR18650-35V",
+    "file_hash": "8678416e81a5a3468a1e65da8a979df2a232066974032852007b3a13d5b4a6da",
+    "page_count": 16,
+    "extracted_at": "2026-01-27T17:39:49.877171+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "model_name": "EVE-INR18650-35V",
+    "size_code": "18650"
+  }
+}

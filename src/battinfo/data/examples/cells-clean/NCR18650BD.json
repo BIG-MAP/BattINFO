@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "NCR18650BD.datasheet.json",
+    "source_id": "NCR18650BD",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.743751+00:00"
+  },
+  "cell": {
+    "model_name": "NCR18650BD",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NCA",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/yb3r-mw8s-b2ns-hkpn"
+  },
+  "specs": {
+    "weight": {
+      "value": 49.0,
+      "unit": "g",
+      "raw": {
+        "text": "Weight: 49g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 10A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 10A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.5,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.5mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.3,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.3mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

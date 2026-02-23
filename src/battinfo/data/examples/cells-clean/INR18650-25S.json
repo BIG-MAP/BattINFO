@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR18650-25S.datasheet.json",
+    "source_id": "INR18650-25S",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.715315+00:00"
+  },
+  "cell": {
+    "model_name": "INR18650-25S",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/xyst-7bbv-ame9-t922"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "3.3 Nominal voltage 3.6V",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V",
+      "raw": {
+        "text": "3.8 Discharge cut-off voltage 2.5V (End of discharge)",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "weight": {
+      "value": 47.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.11 Cell weight 47.0g max",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "diameter": {
+      "value": 18.43,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter : Max. 18.43 mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "height": {
+      "value": 65.0,
+      "unit": "mm",
+      "raw": {
+        "text": "Height : Max. 65.00 mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

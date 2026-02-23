@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "UR18650NSX.pdf",
+    "model_name": "UR18650NSX",
+    "file_hash": "98d098425c8ca2ee0584a71dd24b3f8ffd11dad8db0bf883177e0f0a621c4f15",
+    "page_count": 5,
+    "extracted_at": "2026-01-27T17:39:49.693985+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "model_name": "UR18650NSX",
+    "size_code": "18650"
+  },
+  "specs": {
+    "rated_capacity": {
+      "value": 2500.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Rated capacity(1) 2500mAh D",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal voltage 3.6V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 45.8,
+      "unit": "g",
+      "raw": {
+        "text": "Weight (max.) 45.8g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  }
+}

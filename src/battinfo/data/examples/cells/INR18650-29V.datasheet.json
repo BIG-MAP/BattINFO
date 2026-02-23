@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR18650-29V.pdf",
+    "model_name": "INR18650-29V",
+    "file_hash": "66c582f410336532b7dbecc3194f297cd9c111c5a9d00716afa52707151c0a3e",
+    "page_count": 17,
+    "extracted_at": "2026-01-27T17:39:49.847688+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR18650-29V",
+    "size_code": "18650"
+  },
+  "specs": {
+    "weight": {
+      "value": 2.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.9 Cell Weight 44.5±2.0g",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "diameter": {
+      "value": 0.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.35±0.10mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "height": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.00±0.15mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  }
+}

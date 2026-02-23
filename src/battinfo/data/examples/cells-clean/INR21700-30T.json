@@ -1,0 +1,63 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR21700-30T.datasheet.json",
+    "source_id": "INR21700-30T",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.693985+00:00"
+  },
+  "cell": {
+    "model_name": "INR21700-30T",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "21700",
+    "id": "https://w3id.org/battinfo/cell-type/tfjd-7ad9-3nzj-z2qw"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "3.2 Nominal voltage 3.6V",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "weight": {
+      "value": 69.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.8 Cell weight 69.0g max",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "diameter": {
+      "value": 21.22,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter : Max. 21.22 mm",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "height": {
+      "value": 70.3,
+      "unit": "mm",
+      "raw": {
+        "text": "Height : Max. 70.30 mm",
+        "confidence": 0.6,
+        "page": 2
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

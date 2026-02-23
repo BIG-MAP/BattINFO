@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Panasonic_NCA596080.curated.json",
+    "source_id": "cellinfo:Panasonic_NCA596080",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:53.749248+00:00"
+  },
+  "cell": {
+    "model_name": "Panasonic_NCA596080",
+    "manufacturer": "Panasonic",
+    "format": "prismatic",
+    "chemistry": "NCA",
+    "size_code": "59608",
+    "id": "https://w3id.org/battinfo/cell-type/65dd-na7p-rzyh-rpee"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 300.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.75,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 3.94,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 3.94,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 3.94,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 2.758,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 2.758,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.08,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.005849999999999999,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.06,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 3.95,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.067,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

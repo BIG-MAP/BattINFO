@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR18650-P26A.pdf",
+    "model_name": "INR18650-P26A",
+    "file_hash": "c935889e0cb9a0caecf9e3461f696797048da2abf01a7c63cfdb79688623a196",
+    "page_count": 15,
+    "extracted_at": "2026-01-27T17:39:49.794116+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR18650-P26A",
+    "size_code": "18650"
+  },
+  "specs": {
+    "rated_capacity": {
+      "value": 2.6,
+      "unit": "Ah",
+      "raw": {
+        "text": "3 Rated capacity 2.6Ah (Typical) Rated discharge capacity after rated charge.",
+        "confidence": 0.6,
+        "page": 4
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "4 Nominal voltage 3.6V Mean voltage during rated discharge after",
+        "confidence": 0.6,
+        "page": 4
+      }
+    },
+    "charge_voltage": {
+      "value": 3.45,
+      "unit": "V",
+      "raw": {
+        "text": "5 Shipping voltage ≥ 3.45V Nominal approximate state of charge ≤ 30%.",
+        "confidence": 0.6,
+        "page": 4
+      }
+    }
+  }
+}

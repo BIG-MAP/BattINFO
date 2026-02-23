@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/cell-type.schema.json",
+  "title": "BattINFO Cell Type",
+  "description": "Canonical cell type (class) derived from datasheets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "cell_type", "specs", "provenance"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "cell_type": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "model_name", "manufacturer", "format", "chemistry"],
+      "properties": {
+        "id": { "$ref": "#/$defs/CellTypeIri" },
+        "short_id": { "$ref": "#/$defs/ShortId" },
+        "model_name": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "format": {
+          "type": "string",
+          "enum": ["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"]
+        },
+        "size_code": { "type": "string" },
+        "chemistry": { "type": "string" },
+        "datasheet_revision": { "type": "string" }
+      }
+    },
+    "specs": {
+      "$ref": "cell-canonical.schema.json#/$defs/SpecSet"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "source_file"],
+      "properties": {
+        "source_type": { "type": "string", "enum": ["datasheet"] },
+        "source_file": { "type": "string" },
+        "source_url": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "file_hash": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+        "retrieved_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "UidDashed": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "CellTypeIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    }
+  }
+}

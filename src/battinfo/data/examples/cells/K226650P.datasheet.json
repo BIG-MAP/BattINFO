@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "K226650P.pdf",
+    "model_name": "K226650P",
+    "file_hash": "78d6deb43707117150c7df80d3371303a3e2dd14596f2ea84760e3a542503f24",
+    "page_count": 2,
+    "extracted_at": "2026-01-27T17:39:49.577665+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "model_name": "K226650P",
+    "size_code": "22665"
+  }
+}

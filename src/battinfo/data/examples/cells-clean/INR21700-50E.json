@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR21700-50E.datasheet.json",
+    "source_id": "INR21700-50E",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.529604+00:00"
+  },
+  "cell": {
+    "model_name": "INR21700-50E",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "21700",
+    "id": "https://w3id.org/battinfo/cell-type/fqtf-aq4a-t2bv-6wgz"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "3.4 Nominal Voltage 3.6V",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V",
+      "raw": {
+        "text": "3.10 Discharge Cut-off Voltage 2.5V",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "weight": {
+      "value": 69.0,
+      "unit": "g",
+      "raw": {
+        "text": "3.14 Cell Weight 69g max",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "max_charge_current": {
+      "value": 4900.0,
+      "unit": "mA",
+      "raw": {
+        "text": "3.8 Max. Charge Current 4,900mA (not for cycle life)",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "diameter": {
+      "value": 20.25,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter : Φ Max.20.25mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "height": {
+      "value": 70.8,
+      "unit": "mm",
+      "raw": {
+        "text": "Cell height : Max.70.80mm",
+        "confidence": 0.6,
+        "page": 3
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

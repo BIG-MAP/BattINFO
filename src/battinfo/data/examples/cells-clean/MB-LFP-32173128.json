@@ -1,0 +1,159 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "MB-LFP-32173128.datasheet.json",
+    "source_id": "MB-LFP-32173128",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.603301+00:00"
+  },
+  "cell": {
+    "model_name": "MB-LFP-32173128",
+    "manufacturer": "Unknown",
+    "format": "prismatic",
+    "chemistry": "LFP",
+    "size_code": "32173",
+    "id": "https://w3id.org/battinfo/cell-type/q43c-48ks-rwnw-9sdk"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 60.0,
+      "unit": "Ah",
+      "raw": {
+        "text": "Nominal Capacity 60Ah",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.2,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal Voltage 3.2V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_voltage": {
+      "value": 3.65,
+      "unit": "V",
+      "raw": {
+        "text": "Charge Voltage 3.65V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.0,
+      "unit": "V",
+      "raw": {
+        "text": "Discharge Cut-off Voltage 2.0V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "internal_resistance": {
+      "value": 2.0,
+      "unit": "mΩ",
+      "raw": {
+        "text": "Internal Resistance ≤2mΩ",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 2.0,
+      "unit": "C",
+      "raw": {
+        "text": "Max. Charge Current 2.0C5A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 3.0,
+      "unit": "C",
+      "raw": {
+        "text": "Max.Discharge Current 3.0C5A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_temperature_range": {
+      "min": {
+        "value": 0.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 45.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "discharge_temperature_range": {
+      "min": {
+        "value": -20.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Discharge Temperature -20℃to 55℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 55.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Discharge Temperature -20℃to 55℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Discharge Temperature -20℃to 55℃ @60±25% Relative Humidity",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "storage_temperature_range": {
+      "min": {
+        "value": 0.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Storage Temperature 0℃ to 30℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 30.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Storage Temperature 0℃ to 30℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Storage Temperature 0℃ to 30℃ @60±25% Relative Humidity",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

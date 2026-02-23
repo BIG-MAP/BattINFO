@@ -1,0 +1,25 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "L148N58A.datasheet.json",
+    "source_id": "L148N58A",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.575819+00:00"
+  },
+  "cell": {
+    "model_name": "L148N58A",
+    "manufacturer": "Unknown",
+    "format": "prismatic",
+    "chemistry": "Li-ion",
+    "id": "https://w3id.org/battinfo/cell-type/fcxp-1tgq-nf4y-mx6j"
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer",
+      "cell.chemistry"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

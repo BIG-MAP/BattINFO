@@ -1,0 +1,82 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "EVE_Energy_INP80E.curated.json",
+    "source_id": "cellinfo:EVE_Energy_INP80E",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:50.384624+00:00"
+  },
+  "cell": {
+    "model_name": "EVE_Energy_INP80E",
+    "manufacturer": "EVE Energy",
+    "format": "prismatic",
+    "chemistry": "NMC",
+    "id": "https://w3id.org/battinfo/cell-type/qqq5-ybfa-qb3n-xrng"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 2000.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.7,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 16.0,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 160.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 160.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 16.0,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 80.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.039,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.097,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.148,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 80.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 1.32,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

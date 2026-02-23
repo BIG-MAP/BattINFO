@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Eagle_Picher_Technologies_LLC_SLC-16050-003.curated.json",
+    "source_id": "cellinfo:Eagle_Picher_Technologies_LLC_SLC-16050-003",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:49.219051+00:00"
+  },
+  "cell": {
+    "model_name": "Eagle_Picher_Technologies_LLC_SLC-16050-003",
+    "manufacturer": "Eagle Picher Technologies LLC",
+    "format": "prismatic",
+    "chemistry": "NMC/NCA",
+    "size_code": "16050",
+    "id": "https://w3id.org/battinfo/cell-type/drme-wesm-eccr-8g5g"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.1,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 3.0,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 31.25,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 62.5,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 62.5,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 31.25,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 125.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.0584,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.0815,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.1727,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 62.5,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.7,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 2.02,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": [
+      "Removed NaN-valued specs during cleanup: cycle_life"
+    ]
+  }
+}

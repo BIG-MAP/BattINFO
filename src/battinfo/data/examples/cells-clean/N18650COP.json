@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "N18650COP.datasheet.json",
+    "source_id": "N18650COP",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.760796+00:00"
+  },
+  "cell": {
+    "model_name": "N18650COP",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/j64m-9trz-7a92-9d8n"
+  },
+  "specs": {
+    "max_charge_current": {
+      "value": 6.0,
+      "unit": "A",
+      "raw": {
+        "text": "Max Charge Current 6A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 30.0,
+      "unit": "A",
+      "raw": {
+        "text": "Max Discharge Current 30A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter：18.40±0.15mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 0.25,
+      "unit": "mm",
+      "raw": {
+        "text": "Height：64.85±0.25mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer",
+      "cell.chemistry"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

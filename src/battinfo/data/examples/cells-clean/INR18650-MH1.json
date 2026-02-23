@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR18650-MH1.datasheet.json",
+    "source_id": "INR18650-MH1",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.729850+00:00"
+  },
+  "cell": {
+    "model_name": "INR18650-MH1",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/1p0t-y1f7-66fy-362j"
+  },
+  "specs": {
+    "weight": {
+      "value": 47.1,
+      "unit": "g",
+      "raw": {
+        "text": "Weight: 47.1g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 6.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 6A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 6.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 6A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.41,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.41mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.1mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "CATL_280Ah_CATL_LiFePO4.curated.json",
+    "source_id": "cellinfo:CATL_280Ah_CATL_LiFePO4",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:48.866717+00:00"
+  },
+  "cell": {
+    "model_name": "CATL_280Ah_CATL_LiFePO4",
+    "manufacturer": "CATL",
+    "format": "prismatic",
+    "chemistry": "LFP",
+    "id": "https://w3id.org/battinfo/cell-type/exg8-q774-3zn2-txch"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 12000.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 56.0,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 560.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 560.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 140.0,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 280.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.072,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.174,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.208,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 280.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.2,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 5.34,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

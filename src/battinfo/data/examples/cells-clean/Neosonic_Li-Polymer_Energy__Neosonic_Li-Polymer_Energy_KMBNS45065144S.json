@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Neosonic_Li-Polymer_Energy_KMBNS45065144S.curated.json",
+    "source_id": "cellinfo:Neosonic_Li-Polymer_Energy_KMBNS45065144S",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:53.679023+00:00"
+  },
+  "cell": {
+    "model_name": "Neosonic_Li-Polymer_Energy_KMBNS45065144S",
+    "manufacturer": "Neosonic Li-Polymer Energy",
+    "format": "prismatic",
+    "chemistry": "NMC/NCA",
+    "size_code": "45065",
+    "id": "https://w3id.org/battinfo/cell-type/32dd-9rrz-c5bv-10d0"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 500.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 3.0,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 0.92,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 4.6,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 4.6,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 0.92,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 4.6,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.0045,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.065,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.144,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 4.6,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.7,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.125,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

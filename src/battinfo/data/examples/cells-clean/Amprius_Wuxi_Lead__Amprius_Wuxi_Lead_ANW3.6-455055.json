@@ -1,0 +1,85 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Amprius_Wuxi_Lead_ANW3.6-455055.curated.json",
+    "source_id": "cellinfo:Amprius_Wuxi_Lead_ANW3.6-455055",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:48.063666+00:00"
+  },
+  "cell": {
+    "model_name": "Amprius_Wuxi_Lead_ANW3.6-455055",
+    "manufacturer": "Amprius_Wuxi Lead",
+    "format": "prismatic",
+    "chemistry": "Li-ion",
+    "size_code": "45505",
+    "id": "https://w3id.org/battinfo/cell-type/z1xx-x3rk-dfvs-m2zt"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 150.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.35,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.75,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 0.51,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 1.8,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 1.8,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 0.51,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 1.8,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.0045,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.05,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.055,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 3.6,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.033,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.chemistry"
+    ],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

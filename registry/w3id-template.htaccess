@@ -1,0 +1,27 @@
+# BattINFO w3id template (first draft)
+#
+# Replace https://your-org.github.io/battinfo-registry/site with your deployed site root.
+
+Options +FollowSymLinks
+RewriteEngine on
+
+# Cell instances
+RewriteCond %{REQUEST_URI} ^/battinfo/cell/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ [NC]
+RewriteCond %{HTTP_ACCEPT} application/ld\+json [OR]
+RewriteCond %{HTTP_ACCEPT} application/json
+RewriteRule ^battinfo/cell/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ https://your-org.github.io/battinfo-registry/site/cell/$1/index.jsonld [R=303,L]
+RewriteRule ^battinfo/cell/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ https://your-org.github.io/battinfo-registry/site/cell/$1/index.html [R=303,L]
+
+# Cell types
+RewriteCond %{REQUEST_URI} ^/battinfo/cell-type/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ [NC]
+RewriteCond %{HTTP_ACCEPT} application/ld\+json [OR]
+RewriteCond %{HTTP_ACCEPT} application/json
+RewriteRule ^battinfo/cell-type/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ https://your-org.github.io/battinfo-registry/site/cell-type/$1/index.jsonld [R=303,L]
+RewriteRule ^battinfo/cell-type/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ https://your-org.github.io/battinfo-registry/site/cell-type/$1/index.html [R=303,L]
+
+# Datasets
+RewriteCond %{REQUEST_URI} ^/battinfo/dataset/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ [NC]
+RewriteCond %{HTTP_ACCEPT} application/ld\+json [OR]
+RewriteCond %{HTTP_ACCEPT} application/json
+RewriteRule ^battinfo/dataset/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ https://your-org.github.io/battinfo-registry/site/dataset/$1/index.jsonld [R=303,L]
+RewriteRule ^battinfo/dataset/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})/?$ https://your-org.github.io/battinfo-registry/site/dataset/$1/index.html [R=303,L]

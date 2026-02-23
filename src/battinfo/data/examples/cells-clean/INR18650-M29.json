@@ -1,0 +1,72 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "INR18650-M29.datasheet.json",
+    "source_id": "INR18650-M29",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.729850+00:00"
+  },
+  "cell": {
+    "model_name": "INR18650-M29",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/0js7-m3nx-4ks8-6rhq"
+  },
+  "specs": {
+    "weight": {
+      "value": 48.0,
+      "unit": "g",
+      "raw": {
+        "text": "Weight: 48g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 10A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 10A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.4,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.4mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.2mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

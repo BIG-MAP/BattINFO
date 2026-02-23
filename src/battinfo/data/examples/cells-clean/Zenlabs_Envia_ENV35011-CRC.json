@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Zenlabs_Envia_ENV35011-CRC.curated.json",
+    "source_id": "cellinfo:Zenlabs_Envia_ENV35011-CRC",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:55.671235+00:00"
+  },
+  "cell": {
+    "model_name": "Zenlabs_Envia_ENV35011-CRC",
+    "manufacturer": "Zenlabs_Envia",
+    "format": "prismatic",
+    "chemistry": "NMC",
+    "size_code": "35011",
+    "id": "https://w3id.org/battinfo/cell-type/0871-qbkf-wwgp-tcfh"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 450.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 4.47,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 2.12,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 2.12,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.005,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.064,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.145,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 10.6,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.111,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": [
+      "Removed NaN-valued specs during cleanup: continuous_discharge_current, max_charge_current, max_discharge_current"
+    ]
+  }
+}

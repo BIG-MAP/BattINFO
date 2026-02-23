@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR18650-HJ2.pdf",
+    "model_name": "INR18650-HJ2",
+    "file_hash": "23961738a8d08a0a15f0fefde18bfdc750ece8eb0b608ed19839e6da0476cac7",
+    "page_count": 3,
+    "extracted_at": "2026-01-27T17:39:49.727313+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR18650-HJ2",
+    "size_code": "18650"
+  },
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal Voltage 3.6V - 3.7V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V",
+      "raw": {
+        "text": "Charge cycle termination voltage 4.20V ± 0.05V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 46.0,
+      "unit": "g",
+      "raw": {
+        "text": "Weight: 46g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "diameter": {
+      "value": 18.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter: 18.2mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "height": {
+      "value": 65.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Height: 65.1mm",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 20.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 20A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 20.0,
+      "unit": "A",
+      "raw": {
+        "text": "max discharge current: 20A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  }
+}

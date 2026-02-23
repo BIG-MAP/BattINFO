@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/battinfo.base.schema.json",
+  "title": "BattINFO Canonical Battery Metadata",
+  "description": "Canonical JSON schema for BattINFO data ingestion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["battinfo_version", "record", "battery"],
+  "properties": {
+    "battinfo_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "profile": {
+      "type": "string"
+    },
+    "record": {
+      "$ref": "#/$defs/Record"
+    },
+    "battery": {
+      "$ref": "#/$defs/Battery"
+    },
+    "measurements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Measurement"
+      }
+    }
+  },
+  "$defs": {
+    "Agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "organization": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "orcid": { "type": "string" }
+      }
+    },
+    "Record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "created_by": { "$ref": "#/$defs/Agent" },
+        "source": { "type": "string" }
+      }
+    },
+    "Quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string" },
+        "unit_uri": { "type": "string" }
+      }
+    },
+    "Battery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["cell", "module", "pack", "system"] },
+        "chemistry": { "type": "string" },
+        "manufacturer": { "$ref": "#/$defs/Agent" },
+        "nominal_capacity": { "$ref": "#/$defs/Quantity" },
+        "nominal_voltage": { "$ref": "#/$defs/Quantity" },
+        "mass": { "$ref": "#/$defs/Quantity" }
+      }
+    },
+    "Measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quantity"],
+      "properties": {
+        "name": { "type": "string" },
+        "property": { "type": "string" },
+        "quantity": { "$ref": "#/$defs/Quantity" },
+        "method": { "type": "string" },
+        "timestamp": { "type": "string" }
+      }
+    }
+  }
+}

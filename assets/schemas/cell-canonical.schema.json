@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/cell-canonical.schema.json",
+  "title": "BattINFO Canonical Cell Instance",
+  "description": "Harmonized cell instance schema derived from curated and datasheet sources.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "provenance", "cell"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "cell": {
+      "$ref": "#/$defs/Cell"
+    },
+    "specs": {
+      "$ref": "#/$defs/SpecSet"
+    },
+    "measurements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Measurement" }
+    },
+    "quality": {
+      "$ref": "#/$defs/Quality"
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "source_file"],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": ["curated", "datasheet"]
+        },
+        "source_file": { "type": "string" },
+        "source_id": { "type": "string" },
+        "source_url": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "extracted_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "model_name", "manufacturer", "format", "chemistry"],
+      "properties": {
+        "id": { "$ref": "#/$defs/CellTypeIri" },
+        "model_name": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "format": {
+          "type": "string",
+          "enum": ["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"]
+        },
+        "size_code": { "type": "string" },
+        "chemistry": { "type": "string" },
+        "datasheet_revision": { "type": "string" }
+      }
+    },
+    "SpecSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nominal_capacity": { "$ref": "#/$defs/SpecItem" },
+        "minimum_capacity": { "$ref": "#/$defs/SpecItem" },
+        "rated_capacity": { "$ref": "#/$defs/SpecItem" },
+        "nominal_voltage": { "$ref": "#/$defs/SpecItem" },
+        "charge_voltage": { "$ref": "#/$defs/SpecItem" },
+        "discharge_cutoff_voltage": { "$ref": "#/$defs/SpecItem" },
+        "energy_density_gravimetric": { "$ref": "#/$defs/SpecItem" },
+        "energy_density_volumetric": { "$ref": "#/$defs/SpecItem" },
+        "internal_resistance": { "$ref": "#/$defs/SpecItem" },
+        "impedance": { "$ref": "#/$defs/SpecItem" },
+        "mass": { "$ref": "#/$defs/SpecItem" },
+        "weight": { "$ref": "#/$defs/SpecItem" },
+        "charging_current": { "$ref": "#/$defs/SpecItem" },
+        "discharging_current": { "$ref": "#/$defs/SpecItem" },
+        "max_charge_current": { "$ref": "#/$defs/SpecItem" },
+        "max_discharge_current": { "$ref": "#/$defs/SpecItem" },
+        "continuous_discharge_current": { "$ref": "#/$defs/SpecItem" },
+        "charge_time": { "$ref": "#/$defs/SpecItem" },
+        "cycle_life": { "$ref": "#/$defs/SpecItem" },
+        "diameter": { "$ref": "#/$defs/SpecItem" },
+        "height": { "$ref": "#/$defs/SpecItem" },
+        "width": { "$ref": "#/$defs/SpecItem" },
+        "length": { "$ref": "#/$defs/SpecItem" },
+        "thickness": { "$ref": "#/$defs/SpecItem" },
+        "charge_temperature_range": { "$ref": "#/$defs/RangeSpec" },
+        "discharge_temperature_range": { "$ref": "#/$defs/RangeSpec" },
+        "storage_temperature_range": { "$ref": "#/$defs/RangeSpec" }
+      }
+    },
+    "Measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "quantity"],
+      "properties": {
+        "name": { "type": "string" },
+        "property": { "type": "string" },
+        "quantity": { "$ref": "#/$defs/SpecItem" },
+        "source": { "type": "string" }
+      }
+    },
+    "Quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "missing_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "inferred_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "SpecItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "value_min": { "type": "number" },
+        "value_max": { "type": "number" },
+        "value_typical": { "type": "number" },
+        "value_text": { "type": "string" },
+        "unit": { "type": "string" },
+        "raw": { "$ref": "#/$defs/RawExtraction" }
+      },
+      "anyOf": [
+        { "required": ["value"] },
+        { "required": ["value_min"] },
+        { "required": ["value_max"] },
+        { "required": ["value_typical"] },
+        { "required": ["value_text"] }
+      ]
+    },
+    "RangeSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min": { "$ref": "#/$defs/SpecItem" },
+        "max": { "$ref": "#/$defs/SpecItem" },
+        "raw": { "$ref": "#/$defs/RawExtraction" }
+      }
+    },
+    "RawExtraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "page": { "type": "integer", "minimum": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "CellTypeIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    }
+  }
+}

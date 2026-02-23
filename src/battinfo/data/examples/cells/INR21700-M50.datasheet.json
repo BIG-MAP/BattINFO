@@ -1,0 +1,36 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "INR21700-M50.pdf",
+    "model_name": "INR21700-M50",
+    "file_hash": "c248d633f14792e6a22e21390e97fe26aecd6bf4a9c3895d6af0da07cf89412a",
+    "page_count": 14,
+    "extracted_at": "2026-01-27T17:39:49.460063+00:00"
+  },
+  "cell": {
+    "format": "cylindrical",
+    "chemistry": "NMC",
+    "model_name": "INR21700-M50",
+    "size_code": "21700"
+  },
+  "specs": {
+    "diameter": {
+      "value": 21.1,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter : ≤ 21.10 mm",
+        "confidence": 0.6,
+        "page": 5
+      }
+    },
+    "height": {
+      "value": 70.15,
+      "unit": "mm",
+      "raw": {
+        "text": "Height : ≤ 70.15 mm",
+        "confidence": 0.6,
+        "page": 5
+      }
+    }
+  }
+}

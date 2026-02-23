@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Eemb_Co_LP7568130F.curated.json",
+    "source_id": "cellinfo:Eemb_Co_LP7568130F",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:49.611487+00:00"
+  },
+  "cell": {
+    "model_name": "Eemb_Co_LP7568130F",
+    "manufacturer": "Eemb Co",
+    "format": "prismatic",
+    "chemistry": "LFP",
+    "size_code": "75681",
+    "id": "https://w3id.org/battinfo/cell-type/y0za-4m0m-1dq8-tagd"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 2000.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.0,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 1.0,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 10.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 10.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 0.73,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 5.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.0078,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.0685,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.131,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 5.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.2,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.125,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

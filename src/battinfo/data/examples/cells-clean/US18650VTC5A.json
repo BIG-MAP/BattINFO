@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "US18650VTC5A.datasheet.json",
+    "source_id": "US18650VTC5A",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.614309+00:00"
+  },
+  "cell": {
+    "model_name": "US18650VTC5A",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/z0nq-8qs3-nqek-9hyt"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 2600.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Nominal Capacity* 2600 mAh Shape: Cylindrical",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "minimum_capacity": {
+      "value": 2500.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Rated (minimum) Capacity* 2500 mAh",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "rated_capacity": {
+      "value": 2500.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Rated (minimum) Capacity* 2500 mAh",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal Voltage 3.6 V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 44.9,
+      "unit": "g",
+      "raw": {
+        "text": "Weight (typical) 44.9 g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer",
+      "cell.chemistry"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

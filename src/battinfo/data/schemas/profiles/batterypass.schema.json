@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/profiles/batterypass.schema.json",
+  "title": "BattINFO Battery Pass Profile",
+  "description": "First-draft profile for mapping BattINFO canonical JSON to Battery Pass JSON-LD (pinned to v1.2.0).",
+  "allOf": [
+    { "$ref": "../battinfo.base.schema.json" },
+    {
+      "properties": {
+        "profile": { "const": "batterypass" },
+        "record": {
+          "required": ["id", "title", "created_at", "source", "created_by"],
+          "properties": {
+            "created_by": {
+              "required": ["name"]
+            }
+          }
+        },
+        "battery": {
+          "required": ["manufacturer", "nominal_capacity", "nominal_voltage"],
+          "properties": {
+            "manufacturer": {
+              "required": ["name"]
+            }
+          }
+        },
+        "measurements": {
+          "type": "array",
+          "minItems": 1
+        }
+      },
+      "required": ["profile", "measurements"]
+    }
+  ],
+  "$comment": "This first draft captures BattINFO-side required fields for Battery Pass mapping and will be tightened as mapping coverage expands."
+}

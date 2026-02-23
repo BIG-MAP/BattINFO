@@ -1,0 +1,158 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "HP49C260.datasheet.json",
+    "source_id": "HP49C260",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.607259+00:00"
+  },
+  "cell": {
+    "model_name": "HP49C260",
+    "manufacturer": "Unknown",
+    "format": "other",
+    "chemistry": "Ni-Zn",
+    "id": "https://w3id.org/battinfo/cell-type/8kk5-bjfz-5k9r-yg5f"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 2600.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Nominal Capacity 2600mAh",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 1.65,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal Voltage 1.65V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_voltage": {
+      "value": 1.9,
+      "unit": "V",
+      "raw": {
+        "text": "Charge Voltage 1.9V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "discharge_cutoff_voltage": {
+      "value": 1.2,
+      "unit": "V",
+      "raw": {
+        "text": "Discharge Cut-off Voltage 1.2V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "internal_resistance": {
+      "value": 60.0,
+      "unit": "mΩ",
+      "raw": {
+        "text": "Internal Resistance ≤60mΩ",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 3.0,
+      "unit": "C",
+      "raw": {
+        "text": "Max. Charge Current 3.0C5A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 30.0,
+      "unit": "C",
+      "raw": {
+        "text": "Standard Discharge Max.Discharge Current 30C5A",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_temperature_range": {
+      "min": {
+        "value": 0.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 45.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "discharge_temperature_range": {
+      "min": {
+        "value": -40.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Discharge Temperature -40℃to75℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 75.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Discharge Temperature -40℃to75℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Discharge Temperature -40℃to75℃ @60±25% Relative Humidity",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "storage_temperature_range": {
+      "min": {
+        "value": 0.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Storage Temperature 0℃ to 40℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "max": {
+        "value": 40.0,
+        "unit": "℃",
+        "raw": {
+          "text": "Storage Temperature 0℃ to 40℃ @60±25% Relative Humidity",
+          "confidence": 0.6
+        }
+      },
+      "raw": {
+        "text": "Storage Temperature 0℃ to 40℃ @60±25% Relative Humidity",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

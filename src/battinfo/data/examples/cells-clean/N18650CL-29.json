@@ -1,0 +1,55 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "N18650CL-29.datasheet.json",
+    "source_id": "N18650CL-29",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.777338+00:00"
+  },
+  "cell": {
+    "model_name": "N18650CL-29",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/s30g-kfm6-rxw9-a0pw"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V",
+      "raw": {
+        "text": "continuously with constant voltage of 4.2V until the charged current is 0.01C（28mA）.",
+        "confidence": 0.6,
+        "page": 3
+      }
+    },
+    "diameter": {
+      "value": 0.15,
+      "unit": "mm",
+      "raw": {
+        "text": "电芯尺寸 Diameter: 18.35±0.15 mm 直径：18.35±0.15 mm",
+        "confidence": 0.6,
+        "page": 5
+      }
+    },
+    "height": {
+      "value": 0.25,
+      "unit": "mm",
+      "raw": {
+        "text": "Cell dimension Height: 64.85±0.25 mm 高度：64.85±0.25 mm",
+        "confidence": 0.6,
+        "page": 4
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer",
+      "cell.chemistry"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

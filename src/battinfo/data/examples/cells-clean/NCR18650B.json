@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "NCR18650B.datasheet.json",
+    "source_id": "NCR18650B",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.614309+00:00"
+  },
+  "cell": {
+    "model_name": "NCR18650B",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "NCA",
+    "size_code": "18650",
+    "id": "https://w3id.org/battinfo/cell-type/mt2n-mwz4-fgjd-6vzh"
+  },
+  "specs": {
+    "rated_capacity": {
+      "value": 3200.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "Rated Capacity (at 20℃) Min.3200mAh",
+        "confidence": 0.6,
+        "page": 8
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.6,
+      "unit": "V",
+      "raw": {
+        "text": "Nominal Voltage 3.6V -10deg.C 0deg.C",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "charge_voltage": {
+      "value": 4.2,
+      "unit": "V",
+      "raw": {
+        "text": "*1 Charge ： constant voltage/constant current, 4.2V, max. 885mA, 60mA cut-off",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "weight": {
+      "value": 45.0,
+      "unit": "g",
+      "raw": {
+        "text": "Netweight: 45g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 1.0,
+      "unit": "C",
+      "raw": {
+        "text": "*1 Charge ： constant voltage/constant current, 4.2V, max. 885mA, 60mA cut-off",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "diameter": {
+      "value": 18.6,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter Max. 18.6 mm",
+        "confidence": 0.6,
+        "page": 6
+      }
+    },
+    "height": {
+      "value": 65.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Height Max. 65.2 mm",
+        "confidence": 0.6,
+        "page": 6
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}

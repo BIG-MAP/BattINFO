@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "L173F125A.pdf",
+    "model_name": "L173F125A",
+    "file_hash": "fd8a0afa3817f85b78510c291cbedad4075e5db0a01cb529a2184cae820f1b29",
+    "page_count": 26,
+    "extracted_at": "2026-01-27T17:39:49.629744+00:00"
+  },
+  "cell": {
+    "format": "prismatic",
+    "chemistry": "Li-ion",
+    "model_name": "L173F125A"
+  },
+  "specs": {
+    "discharge_cutoff_voltage": {
+      "value": 2.8,
+      "unit": "V",
+      "raw": {
+        "text": "the product of CALB failure. When the discharge cut-off voltage is lower than 2.8V, the",
+        "confidence": 0.6,
+        "page": 24
+      }
+    }
+  }
+}

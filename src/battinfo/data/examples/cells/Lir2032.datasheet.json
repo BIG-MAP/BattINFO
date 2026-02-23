@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "source": {
+    "filename": "Lir2032.pdf",
+    "model_name": "Lir2032",
+    "file_hash": "1af7cf79225ea4452a552951340d5744453253b9147e6f2c48fc1ef077146263",
+    "page_count": 4,
+    "extracted_at": "2026-01-27T17:39:49.477814+00:00"
+  },
+  "cell": {
+    "format": "coin",
+    "chemistry": "Li-ion",
+    "model_name": "Lir2032",
+    "size_code": "2032"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 35.0,
+      "unit": "mAh",
+      "raw": {
+        "text": "3.1 Capacity Nominal 35mAh",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "nominal_voltage": {
+      "value": 3.7,
+      "unit": "V",
+      "raw": {
+        "text": "3.3 Nominal Voltage 3.7V at 0.2C mA",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "charge_voltage": {
+      "value": 4.15,
+      "unit": "V",
+      "raw": {
+        "text": "6.6 Open Circuit Voltage Within 1hr after full charge,measure >4.15V",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "discharge_cutoff_voltage": {
+      "value": 3.0,
+      "unit": "V",
+      "raw": {
+        "text": "3.5 Cut-off Discharge Voltage 3.00V",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "impedance": {
+      "value": 600.0,
+      "unit": "mΩ",
+      "raw": {
+        "text": "3.13 Charge State Internal Impedance <600mOhms",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "weight": {
+      "value": 2.5,
+      "unit": "g",
+      "raw": {
+        "text": "3.12 Weight of Bare Cell ~2.5g",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_charge_current": {
+      "value": 70.0,
+      "unit": "mA",
+      "raw": {
+        "text": "3.6 Max.Discharge Current 70mA",
+        "confidence": 0.6,
+        "page": 1
+      }
+    },
+    "max_discharge_current": {
+      "value": 70.0,
+      "unit": "mA",
+      "raw": {
+        "text": "3.6 Max.Discharge Current 70mA",
+        "confidence": 0.6,
+        "page": 1
+      }
+    }
+  }
+}

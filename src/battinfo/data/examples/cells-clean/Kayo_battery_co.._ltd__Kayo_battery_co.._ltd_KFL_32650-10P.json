@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "curated",
+    "source_file": "Kayo_battery_co.._ltd_KFL_32650-10P.curated.json",
+    "source_id": "cellinfo:Kayo_battery_co.._ltd_KFL_32650-10P",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:51.767057+00:00"
+  },
+  "cell": {
+    "model_name": "Kayo_battery_co.._ltd_KFL_32650-10P",
+    "manufacturer": "Kayo battery co.. ltd",
+    "format": "cylindrical",
+    "chemistry": "LFP",
+    "size_code": "32650",
+    "id": "https://w3id.org/battinfo/cell-type/t3tj-bd5w-qa19-eqk1"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 2000.0,
+      "unit": "count"
+    },
+    "charge_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "discharge_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 0.76,
+      "unit": "A"
+    },
+    "max_discharge_current": {
+      "value": 38.0,
+      "unit": "A"
+    },
+    "continuous_discharge_current": {
+      "value": 38.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 1.52,
+      "unit": "A"
+    },
+    "max_charge_current": {
+      "value": 3.8,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.065,
+      "unit": "m"
+    },
+    "diameter": {
+      "value": 0.0325,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 3.8,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.2,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.12,
+      "unit": "kg"
+    }
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  }
+}

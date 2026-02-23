@@ -1,98 +1,85 @@
-<!-- markdownlint-disable MD033 -->
+# BattINFO
 
-# Battery Interface Ontology (BattINFO)
+BattINFO is the implementation and interoperability layer for the
+domain-battery ontology. It provides canonical JSON schemas, mappings,
+examples, and tooling so data engineers and lab scientists can create,
+validate, and transform battery metadata without touching RDF directly.
 
-BattINFO is a domain of the [Elementary Multiperspective Materials Ontology (EMMO)][1], for describing battery systems, materials, methods, and data. Its primary objective is to support the creation of [FAIR](https://www.go-fair.org/fair-principles/), [Linked Data](https://en.wikipedia.org/wiki/Linked_data). This ontology serves as a foundational resource for harmonizing battery knowledge representation, enhancing data interoperability, and accelerating progress in battery research and innovation.
+Status: Pilot-quality baseline.
+- Core query/create/publish/index workflows are implemented and tested.
+- Interfaces may evolve during pilot trials based on real workflow feedback.
 
-Reference documentation is available [here](https://emmo-repo.github.io/domain-battery/index.html).
- 
-# Quick Start
+Core principles
+- Domain-battery remains the normative ontology (semantics and terms).
+- BattINFO is non-normative and operational (schemas, mappings, tooling).
+- Canonical contract is JSON Schema; Pydantic models are generated for the CLI.
+- Battery Pass JSON-LD outputs are supported and pinned per release.
 
-Here is some information to help you get started working with the ontology in python and creating you own instances of Linked Data. For more information, please see the [Getting Started](https://emmo-repo.github.io/domain-battery/pages/getstarted.html) and [Examples](https://emmo-repo.github.io/domain-battery/pages/examples.html) section of the documentation. 
+What BattINFO does
+- Validate battery metadata as plain JSON (JSON Schema / Pydantic).
+- Map JSON inputs into domain-battery aligned JSON-LD.
+- Produce Battery Pass JSON-LD (pinned to v1.2.0).
+- Provide profiles, examples, and mapping rules for common workflows.
+- Enforce persistent, opaque BattINFO identifiers under `https://w3id.org/battinfo/`.
 
-## Reference IRIs
+Quick start
+```
+battinfo validate input.json --profile base
+battinfo validate input.json --profile batterypass
+battinfo map input.json --target domain-battery --out output.domain.jsonld
+battinfo map input.json --target batterypass --out output.jsonld
+battinfo query cell-types --manufacturer A123 --chemistry LFP --format json
+battinfo create cell-instance --model-name ANR26650M1-B --manufacturer A123 --format json
+battinfo publish batch --source-dir assets/examples/cell-instances --format json
+battinfo index build --source-root assets/examples --out .battinfo/index.json --format json
+battinfo index stats --index .battinfo/index.json --format json
+```
 
-The table below contains a quick cheat sheet of IRIs for accessing different files from the ontology
-The import structure is summarized in the following table:
-
-| IRI                                        | Description                   |
-| ------------------------------------------ | ----------------------------- |
-| `https://w3id.org/battinfo`                | Base Asserted Ontology*       |
-| `https://w3id.org/battinfo/inferred`       | Base Pre-Inferred Ontology*   |
-| `https://w3id.org/battinfo/latest`         | Latest Asserted Ontology*     |
-| `https://w3id.org/battinfo/source`         | Source of Asserted Ontology*  |
-| `https://w3id.org/battinfo/context`        | Latest JSON-LD Context File   |
-| `https://w3id.org/battinfo/{VERSION}`      | Version of Asserted Ontology* |
-| `https://w3id.org/battinfo/{VERSION}/...`  | ... follows same logic above  |
-
-*IRI directs to human readable documentation if called from the web browser and to the source .ttl file if called from an application
-
-## Python
-There are two common ways to work with the ontology in python: loading the ontology as a graph using [rdflib](https://rdflib.readthedocs.io/en/stable/) or exploring the content of the ontology using [EMMOntoPy](https://github.com/emmo-repo/EMMOntoPy). Examples of both are provided below.
-
-### rdflib
-In [rdflib](https://rdflib.readthedocs.io/en/stable/), you can import the ontology as a graph, e.g. to run SPARQL queries:
-
+Python API quick start
 ```python
-from rdflib import Graph
+from battinfo.api import query_cell_types, create_cell_instance, publish_record
 
-# Define the IRI of the ontology
-battinfo = "https://w3id.org/battinfo"
-
-# Create an empty graph
-g = Graph()
-
-# Load the ontology from the IRI
-g.parse(battinfo, format="ttl")
-
-# Print the number of triples in the graph
-print(f"Graph has {len(g)} triples.")
+rows = query_cell_types(manufacturer="A123", chemistry="LFP", limit=5)
+cell = create_cell_instance(
+    model_name="ANR26650M1-B",
+    manufacturer="A123",
+    serial_number="LAB-001",
+)
+publish_record(cell, target_root="registry/site")
 ```
-### EMMOntoPy
-In [EMMOntoPy](https://github.com/emmo-repo/EMMOntoPy), you can choose to import the ontology directly from the web:
+- Full API guide: `docs/python-api.md`
 
-```python
-from ontopy import get_ontology
+Identifier policy
+- See `IDENTIFIER_POLICY.md` for canonical identifier and minting governance.
 
-# Loading from web
-battinfo = get_ontology('https://w3id.org/battinfo').load()
+Notebooks
+- See `notebooks/README.md` for guided, executable examples for validation, mapping, ID policy checks, and resolver artifacts.
+
+CLI roadmap
+- See `docs/cli-spec.md` for the concrete `query` / `create` / `publish` / `index` command specification.
+
+Resolver artifact build (first draft)
 ```
-
-## Usage
-
-This domain ontology supports the creation of Linked Data in any RDF-supported format. Below is an example using [JSON-LD](https://json-ld.org/) to desecribe a zinc foil electrode with some creator information and properties. Please see the documentation for [more examples](https://emmo-repo.github.io/domain-battery/pages/examples.html). 
-
-```json
-{
-    "@context": "https://w3id.org/emmo/domain/battery/context",
-    "@type": "CR2032",
-    "schema:name": "My CR2032 Coin Cell",
-    "schema:manufacturer": {
-       "@id": "https://www.wikidata.org/wiki/Q3041255",
-       "schema:name": "SINTEF"
-    },
-    "hasProperty": {
-       "@type": ["NominalCapacity", "ConventionalProperty"],
-       "hasNumericalPart": {
-          "@type": "Real",
-          "hasNumericalValue": 230
-        },
-        "hasMeasurementUnit": "emmo:MilliAmpereHour"
-     }
-}
+python scripts/build_resolver_artifacts.py
+python scripts/lint_identifier_policy.py
+python scripts/validate_cells_clean.py
 ```
+This generates static resolution artifacts under `registry/site/` for:
+- `cell`
+- `cell-type`
+- `dataset`
 
-## Acknowledgements
+Repository layout
+- `assets/` Canonical schemas, mappings, and examples (source of truth)
+- `src/battinfo/` Python package + CLI
+- `registry/compat.yaml` Version pinning for domain-battery and Battery Pass
+- `registry/site/` Generated resolver artifacts (HTML + JSON + JSON-LD)
+- `docs/` Adoption and usage docs
+- `legacy/` Prior ontology artifacts and docs (archived)
 
-<img src="docs/assets/img/EU_Flag.jpg" alt="EU-Flag" width="100">
+Compatibility
+See `registry/compat.yaml`.
 
-This project has received support from European Union research and innovation programs, under grant agreement numbers:
-
-* 957189 - [BIG-MAP](http://www.big-map.eu/) 
-
-[1]: https://www.w3.org/wiki/LinkedData 
-[2]: https://www.go-fair.org/fair-principles/
-[3]: https://en.wikipedia.org/wiki/Semantic_Web
-[4]: https://big-map.github.io/BattINFO/index.html
-[5]: https://github.com/emmo-repo/EMMO
-[6]: https://www.big-map.eu
+Notes
+- BattINFO does not host or modify the domain-battery ontology.
+- BattINFO does not publish authoritative Battery Pass artifacts.

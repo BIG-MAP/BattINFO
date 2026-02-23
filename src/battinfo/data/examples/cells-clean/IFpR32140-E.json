@@ -1,0 +1,81 @@
+{
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "IFpR32140-E.datasheet.json",
+    "source_id": "IFpR32140-E",
+    "source_url": null,
+    "extracted_at": "2026-01-27T17:39:49.677445+00:00"
+  },
+  "cell": {
+    "model_name": "IFpR32140-E",
+    "manufacturer": "Unknown",
+    "format": "cylindrical",
+    "chemistry": "LFP",
+    "size_code": "32140",
+    "id": "https://w3id.org/battinfo/cell-type/z05h-1r86-6bkh-6vb4"
+  },
+  "specs": {
+    "charge_voltage": {
+      "value": 3.65,
+      "unit": "V",
+      "raw": {
+        "text": "Recommended Charge Voltage 3.65 V",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "mass": {
+      "value": 275.0,
+      "unit": "g",
+      "raw": {
+        "text": "Mass 275 g +/- 5 g 2.1",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "max_charge_current": {
+      "value": 45.0,
+      "unit": "A",
+      "raw": {
+        "text": "Max Continuous Discharge Current 45 A (3C)",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "max_discharge_current": {
+      "value": 45.0,
+      "unit": "A",
+      "raw": {
+        "text": "Max Continuous Discharge Current 45 A (3C)",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "diameter": {
+      "value": 0.2,
+      "unit": "mm",
+      "raw": {
+        "text": "Diameter Ø33.4 +/- 0.2 mm 2.4 1.0 C-Rate Discharge",
+        "confidence": 0.6,
+        "page": 2
+      }
+    },
+    "length": {
+      "value": 0.5,
+      "unit": "mm",
+      "raw": {
+        "text": "Length 139.8 +/- 0.5 mm 3.0 C-Rate Discharge",
+        "confidence": 0.6,
+        "page": 2
+      }
+    }
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.manufacturer"
+    ],
+    "inferred_fields": [],
+    "warnings": []
+  }
+}
