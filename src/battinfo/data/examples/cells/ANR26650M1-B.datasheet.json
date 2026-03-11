@@ -14,7 +14,7 @@
     "size_code": "26650"
   },
   "specs": {
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 2.4,
       "unit": "Ah",
       "raw": {

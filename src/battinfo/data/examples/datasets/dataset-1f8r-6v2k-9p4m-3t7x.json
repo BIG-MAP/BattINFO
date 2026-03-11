@@ -1,29 +1,97 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "dataset": {
     "id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
     "short_id": "1f8r6v",
-    "title": "Cell cycling run for BattINFO cell 3m6k9t",
+    "identifier": "doi:10.5281/zenodo.1234567",
+    "name": "Cell cycling run for BattINFO cell 3m6k9t",
     "description": "Raw cycling and metadata export for one physical cell.",
-    "license": "CC-BY-4.0",
-    "format": "application/x-hdf5",
-    "access_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
-    "download_url": null,
-    "created_at": "2026-02-22T00:00:00Z",
-    "checksum": {
-      "algorithm": "sha256",
-      "value": "8fbf34bd0f8a0caef6f5ce6cc1f8e6a2d8f0123982fc624d6f7f3f7e27b95a89"
+    "url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "sameAs": [
+      "https://doi.org/10.5281/zenodo.1234567"
+    ],
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "version": "1.0.0",
+    "keywords": [
+      "battery cycling",
+      "time series",
+      "lithium-ion"
+    ],
+    "creator": [
+      {
+        "type": "Organization",
+        "name": "BattINFO Maintainers"
+      }
+    ],
+    "publisher": {
+      "type": "Organization",
+      "name": "BattINFO"
     },
-    "related_entities": {
-      "cell_ids": [
-        "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
-      ]
-    }
+    "citation": [
+      {
+        "kind": "dataset",
+        "url": "https://doi.org/10.5281/zenodo.1234567",
+        "doi": "10.5281/zenodo.1234567",
+        "citation_key": "example_dataset_2026"
+      }
+    ],
+    "about": [
+      "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+      "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
+    ],
+    "measurementTechnique": [
+      "cycling"
+    ],
+    "measurementMethod": [
+      "galvanostatic cycling"
+    ],
+    "variableMeasured": [
+      {
+        "name": "voltage",
+        "unit_text": "V"
+      },
+      {
+        "name": "current",
+        "unit_text": "A"
+      },
+      {
+        "name": "capacity",
+        "unit_text": "Ah"
+      }
+    ],
+    "isAccessibleForFree": true,
+    "inLanguage": "en",
+    "dateCreated": 1771718400,
+    "dateModified": 1771718400,
+    "datePublished": 1771718400,
+    "distribution": [
+      {
+        "type": "DataDownload",
+        "name": "Raw cycling HDF5 archive",
+        "contentUrl": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x/raw.h5",
+        "encodingFormat": "application/x-hdf5",
+        "checksum": {
+          "algorithm": "sha256",
+          "value": "8fbf34bd0f8a0caef6f5ce6cc1f8e6a2d8f0123982fc624d6f7f3f7e27b95a89"
+        },
+        "accessLevel": "open"
+      }
+    ]
   },
   "provenance": {
     "source_type": "measurement",
+    "source_name": "Example Lab Data Portal",
     "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
-    "retrieved_at": "2026-02-22T00:00:00Z",
-    "curated_by": "BattINFO Maintainers"
-  }
+    "source_file": "dataset-1f8r-6v2k-9p4m-3t7x.json",
+    "source_dataset_key": "example-0001",
+    "ingest_status": "ready",
+    "quality_flags": [],
+    "retrieved_at": 1771718400,
+    "curated_by": "BattINFO Maintainers",
+    "workflow_version": "0.2.0"
+  },
+  "notes": [
+    "Schema.org-first dataset record with BattINFO battery extensions.",
+    "Used as a canonical example for dataset ingestion and linking workflows."
+  ]
 }

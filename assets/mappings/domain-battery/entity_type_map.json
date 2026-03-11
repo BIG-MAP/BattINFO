@@ -1,0 +1,72 @@
+{
+  "version": "0.1.0-draft",
+  "status": "draft",
+  "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
+  "notes": [
+    "Normative mapping table for descriptor entity-type enrichment.",
+    "Keys are normalized to lower-case for deterministic lookup in the JSON-LD renderer."
+  ],
+  "mappings": {
+    "format": {
+      "cylindrical": {
+        "battery_types": [
+          "BatteryCell",
+          "CylindricalBattery"
+        ]
+      },
+      "prismatic": {
+        "battery_types": [
+          "BatteryCell",
+          "PrismaticBattery"
+        ]
+      },
+      "pouch": {
+        "battery_types": [
+          "BatteryCell",
+          "PouchCell"
+        ]
+      },
+      "coin": {
+        "battery_types": [
+          "BatteryCell",
+          "CoinCell"
+        ]
+      },
+      "other": {
+        "battery_types": [
+          "BatteryCell"
+        ]
+      },
+      "unknown": {
+        "battery_types": [
+          "BatteryCell"
+        ]
+      }
+    },
+    "chemistry": {
+      "li-ion": {
+        "battery_types": [
+          "LithiumIonBattery"
+        ]
+      }
+    },
+    "positive_electrode_basis": {
+      "lfp": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumIronPhosphateElectrode",
+        "battery_types": [
+          "LithiumIonIronPhosphateBattery"
+        ]
+      }
+    },
+    "negative_electrode_basis": {
+      "graphite": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "GraphiteElectrode",
+        "battery_types": [
+          "LithiumIonGraphiteBattery"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r",
+    "short_id": "5p7v2n",
+    "identifier": "test:5p7v-2n8k-4m3t-6q9r",
+    "cell_id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+    "name": "A123 ANR26650M1-B baseline cycling",
+    "description": "Galvanostatic cycling test for one physical cell instance.",
+    "kind": "cycle_life",
+    "status": "completed",
+    "protocol_name": "0.5C charge/discharge baseline cycling",
+    "started_at": 1771718400,
+    "ended_at": 1771804800,
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "source_file": "test-5p7v-2n8k-4m3t-6q9r.json",
+    "retrieved_at": 1771804800,
+    "workflow_version": "0.2.0"
+  },
+  "notes": [
+    "Explicit test record linking the physical cell instance to its cycling dataset."
+  ]
+}

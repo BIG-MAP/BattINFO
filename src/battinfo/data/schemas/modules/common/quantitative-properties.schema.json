@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/common/quantitative-properties.schema.json",
+  "title": "Quantitative Properties",
+  "description": "Named quantity map for technical properties at any component level.",
+  "type": "object",
+  "patternProperties": {
+    "^[a-z][a-z0-9_]*$": {
+      "$ref": "quantity.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

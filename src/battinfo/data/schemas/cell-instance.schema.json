@@ -21,7 +21,7 @@
         "short_id": { "$ref": "#/$defs/ShortId" },
         "serial_number": { "type": "string" },
         "batch_id": { "type": "string" },
-        "manufactured_at": { "type": "string", "format": "date-time" }
+        "manufactured_at": { "$ref": "#/$defs/UnixTime" }
       }
     },
     "measured": {
@@ -50,7 +50,7 @@
             { "type": "null" }
           ]
         },
-        "retrieved_at": { "type": "string", "format": "date-time" }
+        "retrieved_at": { "$ref": "#/$defs/UnixTime" }
       }
     },
     "datasets": {
@@ -64,6 +64,11 @@
     }
   },
   "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
     "ShortId": {
       "type": "string",
       "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"

@@ -16,7 +16,7 @@
     "id": "https://w3id.org/battinfo/cell-type/j6m4-chgt-xrtr-7jav"
   },
   "specs": {
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 2900.0,
       "unit": "mAh",
       "raw": {

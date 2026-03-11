@@ -1,0 +1,43 @@
+{
+  "generated_from": "src/battinfo/data/profiles/battery-descriptor/profile.json",
+  "fragment": "provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_file",
+    "retrieved_at"
+  ],
+  "properties": {
+    "source_type": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retrieved_at": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "workflow_version": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

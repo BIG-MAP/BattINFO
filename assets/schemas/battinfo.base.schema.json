@@ -54,12 +54,40 @@
     "Quantity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["value", "unit"],
       "properties": {
-        "value": { "type": "number" },
-        "unit": { "type": "string" },
+        "value": {
+          "anyOf": [
+            { "type": "number" },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+        "min_value": { "type": "number" },
+        "max_value": { "type": "number" },
+        "typical_value": { "type": "number" },
+        "value_text": { "type": "string", "minLength": 1 },
+        "unit_code": { "type": "string", "minLength": 1 },
+        "unit_text": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
         "unit_uri": { "type": "string" }
-      }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            { "required": ["value"] },
+            { "required": ["min_value"] },
+            { "required": ["max_value"] },
+            { "required": ["typical_value"] },
+            { "required": ["value_text"] }
+          ]
+        },
+        {
+          "anyOf": [
+            { "required": ["unit_code"] },
+            { "required": ["unit_text"] },
+            { "required": ["unit"] }
+          ]
+        }
+      ]
     },
     "Battery": {
       "type": "object",

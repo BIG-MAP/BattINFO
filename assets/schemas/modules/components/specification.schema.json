@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/specification.schema.json",
+  "title": "Cell Type Specification",
+  "description": "Shared cell-type specification for BattINFO and BDF metadata with a required minimal core and optional deep extensions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "manufacturer",
+    "model",
+    "format",
+    "chemistry",
+    "positive_electrode_basis",
+    "negative_electrode_basis"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "manufacturer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "cylindrical",
+        "prismatic",
+        "pouch",
+        "coin",
+        "other",
+        "unknown"
+      ]
+    },
+    "chemistry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "positive_electrode_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "negative_electrode_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "size_code": {
+      "type": "string"
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "positive_electrode": {
+      "$ref": "electrode.schema.json"
+    },
+    "negative_electrode": {
+      "$ref": "electrode.schema.json"
+    },
+    "electrolyte": {
+      "$ref": "electrolyte.schema.json"
+    },
+    "separator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "material"
+      ],
+      "properties": {
+        "material": {
+          "type": "string",
+          "minLength": 1
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "comment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
+

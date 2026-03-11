@@ -1,0 +1,74 @@
+{
+  "version": "0.1.0-draft",
+  "generated_at": "2026-03-03T22:11:09.996047+00:00",
+  "ontology_source": "https://w3id.org/emmo/domain/battery/inferred",
+  "unit_count": 8,
+  "mappings": [
+    {
+      "symbol": "A",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#Ampere",
+      "unit_pref_label": "Ampere",
+      "unit_label": "Ampere",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Ah",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#AmpereHour",
+      "unit_qname": "emmo:AmpereHour",
+      "unit_pref_label": "AmpereHour",
+      "unit_label": "AmpereHour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "V",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#Volt",
+      "unit_pref_label": "Volt",
+      "unit_label": "Volt",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "count",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "unit_qname": "emmo:UnitOne",
+      "unit_pref_label": "UnitOne",
+      "unit_label": "UnitOne",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "g",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#Gram",
+      "unit_pref_label": "Gram",
+      "unit_label": "Gram",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mm",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#MilliMetre",
+      "unit_pref_label": "MilliMetre",
+      "unit_label": "MilliMetre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mΩ",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#MilliOhm",
+      "unit_pref_label": "MilliOhm",
+      "unit_label": "MilliOhm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "°C",
+      "status": "candidate",
+      "unit_iri": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+      "unit_pref_label": "C",
+      "unit_label": "C",
+      "confidence": 1.0
+    }
+  ]
+}

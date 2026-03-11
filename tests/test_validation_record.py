@@ -1,0 +1,66 @@
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from battinfo.validate import ValidationPolicy, validate_record, validate_record_report
+
+STRICT = ValidationPolicy(name="strict", semantic="error")
+
+
+def _load_json(path: str) -> dict:
+    return json.loads((ROOT / path).read_text(encoding="utf-8"))
+
+
+def test_validate_record_report_accepts_canonical_cell_type_example() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    report = validate_record_report(doc, policy=STRICT)
+    assert report.ok
+    assert not report.issues
+
+
+def test_validate_record_report_accepts_linked_dataset_example_with_source_root() -> None:
+    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
+    assert report.ok
+    assert not report.issues
+
+
+def test_validate_record_report_combines_schema_and_semantic_issues() -> None:
+    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["url"] = "not-a-uri"
+    doc["dataset"]["dateModified"] = doc["dataset"]["dateCreated"] - 1
+    report = validate_record_report(doc, policy=STRICT)
+    assert not report.ok
+    codes = {issue.code for issue in report.errors}
+    assert "schema.format.uri" in codes
+    assert "semantic.temporal_order_invalid" in codes
+
+
+def test_validate_record_report_includes_reference_issues_when_source_root_provided() -> None:
+    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["dataset_ids"] = ["https://w3id.org/battinfo/dataset/eysh-4h5s-k4bx-zkgg"]
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
+    assert not report.ok
+    assert any(issue.code == "reference.missing" for issue in report.errors)
+
+
+def test_validate_record_result_preserves_issue_metadata() -> None:
+    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["short_id"] = "xxxxxx"
+    result = validate_record(doc, policy=STRICT)
+    assert not result.ok
+    assert result.issues
+    assert result.issues[0].code == "semantic.short_id_mismatch"
+
+
+def test_validate_record_accepts_named_policy_string() -> None:
+    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["short_id"] = "xxxxxx"
+    result = validate_record(doc, policy="strict")
+    assert not result.ok
+    assert result.policy == "strict"

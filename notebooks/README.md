@@ -1,41 +1,47 @@
 # BattINFO Notebooks
 
-This folder contains practical notebooks for exploring and debugging the refactor.
+This folder now contains the four notebooks that are intended to onboard new
+users to the current stable BattINFO workflow.
+
+Notebook status:
+
+- preview scope for alpha testing
+- useful for onboarding and examples
+- not part of the frozen core alpha contract
 
 ## Notebook Index
 
-1. `00_setup_and_navigation.ipynb`
-   - Environment/path setup and navigation.
+1. `01_cr2032_publication_quickstart.ipynb`
+   - The shortest useful BattINFO walkthrough.
+   - Build a `CellType -> CellInstance -> Test -> Dataset` chain in Python.
+   - Publish `battinfo.publish.jsonld` and reload it with `load_publication(...)`.
 
-2. `01_identifier_policy_checks.ipynb`
-   - Inspect identifier policy rules and run ID lint checks.
+2. `02_detailed_cell_specification_walkthrough.ipynb`
+   - Use the richer `A123__ANR26650M1-B` library example.
+   - Inspect positive/negative electrodes, coating components, electrolyte, and separator metadata.
+   - Show how a rich `CellSpecification` can be reduced into a lighter public `CellType`.
 
-3. `02_validation_profiles.ipynb`
-   - Validate base and Battery Pass profile documents.
+3. `03_rich_python_api_construction.ipynb`
+   - Build a rich `CellSpecification` directly in Python.
+   - Create the public `CellType`, `CellInstance`, `Test`, and `Dataset` objects in code.
+   - Publish and reload the resulting `battinfo.publish.jsonld` artifact.
 
-4. `03_mapping_json_to_jsonld.ipynb`
-   - Run direct + CLI mapping and compare with golden outputs.
+4. `04_rich_dict_first_construction.ipynb`
+   - Build the same kind of rich engineering example with plain Python dictionaries.
+   - Derive the public `CellType` from that dict-first specification record.
+   - Publish and reload the resulting `battinfo.publish.jsonld` artifact.
 
-5. `04_cells_clean_quality.ipynb`
-   - Inspect canonical `cells-clean` data quality and validation state.
+## Why The Set Was Reduced
 
-6. `05_resolver_artifacts.ipynb`
-   - Build and inspect resolver artifacts and `w3id` template logic.
-
-7. `06_minting_and_instance_workflow.ipynb`
-   - Create new cell-type and cell-instance records via scripts.
-
-8. `07_query_library_features.ipynb`
-   - Query cell types, instances, and datasets via both Python API and CLI with parity checks.
-
-9. `08_create_and_link_instance.ipynb`
-   - Instantiate and link resources via both Python API and CLI.
-
-10. `09_publish_pipeline_workflow.ipynb`
-   - Run an end-to-end publish pipeline via both Python API and CLI with debug-friendly logs.
+Earlier notebooks were useful during refactors and API exploration, but they
+mixed onboarding with maintenance and transitional workflows. The current set
+keeps one notebook focused on the core publication path, one on richer
+specification content, one on building that richer example directly in Python,
+and one on a dict-first style that delays BattINFO object construction until
+the boundary where it is needed.
 
 ## Usage Notes
 
-- Open notebooks from repository root if possible.
-- If opened from inside `notebooks/`, setup cells handle path normalization.
-- Notebooks are designed to be executable without installing the package globally.
+- Use the repository `.venv` kernel in VS Code.
+- The publication review notebook now assumes `battinfo` is importable directly from that environment.
+- Open notebooks from repository root or with that `.venv` selected as the active kernel.

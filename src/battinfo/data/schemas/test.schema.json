@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/test.schema.json",
+  "title": "BattINFO Test",
+  "description": "Canonical BattINFO test metadata linking a physical cell instance to a concrete test activity and its datasets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "test",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "cell_id",
+        "name",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TestIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cell_id": {
+          "$ref": "#/$defs/CellIri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "cycle_life",
+            "capacity_check",
+            "rate_capability",
+            "impedance",
+            "calendar_ageing",
+            "formation",
+            "other"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "running",
+            "completed",
+            "aborted",
+            "other"
+          ]
+        },
+        "protocol_name": {
+          "type": "string"
+        },
+        "protocol_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "instrument_name": {
+          "type": "string"
+        },
+        "started_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "ended_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "dataset_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DatasetIri"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type",
+        "retrieved_at"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "measurement",
+            "lab",
+            "simulation",
+            "manual",
+            "other"
+          ]
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "workflow_version": {
+          "type": "string"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "CellIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "DatasetIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "TestIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    }
+  }
+}

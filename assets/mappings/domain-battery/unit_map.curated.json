@@ -1,0 +1,28 @@
+{
+  "version": "0.1.0-draft",
+  "status": "review",
+  "notes": [
+    "Curated unit mappings promoted from decisions in interactive review.",
+    "These entries are treated as authoritative for JSON->RDF conversion."
+  ],
+  "mappings": [
+    {
+      "symbol": "Ah",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#AmpereHour",
+      "unit_qname": "emmo:AmpereHour",
+      "unit_pref_label": "AmpereHour",
+      "unit_label": "AmpereHour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "count",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "unit_qname": "emmo:UnitOne",
+      "unit_pref_label": "UnitOne",
+      "unit_label": "UnitOne",
+      "confidence": 1.0
+    }
+  ]
+}

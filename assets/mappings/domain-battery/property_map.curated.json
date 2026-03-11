@@ -1,0 +1,19 @@
+{
+  "version": "0.1.0-draft",
+  "status": "review",
+  "notes": [
+    "Curated mapping entries promoted from decisions in interactive review.",
+    "These entries are treated as authoritative for JSON->RDF conversion."
+  ],
+  "mappings": [
+    {
+      "key": "discharging_cutoff_voltage",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
+      "class_qname": "emmo:LowerVoltageLimit",
+      "class_pref_label": "LowerVoltageLimit",
+      "class_label": "LowerVoltageLimit",
+      "confidence": 1.0
+    }
+  ]
+}

@@ -1,13 +1,25 @@
 {
   "schema_version": "0.1.0",
-  "cell_type": {
+  "product": {
     "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
-    "model_name": "ANR26650M1-B",
-    "manufacturer": "A123",
-    "format": "cylindrical",
-    "chemistry": "LFP",
-    "size_code": "26650"
+    "identifier": "cell-type:7d9k-2m4p-8t3x-6nq5",
+    "name": "A123 ANR26650M1-B",
+    "model": "ANR26650M1-B",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "A123"
+    },
+    "brand": {
+      "type": "Brand",
+      "name": "A123"
+    },
+    "category": "battery cell",
+    "cellFormat": "cylindrical",
+    "chemistry": "Li-ion",
+    "positiveElectrodeBasis": "LFP",
+    "negativeElectrodeBasis": "unknown",
+    "sizeCode": "26650"
   },
   "specs": {
     "nominal_capacity": {
@@ -19,7 +31,7 @@
         "confidence": 0.8
       }
     },
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 2.4,
       "unit": "Ah",
       "raw": {
@@ -46,7 +58,7 @@
         "confidence": 0.8
       }
     },
-    "weight": {
+    "mass": {
       "value": 76.0,
       "unit": "g",
       "raw": {
@@ -73,147 +85,63 @@
         "confidence": 0.8
       }
     },
-    "standard_charge": {
-      "spec": {
-        "value": 2.5,
-        "unit": "A",
-        "raw": {
-          "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
-      "conditions": {
-        "voltage": {
-          "value": 3.6,
-          "unit": "V",
-          "raw": {
-            "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
-            "page": 1,
-            "confidence": 0.8
-          }
-        },
-        "time": {
-          "value": 60,
-          "unit": "min",
-          "raw": {
-            "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
-            "page": 1,
-            "confidence": 0.8
-          }
-        },
-        "method": "CCCV"
+    "pulse_charging_current": {
+      "value": 10.0,
+      "unit": "A",
+      "raw": {
+        "text": "Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min",
+        "page": 1,
+        "confidence": 0.8
       }
     },
-    "max_charge_current": {
-      "spec": {
-        "value": 10.0,
-        "unit": "A",
-        "raw": {
-          "text": "Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
-      "conditions": {
-        "voltage": {
-          "value": 3.6,
-          "unit": "V",
-          "raw": {
-            "text": "Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min",
-            "page": 1,
-            "confidence": 0.8
-          }
-        },
-        "time": {
-          "value": 12,
-          "unit": "min",
-          "raw": {
-            "text": "Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min",
-            "page": 1,
-            "confidence": 0.8
-          }
-        },
-        "notes": "to 80% SOC, CC"
+    "continuous_charging_current": {
+      "value": 2.5,
+      "unit": "A",
+      "raw": {
+        "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
+        "page": 1,
+        "confidence": 0.8
       }
     },
-    "max_discharge_current": {
-      "spec": {
-        "value": 50.0,
-        "unit": "A",
-        "raw": {
-          "text": "Maximum Continuous Discharge 50A",
-          "page": 1,
-          "confidence": 0.8
-        }
+    "pulse_discharging_current": {
+      "value": 50.0,
+      "unit": "A",
+      "raw": {
+        "text": "Maximum Continuous Discharge 50A",
+        "page": 1,
+        "confidence": 0.8
       }
     },
-    "pulse_discharge_current": {
-      "spec": {
-        "value": 120.0,
-        "unit": "A",
-        "raw": {
-          "text": "Maximum Pulse Discharge (10 seconds) 120A",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
-      "conditions": {
-        "time": {
-          "value": 10,
-          "unit": "s",
-          "raw": {
-            "text": "Maximum Pulse Discharge (10 seconds) 120A",
-            "page": 1,
-            "confidence": 0.8
-          }
-        }
-      }
-    },
-    "discharge_temperature_range": {
-      "min": {
-        "value": -30,
-        "unit": "°C",
-        "raw": {
-          "text": "Operating Temperature -30°C to 55°C",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
-      "max": {
-        "value": 55,
-        "unit": "°C",
-        "raw": {
-          "text": "Operating Temperature -30°C to 55°C",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
+    "discharging_temperature_min": {
+      "value": -30,
+      "unit": "°C",
       "raw": {
         "text": "Operating Temperature -30°C to 55°C",
         "page": 1,
         "confidence": 0.8
       }
     },
-    "storage_temperature_range": {
-      "min": {
-        "value": -40,
-        "unit": "°C",
-        "raw": {
-          "text": "Storage Temperature -40°C to 60°C",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
-      "max": {
-        "value": 60,
-        "unit": "°C",
-        "raw": {
-          "text": "Storage Temperature -40°C to 60°C",
-          "page": 1,
-          "confidence": 0.8
-        }
-      },
+    "discharging_temperature_max": {
+      "value": 55,
+      "unit": "°C",
+      "raw": {
+        "text": "Operating Temperature -30°C to 55°C",
+        "page": 1,
+        "confidence": 0.8
+      }
+    },
+    "storage_temperature_min": {
+      "value": -40,
+      "unit": "°C",
+      "raw": {
+        "text": "Storage Temperature -40°C to 60°C",
+        "page": 1,
+        "confidence": 0.8
+      }
+    },
+    "storage_temperature_max": {
+      "value": 60,
+      "unit": "°C",
       "raw": {
         "text": "Storage Temperature -40°C to 60°C",
         "page": 1,
@@ -221,26 +149,12 @@
       }
     },
     "cycle_life": {
-      "cycles": {
-        "value_text": ">1000",
-        "unit": "count",
-        "raw": {
-          "text": "Cycle Life at 20A Discharge, 100% DOD >1,000 cycles",
-          "page": 1,
-          "confidence": 0.7
-        }
-      },
-      "conditions": {
-        "current": {
-          "value": 20.0,
-          "unit": "A",
-          "raw": {
-            "text": "Cycle Life at 20A Discharge, 100% DOD >1,000 cycles",
-            "page": 1,
-            "confidence": 0.7
-          }
-        },
-        "notes": "100% DOD"
+      "value_text": ">1000",
+      "unit": "count",
+      "raw": {
+        "text": "Cycle Life at 20A Discharge, 100% DOD >1,000 cycles",
+        "page": 1,
+        "confidence": 0.7
       }
     }
   },
@@ -249,6 +163,6 @@
     "source_file": "A123__ANR26650M1-B.pdf",
     "source_url": null,
     "file_hash": "b5069f48e121de3a1308af66215e7a97a1c8c6a87227da089c83e352f1ddf35e",
-    "retrieved_at": "2026-01-28T07:33:04.656447+00:00"
+    "retrieved_at": 1769585584
   }
 }

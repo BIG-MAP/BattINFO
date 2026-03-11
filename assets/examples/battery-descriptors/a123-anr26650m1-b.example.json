@@ -1,0 +1,376 @@
+{
+  "schema_version": "1.0.0",
+  "specification": {
+    "id": "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw",
+    "manufacturer": "A123",
+    "model": "ANR26650M1-B",
+    "format": "cylindrical",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "size_code": "R26650",
+    "property": {
+      "nominal_capacity": {
+        "typical_value": 2.5,
+        "unit": "Ah"
+      },
+      "rated_capacity": {
+        "value": 2.4,
+        "unit": "Ah"
+      },
+      "nominal_voltage": {
+        "value": 3.3,
+        "unit": "V"
+      },
+      "charging_voltage": {
+        "value": 3.65,
+        "unit": "V"
+      },
+      "discharging_cutoff_voltage": {
+        "value": 2.0,
+        "unit": "V"
+      },
+      "continuous_charging_current": {
+        "max_value": 2.5,
+        "unit": "A"
+      },
+      "pulse_charging_current": {
+        "max_value": 5.0,
+        "unit": "A"
+      },
+      "continuous_discharging_current": {
+        "max_value": 50.0,
+        "unit": "A"
+      },
+      "pulse_discharging_current": {
+        "max_value": 120.0,
+        "unit": "A"
+      },
+      "charging_temperature_min": {
+        "value": 0.0,
+        "unit": "degC"
+      },
+      "charging_temperature_max": {
+        "value": 45.0,
+        "unit": "degC"
+      },
+      "discharging_temperature_min": {
+        "value": -20.0,
+        "unit": "degC"
+      },
+      "discharging_temperature_max": {
+        "value": 60.0,
+        "unit": "degC"
+      },
+      "storage_temperature_min": {
+        "value": -20.0,
+        "unit": "degC"
+      },
+      "storage_temperature_max": {
+        "value": 45.0,
+        "unit": "degC"
+      },
+      "cycle_life": {
+        "value": 2000,
+        "unit": "count"
+      },
+      "diameter": {
+        "value": 26.0,
+        "unit": "mm"
+      },
+      "height": {
+        "value": 65.2,
+        "unit": "mm"
+      },
+      "mass": {
+        "value": 76.0,
+        "unit": "g"
+      },
+      "volume": {
+        "value": 0.0346,
+        "unit": "L"
+      },
+      "specific_energy": {
+        "value": 108.6,
+        "unit": "Wh/kg"
+      },
+      "energy_density": {
+        "value": 238.0,
+        "unit": "Wh/L"
+      },
+      "internal_resistance": {
+        "value": 6.0,
+        "unit": "milliohm"
+      },
+      "impedance": {
+        "value_text": "5-8 (1 kHz, 50% SOC)",
+        "unit": "milliohm"
+      }
+    },
+    "positive_electrode": {
+      "coating": {
+        "component": {
+          "active_material": [
+            {
+              "name": "LFP",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.94,
+                  "unit": "1"
+                },
+                "particle_d50": {
+                  "value": 1.8,
+                  "unit": "um"
+                }
+              }
+            }
+          ],
+          "binder": [
+            {
+              "name": "PVDF",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.03,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "additive": [
+            {
+              "name": "Carbon black",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.03,
+                  "unit": "1"
+                }
+              }
+            },
+            {
+              "name": "Al2O3 coating particles",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.005,
+                  "unit": "1"
+                }
+              }
+            }
+          ]
+        },
+        "property": {
+          "loading": {
+            "value": 20.0,
+            "unit": "mg/cm^2"
+          },
+          "porosity": {
+            "value": 0.35,
+            "unit": "1"
+          },
+          "thickness": {
+            "value": 66.0,
+            "unit": "um"
+          }
+        },
+        "comment": "Representative production coating composition."
+      },
+      "current_collector": {
+        "name": "Al foil",
+        "property": {
+          "thickness": {
+            "value": 15.0,
+            "unit": "um"
+          },
+          "areal_mass": {
+            "value": 40.5,
+            "unit": "mg/cm^2"
+          }
+        },
+        "comment": "Etched aluminum collector."
+      },
+      "property": {
+        "compaction_density": {
+          "value": 2.9,
+          "unit": "g/cm^3"
+        }
+      },
+      "comment": "Positive electrode parameters from internal recipe."
+    },
+    "negative_electrode": {
+      "coating": {
+        "component": {
+          "active_material": [
+            {
+              "name": "Graphite",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.95,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "binder": [
+            {
+              "name": "CMC/SBR",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.04,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "additive": [
+            {
+              "name": "Carbon black",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.01,
+                  "unit": "1"
+                }
+              }
+            }
+          ]
+        },
+        "property": {
+          "loading": {
+            "value": 11.2,
+            "unit": "mg/cm^2"
+          },
+          "thickness": {
+            "value": 78.0,
+            "unit": "um"
+          }
+        },
+        "comment": "Representative negative coating."
+      },
+      "current_collector": {
+        "name": "Cu foil",
+        "property": {
+          "thickness": {
+            "value": 10.0,
+            "unit": "um"
+          }
+        }
+      },
+      "comment": "Negative electrode with graphite-dominant active material."
+    },
+    "electrolyte": {
+      "family": "organic",
+      "solvent_mixture": {
+        "component": [
+          {
+            "name": "EC",
+            "property": {
+              "volume_fraction": {
+                "value": 0.3,
+                "unit": "1"
+              }
+            }
+          },
+          {
+            "name": "EMC",
+            "property": {
+              "volume_fraction": {
+                "value": 0.7,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "property": {
+          "water_content": {
+            "max_value": 20,
+            "unit": "ppm"
+          }
+        },
+        "comment": "Base solvent system."
+      },
+      "salt": {
+        "name": "LiPF6",
+        "cation": "Li+",
+        "anion": "PF6-",
+        "property": {
+          "concentration": {
+            "value": 1.0,
+            "unit": "mol/L"
+          }
+        },
+        "comment": "Standard 1M salt concentration."
+      },
+      "additive": [
+        {
+          "name": "VC",
+          "property": {
+            "volume_fraction": {
+              "value": 0.02,
+              "unit": "1"
+            }
+          }
+        },
+        {
+          "name": "FEC",
+          "property": {
+            "volume_fraction": {
+              "value": 0.03,
+              "unit": "1"
+            }
+          }
+        }
+      ],
+      "property": {
+        "conductivity": {
+          "value": 10.5,
+          "unit": "mS/cm"
+        },
+        "viscosity": {
+          "value": 2.4,
+          "unit": "mPa*s"
+        }
+      },
+      "comment": "Electrolyte composition at 25 C."
+    },
+    "separator": {
+      "material": "PE/PP trilayer",
+      "property": {
+        "thickness": {
+          "value": 20.0,
+          "unit": "um"
+        },
+        "porosity": {
+          "value": 0.42,
+          "unit": "1"
+        }
+      },
+      "comment": "Microporous polyolefin separator."
+    },
+    "comment": [
+      "Primary review artifact for BattINFO/BDF battery descriptor structure.",
+      "Values are representative and intended for schema/mapping review."
+    ]
+  },
+  "instances": [
+    {
+      "name": "lfp_k1",
+      "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+    },
+    {
+      "name": "lfp_k2",
+      "id": "https://w3id.org/battinfo/cell/6p9v-2d4k-r7mt-h3qc",
+      "comment": "Second instance from same procurement lot."
+    }
+  ],
+  "provenance": {
+    "source_type": "measurement",
+    "source_name": "Catenaro 2021 ingestion pilot",
+    "source_file": "ddata/a123/anr26650m1-b/catenaro-2021/battery.json",
+    "source_url": "https://doi.org/10.17632/kxsbr4x3j2.2",
+    "retrieved_at": 1772556000,
+    "workflow_version": "battinfo-ingest-0.2.0",
+    "comment": "Manually curated example for schema validation and RDF mapping review."
+  },
+  "comment": [
+    "This is the primary end-to-end review file for battery descriptor changes.",
+    "Update this file whenever schema or mapping decisions change."
+  ]
+}

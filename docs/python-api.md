@@ -1,11 +1,14 @@
-# BattINFO Python API (First Draft)
+# BattINFO Python API
 
-The `battinfo.api` module provides a lightweight Python interface for core workflows:
+BattINFO currently exposes two practical Python surfaces:
 
-- query resource libraries
-- create canonical records
-- publish resolver artifacts
-- build/query index summaries
+- object-first publication for `CellType -> CellInstance -> Test -> Dataset`
+- record/query/registration helpers from `battinfo.api`
+
+Alpha scope:
+
+- core: publication, canonical record registration/query/publish/index helpers
+- preview: reusable library and notebook-driven exploratory workflows
 
 ## Install
 
@@ -13,105 +16,98 @@ The `battinfo.api` module provides a lightweight Python interface for core workf
 python -m pip install -e .
 ```
 
-## Query
+## Publication
+
+The stable publication path is JSON-LD-first. Build the core object chain, call
+`publish(...)`, then reload with `load_publication(...)`.
 
 ```python
-from battinfo.api import query_cell_types, query_cell_instances, query_datasets
+from battinfo import CellInstance, CellType, Dataset, Test, load_publication, publish
 
-cell_types = query_cell_types(
-    manufacturer="A123",
-    chemistry="LFP",
-    nominal_capacity_min=20,
-    limit=10,
+cell_type = CellType(
+    manufacturer="Energizer",
+    model="CR2032",
+    format="coin",
+    chemistry="Li-primary",
+    size_code="CR2032",
+    nominal_properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
 )
 
-instances = query_cell_instances(has_dataset=True)
+cell = CellInstance(
+    cell_type=cell_type,
+    serial_number="energizer-cr2032-202602-dtjrga",
+)
 
-datasets = query_datasets(
-    related_cell_id="https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+test = Test(
+    cell=cell,
+    kind="capacity_check",
+    protocol="constant current discharging",
+    instrument="short Landt cycler",
+    status="completed",
+)
+
+dataset = Dataset(
+    path="path/to/dataset-dir",
+    cell=cell,
+    test=test,
+    name="Energizer CR2032 dataset",
+)
+
+report = publish(
+    cell_type=cell_type,
+    cell_instance=cell,
+    test=test,
+    dataset=dataset,
+)
+
+bundle = load_publication("path/to/dataset-dir/battinfo.publish.jsonld")
+```
+
+Notes:
+
+- `battinfo.publish.jsonld` is the portable artifact.
+- `CellSpecification` is optional provenance support, not required core bundle content.
+- `emit_bundle_dir=True` writes the optional debug JSON files under `dataset_dir/battinfo/`.
+- `publish_dataset_metadata(...)` is the generic helper for low-plumbing workflows.
+- `publish_cr2032_dataset_metadata(...)` is kept as a CR2032 convenience wrapper.
+
+## Query And Registration
+
+The `battinfo.api` helpers remain useful for canonical record workflows:
+
+```python
+from battinfo import query_cell_types, register_cell_instance, template_cell_instance
+
+rows = query_cell_types(manufacturer="A123", chemistry="LFP", limit=5)
+
+draft = template_cell_instance(type_id="https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8")
+draft["cell_instance"]["serial_number"] = "LAB-001"
+
+result = register_cell_instance(
+    draft,
+    source_root="assets/examples",
+    resolve_references=False,
 )
 ```
 
-## Create
+## Index And Resolver Publishing
 
 ```python
-from battinfo.api import create_cell_type_from_datasheet, create_cell_instance
-
-cell_type = create_cell_type_from_datasheet(
-    "assets/examples/cells/A123__ANR26650M1-B.datasheet.json",
-    uid="7d9k2m4p8t3x6nq5",
-)
-
-cell_instance = create_cell_instance(
-    type_id=cell_type["cell_type"]["id"],
-    serial_number="LAB-001",  # metadata only
-    dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
-    uid="3m6k9t2p7x4h9nq8",
-)
-```
-
-You can also instantiate from metadata instead of passing `type_id`:
-
-```python
-from battinfo.api import create_cell_instance
-
-cell_instance = create_cell_instance(
-    model_name="ANR26650M1-B",
-    manufacturer="A123",
-    serial_number="LAB-002",
-)
-```
-
-If metadata matches multiple types, the API raises an error and asks for additional filters or explicit `type_id`.
-
-## Publish
-
-```python
-from battinfo.api import publish_record, publish_batch
+from battinfo import build_index, index_stats, publish_record
 
 publish_record(
     "assets/examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json",
-    target_root="registry/site",
+    target_root=".battinfo/resolver-site",
 )
 
-summary = publish_batch(
-    source_dirs=[
-        "assets/examples/cell-types",
-        "assets/examples/cell-instances",
-        "assets/examples/datasets",
-    ],
-    target_root="registry/site",
-)
-print(summary)
-```
-
-`publish_record` writes:
-
-- `index.json`
-- `index.jsonld`
-- `index.html`
-
-at `registry/site/{entity-type}/{uid}/`.
-
-## Index
-
-```python
-from battinfo.api import build_index, index_stats
-
-index = build_index(
-    source_root="assets/examples",
-    out_path=".battinfo/index.json",
-)
-print(index["total_count"])
-
+index = build_index(source_root="assets/examples", out_path=".battinfo/index.json")
 stats = index_stats(".battinfo/index.json")
-print(stats)
 ```
 
-## Identifier Guidance
+## Guidance
 
-- Keep canonical identifiers opaque (`https://w3id.org/battinfo/cell-type/{uid}`).
-- Do not encode manufacturer/model semantics in IDs.
-- Use metadata lookup (`model_name`, `manufacturer`, `chemistry`, etc.) and `short_id` for human workflows.
-
-This preserves persistence while keeping instantiation practical.
+- Use `publish(...)` for dataset publication.
+- Use `load_publication(...)` to reconstruct Python objects from published JSON-LD.
+- Use `BattinfoBundle.to_directory(...)` only for optional debug inspection bundles.
+- Prefer opaque BattINFO IRIs under `https://w3id.org/battinfo/`.
+- For validation policy and machine-readable issue output, see `docs/validation-contract.md`.

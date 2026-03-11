@@ -16,7 +16,7 @@
     "id": "https://w3id.org/battinfo/cell-type/pkr8-4y7r-774a-sr8v"
   },
   "specs": {
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 2.4,
       "unit": "Ah",
       "raw": {

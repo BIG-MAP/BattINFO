@@ -81,7 +81,7 @@
     "charge_temperature_range": {
       "min": {
         "value": 0.0,
-        "unit": "℃",
+        "unit": "degC",
         "raw": {
           "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
           "confidence": 0.6
@@ -89,7 +89,7 @@
       },
       "max": {
         "value": 45.0,
-        "unit": "℃",
+        "unit": "degC",
         "raw": {
           "text": "Charge Temperature 0℃ to 45℃ @60±25% Relative Humidity",
           "confidence": 0.6
@@ -104,7 +104,7 @@
     "discharge_temperature_range": {
       "min": {
         "value": -40.0,
-        "unit": "℃",
+        "unit": "degC",
         "raw": {
           "text": "Discharge Temperature -40℃to75℃ @60±25% Relative Humidity",
           "confidence": 0.6
@@ -112,7 +112,7 @@
       },
       "max": {
         "value": 75.0,
-        "unit": "℃",
+        "unit": "degC",
         "raw": {
           "text": "Discharge Temperature -40℃to75℃ @60±25% Relative Humidity",
           "confidence": 0.6
@@ -127,7 +127,7 @@
     "storage_temperature_range": {
       "min": {
         "value": 0.0,
-        "unit": "℃",
+        "unit": "degC",
         "raw": {
           "text": "Storage Temperature 0℃ to 40℃ @60±25% Relative Humidity",
           "confidence": 0.6
@@ -135,7 +135,7 @@
       },
       "max": {
         "value": 40.0,
-        "unit": "℃",
+        "unit": "degC",
         "raw": {
           "text": "Storage Temperature 0℃ to 40℃ @60±25% Relative Humidity",
           "confidence": 0.6

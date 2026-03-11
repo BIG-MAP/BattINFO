@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/electrode-coating.schema.json",
+  "title": "Electrode Coating",
+  "description": "Electrode coating composition and quantitative properties.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "component"
+  ],
+  "properties": {
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active_material": {
+          "type": "array",
+          "items": {
+            "$ref": "material-component.schema.json"
+          }
+        },
+        "binder": {
+          "type": "array",
+          "items": {
+            "$ref": "material-component.schema.json"
+          }
+        },
+        "additive": {
+          "type": "array",
+          "items": {
+            "$ref": "material-component.schema.json"
+          }
+        }
+      }
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}
+

@@ -8,6 +8,10 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Package + Dev Dependencies
         run: |
@@ -26,10 +30,29 @@ jobs:
         run: python -m pytest -q tests
 
       - name: Lint Identifier Policy Compliance
-        run: python scripts/lint_identifier_policy.py
+        run: python .tools/quality/lint_identifier_policy.py
 
       - name: Validate Canonical cells-clean Dataset
-        run: python scripts/validate_cells_clean.py
+        run: python .tools/library/validate_cells_clean.py
+
+      - name: Generate Cell-Type Datasheet Smoke Batch
+        run: python .tools/datasheets/generate_cell_type_datasheet_examples.py --count 10 --strategy diverse --target-dir "${{ runner.temp }}/battinfo-ci/cell-types" --clean-target --batch-tag ci-smoke-v1 --infer-negative-electrode-basis
+
+      - name: Validate Cell-Type Datasheet Smoke Batch
+        run: python .tools/datasheets/validate_cell_type_datasheets.py --dir "${{ runner.temp }}/battinfo-ci/cell-types" --profile cell-type-datasheet
+
+      - name: Enforce Cell-Type Datasheet Quality Gates
+        run: python .tools/datasheets/check_datasheet_quality.py --dir "${{ runner.temp }}/battinfo-ci/cell-types" --max-empty-specs 0 --max-unknown-manufacturer 0 --max-unknown-chemistry 0 --max-unknown-positive-electrode-basis 0 --max-unknown-negative-electrode-basis 0 --required-spec nominal_capacity --required-spec nominal_voltage --min-required-spec-coverage 1.0
 
       - name: Build Resolver Artifacts
-        run: python scripts/build_resolver_artifacts.py
+        run: python .tools/build/build_resolver_artifacts.py
+
+      - name: Build Distributions
+        run: python -m build
+
+      - name: Smoke Test Installed Wheel
+        run: |
+          python -m pip uninstall -y battinfo
+          python -m pip install dist/*.whl
+          python tests/installed_smoke.py
+

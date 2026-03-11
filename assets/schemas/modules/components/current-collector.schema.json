@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/current-collector.schema.json",
+  "title": "Current Collector",
+  "description": "Current collector material and quantitative properties.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}
+

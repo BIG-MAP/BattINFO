@@ -1,0 +1,112 @@
+{
+  "version": "1.0.0-draft",
+  "status": "draft",
+  "product": {
+    "type": "Product",
+    "identifier": "https://w3id.org/battinfo/cell-type/dyx1-c3dw-ag6m-m2ge",
+    "short_id": "dyx1c3",
+    "name": "Amita_Technologies_120155250L-AL40",
+    "description": "Draft cell-type datasheet derived from CellInfo source record cellinfo:Amita_Technologies_120155250L-AL40.",
+    "brand": "Amita Technologies",
+    "manufacturer": "Amita Technologies",
+    "model": "Amita_Technologies_120155250L-AL40",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "Li-ion",
+    "negative_electrode_basis": "unknown",
+    "format": "prismatic",
+    "category": "prismatic battery cell",
+    "application": "battery cell"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 7500.0,
+      "unit": "count"
+    },
+    "charging_voltage": {
+      "value": 2.7,
+      "unit": "V"
+    },
+    "discharging_cutoff_voltage": {
+      "value": 1.6,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 8.0,
+      "unit": "A"
+    },
+    "max_discharging_current": {
+      "value": 200.0,
+      "unit": "A"
+    },
+    "continuous_discharging_current": {
+      "value": 200.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 8.0,
+      "unit": "A"
+    },
+    "max_charging_current": {
+      "value": 120.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.012,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.155,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.25,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 42.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 2.2,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.98,
+      "unit": "kg"
+    }
+  },
+  "lineage": {
+    "source_record": "src/battinfo/data/examples/cells-clean/Amita_Technologies__Amita_Technologies_120155250L-AL40.json",
+    "source_type": "curated",
+    "source_file": "Amita_Technologies_120155250L-AL40.curated.json",
+    "source_id": "cellinfo:Amita_Technologies_120155250L-AL40",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:47.805163+00:00"
+  },
+  "quality": {
+    "missing_fields": [
+      "cell.chemistry"
+    ],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  },
+  "notes": [
+    "Draft v1 datasheet generated from BattINFO canonical cells-clean record.",
+    "This is not an original manufacturer PDF datasheet.",
+    "Capacity convention: if both typical and rated capacities are available, keep typical in specs.nominal_capacity.value_typical and rated in specs.rated_capacity.value.",
+    "Electrode-basis fields can be more specific than chemistry family."
+  ],
+  "extensions": {
+    "x-battinfo-ingest_batch": "cellinfo-top10-diverse-v1"
+  },
+  "references": [
+    {
+      "type": "database",
+      "title": "Amita_Technologies_120155250L-AL40.curated.json",
+      "url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+      "accessed_at": "2026-01-28T07:25:47.805163+00:00"
+    }
+  ]
+}

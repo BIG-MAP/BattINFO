@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0-draft",
+  "status": "draft",
+  "product": {
+    "type": "Product",
+    "identifier": "https://w3id.org/battinfo/cell-type/pa28-mbn7-1wsk-x4nf",
+    "short_id": "pa28mb",
+    "name": "IFpP45-173-115-B",
+    "description": "Draft cell-type datasheet derived from Morrow Cell Design Tool workbook.",
+    "brand": "Morrow",
+    "manufacturer": "Morrow",
+    "model": "IFpP45-173-115-B",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "Graphite",
+    "format": "prismatic",
+    "category": "prismatic battery cell",
+    "application": "battery cell"
+  },
+  "specs": {
+    "nominal_capacity": {
+      "value": 100.0,
+      "unit": "Ah",
+      "source_note": "Design!E23 (capacity (Ah))"
+    },
+    "charging_voltage": {
+      "value": 3.65,
+      "unit": "V",
+      "source_note": "Design!E27 (voltage range 2.5~3.65)"
+    },
+    "discharging_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V",
+      "source_note": "Design!E27 (voltage range 2.5~3.65)"
+    },
+    "nominal_specific_energy": {
+      "value": 163.0,
+      "unit": "Wh/kg",
+      "source_note": "Design!G23 (GED (Wh/kg))"
+    },
+    "nominal_energy_density": {
+      "value": 355.0,
+      "unit": "Wh/L",
+      "source_note": "Design!I23 (VED (Wh/L))"
+    },
+    "thickness": {
+      "value": 45.0,
+      "unit": "mm",
+      "source_note": "Design!K23 (T (mm))"
+    },
+    "width": {
+      "value": 173.0,
+      "unit": "mm",
+      "source_note": "Design!M23 (W (mm))"
+    },
+    "height": {
+      "value": 115.0,
+      "unit": "mm",
+      "source_note": "Design!O23 (H (mm))"
+    }
+  },
+  "lineage": {
+    "source_record": "local/Cell_Design_Tool_v0.2-LFP-Oct.xlsx::Design",
+    "source_type": "other",
+    "source_file": "Cell_Design_Tool_v0.2 -LFP Oct w.o CEC 1.xlsx",
+    "source_id": "morrow:IFpP45-173-115-B",
+    "source_url": null,
+    "source_checksum": "sha256:7cd4ac35fd18b390b6339da55e230206d83b219496c0369a92bf2430aad6c225",
+    "extracted_at": "2026-03-05T08:30:51+00:00"
+  },
+  "quality": {
+    "missing_fields": [
+      "specs.nominal_voltage",
+      "specs.mass",
+      "specs.internal_resistance",
+      "specs.cycle_life",
+      "specs.charging_current",
+      "specs.max_charging_current",
+      "specs.discharging_current",
+      "specs.continuous_discharging_current",
+      "specs.max_discharging_current",
+      "specs.operating_temperature_charging",
+      "specs.operating_temperature_discharging",
+      "specs.storage_temperature"
+    ],
+    "inferred_fields": [
+      "product.negative_electrode_basis"
+    ],
+    "warnings": [
+      "Workbook did not explicitly include model string 'IFpP45-173-115-B'; model assigned by user instruction.",
+      "Nominal voltage not explicitly stated in the workbook section used for extraction."
+    ]
+  },
+  "notes": [
+    "Draft v1 datasheet generated from a local design workbook rather than a published manufacturer PDF datasheet.",
+    "Negative electrode basis set to Graphite based on Design!D67='AG' (anode active material).",
+    "Dimensions (45x173x115 mm) are reflected in model token IFpP45-173-115-B."
+  ],
+  "extensions": {
+    "x-battinfo-source_sheet": "Design",
+    "x-battinfo-uid_seed": "cell-type|morrow|ifpp45-173-115-b"
+  },
+  "references": [
+    {
+      "type": "other",
+      "title": "Morrow Cell Design Tool v0.2 (LFP Oct w.o CEC 1)",
+      "identifier": "local/Cell_Design_Tool_v0.2-LFP-Oct.xlsx",
+      "accessed_at": "2026-03-05T08:30:51+00:00"
+    }
+  ]
+}

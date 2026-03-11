@@ -54,7 +54,6 @@
         "model_name": { "type": "string" },
         "manufacturer": { "type": "string" },
         "datasheet_revision": { "type": "string" },
-        "specs": { "$ref": "#/$defs/SpecSet" },
         "specs": { "$ref": "#/$defs/SpecSet" }
       }
     },
@@ -63,7 +62,7 @@
       "additionalProperties": false,
       "properties": {
         "nominal_capacity": { "$ref": "#/$defs/SpecItem" },
-        "minimum_capacity": { "$ref": "#/$defs/SpecItem" },
+        "min_capacity": { "$ref": "#/$defs/SpecItem" },
         "rated_capacity": { "$ref": "#/$defs/SpecItem" },
         "nominal_voltage": { "$ref": "#/$defs/SpecItem" },
         "charge_voltage": { "$ref": "#/$defs/SpecItem" },
@@ -123,23 +122,40 @@
     "SpecItem": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["unit"],
       "properties": {
-        "value": { "type": "number" },
-        "value_min": { "type": "number" },
-        "value_max": { "type": "number" },
-        "value_typical": { "type": "number" },
-        "value_text": { "type": "string" },
-        "unit": { "type": "string" },
+        "value": {
+          "anyOf": [
+            { "type": "number" },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+        "min_value": { "type": "number" },
+        "max_value": { "type": "number" },
+        "typical_value": { "type": "number" },
+        "value_text": { "type": "string", "minLength": 1 },
+        "unit_code": { "type": "string", "minLength": 1 },
+        "unit_text": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
         "tolerance": { "type": "string" },
         "raw": { "$ref": "#/$defs/RawExtraction" }
       },
-      "anyOf": [
-        { "required": ["value"] },
-        { "required": ["value_min"] },
-        { "required": ["value_max"] },
-        { "required": ["value_typical"] },
-        { "required": ["value_text"] }
+      "allOf": [
+        {
+          "anyOf": [
+            { "required": ["value"] },
+            { "required": ["min_value"] },
+            { "required": ["max_value"] },
+            { "required": ["typical_value"] },
+            { "required": ["value_text"] }
+          ]
+        },
+        {
+          "anyOf": [
+            { "required": ["unit_code"] },
+            { "required": ["unit_text"] },
+            { "required": ["unit"] }
+          ]
+        }
       ]
     },
     "Conditions": {

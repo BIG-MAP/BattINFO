@@ -16,7 +16,7 @@
     "id": "https://w3id.org/battinfo/cell-type/2zb3-dstp-e7xd-r38y"
   },
   "specs": {
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 2450.0,
       "unit": "mAh",
       "raw": {

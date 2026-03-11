@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/material-component.schema.json",
+  "title": "Material Component",
+  "description": "A named material and optional quantitative attributes under property.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}
+

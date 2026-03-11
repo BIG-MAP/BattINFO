@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/common/provenance.schema.json",
+  "title": "Provenance",
+  "description": "Minimal provenance object for shared BattINFO/BDF descriptor files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_file",
+    "retrieved_at"
+  ],
+  "properties": {
+    "source_type": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retrieved_at": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "workflow_version": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

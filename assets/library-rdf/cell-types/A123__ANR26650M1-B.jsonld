@@ -1,0 +1,338 @@
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context.json",
+    {
+      "schema": "https://schema.org/",
+      "hasProperty": {
+        "@id": "hasProperty"
+      }
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw",
+      "@type": [
+        "BatteryCell",
+        "CylindricalBattery",
+        "LithiumIonBattery",
+        "LithiumIonIronPhosphateBattery",
+        "LithiumIonGraphiteBattery",
+        "schema:ProductModel"
+      ],
+      "schema:name": "A123 ANR26650M1-B",
+      "schema:model": "ANR26650M1-B",
+      "schema:manufacturer": {
+        "@type": "schema:Organization",
+        "schema:name": "A123"
+      },
+      "schema:size": "R26650",
+      "hasPositiveElectrode": {
+        "@type": "LithiumIronPhosphateElectrode"
+      },
+      "hasNegativeElectrode": {
+        "@type": "GraphiteElectrode"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MaximumChargingTemperature",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 45.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+        },
+        {
+          "@type": [
+            "MinimumChargingTemperature",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 0.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+        },
+        {
+          "@type": [
+            "ChargingVoltage",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 3.65
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+        },
+        {
+          "@type": [
+            "MaximumContinuousChargingCurrent",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 2.5,
+            "schema:valueReference": {
+              "@type": "schema:DefinedTerm",
+              "schema:name": "max_value"
+            }
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+        },
+        {
+          "@type": [
+            "MaximumContinuousDischargingCurrent",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 50.0,
+            "schema:valueReference": {
+              "@type": "schema:DefinedTerm",
+              "schema:name": "max_value"
+            }
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+        },
+        {
+          "@type": [
+            "CycleLife",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 2000
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        },
+        {
+          "@type": [
+            "Diameter",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 26.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "LowerVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 2.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+        },
+        {
+          "@type": [
+            "MaximumDischargingTemperature",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 60.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+        },
+        {
+          "@type": [
+            "MinimumDischargingTemperature",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": -20.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+        },
+        {
+          "@type": [
+            "EnergyDensity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 238.0
+          },
+          "schema:unitText": "Wh/L"
+        },
+        {
+          "@type": [
+            "Height",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 65.2
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "ElectricImpedance",
+            "ConventionalProperty"
+          ],
+          "schema:value": "5-8 (1 kHz, 50% SOC)",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
+        },
+        {
+          "@type": [
+            "InternalResistance",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 6.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
+        },
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 76.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+        },
+        {
+          "@type": [
+            "NominalCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 2.5,
+            "schema:valueReference": {
+              "@type": "schema:DefinedTerm",
+              "schema:name": "typical_value"
+            }
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+        },
+        {
+          "@type": [
+            "NominalVoltage",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 3.3
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+        },
+        {
+          "@type": [
+            "MaximumPulseChargingCurrent",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 5.0,
+            "schema:valueReference": {
+              "@type": "schema:DefinedTerm",
+              "schema:name": "max_value"
+            }
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+        },
+        {
+          "@type": [
+            "MaximumPulseDischargingCurrent",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 120.0,
+            "schema:valueReference": {
+              "@type": "schema:DefinedTerm",
+              "schema:name": "max_value"
+            }
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+        },
+        {
+          "@type": [
+            "RatedCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 2.4
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+        },
+        {
+          "@type": [
+            "SpecificEnergy",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 108.6
+          },
+          "schema:unitText": "Wh/kg"
+        },
+        {
+          "@type": [
+            "MaximumStorageTemperature",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 45.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+        },
+        {
+          "@type": [
+            "MinimumStorageTemperature",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": -20.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+        },
+        {
+          "@type": [
+            "Volume",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Real",
+            "hasNumericalValue": 0.0346
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Litre"
+        }
+      ],
+      "schema:description": [
+        "Primary review artifact for BattINFO/BDF battery descriptor structure.",
+        "Values are representative and intended for schema/mapping review.",
+        "Reusable BattINFO library example for a curated commercial cylindrical cell type.",
+        "Promoted from the canonical A123 review descriptor."
+      ],
+      "schema:schemaVersion": "1.0.0",
+      "schema:isBasedOn": {
+        "@type": "schema:CreativeWork",
+        "@id": "https://doi.org/10.17632/kxsbr4x3j2.2",
+        "schema:additionalType": "measurement",
+        "schema:name": "Catenaro 2021 ingestion pilot",
+        "schema:identifier": "ddata/a123/anr26650m1-b/catenaro-2021/battery.json",
+        "schema:url": "https://doi.org/10.17632/kxsbr4x3j2.2",
+        "schema:dateModified": "2026-03-03T16:40:00+00:00",
+        "schema:version": "battinfo-ingest-0.2.0",
+        "schema:description": "Manually curated example promoted into the reusable BattINFO cell-type library."
+      }
+    }
+  ]
+}

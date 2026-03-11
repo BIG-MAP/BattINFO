@@ -14,7 +14,7 @@
     "size_code": "18650"
   },
   "specs": {
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 3380.0,
       "unit": "mAh",
       "raw": {

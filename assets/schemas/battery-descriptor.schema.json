@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/battery-descriptor.schema.json",
+  "title": "BattINFO/BDF Battery Descriptor",
+  "description": "Shared battery descriptor contract for dataset-adjacent battery metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "specification"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "specification": {
+      "$ref": "modules/components/specification.schema.json"
+    },
+    "instances": {
+      "type": "array",
+      "items": {
+        "$ref": "modules/components/cell-instance-reference.schema.json"
+      }
+    },
+    "provenance": {
+      "$ref": "modules/common/provenance.schema.json"
+    },
+    "comment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

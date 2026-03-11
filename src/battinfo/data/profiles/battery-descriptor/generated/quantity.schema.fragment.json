@@ -1,0 +1,86 @@
+{
+  "generated_from": "src/battinfo/data/profiles/battery-descriptor/profile.json",
+  "fragment": "quantity",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    },
+    "min_value": {
+      "type": "number"
+    },
+    "max_value": {
+      "type": "number"
+    },
+    "typical_value": {
+      "type": "number"
+    },
+    "value_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unit_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical compact unit symbol/code, for example V, A, Ah, Wh/kg."
+    }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": [
+            "value"
+          ]
+        },
+        {
+          "required": [
+            "min_value"
+          ]
+        },
+        {
+          "required": [
+            "max_value"
+          ]
+        },
+        {
+          "required": [
+            "typical_value"
+          ]
+        },
+        {
+          "required": [
+            "value_text"
+          ]
+        }
+      ]
+    },
+    {
+      "anyOf": [
+        {
+          "required": [
+            "unit"
+          ]
+        },
+        {
+          "required": [
+            "unit_text"
+          ]
+        }
+      ]
+    }
+  ]
+}

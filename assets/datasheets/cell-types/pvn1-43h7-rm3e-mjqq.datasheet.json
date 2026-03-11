@@ -1,0 +1,110 @@
+{
+  "version": "1.0.0-draft",
+  "status": "draft",
+  "product": {
+    "type": "Product",
+    "identifier": "https://w3id.org/battinfo/cell-type/pvn1-43h7-rm3e-mjqq",
+    "short_id": "pvn143",
+    "name": "A123_20AH",
+    "description": "Draft cell-type datasheet derived from CellInfo source record cellinfo:A123_20AH.",
+    "brand": "A123",
+    "manufacturer": "A123",
+    "model": "A123_20AH",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "unknown",
+    "format": "prismatic",
+    "category": "prismatic battery cell",
+    "application": "battery cell"
+  },
+  "specs": {
+    "cycle_life": {
+      "value": 1000.0,
+      "unit": "count"
+    },
+    "charging_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "discharging_cutoff_voltage": {
+      "value": 2.5,
+      "unit": "V"
+    },
+    "discharging_current": {
+      "value": 4.0,
+      "unit": "A"
+    },
+    "max_discharging_current": {
+      "value": 20.0,
+      "unit": "A"
+    },
+    "continuous_discharging_current": {
+      "value": 20.0,
+      "unit": "A"
+    },
+    "charging_current": {
+      "value": 4.0,
+      "unit": "A"
+    },
+    "max_charging_current": {
+      "value": 20.0,
+      "unit": "A"
+    },
+    "height": {
+      "value": 0.00725,
+      "unit": "m"
+    },
+    "width": {
+      "value": 0.16,
+      "unit": "m"
+    },
+    "length": {
+      "value": 0.227,
+      "unit": "m"
+    },
+    "nominal_capacity": {
+      "value": 20.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.3,
+      "unit": "V"
+    },
+    "mass": {
+      "value": 0.496,
+      "unit": "kg"
+    }
+  },
+  "lineage": {
+    "source_record": "src/battinfo/data/examples/cells-clean/A123_20AH.json",
+    "source_type": "curated",
+    "source_file": "A123_20AH.curated.json",
+    "source_id": "cellinfo:A123_20AH",
+    "source_url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+    "extracted_at": "2026-01-28T07:25:47.649331+00:00"
+  },
+  "quality": {
+    "missing_fields": [],
+    "inferred_fields": [
+      "cell.format"
+    ],
+    "warnings": []
+  },
+  "notes": [
+    "Draft v1 datasheet generated from BattINFO canonical cells-clean record.",
+    "This is not an original manufacturer PDF datasheet.",
+    "Capacity convention: if both typical and rated capacities are available, keep typical in specs.nominal_capacity.value_typical and rated in specs.rated_capacity.value.",
+    "Electrode-basis fields can be more specific than chemistry family."
+  ],
+  "extensions": {
+    "x-battinfo-ingest_batch": "cellinfo-top10-diverse-v1"
+  },
+  "references": [
+    {
+      "type": "database",
+      "title": "A123_20AH.curated.json",
+      "url": "https://github.com/TUMFTM/TruckBatteryDesign/raw/main/Step1_cell_selection/inputs/CellDatabase_v6.xlsx",
+      "accessed_at": "2026-01-28T07:25:47.649331+00:00"
+    }
+  ]
+}

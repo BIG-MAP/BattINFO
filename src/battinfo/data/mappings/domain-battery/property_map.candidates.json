@@ -1,0 +1,241 @@
+{
+  "version": "0.1.0-draft",
+  "generated_at": "2026-03-03T22:11:09.996047+00:00",
+  "ontology_source": "https://w3id.org/emmo/domain/battery/inferred",
+  "key_count": 29,
+  "mappings": [
+    {
+      "key": "charging_temperature_max",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
+      "class_pref_label": "Charging",
+      "class_label": "Charging",
+      "confidence": 0.75
+    },
+    {
+      "key": "charging_temperature_min",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
+      "class_pref_label": "Charging",
+      "class_label": "Charging",
+      "confidence": 0.75
+    },
+    {
+      "key": "charging_time",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
+      "class_pref_label": "Charging",
+      "class_label": "Charging",
+      "confidence": 0.75
+    },
+    {
+      "key": "charging_voltage",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87",
+      "class_pref_label": "ChargingVoltage",
+      "class_label": "ChargingVoltage",
+      "confidence": 1.0
+    },
+    {
+      "key": "continuous_charging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+      "class_pref_label": "MaximumContinuousChargingCurrent",
+      "class_label": "MaximumContinuousChargingCurrent",
+      "confidence": 0.9
+    },
+    {
+      "key": "continuous_discharging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+      "class_pref_label": "MaximumContinuousDischargingCurrent",
+      "class_label": "MaximumContinuousDischargingCurrent",
+      "confidence": 0.9
+    },
+    {
+      "key": "cycle_life",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937",
+      "class_pref_label": "CycleLife",
+      "class_label": "CycleLife",
+      "confidence": 1.0
+    },
+    {
+      "key": "diameter",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6",
+      "class_pref_label": "Diameter",
+      "class_label": "Diameter",
+      "confidence": 1.0
+    },
+    {
+      "key": "discharging_cutoff_voltage",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
+      "class_qname": "emmo:LowerVoltageLimit",
+      "class_pref_label": "LowerVoltageLimit",
+      "class_label": "LowerVoltageLimit",
+      "confidence": 1.0
+    },
+    {
+      "key": "discharging_temperature_max",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_06d8e1ee_924a_4915_998d_33a69f41dadc",
+      "class_pref_label": "Discharging",
+      "class_label": "Discharging",
+      "confidence": 0.75
+    },
+    {
+      "key": "discharging_temperature_min",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_06d8e1ee_924a_4915_998d_33a69f41dadc",
+      "class_pref_label": "Discharging",
+      "class_label": "Discharging",
+      "confidence": 0.75
+    },
+    {
+      "key": "energy_density",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
+      "class_pref_label": "EnergyDensity",
+      "class_label": "EnergyDensity",
+      "confidence": 1.0
+    },
+    {
+      "key": "height",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba",
+      "class_pref_label": "Height",
+      "class_label": "Height",
+      "confidence": 1.0
+    },
+    {
+      "key": "impedance",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_79a02de5_b884_4eab_bc18_f67997d597a2",
+      "class_pref_label": "ElectricImpedance",
+      "class_label": "ElectricImpedance",
+      "confidence": 0.9
+    },
+    {
+      "key": "internal_resistance",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
+      "class_pref_label": "InternalResistance",
+      "class_label": "InternalResistance",
+      "confidence": 1.0
+    },
+    {
+      "key": "length",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac",
+      "class_pref_label": "Length",
+      "class_label": "Length",
+      "confidence": 1.0
+    },
+    {
+      "key": "mass",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405",
+      "class_pref_label": "Mass",
+      "class_label": "Mass",
+      "confidence": 1.0
+    },
+    {
+      "key": "min_capacity",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_791c1915_a791_4450_acd8_7f94764743b5",
+      "class_pref_label": "Capacity",
+      "class_label": "Capacity",
+      "confidence": 0.75
+    },
+    {
+      "key": "nominal_capacity",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
+      "class_pref_label": "NominalCapacity",
+      "class_label": "NominalCapacity",
+      "confidence": 1.0
+    },
+    {
+      "key": "nominal_voltage",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6",
+      "class_pref_label": "NominalVoltage",
+      "class_label": "NominalVoltage",
+      "confidence": 1.0
+    },
+    {
+      "key": "pulse_charging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da",
+      "class_pref_label": "MaximumPulseChargingCurrent",
+      "class_label": "MaximumPulseChargingCurrent",
+      "confidence": 0.9
+    },
+    {
+      "key": "pulse_discharging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b",
+      "class_pref_label": "MaximumPulseDischargingCurrent",
+      "class_label": "MaximumPulseDischargingCurrent",
+      "confidence": 0.9
+    },
+    {
+      "key": "rated_capacity",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26",
+      "class_pref_label": "RatedCapacity",
+      "class_label": "RatedCapacity",
+      "confidence": 1.0
+    },
+    {
+      "key": "specific_energy",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
+      "class_pref_label": "SpecificEnergy",
+      "class_label": "SpecificEnergy",
+      "confidence": 1.0
+    },
+    {
+      "key": "storage_temperature_max",
+      "status": "unmapped",
+      "class_iri": null,
+      "class_pref_label": null,
+      "class_label": null,
+      "confidence": 0.0
+    },
+    {
+      "key": "storage_temperature_min",
+      "status": "unmapped",
+      "class_iri": null,
+      "class_pref_label": null,
+      "class_label": null,
+      "confidence": 0.0
+    },
+    {
+      "key": "thickness",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656",
+      "class_pref_label": "Thickness",
+      "class_label": "Thickness",
+      "confidence": 1.0
+    },
+    {
+      "key": "volume",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed",
+      "class_pref_label": "Volume",
+      "class_label": "Volume",
+      "confidence": 1.0
+    },
+    {
+      "key": "width",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0",
+      "class_pref_label": "Width",
+      "class_label": "Width",
+      "confidence": 1.0
+    }
+  ]
+}

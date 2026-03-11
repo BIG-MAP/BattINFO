@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/cell-instance-reference.schema.json",
+  "title": "Cell Instance Reference",
+  "description": "Local or canonical reference to a physical cell instance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

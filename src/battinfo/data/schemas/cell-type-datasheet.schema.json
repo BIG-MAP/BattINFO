@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/cell-type-datasheet.schema.json",
+  "title": "BattINFO Cell-Type Datasheet",
+  "description": "Human-friendly cell-type datasheet format with schema.org Product-aligned metadata and BattINFO quantitative specs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "product", "specs", "lineage"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "reviewed", "released", "deprecated"]
+    },
+    "product": {
+      "$ref": "#/$defs/Product"
+    },
+    "specs": {
+      "$ref": "#/$defs/DatasheetSpecSet"
+    },
+    "lineage": {
+      "$ref": "#/$defs/Lineage"
+    },
+    "quality": {
+      "$ref": "#/$defs/Quality"
+    },
+    "references": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Reference" },
+      "uniqueItems": true
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    }
+  },
+  "$defs": {
+    "CellTypeIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "StandardUnit": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9%./^_-]+$"
+    },
+    "SpecConditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temperature_c": { "type": "number" },
+        "c_rate": { "type": "number" },
+        "soc_min_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "soc_max_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "notes": { "type": "string" }
+      }
+    },
+    "SpecItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            { "type": "number" },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+        "min_value": { "type": "number" },
+        "max_value": { "type": "number" },
+        "typical_value": { "type": "number" },
+        "value_text": { "type": "string", "minLength": 1 },
+        "unit_code": { "$ref": "#/$defs/StandardUnit" },
+        "unit_text": { "type": "string", "minLength": 1 },
+        "unit": { "$ref": "#/$defs/StandardUnit" },
+        "unit_standard": {
+          "type": "string",
+          "enum": ["SI", "UCUM", "custom"]
+        },
+        "conditions": { "$ref": "#/$defs/SpecConditions" },
+        "source_note": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            { "required": ["value"] },
+            { "required": ["min_value"] },
+            { "required": ["max_value"] },
+            { "required": ["typical_value"] },
+            { "required": ["value_text"] }
+          ]
+        },
+        {
+          "anyOf": [
+            { "required": ["unit_code"] },
+            { "required": ["unit_text"] },
+            { "required": ["unit"] }
+          ]
+        }
+      ]
+    },
+    "DatasheetSpecSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "properties": {
+        "nominal_capacity": { "$ref": "#/$defs/SpecItem" },
+        "rated_capacity": { "$ref": "#/$defs/SpecItem" },
+        "min_capacity": { "$ref": "#/$defs/SpecItem" },
+        "nominal_energy": { "$ref": "#/$defs/SpecItem" },
+        "nominal_specific_energy": { "$ref": "#/$defs/SpecItem" },
+        "nominal_energy_density": { "$ref": "#/$defs/SpecItem" },
+        "nominal_voltage": { "$ref": "#/$defs/SpecItem" },
+        "charging_voltage": { "$ref": "#/$defs/SpecItem" },
+        "discharging_cutoff_voltage": { "$ref": "#/$defs/SpecItem" },
+        "charging_current": { "$ref": "#/$defs/SpecItem" },
+        "max_charging_current": { "$ref": "#/$defs/SpecItem" },
+        "discharging_current": { "$ref": "#/$defs/SpecItem" },
+        "continuous_discharging_current": { "$ref": "#/$defs/SpecItem" },
+        "max_discharging_current": { "$ref": "#/$defs/SpecItem" },
+        "cycle_life": { "$ref": "#/$defs/SpecItem" },
+        "internal_resistance": { "$ref": "#/$defs/SpecItem" },
+        "mass": { "$ref": "#/$defs/SpecItem" },
+        "height": { "$ref": "#/$defs/SpecItem" },
+        "width": { "$ref": "#/$defs/SpecItem" },
+        "length": { "$ref": "#/$defs/SpecItem" },
+        "thickness": { "$ref": "#/$defs/SpecItem" },
+        "diameter": { "$ref": "#/$defs/SpecItem" },
+        "operating_temperature_charging": { "$ref": "#/$defs/SpecItem" },
+        "operating_temperature_discharging": { "$ref": "#/$defs/SpecItem" },
+        "storage_temperature": { "$ref": "#/$defs/SpecItem" }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "identifier",
+        "short_id",
+        "name",
+        "brand",
+        "manufacturer",
+        "model",
+        "chemistry",
+        "positive_electrode_basis",
+        "negative_electrode_basis",
+        "format",
+        "category"
+      ],
+      "properties": {
+        "type": { "type": "string", "enum": ["Product"] },
+        "identifier": { "$ref": "#/$defs/CellTypeIri" },
+        "short_id": {
+          "type": "string",
+          "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "brand": { "type": "string", "minLength": 1 },
+        "manufacturer": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "chemistry": { "type": "string", "minLength": 1 },
+        "positive_electrode_basis": { "type": "string", "minLength": 1 },
+        "negative_electrode_basis": { "type": "string", "minLength": 1 },
+        "format": {
+          "type": "string",
+          "enum": ["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"]
+        },
+        "category": { "type": "string", "minLength": 1 },
+        "application": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "sku": { "type": "string" },
+        "gtin": { "type": "string" },
+        "release_date": { "type": "string", "format": "date" }
+      }
+    },
+    "Lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_record", "source_type", "source_file", "extracted_at"],
+      "properties": {
+        "source_record": { "type": "string" },
+        "source_type": { "type": "string", "enum": ["curated", "datasheet", "other"] },
+        "source_file": { "type": "string" },
+        "source_id": { "type": "string" },
+        "source_url": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "source_checksum": { "type": "string" },
+        "extracted_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "missing_fields": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "inferred_fields": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "warnings": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "Reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["manufacturer_datasheet", "catalog", "paper", "database", "other"]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "identifier": { "type": "string" },
+        "citation": { "type": "string" },
+        "accessed_at": { "type": "string", "format": "date-time" }
+      },
+      "anyOf": [
+        { "required": ["url"] },
+        { "required": ["identifier"] },
+        { "required": ["citation"] }
+      ]
+    },
+    "Extensions": {
+      "type": "object",
+      "patternProperties": {
+        "^x-[a-z0-9._-]+$": {}
+      },
+      "additionalProperties": false
+    }
+  }
+}

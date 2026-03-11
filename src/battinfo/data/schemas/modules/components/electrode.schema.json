@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json",
+  "title": "Electrode",
+  "description": "Electrode model composed of coating, current collector, and optional properties.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "coating": {
+      "$ref": "electrode-coating.schema.json"
+    },
+    "current_collector": {
+      "$ref": "current-collector.schema.json"
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "comment": {
+      "type": "string"
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "coating"
+      ]
+    },
+    {
+      "required": [
+        "current_collector"
+      ]
+    },
+    {
+      "required": [
+        "property"
+      ]
+    }
+  ]
+}
+

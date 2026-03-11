@@ -2,9 +2,16 @@
 __pycache__
 *.py[cod]
 .venv
+.pytest_cache
+.jupyter-runtime-test
+.ci
 *.egg-info
 dist
 build
+.battinfo
 
 # Documentation
 site
+
+# Editor
+.vscode/

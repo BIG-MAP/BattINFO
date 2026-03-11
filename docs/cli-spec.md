@@ -1,4 +1,4 @@
-# BattINFO CLI Specification (First Draft)
+# BattINFO CLI Specification (Alpha Scope)
 
 ## 1. Scope
 
@@ -21,9 +21,7 @@ battinfo <group> <command> [options]
 
 Global options:
 
-- `--format {table,json}` output format (default `table` for query, `json` for create/publish status)
-- `--quiet` minimal output
-- `--verbose` include debug details
+- command-specific `--format` options are used where supported
 
 Exit codes:
 
@@ -32,9 +30,48 @@ Exit codes:
 - `2`: configuration or dependency error
 - `3`: internal processing error
 
-## 3. Query Commands
+## 3. Validation Command
 
-### 3.1 Query Cell Types
+### 3.1 Validate Documents
+
+```text
+battinfo validate <input-path> [options]
+```
+
+Options:
+
+- `--profile <profile-name>` for profile/schema validation
+- `--source-root <dir>` for canonical record validation with reference checks
+- `--policy <default|strict|publisher|ingest>`
+- `--format <text|json>`
+
+Behavior:
+
+- validates a schema/profile document when `--source-root` is omitted
+- validates a canonical record when `--source-root` is provided
+- emits machine-readable structured issue output in JSON mode
+- returns success when only warning-severity issues are present
+
+JSON output contract:
+
+```json
+{
+  "ok": true,
+  "mode": "profile",
+  "policy": "default",
+  "profile": "battery-descriptor",
+  "source_root": null,
+  "issue_count": 0,
+  "error_count": 0,
+  "warning_count": 0,
+  "errors": [],
+  "issues": []
+}
+```
+
+## 4. Query Commands
+
+### 4.1 Query Cell Types
 
 ```text
 battinfo query cell-types [filters...]
@@ -60,7 +97,7 @@ Behavior:
 - Returns canonical `cell-type` IRIs and summary metadata.
 - Range filters apply to normalized canonical fields in `specs`.
 
-### 3.2 Query Cell Instances
+### 4.2 Query Cell Instances
 
 ```text
 battinfo query cell-instances [filters...]
@@ -85,7 +122,7 @@ Behavior:
 - Returns instance IRIs with type links and dataset links.
 - `--serial-number` is optional metadata search only.
 
-### 3.3 Query Datasets
+### 4.3 Query Datasets
 
 ```text
 battinfo query datasets [filters...]
@@ -108,7 +145,7 @@ Behavior:
 
 - Returns dataset IRIs with title, format, access URL, and related entity links.
 
-### 3.4 Query Output Contract
+### 4.4 Query Output Contract
 
 JSON mode (`--format json`) for all query commands:
 
@@ -129,9 +166,9 @@ JSON mode (`--format json`) for all query commands:
 }
 ```
 
-## 4. Create Commands
+## 5. Create Commands
 
-### 4.1 Create Cell Instance
+### 5.1 Create Cell Instance
 
 ```text
 battinfo create cell-instance \
@@ -159,14 +196,84 @@ Output contract:
 }
 ```
 
-## 5. Publish Commands
+### 5.2 Register Canonical Resources
 
-### 5.1 Publish One Resource
+Registration is the primary workflow for creating canonical BattINFO resources in source storage.
+
+```text
+battinfo register record --input <json-path> [options]
+battinfo register cell-type [--input <json-path> | inline-fields...] [options]
+battinfo register cell-instance [--input <json-path> | inline-fields...] [options]
+battinfo register dataset [--input <json-path> | inline-fields...] [options]
+battinfo register batch --source-dir <dir> [--source-dir <dir> ...] [options]
+```
+
+Common options:
+
+- `--source-root <dir>` (default `assets/examples`)
+- `--mode <create_only|upsert>`
+- `--duplicate-policy <error|return_existing>`
+- `--dry-run`
+- `--publish/--no-publish`
+- `--resolve-references/--no-resolve-references`
+
+Behavior:
+
+- Validates against schema profile.
+- Mints or verifies canonical identifier.
+- Enforces duplicate/idempotency policy.
+- Optionally publishes resolver artifacts.
+
+Typical result:
+
+```json
+{
+  "status": "created",
+  "entity_type": "cell-type",
+  "id": "https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8",
+  "path": "assets/examples/cell-types/cell-type-3m6k-9t2p-7x4h-9nq8.json",
+  "mode": "create_only",
+  "published": false
+}
+```
+
+Batch result:
+
+```json
+{
+  "status": "ok",
+  "processed": 30,
+  "created": 30,
+  "updated": 0,
+  "exists": 0,
+  "dry_run": 0,
+  "failed": 0,
+  "failures": []
+}
+```
+
+### 5.3 Generate Starter Templates
+
+```text
+battinfo template cell-type [options]
+battinfo template cell-instance [options]
+battinfo template dataset [options]
+```
+
+Behavior:
+
+- Generates minimal canonical JSON records suitable for edit + registration.
+- Writes to `--out` when provided; otherwise prints JSON to stdout.
+- Defaults use placeholder IRIs/UIDs (`0000-0000-0000-0000`) for easy replacement.
+
+## 6. Publish Commands
+
+### 6.1 Publish One Resource
 
 ```text
 battinfo publish record \
   --input <json-path> \
-  [--target-root registry/site] \
+  [--target-root .battinfo/resolver-site] \
   [--build-jsonld true] \
   [--build-html true]
 ```
@@ -177,13 +284,13 @@ Behavior:
 - Builds resolver artifacts (`index.json`, `index.jsonld`, `index.html`) under the canonical path.
 - Fails fast on invalid IDs or schema violations.
 
-### 5.2 Publish Batch
+### 6.2 Publish Batch
 
 ```text
 battinfo publish batch \
   --source-dir <dir> \
   [--glob *.json] \
-  [--target-root registry/site]
+  [--target-root .battinfo/resolver-site]
 ```
 
 Behavior:
@@ -208,9 +315,9 @@ Output contract:
 }
 ```
 
-## 6. Index Commands
+## 7. Index Commands
 
-### 6.1 Build Index
+### 7.1 Build Index
 
 ```text
 battinfo index build \
@@ -218,7 +325,7 @@ battinfo index build \
   --out .battinfo/index.json
 ```
 
-### 6.2 Show Index Stats
+### 7.2 Show Index Stats
 
 ```text
 battinfo index stats \
@@ -232,7 +339,7 @@ Minimum stats output:
 - `dataset_count`
 - `build_timestamp`
 
-## 7. Acceptance Criteria
+## 8. Acceptance Criteria
 
 ### Query
 
@@ -263,7 +370,7 @@ Minimum stats output:
 - Included in CI checks.
 - Error messages are actionable and path-specific.
 
-## 8. First Implementation Mapping (Code Layout)
+## 9. First Implementation Mapping (Code Layout)
 
 Suggested modules:
 

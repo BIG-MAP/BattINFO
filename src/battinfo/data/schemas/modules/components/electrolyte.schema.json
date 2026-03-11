@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/electrolyte.schema.json",
+  "title": "Electrolyte",
+  "description": "Electrolyte family and composition.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "family"
+  ],
+  "properties": {
+    "family": {
+      "type": "string",
+      "enum": [
+        "organic",
+        "aqueous",
+        "ionic_liquid",
+        "solid",
+        "gel",
+        "hybrid",
+        "unknown"
+      ]
+    },
+    "solvent_mixture": {
+      "$ref": "material-mixture.schema.json"
+    },
+    "salt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cation": {
+          "type": "string"
+        },
+        "anion": {
+          "type": "string"
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "additive": {
+      "type": "array",
+      "items": {
+        "$ref": "material-component.schema.json"
+      }
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}
+

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "battinfo"
 version = "0.1.0"
@@ -7,6 +11,15 @@ requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
   { name = "BattINFO Team" }
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering",
 ]
 dependencies = [
   "pydantic>=2.7",
@@ -21,6 +34,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "build>=1.2",
   "datamodel-code-generator>=0.25",
   "ruff>=0.6",
   "pytest>=8.0"
@@ -37,3 +51,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 battinfo = ["data/**/*"]
+
+[tool.pytest.ini_options]
+norecursedirs = ["legacy"]

@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0-draft",
+  "status": "draft",
+  "target": "domain-battery-jsonld",
+  "notes": [
+    "Explicit list of BattINFO-specific extension terms still allowed in domain-battery JSON-LD output.",
+    "Any battinfo: term not listed here should be treated as a semantic governance failure."
+  ],
+  "allowed_extensions": []
+}

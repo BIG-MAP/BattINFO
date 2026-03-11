@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/datasheet-source-manifest.schema.json",
+  "title": "BattINFO Datasheet Source Manifest",
+  "description": "Manifest of immutable source documents for datasheet ingestion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generated_at", "sources"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SourceRecord"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    }
+  },
+  "$defs": {
+    "SourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_type",
+        "path",
+        "file_name",
+        "checksum_sha256",
+        "size_bytes",
+        "discovered_at"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^src:[a-z0-9][a-z0-9._:-]*$"
+        },
+        "source_type": {
+          "type": "string",
+          "enum": ["cellinfo-json", "pdf-datasheet", "manual-json", "other"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checksum_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "discovered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "collection": {
+          "type": "string"
+        },
+        "hints": {
+          "$ref": "#/$defs/Hints"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["new", "ingested", "duplicate", "ignored", "error"]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        }
+      }
+    },
+    "Hints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "manufacturer": {
+          "type": "string"
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "contains_multiple_cells": {
+          "type": "boolean"
+        },
+        "page_hint": {
+          "type": "string"
+        }
+      }
+    },
+    "Extensions": {
+      "type": "object",
+      "patternProperties": {
+        "^x-[a-z0-9._-]+$": {}
+      },
+      "additionalProperties": false
+    }
+  }
+}

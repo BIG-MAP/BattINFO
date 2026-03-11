@@ -1,48 +1,50 @@
-# Resolver Deployment (First Draft)
+# Resolver Deployment
 
-This document describes the first-draft BattINFO resource resolution setup.
+Deployment infrastructure has been split out of this repository.
+
+The main BattINFO repository can still generate local resolver artifacts for review,
+but the deployed resolver, static hosting layout, and `w3id.org` rules belong in
+the dedicated `battinfo-registry` repository.
 
 ## Artifact Build
 
-Generate resolver artifacts from canonical examples:
+Generate local resolver artifacts from canonical examples:
 
 ```powershell
-python scripts/build_resolver_artifacts.py
+python .tools/build/build_resolver_artifacts.py
 ```
 
 Output root:
 
 ```text
-registry/site/
+.battinfo/resolver-site/
 ```
 
 Generated structure:
 
-- `registry/site/cell/{uid}/index.html`
-- `registry/site/cell/{uid}/index.json`
-- `registry/site/cell/{uid}/index.jsonld`
-- `registry/site/cell-type/{uid}/index.html`
-- `registry/site/cell-type/{uid}/index.json`
-- `registry/site/cell-type/{uid}/index.jsonld`
-- `registry/site/dataset/{uid}/index.html`
-- `registry/site/dataset/{uid}/index.json`
-- `registry/site/dataset/{uid}/index.jsonld`
+- `.battinfo/resolver-site/cell/{uid}/index.html`
+- `.battinfo/resolver-site/cell/{uid}/index.json`
+- `.battinfo/resolver-site/cell/{uid}/index.jsonld`
+- `.battinfo/resolver-site/cell-type/{uid}/index.html`
+- `.battinfo/resolver-site/cell-type/{uid}/index.json`
+- `.battinfo/resolver-site/cell-type/{uid}/index.jsonld`
+- `.battinfo/resolver-site/dataset/{uid}/index.html`
+- `.battinfo/resolver-site/dataset/{uid}/index.json`
+- `.battinfo/resolver-site/dataset/{uid}/index.jsonld`
 
-## w3id Template
+## Deployment Ownership
 
-Use `registry/w3id-template.htaccess` as the starting point for `w3id.org` rules.
+Items that no longer belong in this repository:
 
-The template implements:
+- deployed resolver site contents
+- `w3id.org` redirect templates/rules
+- static-hosting-specific deployment configuration
 
-- 303 redirects for non-information resources
-- Content negotiation for JSON-LD (`application/ld+json`) vs HTML
-- Patterns for:
-  - `/battinfo/cell/{uid}`
-  - `/battinfo/cell-type/{uid}`
-  - `/battinfo/dataset/{uid}`
+Those should live in `battinfo-registry`.
 
 ## Deployment Notes
 
-- Replace placeholder host `https://your-org.github.io/battinfo-registry/site` with your actual deployed static site root.
+- Publish reviewed local artifacts from `.battinfo/resolver-site/` into `battinfo-registry` as needed.
 - Keep canonical UID format dashed-lowercase (`xxxx-xxxx-xxxx-xxxx`).
 - Ensure deployed paths match generated folder layout exactly.
+

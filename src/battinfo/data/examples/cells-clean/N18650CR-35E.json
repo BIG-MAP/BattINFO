@@ -16,7 +16,7 @@
     "id": "https://w3id.org/battinfo/cell-type/54mv-ycn9-2c8p-xvdr"
   },
   "specs": {
-    "minimum_capacity": {
+    "min_capacity": {
       "value": 3380.0,
       "unit": "mAh",
       "raw": {

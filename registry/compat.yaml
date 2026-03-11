@@ -1,5 +1,0 @@
-battinfo_version: "0.1.0"
-domain_battery_version: "TBD"
-battery_pass_version: "1.2.0"
-notes:
-  - "Pin BatteryPassDataModel v1.2.0 for JSON-LD mapping."

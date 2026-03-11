@@ -1,32 +1,184 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/cell-type.schema.json",
-  "title": "BattINFO Cell Type",
-  "description": "Canonical cell type (class) derived from datasheets.",
+  "title": "BattINFO Cell Type (Schema.org-Aligned Product)",
+  "description": "Canonical cell-type metadata using schema.org Product terms with minimal battery-specific extensions.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "cell_type", "specs", "provenance"],
+  "required": [
+    "schema_version",
+    "product",
+    "specs",
+    "provenance"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "properties": {
+              "cellFormat": {
+                "const": "cylindrical"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "specs": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "length"
+                  ]
+                },
+                {
+                  "required": [
+                    "width"
+                  ]
+                },
+                {
+                  "required": [
+                    "thickness"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "properties": {
+              "cellFormat": {
+                "enum": [
+                  "prismatic",
+                  "pouch"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "specs": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "diameter"
+                  ]
+                },
+                {
+                  "required": [
+                    "height"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "schema_version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
     },
-    "cell_type": {
+    "product": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "model_name", "manufacturer", "format", "chemistry"],
+      "required": [
+        "id",
+        "identifier",
+        "name",
+        "model",
+        "manufacturer",
+        "cellFormat",
+        "chemistry"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/CellTypeIri" },
-        "short_id": { "$ref": "#/$defs/ShortId" },
-        "model_name": { "type": "string" },
-        "manufacturer": { "type": "string" },
-        "format": {
-          "type": "string",
-          "enum": ["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"]
+        "id": {
+          "$ref": "#/$defs/CellTypeIri"
         },
-        "size_code": { "type": "string" },
-        "chemistry": { "type": "string" },
-        "datasheet_revision": { "type": "string" }
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "identifier": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/Organization"
+        },
+        "brand": {
+          "$ref": "#/$defs/BrandOrOrganization"
+        },
+        "category": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "additionalType": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          ]
+        },
+        "cellFormat": {
+          "type": "string",
+          "enum": [
+            "cylindrical",
+            "prismatic",
+            "pouch",
+            "coin",
+            "other",
+            "unknown"
+          ]
+        },
+        "sizeCode": {
+          "type": "string"
+        },
+        "chemistry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "positiveElectrodeBasis": {
+          "type": "string"
+        },
+        "negativeElectrodeBasis": {
+          "type": "string"
+        },
+        "datasheetRevision": {
+          "type": "string"
+        }
       }
     },
     "specs": {
@@ -35,37 +187,155 @@
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source_type", "source_file"],
+      "required": [
+        "source_type",
+        "source_file",
+        "retrieved_at"
+      ],
       "properties": {
-        "source_type": { "type": "string", "enum": ["datasheet"] },
-        "source_file": { "type": "string" },
-        "source_url": {
-          "oneOf": [
-            { "type": "string", "format": "uri" },
-            { "type": "null" }
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet"
           ]
         },
-        "file_hash": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
-        "retrieved_at": { "type": "string", "format": "date-time" }
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
       }
     },
     "notes": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     }
   },
   "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
     "ShortId": {
       "type": "string",
       "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
     },
-    "UidDashed": {
-      "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-    },
     "CellTypeIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Identifier": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/PropertyValue"
+        },
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/$defs/PropertyValue"
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "PropertyValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "property_id",
+        "value"
+      ],
+      "properties": {
+        "property_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "Brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Brand"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "BrandOrOrganization": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Brand"
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ]
     }
   }
 }
