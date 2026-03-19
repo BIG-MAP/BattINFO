@@ -231,11 +231,12 @@ Do not encode semantics in the UID.
 3. Auto-fill `DatasetRegistry` from current sheets via migration script.
 4. Run validation and produce conflict report.
 5. Curate conflicts, set `ingest_status=ready`.
-6. Export rows to canonical BattINFO JSON and register in batch.
+6. Export rows to canonical BattINFO JSON and save in batch.
 
 ## 12. Practical Adoption Notes
 
 - Keep curator-friendly thematic tabs if needed, but ingestion reads only `DatasetRegistry`.
 - Treat spreadsheet as UI, not source of truth.
 - Treat canonical JSON registry as source of truth.
+
 

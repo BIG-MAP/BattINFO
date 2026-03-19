@@ -42,6 +42,25 @@ def test_test_schema_and_examples_are_synced_between_assets_and_package() -> Non
     package_schema = ROOT / "src" / "battinfo" / "data" / "schemas" / "test.schema.json"
     assert json.loads(assets_schema.read_text(encoding="utf-8")) == json.loads(package_schema.read_text(encoding="utf-8"))
 
-    assets_example = ROOT / "assets" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json"
-    package_example = ROOT / "src" / "battinfo" / "data" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json"
-    assert json.loads(assets_example.read_text(encoding="utf-8")) == json.loads(package_example.read_text(encoding="utf-8"))
+    assets_examples = ROOT / "assets" / "examples" / "tests"
+    package_examples = ROOT / "src" / "battinfo" / "data" / "examples" / "tests"
+    asset_files = sorted(path.name for path in assets_examples.glob("*.json"))
+    package_files = sorted(path.name for path in package_examples.glob("*.json"))
+    assert asset_files == package_files
+
+    for filename in asset_files:
+        assets_example = assets_examples / filename
+        package_example = package_examples / filename
+        assert json.loads(assets_example.read_text(encoding="utf-8")) == json.loads(
+            package_example.read_text(encoding="utf-8")
+        )
+
+
+def test_test_examples_cover_alpha_hardening_kinds() -> None:
+    examples_dir = ROOT / "assets" / "examples" / "tests"
+    observed = {
+        json.loads(path.read_text(encoding="utf-8"))["test"]["kind"]
+        for path in sorted(examples_dir.glob("*.json"))
+    }
+    expected = {"cycle_life", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
+    assert expected.issubset(observed)

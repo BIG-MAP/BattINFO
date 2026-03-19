@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/1n7q-5r3k-8x4p-6m2t",
+    "short_id": "1n7q5r",
+    "identifier": "test:1n7q-5r3k-8x4p-6m2t",
+    "cell_id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+    "name": "A123 ANR26650M1-B GITT diffusion test",
+    "description": "Galvanostatic intermittent titration technique characterization for one physical cell instance.",
+    "kind": "gitt",
+    "status": "completed",
+    "protocol_name": "Current pulse and rest sequence for diffusion analysis",
+    "started_at": 1772582400,
+    "ended_at": 1772668800,
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "source_file": "test-1n7q-5r3k-8x4p-6m2t.json",
+    "retrieved_at": 1772668800,
+    "workflow_version": "0.2.0",
+    "citation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+  },
+  "notes": [
+    "Alpha hardening example for the gitt test kind."
+  ]
+}

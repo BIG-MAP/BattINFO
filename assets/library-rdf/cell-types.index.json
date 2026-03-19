@@ -1,13 +1,13 @@
 {
   "library_type": "battinfo-cell-type-library",
   "entry_count": 2,
-  "source_dir": "assets/library/cell-types",
-  "output_jsonld_dir": "assets/library-rdf/cell-types",
-  "aggregate_jsonld": "ontology/library/cell-types.jsonld",
+  "source_dir": "assets\\library\\cell-types",
+  "output_jsonld_dir": "assets\\library-rdf\\cell-types",
+  "aggregate_jsonld": "ontology\\library\\cell-types.jsonld",
   "entries": [
     {
-      "source_json": "assets/library/cell-types/A123__ANR26650M1-B.json",
-      "output_jsonld": "assets/library-rdf/cell-types/A123__ANR26650M1-B.jsonld",
+      "source_json": "assets\\library\\cell-types\\A123__ANR26650M1-B.json",
+      "output_jsonld": "assets\\library-rdf\\cell-types\\A123__ANR26650M1-B.jsonld",
       "id": "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw",
       "manufacturer": "A123",
       "model": "ANR26650M1-B",
@@ -15,8 +15,8 @@
       "chemistry": "Li-ion"
     },
     {
-      "source_json": "assets/library/cell-types/ENERGIZER__CR2032.json",
-      "output_jsonld": "assets/library-rdf/cell-types/ENERGIZER__CR2032.jsonld",
+      "source_json": "assets\\library\\cell-types\\ENERGIZER__CR2032.json",
+      "output_jsonld": "assets\\library-rdf\\cell-types\\ENERGIZER__CR2032.jsonld",
       "id": "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj",
       "manufacturer": "Energizer",
       "model": "CR2032",

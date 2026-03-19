@@ -51,6 +51,37 @@
     "size_code": {
       "type": "string"
     },
+    "construction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "assembly_type": {
+          "type": "string",
+          "enum": [
+            "wound",
+            "stacked",
+            "other",
+            "unknown"
+          ]
+        },
+        "layering": {
+          "type": "string",
+          "enum": [
+            "single_layer",
+            "multilayer",
+            "not_applicable",
+            "unknown"
+          ]
+        },
+        "layer_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
     "property": {
       "$ref": "../common/quantitative-properties.schema.json"
     },

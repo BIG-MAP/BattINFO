@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from functools import lru_cache
 from importlib import resources
 from typing import Any, Mapping
@@ -51,12 +52,16 @@ PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
     ("min_capacity", "nominal_capacity"),
 )
 
+CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
+
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
     "cell-type": ("product", "cell_type"),
     "cell": ("cell_instance",),
     "test": ("test",),
     "dataset": ("dataset",),
 }
+
+SIZE_CODE_PATTERN = re.compile(r"^[RP][A-Za-z0-9]+(?:[/-][A-Za-z0-9]+)*$")
 
 
 def _load_mapping_json(*parts: str) -> dict[str, Any]:
@@ -219,6 +224,51 @@ def _validate_controlled_values(
             )
 
 
+def _validate_size_code(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    issue_severity: str,
+) -> None:
+    product = doc.get("product")
+    if not isinstance(product, Mapping):
+        return
+    size_code = product.get("sizeCode")
+    if not isinstance(size_code, str) or not size_code.strip():
+        return
+    normalized = size_code.strip()
+    if not SIZE_CODE_PATTERN.fullmatch(normalized):
+        _append_issue(
+            issues,
+            code="semantic.size_code_invalid",
+            severity=issue_severity,
+            path="product.sizeCode",
+            message="sizeCode must start with 'R' or 'P', for example 'R26650', 'P20/50/50', or 'P20-50-50'.",
+            resource_type=resource_type,
+        )
+        return
+
+    format_value = product.get("cellFormat")
+    if not isinstance(format_value, str):
+        return
+    format_key = format_value.strip().lower()
+    prefix = normalized[0]
+    expected_prefix = None
+    if format_key in {"coin", "cylindrical"}:
+        expected_prefix = "R"
+    elif format_key in {"pouch", "prismatic"}:
+        expected_prefix = "P"
+    if expected_prefix is not None and prefix != expected_prefix:
+        _append_issue(
+            issues,
+            code="semantic.size_code_prefix_mismatch",
+            severity=issue_severity,
+            path="product.sizeCode",
+            message=f"sizeCode '{size_code}' must start with '{expected_prefix}' for cellFormat '{format_value}'.",
+            resource_type=resource_type,
+        )
+
+
 def _validate_specs(
     specs: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -306,6 +356,25 @@ def _validate_dataset_semantics(
     resource_type: str | None,
     issue_severity: str,
 ) -> None:
+    about = dataset.get("about")
+    related_entities = dataset.get("related_entities")
+    has_cell_link = False
+    if isinstance(about, list):
+        has_cell_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in about)
+    elif isinstance(related_entities, Mapping):
+        cell_ids = related_entities.get("cell_ids")
+        if isinstance(cell_ids, list):
+            has_cell_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in cell_ids)
+    if not has_cell_link:
+        _append_issue(
+            issues,
+            code="semantic.dataset_missing_cell_link",
+            severity=issue_severity,
+            path="dataset.about",
+            message="dataset must reference at least one BattINFO cell IRI.",
+            resource_type=resource_type,
+        )
+
     created = dataset.get("dateCreated")
     modified = dataset.get("dateModified")
     published = dataset.get("datePublished")
@@ -390,6 +459,7 @@ def validate_semantic_report(
 
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
     _validate_controlled_values(doc, issues, resource_type)
+    _validate_size_code(doc, issues, resource_type, hard_issue_severity)
 
     specs = doc.get("specs")
     if isinstance(specs, Mapping):

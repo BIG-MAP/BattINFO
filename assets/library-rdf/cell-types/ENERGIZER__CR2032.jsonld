@@ -1,6 +1,6 @@
 {
   "@context": [
-    "https://w3id.org/emmo/domain/battery/context.json",
+    "https://w3id.org/emmo/domain/battery/context",
     {
       "schema": "https://schema.org/",
       "hasProperty": {
@@ -22,7 +22,7 @@
         "@type": "schema:Organization",
         "schema:name": "Energizer"
       },
-      "schema:size": "R2032",
+      "schema:size": "CR2032",
       "hasProperty": [
         {
           "@type": [
@@ -30,7 +30,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 20.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
@@ -41,7 +41,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 3.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
@@ -52,7 +52,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 3.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
@@ -75,6 +75,10 @@
         "schema:dateModified": "2026-03-10T20:13:38+00:00",
         "schema:version": "notebook-cr2032-eval-0.1.0",
         "schema:description": "Datasheet SHA-256: ff05548e1efc6164fc779836976b0de4859ddcfa0c4f058dd55147bdc239d41f"
+      },
+      "schema:citation": {
+        "@id": "https://example.org/datasheets/ENERGIZER__CR2032.pdf",
+        "@type": "schema:CreativeWork"
       }
     }
   ]

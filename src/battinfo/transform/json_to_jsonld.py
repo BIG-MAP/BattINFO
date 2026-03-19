@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from functools import lru_cache
 from importlib import resources
@@ -63,10 +64,60 @@ MANUAL_UNIT_TYPES = {
     "L": "https://w3id.org/emmo#Litre",
     "kg": "https://w3id.org/emmo#Kilogram",
 }
+DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
+DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
 def _snake_to_camel(value: str) -> str:
     head, *tail = value.split("_")
     return head + "".join(part[:1].upper() + part[1:] for part in tail)
+
+
+def _citation_doi_from_url(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    match = DOI_URL_RE.match(value.strip())
+    if match is None:
+        return None
+    return match.group(1)
+
+
+def _citation_url_value(provenance: dict[str, Any] | None) -> str | None:
+    if not isinstance(provenance, dict):
+        return None
+    citation = provenance.get("citation")
+    if isinstance(citation, str):
+        normalized = citation.strip()
+        if normalized:
+            extracted = _citation_doi_from_url(normalized)
+            if extracted is not None:
+                return f"https://doi.org/{extracted}"
+            if DOI_LITERAL_RE.fullmatch(normalized):
+                return f"https://doi.org/{normalized}"
+            return normalized
+    citation_doi = provenance.get("citation_doi")
+    if isinstance(citation_doi, str):
+        normalized = citation_doi.strip()
+        if normalized:
+            extracted = _citation_doi_from_url(normalized)
+            if extracted is not None:
+                return f"https://doi.org/{extracted}"
+            return f"https://doi.org/{normalized}"
+    return None
+
+
+def _citation_doi_value(provenance: dict[str, Any] | None) -> str | None:
+    return _citation_doi_from_url(_citation_url_value(provenance))
+
+
+def _citation_to_jsonld(provenance: dict[str, Any] | None) -> dict[str, Any] | None:
+    citation_url = _citation_url_value(provenance)
+    if citation_url is None:
+        return None
+    node: dict[str, Any] = {"@id": citation_url, "@type": "schema:CreativeWork"}
+    citation_doi = _citation_doi_value(provenance)
+    if citation_doi is not None:
+        node["bibo:doi"] = citation_doi
+    return node
 
 
 def _property_predicate(name: str) -> str:
@@ -326,6 +377,35 @@ def _merge_text_values(*values: Any) -> list[str] | str | None:
     return deduped[0] if len(deduped) == 1 else deduped
 
 
+def _property_value_node(property_id: str, name: str, value: Any) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    return {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": property_id,
+        "schema:name": name,
+        "schema:value": value,
+    }
+
+
+def _descriptor_construction_to_jsonld(construction: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not isinstance(construction, dict):
+        return []
+
+    nodes: list[dict[str, Any]] = []
+    for property_id, name in (
+        ("construction.assembly_type", "Assembly Type"),
+        ("construction.layering", "Layering"),
+        ("construction.layer_count", "Layer Count"),
+        ("construction.comment", "Construction Comment"),
+    ):
+        value = construction.get(property_id.rsplit(".", 1)[-1])
+        node = _property_value_node(property_id, name, value)
+        if node is not None:
+            nodes.append(node)
+    return nodes
+
+
 def _battery_to_jsonld(battery: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {
         "@id": battery.get("id"),
@@ -444,6 +524,10 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
         if property_nodes:
             battery["hasProperty"] = property_nodes
 
+    construction_nodes = _descriptor_construction_to_jsonld(specification.get("construction"))
+    if construction_nodes:
+        battery["schema:additionalProperty"] = construction_nodes[0] if len(construction_nodes) == 1 else construction_nodes
+
     comment = _comment_value(specification.get("comment"))
     if comment is not None:
         battery[specification_comment_target] = comment
@@ -510,18 +594,19 @@ def _base_context(
     include_has_battery: bool = True,
     include_has_measurement: bool = True,
     include_has_property: bool = False,
+    include_bibo: bool = False,
 ) -> list[Any]:
     context_entry: dict[str, Any] = {
         "schema": "https://schema.org/",
     }
+    if include_bibo:
+        context_entry["bibo"] = "http://purl.org/ontology/bibo/"
     if include_battinfo:
         context_entry["battinfo"] = "https://w3id.org/battinfo#"
     if include_has_measurement:
         context_entry["hasMeasurement"] = {"@id": "battinfo:hasMeasurement"}
     if include_has_battery:
         context_entry["hasBattery"] = {"@id": "battinfo:hasBattery", "@type": "@id"}
-    if include_has_property:
-        context_entry["hasProperty"] = {"@id": "hasProperty"}
     return [BATTERY_CONTEXT_URL, context_entry]
 
 
@@ -590,9 +675,13 @@ def _to_domain_battery_jsonld_descriptor(data: dict[str, Any]) -> dict[str, Any]
             include_has_battery=False,
             include_has_measurement=False,
             include_has_property=True,
+            include_bibo=_citation_doi_value(data.get("provenance")) is not None,
         ),
         "@graph": graph_nodes,
     }
+    citation = _citation_to_jsonld(data.get("provenance"))
+    if citation is not None:
+        battery["schema:citation"] = citation
 
     return doc
 

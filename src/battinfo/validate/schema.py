@@ -19,8 +19,6 @@ PROFILE_TO_SCHEMA = {
     "batterypass": "profiles/batterypass.schema.json",
     "test": "test.schema.json",
     "cell-type-datasheet": "cell-type-datasheet.schema.json",
-    "datasheet-source-manifest": "datasheet-source-manifest.schema.json",
-    "cell-type-candidate": "cell-type-candidate.schema.json",
 }
 
 FORMAT_CHECKER = FormatChecker()
@@ -97,10 +95,6 @@ def _resource_type_from_profile(profile: str | None) -> str | None:
         return "battery-descriptor"
     if profile == "cell-type-datasheet":
         return "cell-type-datasheet"
-    if profile == "datasheet-source-manifest":
-        return "datasheet-source-manifest"
-    if profile == "cell-type-candidate":
-        return "cell-type-candidate"
     return None
 
 

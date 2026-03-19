@@ -1,8 +1,9 @@
 {
   "@context": [
-    "https://w3id.org/emmo/domain/battery/context.json",
+    "https://w3id.org/emmo/domain/battery/context",
     {
       "schema": "https://schema.org/",
+      "bibo": "http://purl.org/ontology/bibo/",
       "hasProperty": {
         "@id": "hasProperty"
       }
@@ -10,7 +11,7 @@
   ],
   "@graph": [
     {
-      "@id": "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw",
+      "@id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
       "@type": [
         "BatteryCell",
         "CylindricalBattery",
@@ -39,7 +40,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 45.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
@@ -50,7 +51,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 0.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
@@ -61,7 +62,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 3.65
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
@@ -72,7 +73,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 2.5,
             "schema:valueReference": {
               "@type": "schema:DefinedTerm",
@@ -87,7 +88,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 50.0,
             "schema:valueReference": {
               "@type": "schema:DefinedTerm",
@@ -102,7 +103,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 2000
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
@@ -113,7 +114,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 26.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
@@ -124,7 +125,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 2.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
@@ -135,7 +136,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 60.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
@@ -146,7 +147,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": -20.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
@@ -157,7 +158,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 238.0
           },
           "schema:unitText": "Wh/L"
@@ -168,7 +169,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 65.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
@@ -187,7 +188,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 6.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
@@ -198,7 +199,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 76.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
@@ -209,7 +210,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 2.5,
             "schema:valueReference": {
               "@type": "schema:DefinedTerm",
@@ -224,7 +225,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 3.3
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
@@ -235,7 +236,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 5.0,
             "schema:valueReference": {
               "@type": "schema:DefinedTerm",
@@ -250,7 +251,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 120.0,
             "schema:valueReference": {
               "@type": "schema:DefinedTerm",
@@ -265,7 +266,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 2.4
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
@@ -276,7 +277,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 108.6
           },
           "schema:unitText": "Wh/kg"
@@ -287,7 +288,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 45.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
@@ -298,7 +299,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": -20.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
@@ -309,7 +310,7 @@
             "ConventionalProperty"
           ],
           "hasNumericalPart": {
-            "@type": "Real",
+            "@type": "RealData",
             "hasNumericalValue": 0.0346
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Litre"
@@ -327,11 +328,16 @@
         "@id": "https://doi.org/10.17632/kxsbr4x3j2.2",
         "schema:additionalType": "measurement",
         "schema:name": "Catenaro 2021 ingestion pilot",
-        "schema:identifier": "ddata/a123/anr26650m1-b/catenaro-2021/battery.json",
+        "schema:identifier": "sources/a123/anr26650m1-b/catenaro-2021/battery.json",
         "schema:url": "https://doi.org/10.17632/kxsbr4x3j2.2",
         "schema:dateModified": "2026-03-03T16:40:00+00:00",
         "schema:version": "battinfo-ingest-0.2.0",
         "schema:description": "Manually curated example for schema validation and RDF mapping review."
+      },
+      "schema:citation": {
+        "@id": "https://doi.org/10.17632/kxsbr4x3j2.2",
+        "@type": "schema:CreativeWork",
+        "bibo:doi": "10.17632/kxsbr4x3j2.2"
       }
     },
     {
@@ -339,7 +345,7 @@
       "@id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
       "schema:name": "lfp_k1",
       "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw"
+        "@id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
       }
     },
     {
@@ -348,7 +354,7 @@
       "schema:name": "lfp_k2",
       "schema:description": "Second instance from same procurement lot.",
       "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw"
+        "@id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
       }
     }
   ]

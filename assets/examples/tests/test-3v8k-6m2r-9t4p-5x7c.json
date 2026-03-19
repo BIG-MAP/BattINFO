@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/3v8k-6m2r-9t4p-5x7c",
+    "short_id": "3v8k6m",
+    "identifier": "test:3v8k-6m2r-9t4p-5x7c",
+    "cell_id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+    "name": "A123 ANR26650M1-B EIS spectroscopy test",
+    "description": "Electrochemical impedance spectroscopy characterization for one physical cell instance.",
+    "kind": "eis",
+    "status": "completed",
+    "protocol_name": "Frequency sweep impedance measurement across selected SOC points",
+    "started_at": 1772928000,
+    "ended_at": 1773014400,
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "source_file": "test-3v8k-6m2r-9t4p-5x7c.json",
+    "retrieved_at": 1773014400,
+    "workflow_version": "0.2.0",
+    "citation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+  },
+  "notes": [
+    "Alpha hardening example for the eis test kind."
+  ]
+}

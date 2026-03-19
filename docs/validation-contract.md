@@ -7,7 +7,7 @@ This document defines the validation behavior that alpha consumers can rely on f
 Core validation entry points:
 
 - `battinfo validate`
-- `battinfo register ... --validate`
+- `battinfo save ... --validate`
 - `battinfo publish ... --validate`
 - `battinfo index build --validate`
 - `battinfo.validate.validate_json(...)`
@@ -111,3 +111,4 @@ Exit codes:
 For alpha, reference validation is supported against repository-style source trees through `source_root`.
 
 This is sufficient for the core alpha scope, but it is not yet the long-term scalability model for larger external registries or snapshots.
+

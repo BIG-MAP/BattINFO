@@ -21,7 +21,8 @@
     "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
     "source_file": "test-5p7v-2n8k-4m3t-6q9r.json",
     "retrieved_at": 1771804800,
-    "workflow_version": "0.2.0"
+    "workflow_version": "0.2.0",
+    "citation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
   },
   "notes": [
     "Explicit test record linking the physical cell instance to its cycling dataset."

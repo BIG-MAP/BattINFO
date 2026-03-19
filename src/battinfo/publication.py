@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import html
 import hashlib
 import json
 import mimetypes
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 from urllib.parse import unquote, urlparse
+
+from rdflib import Dataset as RdfDataset
 
 from battinfo.bundle import BattinfoBundle, CellInstance, CellSpecification, CellType, Dataset, ProtocolInfo, ProvenanceInfo, Test
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
@@ -47,6 +51,8 @@ CELL_SUBCLASS_MAP = {
     "pouch": "PouchCell",
     "prismatic": "PrismaticBattery",
 }
+DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
+DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
 
 def _as_path(path: PathLike) -> Path:
@@ -60,6 +66,12 @@ def _load_json(path: Path) -> dict[str, Any]:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def _triple_count(payload: Mapping[str, Any]) -> int:
+    dataset = RdfDataset()
+    dataset.parse(data=json.dumps(payload), format="json-ld")
+    return len(dataset)
 
 
 def _tail_id(entity_id: str) -> str:
@@ -119,6 +131,30 @@ def _with_default(value: str | None, fallback: str) -> str:
 
 def _without_none(payload: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if value is not None}
+
+
+def _citation_doi_from_url(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    match = DOI_URL_RE.match(value.strip())
+    if match is None:
+        return None
+    return match.group(1)
+
+
+def _citation_url_value(source: ProvenanceInfo) -> str | None:
+    if source.citation:
+        extracted = _citation_doi_from_url(source.citation)
+        if extracted is not None:
+            return f"https://doi.org/{extracted}"
+        if DOI_LITERAL_RE.fullmatch(source.citation):
+            return f"https://doi.org/{source.citation}"
+        return source.citation
+    return None
+
+
+def _citation_doi_value(source: ProvenanceInfo) -> str | None:
+    return _citation_doi_from_url(_citation_url_value(source))
 
 
 def _upsert_graph_node(graph: list[dict[str, Any]], node: dict[str, Any]) -> None:
@@ -231,28 +267,443 @@ def _distribution_entries(dataset_dir: Path, files: list[Path]) -> list[dict[str
     return entries
 
 
+def _schema_distribution_node(value: Mapping[str, Any], *, part_of_id: str) -> dict[str, Any] | None:
+    content_url = value.get("contentUrl")
+    encoding_format = value.get("encodingFormat")
+    checksum = value.get("checksum")
+    if not isinstance(content_url, str) and not isinstance(encoding_format, str) and not isinstance(checksum, Mapping):
+        return None
+    node: dict[str, Any] = {"@type": "schema:DataDownload"}
+    name = value.get("name")
+    if isinstance(name, str):
+        node["schema:name"] = name
+    description = value.get("description")
+    if isinstance(description, str):
+        node["schema:description"] = description
+    if isinstance(content_url, str):
+        node["schema:contentUrl"] = content_url
+    if isinstance(encoding_format, str):
+        node["schema:encodingFormat"] = encoding_format
+    content_size = value.get("contentSize")
+    if isinstance(content_size, str):
+        node["schema:contentSize"] = content_size
+    access_level = value.get("accessLevel")
+    if isinstance(access_level, str):
+        node["schema:accessLevel"] = access_level
+    node["schema:isPartOf"] = {"@id": part_of_id}
+    if isinstance(checksum, Mapping) and isinstance(checksum.get("algorithm"), str) and isinstance(checksum.get("value"), str):
+        if checksum["algorithm"].lower() == "sha256":
+            node["schema:sha256"] = checksum["value"]
+        else:
+            node["schema:checksum"] = {
+                "@type": "schema:PropertyValue",
+                "schema:propertyID": checksum["algorithm"],
+                "schema:value": checksum["value"],
+            }
+    return node
+
+
+def _publication_distribution_entries(dataset: Dataset, dataset_dir: Path, files: list[Path]) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    seen_content_urls: set[str] = set()
+    for item in dataset.distributions:
+        node = _schema_distribution_node(item, part_of_id=dataset_dir.resolve().as_uri())
+        if node is None:
+            continue
+        content_url = node.get("schema:contentUrl")
+        if isinstance(content_url, str):
+            seen_content_urls.add(content_url)
+        entries.append(node)
+    for node in _distribution_entries(dataset_dir, files):
+        content_url = node.get("schema:contentUrl")
+        if isinstance(content_url, str) and content_url in seen_content_urls:
+            continue
+        entries.append(node)
+    return entries
+
+
+def _schema_identifier_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, Mapping):
+        property_id = value.get("property_id")
+        prop_value = value.get("value")
+        if isinstance(property_id, str) and isinstance(prop_value, str):
+            return {
+                "@type": "schema:PropertyValue",
+                "schema:propertyID": property_id,
+                "schema:value": prop_value,
+            }
+        return None
+    if isinstance(value, list):
+        out: list[Any] = []
+        for item in value:
+            converted = _schema_identifier_value(item)
+            if converted is not None:
+                out.append(converted)
+        return out or None
+    return None
+
+
+def _schema_agent_node(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    agent_type = value.get("type")
+    if not isinstance(agent_type, str):
+        agent_type = "Organization"
+    if agent_type not in {"Person", "Organization"}:
+        agent_type = "Organization"
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    node: dict[str, Any] = {
+        "@type": f"schema:{agent_type}",
+        "schema:name": name,
+    }
+    url = value.get("url")
+    if isinstance(url, str):
+        node["schema:url"] = url
+    email = value.get("email")
+    if isinstance(email, str):
+        node["schema:email"] = email
+    given_name = value.get("given_name")
+    if isinstance(given_name, str):
+        node["schema:givenName"] = given_name
+    family_name = value.get("family_name")
+    if isinstance(family_name, str):
+        node["schema:familyName"] = family_name
+    same_as = value.get("sameAs")
+    if isinstance(same_as, str):
+        node["schema:sameAs"] = same_as
+    affiliation = value.get("affiliation")
+    if isinstance(affiliation, Mapping):
+        nested = _schema_agent_node(affiliation)
+        if nested is not None:
+            node["schema:affiliation"] = nested
+    return node
+
+
+def _schema_data_catalog_node(value: Any) -> Any:
+    if isinstance(value, str):
+        return {"@id": value} if "://" in value else value
+    if not isinstance(value, Mapping):
+        return None
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    node: dict[str, Any] = {
+        "@type": "schema:DataCatalog",
+        "schema:name": name,
+    }
+    node_id = value.get("id")
+    if isinstance(node_id, str):
+        node["@id"] = node_id
+    url = value.get("url")
+    if isinstance(url, str):
+        node["schema:url"] = url
+    same_as = value.get("sameAs")
+    if isinstance(same_as, str):
+        node["schema:sameAs"] = same_as
+    description = value.get("description")
+    if isinstance(description, str):
+        node["schema:description"] = description
+    return node
+
+
+def _schema_citation_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return value
+    if not isinstance(value, Mapping):
+        return None
+    node: dict[str, Any] = {"@type": "schema:CreativeWork"}
+    url = value.get("url")
+    if isinstance(url, str):
+        node["@id"] = url
+        node["schema:url"] = url
+    name = value.get("name")
+    if isinstance(name, str):
+        node["schema:name"] = name
+    kind = value.get("kind")
+    if isinstance(kind, str):
+        node["schema:additionalType"] = kind
+    doi = value.get("doi")
+    if isinstance(doi, str):
+        node["bibo:doi"] = doi
+    citation_key = value.get("citation_key")
+    if isinstance(citation_key, str):
+        node["schema:identifier"] = citation_key
+    return node
+
+
+def _schema_variable_measured(values: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for value in values:
+        name = value.get("name")
+        if not isinstance(name, str) or not name.strip():
+            continue
+        node: dict[str, Any] = {
+            "@type": "schema:PropertyValue",
+            "schema:name": name,
+        }
+        description = value.get("description")
+        if isinstance(description, str):
+            node["schema:description"] = description
+        unit_text = value.get("unit_text")
+        if isinstance(unit_text, str):
+            node["schema:unitText"] = unit_text
+        same_as = value.get("sameAs")
+        if isinstance(same_as, str):
+            node["schema:sameAs"] = same_as
+            node["schema:propertyID"] = same_as
+        out.append(node)
+    return out
+
+
+def _schema_table_column_node(value: Mapping[str, Any]) -> dict[str, Any] | None:
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    node: dict[str, Any] = {
+        "@type": "csvw:Column",
+        "csvw:name": name,
+    }
+    titles = value.get("titles")
+    if isinstance(titles, str):
+        node["csvw:titles"] = titles
+    elif isinstance(titles, list):
+        title_values = [item for item in titles if isinstance(item, str)]
+        if title_values:
+            node["csvw:titles"] = title_values
+    description = value.get("description")
+    if isinstance(description, str):
+        node["schema:description"] = description
+    datatype = value.get("datatype")
+    if isinstance(datatype, str):
+        node["csvw:datatype"] = datatype
+    unit_text = value.get("unit_text")
+    if isinstance(unit_text, str):
+        node["schema:unitText"] = unit_text
+    same_as = value.get("sameAs")
+    if isinstance(same_as, str):
+        node["schema:sameAs"] = same_as
+        node["schema:propertyID"] = same_as
+    required = value.get("required")
+    if isinstance(required, bool):
+        node["csvw:required"] = required
+    return node
+
+
+def _schema_table_schema_node(value: Any) -> dict[str, Any] | str | None:
+    if isinstance(value, str):
+        return value
+    if not isinstance(value, Mapping):
+        return None
+    columns = value.get("columns")
+    if not isinstance(columns, list):
+        return None
+    column_nodes = [column for item in columns if isinstance(item, Mapping) and (column := _schema_table_column_node(item)) is not None]
+    if not column_nodes:
+        return None
+    node: dict[str, Any] = {
+        "@type": "csvw:Schema",
+        "csvw:column": column_nodes,
+    }
+    if isinstance(value.get("id"), str):
+        node["@id"] = value["id"]
+    if isinstance(value.get("name"), str):
+        node["schema:name"] = value["name"]
+    if isinstance(value.get("description"), str):
+        node["schema:description"] = value["description"]
+    primary_key = value.get("primaryKey")
+    if isinstance(primary_key, str):
+        node["csvw:primaryKey"] = primary_key
+    elif isinstance(primary_key, list):
+        values = [item for item in primary_key if isinstance(item, str)]
+        if values:
+            node["csvw:primaryKey"] = values
+    return node
+
+
+def _schema_main_entity_node(value: Mapping[str, Any]) -> dict[str, Any] | None:
+    node_type = value.get("type")
+    if isinstance(node_type, str) and ":" in node_type:
+        node_type = node_type.split(":", 1)[1]
+    if node_type == "Table":
+        url = value.get("url")
+        table_schema = value.get("tableSchema")
+        resolved_table_schema = _schema_table_schema_node(table_schema)
+        if not isinstance(url, str) or resolved_table_schema is None:
+            return None
+        node: dict[str, Any] = {
+            "@type": "csvw:Table",
+            "csvw:url": url,
+            "csvw:tableSchema": resolved_table_schema,
+        }
+        if isinstance(value.get("id"), str):
+            node["@id"] = value["id"]
+        if isinstance(value.get("name"), str):
+            node["schema:name"] = value["name"]
+        if isinstance(value.get("description"), str):
+            node["schema:description"] = value["description"]
+        return node
+    if node_type == "TableGroup":
+        table_items = value.get("table")
+        if not isinstance(table_items, list):
+            return None
+        tables = [table for item in table_items if isinstance(item, Mapping) and (table := _schema_main_entity_node(item)) is not None]
+        if not tables:
+            return None
+        node = {
+            "@type": "csvw:TableGroup",
+            "csvw:table": tables,
+        }
+        if isinstance(value.get("id"), str):
+            node["@id"] = value["id"]
+        if isinstance(value.get("url"), str):
+            node["csvw:url"] = value["url"]
+        if isinstance(value.get("name"), str):
+            node["schema:name"] = value["name"]
+        if isinstance(value.get("description"), str):
+            node["schema:description"] = value["description"]
+        return node
+    return None
+
+
+def _publication_html(payload: Mapping[str, Any], *, title: str | None = None) -> str:
+    graph = payload.get("@graph")
+    if isinstance(graph, list):
+        dataset_node = next(
+            (
+                node
+                for node in graph
+                if isinstance(node, Mapping) and (
+                    node.get("@type") == "schema:Dataset"
+                    or (isinstance(node.get("@type"), list) and "schema:Dataset" in node.get("@type"))
+                )
+            ),
+            None,
+        )
+    else:
+        dataset_node = payload if isinstance(payload, Mapping) else None
+    doc_title = title
+    if doc_title is None and isinstance(dataset_node, Mapping):
+        name = dataset_node.get("schema:name")
+        if isinstance(name, str):
+            doc_title = name
+    if doc_title is None:
+        doc_title = "BattINFO Publication"
+    payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
+    return (
+        "<!doctype html>\n"
+        "<html lang=\"en\">\n"
+        "<head>\n"
+        "  <meta charset=\"utf-8\" />\n"
+        f"  <title>{html.escape(doc_title)}</title>\n"
+        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+        "  <script type=\"application/ld+json\">\n"
+        f"{payload_json}\n"
+        "  </script>\n"
+        "</head>\n"
+        "<body></body>\n"
+        "</html>\n"
+    )
+
+
+def save_publication_html(
+    payload: Mapping[str, Any] | PathLike,
+    out_path: PathLike,
+    *,
+    title: str | None = None,
+) -> Path:
+    data = _load_json(_as_path(payload)) if isinstance(payload, (str, Path)) else dict(payload)
+    out = _as_path(out_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_publication_html(data, title=title), encoding="utf-8")
+    return out
+
+
 def _dataset_jsonld_node(
-    dataset_record: Mapping[str, Any],
+    dataset: Dataset,
     files: list[Path],
     dataset_dir: Path,
     test_id: str,
     cell_id: str,
 ) -> dict[str, Any]:
-    dataset = dataset_record["dataset"]
     about_refs = [{"@id": cell_id}, {"@id": test_id}]
     node: dict[str, Any] = {
-        "@id": dataset["id"],
+        "@id": dataset.id,
         "@type": "schema:Dataset",
-        "schema:identifier": dataset.get("identifier"),
-        "schema:name": dataset.get("name") or dataset.get("title"),
-        "schema:description": dataset.get("description"),
-        "schema:url": dataset_dir.resolve().as_uri(),
+        "schema:identifier": _schema_identifier_value(dataset.identifier),
+        "schema:name": dataset.name,
+        "schema:description": dataset.description,
+        "schema:url": dataset.access_url or dataset_dir.resolve().as_uri(),
         "schema:about": about_refs,
-        "schema:distribution": _distribution_entries(dataset_dir, files),
+        "schema:distribution": _publication_distribution_entries(dataset, dataset_dir, files),
     }
-    license_value = dataset.get("license")
-    if license_value is not None:
-        node["schema:license"] = license_value
+    if dataset.license is not None:
+        node["schema:license"] = dataset.license
+    if dataset.same_as:
+        node["schema:sameAs"] = list(dataset.same_as)
+    if dataset.additional_type:
+        node["schema:additionalType"] = list(dataset.additional_type)
+    if dataset.version is not None:
+        node["schema:version"] = dataset.version
+    if dataset.keywords:
+        node["schema:keywords"] = list(dataset.keywords)
+    if dataset.creators:
+        creators = [creator for item in dataset.creators if (creator := _schema_agent_node(item)) is not None]
+        if creators:
+            node["schema:creator"] = creators
+    if dataset.publisher is not None:
+        publisher = _schema_agent_node(dataset.publisher)
+        if publisher is not None:
+            node["schema:publisher"] = publisher
+    if dataset.funders:
+        funders = [funder for item in dataset.funders if (funder := _schema_agent_node(item)) is not None]
+        if funders:
+            node["schema:funder"] = funders
+    if dataset.citations:
+        citations = [citation for item in dataset.citations if (citation := _schema_citation_value(item)) is not None]
+        if citations:
+            node["schema:citation"] = citations
+    if dataset.measurement_techniques:
+        node["schema:measurementTechnique"] = list(dataset.measurement_techniques)
+    if dataset.measurement_methods:
+        node["schema:measurementMethod"] = list(dataset.measurement_methods)
+    if dataset.variable_measured:
+        variable_measured = _schema_variable_measured(dataset.variable_measured)
+        if variable_measured:
+            node["schema:variableMeasured"] = variable_measured
+    if dataset.is_accessible_for_free is not None:
+        node["schema:isAccessibleForFree"] = dataset.is_accessible_for_free
+    if dataset.conditions_of_access is not None:
+        node["schema:conditionsOfAccess"] = dataset.conditions_of_access
+    if dataset.in_language is not None:
+        node["schema:inLanguage"] = dataset.in_language
+    if dataset.created_at is not None:
+        node["schema:dateCreated"] = dataset.created_at
+    if dataset.modified_at is not None:
+        node["schema:dateModified"] = dataset.modified_at
+    if dataset.published_at is not None:
+        node["schema:datePublished"] = dataset.published_at
+    if dataset.temporal_coverage is not None:
+        node["schema:temporalCoverage"] = dataset.temporal_coverage
+    if dataset.spatial_coverage is not None:
+        node["schema:spatialCoverage"] = dataset.spatial_coverage
+    if dataset.is_based_on:
+        node["schema:isBasedOn"] = list(dataset.is_based_on)
+    if dataset.included_in_data_catalog is not None:
+        included_in_data_catalog = _schema_data_catalog_node(dataset.included_in_data_catalog)
+        if included_in_data_catalog is not None:
+            node["schema:includedInDataCatalog"] = included_in_data_catalog
+    if dataset.main_entity:
+        main_entity = [
+            main_entity_node
+            for item in dataset.main_entity
+            if (main_entity_node := _schema_main_entity_node(item)) is not None
+        ]
+        if main_entity:
+            node["schema:mainEntity"] = main_entity
     return _without_none(node)
 
 
@@ -266,7 +717,7 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
         description_value = [description_value, f"Protocol: {protocol_name}"]
     node: dict[str, Any] = {
         "@id": test["id"],
-        "@type": "schema:Action",
+        "@type": ["schema:Action", "BatteryTest"],
         "schema:identifier": test.get("identifier"),
         "schema:name": test.get("name"),
         "schema:description": description_value,
@@ -289,16 +740,17 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
 
 def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_type: CellType) -> dict[str, Any]:
     inst = cell_instance_record["cell_instance"]
-    type_list = ["schema:IndividualProduct", "BatteryCell", inst["type_id"]]
+    type_list = ["schema:IndividualProduct", "BatteryCell"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_type.format)
     if subclass_term is not None:
-        type_list.insert(2, subclass_term)
+        type_list.append(subclass_term)
     node: dict[str, Any] = {
         "@id": inst["id"],
         "@type": type_list,
         "schema:identifier": inst.get("short_id"),
         "schema:name": label,
         "schema:description": "Dataset-local cell instance included in the publication graph.",
+        "schema:isVariantOf": {"@id": inst["type_id"]},
     }
     if inst.get("serial_number"):
         node["schema:serialNumber"] = inst["serial_number"]
@@ -323,6 +775,17 @@ def _schema_source_node(source: ProvenanceInfo) -> dict[str, Any] | None:
     if source.comment is not None:
         node["schema:description"] = source.comment
     return node or None
+
+
+def _schema_citation_node(source: ProvenanceInfo) -> dict[str, Any] | None:
+    citation_url = _citation_url_value(source)
+    if citation_url is None:
+        return None
+    node: dict[str, Any] = {"@id": citation_url, "@type": "schema:CreativeWork"}
+    citation_doi = _citation_doi_value(source)
+    if citation_doi is not None:
+        node["bibo:doi"] = citation_doi
+    return node
 
 
 def _cell_type_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
@@ -354,14 +817,13 @@ def _cell_type_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
 
 
 def _cell_type_jsonld_node(cell_type: CellType, *, cell_specification: CellSpecification | None = None) -> dict[str, Any]:
-    subclass_of = [{"@id": "BatteryCell"}]
+    type_list = ["schema:ProductModel", "BatteryCell"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_type.format)
     if subclass_term is not None:
-        subclass_of.append({"@id": subclass_term})
+        type_list.append(subclass_term)
     node: dict[str, Any] = {
         "@id": cell_type.id,
-        "@type": OWL_CLASS_IRI,
-        RDFS_SUBCLASS_OF_IRI: subclass_of,
+        "@type": type_list,
         "schema:identifier": _tail_id(cell_type.id),
         "schema:name": cell_type.name,
         "schema:model": cell_type.model,
@@ -390,6 +852,9 @@ def _cell_type_jsonld_node(cell_type: CellType, *, cell_specification: CellSpeci
         ]
         if properties:
             node["hasProperty"] = properties
+    citation_node = _schema_citation_node(cell_type.source)
+    if citation_node is not None:
+        node["schema:citation"] = citation_node
     return _without_none(node)
 
 
@@ -427,6 +892,9 @@ def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, ce
     source_node = _schema_source_node(cell_specification.source)
     if source_node is not None:
         node["schema:isBasedOn"] = source_node
+    citation_node = _schema_citation_node(cell_specification.source)
+    if citation_node is not None:
+        node["schema:citation"] = citation_node
     return _without_none(node)
 
 
@@ -437,10 +905,20 @@ def _publication_graph(
     cell_instance_record: dict[str, Any],
     test_record: dict[str, Any],
     dataset_record: dict[str, Any],
+    dataset: Dataset,
     dataset_dir: Path,
     dataset_files: list[Path],
     instance_label: str,
 ) -> dict[str, Any]:
+    include_bibo = any(
+        _citation_doi_value(source) is not None
+        for source in (
+            cell_specification.source if cell_specification is not None else None,
+            cell_type.source,
+        )
+        if source is not None
+    )
+    include_csvw = bool(dataset.main_entity)
     graph = [_cell_type_jsonld_node(cell_type, cell_specification=cell_specification)]
     if cell_specification is not None:
         graph.append(_cell_specification_jsonld_node(cell_specification, cell_type=cell_type))
@@ -450,7 +928,7 @@ def _publication_graph(
     _upsert_graph_node(
         graph,
         _dataset_jsonld_node(
-            dataset_record,
+            dataset,
             files=dataset_files,
             dataset_dir=dataset_dir,
             test_id=test_record["test"]["id"],
@@ -467,8 +945,20 @@ def _publication_graph(
             "schema:hasPart": [{"@id": dataset_record["dataset"]["id"]}],
         }
     )
+    context: Any
+    if include_bibo or include_csvw:
+        context_entries: list[Any] = [DOMAIN_BATTERY_CONTEXT_URL]
+        local_context: dict[str, str] = {}
+        if include_bibo:
+            local_context["bibo"] = "http://purl.org/ontology/bibo/"
+        if include_csvw:
+            local_context["csvw"] = "http://www.w3.org/ns/csvw#"
+        context_entries.append(local_context)
+        context = context_entries
+    else:
+        context = DOMAIN_BATTERY_CONTEXT_URL
     return {
-        "@context": DOMAIN_BATTERY_CONTEXT_URL,
+        "@context": context,
         "@graph": graph,
     }
 
@@ -750,8 +1240,10 @@ def publish(
     cell_specification: CellSpecification | Mapping[str, Any] | PathLike | None = None,
     datasheet_path: PathLike | None = None,
     publish_filename: str = DEFAULT_PUBLISH_FILENAME,
+    html_filename: str = "index.html",
     dataset_glob: str = "**/*",
     emit_bundle_dir: bool = False,
+    emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
 ) -> dict[str, Any]:
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
@@ -787,6 +1279,7 @@ def publish(
         cell_instance_record=bundle.cell_instance.to_record(),
         test_record=bundle.test.to_record(),
         dataset_record=bundle.dataset.to_record(),
+        dataset=bundle.dataset,
         dataset_dir=dataset_dir,
         dataset_files=dataset_files,
         instance_label=bundle.cell_instance.name or dataset_dir.name,
@@ -803,11 +1296,19 @@ def publish(
         "dataset_dir": str(dataset_dir),
         "dataset_files": [str(path) for path in dataset_files],
         "publish_path": str(publish_path),
+        "triple_count": _triple_count(publish_payload),
         "cell_type_id": bundle.cell_type.id,
         "cell_instance_id": bundle.cell_instance.id,
         "test_id": bundle.test.id,
         "dataset_id": bundle.dataset.id,
     }
+    if emit_html_page:
+        html_path = save_publication_html(
+            publish_payload,
+            dataset_dir / html_filename,
+            title=bundle.dataset.name or bundle.bundle_name,
+        )
+        result["html_path"] = str(html_path)
     if normalized_cell_specification is not None:
         result["cell_specification_id"] = normalized_cell_specification.id
     if emit_bundle_dir:
@@ -842,9 +1343,11 @@ def publish_dataset_metadata(
     dataset_license: str | None = None,
     dataset_format: str = "application/vnd.battinfo.dataset-directory",
     publish_filename: str = DEFAULT_PUBLISH_FILENAME,
+    html_filename: str = "index.html",
     report_filename: str = DEFAULT_PUBLICATION_REPORT_FILENAME,
     dataset_glob: str = "**/*",
     emit_bundle_dir: bool = False,
+    emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
 ) -> dict[str, Any]:
     staging_root = _as_path(staging_root)
@@ -948,8 +1451,10 @@ def publish_dataset_metadata(
             test=test,
             dataset=dataset,
             publish_filename=publish_filename,
+            html_filename=html_filename,
             dataset_glob=dataset_glob,
             emit_bundle_dir=emit_bundle_dir,
+            emit_html_page=emit_html_page,
             validation_policy=validation_policy,
         )
 
@@ -961,6 +1466,8 @@ def publish_dataset_metadata(
             "dataset_id": publish_result["dataset_id"],
             "publish_path": publish_result["publish_path"],
         }
+        if emit_html_page:
+            result_entry["html_path"] = publish_result["html_path"]
         if emit_bundle_dir:
             result_entry.update(
                 {
@@ -1001,9 +1508,11 @@ def publish_cr2032_dataset_metadata(
     staging_root: PathLike,
     library_spec_path: PathLike = DEFAULT_CR2032_LIBRARY_SPEC,
     publish_filename: str = DEFAULT_PUBLISH_FILENAME,
+    html_filename: str = "index.html",
     report_filename: str = DEFAULT_CR2032_REPORT_FILENAME,
     dataset_glob: str = "**/*",
     emit_bundle_dir: bool = False,
+    emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
 ) -> dict[str, Any]:
     dataset_dir_paths = [_as_path(path) for path in (dataset_dirs or DEFAULT_CR2032_DATASET_DIRS)]
@@ -1028,9 +1537,11 @@ def publish_cr2032_dataset_metadata(
             "{cell_type_name} constant-current discharge run."
         ),
         publish_filename=publish_filename,
+        html_filename=html_filename,
         report_filename=report_filename,
         dataset_glob=dataset_glob,
         emit_bundle_dir=emit_bundle_dir,
+        emit_html_page=emit_html_page,
         validation_policy=validation_policy,
     )
 
@@ -1052,4 +1563,5 @@ __all__ = [
     "publish",
     "publish_cr2032_dataset_metadata",
     "publish_dataset_metadata",
+    "save_publication_html",
 ]

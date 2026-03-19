@@ -81,7 +81,7 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     return sorted(directory.glob("*.json"))
 
 
-def _registration_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
+def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     filename = f"{entity_type}-{uid}.json" if entity_type != "cell-type" else f"cell-type-{uid}.json"
     if entity_type == "cell-type":
         return source_root / "cell-types" / filename
@@ -96,7 +96,7 @@ def _registration_entity_path(entity_type: str, uid: str, source_root: Path) -> 
 
 def _find_record(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
     entity_type, uid = _iri_tail(entity_id)
-    expected = _registration_entity_path(entity_type, uid, source_root)
+    expected = _save_entity_path(entity_type, uid, source_root)
     if expected.exists():
         try:
             doc = _load_json(expected)
@@ -126,9 +126,12 @@ def _check_reference(
     resource_type: str | None,
     missing_message: str,
     mismatch_message: str,
+    allow_missing: bool = False,
 ) -> None:
     found = _find_record(ref_id, source_root)
     if found is None:
+        if allow_missing:
+            return
         issues.append(
             ValidationIssue(
                 code="reference.missing",
@@ -159,6 +162,7 @@ def validate_references_report(
     source_root: str | Path,
     *,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
+    allow_missing: bool = False,
 ) -> ValidationReport:
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     if resolved_policy.references == "off":
@@ -190,19 +194,10 @@ def validate_references_report(
                     "Referenced cell_type must resolve to a cell-type record in source_root. "
                     f"Found a different record type for: {type_id}"
                 ),
+                allow_missing=allow_missing,
             )
 
         dataset_ids: list[tuple[str, str]] = []
-        provenance = doc.get("provenance", {})
-        if isinstance(provenance, Mapping):
-            if isinstance(provenance.get("dataset_id"), str):
-                dataset_ids.append(("provenance.dataset_id", provenance["dataset_id"]))
-            if isinstance(provenance.get("dataset_ids"), list):
-                dataset_ids.extend(
-                    (f"provenance.dataset_ids[{idx}]", dataset_id)
-                    for idx, dataset_id in enumerate(provenance["dataset_ids"])
-                    if isinstance(dataset_id, str)
-                )
         datasets = doc.get("datasets", [])
         if isinstance(datasets, list):
             dataset_ids.extend(
@@ -210,6 +205,18 @@ def validate_references_report(
                 for idx, dataset in enumerate(datasets)
                 if isinstance(dataset, Mapping) and isinstance(dataset.get("id"), str)
             )
+        else:
+            provenance = doc.get("provenance", {})
+            # Backward compatibility for legacy records that stored dataset links under provenance.
+            if isinstance(provenance, Mapping):
+                if isinstance(provenance.get("dataset_id"), str):
+                    dataset_ids.append(("provenance.dataset_id", provenance["dataset_id"]))
+                if isinstance(provenance.get("dataset_ids"), list):
+                    dataset_ids.extend(
+                        (f"provenance.dataset_ids[{idx}]", dataset_id)
+                        for idx, dataset_id in enumerate(provenance["dataset_ids"])
+                        if isinstance(dataset_id, str)
+                    )
         for path, dataset_id in dataset_ids:
             _check_reference(
                 issues=issues,
@@ -226,6 +233,7 @@ def validate_references_report(
                     "Referenced dataset must resolve to a dataset record in source_root. "
                     f"Found a different record type for: {dataset_id}"
                 ),
+                allow_missing=allow_missing,
             )
 
     if isinstance(doc.get("test"), Mapping):
@@ -246,6 +254,7 @@ def validate_references_report(
                     "Referenced cell must resolve to a cell-instance record in source_root. "
                     f"Found a different record type for: {cell_id}"
                 ),
+                allow_missing=allow_missing,
             )
         dataset_ids = doc["test"].get("dataset_ids")
         if isinstance(dataset_ids, list):
@@ -267,6 +276,7 @@ def validate_references_report(
                         "Referenced dataset must resolve to a dataset record in source_root. "
                         f"Found a different record type for: {dataset_id}"
                     ),
+                    allow_missing=allow_missing,
                 )
 
     if isinstance(doc.get("dataset"), Mapping):
@@ -291,6 +301,7 @@ def validate_references_report(
                             "Referenced cell must resolve to a cell-instance record in source_root. "
                             f"Found a different record type for: {ref_id}"
                         ),
+                        allow_missing=allow_missing,
                     )
                 elif TEST_IRI_RE.fullmatch(ref_id):
                     _check_reference(
@@ -308,6 +319,7 @@ def validate_references_report(
                             "Referenced test must resolve to a test record in source_root. "
                             f"Found a different record type for: {ref_id}"
                         ),
+                        allow_missing=allow_missing,
                     )
 
         legacy_related = doc["dataset"].get("related_entities", {})
@@ -330,6 +342,7 @@ def validate_references_report(
                         "Referenced cell must resolve to a cell-instance record in source_root. "
                         f"Found a different record type for: {ref_id}"
                     ),
+                    allow_missing=allow_missing,
                 )
 
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)

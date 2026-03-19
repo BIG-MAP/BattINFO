@@ -33,22 +33,19 @@
       "required": ["source_type"],
       "properties": {
         "source_type": { "type": "string", "enum": ["measurement", "lab", "bms", "other"] },
-        "dataset_id": {
-          "oneOf": [
-            { "$ref": "#/$defs/DatasetIri" },
-            { "type": "null" }
-          ]
-        },
-        "dataset_ids": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/DatasetIri" },
-          "uniqueItems": true
-        },
         "source_url": {
           "oneOf": [
             { "type": "string", "format": "uri" },
             { "type": "null" }
           ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
         },
         "retrieved_at": { "$ref": "#/$defs/UnixTime" }
       }

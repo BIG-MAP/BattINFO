@@ -19,7 +19,7 @@
     "chemistry": "Li-ion",
     "positiveElectrodeBasis": "LFP",
     "negativeElectrodeBasis": "unknown",
-    "sizeCode": "26650"
+    "sizeCode": "R26650"
   },
   "specs": {
     "nominal_capacity": {

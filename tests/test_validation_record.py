@@ -49,6 +49,14 @@ def test_validate_record_report_includes_reference_issues_when_source_root_provi
     assert any(issue.code == "reference.missing" for issue in report.errors)
 
 
+def test_validate_record_report_rejects_dataset_without_cell_link() -> None:
+    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["about"] = ["https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"]
+    report = validate_record_report(doc, policy=STRICT)
+    assert not report.ok
+    assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.errors)
+
+
 def test_validate_record_result_preserves_issue_metadata() -> None:
     doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["short_id"] = "xxxxxx"
@@ -64,3 +72,13 @@ def test_validate_record_accepts_named_policy_string() -> None:
     result = validate_record(doc, policy="strict")
     assert not result.ok
     assert result.policy == "strict"
+
+
+def test_validate_record_report_rejects_invalid_size_code_shape() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc["product"]["sizeCode"] = "26650"
+    report = validate_record_report(doc, policy=STRICT)
+    assert not report.ok
+    codes = {issue.code for issue in report.errors}
+    assert "schema.pattern" in codes
+    assert "semantic.size_code_invalid" in codes

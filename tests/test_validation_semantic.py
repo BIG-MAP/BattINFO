@@ -59,6 +59,21 @@ def test_semantic_validation_rejects_invalid_dataset_temporal_order_and_checksum
     assert "semantic.checksum_invalid" in codes
 
 
+def test_semantic_validation_rejects_dataset_without_cell_link() -> None:
+    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["about"] = ["https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"]
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not report.ok
+    assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.errors)
+
+
+def test_semantic_validation_allows_dataset_without_test_link_when_cell_is_present() -> None:
+    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["about"] = ["https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"]
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert report.ok
+
+
 def test_semantic_validation_warns_for_unmapped_controlled_value() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
     doc["product"]["chemistry"] = "VeryNewChem"
@@ -75,3 +90,19 @@ def test_semantic_validation_defaults_to_warning_mode_for_hard_rules() -> None:
     assert report.ok
     assert report.warnings
     assert report.warnings[0].code == "semantic.short_id_mismatch"
+
+
+def test_semantic_validation_rejects_size_code_without_round_or_pouch_prefix() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc["product"]["sizeCode"] = "26650"
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not report.ok
+    assert any(issue.code == "semantic.size_code_invalid" for issue in report.errors)
+
+
+def test_semantic_validation_rejects_size_code_prefix_mismatch_for_format() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc["product"]["sizeCode"] = "P20/50/50"
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not report.ok
+    assert any(issue.code == "semantic.size_code_prefix_mismatch" for issue in report.errors)

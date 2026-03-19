@@ -164,7 +164,8 @@
           ]
         },
         "sizeCode": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[RP][A-Za-z0-9]+(?:[/-][A-Za-z0-9]+)*$"
         },
         "chemistry": {
           "type": "string",
@@ -212,6 +213,14 @@
               "type": "null"
             }
           ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
         },
         "file_hash": {
           "type": "string",

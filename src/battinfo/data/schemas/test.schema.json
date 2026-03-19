@@ -51,6 +51,11 @@
             "cycle_life",
             "capacity_check",
             "rate_capability",
+            "hppc",
+            "ici",
+            "gitt",
+            "dcir",
+            "eis",
             "impedance",
             "calendar_ageing",
             "formation",
@@ -120,6 +125,14 @@
               "type": "null"
             }
           ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
         },
         "source_file": {
           "type": "string"

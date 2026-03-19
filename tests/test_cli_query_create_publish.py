@@ -22,7 +22,7 @@ def test_query_cell_types_json() -> None:
             "--manufacturer",
             "A123",
             "--chemistry",
-            "LFP",
+            "Li-ion",
             "--limit",
             "5",
             "--format",
@@ -33,6 +33,126 @@ def test_query_cell_types_json() -> None:
     payload = json.loads(result.stdout)
     assert payload["resource"] == "cell-types"
     assert payload["count"] >= 1
+
+
+def test_query_tests_json() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "query",
+            "tests",
+            "--kind",
+            "hppc",
+            "--limit",
+            "5",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["resource"] == "tests"
+    assert payload["count"] >= 1
+    assert all(item["kind"] == "hppc" for item in payload["items"])
+
+
+def test_query_tests_by_cell_and_dataset_json() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "query",
+            "tests",
+            "--cell-id",
+            "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+            "--dataset-id",
+            "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["resource"] == "tests"
+    assert payload["count"] >= 1
+    assert all(item["cell_id"] == "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8" for item in payload["items"])
+    assert all("https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x" in item["dataset_ids"] for item in payload["items"])
+
+
+def test_query_datasets_by_related_cell_and_test_json() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "query",
+            "datasets",
+            "--related-cell-id",
+            "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+            "--related-test-id",
+            "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["resource"] == "datasets"
+    assert payload["count"] >= 1
+    assert all(
+        "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8" in item["related_cell_ids"] for item in payload["items"]
+    )
+    assert all(
+        "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r" in item["related_test_ids"] for item in payload["items"]
+    )
+
+
+def test_save_record_with_resolve_references_defers_missing_targets(tmp_path: Path) -> None:
+    runner = CliRunner()
+    source_root = tmp_path / "examples"
+    cell_instance_path = tmp_path / "cell-instance.json"
+    cell_instance_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.0",
+                "cell_instance": {
+                    "id": "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x",
+                    "type_id": "https://w3id.org/battinfo/cell-type/eysh-4h5s-k4bx-zkgg",
+                    "short_id": "1f8r6v",
+                },
+                "provenance": {
+                    "source_type": "measurement",
+                    "retrieved_at": 1771804800,
+                },
+                "datasets": [
+                    {
+                        "id": "https://w3id.org/battinfo/dataset/87fr-c4vr-wfyh-21td",
+                        "role": "raw",
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "save",
+            "record",
+            "--input",
+            str(cell_instance_path),
+            "--source-root",
+            str(source_root),
+            "--resolve-references",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "created"
 
 
 def test_validate_defaults_to_battery_descriptor_profile() -> None:
@@ -164,7 +284,7 @@ def test_validate_json_output_failure_has_structured_issue_metadata() -> None:
     assert any(issue["code"] == "semantic.short_id_mismatch" for issue in payload["issues"])
 
 
-def test_register_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> None:
+def test_save_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> None:
     runner = CliRunner()
     bad_path = tmp_path / "bad-test.json"
     source = json.loads(
@@ -176,7 +296,7 @@ def test_register_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -
     result = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "record",
             "--input",
             str(bad_path),
@@ -356,14 +476,14 @@ def test_index_build_and_stats_json(tmp_path: Path) -> None:
     assert stats_payload["dataset_count"] == build_payload["dataset_count"]
 
 
-def test_register_cli_flow_json(tmp_path: Path) -> None:
+def test_save_cli_flow_json(tmp_path: Path) -> None:
     runner = CliRunner()
     source_root = tmp_path / "examples"
 
     reg_type = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "cell-type",
             "--manufacturer",
             "Duracell",
@@ -391,7 +511,7 @@ def test_register_cli_flow_json(tmp_path: Path) -> None:
     reg_cell = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "cell-instance",
             "--type-id",
             type_id,
@@ -414,7 +534,7 @@ def test_register_cli_flow_json(tmp_path: Path) -> None:
     reg_test = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "test",
             "--cell-id",
             cell_payload["id"],
@@ -439,7 +559,7 @@ def test_register_cli_flow_json(tmp_path: Path) -> None:
     reg_dataset = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "dataset",
             "--title",
             "MN1500 CLI Dataset",
@@ -462,7 +582,7 @@ def test_register_cli_flow_json(tmp_path: Path) -> None:
     assert dataset_payload["status"] == "created"
 
 
-def test_register_batch_cli_json(tmp_path: Path) -> None:
+def test_save_batch_cli_json(tmp_path: Path) -> None:
     runner = CliRunner()
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
@@ -573,7 +693,7 @@ def test_register_batch_cli_json(tmp_path: Path) -> None:
     reg_batch = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "batch",
             "--source-dir",
             str(cell_types_dir),
@@ -600,7 +720,7 @@ def test_register_batch_cli_json(tmp_path: Path) -> None:
     reg_batch_again = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "batch",
             "--source-dir",
             str(cell_types_dir),
@@ -625,7 +745,7 @@ def test_register_batch_cli_json(tmp_path: Path) -> None:
     assert batch_payload_again["failed"] == 0
 
 
-def test_template_cli_then_register_record(tmp_path: Path) -> None:
+def test_template_cli_then_save_record(tmp_path: Path) -> None:
     runner = CliRunner()
     source_root = tmp_path / "examples"
     cell_type_path = tmp_path / "cell-type.template.json"
@@ -660,7 +780,7 @@ def test_template_cli_then_register_record(tmp_path: Path) -> None:
     reg_type = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "record",
             "--input",
             str(cell_type_path),
@@ -697,7 +817,7 @@ def test_template_cli_then_register_record(tmp_path: Path) -> None:
     reg_cell = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "record",
             "--input",
             str(cell_instance_path),
@@ -736,7 +856,7 @@ def test_template_cli_then_register_record(tmp_path: Path) -> None:
     reg_test = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "record",
             "--input",
             str(test_path),
@@ -777,7 +897,7 @@ def test_template_cli_then_register_record(tmp_path: Path) -> None:
     reg_dataset = runner.invoke(
         app,
         [
-            "register",
+            "save",
             "record",
             "--input",
             str(dataset_path),
@@ -793,7 +913,7 @@ def test_template_cli_then_register_record(tmp_path: Path) -> None:
     assert dataset_payload["status"] == "created"
 
 
-def test_library_cli_template_register_query_build_rdf(tmp_path: Path) -> None:
+def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
     runner = CliRunner()
     template_path = tmp_path / "A123__ANR26650M1-B.json"
     library_root = tmp_path / "library" / "cell-types"
@@ -840,11 +960,11 @@ def test_library_cli_template_register_query_build_rdf(tmp_path: Path) -> None:
     }
     template_path.write_text(json.dumps(template_doc, indent=2) + "\n", encoding="utf-8")
 
-    register_result = runner.invoke(
+    save_result = runner.invoke(
         app,
         [
             "library",
-            "register",
+            "save",
             "cell-type",
             "--input",
             str(template_path),
@@ -856,11 +976,11 @@ def test_library_cli_template_register_query_build_rdf(tmp_path: Path) -> None:
             "json",
         ],
     )
-    assert register_result.exit_code == 0, register_result.stdout
-    register_payload = json.loads(register_result.stdout)
-    assert register_payload["status"] == "created"
-    assert Path(register_payload["path"]).exists()
-    assert Path(register_payload["package_path"]).exists()
+    assert save_result.exit_code == 0, save_result.stdout
+    save_payload = json.loads(save_result.stdout)
+    assert save_payload["status"] == "created"
+    assert Path(save_payload["path"]).exists()
+    assert Path(save_payload["package_path"]).exists()
 
     query_result = runner.invoke(
         app,
@@ -905,3 +1025,5 @@ def test_library_cli_template_register_query_build_rdf(tmp_path: Path) -> None:
     assert build_payload["entry_count"] == 1
     assert aggregate_jsonld.exists()
     assert manifest_json.exists()
+
+

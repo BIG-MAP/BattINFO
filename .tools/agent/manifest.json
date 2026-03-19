@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "repo": {
+    "name": "BattINFO",
+    "python": ">=3.10",
+    "status": "alpha-ready-scope"
+  },
+  "install": {
+    "venv": "python -m venv .venv",
+    "bootstrap": [
+      ".\\.venv\\Scripts\\python -m pip install --upgrade pip setuptools wheel",
+      ".\\.venv\\Scripts\\python -m pip install -e .[dev]"
+    ]
+  },
+  "verification": {
+    "primary": ".\\.venv\\Scripts\\python .tools/quality/run_alpha_verification.py",
+    "machine_readable": ".\\.venv\\Scripts\\python .tools/quality/run_alpha_verification.py --report-json .battinfo/reports/alpha-verification.json",
+    "focused": [
+      ".\\.venv\\Scripts\\python -m pytest -q tests/test_workspace.py",
+      ".\\.venv\\Scripts\\python -m pytest -q tests/test_bundle.py",
+      ".\\.venv\\Scripts\\python tests/installed_smoke.py"
+    ]
+  },
+  "preferred_surfaces": {
+    "workflow_api": "src/battinfo/workspace.py",
+    "authoring_api": "src/battinfo/authoring.py",
+    "public_exports": "src/battinfo/__init__.py",
+    "low_level_api": "src/battinfo/api.py"
+  },
+  "alpha_scope": {
+    "supported_cases": [
+      "simple commercial cell",
+      "detailed cell description",
+      "battery test",
+      "battery dataset"
+    ],
+    "required_test_kinds": [
+      "cycle_life",
+      "rate_capability",
+      "formation",
+      "hppc",
+      "ici",
+      "gitt",
+      "dcir",
+      "eis"
+    ]
+  },
+  "source_of_truth": {
+    "canonical_assets": "assets",
+    "packaged_assets": "src/battinfo/data",
+    "tests": "tests",
+    "notebooks": "notebooks"
+  },
+  "safe_write_roots": [
+    ".battinfo"
+  ],
+  "avoid": [
+    "raw nested dict authoring in notebooks",
+    "sys.path notebook scaffolding",
+    "editing packaged copies without syncing canonical assets"
+  ],
+  "docs": {
+    "agent_guide": "AGENTS.md",
+    "readme": "README.md",
+    "alpha_scope": "docs/alpha-scope.md",
+    "python_api": "docs/python-api.md",
+    "notebooks": "notebooks/README.md"
+  }
+}

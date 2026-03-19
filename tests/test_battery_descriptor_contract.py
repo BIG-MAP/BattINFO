@@ -54,3 +54,18 @@ def test_battery_descriptor_schema_files_are_synced_between_assets_and_package()
         pkg_doc = json.loads(pkg_path.read_text(encoding="utf-8"))
         assert src_doc == pkg_doc, f"Schema drift detected for {rel}"
 
+
+def test_battery_descriptor_examples_are_synced_between_assets_and_package() -> None:
+    assets_root = ROOT / "assets" / "examples" / "battery-descriptors"
+    package_root = ROOT / "src" / "battinfo" / "data" / "examples" / "battery-descriptors"
+
+    tracked = sorted(assets_root.glob("*.example.json"))
+    assert tracked, f"No battery-descriptor examples found in {assets_root}"
+
+    for src_path in tracked:
+        pkg_path = package_root / src_path.name
+        assert pkg_path.exists(), f"Missing packaged example copy: {pkg_path}"
+
+        src_doc = json.loads(src_path.read_text(encoding="utf-8"))
+        pkg_doc = json.loads(pkg_path.read_text(encoding="utf-8"))
+        assert src_doc == pkg_doc, f"Example drift detected for {src_path.name}"

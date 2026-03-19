@@ -6,6 +6,7 @@ from typing import Any
 
 import typer
 
+from battinfo.runtime import recover_notebook_runtime
 from battinfo.api import (
     CellSpecificationInput,
     CellInstanceInput,
@@ -24,19 +25,20 @@ from battinfo.api import (
     query_tests as api_query_tests,
     query_cell_types as api_query_cell_types,
     query_datasets as api_query_datasets,
-    register_batch as api_register_batch,
-    register_cell_instance as api_register_cell_instance,
-    register_cell_type as api_register_cell_type,
-    register_dataset as api_register_dataset,
-    register_library_cell_type as api_register_library_cell_type,
-    register_test as api_register_test,
-    register_record as api_register_record,
+    save_batch as api_save_batch,
+    save_cell_instance as api_save_cell_instance,
+    save_cell_type as api_save_cell_type,
+    save_dataset as api_save_dataset,
+    save_library_cell_type as api_save_library_cell_type,
+    save_test as api_save_test,
+    save_record as api_save_record,
     template_cell_specification as api_template_cell_specification,
     template_cell_instance as api_template_cell_instance,
     template_cell_type as api_template_cell_type,
     template_dataset as api_template_dataset,
     template_test as api_template_test,
 )
+from battinfo.local_workspace import LocalWorkspace
 from battinfo.workflows.map import run_mapping
 from battinfo.validate import get_validation_policy
 from battinfo.validate.pydantic import validate_json
@@ -47,22 +49,26 @@ query_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Query 
 create_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Create BattINFO resources.")
 publish_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Publish BattINFO resolver artifacts.")
 index_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Build and inspect BattINFO indexes.")
-register_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Register canonical BattINFO resources.")
+save_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Save canonical BattINFO resources locally.")
 template_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Generate starter templates.")
 library_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage reusable BattINFO library records.")
 library_query_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Query reusable library records.")
-library_register_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Register reusable library records.")
+library_save_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Save reusable BattINFO library records locally.")
 library_template_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Generate reusable library templates.")
+workspace_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Author BattINFO workspaces on disk.")
+notebook_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Notebook runtime recovery helpers.")
 
 app.add_typer(query_app, name="query")
 app.add_typer(create_app, name="create")
 app.add_typer(publish_app, name="publish")
 app.add_typer(index_app, name="index")
-app.add_typer(register_app, name="register")
+app.add_typer(save_app, name="save")
 app.add_typer(template_app, name="template")
 app.add_typer(library_app, name="library")
+app.add_typer(workspace_app, name="workspace")
+app.add_typer(notebook_app, name="notebook")
 library_app.add_typer(library_query_app, name="query")
-library_app.add_typer(library_register_app, name="register")
+library_app.add_typer(library_save_app, name="save")
 library_app.add_typer(library_template_app, name="template")
 
 
@@ -120,7 +126,7 @@ def _check_validation_output_format(output_format: str) -> str:
     return fmt
 
 
-def _check_register_mode(mode: str) -> str:
+def _check_save_mode(mode: str) -> str:
     value = mode.lower().strip()
     if value not in {"create_only", "upsert"}:
         raise typer.BadParameter("--mode must be 'create_only' or 'upsert'.")
@@ -140,6 +146,25 @@ def _check_validation_policy(policy: str) -> str:
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
     return resolved.name
+
+
+def _check_workspace_output_format(output_format: str) -> str:
+    fmt = output_format.lower().strip()
+    if fmt not in {"json", "text"}:
+        raise typer.BadParameter("--format must be 'json' or 'text'.")
+    return fmt
+
+
+def _render_notebook_recovery(payload: dict[str, Any]) -> None:
+    typer.echo(f"Project root: {payload['project_root']}")
+    typer.echo(f"Kernel processes found: {payload['kernel_process_count']}")
+    typer.echo(f"Processes terminated: {payload['terminated_pid_count']}")
+    typer.echo(f"Processes killed: {payload['killed_pid_count']}")
+    typer.echo(f"Remaining processes: {payload['remaining_pid_count']}")
+    if payload["cleared_runtime_paths"]:
+        typer.echo("Cleared runtime state:")
+        for path in payload["cleared_runtime_paths"]:
+            typer.echo(f"- {path}")
 
 
 def _init_example_document(profile: str) -> dict[str, Any]:
@@ -275,6 +300,108 @@ def init(
             encoding="utf-8",
         )
     typer.echo(f"Initialized {project_dir}")
+
+
+@workspace_app.command("init")
+def workspace_init(
+    workspace_dir: Path = typer.Argument(...),
+    force: bool = typer.Option(False, "--force", help="Overwrite an existing non-empty workspace directory."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Initialize a disk-backed BattINFO workspace scaffold."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        workspace = LocalWorkspace.init(workspace_dir, force=force)
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    payload = {
+        "status": "initialized",
+        "workspace_root": str(workspace.root),
+        "manifest_path": str(workspace.manifest_path),
+    }
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Initialized workspace at {workspace.root}")
+
+
+@workspace_app.command("validate")
+def workspace_validate(
+    workspace_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
+    policy: str = typer.Option("strict", help="Validation policy: default|strict|publisher|ingest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Validate a disk-backed BattINFO workspace and write dist/validation-report.json."""
+    fmt = _check_workspace_output_format(output_format)
+    policy_name = _check_validation_policy(policy)
+    report = LocalWorkspace(workspace_dir).validate(policy=policy_name, write_report=True)
+
+    if fmt == "json":
+        _emit_json(report)
+    else:
+        typer.echo("Validation passed." if report["ok"] else "Validation failed.")
+        typer.echo(f"Report: {Path(workspace_dir) / 'dist' / 'validation-report.json'}")
+        typer.echo(f"Issues: {report['issue_count']}")
+    raise typer.Exit(code=0 if report["ok"] else 1)
+
+
+@workspace_app.command("bundle")
+def workspace_bundle(
+    workspace_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
+    policy: str = typer.Option("strict", help="Validation policy: default|strict|publisher|ingest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Bundle a disk-backed BattINFO workspace into dist artifacts."""
+    fmt = _check_workspace_output_format(output_format)
+    policy_name = _check_validation_policy(policy)
+    try:
+        payload = LocalWorkspace(workspace_dir).bundle(policy=policy_name)
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Bundled workspace at {workspace_dir}")
+    typer.echo(f"Registry intake: {payload['registry_intake_path']}")
+
+
+@notebook_app.command("recover")
+def notebook_recover(
+    project_root: Path = typer.Option(Path("."), "--project-root", file_okay=False, dir_okay=True, readable=True),
+    venv_path: Path = typer.Option(Path(".venv"), "--venv-path", help="Relative or absolute venv root."),
+    clear_local_runtime: bool = typer.Option(
+        True,
+        "--clear-local-runtime/--keep-local-runtime",
+        help="Remove local .jupyter-runtime-test state after stopping kernels.",
+    ),
+    force_kill: bool = typer.Option(
+        True,
+        "--force-kill/--no-force-kill",
+        help="Force-kill repo-local notebook kernels that do not exit after terminate().",
+    ),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Recover from a stuck VS Code notebook restart by stopping repo-local ipykernel processes."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = recover_notebook_runtime(
+            project_root=project_root,
+            venv_path=venv_path,
+            clear_local_runtime=clear_local_runtime,
+            force_kill=force_kill,
+        )
+    except RuntimeError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _render_notebook_recovery(payload)
 
 
 @app.command()
@@ -612,8 +739,8 @@ def library_query_cell_types(
     )
 
 
-@library_register_app.command("cell-type")
-def library_register_cell_type(
+@library_save_app.command("cell-type")
+def library_save_cell_type(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical cell-specification JSON."
     ),
@@ -647,13 +774,13 @@ def library_register_cell_type(
         Path("src/battinfo/data/library/cell-types"),
         help="Packaged reusable library cell-specification directory.",
     ),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate cell specification before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate cell specification before saving."),
     sync_packaged_copy: bool = typer.Option(
-        True, "--sync-packaged-copy/--no-sync-packaged-copy", help="Sync the registered cell specification into package data."
+        True, "--sync-packaged-copy/--no-sync-packaged-copy", help="Sync the saved cell specification into package data."
     ),
-    build_rdf: bool = typer.Option(False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after registration."),
+    build_rdf: bool = typer.Option(False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after saving."),
     output_jsonld_dir: Path = typer.Option(
         Path("assets/library-rdf/cell-types"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
@@ -667,12 +794,12 @@ def library_register_cell_type(
         help="Path for the generated library manifest JSON.",
     ),
     clean_output: bool = typer.Option(False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register a reusable library cell type from cell-specification JSON or inline fields."""
+    """Save a reusable library cell type from cell-specification JSON or inline fields."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     try:
         if input_path is not None:
@@ -704,7 +831,7 @@ def library_register_cell_type(
                 source_file=source_file,
                 source_url=source_url,
             )
-        payload = api_register_library_cell_type(
+        payload = api_save_library_cell_type(
             draft_obj,
             library_root=library_dir,
             package_root=packaged_dir,
@@ -1014,34 +1141,36 @@ def create_cell_instance(
     _emit_table([payload], ["status", "resource", "id", "type_id", "path"])
 
 
-@register_app.command("record")
-def register_record(
+@save_app.command("record")
+def save_record(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True),
     source_root: Path = typer.Option(
         Path("assets/examples"),
         help="Root directory containing cell-types, cell-instances, and datasets.",
     ),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
-        True, "--resolve-references/--no-resolve-references", help="Resolve linked IDs against source_root."
+        True,
+        "--resolve-references/--no-resolve-references",
+        help="Best-effort reference checks at save time; full link integrity is enforced by batch/index validation.",
     ),
-    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after registration."),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     build_jsonld: bool = typer.Option(True, "--build-jsonld/--no-build-jsonld", help="Publish JSON-LD artifact."),
     build_html: bool = typer.Option(True, "--build-html/--no-build-html", help="Publish HTML artifact."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register one canonical BattINFO record from JSON."""
+    """Save one canonical BattINFO record from JSON."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     try:
-        payload = api_register_record(
+        payload = api_save_record(
             input_path,
             source_root=source_root,
             mode=reg_mode,
@@ -1064,8 +1193,8 @@ def register_record(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
-@register_app.command("batch")
-def register_batch(
+@save_app.command("batch")
+def save_batch(
     source_dir: list[Path] = typer.Option(
         [],
         "--source-dir",
@@ -1077,26 +1206,28 @@ def register_batch(
     ),
     source_root: Path = typer.Option(
         Path("assets/examples"),
-        help="Root directory containing canonical resources for registration targets.",
+        help="Root directory containing canonical resources for save targets.",
     ),
     glob: str = typer.Option("*.json", help="File glob for batch inputs."),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
-        True, "--resolve-references/--no-resolve-references", help="Resolve linked IDs against source_root."
+        True,
+        "--resolve-references/--no-resolve-references",
+        help="Allow deferred writes, then validate the resulting source tree as a set.",
     ),
-    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after registration."),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     build_jsonld: bool = typer.Option(True, "--build-jsonld/--no-build-jsonld", help="Publish JSON-LD artifact."),
     build_html: bool = typer.Option(True, "--build-html/--no-build-html", help="Publish HTML artifact."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate records before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate records before saving."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register a deterministic batch of canonical JSON records."""
+    """Save a deterministic batch of canonical JSON records."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     kwargs: dict[str, Any] = {
@@ -1115,15 +1246,15 @@ def register_batch(
     }
     if source_dir:
         kwargs["source_dirs"] = source_dir
-    payload = api_register_batch(**kwargs)
+    payload = api_save_batch(**kwargs)
     if fmt == "json":
         _emit_json(payload)
         return
     _emit_table([payload], ["status", "processed", "created", "updated", "exists", "dry_run", "failed"])
 
 
-@register_app.command("cell-type")
-def register_cell_type(
+@save_app.command("cell-type")
+def save_cell_type(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
@@ -1138,19 +1269,19 @@ def register_cell_type(
     specs_path: Path | None = typer.Option(
         None, "--specs", exists=True, file_okay=True, dir_okay=False, readable=True, help="Optional specs JSON object."
     ),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Registration source root."),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
-    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after registration."),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register a cell-type using either --input JSON or inline draft fields."""
+    """Save a cell-type using either --input JSON or inline draft fields."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     try:
@@ -1176,7 +1307,7 @@ def register_cell_type(
                 source_file=source_file,
                 source_url=source_url,
             )
-        payload = api_register_cell_type(
+        payload = api_save_cell_type(
             draft_obj,
             source_root=source_root,
             mode=reg_mode,
@@ -1197,8 +1328,8 @@ def register_cell_type(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
-@register_app.command("cell-instance")
-def register_cell_instance(
+@save_app.command("cell-instance")
+def save_cell_instance(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
@@ -1207,22 +1338,22 @@ def register_cell_instance(
     dataset_id: list[str] = typer.Option([], "--dataset-id", help="Optional linked dataset IRI. Repeat for multiple."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Registration source root."),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
         True, "--resolve-references/--no-resolve-references", help="Resolve linked IDs against source_root."
     ),
-    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after registration."),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register a cell-instance using either --input JSON or inline draft fields."""
+    """Save a cell-instance using either --input JSON or inline draft fields."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     try:
@@ -1239,7 +1370,7 @@ def register_cell_instance(
                 dataset_id=(dataset_id[0] if dataset_id else None),
                 dataset_ids=(dataset_id[1:] if len(dataset_id) > 1 else []),
             )
-        payload = api_register_cell_instance(
+        payload = api_save_cell_instance(
             draft_obj,
             source_root=source_root,
             mode=reg_mode,
@@ -1260,8 +1391,8 @@ def register_cell_instance(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
-@register_app.command("dataset")
-def register_dataset(
+@save_app.command("dataset")
+def save_dataset(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
@@ -1276,22 +1407,22 @@ def register_dataset(
     checksum_algorithm: str | None = typer.Option(None, help="Checksum algorithm (sha256|sha512|md5|other)."),
     checksum_value: str | None = typer.Option(None, help="Checksum value."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Registration source root."),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
         True, "--resolve-references/--no-resolve-references", help="Resolve linked IDs against source_root."
     ),
-    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after registration."),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register a dataset using either --input JSON or inline draft fields."""
+    """Save a dataset using either --input JSON or inline draft fields."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     try:
@@ -1315,7 +1446,7 @@ def register_dataset(
                 checksum_algorithm=checksum_algorithm,  # type: ignore[arg-type]
                 checksum_value=checksum_value,
             )
-        payload = api_register_dataset(
+        payload = api_save_dataset(
             draft_obj,
             source_root=source_root,
             mode=reg_mode,
@@ -1336,8 +1467,8 @@ def register_dataset(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
-@register_app.command("test")
-def register_test(
+@save_app.command("test")
+def save_test(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
@@ -1351,22 +1482,22 @@ def register_test(
     dataset_id: list[str] = typer.Option([], "--dataset-id", help="Linked dataset IRI. Repeat for multiple."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|simulation|manual|other."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Registration source root."),
-    mode: str = typer.Option("create_only", help="Registration mode: create_only|upsert."),
+    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
         True, "--resolve-references/--no-resolve-references", help="Resolve linked IDs against source_root."
     ),
-    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after registration."),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before registration."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Preview registration without writing files."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Register a test using either --input JSON or inline draft fields."""
+    """Save a test using either --input JSON or inline draft fields."""
     fmt = _check_output_format(output_format)
-    reg_mode = _check_register_mode(mode)
+    reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     try:
@@ -1387,7 +1518,7 @@ def register_test(
                 dataset_ids=dataset_id,
                 source_type=source_type,  # type: ignore[arg-type]
             )
-        payload = api_register_test(
+        payload = api_save_test(
             draft_obj,
             source_root=source_root,
             mode=reg_mode,
@@ -1561,3 +1692,4 @@ def index_stats(
         [payload],
         ["cell_type_count", "cell_instance_count", "test_count", "dataset_count", "total_count", "failed", "build_timestamp"],
     )
+

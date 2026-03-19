@@ -133,6 +133,37 @@
         "size_code": {
           "type": "string"
         },
+        "construction": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assembly_type": {
+              "type": "string",
+              "enum": [
+                "wound",
+                "stacked",
+                "other",
+                "unknown"
+              ]
+            },
+            "layering": {
+              "type": "string",
+              "enum": [
+                "single_layer",
+                "multilayer",
+                "not_applicable",
+                "unknown"
+              ]
+            },
+            "layer_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "comment": {
+              "type": "string"
+            }
+          }
+        },
         "property": {
           "$ref": "../common/quantitative-properties.schema.json"
         },
@@ -223,6 +254,16 @@
               "type": "null"
             }
           ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "Deprecated compatibility field. Prefer provenance.citation with a DOI resolver URL."
         },
         "retrieved_at": {
           "type": "integer",
@@ -391,6 +432,26 @@
       "kind": "generic_metadata",
       "jsonld_target": "schema:size"
     },
+    "specification.construction": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:additionalProperty"
+    },
+    "specification.construction.assembly_type": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:additionalProperty"
+    },
+    "specification.construction.layering": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:additionalProperty"
+    },
+    "specification.construction.layer_count": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:additionalProperty"
+    },
+    "specification.construction.comment": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:additionalProperty"
+    },
     "specification.comment": {
       "kind": "generic_metadata",
       "jsonld_target": "schema:description"
@@ -431,6 +492,14 @@
     "provenance": {
       "kind": "generic_metadata",
       "jsonld_target": "schema:isBasedOn"
+    },
+    "provenance.citation": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:citation"
+    },
+    "provenance.citation_doi": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:citation"
     },
     "comment": {
       "kind": "generic_metadata",

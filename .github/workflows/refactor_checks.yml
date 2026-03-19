@@ -47,8 +47,8 @@ jobs:
       - name: Build Resolver Artifacts
         run: python .tools/build/build_resolver_artifacts.py
 
-      - name: Build Distributions
-        run: python -m build
+      - name: Run Alpha Verification Gate
+        run: python .tools/quality/run_alpha_verification.py
 
       - name: Smoke Test Installed Wheel
         run: |

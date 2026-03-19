@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import html
 import json
 import re
@@ -9,7 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping, Sequence
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
+from battinfo.bundle import BatteryTestType
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.pydantic import validate_json
 from battinfo.validate.publication import validate_publication_report
@@ -19,6 +21,7 @@ from battinfo.validate.schema import validate_schema_data
 from battinfo.workflows.map import run_mapping
 
 PathLike = str | Path
+TestKind = BatteryTestType
 
 UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
 UID_DASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
@@ -41,7 +44,6 @@ PACKAGE_ROOT = Path(__file__).resolve().parent
 EXAMPLES_ROOT = PACKAGE_ROOT / "data" / "examples"
 SCHEMAS_ROOT = PACKAGE_ROOT / "data" / "schemas"
 
-DEFAULT_CELLS_CLEAN_DIR = EXAMPLES_ROOT / "cells-clean"
 DEFAULT_CELL_TYPES_DIR = EXAMPLES_ROOT / "cell-types"
 DEFAULT_CELL_INSTANCES_DIR = EXAMPLES_ROOT / "cell-instances"
 DEFAULT_TESTS_DIR = EXAMPLES_ROOT / "tests"
@@ -71,9 +73,43 @@ DUPLICATE_POLICY_ERROR = "error"
 DUPLICATE_POLICY_RETURN_EXISTING = "return_existing"
 DUPLICATE_POLICIES = {DUPLICATE_POLICY_ERROR, DUPLICATE_POLICY_RETURN_EXISTING}
 
+_DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
+_DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
+
+
+def _citation_doi_from_url(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    match = _DOI_URL_RE.match(value.strip())
+    if match is None:
+        return None
+    return match.group(1)
+
+
+def _citation_url_value(citation: object = None, citation_doi: object = None) -> str | None:
+    if isinstance(citation, str):
+        normalized = citation.strip()
+        if not normalized:
+            return None
+        extracted = _citation_doi_from_url(normalized)
+        if extracted is not None:
+            return f"https://doi.org/{extracted}"
+        if _DOI_LITERAL_RE.fullmatch(normalized):
+            return f"https://doi.org/{normalized}"
+        return normalized
+    if isinstance(citation_doi, str):
+        normalized = citation_doi.strip()
+        if not normalized:
+            return None
+        extracted = _citation_doi_from_url(normalized)
+        if extracted is not None:
+            return f"https://doi.org/{extracted}"
+        return f"https://doi.org/{normalized}"
+    return None
+
 
 class CellTypeInput(BaseModel):
-    """Typed input for registering a new canonical cell-type resource."""
+    """Typed input for saving a new canonical cell-type resource."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -92,13 +128,14 @@ class CellTypeInput(BaseModel):
     source_type: Literal["datasheet"] = "datasheet"
     source_file: str = "manual.json"
     source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     file_hash: str | None = None
     retrieved_at: int | None = None
     notes: list[str] = Field(default_factory=list)
 
 
 class CellSpecificationInput(BaseModel):
-    """Typed input for registering a reusable cell specification for a cell type."""
+    """Typed input for saving a reusable cell specification for a cell type."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -112,12 +149,14 @@ class CellSpecificationInput(BaseModel):
     positive_electrode_basis: str
     negative_electrode_basis: str
     size_code: str | None = None
+    construction: dict[str, Any] = Field(default_factory=dict)
     property: dict[str, Any] = Field(default_factory=dict)
     specification_comment: list[str] = Field(default_factory=list)
     source_type: str = "datasheet"
     source_name: str | None = None
     source_file: str = "manual.json"
     source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     retrieved_at: int | str | None = None
     workflow_version: str | None = None
     provenance_comment: str | None = None
@@ -125,7 +164,7 @@ class CellSpecificationInput(BaseModel):
 
 
 class CellInstanceInput(BaseModel):
-    """Typed input for registering a new canonical cell-instance resource."""
+    """Typed input for saving a new canonical cell-instance resource."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -141,12 +180,13 @@ class CellInstanceInput(BaseModel):
     dataset_id: str | None = None
     dataset_ids: list[str] = Field(default_factory=list)
     source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     retrieved_at: int | str | None = None
     notes: list[str] = Field(default_factory=list)
 
 
 class DatasetInput(BaseModel):
-    """Typed input for registering a new canonical dataset resource."""
+    """Typed input for saving a new canonical dataset resource."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -156,23 +196,47 @@ class DatasetInput(BaseModel):
     title: str
     description: str | None = None
     license: str | None = None
+    identifier: Any | None = None
+    same_as: list[str] = Field(default_factory=list)
+    additional_type: list[str] = Field(default_factory=list)
+    version: str | None = None
+    keywords: list[str] = Field(default_factory=list)
+    creator: list[dict[str, Any]] = Field(default_factory=list)
+    publisher: dict[str, Any] | None = None
+    funder: list[dict[str, Any]] = Field(default_factory=list)
+    citation_list: list[dict[str, Any]] = Field(default_factory=list)
+    measurement_techniques: list[str] = Field(default_factory=list)
+    measurement_methods: list[str] = Field(default_factory=list)
+    variable_measured: list[dict[str, Any]] = Field(default_factory=list)
+    is_accessible_for_free: bool | None = None
+    conditions_of_access: str | None = None
+    in_language: str | None = None
     format: str | None = None
     access_url: str | None = None
     download_url: str | None = None
     created_at: str | None = None
+    modified_at: str | None = None
+    published_at: str | None = None
+    temporal_coverage: str | None = None
+    spatial_coverage: str | None = None
+    is_based_on: list[str] = Field(default_factory=list)
+    included_in_data_catalog: Any | None = None
+    main_entity: list[dict[str, Any]] = Field(default_factory=list)
+    distribution: list[dict[str, Any]] = Field(default_factory=list)
     checksum_algorithm: Literal["sha256", "sha512", "md5", "other"] | None = None
     checksum_value: str | None = None
     related_cell_ids: list[str] = Field(default_factory=list)
     related_test_ids: list[str] = Field(default_factory=list)
     source_type: Literal["catalog", "measurement", "lab", "simulation", "external", "manual", "other"] = "other"
     source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     retrieved_at: int | None = None
     curated_by: str | None = None
     notes: list[str] = Field(default_factory=list)
 
 
 class TestInput(BaseModel):
-    """Typed input for registering a new canonical test resource."""
+    """Typed input for saving a new canonical test resource."""
 
     model_config = ConfigDict(extra="forbid")
     __test__ = False
@@ -182,7 +246,7 @@ class TestInput(BaseModel):
     uid: str | None = None
     cell_id: str
     name: str
-    kind: Literal["cycle_life", "capacity_check", "rate_capability", "impedance", "calendar_ageing", "formation", "other"]
+    kind: TestKind
     description: str | None = None
     status: Literal["planned", "running", "completed", "aborted", "other"] | None = None
     protocol_name: str | None = None
@@ -193,6 +257,7 @@ class TestInput(BaseModel):
     dataset_ids: list[str] = Field(default_factory=list)
     source_type: Literal["measurement", "lab", "simulation", "manual", "other"] = "measurement"
     source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     source_file: str | None = None
     retrieved_at: int | str | None = None
     workflow_version: str | None = None
@@ -208,7 +273,7 @@ def template_cell_type(
     uid: str | None = TEMPLATE_UID,
     source_file: str = "template-cell-type.json",
 ) -> dict[str, Any]:
-    """Build a starter canonical cell-type document for registration workflows."""
+    """Build a starter canonical cell-type document for save workflows."""
     draft = CellTypeInput(
         uid=uid,
         model_name=model_name,
@@ -217,7 +282,7 @@ def template_cell_type(
         format=format,
         source_file=source_file,
         specs={},
-        notes=["Template-generated record. Fill in specs/provenance before registration."],
+        notes=["Template-generated record. Fill in specs/provenance before saving."],
     )
     return _record_from_cell_type(draft)
 
@@ -228,12 +293,12 @@ def template_cell_instance(
     source_type: Literal["measurement", "lab", "bms", "other"] = "measurement",
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
-    """Build a starter canonical cell-instance document for registration workflows."""
+    """Build a starter canonical cell-instance document for save workflows."""
     draft = CellInstanceInput(
         uid=uid,
         type_id=type_id,
         source_type=source_type,
-        notes=["Template-generated record. Set type_id/serial_number/datasets before registration."],
+        notes=["Template-generated record. Set type_id/serial_number/datasets before saving."],
     )
     return _record_from_cell_instance(draft)
 
@@ -246,14 +311,14 @@ def template_dataset(
     related_cell_ids: list[str] | None = None,
     related_test_ids: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical dataset document for registration workflows."""
+    """Build a starter canonical dataset document for save workflows."""
     draft = DatasetInput(
         uid=uid,
         title=title,
         source_type=source_type,
         related_cell_ids=related_cell_ids or [TEMPLATE_CELL_ID],
         related_test_ids=related_test_ids or [],
-        notes=["Template-generated record. Fill in URL/license/distribution details before registration."],
+        notes=["Template-generated record. Fill in URL/license/distribution details before saving."],
     )
     return _record_from_dataset(draft)
 
@@ -262,12 +327,12 @@ def template_test(
     *,
     cell_id: str = TEMPLATE_CELL_ID,
     name: str = "Example Test",
-    kind: Literal["cycle_life", "capacity_check", "rate_capability", "impedance", "calendar_ageing", "formation", "other"] = "other",
+    kind: TestKind = BatteryTestType.OTHER,
     source_type: Literal["measurement", "lab", "simulation", "manual", "other"] = "measurement",
     uid: str | None = TEMPLATE_UID,
     dataset_ids: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical test document for registration workflows."""
+    """Build a starter canonical test document for save workflows."""
     draft = TestInput(
         uid=uid,
         cell_id=cell_id,
@@ -275,7 +340,7 @@ def template_test(
         kind=kind,
         source_type=source_type,
         dataset_ids=dataset_ids or [],
-        notes=["Template-generated record. Set the concrete cell, protocol, and datasets before registration."],
+        notes=["Template-generated record. Set the concrete cell, protocol, and datasets before saving."],
     )
     return _record_from_test(draft)
 
@@ -484,6 +549,8 @@ def _record_from_cell_specification(draft: CellSpecificationInput) -> dict[str, 
     }
     if draft.size_code is not None:
         specification["size_code"] = draft.size_code
+    if draft.construction:
+        specification["construction"] = draft.construction
     if draft.property:
         specification["property"] = draft.property
     if draft.specification_comment:
@@ -499,6 +566,9 @@ def _record_from_cell_specification(draft: CellSpecificationInput) -> dict[str, 
         provenance["source_name"] = draft.source_name
     if draft.source_url is not None:
         provenance["source_url"] = draft.source_url
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        provenance["citation"] = citation
     if draft.workflow_version is not None:
         provenance["workflow_version"] = draft.workflow_version
     if draft.provenance_comment is not None:
@@ -554,6 +624,7 @@ def query_library_cell_types(
             "chemistry": specification.get("chemistry"),
             "format": specification.get("format"),
             "size_code": specification.get("size_code"),
+            "construction": specification.get("construction"),
             "positive_electrode_basis": specification.get("positive_electrode_basis"),
             "negative_electrode_basis": specification.get("negative_electrode_basis"),
             "nominal_capacity": _quantity_numeric_value(properties, "nominal_capacity")
@@ -621,9 +692,6 @@ def query_cell_types(
     nominal_voltage_min: float | None = None,
     nominal_voltage_max: float | None = None,
     spec_filters: Mapping[str, tuple[float | None, float | None]] | None = None,
-    include_cells_clean: bool = True,
-    include_cell_types: bool = True,
-    cells_clean_dir: PathLike = DEFAULT_CELLS_CLEAN_DIR,
     cell_types_dir: PathLike = DEFAULT_CELL_TYPES_DIR,
     limit: int = 50,
     offset: int = 0,
@@ -632,82 +700,53 @@ def query_cell_types(
     records: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
 
-    if include_cells_clean:
-        for path in _iter_json_files(_as_path(cells_clean_dir)):
-            doc = _load_json(path)
-            cell = doc.get("cell", {})
-            specs = doc.get("specs", {})
-            if not isinstance(cell, Mapping):
-                continue
-            cell_id = cell.get("id")
-            if not isinstance(cell_id, str) or cell_id in seen_ids:
-                continue
-            seen_ids.add(cell_id)
-            records.append(
-                {
-                    "id": cell_id,
-                    "short_id": _short_id_from_iri(cell_id),
-                    "model_name": cell.get("model_name"),
-                    "manufacturer": cell.get("manufacturer"),
-                    "chemistry": cell.get("chemistry"),
-                    "format": cell.get("format"),
-                    "size_code": cell.get("size_code"),
-                    "nominal_capacity": _spec_numeric_value(specs, "nominal_capacity"),
-                    "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
-                    "specs": specs,
-                    "source": "cells-clean",
-                    "path": str(path),
-                }
+    for path in _iter_json_files(_as_path(cell_types_dir)):
+        doc = _load_json(path)
+        product = doc.get("product", {})
+        specs = doc.get("specs", {})
+        if isinstance(product, Mapping):
+            cell_id = product.get("id")
+            manufacturer_obj = product.get("manufacturer")
+            manufacturer_name = (
+                manufacturer_obj.get("name")
+                if isinstance(manufacturer_obj, Mapping)
+                else manufacturer_obj
             )
-
-    if include_cell_types:
-        for path in _iter_json_files(_as_path(cell_types_dir)):
-            doc = _load_json(path)
-            product = doc.get("product", {})
-            specs = doc.get("specs", {})
-            if isinstance(product, Mapping):
-                cell_id = product.get("id")
-                manufacturer_obj = product.get("manufacturer")
-                manufacturer_name = (
-                    manufacturer_obj.get("name")
-                    if isinstance(manufacturer_obj, Mapping)
-                    else manufacturer_obj
-                )
-                model_name = product.get("model")
-                format_name = product.get("cellFormat")
-                size_code = product.get("sizeCode")
-                chemistry_name = product.get("chemistry")
-                short_id = product.get("short_id")
-            else:
-                legacy = doc.get("cell_type", {})
-                if not isinstance(legacy, Mapping):
-                    continue
-                cell_id = legacy.get("id")
-                manufacturer_name = legacy.get("manufacturer")
-                model_name = legacy.get("model_name")
-                format_name = legacy.get("format")
-                size_code = legacy.get("size_code")
-                chemistry_name = legacy.get("chemistry")
-                short_id = legacy.get("short_id")
-            if not isinstance(cell_id, str) or cell_id in seen_ids:
+            model_name = product.get("model")
+            format_name = product.get("cellFormat")
+            size_code = product.get("sizeCode")
+            chemistry_name = product.get("chemistry")
+            short_id = product.get("short_id")
+        else:
+            legacy = doc.get("cell_type", {})
+            if not isinstance(legacy, Mapping):
                 continue
-            seen_ids.add(cell_id)
-            records.append(
-                {
-                    "id": cell_id,
-                    "short_id": short_id or _short_id_from_iri(cell_id),
-                    "model_name": model_name,
-                    "manufacturer": manufacturer_name,
-                    "chemistry": chemistry_name,
-                    "format": format_name,
-                    "size_code": size_code,
-                    "nominal_capacity": _spec_numeric_value(specs, "nominal_capacity"),
-                    "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
-                    "specs": specs,
-                    "source": "cell-types",
-                    "path": str(path),
-                }
-            )
+            cell_id = legacy.get("id")
+            manufacturer_name = legacy.get("manufacturer")
+            model_name = legacy.get("model_name")
+            format_name = legacy.get("format")
+            size_code = legacy.get("size_code")
+            chemistry_name = legacy.get("chemistry")
+            short_id = legacy.get("short_id")
+        if not isinstance(cell_id, str) or cell_id in seen_ids:
+            continue
+        seen_ids.add(cell_id)
+        records.append(
+            {
+                "id": cell_id,
+                "short_id": short_id or _short_id_from_iri(cell_id),
+                "model_name": model_name,
+                "manufacturer": manufacturer_name,
+                "chemistry": chemistry_name,
+                "format": format_name,
+                "size_code": size_code,
+                "nominal_capacity": _spec_numeric_value(specs, "nominal_capacity"),
+                "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
+                "specs": specs,
+                "source": "cell-types",
+                "path": str(path),
+            }
+        )
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
@@ -763,14 +802,29 @@ def query_cell_instances(
         doc = _load_json(path)
         inst = doc.get("cell_instance", {})
         prov = doc.get("provenance", {})
+        dataset_links = doc.get("datasets", [])
         if not isinstance(inst, Mapping):
             continue
+        linked_dataset_ids: list[str] = []
+        if isinstance(dataset_links, list):
+            linked_dataset_ids = [
+                item["id"]
+                for item in dataset_links
+                if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+            ]
+        elif isinstance(prov, Mapping):
+            # Backward compatibility for legacy records that stored dataset links under provenance.
+            if isinstance(prov.get("dataset_ids"), list):
+                linked_dataset_ids = [item for item in prov["dataset_ids"] if isinstance(item, str)]
+            elif isinstance(prov.get("dataset_id"), str):
+                linked_dataset_ids = [prov["dataset_id"]]
         rec = {
             "id": inst.get("id"),
             "type_id": inst.get("type_id"),
             "short_id": inst.get("short_id"),
             "serial_number": inst.get("serial_number"),
-            "dataset_id": prov.get("dataset_id") if isinstance(prov, Mapping) else None,
+            "dataset_id": linked_dataset_ids[0] if linked_dataset_ids else None,
+            "dataset_ids": linked_dataset_ids,
             "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
             "path": str(path),
             "record": doc,
@@ -933,6 +987,26 @@ def query_tests(
         filtered.append(rec)
 
     return _paginate(filtered, limit=limit, offset=offset)
+
+
+def query(kind: str, /, **filters: Any) -> list[dict[str, Any]]:
+    """Query BattINFO resources by explicit kind."""
+    normalized = kind.strip().lower().replace("-", "_")
+
+    if normalized in {"cell_type", "cell_types"}:
+        return query_cell_types(**filters)
+    if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
+        return query_cell_instances(**filters)
+    if normalized in {"test", "tests"}:
+        return query_tests(**filters)
+    if normalized in {"dataset", "datasets"}:
+        return query_datasets(**filters)
+    if normalized in {"description", "descriptions", "library_cell_type", "library_cell_types"}:
+        return query_library_cell_types(**filters)
+
+    raise ValueError(
+        "kind must be one of: cell_types, cells, tests, datasets, descriptions."
+    )
 
 
 def resolve_cell_type_id(
@@ -1160,6 +1234,12 @@ def create_cell_type_from_datasheet(
             or _now_unix(),
         },
     }
+    citation = _citation_url_value(
+        source.get("citation") if isinstance(source, Mapping) else None,
+        source.get("citation_doi") if isinstance(source, Mapping) else None,
+    )
+    if citation is not None:
+        out["provenance"]["citation"] = citation
 
     if isinstance(cell, Mapping):
         if isinstance(cell.get("size_code"), str):
@@ -1254,8 +1334,6 @@ def create_cell_instance(
     if serial_number:
         out["cell_instance"]["serial_number"] = serial_number
     if dataset_id:
-        out["provenance"]["dataset_id"] = dataset_id
-        out["provenance"]["dataset_ids"] = [dataset_id]
         out["datasets"] = [{"id": dataset_id, "role": "raw"}]
 
     if validate:
@@ -1266,7 +1344,7 @@ def create_cell_instance(
     return out
 
 
-def _registration_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
+def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     if entity_type == "cell-type":
         return source_root / "cell-types" / f"cell-type-{uid}.json"
     if entity_type == "cell":
@@ -1275,7 +1353,7 @@ def _registration_entity_path(entity_type: str, uid: str, source_root: Path) -> 
         return source_root / "tests" / f"test-{uid}.json"
     if entity_type == "dataset":
         return source_root / "datasets" / f"dataset-{uid}.json"
-    raise ValueError(f"Unsupported entity type for registration path: {entity_type}")
+    raise ValueError(f"Unsupported entity type for save path: {entity_type}")
 
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
@@ -1296,7 +1374,7 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
 
 def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
     entity_type, uid = _iri_tail(entity_id)
-    expected = _registration_entity_path(entity_type, uid, source_root)
+    expected = _save_entity_path(entity_type, uid, source_root)
     if expected.exists():
         try:
             if _entity_id(_load_json(expected)) == entity_id:
@@ -1314,7 +1392,7 @@ def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
     return None
 
 
-def _validate_register_mode(mode: str) -> str:
+def _validate_save_mode(mode: str) -> str:
     mode_normalized = mode.strip().lower()
     if mode_normalized not in REGISTER_MODES:
         raise ValueError(f"mode must be one of: {', '.join(sorted(REGISTER_MODES))}")
@@ -1367,6 +1445,9 @@ def _record_from_cell_type(draft: CellTypeInput) -> dict[str, Any]:
             "retrieved_at": draft.retrieved_at or _now_unix(),
         },
     }
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        record["provenance"]["citation"] = citation
     if draft.positive_electrode_basis is not None:
         record["product"]["positiveElectrodeBasis"] = draft.positive_electrode_basis
     if draft.negative_electrode_basis is not None:
@@ -1429,9 +1510,10 @@ def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
         record["measured"] = draft.measured
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        record["provenance"]["citation"] = citation
     if dataset_ids:
-        record["provenance"]["dataset_ids"] = dataset_ids
-        record["provenance"]["dataset_id"] = dataset_ids[0]
         record["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
     if draft.notes:
         record["notes"] = list(draft.notes)
@@ -1463,7 +1545,7 @@ def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
     dataset_obj: dict[str, Any] = {
         "id": entity_id,
         "short_id": dashed_uid.replace("-", "")[:6],
-        "identifier": f"dataset:{dashed_uid}",
+        "identifier": draft.identifier if draft.identifier is not None else f"dataset:{dashed_uid}",
         "name": draft.title,
         "url": draft.access_url or draft.source_url or f"https://example.org/dataset/{dashed_uid}",
     }
@@ -1471,14 +1553,56 @@ def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
         dataset_obj["description"] = draft.description
     if draft.license is not None:
         dataset_obj["license"] = draft.license
+    if draft.same_as:
+        dataset_obj["sameAs"] = list(dict.fromkeys(draft.same_as))
+    if draft.additional_type:
+        dataset_obj["additionalType"] = list(dict.fromkeys(draft.additional_type))
+    if draft.version is not None:
+        dataset_obj["version"] = draft.version
+    if draft.keywords:
+        dataset_obj["keywords"] = list(dict.fromkeys(draft.keywords))
+    if draft.creator:
+        dataset_obj["creator"] = copy.deepcopy(draft.creator)
+    if draft.publisher is not None:
+        dataset_obj["publisher"] = copy.deepcopy(draft.publisher)
+    if draft.funder:
+        dataset_obj["funder"] = copy.deepcopy(draft.funder)
+    if draft.citation_list:
+        dataset_obj["citation"] = copy.deepcopy(draft.citation_list)
+    if draft.measurement_techniques:
+        dataset_obj["measurementTechnique"] = list(dict.fromkeys(draft.measurement_techniques))
+    if draft.measurement_methods:
+        dataset_obj["measurementMethod"] = list(dict.fromkeys(draft.measurement_methods))
+    if draft.variable_measured:
+        dataset_obj["variableMeasured"] = copy.deepcopy(draft.variable_measured)
+    if draft.is_accessible_for_free is not None:
+        dataset_obj["isAccessibleForFree"] = draft.is_accessible_for_free
+    if draft.conditions_of_access is not None:
+        dataset_obj["conditionsOfAccess"] = draft.conditions_of_access
+    if draft.in_language is not None:
+        dataset_obj["inLanguage"] = draft.in_language
     if about_refs:
         dataset_obj["about"] = about_refs
     created_unix = _to_unix_time(draft.created_at) or _now_unix()
+    modified_unix = _to_unix_time(draft.modified_at) or created_unix
+    published_unix = _to_unix_time(draft.published_at) or created_unix
     dataset_obj["dateCreated"] = created_unix
-    dataset_obj["dateModified"] = created_unix
-    dataset_obj["datePublished"] = created_unix
+    dataset_obj["dateModified"] = modified_unix
+    dataset_obj["datePublished"] = published_unix
+    if draft.temporal_coverage is not None:
+        dataset_obj["temporalCoverage"] = draft.temporal_coverage
+    if draft.spatial_coverage is not None:
+        dataset_obj["spatialCoverage"] = draft.spatial_coverage
+    if draft.is_based_on:
+        dataset_obj["isBasedOn"] = list(dict.fromkeys(draft.is_based_on))
+    if draft.included_in_data_catalog is not None:
+        dataset_obj["includedInDataCatalog"] = draft.included_in_data_catalog
+    if draft.main_entity:
+        dataset_obj["mainEntity"] = copy.deepcopy(draft.main_entity)
 
-    if draft.download_url is not None or draft.format is not None or (draft.checksum_algorithm and draft.checksum_value):
+    if draft.distribution:
+        dataset_obj["distribution"] = copy.deepcopy(draft.distribution)
+    elif draft.download_url is not None or draft.format is not None or (draft.checksum_algorithm and draft.checksum_value):
         distribution: dict[str, Any] = {
             "type": "DataDownload",
             "contentUrl": draft.download_url or draft.access_url or draft.source_url or f"https://example.org/dataset/{dashed_uid}/download",
@@ -1510,6 +1634,9 @@ def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        record["provenance"]["citation"] = citation
     if draft.curated_by is not None:
         record["provenance"]["curated_by"] = draft.curated_by
     if draft.notes:
@@ -1575,6 +1702,9 @@ def _record_from_test(draft: TestInput) -> dict[str, Any]:
         record["test"]["dataset_ids"] = list(dict.fromkeys(draft.dataset_ids))
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        record["provenance"]["citation"] = citation
     if draft.source_file is not None:
         record["provenance"]["source_file"] = draft.source_file
     if draft.workflow_version is not None:
@@ -1584,14 +1714,14 @@ def _record_from_test(draft: TestInput) -> dict[str, Any]:
     return record
 
 
-def _resolve_references_for_registration(doc: dict[str, Any], source_root: Path) -> None:
-    report = validate_references_report(doc, source_root)
+def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None:
+    report = validate_references_report(doc, source_root, allow_missing=True)
     if report.ok:
         return
     raise ValueError(report.errors[0].message)
 
 
-def register_record(
+def save_record(
     record: dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
@@ -1606,23 +1736,22 @@ def register_record(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register one canonical BattINFO resource into source storage and optional resolver artifacts."""
-    mode_normalized = _validate_register_mode(mode)
+    """Save one canonical BattINFO resource into local source storage and optional resolver artifacts."""
+    mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
     source_root_path = _as_path(source_root)
 
     doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else record
     if validate:
-        validation_root = source_root_path if resolve_references else None
-        _validate_canonical_record(doc, source_root=validation_root, policy=validation_policy)
+        _validate_canonical_record(doc, policy=validation_policy)
 
     entity_id = _entity_id(doc)
     entity_type, uid = _iri_tail(entity_id)
     existing_path = _find_record_path_by_id(entity_id, source_root_path)
-    target_path = existing_path if existing_path is not None else _registration_entity_path(entity_type, uid, source_root_path)
+    target_path = existing_path if existing_path is not None else _save_entity_path(entity_type, uid, source_root_path)
 
     if resolve_references:
-        _resolve_references_for_registration(doc, source_root_path)
+        _resolve_references_for_save(doc, source_root_path)
 
     if existing_path is not None and mode_normalized == REGISTER_MODE_CREATE_ONLY:
         if duplicate_policy_normalized == DUPLICATE_POLICY_RETURN_EXISTING:
@@ -1669,7 +1798,7 @@ def register_record(
     return payload
 
 
-def register_cell_type(
+def save_cell_type(
     draft: CellTypeInput | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
@@ -1684,12 +1813,12 @@ def register_cell_type(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register a cell-type from either draft payload or canonical record."""
+    """Save a cell-type from either draft payload or canonical record."""
     from battinfo.bundle import CellType as CellTypeBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return register_cell_type(
+        return save_cell_type(
             loaded,
             source_root=source_root,
             mode=mode,
@@ -1704,7 +1833,7 @@ def register_cell_type(
             dry_run=dry_run,
         )
     if isinstance(draft, CellTypeBundle):
-        return register_record(
+        return save_record(
             draft.to_record(),
             source_root=source_root,
             mode=mode,
@@ -1721,7 +1850,7 @@ def register_cell_type(
     if isinstance(draft, Mapping) and (
         isinstance(draft.get("product"), Mapping) or isinstance(draft.get("cell_type"), Mapping)
     ):
-        return register_record(
+        return save_record(
             dict(draft),
             source_root=source_root,
             mode=mode,
@@ -1737,7 +1866,7 @@ def register_cell_type(
         )
     draft_model = draft if isinstance(draft, CellTypeInput) else CellTypeInput.model_validate(draft)
     record = _record_from_cell_type(draft_model)
-    return register_record(
+    return save_record(
         record,
         source_root=source_root,
         mode=mode,
@@ -1753,7 +1882,7 @@ def register_cell_type(
     )
 
 
-def register_cell_instance(
+def save_cell_instance(
     draft: CellInstanceInput | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
@@ -1768,12 +1897,12 @@ def register_cell_instance(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register a cell-instance from either draft payload or canonical record."""
+    """Save a cell-instance from either draft payload or canonical record."""
     from battinfo.bundle import CellInstance as CellInstanceBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return register_cell_instance(
+        return save_cell_instance(
             loaded,
             source_root=source_root,
             mode=mode,
@@ -1788,7 +1917,7 @@ def register_cell_instance(
             dry_run=dry_run,
         )
     if isinstance(draft, CellInstanceBundle):
-        return register_record(
+        return save_record(
             draft.to_record(),
             source_root=source_root,
             mode=mode,
@@ -1803,7 +1932,7 @@ def register_cell_instance(
             dry_run=dry_run,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_instance"), Mapping):
-        return register_record(
+        return save_record(
             dict(draft),
             source_root=source_root,
             mode=mode,
@@ -1819,7 +1948,7 @@ def register_cell_instance(
         )
     draft_model = draft if isinstance(draft, CellInstanceInput) else CellInstanceInput.model_validate(draft)
     record = _record_from_cell_instance(draft_model)
-    return register_record(
+    return save_record(
         record,
         source_root=source_root,
         mode=mode,
@@ -1835,7 +1964,7 @@ def register_cell_instance(
     )
 
 
-def register_dataset(
+def save_dataset(
     draft: DatasetInput | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
@@ -1850,12 +1979,12 @@ def register_dataset(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register a dataset from either draft payload or canonical record."""
+    """Save a dataset from either draft payload or canonical record."""
     from battinfo.bundle import Dataset as DatasetBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return register_dataset(
+        return save_dataset(
             loaded,
             source_root=source_root,
             mode=mode,
@@ -1870,7 +1999,7 @@ def register_dataset(
             dry_run=dry_run,
         )
     if isinstance(draft, DatasetBundle):
-        return register_record(
+        return save_record(
             draft.to_record(),
             source_root=source_root,
             mode=mode,
@@ -1885,7 +2014,7 @@ def register_dataset(
             dry_run=dry_run,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("dataset"), Mapping):
-        return register_record(
+        return save_record(
             dict(draft),
             source_root=source_root,
             mode=mode,
@@ -1901,7 +2030,7 @@ def register_dataset(
         )
     draft_model = draft if isinstance(draft, DatasetInput) else DatasetInput.model_validate(draft)
     record = _record_from_dataset(draft_model)
-    return register_record(
+    return save_record(
         record,
         source_root=source_root,
         mode=mode,
@@ -1917,7 +2046,7 @@ def register_dataset(
     )
 
 
-def register_test(
+def save_test(
     draft: TestInput | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
@@ -1932,12 +2061,12 @@ def register_test(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register a test from either draft payload or canonical record."""
+    """Save a test from either draft payload or canonical record."""
     from battinfo.bundle import Test as TestBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return register_test(
+        return save_test(
             loaded,
             source_root=source_root,
             mode=mode,
@@ -1952,7 +2081,7 @@ def register_test(
             dry_run=dry_run,
         )
     if isinstance(draft, TestBundle):
-        return register_record(
+        return save_record(
             draft.to_record(),
             source_root=source_root,
             mode=mode,
@@ -1967,7 +2096,7 @@ def register_test(
             dry_run=dry_run,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("test"), Mapping):
-        return register_record(
+        return save_record(
             dict(draft),
             source_root=source_root,
             mode=mode,
@@ -1983,7 +2112,7 @@ def register_test(
         )
     draft_model = draft if isinstance(draft, TestInput) else TestInput.model_validate(draft)
     record = _record_from_test(draft_model)
-    return register_record(
+    return save_record(
         record,
         source_root=source_root,
         mode=mode,
@@ -2096,7 +2225,7 @@ def build_cell_type_library_rdf(
     }
 
 
-def register_library_cell_type(
+def save_library_cell_type(
     draft: CellSpecificationInput | dict[str, Any] | PathLike,
     *,
     library_root: PathLike = DEFAULT_LIBRARY_CELL_TYPES_DIR,
@@ -2113,12 +2242,12 @@ def register_library_cell_type(
     clean_output: bool = False,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register a reusable cell specification into the curated library."""
+    """Save a reusable cell specification into the curated library."""
     from battinfo.bundle import CellSpecification as CellSpecificationBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return register_library_cell_type(
+        return save_library_cell_type(
             loaded,
             library_root=library_root,
             package_root=package_root,
@@ -2146,7 +2275,7 @@ def register_library_cell_type(
     if validate:
         _validate_cell_specification(doc)
 
-    mode_normalized = _validate_register_mode(mode)
+    mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
     library_root_path = _as_path(library_root)
     package_root_path = _as_path(package_root)
@@ -2242,7 +2371,7 @@ def register_library_cell_type(
     return payload
 
 
-def register_batch(
+def save_batch(
     *,
     source_dirs: Sequence[PathLike] = DEFAULT_PUBLISH_SOURCES,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
@@ -2258,8 +2387,8 @@ def register_batch(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Register a deterministic batch of canonical resources."""
-    mode_normalized = _validate_register_mode(mode)
+    """Save a deterministic batch of canonical resources."""
+    mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
 
     failures: list[dict[str, str]] = []
@@ -2276,7 +2405,7 @@ def register_batch(
         for path in sorted(src_path.glob(glob)):
             processed += 1
             try:
-                payload = register_record(
+                payload = save_record(
                     path,
                     source_root=source_root,
                     mode=mode_normalized,
@@ -2301,6 +2430,20 @@ def register_batch(
                     dry_run_count += 1
             except Exception as exc:  # noqa: BLE001
                 failures.append({"file": str(path), "error": str(exc)})
+
+    if resolve_references and validate and not dry_run:
+        link_report = build_index(
+            source_root=source_root,
+            validate=True,
+            validation_policy=validation_policy,
+        )
+        for failure in link_report["failures"]:
+            failures.append(
+                {
+                    "file": str(failure["file"]),
+                    "error": str(failure["error"]),
+                }
+            )
 
     return {
         "status": "ok" if not failures else "partial",
@@ -2349,6 +2492,254 @@ def _iri_tail(iri: str) -> tuple[str, str]:
     return parts[-2], parts[-1]
 
 
+def _schema_identifier_value(value: Any, fallback: str) -> Any:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, Mapping):
+        property_id = value.get("property_id")
+        property_value = value.get("value")
+        if isinstance(property_id, str) and isinstance(property_value, str):
+            return {
+                "@type": "schema:PropertyValue",
+                "schema:propertyID": property_id,
+                "schema:value": property_value,
+            }
+    return fallback
+
+
+def _schema_agent_value(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    agent_type = value.get("type")
+    if not isinstance(agent_type, str) or agent_type not in {"Person", "Organization"}:
+        agent_type = "Organization"
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    out: dict[str, Any] = {"@type": f"schema:{agent_type}", "schema:name": name}
+    if isinstance(value.get("url"), str):
+        out["schema:url"] = value["url"]
+    if isinstance(value.get("email"), str):
+        out["schema:email"] = value["email"]
+    if isinstance(value.get("given_name"), str):
+        out["schema:givenName"] = value["given_name"]
+    if isinstance(value.get("family_name"), str):
+        out["schema:familyName"] = value["family_name"]
+    if isinstance(value.get("sameAs"), str):
+        out["schema:sameAs"] = value["sameAs"]
+    if isinstance(value.get("affiliation"), Mapping):
+        nested = _schema_agent_value(value["affiliation"])
+        if nested is not None:
+            out["schema:affiliation"] = nested
+    return out
+
+
+def _schema_data_catalog_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return {"@id": value} if "://" in value else value
+    if not isinstance(value, Mapping):
+        return None
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    out: dict[str, Any] = {"@type": "schema:DataCatalog", "schema:name": name}
+    if isinstance(value.get("id"), str):
+        out["@id"] = value["id"]
+    if isinstance(value.get("url"), str):
+        out["schema:url"] = value["url"]
+    if isinstance(value.get("sameAs"), str):
+        out["schema:sameAs"] = value["sameAs"]
+    if isinstance(value.get("description"), str):
+        out["schema:description"] = value["description"]
+    return out
+
+
+def _schema_citation_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return value
+    if not isinstance(value, Mapping):
+        return None
+    out: dict[str, Any] = {"@type": "schema:CreativeWork"}
+    if isinstance(value.get("url"), str):
+        out["@id"] = value["url"]
+        out["schema:url"] = value["url"]
+    if isinstance(value.get("name"), str):
+        out["schema:name"] = value["name"]
+    if isinstance(value.get("kind"), str):
+        out["schema:additionalType"] = value["kind"]
+    if isinstance(value.get("doi"), str):
+        out["battinfo:doi"] = value["doi"]
+    if isinstance(value.get("citation_key"), str):
+        out["schema:identifier"] = value["citation_key"]
+    return out if len(out) > 1 else None
+
+
+def _schema_variable_measured_value(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    out: dict[str, Any] = {"@type": "schema:PropertyValue", "schema:name": name}
+    if isinstance(value.get("description"), str):
+        out["schema:description"] = value["description"]
+    if isinstance(value.get("unit_text"), str):
+        out["schema:unitText"] = value["unit_text"]
+    same_as = value.get("sameAs")
+    if isinstance(same_as, str):
+        out["schema:sameAs"] = same_as
+        out["schema:propertyID"] = same_as
+    return out
+
+
+def _schema_distribution_value(value: Any, *, part_of_id: str) -> dict[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    content_url = value.get("contentUrl")
+    encoding_format = value.get("encodingFormat")
+    checksum = value.get("checksum")
+    if (
+        not isinstance(content_url, str)
+        and not isinstance(encoding_format, str)
+        and not isinstance(checksum, Mapping)
+    ):
+        return None
+    if not (
+        isinstance(checksum, Mapping)
+        and isinstance(checksum.get("algorithm"), str)
+        and checksum["algorithm"].lower() == "sha256"
+        and isinstance(checksum.get("value"), str)
+    ):
+        return None
+    out: dict[str, Any] = {"@type": "schema:DataDownload"}
+    if isinstance(value.get("name"), str):
+        out["schema:name"] = value["name"]
+    if isinstance(value.get("description"), str):
+        out["schema:description"] = value["description"]
+    if isinstance(content_url, str):
+        out["schema:contentUrl"] = content_url
+    if isinstance(encoding_format, str):
+        out["schema:encodingFormat"] = encoding_format
+    if isinstance(value.get("contentSize"), str):
+        out["schema:contentSize"] = value["contentSize"]
+    if isinstance(value.get("accessLevel"), str):
+        out["schema:accessLevel"] = value["accessLevel"]
+    out["schema:isPartOf"] = {"@id": part_of_id}
+    out["schema:sha256"] = checksum["value"]
+    return out
+
+
+def _schema_table_column_value(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    name = value.get("name")
+    if not isinstance(name, str) or not name.strip():
+        return None
+    out: dict[str, Any] = {
+        "@type": "csvw:Column",
+        "csvw:name": name,
+    }
+    titles = value.get("titles")
+    if isinstance(titles, str):
+        out["csvw:titles"] = titles
+    elif isinstance(titles, list):
+        title_values = [item for item in titles if isinstance(item, str)]
+        if title_values:
+            out["csvw:titles"] = title_values
+    if isinstance(value.get("description"), str):
+        out["schema:description"] = value["description"]
+    if isinstance(value.get("datatype"), str):
+        out["csvw:datatype"] = value["datatype"]
+    if isinstance(value.get("unit_text"), str):
+        out["schema:unitText"] = value["unit_text"]
+    same_as = value.get("sameAs")
+    if isinstance(same_as, str):
+        out["schema:sameAs"] = same_as
+        out["schema:propertyID"] = same_as
+    required = value.get("required")
+    if isinstance(required, bool):
+        out["csvw:required"] = required
+    return out
+
+
+def _schema_table_schema_value(value: Any) -> dict[str, Any] | str | None:
+    if isinstance(value, str):
+        return value
+    if not isinstance(value, Mapping):
+        return None
+    columns = value.get("columns")
+    if not isinstance(columns, list):
+        return None
+    column_nodes = [column for item in columns if (column := _schema_table_column_value(item)) is not None]
+    if not column_nodes:
+        return None
+    out: dict[str, Any] = {
+        "@type": "csvw:Schema",
+        "csvw:column": column_nodes,
+    }
+    if isinstance(value.get("id"), str):
+        out["@id"] = value["id"]
+    if isinstance(value.get("name"), str):
+        out["schema:name"] = value["name"]
+    if isinstance(value.get("description"), str):
+        out["schema:description"] = value["description"]
+    primary_key = value.get("primaryKey")
+    if isinstance(primary_key, str):
+        out["csvw:primaryKey"] = primary_key
+    elif isinstance(primary_key, list):
+        values = [item for item in primary_key if isinstance(item, str)]
+        if values:
+            out["csvw:primaryKey"] = values
+    return out
+
+
+def _schema_main_entity_value(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, Mapping):
+        return None
+    node_type = value.get("type")
+    if isinstance(node_type, str) and ":" in node_type:
+        node_type = node_type.split(":", 1)[1]
+    if node_type == "Table":
+        url = value.get("url")
+        table_schema = value.get("tableSchema")
+        resolved_table_schema = _schema_table_schema_value(table_schema)
+        if not isinstance(url, str) or resolved_table_schema is None:
+            return None
+        out: dict[str, Any] = {
+            "@type": "csvw:Table",
+            "csvw:url": url,
+            "csvw:tableSchema": resolved_table_schema,
+        }
+        if isinstance(value.get("id"), str):
+            out["@id"] = value["id"]
+        if isinstance(value.get("name"), str):
+            out["schema:name"] = value["name"]
+        if isinstance(value.get("description"), str):
+            out["schema:description"] = value["description"]
+        return out
+    if node_type == "TableGroup":
+        table_items = value.get("table")
+        if not isinstance(table_items, list):
+            return None
+        tables = [table for item in table_items if (table := _schema_main_entity_value(item)) is not None]
+        if not tables:
+            return None
+        out = {
+            "@type": "csvw:TableGroup",
+            "csvw:table": tables,
+        }
+        if isinstance(value.get("id"), str):
+            out["@id"] = value["id"]
+        if isinstance(value.get("url"), str):
+            out["csvw:url"] = value["url"]
+        if isinstance(value.get("name"), str):
+            out["schema:name"] = value["name"]
+        if isinstance(value.get("description"), str):
+            out["schema:description"] = value["description"]
+        return out
+    return None
+
+
 def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
     entity_iri = _entity_id(doc)
     entity_type, uid = _iri_tail(entity_iri)
@@ -2357,6 +2748,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         {
             "schema": "https://schema.org/",
             "battinfo": "https://w3id.org/battinfo#",
+            "csvw": "http://www.w3.org/ns/csvw#",
         },
     ]
 
@@ -2441,7 +2833,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             "@context": context,
             "@id": entity_iri,
             "@type": "schema:Dataset",
-            "schema:identifier": uid,
+            "schema:identifier": _schema_identifier_value(dataset.get("identifier"), uid),
             "schema:name": dataset.get("name") or dataset.get("title"),
             "schema:description": dataset.get("description"),
             "schema:license": dataset.get("license"),
@@ -2449,6 +2841,103 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         }
         if dataset.get("url") or dataset.get("access_url"):
             out["schema:url"] = dataset.get("url") or dataset.get("access_url")
+        if isinstance(dataset.get("sameAs"), list):
+            same_as = [item for item in dataset["sameAs"] if isinstance(item, str)]
+            if same_as:
+                out["schema:sameAs"] = same_as
+        if isinstance(dataset.get("additionalType"), list):
+            additional_type = [item for item in dataset["additionalType"] if isinstance(item, str)]
+            if additional_type:
+                out["schema:additionalType"] = additional_type
+        if isinstance(dataset.get("version"), str):
+            out["schema:version"] = dataset["version"]
+        if isinstance(dataset.get("keywords"), list):
+            keywords = [item for item in dataset["keywords"] if isinstance(item, str)]
+            if keywords:
+                out["schema:keywords"] = keywords
+        creator_value = dataset.get("creator")
+        if isinstance(creator_value, list):
+            creators = [node for item in creator_value if (node := _schema_agent_value(item)) is not None]
+            if creators:
+                out["schema:creator"] = creators
+        elif isinstance(creator_value, Mapping):
+            creator = _schema_agent_value(creator_value)
+            if creator is not None:
+                out["schema:creator"] = creator
+        publisher = _schema_agent_value(dataset.get("publisher"))
+        if publisher is not None:
+            out["schema:publisher"] = publisher
+        funder_value = dataset.get("funder")
+        if isinstance(funder_value, list):
+            funders = [node for item in funder_value if (node := _schema_agent_value(item)) is not None]
+            if funders:
+                out["schema:funder"] = funders
+        elif isinstance(funder_value, Mapping):
+            funder = _schema_agent_value(funder_value)
+            if funder is not None:
+                out["schema:funder"] = funder
+        citation_value = dataset.get("citation")
+        if isinstance(citation_value, list):
+            citations = [node for item in citation_value if (node := _schema_citation_value(item)) is not None]
+            if citations:
+                out["schema:citation"] = citations
+        else:
+            citation = _schema_citation_value(citation_value)
+            if citation is not None:
+                out["schema:citation"] = citation
+        if isinstance(dataset.get("measurementTechnique"), list):
+            values = [item for item in dataset["measurementTechnique"] if isinstance(item, str)]
+            if values:
+                out["schema:measurementTechnique"] = values
+        if isinstance(dataset.get("measurementMethod"), list):
+            values = [item for item in dataset["measurementMethod"] if isinstance(item, str)]
+            if values:
+                out["schema:measurementMethod"] = values
+        if isinstance(dataset.get("variableMeasured"), list):
+            values = [node for item in dataset["variableMeasured"] if (node := _schema_variable_measured_value(item)) is not None]
+            if values:
+                out["schema:variableMeasured"] = values
+        if isinstance(dataset.get("isAccessibleForFree"), bool):
+            out["schema:isAccessibleForFree"] = dataset["isAccessibleForFree"]
+        if isinstance(dataset.get("conditionsOfAccess"), str):
+            out["schema:conditionsOfAccess"] = dataset["conditionsOfAccess"]
+        if isinstance(dataset.get("inLanguage"), str):
+            out["schema:inLanguage"] = dataset["inLanguage"]
+        if dataset.get("dateCreated") is not None:
+            out["schema:dateCreated"] = dataset["dateCreated"]
+        if dataset.get("dateModified") is not None:
+            out["schema:dateModified"] = dataset["dateModified"]
+        if dataset.get("datePublished") is not None:
+            out["schema:datePublished"] = dataset["datePublished"]
+        if isinstance(dataset.get("temporalCoverage"), str):
+            out["schema:temporalCoverage"] = dataset["temporalCoverage"]
+        if isinstance(dataset.get("spatialCoverage"), str):
+            out["schema:spatialCoverage"] = dataset["spatialCoverage"]
+        if isinstance(dataset.get("isBasedOn"), list):
+            refs = [{"@id": item} for item in dataset["isBasedOn"] if isinstance(item, str)]
+            if refs:
+                out["schema:isBasedOn"] = refs
+        included_in_data_catalog = dataset.get("includedInDataCatalog")
+        included_in_data_catalog_value = _schema_data_catalog_value(included_in_data_catalog)
+        if included_in_data_catalog_value is not None:
+            out["schema:includedInDataCatalog"] = included_in_data_catalog_value
+        if isinstance(distribution, list):
+            values = [
+                node
+                for item in distribution
+                if (node := _schema_distribution_value(item, part_of_id=entity_iri)) is not None
+            ]
+            if values:
+                out["schema:distribution"] = values
+        main_entity = dataset.get("mainEntity")
+        if isinstance(main_entity, list):
+            values = [node for item in main_entity if (node := _schema_main_entity_value(item)) is not None]
+            if values:
+                out["schema:mainEntity"] = values
+        elif isinstance(main_entity, Mapping):
+            value = _schema_main_entity_value(main_entity)
+            if value is not None:
+                out["schema:mainEntity"] = value
         about = dataset.get("about")
         if isinstance(about, list):
             cells = [cell_id for cell_id in about if isinstance(cell_id, str) and CELL_IRI_RE.fullmatch(cell_id)]
@@ -2657,14 +3146,27 @@ def build_index(
                 _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
             inst = doc.get("cell_instance", {})
             prov = doc.get("provenance", {})
+            dataset_links = doc.get("datasets", [])
             if not isinstance(inst, Mapping) or not isinstance(inst.get("id"), str):
                 raise ValueError("missing cell_instance.id")
+            linked_dataset_ids: list[str] = []
+            if isinstance(dataset_links, list):
+                linked_dataset_ids = [
+                    item["id"]
+                    for item in dataset_links
+                    if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+                ]
+            elif isinstance(prov, Mapping):
+                if isinstance(prov.get("dataset_ids"), list):
+                    linked_dataset_ids = [item for item in prov["dataset_ids"] if isinstance(item, str)]
+                elif isinstance(prov.get("dataset_id"), str):
+                    linked_dataset_ids = [prov["dataset_id"]]
             cell_instances.append(
                 {
                     "id": inst["id"],
                     "type_id": inst.get("type_id"),
                     "short_id": inst.get("short_id") or _short_id_from_iri(inst["id"]),
-                    "dataset_id": prov.get("dataset_id") if isinstance(prov, Mapping) else None,
+                    "dataset_id": linked_dataset_ids[0] if linked_dataset_ids else None,
                     "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
                     "path": _relative_or_absolute(path, src_root),
                 }
@@ -2824,19 +3326,20 @@ __all__ = [
     "index_stats",
     "publish_batch",
     "publish_record",
+    "query",
     "query_cell_instances",
     "query_library_cell_types",
     "query_cell_types",
     "query_datasets",
     "query_tests",
-    "register_batch",
-    "register_cell_instance",
-    "register_cell_type",
-    "register_dataset",
-    "register_library_cell_type",
+    "save_batch",
+    "save_cell_instance",
+    "save_cell_type",
+    "save_dataset",
+    "save_library_cell_type",
     "resolve_cell_type_id",
-    "register_record",
-    "register_test",
+    "save_record",
+    "save_test",
     "template_cell_specification",
     "template_cell_instance",
     "template_cell_type",

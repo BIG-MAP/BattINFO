@@ -7,8 +7,8 @@
     "canonical_keys_source": "assets/schemas/cell-canonical.schema.json#/$defs/SpecSet/properties",
     "scan_roots": [
       "assets/examples",
-      "assets/datasheets",
-      ".battinfo/ingest/ddata-sidecars",
+      "assets/library",
+      ".battinfo/ingest/source-sidecars",
       "src/battinfo/data/examples"
     ],
     "observed_key_count": 46,

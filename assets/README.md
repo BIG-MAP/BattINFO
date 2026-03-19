@@ -11,7 +11,6 @@ Subdirectories:
 - `schemas/` Normative JSON Schemas used by CLI/API validation
 - `library/` Canonical reusable source records
 - `library-rdf/` Generated RDF/JSON-LD library artifacts
-- `datasheets/` Curated datasheet JSON examples
 - `mappings/` Mapping rules and candidate mapping artifacts
 
 Identifier-constrained resource schemas include:

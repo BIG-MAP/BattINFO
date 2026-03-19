@@ -110,6 +110,13 @@
         "publisher": {
           "$ref": "#/$defs/Organization"
         },
+        "funder": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PersonOrOrganization"
+          },
+          "minItems": 1
+        },
         "citation": {
           "type": "array",
           "items": {
@@ -186,6 +193,20 @@
           },
           "minItems": 1
         },
+        "mainEntity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CsvwMainEntity"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CsvwMainEntity"
+              },
+              "minItems": 1
+            }
+          ]
+        },
         "isBasedOn": {
           "type": "array",
           "items": {
@@ -202,6 +223,9 @@
             {
               "type": "string",
               "format": "uri"
+            },
+            {
+              "$ref": "#/$defs/DataCatalog"
             }
           ]
         }
@@ -240,6 +264,14 @@
               "type": "null"
             }
           ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
         },
         "source_file": {
           "type": "string"
@@ -392,11 +424,23 @@
           "type": "string",
           "minLength": 1
         },
+        "given_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_name": {
+          "type": "string",
+          "minLength": 1
+        },
         "email": {
           "type": "string",
           "format": "email"
         },
         "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sameAs": {
           "type": "string",
           "format": "uri"
         },
@@ -422,6 +466,10 @@
         "url": {
           "type": "string",
           "format": "uri"
+        },
+        "sameAs": {
+          "type": "string",
+          "format": "uri"
         }
       }
     },
@@ -434,6 +482,37 @@
           "$ref": "#/$defs/Organization"
         }
       ]
+    },
+    "DataCatalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "DataCatalog"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sameAs": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
     },
     "Citation": {
       "type": "object",
@@ -526,6 +605,178 @@
             "closed",
             "unknown"
           ]
+        }
+      }
+    },
+    "CsvwTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "url",
+        "tableSchema"
+      ],
+      "properties": {
+        "type": {
+          "const": "Table"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tableSchema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "#/$defs/CsvwTableSchema"
+            }
+          ]
+        }
+      }
+    },
+    "CsvwTableGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "table"
+      ],
+      "properties": {
+        "type": {
+          "const": "TableGroup"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "table": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CsvwTable"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "CsvwMainEntity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CsvwTable"
+        },
+        {
+          "$ref": "#/$defs/CsvwTableGroup"
+        }
+      ]
+    },
+    "CsvwTableColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "titles": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sameAs": {
+          "type": "string",
+          "format": "uri"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "CsvwTableSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "columns"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "primaryKey": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          ]
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CsvwTableColumn"
+          },
+          "minItems": 1
         }
       }
     },

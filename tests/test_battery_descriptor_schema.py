@@ -63,6 +63,7 @@ def test_battery_descriptor_schema_validates_example() -> None:
         ],
         "provenance": {
             "source_file": "battery.json",
+            "citation": "https://doi.org/10.17632/kxsbr4x3j2.2",
             "retrieved_at": 1772556000
         }
     }
@@ -116,3 +117,31 @@ def test_battery_descriptor_schema_validates_minimal_core() -> None:
     assert errors == []
 
 
+def test_battery_descriptor_schema_accepts_construction_metadata() -> None:
+    schema_root = ROOT / "src" / "battinfo" / "data" / "schemas"
+    schema_path = schema_root / "battery-descriptor.schema.json"
+    schema_doc = json.loads(schema_path.read_text(encoding="utf-8"))
+    registry = _schema_registry(schema_root)
+    validator = Draft202012Validator(schema_doc, registry=registry)
+
+    sample = {
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/cell-type/4p7m-2q8v-6n3t-9k5r",
+            "manufacturer": "ExampleCells",
+            "model": "SLP-001",
+            "format": "pouch",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "NMC",
+            "negative_electrode_basis": "graphite",
+            "construction": {
+                "assembly_type": "stacked",
+                "layering": "single_layer",
+                "layer_count": 1,
+                "comment": "Single-layer alpha fixture."
+            }
+        }
+    }
+
+    errors = list(validator.iter_errors(sample))
+    assert errors == []

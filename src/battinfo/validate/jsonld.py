@@ -1,14 +1,22 @@
 from __future__ import annotations
 
+import copy
 import json
 from functools import lru_cache
 from importlib import resources
 from typing import Any
 
+from rdflib import Dataset
+try:
+    from pyld import jsonld as pyld_jsonld
+except ImportError:  # pragma: no cover - exercised only when the dependency is missing at runtime.
+    pyld_jsonld = None
+
 from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPolicy, ValidationReport, ValidationResult, get_validation_policy
 
 _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "BatteryCell",
+    "BatteryTest",
     "BatteryModule",
     "BatteryPack",
     "BatterySystem",
@@ -99,6 +107,95 @@ def _walk_relative_type_errors(node: Any, path: str, errors: list[str]) -> None:
             _walk_relative_type_errors(item, next_path, errors)
 
 
+def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    try:
+        dataset = Dataset()
+        dataset.parse(data=json.dumps(data), format="json-ld")
+    except Exception as exc:  # noqa: BLE001
+        issues.append(
+            ValidationIssue(
+                code="jsonld.parse_error",
+                severity="error",
+                path="",
+                message=f"JSON-LD could not be parsed into an RDF dataset: {exc}",
+                validator="jsonld",
+                resource_type="jsonld",
+            )
+        )
+        return issues
+
+    try:
+        dataset.serialize(format="nquads")
+    except Exception as exc:  # noqa: BLE001
+        issues.append(
+            ValidationIssue(
+                code="jsonld.dataset_materialization_error",
+                severity="error",
+                path="",
+                message=f"JSON-LD parsed, but the RDF dataset could not be materialized to N-Quads: {exc}",
+                validator="jsonld",
+                resource_type="jsonld",
+            )
+        )
+    return issues
+
+
+@lru_cache(maxsize=1)
+def _pyld_base_document_loader() -> Any:
+    if pyld_jsonld is None:
+        return None
+    return pyld_jsonld.requests_document_loader(timeout=10)
+
+
+@lru_cache(maxsize=32)
+def _cached_pyld_document(url: str) -> dict[str, Any]:
+    loader = _pyld_base_document_loader()
+    if loader is None:
+        raise RuntimeError("PyLD is not available.")
+    return loader(url, {})
+
+
+def _pyld_document_loader(url: str, options: dict[str, Any]) -> dict[str, Any]:
+    return copy.deepcopy(_cached_pyld_document(url))
+
+
+def _urdna2015_issues(data: dict[str, Any]) -> list[ValidationIssue]:
+    if pyld_jsonld is None:
+        return [
+            ValidationIssue(
+                code="jsonld.normalizer_unavailable",
+                severity="error",
+                path="",
+                message="PyLD is not installed, so URDNA2015 normalization could not be run.",
+                validator="jsonld",
+                resource_type="jsonld",
+            )
+        ]
+
+    try:
+        pyld_jsonld.normalize(
+            data,
+            {
+                "algorithm": "URDNA2015",
+                "format": "application/n-quads",
+                "documentLoader": _pyld_document_loader,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001
+        return [
+            ValidationIssue(
+                code="jsonld.urdna2015_normalization_error",
+                severity="error",
+                path="",
+                message=f"JSON-LD could not be normalized with URDNA2015: {exc}",
+                validator="jsonld",
+                resource_type="jsonld",
+            )
+        ]
+    return []
+
+
 def validate_jsonld_report(
     data: dict[str, Any],
     *,
@@ -120,6 +217,10 @@ def validate_jsonld_report(
                 resource_type="jsonld",
             )
         )
+    materialization_issues = _parse_materialization_issues(data)
+    issues.extend(materialization_issues)
+    if not any(issue.code == "jsonld.parse_error" for issue in materialization_issues):
+        issues.extend(_urdna2015_issues(data))
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)
 
 

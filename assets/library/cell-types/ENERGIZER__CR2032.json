@@ -8,7 +8,7 @@
     "chemistry": "Li-primary",
     "positive_electrode_basis": "MnO2",
     "negative_electrode_basis": "Li-metal",
-    "size_code": "CR2032",
+    "size_code": "R2032",
     "property": {
       "nominal_voltage": {
         "value": 3.0,
@@ -35,7 +35,8 @@
     "source_url": "https://example.org/datasheets/ENERGIZER__CR2032.pdf",
     "retrieved_at": 1773173618,
     "workflow_version": "notebook-cr2032-eval-0.1.0",
-    "comment": "Datasheet SHA-256: ff05548e1efc6164fc779836976b0de4859ddcfa0c4f058dd55147bdc239d41f"
+    "comment": "Datasheet SHA-256: ff05548e1efc6164fc779836976b0de4859ddcfa0c4f058dd55147bdc239d41f",
+    "citation": "https://example.org/datasheets/ENERGIZER__CR2032.pdf"
   },
   "comment": [
     "Reusable BattINFO library example for a commercial coin cell type.",

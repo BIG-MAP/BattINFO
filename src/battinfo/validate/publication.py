@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
 import re
 from typing import Any
 from urllib.parse import urlparse
-
-from rdflib import Graph
 
 from battinfo.validate.core import (
     DEFAULT_POLICY,
@@ -228,26 +225,6 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
 
     return ValidationReport(issues=tuple(issues), policy=policy)
 
-
-def _parse_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
-    if policy.publication == "off":
-        return ValidationReport(policy=policy)
-    try:
-        graph = Graph()
-        graph.parse(data=json.dumps(data), format="json-ld")
-    except Exception as exc:  # noqa: BLE001
-        issue = ValidationIssue(
-            code="publication.jsonld_parse_error",
-            severity=_issue_severity(policy),  # type: ignore[arg-type]
-            path="",
-            message=f"Publication payload could not be parsed as JSON-LD/RDF: {exc}",
-            validator="publication",
-            resource_type="jsonld-publication",
-        )
-        return ValidationReport(issues=(issue,), policy=policy)
-    return ValidationReport(policy=policy)
-
-
 def validate_publication_report(
     data: dict[str, Any],
     *,
@@ -259,7 +236,6 @@ def validate_publication_report(
     jsonld_report = validate_jsonld_report(data, policy=resolved_policy)
     return combine_reports(
         jsonld_report,
-        _parse_issues(data, resolved_policy),
         _shape_issues(data, resolved_policy),
         policy=resolved_policy,
     )

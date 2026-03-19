@@ -10,9 +10,57 @@ Status: Pre-release with alpha-ready scope defined.
 - Core, preview, and in-development boundaries are now documented for alpha testing.
 
 Alpha scope
-- Core: stable battery-descriptor validation/mapping, canonical record query/register/publish/index flows, JSON-LD-first publication, and validation policies.
-- Preview: reusable cell-type library flows, notebooks, and curated datasheet validation examples.
-- In development: datasheet authoring as a public contract, ingestion pipelines, semantic mapping candidate workflows, and large-scale reference validation.
+- Core: stable battery-descriptor validation/mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
+- Preview: reusable cell-type library flows beyond the alpha walkthrough fixtures and curated datasheet validation examples.
+- In development: datasheet authoring as a public contract, semantic mapping workflows, and large-scale reference validation.
+- Implementation plan for closing alpha blockers: `docs/alpha-implementation-plan.md`
+
+Alpha hardening targets
+- simple commercial cell records with specification-sheet-level metadata
+- detailed cell descriptors covering coin, cylindrical, pouch, and prismatic formats
+- explicit canonical test records and linked dataset records
+- clean-environment install, validate, publish, index, and query workflows for the supported alpha cases
+
+Alpha bootstrap
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python -m pip install --upgrade pip setuptools wheel
+.\.venv\Scripts\python -m pip install -e .[dev]
+```
+
+Alpha verification
+```powershell
+.\.venv\Scripts\python .tools/quality/run_alpha_verification.py
+```
+
+Agent bootstrap
+- Repo-local agent guide: `AGENTS.md`
+- Machine-readable agent manifest: `.tools/agent/manifest.json`
+- Contract check: `python .tools/quality/check_agent_readiness.py`
+- Machine-readable alpha report: `.\.venv\Scripts\python .tools/quality/run_alpha_verification.py --report-json .battinfo/reports/alpha-verification.json`
+
+Equivalent explicit commands:
+```powershell
+.\.venv\Scripts\python -m pytest -q tests/test_alpha_workflow.py tests/test_alpha_descriptor_matrix.py tests/test_alpha_scope_acceptance.py
+.\.venv\Scripts\python tests/installed_smoke.py
+.\.venv\Scripts\python -m build --no-isolation
+```
+
+The alpha verification set covers:
+- simple commercial cell save/query
+- detailed cell descriptors for coin, cylindrical, single-layer pouch, multilayer pouch, and prismatic
+- canonical battery-test records for cycling, rate capability, formation, HPPC, ICI, GITT, DCIR, and EIS
+- linked dataset records that must reference a tested cell and may also reference a test
+- packaging smoke via `python -m build --no-isolation`
+
+Reference policy for alpha:
+- `save record --resolve-references` is best-effort and does not require every linked target to already exist
+- full referential integrity is enforced on the finished source tree by `save batch --resolve-references` and `build_index(..., validate=True)`
+
+Migration note:
+- Local canonical record writes now use `save*` names.
+- The older local `register*` names were removed.
+- `register*` is reserved for future remote registry communication.
 
 Tested Python support for alpha preparation
 - Python 3.10 and 3.11 are the tested targets in CI.
@@ -37,17 +85,17 @@ Quick start
 ```
 battinfo validate input.json --profile battery-descriptor --format json
 battinfo validate input.json --profile batterypass --format json
-battinfo validate assets/datasheets/cell-types/pvn1-43h7-rm3e-mjqq.datasheet.json --profile cell-type-datasheet
+battinfo validate input.datasheet.json --profile cell-type-datasheet
 battinfo template cell-type --manufacturer Duracell --model-name MN1500 --chemistry Zn-air --cell-format cylindrical --out mn1500.cell-type.json --format json
-battinfo register record --input mn1500.cell-type.json --source-root assets/examples --no-resolve-references --format json
+battinfo save record --input mn1500.cell-type.json --source-root assets/examples --no-resolve-references --format json
 battinfo map input.json --target domain-battery --out output.domain.jsonld
 battinfo map input.json --target batterypass --out output.jsonld
 battinfo query cell-types --manufacturer A123 --chemistry LFP --format json
 battinfo create cell-instance --model-name ANR26650M1-B --manufacturer A123 --format json
-battinfo register cell-type --manufacturer Duracell --model-name MN1500 --chemistry Zn-air --cell-format cylindrical --source-file manual-mn1500.json --format json
-battinfo register cell-instance --type-id https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8 --source-type lab --format json
-battinfo register dataset --title "MN1500 cycling" --source-type measurement --format json
-battinfo register batch --source-dir .battinfo/candidates/cell-types --source-dir .battinfo/candidates/cell-instances --source-dir .battinfo/candidates/datasets --source-root assets/examples --format json
+battinfo save cell-type --manufacturer Duracell --model-name MN1500 --chemistry Zn-air --cell-format cylindrical --source-file manual-mn1500.json --format json
+battinfo save cell-instance --type-id https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8 --source-type lab --format json
+battinfo save dataset --title "MN1500 cycling" --source-type measurement --format json
+battinfo save batch --source-dir batch/cell-types --source-dir batch/cell-instances --source-dir batch/datasets --source-root assets/examples --format json
 battinfo publish batch --source-dir assets/examples/cell-instances --format json
 battinfo index build --source-root assets/examples --out .battinfo/index.json --format json
 battinfo index stats --index .battinfo/index.json --format json
@@ -80,56 +128,36 @@ Identifier policy
 
 Notebooks
 - See `notebooks/README.md` for the current executable workflow examples:
-  descriptor examples, registration flows, and JSON-LD-first dataset publication review.
-  These notebooks are currently part of the preview scope, not the core alpha contract.
+  the minimal end-to-end BattINFO authoring and publication flow.
+- If VS Code gets stuck on notebook kernel restart for the repo `.venv`, run:
+  `battinfo notebook recover --project-root . --format text`
 
-Cell-type datasheet standard
-- Draft v1 reference: `docs/datasheet-standard.md`
-- v1.0 release-candidate checklist: `docs/datasheet-v1-rc-checklist.md`
+Cell-type datasheets and registry intake
 - Dataset registry intake spec (v1 draft): `docs/dataset-registry-intake-spec.md`
-- Ingestion pipeline guide (CellInfo + local PDFs): `docs/ingestion-pipeline.md`
-- Example batch generation:
-  `python .tools/datasheets/generate_cell_type_datasheet_examples.py --count 10 --target-dir .battinfo/datasheets/top10 --strategy diverse --clean-target --batch-tag cellinfo-top10-diverse-v1`
-- Example batch generation with conservative negative-electrode inference:
-  `python .tools/datasheets/generate_cell_type_datasheet_examples.py --count 100 --strategy diverse --target-dir .battinfo/datasheets/pilot100-enriched --clean-target --batch-tag cellinfo-pilot100-diverse-v1-enriched --infer-negative-electrode-basis`
-- Validate generated datasheets:
-  `python .tools/datasheets/validate_cell_type_datasheets.py --dir .battinfo/datasheets/top10 --profile cell-type-datasheet`
-- Run quality gates on generated batch:
-  `python .tools/datasheets/check_datasheet_quality.py --dir .battinfo/datasheets/top10 --report .battinfo/reports/cellinfo-top10-gate.md --max-empty-specs 0 --max-unknown-manufacturer 0 --max-unknown-chemistry 0 --max-unknown-positive-electrode-basis 0 --max-unknown-negative-electrode-basis -1 --required-spec nominal_capacity --required-spec nominal_voltage --min-required-spec-coverage 1.0`
-- CI-style smoke gate (deterministic batch + strict unknown-negative gate):
-  `python .tools/datasheets/generate_cell_type_datasheet_examples.py --count 10 --strategy diverse --target-dir .battinfo/ci-smoke/cell-types --clean-target --batch-tag ci-smoke-v1 --infer-negative-electrode-basis`
-  `python .tools/datasheets/validate_cell_type_datasheets.py --dir .battinfo/ci-smoke/cell-types --profile cell-type-datasheet`
-  `python .tools/datasheets/check_datasheet_quality.py --dir .battinfo/ci-smoke/cell-types --report .battinfo/reports/ci-smoke-gate.md --max-empty-specs 0 --max-unknown-manufacturer 0 --max-unknown-chemistry 0 --max-unknown-positive-electrode-basis 0 --max-unknown-negative-electrode-basis 0 --required-spec nominal_capacity --required-spec nominal_voltage --min-required-spec-coverage 1.0`
-- Build curation backlog report:
-  `python .tools/datasheets/report_datasheet_curation_backlog.py --dir .battinfo/datasheets/top10 --out .battinfo/reports/datasheet-curation-backlog.md --max-list 30`
-- Build delta report (baseline vs enriched):
-  `python .tools/datasheets/report_datasheet_delta.py --baseline-dir .battinfo/datasheets/pilot100 --enriched-dir .battinfo/datasheets/pilot100-enriched --out .battinfo/reports/pilot100-delta.md`
+- Validate a directory of BattINFO cell-type datasheets:
+  `python .tools/datasheets/validate_cell_type_datasheets.py --dir <path-to-datasheets> --profile cell-type-datasheet`
+- Run datasheet quality checks:
+  `python .tools/datasheets/check_datasheet_quality.py --dir <path-to-datasheets> --report .battinfo/reports/datasheet-quality.md`
+- Build datasheet curation backlog report:
+  `python .tools/datasheets/report_datasheet_curation_backlog.py --dir <path-to-datasheets> --out .battinfo/reports/datasheet-curation-backlog.md --max-list 30`
+- Build datasheet delta report:
+  `python .tools/datasheets/report_datasheet_delta.py --baseline-dir <baseline-dir> --enriched-dir <updated-dir> --out .battinfo/reports/datasheet-delta.md`
 - Generate first-pass semantic mapping candidates for quantitative properties:
   `python .tools/semantic/generate_semantic_mapping_candidates.py --ontology https://w3id.org/emmo/domain/battery/inferred --sample-json assets/examples/cell-types/A123__ANR26650M1-B.json --out-dir assets/mappings/domain-battery --overwrite`
 - Run semantic mapping quality gates and emit review report:
   `python .tools/semantic/check_semantic_mapping_candidates.py --property-map assets/mappings/domain-battery/property_map.candidates.json --unit-map assets/mappings/domain-battery/unit_map.candidates.json --report assets/mappings/domain-battery/quantitative_mapping_gate.md`
 
-Ingestion scaffolding (new)
-- Build source manifest from CellInfo + local PDF directory:
-  `python .tools/build/build_datasheet_source_manifest.py --cellinfo-dir src/battinfo/data/examples/cells-clean --pdf-dir <path-to-datasheets> --recursive --out .battinfo/ingest/manifests/datasheet-sources.manifest.json --summary-md .battinfo/ingest/manifests/datasheet-sources.summary.md`
-- Convert CellInfo records into normalized candidate records:
-  `python .tools/ingest/ingest_cellinfo_candidates.py --source-dir src/battinfo/data/examples/cells-clean --target-dir .battinfo/ingest/candidates/cellinfo --clean-target --validate --summary-md .battinfo/ingest/candidates/cellinfo/CELLINFO_CANDIDATES_SUMMARY.md`
-- Seed multi-cell PDF candidates from manifest hints:
-  `python .tools/ingest/seed_pdf_candidates_from_manifest.py --manifest .battinfo/ingest/manifests/datasheet-sources.manifest.json --target-dir .battinfo/ingest/candidates/pdf-seeded --clean-target`
-- Produce dedup/match triage report against existing datasheets:
-  `python .tools/ingest/report_candidate_matches.py --candidate-dir .battinfo/ingest/candidates/cellinfo --existing-dir assets/datasheets/cell-types --out .battinfo/ingest/reports/cellinfo-match-report.md --json-out .battinfo/ingest/reports/cellinfo-match-report.json`
-
-Template-first registration workflow
+Template-first save workflow
 - Generate starter records:
   `battinfo template cell-type --out cell-type.template.json`
   `battinfo template cell-instance --out cell-instance.template.json`
   `battinfo template dataset --out dataset.template.json`
 - Register canonical records:
-  `battinfo register record --input cell-type.template.json --source-root assets/examples --no-resolve-references --format json`
-  `battinfo register record --input cell-instance.template.json --source-root assets/examples --resolve-references --format json`
-  `battinfo register record --input dataset.template.json --source-root assets/examples --resolve-references --format json`
+  `battinfo save record --input cell-type.template.json --source-root assets/examples --no-resolve-references --format json`
+  `battinfo save record --input cell-instance.template.json --source-root assets/examples --resolve-references --format json`
+  `battinfo save record --input dataset.template.json --source-root assets/examples --resolve-references --format json`
 - Register in one pass from staging directories:
-  `battinfo register batch --source-dir .battinfo/candidates/cell-types --source-dir .battinfo/candidates/cell-instances --source-dir .battinfo/candidates/datasets --source-root assets/examples --resolve-references --format json`
+  `battinfo save batch --source-dir batch/cell-types --source-dir batch/cell-instances --source-dir batch/datasets --source-root assets/examples --resolve-references --format json`
 
 CLI roadmap
 - See `docs/cli-spec.md` for the concrete `query` / `create` / `publish` / `index` command specification.
@@ -151,7 +179,7 @@ Repository layout
 - `src/battinfo/` Python package + CLI
 - `assets/compat.yaml` Compatibility metadata for domain-battery and Battery Pass
 - `docs/` Adoption and usage docs
-- `.tools/` Maintainer-only tooling grouped into `build/`, `datasheets/`, `ingest/`, `library/`, `quality/`, and `semantic/`
+- `.tools/` Maintainer-only tooling grouped into `build/`, `datasheets/`, `library/`, `quality/`, and `semantic/`
 - `tests/` Regression and contract tests
 - `legacy/` Prior ontology artifacts and docs (archived)
 
@@ -166,4 +194,6 @@ See `assets/compat.yaml`.
 Notes
 - BattINFO does not host or modify the domain-battery ontology.
 - BattINFO does not publish authoritative Battery Pass artifacts.
+
+
 

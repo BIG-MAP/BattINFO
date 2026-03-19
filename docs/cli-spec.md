@@ -4,8 +4,8 @@
 
 This specification defines the primary user interaction surface for BattINFO:
 
-- query library resources (`cell-type`, `cell`, `dataset`)
-- create new resource instances (starting with `cell-instance`)
+- query canonical resources (`cell-type`, `cell-instance`, `test`, `dataset`)
+- create new resource instances
 - publish validated records into resolver-ready artifacts
 - build and inspect local resource indexes
 
@@ -82,7 +82,7 @@ Filters:
 - `--id <cell-type-iri>`
 - `--manufacturer <name>`
 - `--chemistry <value>`
-- `--format <cylindrical|prismatic|pouch|coin|other|unknown>`
+- `--cell-format <cylindrical|prismatic|pouch|coin|other|unknown>`
 - `--model-name-contains <text>`
 - `--nominal-capacity-min <number>`
 - `--nominal-capacity-max <number>`
@@ -112,8 +112,6 @@ Filters:
 - `--has-dataset <true|false>`
 - `--dataset-id <dataset-iri>`
 - `--source-type <measurement|lab|bms|other>`
-- `--retrieved-after <ISO8601>`
-- `--retrieved-before <ISO8601>`
 - `--limit <int>` (default `50`)
 - `--offset <int>` (default `0`)
 
@@ -133,10 +131,9 @@ Filters:
 - `--id <dataset-iri>`
 - `--title-contains <text>`
 - `--related-cell-id <cell-iri>`
+- `--related-test-id <test-iri>`
 - `--source-type <measurement|lab|simulation|external|other>`
-- `--created-after <ISO8601>`
-- `--created-before <ISO8601>`
-- `--format <mime-or-label>`
+- `--data-format <mime-or-label>`
 - `--license <string>`
 - `--limit <int>` (default `50`)
 - `--offset <int>` (default `0`)
@@ -145,7 +142,27 @@ Behavior:
 
 - Returns dataset IRIs with title, format, access URL, and related entity links.
 
-### 4.4 Query Output Contract
+### 4.4 Query Tests
+
+```text
+battinfo query tests [filters...]
+```
+
+Filters:
+
+- `--id <test-iri>`
+- `--cell-id <cell-iri>`
+- `--dataset-id <dataset-iri>`
+- `--kind <test-kind>`
+- `--source-type <measurement|lab|simulation|manual|other>`
+- `--limit <int>` (default `50`)
+- `--offset <int>` (default `0`)
+
+Behavior:
+
+- Returns canonical test IRIs with cell links, dataset links, and summary test metadata.
+
+### 4.5 Query Output Contract
 
 JSON mode (`--format json`) for all query commands:
 
@@ -201,11 +218,11 @@ Output contract:
 Registration is the primary workflow for creating canonical BattINFO resources in source storage.
 
 ```text
-battinfo register record --input <json-path> [options]
-battinfo register cell-type [--input <json-path> | inline-fields...] [options]
-battinfo register cell-instance [--input <json-path> | inline-fields...] [options]
-battinfo register dataset [--input <json-path> | inline-fields...] [options]
-battinfo register batch --source-dir <dir> [--source-dir <dir> ...] [options]
+battinfo save record --input <json-path> [options]
+battinfo save cell-type [--input <json-path> | inline-fields...] [options]
+battinfo save cell-instance [--input <json-path> | inline-fields...] [options]
+battinfo save dataset [--input <json-path> | inline-fields...] [options]
+battinfo save batch --source-dir <dir> [--source-dir <dir> ...] [options]
 ```
 
 Common options:
@@ -262,7 +279,7 @@ battinfo template dataset [options]
 
 Behavior:
 
-- Generates minimal canonical JSON records suitable for edit + registration.
+- Generates minimal canonical JSON records suitable for edit + save.
 - Writes to `--out` when provided; otherwise prints JSON to stdout.
 - Defaults use placeholder IRIs/UIDs (`0000-0000-0000-0000`) for easy replacement.
 
@@ -343,8 +360,8 @@ Minimum stats output:
 
 ### Query
 
-- `query cell-types`, `query cell-instances`, `query datasets` implemented.
-- Each supports at least 10 meaningful filters.
+- `query cell-types`, `query cell-instances`, `query tests`, and `query datasets` implemented.
+- Each command supports meaningful resource-specific filters.
 - JSON output contract stable and documented.
 
 ### Create
@@ -387,3 +404,5 @@ CLI wiring:
   - `create`
   - `publish`
   - `index`
+
+

@@ -25,32 +25,74 @@ from battinfo.validate import (
 def test_validate_json_report_exposes_structured_schema_issue() -> None:
     doc = {
         "version": "1.0.0",
-        "generated_at": "not-a-datetime",
-        "sources": [],
+        "product": {
+            "type": "Product",
+            "identifier": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+            "short_id": "7d9k2m",
+            "name": "A123 ANR26650M1-B",
+            "brand": "A123",
+            "manufacturer": "A123",
+            "model": "ANR26650M1-B",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "LFP",
+            "negative_electrode_basis": "graphite",
+            "format": "cylindrical",
+            "category": "battery cell",
+        },
+        "specs": {
+            "nominal_capacity": {"value": 2.5, "unit": "Ah"},
+        },
+        "lineage": {
+            "source_record": "A123__ANR26650M1-B",
+            "source_type": "datasheet",
+            "source_file": "A123__ANR26650M1-B.pdf",
+            "extracted_at": "not-a-datetime",
+        },
     }
-    report = validate_json_report(doc, profile="datasheet-source-manifest")
+    report = validate_json_report(doc, profile="cell-type-datasheet")
     assert not report.ok
     assert report.policy.name == "default"
     assert report.errors
     issue = report.errors[0]
     assert issue.code == "schema.format.date_time"
-    assert issue.path == "generated_at"
-    assert issue.profile == "datasheet-source-manifest"
+    assert issue.path == "lineage.extracted_at"
+    assert issue.profile == "cell-type-datasheet"
     assert issue.validator == "format"
 
 
 def test_validate_json_result_preserves_structured_issues() -> None:
     doc = {
         "version": "1.0.0",
-        "generated_at": "not-a-datetime",
-        "sources": [],
+        "product": {
+            "type": "Product",
+            "identifier": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+            "short_id": "7d9k2m",
+            "name": "A123 ANR26650M1-B",
+            "brand": "A123",
+            "manufacturer": "A123",
+            "model": "ANR26650M1-B",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "LFP",
+            "negative_electrode_basis": "graphite",
+            "format": "cylindrical",
+            "category": "battery cell",
+        },
+        "specs": {
+            "nominal_capacity": {"value": 2.5, "unit": "Ah"},
+        },
+        "lineage": {
+            "source_record": "A123__ANR26650M1-B",
+            "source_type": "datasheet",
+            "source_file": "A123__ANR26650M1-B.pdf",
+            "extracted_at": "not-a-datetime",
+        },
     }
-    result = validate_json(doc, profile="datasheet-source-manifest")
+    result = validate_json(doc, profile="cell-type-datasheet")
     assert not result.ok
     assert result.policy == "default"
     assert result.issues
     assert result.issues[0].code == "schema.format.date_time"
-    assert any("generated_at" in err for err in result.errors)
+    assert any("extracted_at" in err for err in result.errors)
 
 
 def test_validate_json_report_unknown_profile_has_stable_issue_code() -> None:
@@ -80,6 +122,31 @@ def test_validate_jsonld_result_preserves_issue_metadata() -> None:
     assert not result.ok
     assert result.issues[0].code == "jsonld.type_term_unknown"
     assert "relative @type reference 'Real'" in result.errors[0]
+
+
+def test_validate_jsonld_report_detects_rdf_parse_failure() -> None:
+    payload = {
+        "@context": "https://w3id.org/emmo/domain/battery/context",
+        "@graph": [{"@id": "https://example.org/x", "@reverse": "not-an-object"}],
+    }
+    report = validate_jsonld_report(payload)
+    assert not report.ok
+    assert any(issue.code == "jsonld.parse_error" for issue in report.errors)
+
+
+def test_validate_jsonld_report_accepts_valid_payload_with_urdna2015() -> None:
+    payload = {
+        "@context": "https://w3id.org/emmo/domain/battery/context",
+        "@graph": [
+            {
+                "@id": "https://example.org/x",
+                "@type": ["BatteryCell", "schema:ProductModel"],
+                "schema:name": "Example battery",
+            }
+        ],
+    }
+    report = validate_jsonld_report(payload)
+    assert report.ok
 
 
 def test_validate_publication_report_detects_invalid_dataset_distribution() -> None:

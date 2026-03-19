@@ -7,6 +7,9 @@ __pycache__
 .ci
 *.egg-info
 dist
+!assets/examples/workspaces/
+!assets/examples/workspaces/**/dist/
+!assets/examples/workspaces/**/dist/**
 build
 .battinfo
 

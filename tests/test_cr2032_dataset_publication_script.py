@@ -165,11 +165,15 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     instance_node = next(node for node in graph if node.get("@id") == bundle.cell_instance.id)
     type_values = instance_node.get("@type")
     assert isinstance(type_values, list)
-    assert bundle.cell_type.id in type_values
-    assert "schema:isVariantOf" not in instance_node
+    assert bundle.cell_type.id not in type_values
+    assert instance_node["schema:isVariantOf"]["@id"] == bundle.cell_type.id
     class_node = next(node for node in graph if node.get("@id") == bundle.cell_type.id)
-    assert class_node["@type"] == "http://www.w3.org/2002/07/owl#Class"
+    class_types = class_node["@type"] if isinstance(class_node["@type"], list) else [class_node["@type"]]
+    assert "schema:ProductModel" in class_types
     test_node = next(node for node in graph if node.get("@id") == bundle.test.id)
+    test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
+    assert "schema:Action" in test_types
+    assert "BatteryTest" in test_types
     assert test_node["schema:description"] == "Protocol: constant current discharging"
     assert test_node["schema:instrument"]["schema:name"] == "short Landt cycler"
 
@@ -187,7 +191,7 @@ def test_publish_dataset_metadata_with_cell_type_only(tmp_path: Path) -> None:
         model="21700-A",
         format="cylindrical",
         chemistry="NMC/Graphite",
-        size_code="21700",
+        size_code="R21700",
         nominal_properties={"nominal_voltage": {"value": 3.7, "unit": "V"}},
         source=ProvenanceInfo(type="manual", url="https://example.org/cells/21700-a", retrieved_at=1771804800),
     )
@@ -226,7 +230,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
         model="CR2032",
         format="coin",
         chemistry="Li-primary",
-        size_code="CR2032",
+        size_code="R2032",
         nominal_properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
     )
     cell = CellInstance(
@@ -246,6 +250,37 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
         cell=cell,
         name="Energizer CR2032 dataset",
         description="Raw CCS time series for one CR2032 cell.",
+        keywords=["battery", "coin cell"],
+        creators=[{"type": "Organization", "name": "SINTEF"}],
+        publisher={"type": "Organization", "name": "BattINFO"},
+        funders=[{"type": "Organization", "name": "Battery Data Alliance"}],
+        variable_measured=[{"name": "Voltage", "unit_text": "V"}],
+        main_entity=[
+            {
+                "type": "Table",
+                "id": "https://example.org/datasets/cr2032#table",
+                "url": "measurements/run.csv",
+                "tableSchema": {
+                    "id": "https://example.org/datasets/cr2032/table-schema",
+                    "columns": [
+                        {
+                            "name": "voltage",
+                            "titles": ["Voltage / V"],
+                            "unit_text": "V",
+                        }
+                    ],
+                },
+            }
+        ],
+        distributions=[
+            {
+                "type": "DataDownload",
+                "name": "Primary CSV export",
+                "contentUrl": "https://example.org/downloads/cr2032.csv",
+                "encodingFormat": "text/csv",
+                "checksum": {"algorithm": "sha256", "value": "b" * 64},
+            }
+        ],
     )
 
     result = publish(
@@ -254,11 +289,13 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
         test=test,
         dataset=dataset,
         emit_bundle_dir=True,
+        emit_html_page=True,
     )
 
     assert result["status"] == "ok"
     assert Path(result["publish_path"]).exists()
     assert Path(result["bundle_dir"]).exists()
+    assert Path(result["html_path"]).exists()
     assert result["cell_type_id"].startswith("https://w3id.org/battinfo/cell-type/")
 
     loaded = load_publication(dataset_dir / "battinfo.publish.jsonld")
@@ -267,7 +304,34 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert loaded.test.cell_instance_id == loaded.cell_instance.id
     assert loaded.dataset.test_id == loaded.test.id
     assert loaded.dataset.access_url == dataset_dir.resolve().as_uri()
+    assert loaded.dataset.creators[0]["name"] == "SINTEF"
+    assert loaded.dataset.publisher["name"] == "BattINFO"
+    assert loaded.dataset.funders[0]["name"] == "Battery Data Alliance"
+    assert loaded.dataset.main_entity[0]["type"] == "Table"
+    assert loaded.dataset.main_entity[0]["tableSchema"]["id"] == "https://example.org/datasets/cr2032/table-schema"
+    assert any(dist["contentUrl"] == "https://example.org/downloads/cr2032.csv" for dist in loaded.dataset.distributions)
     assert loaded.cell_type.model == "CR2032"
     assert loaded.cell_instance.serial_number == "energizer-cr2032-202602-dtjrga"
     assert loaded.test.protocol.name == "constant current discharging"
     assert loaded.test.instrument == "short Landt cycler"
+
+    payload = _load_json(dataset_dir / "battinfo.publish.jsonld")
+    dataset_node = next(
+        node
+        for node in payload["@graph"]
+        if isinstance(node, dict) and node.get("@id") == loaded.dataset.id
+    )
+    assert dataset_node["schema:keywords"] == ["battery", "coin cell"]
+    assert dataset_node["schema:funder"][0]["schema:name"] == "Battery Data Alliance"
+    main_entity = dataset_node["schema:mainEntity"]
+    assert isinstance(main_entity, list)
+    assert main_entity[0]["@type"] == "csvw:Table"
+    assert main_entity[0]["csvw:tableSchema"]["@id"] == "https://example.org/datasets/cr2032/table-schema"
+    assert main_entity[0]["csvw:tableSchema"]["csvw:column"][0]["csvw:name"] == "voltage"
+    assert any(
+        isinstance(entry, dict) and entry.get("schema:contentUrl") == "https://example.org/downloads/cr2032.csv"
+        for entry in dataset_node["schema:distribution"]
+    )
+    html_text = Path(result["html_path"]).read_text(encoding="utf-8")
+    assert "application/ld+json" in html_text
+    assert "Energizer CR2032 dataset" in html_text

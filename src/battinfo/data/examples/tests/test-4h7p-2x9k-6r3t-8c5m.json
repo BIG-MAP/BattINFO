@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/4h7p-2x9k-6r3t-8c5m",
+    "short_id": "4h7p2x",
+    "identifier": "test:4h7p-2x9k-6r3t-8c5m",
+    "cell_id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+    "name": "A123 ANR26650M1-B formation protocol",
+    "description": "Initial formation sequence applied to one physical cell instance.",
+    "kind": "formation",
+    "status": "completed",
+    "protocol_name": "Two-cycle formation with staged current holds",
+    "started_at": 1772064000,
+    "ended_at": 1772150400,
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
+    "source_file": "test-4h7p-2x9k-6r3t-8c5m.json",
+    "retrieved_at": 1772150400,
+    "workflow_version": "0.2.0",
+    "citation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+  },
+  "notes": [
+    "Alpha hardening example for the formation test kind."
+  ]
+}

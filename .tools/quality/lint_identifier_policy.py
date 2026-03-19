@@ -106,18 +106,6 @@ def _check_datasets(dir_path: Path, errors: list[str]) -> None:
                     errors.append(f"{path}: invalid related_entities.cell_ids item '{cell_id}'")
 
 
-def _check_cells_clean(dir_path: Path, errors: list[str]) -> None:
-    for path in sorted(dir_path.glob("*.json")):
-        doc = _load(path)
-        cell = doc.get("cell")
-        if not isinstance(cell, dict):
-            errors.append(f"{path}: missing cell object")
-            continue
-        cell_id = cell.get("id")
-        if not isinstance(cell_id, str) or not CELL_TYPE_IRI_RE.fullmatch(cell_id):
-            errors.append(f"{path}: invalid cell.id '{cell_id}'")
-
-
 def _dirs() -> Iterable[tuple[str, Path]]:
     yield "assets cell-types", ROOT / "assets" / "examples" / "cell-types"
     yield "assets cell-instances", ROOT / "assets" / "examples" / "cell-instances"
@@ -125,8 +113,6 @@ def _dirs() -> Iterable[tuple[str, Path]]:
     yield "pkg cell-types", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-types"
     yield "pkg cell-instances", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instances"
     yield "pkg datasets", ROOT / "src" / "battinfo" / "data" / "examples" / "datasets"
-    yield "pkg cells-clean", ROOT / "src" / "battinfo" / "data" / "examples" / "cells-clean"
-
 
 def main() -> None:
     errors: list[str] = []
@@ -142,8 +128,6 @@ def main() -> None:
     _check_cell_types(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-types", errors)
     _check_cell_instances(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instances", errors)
     _check_datasets(ROOT / "src" / "battinfo" / "data" / "examples" / "datasets", errors)
-
-    _check_cells_clean(ROOT / "src" / "battinfo" / "data" / "examples" / "cells-clean", errors)
 
     if errors:
         print(f"identifier-policy-lint: FAIL ({len(errors)} issues)")

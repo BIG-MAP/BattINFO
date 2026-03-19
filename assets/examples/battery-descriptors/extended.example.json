@@ -325,7 +325,8 @@
     "source_url": "https://w3id.org/battinfo",
     "retrieved_at": 1773000000,
     "workflow_version": "battinfo-refactor",
-    "comment": "Created as a complementary full-option example."
+    "comment": "Created as a complementary full-option example.",
+    "citation": "https://w3id.org/battinfo"
   },
   "comment": [
     "This file complements minimal.example.json.",

@@ -6,7 +6,7 @@ This roadmap defines the implementation sequence for that work.
 
 ## Objectives
 
-- Make validation deterministic across CLI, API, registration, publishing, and indexing.
+- Make validation deterministic across CLI, API, saving, publishing, and indexing.
 - Guarantee machine-readable failure output with stable issue codes.
 - Enforce structural, referential, semantic, and publication-layer correctness.
 - Support strict CI gates while still allowing staged cleanup of existing data.
@@ -16,7 +16,7 @@ This roadmap defines the implementation sequence for that work.
 Current validation already provides:
 
 - JSON Schema validation for multiple profiles.
-- Some registration-time cross-reference checks.
+- Some save-time cross-reference checks.
 - Limited JSON-LD term validation.
 - CI smoke validation for canonical examples and generated datasheets.
 
@@ -109,7 +109,7 @@ Deliverables:
 - Consistent schema validation behavior in `validate_json()` and API write paths.
 
 Acceptance criteria:
-- Invalid URLs and timestamps fail in both profile validation and registration flows.
+- Invalid URLs and timestamps fail in both profile validation and save flows.
 - No public write path bypasses schema validation when `validate=True`.
 
 ### Phase 2: Unified Validation Engine
@@ -126,7 +126,7 @@ Deliverables:
   - `validate_batch`
 
 Acceptance criteria:
-- CLI, API, registration, publish, and index paths use the same engine.
+- CLI, API, save, publish, and index paths use the same engine.
 - Machine-readable validation output is available for automation.
 
 ### Phase 3: Referential Integrity
@@ -137,7 +137,7 @@ Deliverables:
 - Stable issue codes for missing and mismatched references.
 
 Acceptance criteria:
-- Broken references are caught outside registration flows as well.
+- Broken references are caught outside save flows as well.
 - Batch validation reports all missing references in one run.
 
 ### Phase 4: Semantic Rules
@@ -234,7 +234,7 @@ Stage 4:
 2. Create a shared validator factory to remove duplicated validator setup.
 3. Add negative tests for malformed `uri`, `email`, `date`, and `date-time`.
 4. Introduce structured validation issue types without breaking existing CLI/API ergonomics.
-5. Refactor current registration reference checks into reusable validation functions.
+5. Refactor current save reference checks into reusable validation functions.
 6. Define the first semantic rule pack for quantities and controlled values.
 
 ## Definition of Done
@@ -247,3 +247,4 @@ BattINFO validation is robust enough for downstream systems when:
 - semantic and publication validation exist for core resources,
 - CI exercises both positive and negative fixtures,
 - downstream clients can pin a policy and trust pass/fail behavior.
+

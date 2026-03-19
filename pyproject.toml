@@ -8,14 +8,14 @@ version = "0.1.0"
 description = "Implementation and interoperability layer for the domain-battery ontology."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "GPL-2.0-only"
+license-files = ["LICENSE"]
 authors = [
   { name = "BattINFO Team" }
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -29,7 +29,8 @@ dependencies = [
   "pandas>=2.2",
   "pyarrow>=15.0",
   "openpyxl>=3.1",
-  "rdflib>=7.0"
+  "rdflib>=7.0",
+  "pyld>=2.0.4"
 ]
 
 [project.optional-dependencies]
@@ -48,9 +49,13 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+namespaces = true
 
 [tool.setuptools.package-data]
 battinfo = ["data/**/*"]
+
+[tool.setuptools.exclude-package-data]
+battinfo = ["**/__pycache__/*", "**/*.py[cod]"]
 
 [tool.pytest.ini_options]
 norecursedirs = ["legacy"]

@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0.0",
+  "specification": {
+    "id": "https://w3id.org/battinfo/cell-type/5j9r-4k7p-2m8t-6v3q",
+    "manufacturer": "AlphaLab",
+    "model": "PRISM-LFP-020",
+    "format": "prismatic",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "construction": {
+      "assembly_type": "stacked",
+      "layering": "multilayer",
+      "layer_count": 24,
+      "comment": "Stacked prismatic alpha fixture."
+    },
+    "property": {
+      "nominal_capacity": {
+        "value": 20.0,
+        "unit": "Ah"
+      },
+      "nominal_voltage": {
+        "value": 3.2,
+        "unit": "V"
+      }
+    },
+    "positive_electrode": {
+      "coating": {
+        "component": {
+          "active_material": [
+            {
+              "name": "LFP",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.94,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "binder": [
+            {
+              "name": "PVDF",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.03,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "additive": [
+            {
+              "name": "Carbon black",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.03,
+                  "unit": "1"
+                }
+              }
+            }
+          ]
+        },
+        "property": {
+          "loading": {
+            "value": 24.0,
+            "unit": "mg/cm^2"
+          }
+        }
+      },
+      "current_collector": {
+        "name": "Al foil"
+      }
+    },
+    "negative_electrode": {
+      "coating": {
+        "component": {
+          "active_material": [
+            {
+              "name": "Graphite",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.95,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "binder": [
+            {
+              "name": "CMC/SBR",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.05,
+                  "unit": "1"
+                }
+              }
+            }
+          ]
+        },
+        "property": {
+          "loading": {
+            "value": 13.0,
+            "unit": "mg/cm^2"
+          }
+        }
+      },
+      "current_collector": {
+        "name": "Cu foil"
+      }
+    },
+    "electrolyte": {
+      "family": "organic",
+      "solvent_mixture": {
+        "component": [
+          {
+            "name": "EC",
+            "property": {
+              "volume_fraction": {
+                "value": 0.25,
+                "unit": "1"
+              }
+            }
+          },
+          {
+            "name": "EMC",
+            "property": {
+              "volume_fraction": {
+                "value": 0.75,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "salt": {
+        "name": "LiPF6",
+        "property": {
+          "concentration": {
+            "value": 1.0,
+            "unit": "mol/L"
+          }
+        }
+      },
+      "additive": [
+        {
+          "name": "FEC",
+          "property": {
+            "volume_fraction": {
+              "value": 0.03,
+              "unit": "1"
+            }
+          }
+        }
+      ]
+    },
+    "separator": {
+      "material": "Ceramic-coated PP",
+      "property": {
+        "thickness": {
+          "value": 18.0,
+          "unit": "um"
+        }
+      }
+    },
+    "comment": [
+      "Detailed prismatic descriptor for alpha validation coverage."
+    ]
+  },
+  "instances": [
+    {
+      "name": "prismatic-alpha-01",
+      "id": "https://w3id.org/battinfo/cell/2q6n-8v4k-5p9r-3t7m",
+      "serial_number": "PRISM-ALPHA-01"
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "BattINFO alpha fixtures",
+    "source_file": "assets/examples/battery-descriptors/alpha-prismatic-detailed.example.json",
+    "retrieved_at": 1773201600,
+    "workflow_version": "alpha-fixtures-0.1",
+    "comment": "Canonical detailed prismatic fixture."
+  },
+  "comment": [
+    "Alpha fixture for detailed prismatic-cell descriptions."
+  ]
+}

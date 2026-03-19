@@ -31,6 +31,16 @@
         }
       ]
     },
+    "citation": {
+      "type": "string",
+      "format": "uri",
+      "description": "Resolvable citation target to use for attribution, typically a DOI URL."
+    },
+    "citation_doi": {
+      "type": "string",
+      "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+      "description": "Deprecated compatibility field. Prefer provenance.citation with a DOI resolver URL."
+    },
     "retrieved_at": {
       "type": "integer",
       "minimum": 0

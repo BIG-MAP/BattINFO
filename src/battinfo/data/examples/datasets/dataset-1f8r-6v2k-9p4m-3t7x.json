@@ -88,7 +88,8 @@
     "quality_flags": [],
     "retrieved_at": 1771718400,
     "curated_by": "BattINFO Maintainers",
-    "workflow_version": "0.2.0"
+    "workflow_version": "0.2.0",
+    "citation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
   },
   "notes": [
     "Schema.org-first dataset record with BattINFO battery extensions.",

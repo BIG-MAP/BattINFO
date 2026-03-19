@@ -14,10 +14,10 @@ from battinfo.api import (
     TestInput,
     build_index,
     publish_batch,
-    register_cell_instance,
-    register_cell_type,
-    register_dataset,
-    register_test,
+    save_cell_instance,
+    save_cell_type,
+    save_dataset,
+    save_test,
 )
 
 
@@ -26,7 +26,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
     publish_root = tmp_path / "site"
     index_path = tmp_path / ".battinfo" / "index.json"
 
-    cell_type = register_cell_type(
+    cell_type = save_cell_type(
         CellTypeInput(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
@@ -38,7 +38,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
         source_root=source_root,
         validation_policy="strict",
     )
-    cell_instance = register_cell_instance(
+    cell_instance = save_cell_instance(
         CellInstanceInput(
             uid="1f8r6v2k9p4m3t7x",
             type_id=cell_type["id"],
@@ -49,7 +49,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
         resolve_references=True,
         validation_policy="strict",
     )
-    test = register_test(
+    test = save_test(
         TestInput(
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell_instance["id"],
@@ -61,7 +61,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
         resolve_references=True,
         validation_policy="strict",
     )
-    dataset = register_dataset(
+    dataset = save_dataset(
         DatasetInput(
             uid="8c1h8pk68034vav6",
             title="MN1500 alpha dataset",
@@ -108,3 +108,4 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
     assert published_dataset.exists()
     payload = json.loads(published_dataset.read_text(encoding="utf-8"))
     assert "@id" in payload or "@graph" in payload
+

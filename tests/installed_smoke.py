@@ -44,7 +44,7 @@ def main() -> None:
             model="CR2032",
             format="coin",
             chemistry="Li-primary",
-            size_code="CR2032",
+            size_code="R2032",
         )
         cell = battinfo.CellInstance(cell_type=cell_type, serial_number="energizer-cr2032-alpha")
         test = battinfo.Test(
@@ -61,7 +61,22 @@ def main() -> None:
             name="Installed smoke dataset",
         )
 
-        battinfo.publish(cell_type=cell_type, cell_instance=cell, test=test, dataset=dataset)
+        publish_result = battinfo.publish(cell_type=cell_type, cell_instance=cell, test=test, dataset=dataset)
+        publication_payload = json.loads(Path(publish_result["publish_path"]).read_text(encoding="utf-8"))
+        graph = publication_payload["@graph"]
+        cell_type_node = next(node for node in graph if node.get("@id") == publish_result["cell_type_id"])
+        cell_instance_node = next(node for node in graph if node.get("@id") == publish_result["cell_instance_id"])
+        assert "schema:ProductModel" in (
+            cell_type_node["@type"] if isinstance(cell_type_node["@type"], list) else [cell_type_node["@type"]]
+        )
+        assert publish_result["cell_type_id"] not in (
+            cell_instance_node["@type"] if isinstance(cell_instance_node["@type"], list) else [cell_instance_node["@type"]]
+        )
+        assert cell_instance_node["schema:isVariantOf"]["@id"] == publish_result["cell_type_id"]
+        test_node = next(node for node in graph if node.get("@id") == publish_result["test_id"])
+        test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
+        assert "schema:Action" in test_types
+        assert "BatteryTest" in test_types
         bundle = battinfo.load_publication(publish_dir / "battinfo.publish.jsonld")
         assert bundle.dataset is not None
 
