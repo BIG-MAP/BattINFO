@@ -1,3 +1,4 @@
 # Packaged Data
 
-This folder mirrors `assets/` and is included in the Python package for runtime use.
+This folder contains the packaged runtime subset of `assets/`, plus generated
+profile fragments that are shipped with the Python package.

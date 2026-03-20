@@ -12,16 +12,21 @@ from battinfo.api import (
     CellInstanceInput,
     CellTypeInput,
     DatasetInput,
+    TestProtocolInput,
     TestInput,
     build_cell_type_library_rdf as api_build_cell_type_library_rdf,
     build_index as api_build_index,
+    build_curated_cell_type_submission as api_build_curated_cell_type_submission,
     create_cell_instance as api_create_cell_instance,
-    create_cell_type_from_datasheet as api_create_cell_type_from_datasheet,
     index_stats as api_index_stats,
     publish_batch as api_publish_batch,
+    publish_curated_cell_type as api_publish_curated_cell_type,
     publish_record as api_publish_record,
+    promote_staging_cell_type as api_promote_staging_cell_type,
+    promote_staging_cell_types as api_promote_staging_cell_types,
     query_cell_instances as api_query_cell_instances,
     query_library_cell_types as api_query_library_cell_types,
+    query_test_protocols as api_query_test_protocols,
     query_tests as api_query_tests,
     query_cell_types as api_query_cell_types,
     query_datasets as api_query_datasets,
@@ -30,13 +35,19 @@ from battinfo.api import (
     save_cell_type as api_save_cell_type,
     save_dataset as api_save_dataset,
     save_library_cell_type as api_save_library_cell_type,
+    save_test_protocol as api_save_test_protocol,
     save_test as api_save_test,
     save_record as api_save_record,
     template_cell_specification as api_template_cell_specification,
     template_cell_instance as api_template_cell_instance,
+    template_cell_type_draft as api_template_cell_type_draft,
     template_cell_type as api_template_cell_type,
     template_dataset as api_template_dataset,
+    template_test_protocol_draft as api_template_test_protocol_draft,
+    template_test_protocol as api_template_test_protocol,
     template_test as api_template_test,
+    validate_staging_cell_type as api_validate_staging_cell_type,
+    validate_staging_cell_types as api_validate_staging_cell_types,
 )
 from battinfo.local_workspace import LocalWorkspace
 from battinfo.workflows.map import run_mapping
@@ -55,6 +66,7 @@ library_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Mana
 library_query_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Query reusable library records.")
 library_save_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Save reusable BattINFO library records locally.")
 library_template_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Generate reusable library templates.")
+editorial_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Validate and promote battinfo-records style staging drafts.")
 workspace_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Author BattINFO workspaces on disk.")
 notebook_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Notebook runtime recovery helpers.")
 
@@ -65,6 +77,7 @@ app.add_typer(index_app, name="index")
 app.add_typer(save_app, name="save")
 app.add_typer(template_app, name="template")
 app.add_typer(library_app, name="library")
+app.add_typer(editorial_app, name="editorial")
 app.add_typer(workspace_app, name="workspace")
 app.add_typer(notebook_app, name="notebook")
 library_app.add_typer(library_query_app, name="query")
@@ -168,7 +181,7 @@ def _render_notebook_recovery(payload: dict[str, Any]) -> None:
 
 
 def _init_example_document(profile: str) -> dict[str, Any]:
-    if profile == "battery-descriptor":
+    if profile == "cell-descriptor":
         return {
             "schema_version": "1.0.0",
             "specification": {
@@ -242,7 +255,7 @@ def _render_validation_issue(issue: Any) -> str:
 @app.command()
 def validate(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    profile: str = typer.Option("battery-descriptor", help="Validation profile name."),
+    profile: str = typer.Option("cell-descriptor", help="Validation profile name."),
     policy: str = typer.Option("default", help="Validation policy: default|strict|publisher|ingest."),
     output_format: str = typer.Option("text", "--format", help="Output format: text|json."),
     source_root: Path | None = typer.Option(
@@ -289,7 +302,7 @@ def validate(
 @app.command()
 def init(
     project_dir: Path = typer.Argument(...),
-    profile: str = typer.Option("battery-descriptor", help="Profile to scaffold."),
+    profile: str = typer.Option("cell-descriptor", help="Profile to scaffold."),
 ) -> None:
     """Create a minimal project scaffold with an example JSON file."""
     project_dir.mkdir(parents=True, exist_ok=True)
@@ -429,6 +442,8 @@ def template_cell_type(
     model_name: str = typer.Option("MODEL-001", "--model-name", help="Model name."),
     chemistry: str = typer.Option("unknown", help="Chemistry label."),
     cell_format: str = typer.Option("unknown", "--cell-format", help="Cell format."),
+    country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin."),
+    year: int | None = typer.Option(None, help="Optional model or release year."),
     uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
@@ -441,6 +456,8 @@ def template_cell_type(
             model_name=model_name,
             chemistry=chemistry,
             format=cell_format,  # type: ignore[arg-type]
+            country_of_origin=country_of_origin,
+            year=year,
             uid=uid,
         )
     except ValueError as exc:
@@ -471,6 +488,62 @@ def template_cell_type(
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
+
+
+@template_app.command("cell-type-draft")
+def template_cell_type_draft(
+    manufacturer: str = typer.Option("ExampleManufacturer", help="Manufacturer name placeholder."),
+    model_name: str = typer.Option("MODEL-001", "--model-name", help="Model name placeholder."),
+    chemistry: str = typer.Option("unknown", help="Chemistry label placeholder."),
+    cell_format: str = typer.Option("unknown", "--cell-format", help="Cell format placeholder."),
+    size_code: str | None = typer.Option(None, help="Optional size code placeholder."),
+    iec_code: str | None = typer.Option(None, help="Optional IEC code placeholder."),
+    country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin placeholder."),
+    year: int | None = typer.Option(None, help="Optional model or release year placeholder."),
+    positive_electrode_basis: str | None = typer.Option(None, help="Optional positive electrode basis placeholder."),
+    negative_electrode_basis: str | None = typer.Option(None, help="Optional negative electrode basis placeholder."),
+    datasheet_revision: str | None = typer.Option(None, help="Optional datasheet revision placeholder."),
+    out: Path | None = typer.Option(None, help="Optional output JSON path."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Generate a starter authoring draft for a hand-edited cell-type JSON file."""
+    fmt = _check_output_format(output_format)
+    record = api_template_cell_type_draft(
+        manufacturer=manufacturer,
+        model_name=model_name,
+        chemistry=chemistry,
+        format=cell_format,  # type: ignore[arg-type]
+        size_code=size_code,
+        iec_code=iec_code,
+        country_of_origin=country_of_origin,
+        year=year,
+        positive_electrode_basis=positive_electrode_basis,
+        negative_electrode_basis=negative_electrode_basis,
+        datasheet_revision=datasheet_revision,
+    )
+
+    if out is not None:
+        _write_json_file(out, record)
+        payload = {
+            "status": "template",
+            "resource": "cell-type-draft",
+            "path": str(out),
+        }
+        if fmt == "json":
+            _emit_json(payload)
+            return
+        _emit_table([payload], ["status", "resource", "path"])
+        return
+
+    if fmt == "json":
+        _emit_json(record)
+        return
+    payload = {
+        "status": "template",
+        "resource": "cell-type-draft",
+        "path": "",
+    }
+    _emit_table([payload], ["status", "resource", "path"])
 
 
 @template_app.command("cell-instance")
@@ -571,6 +644,54 @@ def template_dataset(
         "status": "template",
         "resource": "dataset",
         "id": record["dataset"]["id"],
+        "path": "",
+    }
+    _emit_table([payload], ["status", "resource", "id", "path"])
+
+
+@template_app.command("test-protocol")
+def template_test_protocol(
+    name: str = typer.Option("Example Test Protocol", help="Human-readable protocol name."),
+    kind: str = typer.Option("other", help="Test kind."),
+    source_type: str = typer.Option("manual", help="Source type: manual|lab|simulation|other."),
+    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    out: Path | None = typer.Option(None, help="Optional output JSON path."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Generate a starter template for a reusable test-protocol record."""
+    fmt = _check_output_format(output_format)
+    try:
+        record = api_template_test_protocol(
+            name=name,
+            kind=kind,  # type: ignore[arg-type]
+            source_type=source_type,  # type: ignore[arg-type]
+            uid=uid,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if out is not None:
+        _write_json_file(out, record)
+        payload = {
+            "status": "template",
+            "resource": "test-protocol",
+            "id": record["test_protocol"]["id"],
+            "path": str(out),
+        }
+        if fmt == "json":
+            _emit_json(payload)
+            return
+        _emit_table([payload], ["status", "resource", "id", "path"])
+        return
+
+    if fmt == "json":
+        _emit_json(record)
+        return
+    payload = {
+        "status": "template",
+        "resource": "test-protocol",
+        "id": record["test_protocol"]["id"],
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
@@ -699,7 +820,7 @@ def library_query_cell_types(
     nominal_capacity_max: float | None = typer.Option(None, help="Filter maximum nominal capacity."),
     nominal_voltage_min: float | None = typer.Option(None, help="Filter minimum nominal voltage."),
     nominal_voltage_max: float | None = typer.Option(None, help="Filter maximum nominal voltage."),
-    library_dir: Path = typer.Option(Path("assets/library/cell-types"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(Path(".battinfo/library/cell-types"), help="Reusable library cell-specification directory."),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -769,7 +890,7 @@ def library_save_cell_type(
         readable=True,
         help="Optional JSON object for cell-specification specification.property.",
     ),
-    library_dir: Path = typer.Option(Path("assets/library/cell-types"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(Path(".battinfo/library/cell-types"), help="Reusable library cell-specification directory."),
     packaged_dir: Path = typer.Option(
         Path("src/battinfo/data/library/cell-types"),
         help="Packaged reusable library cell-specification directory.",
@@ -782,15 +903,15 @@ def library_save_cell_type(
     ),
     build_rdf: bool = typer.Option(False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after saving."),
     output_jsonld_dir: Path = typer.Option(
-        Path("assets/library-rdf/cell-types"),
+        Path(".battinfo/library-rdf/cell-types"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path("ontology/library/cell-types.jsonld"),
+        Path(".battinfo/ontology/library/cell-types.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
-        Path("assets/library-rdf/cell-types.index.json"),
+        Path(".battinfo/library-rdf/cell-types.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
     clean_output: bool = typer.Option(False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."),
@@ -859,7 +980,7 @@ def library_save_cell_type(
 @library_app.command("build-rdf")
 def library_build_rdf(
     input_dir: Path = typer.Option(
-        Path("assets/library/cell-types"),
+        Path(".battinfo/library/cell-types"),
         "--input-dir",
         exists=True,
         file_okay=False,
@@ -868,15 +989,15 @@ def library_build_rdf(
         help="Directory containing reusable library cell-specification JSON files.",
     ),
     output_jsonld_dir: Path = typer.Option(
-        Path("assets/library-rdf/cell-types"),
+        Path(".battinfo/library-rdf/cell-types"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path("ontology/library/cell-types.jsonld"),
+        Path(".battinfo/ontology/library/cell-types.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
-        Path("assets/library-rdf/cell-types.index.json"),
+        Path(".battinfo/library-rdf/cell-types.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
     glob: str = typer.Option("*.json", help="File glob used to select library cell specifications."),
@@ -1028,6 +1149,39 @@ def query_datasets(
     _emit_table(rows, ["id", "title", "format", "license", "source_type", "access_url"])
 
 
+@query_app.command("test-protocols")
+def query_test_protocols(
+    id: str | None = typer.Option(None, help="Filter by canonical test-protocol IRI."),
+    kind: str | None = typer.Option(None, help="Filter by protocol kind."),
+    name_contains: str | None = typer.Option(None, help="Case-insensitive substring filter on protocol name."),
+    source_type: str | None = typer.Option(None, help="Filter by source type."),
+    limit: int = typer.Option(50, min=1, help="Maximum rows."),
+    offset: int = typer.Option(0, min=0, help="Start offset."),
+    output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
+) -> None:
+    """Query canonical test protocols."""
+    fmt = _check_output_format(output_format)
+    rows = api_query_test_protocols(
+        id=id,
+        kind=kind,
+        name_contains=name_contains,
+        source_type=source_type,
+        limit=limit,
+        offset=offset,
+    )
+    payload = {
+        "resource": "test-protocols",
+        "count": len(rows),
+        "limit": limit,
+        "offset": offset,
+        "items": rows,
+    }
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _emit_table(rows, ["id", "name", "kind", "version", "source_type"])
+
+
 @query_app.command("tests")
 def query_tests(
     id: str | None = typer.Option(None, help="Filter by canonical test IRI."),
@@ -1061,33 +1215,6 @@ def query_tests(
         _emit_json(payload)
         return
     _emit_table(rows, ["id", "cell_id", "name", "kind", "status", "source_type"])
-
-
-@create_app.command("cell-type")
-def create_cell_type(
-    datasheet: Path = typer.Option(..., exists=True, file_okay=True, dir_okay=False, readable=True),
-    uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    out: Path | None = typer.Option(None, help="Optional output JSON path."),
-    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate against schema."),
-    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
-) -> None:
-    """Create a canonical cell-type record from datasheet extraction JSON."""
-    fmt = _check_output_format(output_format)
-    try:
-        doc = api_create_cell_type_from_datasheet(datasheet, uid=uid, out_path=out, validate=validate)
-    except ValueError as exc:
-        typer.echo(str(exc))
-        raise typer.Exit(code=1) from exc
-    payload = {
-        "status": "created",
-        "resource": "cell-type",
-        "id": doc["product"]["id"],
-        "path": str(out) if out else None,
-    }
-    if fmt == "json":
-        _emit_json(payload)
-        return
-    _emit_table([payload], ["status", "resource", "id", "path"])
 
 
 @create_app.command("cell-instance")
@@ -1145,7 +1272,7 @@ def create_cell_instance(
 def save_record(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True),
     source_root: Path = typer.Option(
-        Path("assets/examples"),
+        Path("examples"),
         help="Root directory containing cell-types, cell-instances, and datasets.",
     ),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
@@ -1205,7 +1332,7 @@ def save_batch(
         readable=True,
     ),
     source_root: Path = typer.Option(
-        Path("assets/examples"),
+        Path("examples"),
         help="Root directory containing canonical resources for save targets.",
     ),
     glob: str = typer.Option("*.json", help="File glob for batch inputs."),
@@ -1263,13 +1390,15 @@ def save_cell_type(
     chemistry: str = typer.Option("unknown", help="Chemistry label."),
     cell_format: str = typer.Option("unknown", "--cell-format", help="Cell format."),
     size_code: str | None = typer.Option(None, help="Optional size code."),
+    country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin."),
+    year: int | None = typer.Option(None, help="Optional model or release year."),
     source_file: str = typer.Option("manual.json", help="Source file label for provenance."),
     source_url: str | None = typer.Option(None, help="Optional source URL."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
     specs_path: Path | None = typer.Option(
         None, "--specs", exists=True, file_okay=True, dir_okay=False, readable=True, help="Optional specs JSON object."
     ),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    source_root: Path = typer.Option(Path("examples"), help="Save source root."),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
@@ -1303,6 +1432,8 @@ def save_cell_type(
                 chemistry=chemistry,
                 format=cell_format,  # type: ignore[arg-type]
                 size_code=size_code,
+                country_of_origin=country_of_origin,
+                year=year,
                 specs=specs,
                 source_file=source_file,
                 source_url=source_url,
@@ -1338,7 +1469,7 @@ def save_cell_instance(
     dataset_id: list[str] = typer.Option([], "--dataset-id", help="Optional linked dataset IRI. Repeat for multiple."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    source_root: Path = typer.Option(Path("examples"), help="Save source root."),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
@@ -1407,7 +1538,7 @@ def save_dataset(
     checksum_algorithm: str | None = typer.Option(None, help="Checksum algorithm (sha256|sha512|md5|other)."),
     checksum_value: str | None = typer.Option(None, help="Checksum value."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    source_root: Path = typer.Option(Path("examples"), help="Save source root."),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
@@ -1467,6 +1598,72 @@ def save_dataset(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
+@save_app.command("test-protocol")
+def save_test_protocol(
+    input_path: Path | None = typer.Option(
+        None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
+    ),
+    name: str | None = typer.Option(None, help="Protocol name (required when --input omitted)."),
+    kind: str = typer.Option("other", help="Test kind."),
+    description: str | None = typer.Option(None, help="Optional protocol description."),
+    version: str | None = typer.Option(None, help="Optional protocol version."),
+    protocol_url: str | None = typer.Option(None, help="Optional protocol URL."),
+    source_type: str = typer.Option("manual", help="Source type: manual|lab|simulation|other."),
+    uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
+    source_root: Path = typer.Option(Path("examples"), help="Save source root."),
+    mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
+    duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
+    resolve_references: bool = typer.Option(
+        True, "--resolve-references/--no-resolve-references", help="Resolve linked IDs against source_root."
+    ),
+    publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
+    publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
+    validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Save a reusable test protocol using either --input JSON or inline draft fields."""
+    fmt = _check_output_format(output_format)
+    reg_mode = _check_save_mode(mode)
+    dup_policy = _check_duplicate_policy(duplicate_policy)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        if input_path is not None:
+            draft_obj: TestProtocolInput | dict[str, Any] | Path = input_path
+        else:
+            if not name:
+                raise ValueError("--name is required when --input is not provided.")
+            draft_obj = TestProtocolInput(
+                uid=uid,
+                name=name,
+                kind=kind,  # type: ignore[arg-type]
+                description=description,
+                version=version,
+                protocol_url=protocol_url,
+                source_type=source_type,  # type: ignore[arg-type]
+            )
+        payload = api_save_test_protocol(
+            draft_obj,
+            source_root=source_root,
+            mode=reg_mode,
+            duplicate_policy=dup_policy,
+            resolve_references=resolve_references,
+            publish=publish,
+            publish_root=publish_root,
+            validate=validate,
+            validation_policy=policy_name,
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
+
+
 @save_app.command("test")
 def save_test(
     input_path: Path | None = typer.Option(
@@ -1475,6 +1672,7 @@ def save_test(
     cell_id: str | None = typer.Option(None, help="Canonical cell-instance IRI (required when --input omitted)."),
     name: str | None = typer.Option(None, help="Test name (required when --input omitted)."),
     kind: str = typer.Option("other", help="Test kind."),
+    protocol_id: str | None = typer.Option(None, help="Optional reusable test-protocol IRI."),
     status: str | None = typer.Option(None, help="Optional test status."),
     protocol_name: str | None = typer.Option(None, help="Optional protocol name."),
     protocol_url: str | None = typer.Option(None, help="Optional protocol URL."),
@@ -1482,7 +1680,7 @@ def save_test(
     dataset_id: list[str] = typer.Option([], "--dataset-id", help="Linked dataset IRI. Repeat for multiple."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|simulation|manual|other."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
-    source_root: Path = typer.Option(Path("assets/examples"), help="Save source root."),
+    source_root: Path = typer.Option(Path("examples"), help="Save source root."),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     resolve_references: bool = typer.Option(
@@ -1511,6 +1709,7 @@ def save_test(
                 cell_id=cell_id,
                 name=name,
                 kind=kind,  # type: ignore[arg-type]
+                protocol_id=protocol_id,
                 status=status,  # type: ignore[arg-type]
                 protocol_name=protocol_name,
                 protocol_url=protocol_url,
@@ -1537,6 +1736,244 @@ def save_test(
         _emit_json(payload)
         return
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
+
+
+@editorial_app.command("validate-staging-cell-type")
+def validate_staging_cell_type(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Validate one single-file staging cell-type draft and preview its canonical record."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_validate_staging_cell_type(input_path, validation_policy=policy_name)
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _emit_table([payload], ["ok", "record_id", "record_id_basis", "requires_record_id", "source_path"])
+
+
+@editorial_app.command("validate-staging-cell-types")
+def validate_staging_cell_types(
+    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
+    glob: str = typer.Option("*.json", help="Glob for staging drafts."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Validate all staging cell-type drafts in a directory."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_validate_staging_cell_types(
+            input_dir=input_dir,
+            glob=glob,
+            validation_policy=policy_name,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    summary = {
+        "status": payload["status"],
+        "input_dir": payload["input_dir"],
+        "processed": payload["processed"],
+        "ok": payload["ok"],
+        "failed": payload["failed"],
+    }
+    _emit_table([summary], ["status", "input_dir", "processed", "ok", "failed"])
+
+
+@editorial_app.command("promote-staging-cell-type")
+def promote_staging_cell_type(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
+    curated_root: Path = typer.Option(Path("records/cell-types"), help="Curated cell-types root."),
+    record_id: str | None = typer.Option(None, "--record-id", help="Override the curated record id."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Promote one staging cell-type draft into records/cell-types/<record-id>/record.json."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_promote_staging_cell_type(
+            input_path,
+            curated_root=curated_root,
+            record_id=record_id,
+            validation_policy=policy_name,
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _emit_table([payload], ["status", "record_id", "record_id_basis", "source_path", "target_path", "dry_run"])
+
+
+@editorial_app.command("promote-staging-cell-types")
+def promote_staging_cell_types(
+    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
+    curated_root: Path = typer.Option(Path("records/cell-types"), help="Curated cell-types root."),
+    glob: str = typer.Option("*.json", help="Glob for staging drafts."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Promote all staging cell-type drafts into curated record.json directories."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_promote_staging_cell_types(
+            input_dir=input_dir,
+            curated_root=curated_root,
+            glob=glob,
+            validation_policy=policy_name,
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    summary = {
+        "status": payload["status"],
+        "input_dir": payload["input_dir"],
+        "curated_root": payload["curated_root"],
+        "processed": payload["processed"],
+        "dry_run": payload["dry_run"],
+    }
+    _emit_table([summary], ["status", "input_dir", "curated_root", "processed", "dry_run"])
+
+
+@editorial_app.command("build-curated-cell-type-submission")
+def build_curated_cell_type_submission(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-type record.json or equivalent canonical JSON."),
+    project_id: str = typer.Option(..., help="Registry project id."),
+    publisher_id: str = typer.Option(..., help="Registry publisher id."),
+    source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
+    source_local_id: str | None = typer.Option(None, help="Override source_local_id; defaults to the curated record id inferred from the path."),
+    title: str | None = typer.Option(None, help="Override submission title."),
+    publication_mode: str = typer.Option("canonical-publication", help="Publication intent mode."),
+    source_system: str = typer.Option("battinfo-records", help="Submission provenance source_system."),
+    workflow_name: str = typer.Option("curated-cell-type-publication", help="Submission provenance workflow_name."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    out_path: Path | None = typer.Option(None, "--out", help="Optional path to write the generated submission package JSON."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Build a registry publication package for one curated cell-type record."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_build_curated_cell_type_submission(
+            input_path,
+            project_id=project_id,
+            publisher_id=publisher_id,
+            source_version=source_version,
+            source_local_id=source_local_id,
+            title=title,
+            publication_mode=publication_mode,
+            source_system=source_system,
+            workflow_name=workflow_name,
+            validation_policy=policy_name,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if out_path is not None:
+        _write_json_file(out_path, payload)
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    resource = payload.get("resource") if isinstance(payload, dict) else None
+    summary = {
+        "project_id": payload.get("project_id"),
+        "publisher_id": payload.get("publisher_id"),
+        "source_version": payload.get("source_version"),
+        "resource_type": resource.get("resource_type") if isinstance(resource, dict) else None,
+        "source_local_id": resource.get("source_local_id") if isinstance(resource, dict) else None,
+        "out_path": str(out_path) if out_path is not None else "",
+    }
+    _emit_table([summary], ["project_id", "publisher_id", "source_version", "resource_type", "source_local_id", "out_path"])
+
+
+@editorial_app.command("publish-curated-cell-type")
+def publish_curated_cell_type(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-type record.json or equivalent canonical JSON."),
+    project_id: str = typer.Option(..., help="Registry project id."),
+    publisher_id: str = typer.Option(..., help="Registry publisher id."),
+    source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
+    registry_url: str = typer.Option(..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."),
+    api_key: str = typer.Option(..., "--api-key", help="Registry submission API key."),
+    api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."),
+    source_local_id: str | None = typer.Option(None, help="Override source_local_id; defaults to the curated record id inferred from the path."),
+    title: str | None = typer.Option(None, help="Override submission title."),
+    publication_mode: str = typer.Option("canonical-publication", help="Publication intent mode."),
+    source_system: str = typer.Option("battinfo-records", help="Submission provenance source_system."),
+    workflow_name: str = typer.Option("curated-cell-type-publication", help="Submission provenance workflow_name."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="HTTP timeout in seconds."),
+    out_path: Path | None = typer.Option(None, "--out", help="Optional path to write the generated submission package JSON before posting."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Publish one curated cell-type record to battinfo-registry."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        if out_path is not None:
+            request_payload = api_build_curated_cell_type_submission(
+                input_path,
+                project_id=project_id,
+                publisher_id=publisher_id,
+                source_version=source_version,
+                source_local_id=source_local_id,
+                title=title,
+                publication_mode=publication_mode,
+                source_system=source_system,
+                workflow_name=workflow_name,
+                validation_policy=policy_name,
+            )
+            _write_json_file(out_path, request_payload)
+        payload = api_publish_curated_cell_type(
+            input_path,
+            project_id=project_id,
+            publisher_id=publisher_id,
+            source_version=source_version,
+            registry_base_url=registry_url,
+            api_key=api_key,
+            api_key_header=api_key_header,
+            source_local_id=source_local_id,
+            title=title,
+            publication_mode=publication_mode,
+            source_system=source_system,
+            workflow_name=workflow_name,
+            validation_policy=policy_name,
+            timeout_sec=timeout_sec,
+        )
+    except (ValueError, RuntimeError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    response_payload = payload.get("response") if isinstance(payload, dict) else None
+    summary = {
+        "status": payload.get("status"),
+        "status_code": payload.get("status_code"),
+        "submission_mode": response_payload.get("submission_mode") if isinstance(response_payload, dict) else None,
+        "resource_count": response_payload.get("resource_count") if isinstance(response_payload, dict) else None,
+        "created_count": response_payload.get("created_count") if isinstance(response_payload, dict) else None,
+    }
+    _emit_table([summary], ["status", "status_code", "submission_mode", "resource_count", "created_count"])
 
 
 @publish_app.command("record")
@@ -1612,7 +2049,7 @@ def publish_batch(
 @index_app.command("build")
 def index_build(
     source_root: Path = typer.Option(
-        Path("assets/examples"),
+        Path("examples"),
         "--source-root",
         exists=True,
         file_okay=False,
@@ -1692,4 +2129,7 @@ def index_stats(
         [payload],
         ["cell_type_count", "cell_instance_count", "test_count", "dataset_count", "total_count", "failed", "build_timestamp"],
     )
+
+
+
 

@@ -175,10 +175,12 @@ def test_project_bundle_writes_registry_intake_for_multi_record_project(tmp_path
 
     bundle = project.bundle()
 
+    submission_package_path = Path(bundle["submission_package_path"])
     registry_intake_path = Path(bundle["registry_intake_path"])
     validation_report_path = Path(bundle["validation_report_path"])
     normalized_dir = Path(bundle["normalized_dir"])
     assert bundle["status"] == "ok"
+    assert submission_package_path.exists()
     assert registry_intake_path.exists()
     assert validation_report_path.exists()
     assert (normalized_dir / "cell-types").is_dir()
@@ -203,10 +205,17 @@ def test_project_bundle_writes_registry_intake_for_multi_record_project(tmp_path
     assert len(test_resources) == 2
     assert len(dataset_resources) == 2
     assert "cell_type" in cell_resources[0]["semantic_payload"]["battinfo_records"]
+    cell_local_id = cell_resources[0]["source_local_id"]
+    test_related = {item["source_local_id"] for resource in test_resources for item in resource["related_resources"]}
+    dataset_related = {item["source_local_id"] for resource in dataset_resources for item in resource["related_resources"] if item["resource_type"] == "cell"}
+    assert test_related == {cell_local_id}
+    assert dataset_related == {cell_local_id}
 
     dataset_resource = dataset_resources[0]
     relationships = {item["relationship"] for item in dataset_resource["related_resources"]}
     assert relationships == {"aboutCell", "generatedByTest"}
+    test_local_ids = {item["source_local_id"] for item in test_resources}
+    assert {item["source_local_id"] for item in dataset_resource["related_resources"] if item["resource_type"] == "test"} <= test_local_ids
     distribution = dataset_resource["distributions"][0]
     assert distribution["package_path"].startswith("artifacts/datasets/")
     assert distribution["access_url"].startswith("file:")
@@ -254,7 +263,8 @@ def test_project_bundle_can_emit_single_dataset_submission(tmp_path: Path) -> No
 
     submission = project.bundle(dataset)
 
-    payload = json.loads(Path(submission["registry_intake_path"]).read_text(encoding="utf-8"))
+    assert Path(submission["submission_package_path"]).exists()
+    payload = json.loads(Path(submission["submission_package_path"]).read_text(encoding="utf-8"))
     assert submission["submission_mode"] == "resource"
     assert submission["resource_type"] == "dataset"
     assert submission["resource_count"] == 1
@@ -289,7 +299,8 @@ def test_project_bundle_can_emit_single_cell_type_submission(tmp_path: Path) -> 
 
     submission = project.bundle(cell_type)
 
-    payload = json.loads(Path(submission["registry_intake_path"]).read_text(encoding="utf-8"))
+    assert Path(submission["submission_package_path"]).exists()
+    payload = json.loads(Path(submission["submission_package_path"]).read_text(encoding="utf-8"))
     assert submission["submission_mode"] == "resource"
     assert submission["resource_type"] == "cell_type"
     assert submission["artifact_count"] == 0

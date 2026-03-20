@@ -23,6 +23,9 @@ CELL_IRI_RE = re.compile(
 DATASET_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
+TEST_PROTOCOL_IRI_RE = re.compile(
+    r"^https://w3id\.org/battinfo/test-protocol/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+)
 TEST_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
@@ -46,6 +49,8 @@ def _entity_id(doc: dict[str, Any]) -> str:
         return doc["cell_type"]["id"]
     if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
         return doc["cell_instance"]["id"]
+    if isinstance(doc.get("test_protocol"), Mapping) and isinstance(doc["test_protocol"].get("id"), str):
+        return doc["test_protocol"]["id"]
     if isinstance(doc.get("test"), Mapping) and isinstance(doc["test"].get("id"), str):
         return doc["test"]["id"]
     if isinstance(doc.get("dataset"), Mapping) and isinstance(doc["dataset"].get("id"), str):
@@ -58,6 +63,8 @@ def _entity_type_from_doc(doc: dict[str, Any]) -> str:
         return "cell-type"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
+    if isinstance(doc.get("test_protocol"), Mapping):
+        return "test-protocol"
     if isinstance(doc.get("test"), Mapping):
         return "test"
     if isinstance(doc.get("dataset"), Mapping):
@@ -70,6 +77,8 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
         directory = source_root / "cell-types"
     elif entity_type == "cell":
         directory = source_root / "cell-instances"
+    elif entity_type == "test-protocol":
+        directory = source_root / "test-protocols"
     elif entity_type == "test":
         directory = source_root / "tests"
     elif entity_type == "dataset":
@@ -87,6 +96,8 @@ def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
         return source_root / "cell-types" / filename
     if entity_type == "cell":
         return source_root / "cell-instances" / filename
+    if entity_type == "test-protocol":
+        return source_root / "test-protocols" / filename
     if entity_type == "test":
         return source_root / "tests" / filename
     if entity_type == "dataset":
@@ -237,6 +248,25 @@ def validate_references_report(
             )
 
     if isinstance(doc.get("test"), Mapping):
+        protocol_id = doc["test"].get("protocol_id")
+        if isinstance(protocol_id, str):
+            _check_reference(
+                issues=issues,
+                ref_id=protocol_id,
+                expected_type="test-protocol",
+                path="test.protocol_id",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    "Referenced test protocol not found in source_root. Register test protocol first "
+                    f"or disable resolve_references. Missing: {protocol_id}"
+                ),
+                mismatch_message=(
+                    "Referenced test protocol must resolve to a test-protocol record in source_root. "
+                    f"Found a different record type for: {protocol_id}"
+                ),
+                allow_missing=allow_missing,
+            )
         cell_id = doc["test"].get("cell_id")
         if isinstance(cell_id, str):
             _check_reference(

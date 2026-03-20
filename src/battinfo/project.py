@@ -127,7 +127,12 @@ class ProjectManifest(BaseModel):
 
 
 class Project:
-    """Editable multi-record BattINFO project for local work and registry bundling."""
+    """Compatibility wrapper around `Workspace` for project-shaped workflows.
+
+    Use `Project` when the same linked object graph needs a named local project,
+    validation reports, copied dataset artifacts, or a registry-ready submission package.
+    For pure Python authoring without the project layer, use `Workspace` directly.
+    """
 
     def __init__(
         self,
@@ -271,6 +276,31 @@ class Project:
         version: str | None = None,
         policy: str = "strict",
     ) -> dict[str, Any]:
+        """Compatibility alias for build_submission_package(...)."""
+
+        return self.build_submission_package(
+            target,
+            name=name,
+            title=title,
+            description=description,
+            tenant=tenant,
+            publisher=publisher,
+            version=version,
+            policy=policy,
+        )
+
+    def build_submission_package(
+        self,
+        target: ProjectTarget | None = None,
+        *,
+        name: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        tenant: str | None = None,
+        publisher: str | None = None,
+        version: str | None = None,
+        policy: str = "strict",
+    ) -> dict[str, Any]:
         if name is not None:
             self.name = name
         if title is not None:
@@ -310,9 +340,19 @@ class Project:
             self._source_local_id("cell", record): self._cell_title(record, cell_type_by_id)
             for record in cell_records
         }
+        cell_local_ids = {
+            str(record["cell_instance"]["id"]): self._source_local_id("cell", record)
+            for record in cell_records
+            if isinstance(record.get("cell_instance"), dict) and isinstance(record["cell_instance"].get("id"), str)
+        }
         test_titles = {
             self._source_local_id("test", record): self._test_title(record)
             for record in test_records
+        }
+        test_local_ids = {
+            str(record["test"]["id"]): self._source_local_id("test", record)
+            for record in test_records
+            if isinstance(record.get("test"), dict) and isinstance(record["test"].get("id"), str)
         }
 
         if target is None:
@@ -320,9 +360,9 @@ class Project:
             for record in cell_records:
                 resources.append(self._cell_resource(record, cell_type_by_id))
             for record in test_records:
-                resources.append(self._test_resource(record, cell_titles))
+                resources.append(self._test_resource(record, cell_titles, cell_local_ids))
             for record in dataset_records:
-                resources.append(self._dataset_resource(record, artifact_map, cell_titles, test_titles))
+                resources.append(self._dataset_resource(record, artifact_map, cell_titles, test_titles, cell_local_ids, test_local_ids))
             resource = None
             artifacts = [artifact for dataset_id in artifact_map for artifact in [self._artifact_entry(artifact_map[dataset_id])] if artifact is not None]
             submission_mode = "bundle"
@@ -336,6 +376,8 @@ class Project:
                 artifact_map=artifact_map,
                 cell_titles=cell_titles,
                 test_titles=test_titles,
+                cell_local_ids=cell_local_ids,
+                test_local_ids=test_local_ids,
             )
             resources = []
             artifacts = self._resource_artifacts(target=target, artifact_map=artifact_map)
@@ -374,7 +416,9 @@ class Project:
             },
         )
         payload = submission.model_dump(mode="json", exclude_none=True)
+        submission_package_path = self._submission_package_path(manifest=manifest, target=target, resource=resource)
         registry_intake_path = self._registry_intake_path(manifest=manifest, target=target, resource=resource)
+        _write_json(submission_package_path, payload)
         _write_json(registry_intake_path, payload)
         return {
             "status": "ok",
@@ -384,6 +428,7 @@ class Project:
             "manifest_path": str(self.manifest_path),
             "validation_report_path": str(self.root / manifest.dist_dir / "validation-report.json"),
             "normalized_dir": str(normalized_dir),
+            "submission_package_path": str(submission_package_path),
             "registry_intake_path": str(registry_intake_path),
             "resource_count": 1 if resource is not None else len(resources),
             "artifact_count": len(artifacts),
@@ -665,6 +710,9 @@ class Project:
             "format": product.get("cellFormat"),
             "chemistry": product.get("chemistry"),
             "size_code": product.get("sizeCode"),
+            "iec_code": product.get("iecCode"),
+            "country_of_origin": product.get("countryOfOrigin"),
+            "year": product.get("year"),
             "positive_electrode_basis": product.get("positiveElectrodeBasis"),
             "negative_electrode_basis": product.get("negativeElectrodeBasis"),
         }
@@ -708,6 +756,9 @@ class Project:
             "format": product.get("cellFormat") if isinstance(product, dict) else None,
             "chemistry": product.get("chemistry") if isinstance(product, dict) else None,
             "size_code": product.get("sizeCode") if isinstance(product, dict) else None,
+            "iec_code": product.get("iecCode") if isinstance(product, dict) else None,
+            "country_of_origin": product.get("countryOfOrigin") if isinstance(product, dict) else None,
+            "year": product.get("year") if isinstance(product, dict) else None,
             "serial_number": cell_payload.get("serial_number"),
             "batch_id": cell_payload.get("batch_id"),
         }
@@ -725,19 +776,25 @@ class Project:
             },
         )
 
-    def _test_resource(self, record: dict[str, Any], cell_titles: dict[str, str]) -> SubmissionResource:
+    def _test_resource(
+        self,
+        record: dict[str, Any],
+        cell_titles: dict[str, str],
+        cell_local_ids: dict[str, str],
+    ) -> SubmissionResource:
         test_payload = record["test"]
         related = []
         if isinstance(test_payload.get("cell_id"), str):
-            local_id = f"cell:{test_payload['cell_id'].rstrip('/').split('/')[-1]}"
-            related.append(
-                SubmissionRelatedResource(
-                    relationship="testsCell",
-                    resource_type="cell",
-                    source_local_id=local_id,
-                    title=cell_titles.get(local_id),
+            local_id = cell_local_ids.get(test_payload["cell_id"])
+            if local_id is not None:
+                related.append(
+                    SubmissionRelatedResource(
+                        relationship="testsCell",
+                        resource_type="cell",
+                        source_local_id=local_id,
+                        title=cell_titles.get(local_id),
+                    )
                 )
-            )
         return SubmissionResource(
             resource_type="test",
             source_local_id=self._source_local_id("test", record),
@@ -767,6 +824,8 @@ class Project:
         artifact_map: dict[str, str | None],
         cell_titles: dict[str, str],
         test_titles: dict[str, str],
+        cell_local_ids: dict[str, str],
+        test_local_ids: dict[str, str],
     ) -> SubmissionResource:
         dataset_payload = record["dataset"]
         dataset_id = str(dataset_payload["id"])
@@ -809,25 +868,27 @@ class Project:
                 if not isinstance(value, str):
                     continue
                 if "/cell/" in value:
-                    local_id = f"cell:{value.rstrip('/').split('/')[-1]}"
-                    related.append(
-                        SubmissionRelatedResource(
-                            relationship="aboutCell",
-                            resource_type="cell",
-                            source_local_id=local_id,
-                            title=cell_titles.get(local_id),
+                    local_id = cell_local_ids.get(value)
+                    if local_id is not None:
+                        related.append(
+                            SubmissionRelatedResource(
+                                relationship="aboutCell",
+                                resource_type="cell",
+                                source_local_id=local_id,
+                                title=cell_titles.get(local_id),
+                            )
                         )
-                    )
                 elif "/test/" in value:
-                    local_id = f"test:{value.rstrip('/').split('/')[-1]}"
-                    related.append(
-                        SubmissionRelatedResource(
-                            relationship="generatedByTest",
-                            resource_type="test",
-                            source_local_id=local_id,
-                            title=test_titles.get(local_id),
+                    local_id = test_local_ids.get(value)
+                    if local_id is not None:
+                        related.append(
+                            SubmissionRelatedResource(
+                                relationship="generatedByTest",
+                                resource_type="test",
+                                source_local_id=local_id,
+                                title=test_titles.get(local_id),
+                            )
                         )
-                    )
 
         return SubmissionResource(
             resource_type="dataset",
@@ -878,6 +939,8 @@ class Project:
         artifact_map: dict[str, str | None],
         cell_titles: dict[str, str],
         test_titles: dict[str, str],
+        cell_local_ids: dict[str, str],
+        test_local_ids: dict[str, str],
     ) -> SubmissionResource:
         if isinstance(target, CellType):
             record = self._find_record("cell_types", target.id, cell_type_by_id.values())
@@ -887,10 +950,10 @@ class Project:
             return self._cell_resource(record, cell_type_by_id)
         if isinstance(target, Test):
             record = self._find_record("tests", target.id, test_records)
-            return self._test_resource(record, cell_titles)
+            return self._test_resource(record, cell_titles, cell_local_ids)
         if isinstance(target, Dataset):
             record = self._find_record("datasets", target.id, dataset_records)
-            return self._dataset_resource(record, artifact_map, cell_titles, test_titles)
+            return self._dataset_resource(record, artifact_map, cell_titles, test_titles, cell_local_ids, test_local_ids)
         raise TypeError("Project.bundle() target must be a CellType, CellInstance, Test, or Dataset.")
 
     def _resource_artifacts(
@@ -903,6 +966,19 @@ class Project:
             return []
         artifact = self._artifact_entry(artifact_map.get(target.id))
         return [artifact] if artifact is not None else []
+
+    def _submission_package_path(
+        self,
+        *,
+        manifest: ProjectManifest,
+        target: ProjectTarget | None,
+        resource: SubmissionResource | None,
+    ) -> Path:
+        dist_dir = self.root / manifest.dist_dir
+        if target is None or resource is None:
+            return dist_dir / "submission-package.json"
+        short_id = resource.source_local_id.split(":", 1)[-1]
+        return dist_dir / f"submission-package.{resource.resource_type}.{short_id}.json"
 
     def _registry_intake_path(
         self,

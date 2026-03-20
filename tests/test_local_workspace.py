@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.cli import app
 from battinfo.local_workspace import WORKSPACE_FILENAME, LocalWorkspace
-from battinfo import BatteryCell, BatteryCellType, BatteryTestType, Dataset, Test, publish, quantity
+from battinfo import BattinfoBundle, BatteryCell, BatteryCellType, BatteryTestType, Dataset, Test, publish, quantity
 
 
 def _build_sample_objects(tmp_path: Path) -> tuple[BatteryCellType, BatteryCell, Test, Dataset]:
@@ -80,8 +80,10 @@ def test_workspace_cli_init_validate_bundle_happy_path(tmp_path: Path) -> None:
     assert bundle_payload["status"] == "ok"
 
     registry_intake_path = workspace_dir / "dist" / "registry-intake.json"
+    submission_package_path = workspace_dir / "dist" / "submission-package.json"
     zenodo_metadata_path = workspace_dir / "dist" / "zenodo-metadata.json"
     normalized_dir = workspace_dir / "dist" / "normalized"
+    assert submission_package_path.exists()
     assert registry_intake_path.exists()
     assert zenodo_metadata_path.exists()
     assert (normalized_dir / "cell-types" / "cell-type.json").exists()
@@ -185,6 +187,7 @@ def test_local_workspace_object_flow_clone_and_intake_rehydration(tmp_path: Path
     )
 
     bundle_v1 = workspace.bundle(policy="strict")
+    assert Path(bundle_v1["submission_package_path"]).exists()
     assert Path(bundle_v1["registry_intake_path"]).exists()
     assert (workspace.root / "artifacts" / "a123-cycle-life.csv").exists()
     assert workspace.read_json("dist/registry-intake.json")["kind"] == "BattinfoSubmission"
@@ -230,7 +233,7 @@ def test_local_workspace_object_flow_clone_and_intake_rehydration(tmp_path: Path
     bundle_v2 = release_v2.bundle(policy="strict")
     intake_workspace = LocalWorkspace.import_registry_intake(
         tmp_path / "rehydrated-from-intake",
-        bundle_v2["registry_intake_path"],
+        bundle_v2["submission_package_path"],
         force=True,
         capture_artifact=False,
     )
@@ -282,3 +285,65 @@ def test_local_workspace_rehydrates_from_publication_bundle(tmp_path: Path) -> N
     assert objects["cell_design"].model == "ANR26650M1-B"
     assert objects["test"].cell_instance_id == objects["cell"].id
     assert objects["dataset"].test_id == objects["test"].id
+
+
+def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path) -> None:
+    cell_design, cell, test, dataset = _build_sample_objects(tmp_path)
+    workspace = LocalWorkspace.from_bundle(
+        tmp_path / "source-workspace",
+        workspace_id="hello-world",
+        title="Hello World Workspace",
+        registry="digibatt/hello-world",
+        publisher_id="demo-lab",
+        bundle=BattinfoBundle(
+            bundle_name="hello-world",
+            cell_type=cell_design,
+            cell_instance=cell,
+            test=test,
+            dataset=dataset,
+        ),
+        release={"version": "1.0.0", "community": "digibatt"},
+        force=True,
+        capture_artifact=True,
+    )
+    submission = json.loads(Path(workspace.bundle(policy="strict")["submission_package_path"]).read_text(encoding="utf-8"))
+    export_payload = {
+        "project_id": submission["project_id"],
+        "publisher_id": submission["publisher_id"],
+        "source_version": submission["source_version"],
+        "raw_submission": submission,
+        "normalized_export": {
+            "kind": "BattinfoProjectExport",
+            "project_id": submission["project_id"],
+            "publisher_id": submission["publisher_id"],
+            "source_version": submission["source_version"],
+            "workspace": submission["workspace"],
+            "release": submission["release"],
+            "resources": [
+                {
+                    "resource_type": item["resource_type"],
+                    "source_local_id": item["source_local_id"],
+                    "title": item["title"],
+                    "semantic_payload": item["semantic_payload"],
+                    "related_resources": item["related_resources"],
+                    "distributions": item["distributions"],
+                }
+                for item in submission["resources"]
+            ],
+            "artifacts": submission["artifacts"],
+            "validation": submission["validation"],
+        },
+    }
+
+    rehydrated = LocalWorkspace.from_submission_package(
+        tmp_path / "rehydrated-from-export",
+        export_payload,
+        force=True,
+        capture_artifact=False,
+    )
+    objects = rehydrated.load_objects()
+    assert objects["cell_design"].model == cell_design.model
+    assert objects["cell"].serial_number == cell.serial_number
+    assert objects["test"].cell_instance_id == objects["cell"].id
+    assert objects["dataset"].test_id == objects["test"].id
+    assert objects["dataset"].cell_instance_id == objects["cell"].id

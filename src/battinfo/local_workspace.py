@@ -25,6 +25,8 @@ DEFAULT_TEST_RESOURCE_PATH = "resources/test.json"
 DEFAULT_DATASET_RESOURCE_PATH = "resources/dataset.json"
 DEFAULT_ARTIFACTS_DIR = "artifacts"
 DEFAULT_DIST_DIR = "dist"
+DEFAULT_SUBMISSION_PACKAGE_FILENAME = "submission-package.json"
+DEFAULT_LEGACY_REGISTRY_INTAKE_FILENAME = "registry-intake.json"
 DEFAULT_SCAFFOLD_WORKSPACE_ID = "digibatt-cr2032-release"
 
 
@@ -389,7 +391,12 @@ def _coerce_zenodo_metadata(value: ZenodoMetadata | Mapping[str, Any] | None) ->
 
 
 class LocalWorkspace:
-    """Disk-backed workspace for authoring one linked cell/test/dataset release."""
+    """Disk-first submission workspace for one linked cell/test/dataset bundle.
+
+    `LocalWorkspace` is distinct from the Python `Workspace` authoring helper. It is
+    designed for JSON resource files on disk plus `battinfo workspace` CLI commands,
+    not for object-first authoring in notebooks or scripts.
+    """
 
     def __init__(self, root: PathLike) -> None:
         self.root = _as_path(root)
@@ -422,7 +429,7 @@ class LocalWorkspace:
                 record_url="https://zenodo.org/records/1234567",
             ),
             comment=[
-                "Edit the resource JSON files directly, then run `battinfo workspace validate` and `battinfo workspace bundle`.",
+                "Edit the resource JSON files directly, then run `battinfo workspace validate` and `battinfo workspace bundle` to build the submission package.",
             ],
         )
         cell_doc = WorkspaceCellDocument(
@@ -498,7 +505,7 @@ class LocalWorkspace:
                     publication_date="2026-03-12",
                     license="CC-BY-4.0",
                 ),
-                comment=["Primary distribution is kept local until registry intake is submitted."],
+                comment=["Primary distribution is kept local until the submission package is submitted."],
             )
         )
 
@@ -941,6 +948,39 @@ class LocalWorkspace:
         )
         return workspace
 
+    @staticmethod
+    def _resource_semantic_payload(resource: Any) -> Mapping[str, Any]:
+        if isinstance(resource, SubmissionResource):
+            return resource.semantic_payload
+        if isinstance(resource, Mapping):
+            payload = resource.get("semantic_payload")
+            if isinstance(payload, Mapping):
+                return payload
+        return {}
+
+    @classmethod
+    def _bundle_from_resource_payloads(
+        cls,
+        resource_payloads: Mapping[str, Any],
+        *,
+        bundle_name: str | None,
+    ) -> BattinfoBundle:
+        cell_payload = cls._resource_semantic_payload(resource_payloads["cell"]).get("battinfo_records", {})
+        test_payload = cls._resource_semantic_payload(resource_payloads["test"]).get("battinfo_records", {})
+        dataset_payload = cls._resource_semantic_payload(resource_payloads["dataset"]).get("battinfo_records", {})
+        cell_type_resource = resource_payloads.get("cell_type")
+        cell_type_payload = cls._resource_semantic_payload(cell_type_resource).get("battinfo_records", {})
+        cell_type_record = cell_type_payload.get("cell_type") or cell_payload.get("cell_type")
+        if not isinstance(cell_type_record, Mapping):
+            raise ValueError("Submission bundle must include a cell_type record, either as a resource or nested in the cell resource.")
+        return BattinfoBundle(
+            bundle_name=bundle_name,
+            cell_type=CellType.from_record(dict(cell_type_record)),
+            cell_instance=CellInstance.from_record(cell_payload["cell"]),
+            test=Test.from_record(test_payload["test"]),
+            dataset=Dataset.from_record(dataset_payload["dataset"]),
+        )
+
     @classmethod
     def from_registry_intake(
         cls,
@@ -954,6 +994,13 @@ class LocalWorkspace:
         capture_artifact: bool = True,
     ) -> "LocalWorkspace":
         payload = _read_json(_as_path(intake)) if isinstance(intake, (str, Path)) else dict(intake)
+        raw_submission = payload.get("raw_submission")
+        if isinstance(raw_submission, Mapping):
+            payload = dict(raw_submission)
+        else:
+            normalized_export = payload.get("normalized_export")
+            if isinstance(normalized_export, Mapping):
+                payload = dict(normalized_export)
         if payload.get("kind") == "BattinfoSubmission":
             submission = BattinfoSubmission.model_validate(payload)
             if submission.submission_mode != "bundle":
@@ -962,15 +1009,9 @@ class LocalWorkspace:
             registry = workspace_payload.get("registry", {"tenant": "imported", "project": submission.project_id})
             release = submission.release
             resource_payloads = {resource.resource_type: resource for resource in submission.resources}
-            cell_payload = resource_payloads["cell"].semantic_payload["battinfo_records"]
-            test_payload = resource_payloads["test"].semantic_payload["battinfo_records"]
-            dataset_payload = resource_payloads["dataset"].semantic_payload["battinfo_records"]
-            bundle = BattinfoBundle(
+            bundle = cls._bundle_from_resource_payloads(
+                resource_payloads,
                 bundle_name=workspace_payload.get("title") or submission.title,
-                cell_type=CellType.from_record(cell_payload["cell_type"]),
-                cell_instance=CellInstance.from_record(cell_payload["cell"]),
-                test=Test.from_record(test_payload["test"]),
-                dataset=Dataset.from_record(dataset_payload["dataset"]),
             )
             resolved_publisher_id = submission.publisher_id
         else:
@@ -978,12 +1019,14 @@ class LocalWorkspace:
             registry = workspace_payload.get("registry", {"tenant": "imported", "project": "registry-intake"})
             release = payload.get("release", {})
             resources = payload.get("resources", {})
-            bundle = BattinfoBundle(
+            resource_payloads = (
+                {str(item.get("resource_type")): item for item in resources if isinstance(item, Mapping) and isinstance(item.get("resource_type"), str)}
+                if isinstance(resources, list)
+                else resources
+            )
+            bundle = cls._bundle_from_resource_payloads(
+                resource_payloads,
                 bundle_name=workspace_payload.get("title"),
-                cell_type=CellType.from_record(resources["cell_type"]),
-                cell_instance=CellInstance.from_record(resources["cell"]),
-                test=Test.from_record(resources["test"]),
-                dataset=Dataset.from_record(resources["dataset"]),
             )
             resolved_publisher_id = payload.get("publisher_id")
         return cls.from_bundle(
@@ -996,6 +1039,30 @@ class LocalWorkspace:
             description=description or workspace_payload.get("description"),
             release=release,
             force=force,
+            capture_artifact=capture_artifact,
+        )
+
+    @classmethod
+    def from_submission_package(
+        cls,
+        root: PathLike,
+        intake: Mapping[str, Any] | PathLike,
+        *,
+        force: bool = False,
+        workspace_id: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        capture_artifact: bool = True,
+    ) -> "LocalWorkspace":
+        """Preferred name for rehydrating from a submission package."""
+
+        return cls.from_registry_intake(
+            root,
+            intake,
+            force=force,
+            workspace_id=workspace_id,
+            title=title,
+            description=description,
             capture_artifact=capture_artifact,
         )
 
@@ -1585,6 +1652,11 @@ class LocalWorkspace:
         return payload
 
     def bundle(self, *, policy: str = "strict") -> dict[str, Any]:
+        """Compatibility alias for build_submission_package(...)."""
+
+        return self.build_submission_package(policy=policy)
+
+    def build_submission_package(self, *, policy: str = "strict") -> dict[str, Any]:
         validation_report = self.validate(policy=policy, write_report=True)
         if not validation_report["ok"]:
             raise ValueError("workspace validation failed; see dist/validation-report.json")
@@ -1597,9 +1669,11 @@ class LocalWorkspace:
         normalized_dir = self.dist_dir / "normalized"
         self._write_normalized_records(records, target_root=normalized_dir)
 
-        registry_intake = self._registry_intake_payload(normalized=normalized, validation_report=validation_report)
-        registry_intake_path = self.dist_dir / "registry-intake.json"
-        _write_json(registry_intake_path, registry_intake)
+        submission_package = self._registry_intake_payload(normalized=normalized, validation_report=validation_report)
+        submission_package_path = self.dist_dir / DEFAULT_SUBMISSION_PACKAGE_FILENAME
+        legacy_registry_intake_path = self.dist_dir / DEFAULT_LEGACY_REGISTRY_INTAKE_FILENAME
+        _write_json(submission_package_path, submission_package)
+        _write_json(legacy_registry_intake_path, submission_package)
 
         zenodo_metadata = self._zenodo_metadata_payload(manifest=manifest, dataset_doc=dataset_doc)
         zenodo_metadata_path = None
@@ -1613,8 +1687,11 @@ class LocalWorkspace:
             "workspace_root": str(self.root),
             "validation_report_path": str(self.dist_dir / "validation-report.json"),
             "normalized_dir": str(normalized_dir),
-            "registry_intake_path": str(registry_intake_path),
+            "submission_package_path": str(submission_package_path),
+            "registry_intake_path": str(legacy_registry_intake_path),
             "zenodo_metadata_path": str(zenodo_metadata_path) if zenodo_metadata_path is not None else None,
+            "resource_count": len(submission_package.get("resources", [])),
+            "artifact_count": len(submission_package.get("artifacts", [])),
             "cell_type_id": records["cell_type"]["product"]["id"],
             "cell_id": records["cell"]["cell_instance"]["id"],
             "test_id": records["test"]["test"]["id"],
@@ -1627,6 +1704,8 @@ __all__ = [
     "DEFAULT_CELL_RESOURCE_PATH",
     "DEFAULT_DATASET_RESOURCE_PATH",
     "DEFAULT_DIST_DIR",
+    "DEFAULT_LEGACY_REGISTRY_INTAKE_FILENAME",
+    "DEFAULT_SUBMISSION_PACKAGE_FILENAME",
     "DEFAULT_TEST_RESOURCE_PATH",
     "LocalWorkspace",
     "ReleaseInfo",

@@ -10,9 +10,9 @@ Status: Pre-release with alpha-ready scope defined.
 - Core, preview, and in-development boundaries are now documented for alpha testing.
 
 Alpha scope
-- Core: stable battery-descriptor validation/mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
-- Preview: reusable cell-type library flows beyond the alpha walkthrough fixtures and curated datasheet validation examples.
-- In development: datasheet authoring as a public contract, semantic mapping workflows, and large-scale reference validation.
+- Core: stable cell-descriptor validation/mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
+- Preview: reusable cell-type library flows beyond the alpha walkthrough fixtures.
+- In development: registry sync/query flows, semantic mapping workflows, and large-scale reference validation.
 - Implementation plan for closing alpha blockers: `docs/alpha-implementation-plan.md`
 
 Alpha hardening targets
@@ -83,11 +83,11 @@ What BattINFO does
 
 Quick start
 ```
-battinfo validate input.json --profile battery-descriptor --format json
+battinfo validate input.json --profile cell-descriptor --format json
 battinfo validate input.json --profile batterypass --format json
-battinfo validate input.datasheet.json --profile cell-type-datasheet
+battinfo template cell-type-draft --out a123-anr26650m1-b.draft.json --format json
 battinfo template cell-type --manufacturer Duracell --model-name MN1500 --chemistry Zn-air --cell-format cylindrical --out mn1500.cell-type.json --format json
-battinfo save record --input mn1500.cell-type.json --source-root assets/examples --no-resolve-references --format json
+battinfo save record --input mn1500.cell-type.json --source-root examples --no-resolve-references --format json
 battinfo map input.json --target domain-battery --out output.domain.jsonld
 battinfo map input.json --target batterypass --out output.jsonld
 battinfo query cell-types --manufacturer A123 --chemistry LFP --format json
@@ -95,9 +95,9 @@ battinfo create cell-instance --model-name ANR26650M1-B --manufacturer A123 --fo
 battinfo save cell-type --manufacturer Duracell --model-name MN1500 --chemistry Zn-air --cell-format cylindrical --source-file manual-mn1500.json --format json
 battinfo save cell-instance --type-id https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8 --source-type lab --format json
 battinfo save dataset --title "MN1500 cycling" --source-type measurement --format json
-battinfo save batch --source-dir batch/cell-types --source-dir batch/cell-instances --source-dir batch/datasets --source-root assets/examples --format json
-battinfo publish batch --source-dir assets/examples/cell-instances --format json
-battinfo index build --source-root assets/examples --out .battinfo/index.json --format json
+battinfo save batch --source-dir batch/cell-types --source-dir batch/cell-instances --source-dir batch/datasets --source-root examples --format json
+battinfo publish batch --source-dir examples/cell-instances --format json
+battinfo index build --source-root examples --out .battinfo/index.json --format json
 battinfo index stats --index .battinfo/index.json --format json
 ```
 
@@ -127,15 +127,13 @@ Identifier policy
 - See `IDENTIFIER_POLICY.md` for canonical identifier and minting governance.
 
 Notebooks
-- See `notebooks/README.md` for the current executable workflow examples:
+- See `examples/notebooks/README.md` for the current executable workflow examples:
   the minimal end-to-end BattINFO authoring and publication flow.
 - If VS Code gets stuck on notebook kernel restart for the repo `.venv`, run:
   `battinfo notebook recover --project-root . --format text`
 
-Cell-type datasheets and registry intake
-- Dataset registry intake spec (v1 draft): `docs/dataset-registry-intake-spec.md`
-- Validate a directory of BattINFO cell-type datasheets:
-  `python .tools/datasheets/validate_cell_type_datasheets.py --dir <path-to-datasheets> --profile cell-type-datasheet`
+Source documents and submission packages
+- Dataset registry intake / submission package spec (v1 draft): `docs/dataset-registry-intake-spec.md`
 - Run datasheet quality checks:
   `python .tools/datasheets/check_datasheet_quality.py --dir <path-to-datasheets> --report .battinfo/reports/datasheet-quality.md`
 - Build datasheet curation backlog report:
@@ -143,21 +141,23 @@ Cell-type datasheets and registry intake
 - Build datasheet delta report:
   `python .tools/datasheets/report_datasheet_delta.py --baseline-dir <baseline-dir> --enriched-dir <updated-dir> --out .battinfo/reports/datasheet-delta.md`
 - Generate first-pass semantic mapping candidates for quantitative properties:
-  `python .tools/semantic/generate_semantic_mapping_candidates.py --ontology https://w3id.org/emmo/domain/battery/inferred --sample-json assets/examples/cell-types/A123__ANR26650M1-B.json --out-dir assets/mappings/domain-battery --overwrite`
+  `python .tools/semantic/generate_semantic_mapping_candidates.py --ontology https://w3id.org/emmo/domain/battery/inferred --sample-json examples/cell-types/A123__ANR26650M1-B.json --out-dir assets/mappings/domain-battery --overwrite`
 - Run semantic mapping quality gates and emit review report:
   `python .tools/semantic/check_semantic_mapping_candidates.py --property-map assets/mappings/domain-battery/property_map.candidates.json --unit-map assets/mappings/domain-battery/unit_map.candidates.json --report assets/mappings/domain-battery/quantitative_mapping_gate.md`
 
 Template-first save workflow
+- Generate a hand-edited authoring draft:
+  `battinfo template cell-type-draft --out cell-type.draft.json`
 - Generate starter records:
   `battinfo template cell-type --out cell-type.template.json`
   `battinfo template cell-instance --out cell-instance.template.json`
   `battinfo template dataset --out dataset.template.json`
 - Register canonical records:
-  `battinfo save record --input cell-type.template.json --source-root assets/examples --no-resolve-references --format json`
-  `battinfo save record --input cell-instance.template.json --source-root assets/examples --resolve-references --format json`
-  `battinfo save record --input dataset.template.json --source-root assets/examples --resolve-references --format json`
+  `battinfo save record --input cell-type.template.json --source-root examples --no-resolve-references --format json`
+  `battinfo save record --input cell-instance.template.json --source-root examples --resolve-references --format json`
+  `battinfo save record --input dataset.template.json --source-root examples --resolve-references --format json`
 - Register in one pass from staging directories:
-  `battinfo save batch --source-dir batch/cell-types --source-dir batch/cell-instances --source-dir batch/datasets --source-root assets/examples --resolve-references --format json`
+  `battinfo save batch --source-dir batch/cell-types --source-dir batch/cell-instances --source-dir batch/datasets --source-root examples --resolve-references --format json`
 
 CLI roadmap
 - See `docs/cli-spec.md` for the concrete `query` / `create` / `publish` / `index` command specification.
@@ -167,7 +167,6 @@ Resolver artifact build (first draft)
 python .tools/build/build_resolver_artifacts.py
 python .tools/quality/lint_identifier_policy.py
 python .tools/library/validate_cells_clean.py
-python .tools/datasheets/validate_cell_type_datasheets.py
 ```
 This generates static resolution artifacts under `.battinfo/resolver-site/` for:
 - `cell`
@@ -175,25 +174,28 @@ This generates static resolution artifacts under `.battinfo/resolver-site/` for:
 - `dataset`
 
 Repository layout
-- `assets/` Canonical schemas, mappings, and examples (source of truth)
+- `assets/` Canonical schemas and mapping assets
+- `examples/` Canonical example records, walkthrough notebooks, and small demo workflows
 - `src/battinfo/` Python package + CLI
-- `assets/compat.yaml` Compatibility metadata for domain-battery and Battery Pass
 - `docs/` Adoption and usage docs
 - `.tools/` Maintainer-only tooling grouped into `build/`, `datasheets/`, `library/`, `quality/`, and `semantic/`
 - `tests/` Regression and contract tests
 - `legacy/` Prior ontology artifacts and docs (archived)
 
 Repository hygiene
-- Keep canonical and packaged source-of-truth content under `assets/` and `src/battinfo/data/`.
+- Keep schemas and mapping tables under `assets/`.
+- Keep canonical example records and notebooks under `examples/`.
+- Treat generated-output paths such as `.battinfo/library-rdf/` as rebuildable outputs, not hand-edited source.
+- Keep the packaged runtime subset under `src/battinfo/data/`.
 - Keep experimental outputs, review artifacts, and scratch runs under ignored local paths such as `.battinfo/`, not at repository root.
 - Treat hidden directories such as `.venv/`, `.pytest_cache/`, `.battinfo/`, and `.jupyter-runtime-test/` as local runtime state.
-
-Compatibility
-See `assets/compat.yaml`.
 
 Notes
 - BattINFO does not host or modify the domain-battery ontology.
 - BattINFO does not publish authoritative Battery Pass artifacts.
+
+
+
 
 
 

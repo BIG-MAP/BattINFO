@@ -7,5 +7,5 @@ Current target:
 
 - `cell-types.jsonld`
 
-These files are generated from canonical JSON sources and should not be edited
-manually.
+These files are generated from canonical JSON sources, may be absent in a clean
+checkout, and should not be edited manually.

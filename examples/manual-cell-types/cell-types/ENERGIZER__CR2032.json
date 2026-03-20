@@ -1,0 +1,27 @@
+{
+  "manufacturer": "Energizer",
+  "model": "CR2032",
+  "format": "coin",
+  "chemistry": "Li-primary",
+  "positive_electrode_basis": "MnO2",
+  "negative_electrode_basis": "Li-metal",
+  "size_code": "R2032",
+  "specs": {
+    "nominal_voltage": {
+      "value": 3.0,
+      "unit": "V"
+    },
+    "diameter": {
+      "value": 20.0,
+      "unit": "mm"
+    },
+    "height": {
+      "value": 3.2,
+      "unit": "mm"
+    }
+  },
+  "provenance": {
+    "source_file": "ENERGIZER__CR2032.pdf"
+  },
+  "comment": "Second manual cell-type draft for batch loading."
+}

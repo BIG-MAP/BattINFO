@@ -6,7 +6,7 @@ This document defines the target architecture for BattINFO, `domain-battery`, an
 
 The architecture is designed to meet these goals:
 - `domain-battery` remains the source of semantic truth
-- BattINFO remains the normative human-facing battery descriptor contract
+- BattINFO remains the normative human-facing cell descriptor contract
 - deterministic JSON-LD/RDF generation is preserved
 - ontology, profile, schema, and code can scale without becoming independent competing sources of truth
 
@@ -74,8 +74,8 @@ Target BattINFO layout:
   - imports `domain-battery`
   - declares BattINFO-specific extensions only
 
-- `src/battinfo/data/profiles/battery-descriptor/`
-  - profile definitions for the BattINFO battery descriptor
+- `src/battinfo/data/profiles/cell-descriptor/`
+  - profile definitions for the BattINFO cell descriptor
   - required/optional fields
   - cardinalities
   - controlled value sets
@@ -135,7 +135,7 @@ Promotion rule:
 
 ## 6. BattINFO Profile Design
 
-The BattINFO battery descriptor profile should be the operational contract layer between ontology and human JSON.
+The BattINFO cell descriptor profile should be the operational contract layer between ontology and human JSON.
 
 It should define:
 - top-level shape
@@ -153,7 +153,7 @@ The profile is the place where semantic constraints become a human-facing contra
 
 The following artifacts should be generated or derived from the profile layer wherever practical:
 
-- `assets/schemas/battery-descriptor.schema.json`
+- `assets/schemas/cell-descriptor.schema.json`
 - `assets/schemas/modules/common/*.json`
 - `assets/schemas/modules/components/*.json`
 - JSON-LD rendering tables
@@ -269,3 +269,4 @@ The target end state is:
 - Python code renders and validates; it does not define semantics
 
 This architecture keeps most maintenance in ontology/profile assets while preserving a practical human-facing JSON contract.
+

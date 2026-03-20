@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0.0",
+  "specification": {
+    "id": "https://w3id.org/battinfo/cell-type/4h8p-3t6m-9q2k-7v5r",
+    "manufacturer": "AlphaLab",
+    "model": "POUCH-ML-LFP-018",
+    "format": "pouch",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "construction": {
+      "assembly_type": "stacked",
+      "layering": "multilayer",
+      "layer_count": 18,
+      "comment": "Multilayer pouch alpha fixture."
+    },
+    "property": {
+      "nominal_capacity": {
+        "value": 5.0,
+        "unit": "Ah"
+      },
+      "nominal_voltage": {
+        "value": 3.2,
+        "unit": "V"
+      }
+    },
+    "positive_electrode": {
+      "coating": {
+        "component": {
+          "active_material": [
+            {
+              "name": "LFP",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.94,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "binder": [
+            {
+              "name": "PVDF",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.03,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "additive": [
+            {
+              "name": "Carbon black",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.03,
+                  "unit": "1"
+                }
+              }
+            }
+          ]
+        },
+        "property": {
+          "loading": {
+            "value": 21.0,
+            "unit": "mg/cm^2"
+          }
+        }
+      },
+      "current_collector": {
+        "name": "Al foil"
+      }
+    },
+    "negative_electrode": {
+      "coating": {
+        "component": {
+          "active_material": [
+            {
+              "name": "Graphite",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.95,
+                  "unit": "1"
+                }
+              }
+            }
+          ],
+          "binder": [
+            {
+              "name": "CMC/SBR",
+              "property": {
+                "mass_fraction": {
+                  "value": 0.05,
+                  "unit": "1"
+                }
+              }
+            }
+          ]
+        },
+        "property": {
+          "loading": {
+            "value": 12.0,
+            "unit": "mg/cm^2"
+          }
+        }
+      },
+      "current_collector": {
+        "name": "Cu foil"
+      }
+    },
+    "electrolyte": {
+      "family": "organic",
+      "solvent_mixture": {
+        "component": [
+          {
+            "name": "EC",
+            "property": {
+              "volume_fraction": {
+                "value": 0.3,
+                "unit": "1"
+              }
+            }
+          },
+          {
+            "name": "EMC",
+            "property": {
+              "volume_fraction": {
+                "value": 0.7,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "salt": {
+        "name": "LiPF6",
+        "property": {
+          "concentration": {
+            "value": 1.1,
+            "unit": "mol/L"
+          }
+        }
+      },
+      "additive": [
+        {
+          "name": "VC",
+          "property": {
+            "volume_fraction": {
+              "value": 0.02,
+              "unit": "1"
+            }
+          }
+        }
+      ]
+    },
+    "separator": {
+      "material": "Ceramic-coated PE",
+      "property": {
+        "thickness": {
+          "value": 20.0,
+          "unit": "um"
+        }
+      }
+    },
+    "comment": [
+      "Detailed multilayer pouch descriptor for alpha validation coverage."
+    ]
+  },
+  "instances": [
+    {
+      "name": "pouch-ml-alpha-01",
+      "id": "https://w3id.org/battinfo/cell/9p5r-7v3k-2m8t-4q6n",
+      "serial_number": "POUCH-ML-ALPHA-01"
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "BattINFO alpha fixtures",
+    "source_file": "examples/cell-descriptors/alpha-pouch-multilayer-detailed.example.json",
+    "retrieved_at": 1773201600,
+    "workflow_version": "alpha-fixtures-0.1",
+    "comment": "Canonical detailed multilayer pouch fixture."
+  },
+  "comment": [
+    "Alpha fixture for detailed multilayer pouch-cell descriptions."
+  ]
+}
+
+

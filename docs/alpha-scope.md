@@ -18,8 +18,8 @@ Tested runtime support:
 
 The following features are in scope for alpha testing now:
 
-- battery-descriptor validation for the stable integration subset
-- battery-descriptor to JSON-LD mapping
+- cell-descriptor validation for the stable integration subset
+- cell-descriptor to JSON-LD mapping
 - canonical record workflows for `cell-type`, `cell-instance`, `test`, and `dataset`
 - CLI/API query, save, publish, and index flows for canonical records
 - JSON-LD-first publication with `publish(...)` and `load_publication(...)`
@@ -81,4 +81,5 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install -e .[dev]
 .\.venv\Scripts\python .tools/quality/run_alpha_verification.py
 ```
+
 

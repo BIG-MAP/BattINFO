@@ -2,11 +2,11 @@
 
 ## Purpose
 
-This document describes the current BattINFO workflow for going from a battery descriptor to explicit physical instances, tests, and linked datasets.
+This document describes the current BattINFO workflow for going from a cell descriptor to explicit physical instances, tests, and linked datasets.
 
 ## Recommended Flow
 
-1. Create one battery descriptor for the commercial cell type.
+1. Create one cell descriptor for the commercial cell type.
 2. Add lightweight `instances` in the descriptor if you want the instance names recorded near the specification.
 3. Register canonical `cell-instance` records for the physical cells you actually procure and test.
 4. Register canonical `test` records for concrete test activities performed on those physical cells.
@@ -18,8 +18,8 @@ Reference handling:
 
 ## Current Canonical Contracts
 
-- battery descriptor:
-  - `assets/schemas/battery-descriptor.schema.json`
+- cell descriptor:
+  - `assets/schemas/cell-descriptor.schema.json`
 - cell instance:
   - `assets/schemas/cell-instance.schema.json`
 - test:
@@ -52,20 +52,20 @@ Dataset linkage policy for alpha:
 ## Current Example Chain
 
 - descriptor:
-  - `assets/examples/battery-descriptors/a123-anr26650m1-b.example.json`
+  - `examples/cell-descriptors/a123-anr26650m1-b.example.json`
 - cell instance:
-  - `assets/examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json`
+  - `examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json`
 - test:
-  - `assets/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
+  - `examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
 - dataset:
-  - `assets/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json`
+  - `examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json`
 
 ## CLI Workflow
 
 Example commands:
 
 ```powershell
-battinfo validate assets/examples/battery-descriptors/a123-anr26650m1-b.example.json
+battinfo validate examples/cell-descriptors/a123-anr26650m1-b.example.json
 
 battinfo save cell-instance --type-id https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5 --uid 3m6k9t2p7x4h9nq8 --source-type lab
 
@@ -100,6 +100,8 @@ What is now first-class:
 What is still intentionally light:
 - the descriptor `instances` block remains a lightweight reference layer, not the full canonical `cell-instance` contract
 - test result content is still represented at the dataset layer rather than as a deeply modeled measurement/event ontology
+
+
 
 
 

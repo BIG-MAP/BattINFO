@@ -28,7 +28,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     source_root = tmp_path / "examples"
     index_path = tmp_path / ".battinfo" / "index.json"
 
-    cell_type_doc = _load_json(ROOT / "assets" / "examples" / "cell-types" / "A123__ANR26650M1-B.json")
+    cell_type_doc = _load_json(ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json")
     cell_type_payload = save_cell_type(
         cell_type_doc,
         source_root=source_root,
@@ -37,7 +37,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert cell_type_payload["status"] == "created"
 
-    cell_instance_doc = _load_json(ROOT / "assets" / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json")
+    cell_instance_doc = _load_json(ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json")
     cell_instance_payload = save_cell_instance(
         cell_instance_doc,
         source_root=source_root,
@@ -46,7 +46,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert cell_instance_payload["status"] == "created"
 
-    dataset_doc = _load_json(ROOT / "assets" / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json")
+    dataset_doc = _load_json(ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json")
     dataset_payload = save_dataset(
         dataset_doc,
         source_root=source_root,
@@ -55,7 +55,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert dataset_payload["status"] == "created"
 
-    test_dir = ROOT / "assets" / "examples" / "tests"
+    test_dir = ROOT / "examples" / "tests"
     expected_kinds = {"cycle_life", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
 
     for path in sorted(test_dir.glob("*.json")):
@@ -112,4 +112,5 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert len(dataset_rows) == 1
     assert dataset_rows[0]["id"] == dataset_doc["dataset"]["id"]
+
 

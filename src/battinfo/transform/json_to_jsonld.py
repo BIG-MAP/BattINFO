@@ -21,6 +21,8 @@ BATTERY_TYPE_MAP = {
 CORE_PROPERTY_PREDICATES = {
     "nominal_capacity": "battinfo:nominalCapacity",
     "rated_capacity": "battinfo:ratedCapacity",
+    "typical_energy": "battinfo:typicalEnergy",
+    "rated_energy": "battinfo:ratedEnergy",
     "nominal_voltage": "battinfo:nominalVoltage",
     "charging_voltage": "battinfo:chargingVoltage",
     "discharging_cutoff_voltage": "battinfo:dischargingCutoffVoltage",
@@ -154,7 +156,7 @@ def _load_mapping_file(*parts: str) -> dict[str, Any]:
 
 
 def _load_profile_file(*parts: str) -> dict[str, Any]:
-    packaged_path = resources.files("battinfo").joinpath("data", "profiles", "battery-descriptor", *parts)
+    packaged_path = resources.files("battinfo").joinpath("data", "profiles", "cell-descriptor", *parts)
     if packaged_path.is_file():
         with packaged_path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
@@ -722,3 +724,4 @@ def to_jsonld(data: dict[str, Any], target: str = "domain-battery") -> dict[str,
     if not validation.ok:
         raise ValueError(f"json-ld validation failed: {'; '.join(validation.errors)}")
     return doc
+

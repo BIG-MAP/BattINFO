@@ -91,10 +91,10 @@ Acceptance criteria:
 - tests fail on any future ID drift in the example chain
 
 Primary files:
-- `assets/examples/battery-descriptors/a123-anr26650m1-b.example.json`
-- `assets/examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json`
-- `assets/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
-- `assets/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json`
+- `examples/cell-descriptors/a123-anr26650m1-b.example.json`
+- `examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json`
+- `examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
+- `examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json`
 - `tests/test_alpha_workflow.py`
 - `tests/test_api.py`
 
@@ -139,7 +139,7 @@ Primary files:
 - `src/battinfo/data/schemas/test.schema.json`
 - `src/battinfo/api.py`
 - `src/battinfo/cli.py`
-- `assets/examples/tests/`
+- `examples/tests/`
 - `tests/test_test_contract.py`
 - `tests/test_cli_query_create_publish.py`
 - `tests/test_api.py`
@@ -175,7 +175,7 @@ Acceptance criteria:
 Primary files:
 - `assets/schemas/modules/components/specification.schema.json`
 - `src/battinfo/data/schemas/modules/components/specification.schema.json`
-- `assets/schemas/battery-descriptor.schema.json`
+- `assets/schemas/cell-descriptor.schema.json`
 - `src/battinfo/workflows/map.py`
 - `src/battinfo/transform/json_to_jsonld.py`
 - `tests/test_battery_descriptor_schema.py`
@@ -209,9 +209,9 @@ Acceptance criteria:
 - every required format example is covered by at least one positive test
 
 Primary files:
-- `assets/examples/battery-descriptors/`
-- `src/battinfo/data/examples/battery-descriptors/`
-- `assets/library/cell-types/`
+- `examples/cell-descriptors/`
+- `src/battinfo/data/examples/cell-descriptors/`
+- `.battinfo/library/cell-types/`
 - `tests/test_battery_descriptor_contract.py`
 - `tests/test_mapping.py`
 
@@ -239,7 +239,7 @@ Acceptance criteria:
 - users can query from either side of the cell/test/dataset chain
 
 Primary files:
-- `assets/examples/datasets/`
+- `examples/datasets/`
 - `src/battinfo/api.py`
 - `src/battinfo/cli.py`
 - `docs/instance-test-dataset-workflow.md`
@@ -347,3 +347,6 @@ BattINFO is ready for the stated alpha scope when:
 - linked datasets are validated and queryable through the cell/test chain
 - a clean environment can install, validate, publish, index, and query the supported cases
 - the dedicated alpha acceptance suite passes
+
+
+

@@ -14,14 +14,14 @@ Artifacts:
 - `unit_map.curated.json`: reviewed/approved unit-symbol to ontology-unit mapping.
 - `property_map.candidates.json`: auto-generated mapping candidates.
 - `unit_map.candidates.json`: auto-generated unit candidates.
-- `quantitative_mapping_report.md`: generation summary for review.
+- `quantitative_mapping_report.md`: optional generated summary for review.
 
 Generate first-pass candidates:
 
 ```bash
 python .tools/semantic/generate_semantic_mapping_candidates.py \
   --ontology https://w3id.org/emmo/domain/battery/inferred \
-  --sample-json assets/examples/cell-types/A123__ANR26650M1-B.json \
+  --sample-json examples/cell-types/A123__ANR26650M1-B.json \
   --out-dir assets/mappings/domain-battery \
   --overwrite
 ```

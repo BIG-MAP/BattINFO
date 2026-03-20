@@ -57,6 +57,28 @@ def test_query_tests_json() -> None:
     assert all(item["kind"] == "hppc" for item in payload["items"])
 
 
+def test_query_test_protocols_json() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "query",
+            "test-protocols",
+            "--kind",
+            "cycle_life",
+            "--limit",
+            "5",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["resource"] == "test-protocols"
+    assert payload["count"] >= 1
+    assert all(item["kind"] == "cycle_life" for item in payload["items"])
+
+
 def test_query_tests_by_cell_and_dataset_json() -> None:
     runner = CliRunner()
     result = runner.invoke(
@@ -161,11 +183,198 @@ def test_validate_defaults_to_battery_descriptor_profile() -> None:
         app,
         [
             "validate",
-            str(ROOT / "assets" / "examples" / "battery-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
         ],
     )
     assert result.exit_code == 0, result.stdout
     assert "Validation passed." in result.stdout
+
+
+def test_template_cell_type_draft_json() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "template",
+            "cell-type-draft",
+            "--manufacturer",
+            "A123",
+            "--model-name",
+            "ANR26650M1-B",
+            "--chemistry",
+            "Li-ion",
+            "--cell-format",
+            "cylindrical",
+            "--iec-code",
+            "IFpR26650",
+            "--country-of-origin",
+            "United States",
+            "--year",
+            "2012",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["manufacturer"] == "A123"
+    assert payload["model"] == "ANR26650M1-B"
+    assert payload["iec_code"] == "IFpR26650"
+    assert payload["country_of_origin"] == "United States"
+    assert payload["year"] == 2012
+    assert "product" not in payload
+
+
+def test_template_cell_type_draft_writes_file(tmp_path: Path) -> None:
+    runner = CliRunner()
+    out = tmp_path / "cell-type.draft.json"
+    result = runner.invoke(
+        app,
+        [
+            "template",
+            "cell-type-draft",
+            "--out",
+            str(out),
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "template"
+    assert payload["resource"] == "cell-type-draft"
+    assert out.exists()
+    draft = json.loads(out.read_text(encoding="utf-8"))
+    assert draft["model"] == "MODEL-001"
+    assert "product" not in draft
+
+
+def test_template_test_protocol_json() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "template",
+            "test-protocol",
+            "--name",
+            "1C Cycle Life at 25 C",
+            "--kind",
+            "cycle_life",
+            "--format",
+            "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["test_protocol"]["name"] == "1C Cycle Life at 25 C"
+    assert payload["test_protocol"]["kind"] == "cycle_life"
+
+
+def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
+    runner = CliRunner()
+    source_root = tmp_path / "examples"
+
+    cell_type_path = tmp_path / "cell-type.json"
+    cell_type_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.0",
+                "product": {
+                    "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+                    "short_id": "7d9k2m",
+                    "identifier": "cell-type:7d9k-2m4p-8t3x-6nq5",
+                    "name": "A123 ANR26650M1-B",
+                    "model": "ANR26650M1-B",
+                    "manufacturer": {
+                        "type": "Organization",
+                        "name": "A123"
+                    },
+                    "cellFormat": "cylindrical",
+                    "chemistry": "Li-ion"
+                },
+                "specs": {},
+                "provenance": {
+                    "source_type": "datasheet",
+                    "source_file": "A123__ANR26650M1-B.pdf",
+                    "retrieved_at": 1773811200
+                }
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    result = runner.invoke(
+        app,
+        ["save", "record", "--input", str(cell_type_path), "--source-root", str(source_root), "--format", "json"],
+    )
+    assert result.exit_code == 0, result.stdout
+
+    cell_result = runner.invoke(
+        app,
+        [
+            "save",
+            "cell-instance",
+            "--type-id",
+            "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+            "--uid",
+            "3m6k9t2p7x4h9nq8",
+            "--source-root",
+            str(source_root),
+            "--mode",
+            "upsert",
+            "--format",
+            "json",
+        ],
+    )
+    assert cell_result.exit_code == 0, cell_result.stdout
+    cell_payload = json.loads(cell_result.stdout)
+
+    protocol_result = runner.invoke(
+        app,
+        [
+            "save",
+            "test-protocol",
+            "--name",
+            "1C Cycle Life at 25 C",
+            "--kind",
+            "cycle_life",
+            "--uid",
+            "8r2m4v6k9p3t7n5x",
+            "--source-root",
+            str(source_root),
+            "--mode",
+            "upsert",
+            "--format",
+            "json",
+        ],
+    )
+    assert protocol_result.exit_code == 0, protocol_result.stdout
+    protocol_payload = json.loads(protocol_result.stdout)
+
+    test_result = runner.invoke(
+        app,
+        [
+            "save",
+            "test",
+            "--cell-id",
+            cell_payload["id"],
+            "--name",
+            "A123 cycle life run",
+            "--kind",
+            "cycle_life",
+            "--protocol-id",
+            protocol_payload["id"],
+            "--source-root",
+            str(source_root),
+            "--mode",
+            "upsert",
+            "--format",
+            "json",
+        ],
+    )
+    assert test_result.exit_code == 0, test_result.stdout
+    test_payload = json.loads(test_result.stdout)
+    assert test_payload["entity_type"] == "test"
 
 
 def test_validate_json_output_success() -> None:
@@ -174,7 +383,7 @@ def test_validate_json_output_success() -> None:
         app,
         [
             "validate",
-            str(ROOT / "assets" / "examples" / "battery-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
             "--format",
             "json",
         ],
@@ -183,7 +392,7 @@ def test_validate_json_output_success() -> None:
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert payload["mode"] == "profile"
-    assert payload["profile"] == "battery-descriptor"
+    assert payload["profile"] == "cell-descriptor"
     assert payload["issue_count"] == 0
 
 
@@ -193,9 +402,9 @@ def test_validate_can_run_canonical_record_validation_with_source_root() -> None
         app,
         [
             "validate",
-            str(ROOT / "assets" / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json"),
+            str(ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json"),
             "--source-root",
-            str(ROOT / "assets" / "examples"),
+            str(ROOT / "examples"),
         ],
     )
     assert result.exit_code == 0, result.stdout
@@ -207,7 +416,7 @@ def test_validate_json_output_includes_warnings_on_success() -> None:
     with runner.isolated_filesystem():
         warn_path = Path("warn-test.json")
         source = json.loads(
-            (ROOT / "assets" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+            (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
         )
         source["test"]["short_id"] = "xxxxxx"
         warn_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -217,7 +426,7 @@ def test_validate_json_output_includes_warnings_on_success() -> None:
                 "validate",
                 str(warn_path),
                 "--source-root",
-                str(ROOT / "assets" / "examples"),
+                str(ROOT / "examples"),
                 "--format",
                 "json",
             ],
@@ -235,7 +444,7 @@ def test_validate_strict_policy_fails_on_semantic_issue() -> None:
     with runner.isolated_filesystem():
         bad_path = Path("bad-test.json")
         source = json.loads(
-            (ROOT / "assets" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+            (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
         )
         source["test"]["short_id"] = "xxxxxx"
         bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -245,7 +454,7 @@ def test_validate_strict_policy_fails_on_semantic_issue() -> None:
                 "validate",
                 str(bad_path),
                 "--source-root",
-                str(ROOT / "assets" / "examples"),
+                str(ROOT / "examples"),
                 "--policy",
                 "strict",
             ],
@@ -260,7 +469,7 @@ def test_validate_json_output_failure_has_structured_issue_metadata() -> None:
     with runner.isolated_filesystem():
         bad_path = Path("bad-test.json")
         source = json.loads(
-            (ROOT / "assets" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+            (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
         )
         source["test"]["short_id"] = "xxxxxx"
         bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -270,7 +479,7 @@ def test_validate_json_output_failure_has_structured_issue_metadata() -> None:
                 "validate",
                 str(bad_path),
                 "--source-root",
-                str(ROOT / "assets" / "examples"),
+                str(ROOT / "examples"),
                 "--policy",
                 "strict",
                 "--format",
@@ -288,7 +497,7 @@ def test_save_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> No
     runner = CliRunner()
     bad_path = tmp_path / "bad-test.json"
     source = json.loads(
-        (ROOT / "assets" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+        (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
     )
     source["test"]["short_id"] = "xxxxxx"
     bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -337,7 +546,7 @@ def test_map_descriptor_example_to_domain_battery_jsonld(tmp_path: Path) -> None
         app,
         [
             "map",
-            str(ROOT / "assets" / "examples" / "battery-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
             "--target",
             "domain-battery",
             "--out",
@@ -412,13 +621,13 @@ def test_publish_batch_json(tmp_path: Path) -> None:
             "publish",
             "batch",
             "--source-dir",
-            str(ROOT / "assets" / "examples" / "cell-types"),
+            str(ROOT / "examples" / "cell-types"),
             "--source-dir",
-            str(ROOT / "assets" / "examples" / "cell-instances"),
+            str(ROOT / "examples" / "cell-instances"),
             "--source-dir",
-            str(ROOT / "assets" / "examples" / "tests"),
+            str(ROOT / "examples" / "tests"),
             "--source-dir",
-            str(ROOT / "assets" / "examples" / "datasets"),
+            str(ROOT / "examples" / "datasets"),
             "--target-root",
             str(tmp_path / "site"),
             "--format",
@@ -441,7 +650,7 @@ def test_index_build_and_stats_json(tmp_path: Path) -> None:
             "index",
             "build",
             "--source-root",
-            str(ROOT / "assets" / "examples"),
+            str(ROOT / "examples"),
             "--out",
             str(index_path),
             "--format",
@@ -1025,5 +1234,7 @@ def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
     assert build_payload["entry_count"] == 1
     assert aggregate_jsonld.exists()
     assert manifest_json.exists()
+
+
 
 

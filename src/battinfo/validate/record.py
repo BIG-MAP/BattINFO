@@ -23,11 +23,13 @@ def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
         return "cell-type.schema.json"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell-instance.schema.json"
+    if isinstance(doc.get("test_protocol"), Mapping):
+        return "test-protocol.schema.json"
     if isinstance(doc.get("test"), Mapping):
         return "test.schema.json"
     if isinstance(doc.get("dataset"), Mapping):
         return "dataset.schema.json"
-    raise ValueError("Unsupported record type: expected product/cell_type, cell_instance, test, or dataset.")
+    raise ValueError("Unsupported record type: expected product/cell_type, cell_instance, test_protocol, test, or dataset.")
 
 
 def _resource_type(doc: dict[str, Any]) -> str | None:
@@ -35,6 +37,8 @@ def _resource_type(doc: dict[str, Any]) -> str | None:
         return "cell-type"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
+    if isinstance(doc.get("test_protocol"), Mapping):
+        return "test-protocol"
     if isinstance(doc.get("test"), Mapping):
         return "test"
     if isinstance(doc.get("dataset"), Mapping):

@@ -14,17 +14,21 @@ from battinfo.api import (
     CellInstanceInput,
     CellTypeInput,
     DatasetInput,
+    TestProtocolInput,
     TestInput,
     build_cell_type_library_rdf,
     build_index,
+    build_curated_cell_type_submission,
     create_cell_instance,
-    create_cell_type_from_datasheet,
     index_stats,
     publish_batch,
+    publish_curated_cell_type,
     publish_record,
+    promote_staging_cell_type,
     query,
     query_cell_instances,
     query_library_cell_types,
+    query_test_protocols,
     query_tests,
     query_cell_types,
     query_datasets,
@@ -33,14 +37,20 @@ from battinfo.api import (
     save_cell_type,
     save_dataset,
     save_library_cell_type,
+    save_test_protocol,
     save_record,
     save_test,
     resolve_cell_type_id,
     template_cell_specification,
     template_cell_instance,
+    template_cell_type_draft,
     template_cell_type,
     template_dataset,
+    template_test_protocol_draft,
+    template_test_protocol,
     template_test,
+    submit_publication_package,
+    validate_staging_cell_type,
 )
 from battinfo.validate import validate_references_report
 
@@ -67,6 +77,12 @@ def test_query_tests_by_new_alpha_kind() -> None:
     assert all(row["kind"] == "hppc" for row in rows)
 
 
+def test_query_test_protocols_by_kind() -> None:
+    rows = query_test_protocols(kind="cycle_life", limit=10)
+    assert rows
+    assert all(row["kind"] == "cycle_life" for row in rows)
+
+
 def test_query_dispatches_by_explicit_kind() -> None:
     dataset_rows = query(
         "datasets",
@@ -85,6 +101,9 @@ def test_query_dispatches_by_explicit_kind() -> None:
     cell_rows = query("cells", has_dataset=True, limit=10)
     assert cell_rows
 
+    protocol_rows = query("test_protocols", kind="cycle_life", limit=10)
+    assert protocol_rows
+
 
 def test_query_rejects_unknown_kind() -> None:
     with pytest.raises(ValueError, match="kind must be one of"):
@@ -97,25 +116,31 @@ def test_template_test_accepts_new_alpha_kinds() -> None:
         assert record["test"]["kind"] == kind
 
 
+def test_template_test_protocol_accepts_new_alpha_kinds() -> None:
+    for kind in ("hppc", "ici", "gitt", "dcir", "eis", "formation", "rate_capability"):
+        record = template_test_protocol(kind=kind)
+        assert record["test_protocol"]["kind"] == kind
+
+
 def test_shipped_example_chain_is_consistent() -> None:
     descriptor = json.loads(
-        (ROOT / "assets" / "examples" / "battery-descriptors" / "a123-anr26650m1-b.example.json").read_text(
+        (ROOT / "examples" / "cell-descriptors" / "a123-anr26650m1-b.example.json").read_text(
             encoding="utf-8"
         )
     )
     cell_type = json.loads(
-        (ROOT / "assets" / "examples" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
+        (ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
     )
     cell_instance = json.loads(
-        (ROOT / "assets" / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(
+        (ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(
             encoding="utf-8"
         )
     )
     test_record = json.loads(
-        (ROOT / "assets" / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+        (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
     )
     dataset = json.loads(
-        (ROOT / "assets" / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(
+        (ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(
             encoding="utf-8"
         )
     )
@@ -133,30 +158,23 @@ def test_resolve_cell_type_id_from_metadata() -> None:
     assert resolved.startswith("https://w3id.org/battinfo/cell-type/")
 
 
-def test_create_cell_type_and_cell_instance(tmp_path: Path) -> None:
-    datasheet = {
-        "cell": {
-            "manufacturer": "A123",
-            "model_name": "ANR26650M1-B",
-            "format": "cylindrical",
-            "chemistry": "Li-ion",
-            "positive_electrode_basis": "LFP",
-            "negative_electrode_basis": "graphite",
-            "size_code": "R26650",
-        },
-        "specs": {
-            "nominal_capacity": {"value": 2.5, "unit": "Ah"},
-            "nominal_voltage": {"value": 3.3, "unit": "V"},
-        },
-        "source": {
-            "filename": "A123__ANR26650M1-B.pdf",
-            "source_url": "https://example.org/datasheets/A123__ANR26650M1-B.pdf",
-            "extracted_at": "2026-01-27T00:00:00Z",
-        },
-    }
-    cell_type = create_cell_type_from_datasheet(datasheet, uid="7d9k2m4p8t3x6nq5")
+def test_template_cell_type_and_create_cell_instance(tmp_path: Path) -> None:
+    cell_type = template_cell_type(
+        manufacturer="A123",
+        model_name="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        iec_code="IFpR26650",
+        country_of_origin="United States",
+        year=2012,
+        uid="7d9k2m4p8t3x6nq5",
+        source_file="A123__ANR26650M1-B.pdf",
+    )
     assert cell_type["product"]["id"] == "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
-    assert cell_type["product"]["sizeCode"] == "R26650"
+    assert cell_type["product"]["model"] == "ANR26650M1-B"
+    assert cell_type["product"]["iecCode"] == "IFpR26650"
+    assert cell_type["product"]["countryOfOrigin"] == "United States"
+    assert cell_type["product"]["year"] == 2012
 
     out_path = tmp_path / "cell-instance.json"
     inst = create_cell_instance(
@@ -172,8 +190,369 @@ def test_create_cell_type_and_cell_instance(tmp_path: Path) -> None:
     assert out_path.exists()
 
 
+def test_query_cell_types_exposes_iec_code(tmp_path: Path) -> None:
+    record = template_cell_type(
+        manufacturer="A123",
+        model_name="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        iec_code="IFpR26650",
+        country_of_origin="United States",
+        year=2012,
+        uid="7d9k2m4p8t3x6nq5",
+        source_file="A123__ANR26650M1-B.pdf",
+    )
+    save_cell_type(record, source_root=tmp_path)
+
+    rows = query_cell_types(cell_types_dir=tmp_path / "cell-types")
+
+    assert len(rows) == 1
+    assert rows[0]["iec_code"] == "IFpR26650"
+    assert rows[0]["country_of_origin"] == "United States"
+    assert rows[0]["year"] == 2012
+
+
+def test_template_cell_type_draft_omits_canonical_fields() -> None:
+    draft = template_cell_type_draft(
+        manufacturer="A123",
+        model_name="ANR26650M1-B",
+        chemistry="Li-ion",
+        format="cylindrical",
+        size_code="R26650",
+        iec_code="IFpR26650",
+        country_of_origin="United States",
+        year=2012,
+    )
+
+    assert draft["manufacturer"] == "A123"
+    assert draft["model"] == "ANR26650M1-B"
+    assert draft["size_code"] == "R26650"
+    assert draft["iec_code"] == "IFpR26650"
+    assert draft["country_of_origin"] == "United States"
+    assert draft["year"] == 2012
+    assert "product" not in draft
+    assert "provenance" not in draft
+
+
+def test_template_test_protocol_draft_omits_canonical_fields() -> None:
+    draft = template_test_protocol_draft(
+        name="1C Cycle Life at 25 C",
+        kind="cycle_life",
+        version="1.0",
+        protocol_url="https://example.org/protocols/cycle-life-1c",
+    )
+
+    assert draft["name"] == "1C Cycle Life at 25 C"
+    assert draft["kind"] == "cycle_life"
+    assert draft["version"] == "1.0"
+    assert "test_protocol" not in draft
+    assert "provenance" not in draft
+
+
+def test_validate_staging_cell_type_accepts_single_file_authoring_draft(tmp_path: Path) -> None:
+    draft_path = tmp_path / "GOOGLE__G20M7.json"
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Google",
+                "model": "G20M7",
+                "year": 2025,
+                "format": "prismatic",
+                "chemistry": "Li-ion",
+                "size_code": "P6/65/75",
+                "iec_code": "ICP6/65/75",
+                "positive_electrode_basis": "LCO",
+                "negative_electrode_basis": "Graphite",
+                "country_of_origin": "Vietnam",
+                "specs": {
+                    "nominal_voltage": {"value": 3.9, "unit": "V"},
+                    "nominal_energy": {"value": 19.39, "unit": "Wh"},
+                },
+                "provenance": {"source_type": "label"},
+                "comment": "Taken from the printed product label.",
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = validate_staging_cell_type(draft_path, validation_policy="strict")
+
+    assert payload["ok"] is True
+    assert payload["record_id"] == "google-g20m7-2025"
+    assert payload["record_id_basis"] == "year"
+    assert payload["requires_record_id"] is False
+    assert payload["record"]["product"]["model"] == "G20M7"
+    assert payload["record"]["product"]["manufacturer"]["name"] == "Google"
+    assert payload["record"]["provenance"]["source_type"] == "label"
+    assert payload["record"]["provenance"]["source_file"] == "GOOGLE__G20M7.json"
+    assert payload["record"]["notes"] == ["Taken from the printed product label."]
+
+
+def test_promote_staging_cell_type_writes_curated_record_json(tmp_path: Path) -> None:
+    draft_path = tmp_path / "staging" / "SUNWODA__BM68.json"
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Sunwoda",
+                "model": "BM68",
+                "year": 2024,
+                "format": "prismatic",
+                "chemistry": "Li-ion",
+                "positive_electrode_basis": "NMC",
+                "negative_electrode_basis": "Graphite",
+                "specs": {"nominal_capacity": {"value": 5.0, "unit": "Ah"}},
+                "provenance": {"source_type": "label"},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = promote_staging_cell_type(
+        draft_path,
+        curated_root=tmp_path / "records" / "cell-types",
+        validation_policy="strict",
+    )
+
+    target_path = Path(payload["target_path"])
+    assert payload["record_id"] == "sunwoda-bm68-2024"
+    assert payload["record_id_basis"] == "year"
+    assert target_path == tmp_path / "records" / "cell-types" / "sunwoda-bm68-2024" / "record.json"
+    assert target_path.exists()
+
+    record = json.loads(target_path.read_text(encoding="utf-8"))
+    assert record["product"]["name"] == "Sunwoda BM68"
+    assert record["product"]["identifier"].startswith("cell-type:")
+    assert record["provenance"]["source_type"] == "label"
+    assert record["provenance"]["source_file"] == "SUNWODA__BM68.json"
+
+
+def test_validate_staging_cell_type_uses_revision_when_year_missing(tmp_path: Path) -> None:
+    draft_path = tmp_path / "GOOGLE__G20M7.json"
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Google",
+                "model": "G20M7",
+                "format": "prismatic",
+                "chemistry": "Li-ion",
+                "datasheet_revision": "SD12",
+                "positive_electrode_basis": "LCO",
+                "negative_electrode_basis": "Graphite",
+                "specs": {"nominal_voltage": {"value": 3.9, "unit": "V"}},
+                "provenance": {"source_type": "label"},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = validate_staging_cell_type(draft_path, validation_policy="strict")
+
+    assert payload["record_id"] == "google-g20m7-sd12"
+    assert payload["record_id_basis"] == "revision"
+    assert payload["requires_record_id"] is False
+
+
+def test_validate_staging_cell_type_uses_evidence_date_when_year_and_revision_missing(tmp_path: Path) -> None:
+    draft_path = tmp_path / "GOOGLE__G20M7.json"
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Google",
+                "model": "G20M7",
+                "format": "prismatic",
+                "chemistry": "Li-ion",
+                "positive_electrode_basis": "LCO",
+                "negative_electrode_basis": "Graphite",
+                "specs": {"nominal_voltage": {"value": 3.9, "unit": "V"}},
+                "provenance": {"source_type": "label", "retrieved_at": "2026-03-20T10:00:00Z"},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = validate_staging_cell_type(draft_path, validation_policy="strict")
+
+    assert payload["record_id"] == "google-g20m7-20260320"
+    assert payload["record_id_basis"] == "evidence_date"
+    assert payload["requires_record_id"] is False
+
+
+def test_promote_staging_cell_type_requires_explicit_record_id_when_ambiguous(tmp_path: Path) -> None:
+    draft_path = tmp_path / "ENERGIZER__CR2032.json"
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Energizer",
+                "model": "CR2032",
+                "format": "coin",
+                "chemistry": "Li-primary",
+                "positive_electrode_basis": "MnO2",
+                "negative_electrode_basis": "Li-metal",
+                "specs": {"nominal_voltage": {"value": 3.0, "unit": "V"}},
+                "provenance": {"source_type": "label"},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = validate_staging_cell_type(draft_path, validation_policy="strict")
+    assert payload["record_id"] is None
+    assert payload["requires_record_id"] is True
+    assert payload["record_id_hint"] == "energizer-cr2032-<year-or-revision>"
+
+    with pytest.raises(ValueError, match="Provide --record-id explicitly"):
+        promote_staging_cell_type(
+            draft_path,
+            curated_root=tmp_path / "records" / "cell-types",
+            validation_policy="strict",
+        )
+
+
+def test_save_cell_type_accepts_label_source_type(tmp_path: Path) -> None:
+    payload = save_cell_type(
+        {
+            "manufacturer": "Google",
+            "model_name": "G20M7",
+            "format": "prismatic",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "LCO",
+            "negative_electrode_basis": "Graphite",
+            "source_type": "label",
+            "source_file": "GOOGLE__G20M7.json",
+            "notes": ["Taken from the printed product label."],
+        },
+        source_root=tmp_path,
+        mode="upsert",
+        validation_policy="strict",
+    )
+
+    record = json.loads(Path(payload["path"]).read_text(encoding="utf-8"))
+    assert record["provenance"]["source_type"] == "label"
+    assert record["notes"] == ["Taken from the printed product label."]
+
+
+def test_build_curated_cell_type_submission_infers_source_local_id_from_record_directory(tmp_path: Path) -> None:
+    record_dir = tmp_path / "records" / "cell-types" / "google-g20m7-2025"
+    record_dir.mkdir(parents=True, exist_ok=True)
+    record_path = record_dir / "record.json"
+    record_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.0",
+                "product": {
+                    "id": "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0",
+                    "short_id": "123456",
+                    "identifier": "cell-type:1234-5678-9abc-def0",
+                    "name": "Google G20M7",
+                    "model": "G20M7",
+                    "manufacturer": {"type": "Organization", "name": "Google"},
+                    "cellFormat": "prismatic",
+                    "chemistry": "Li-ion",
+                    "positiveElectrodeBasis": "LCO",
+                    "negativeElectrodeBasis": "Graphite",
+                    "sizeCode": "P6/65/75",
+                    "iecCode": "ICP6/65/75",
+                    "countryOfOrigin": "Vietnam",
+                    "year": 2025,
+                },
+                "specs": {
+                    "nominal_voltage": {"value": 3.9, "unit": "V"},
+                    "nominal_energy": {"value": 19.39, "unit": "Wh"},
+                },
+                "provenance": {
+                    "source_type": "label",
+                    "source_file": "google-g20m7-2025.json",
+                    "retrieved_at": 1771804800,
+                },
+                "notes": ["Curated cell type record."],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_curated_cell_type_submission(
+        record_path,
+        project_id="battinfo-records-cell-types",
+        publisher_id="demo-editorial",
+        source_version="demo-2026-03-20",
+        validation_policy="strict",
+    )
+
+    assert payload["submission_mode"] == "resource"
+    assert payload["project_id"] == "battinfo-records-cell-types"
+    assert payload["publisher_id"] == "demo-editorial"
+    assert payload["source_version"] == "demo-2026-03-20"
+    assert payload["resource"]["resource_type"] == "cell_type"
+    assert payload["resource"]["source_local_id"] == "google-g20m7-2025"
+    assert payload["resource"]["semantic_payload"]["battinfo_records"]["cell_type"]["product"]["model"] == "G20M7"
+    assert payload["workspace"]["editorial"]["record_id"] == "google-g20m7-2025"
+
+
+def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> None:
+    cell_type = save_cell_type(
+        CellTypeInput(
+            uid="7d9k2m4p8t3x6nq5",
+            manufacturer="A123",
+            model_name="ANR26650M1-B",
+            chemistry="Li-ion",
+            format="cylindrical",
+            source_file="A123__ANR26650M1-B.pdf",
+        ),
+        source_root=tmp_path,
+        mode="upsert",
+    )
+    cell = save_cell_instance(
+        CellInstanceInput(
+            uid="3m6k9t2p7x4h9nq8",
+            type_id=cell_type["id"],
+        ),
+        source_root=tmp_path,
+        mode="upsert",
+    )
+    protocol = save_test_protocol(
+        TestProtocolInput(
+            uid="8r2m4v6k9p3t7n5x",
+            name="1C Cycle Life at 25 C",
+            kind="cycle_life",
+            version="1.0",
+            protocol_url="https://example.org/protocols/cycle-life-1c",
+        ),
+        source_root=tmp_path,
+        mode="upsert",
+    )
+    test = save_test(
+        TestInput(
+            uid="5p7v2n8k4m3t6q9r",
+            cell_id=cell["id"],
+            name="A123 cycle life run",
+            kind="cycle_life",
+            protocol_id=protocol["id"],
+        ),
+        source_root=tmp_path,
+        mode="upsert",
+    )
+
+    assert protocol["entity_type"] == "test-protocol"
+    assert test["entity_type"] == "test"
+
+    protocol_rows = query_test_protocols(directory=tmp_path / "test-protocols")
+    assert len(protocol_rows) == 1
+    assert protocol_rows[0]["id"] == protocol["id"]
+
+    test_rows = query_tests(directory=tmp_path / "tests")
+    assert len(test_rows) == 1
+    assert test_rows[0]["protocol_id"] == protocol["id"]
+
+
 def test_publish_record_writes_artifacts(tmp_path: Path) -> None:
-    src = ROOT / "assets" / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json"
+    src = ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json"
     result = publish_record(src, target_root=tmp_path)
 
     out_dir = tmp_path / "cell" / "3m6k-9t2p-7x4h-9nq8"
@@ -270,10 +649,10 @@ def test_publish_record_dataset_jsonld_preserves_rich_metadata(tmp_path: Path) -
 def test_publish_batch_summary(tmp_path: Path) -> None:
     summary = publish_batch(
         source_dirs=[
-            ROOT / "assets" / "examples" / "cell-types",
-            ROOT / "assets" / "examples" / "cell-instances",
-            ROOT / "assets" / "examples" / "tests",
-            ROOT / "assets" / "examples" / "datasets",
+            ROOT / "examples" / "cell-types",
+            ROOT / "examples" / "cell-instances",
+            ROOT / "examples" / "tests",
+            ROOT / "examples" / "datasets",
         ],
         target_root=tmp_path,
     )
@@ -284,7 +663,7 @@ def test_publish_batch_summary(tmp_path: Path) -> None:
 
 def test_build_index_and_stats(tmp_path: Path) -> None:
     out = tmp_path / "index.json"
-    index = build_index(source_root=ROOT / "assets" / "examples", out_path=out)
+    index = build_index(source_root=ROOT / "examples", out_path=out)
     assert out.exists()
     assert index["cell_type_count"] >= 1
     assert index["cell_instance_count"] >= 1
@@ -652,18 +1031,18 @@ def test_save_batch_handles_circular_linked_examples_as_a_set(tmp_path: Path) ->
     datasets_dir.mkdir(parents=True)
 
     (cell_types_dir / "A123__ANR26650M1-B.json").write_text(
-        (ROOT / "assets" / "examples" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"),
+        (ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (cell_instances_dir / "cell-3m6k-9t2p-7x4h-9nq8.json").write_text(
-        (ROOT / "assets" / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(encoding="utf-8"),
+        (ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (datasets_dir / "dataset-1f8r-6v2k-9p4m-3t7x.json").write_text(
-        (ROOT / "assets" / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8"),
+        (ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
-    for path in sorted((ROOT / "assets" / "examples" / "tests").glob("*.json")):
+    for path in sorted((ROOT / "examples" / "tests").glob("*.json")):
         (tests_dir / path.name).write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
 
     summary = save_batch(
@@ -858,3 +1237,5 @@ def test_save_library_cell_type_persists_construction_metadata(tmp_path: Path) -
 
     rows = query_library_cell_types(directory=library_root)
     assert rows[0]["construction"]["assembly_type"] == "stacked"
+
+

@@ -9,7 +9,7 @@ datasets.
 The integration model is:
 
 ```text
-datasheet PDF -> curated battery descriptor JSON -> generated RDF/JSON-LD
+datasheet PDF -> curated cell record JSON -> generated RDF/JSON-LD
 ```
 
 The descriptor JSON is the canonical authoring and review format. The RDF
@@ -21,25 +21,27 @@ separately.
 Use this order:
 
 1. `domain-battery` and `battinfo.ttl` define semantics and profile policy.
-2. `assets/library/cell-types/*.json` stores the canonical reusable type
-   records as BattINFO battery descriptors.
-3. `assets/library-rdf/cell-types/*.jsonld` and
-   `ontology/library/cell-types.jsonld` are generated publication artifacts.
+2. The curated shared corpus should live outside this repo, for example in a
+   dedicated `battinfo-records` repository.
+3. Local working copies and rebuildable artifacts can live under `.battinfo/`
+   when you want to validate or regenerate the library locally.
 
 `ontology/battinfo.ttl` should stay focused on ontology/profile terms. It
 should not become a hand-maintained dump of every commercial cell type.
 
 ## Repository Layout
 
-- `assets/library/cell-types/`
-  - canonical reusable type descriptors
+- external curated records repo, for example `battinfo-records/`
+  - maintained shared cell-type corpus
+- `.battinfo/library/cell-types/`
+  - local working copy or sync target used during rebuilds
 - `src/battinfo/data/library/cell-types/`
   - packaged copies when the library is shipped with the Python package
-- `assets/library-rdf/cell-types/`
-  - per-record generated RDF/JSON-LD artifacts
-- `assets/library-rdf/cell-types.index.json`
+- `.battinfo/library-rdf/cell-types/`
+  - output location for per-record generated RDF/JSON-LD artifacts
+- `.battinfo/library-rdf/cell-types.index.json`
   - generated manifest over the library
-- `ontology/library/cell-types.jsonld`
+- `.battinfo/ontology/library/cell-types.jsonld`
   - aggregated generated RDF publication artifact
 
 ## Reuse Model
@@ -78,12 +80,12 @@ python .tools/build/build_cell_type_library_rdf.py --clean-output
 
 This does three things:
 
-1. validates every descriptor in `assets/library/cell-types/`
+1. validates every descriptor in `.battinfo/library/cell-types/`
 2. generates per-record domain-battery JSON-LD into
-   `assets/library-rdf/cell-types/`
+   `.battinfo/library-rdf/cell-types/`
 3. generates:
-   - `assets/library-rdf/cell-types.index.json`
-   - `ontology/library/cell-types.jsonld`
+   - `.battinfo/library-rdf/cell-types.index.json`
+   - `.battinfo/ontology/library/cell-types.jsonld`
 
 ## Curation Workflow
 
@@ -92,7 +94,8 @@ Recommended workflow for a new commercial cell type:
 1. identify the datasheet PDF
 2. create a BattINFO battery descriptor draft
 3. review and enrich the specification
-4. place the curated descriptor in `assets/library/cell-types/`
+4. place the curated descriptor in the external curated records repo, or sync it
+   into `.battinfo/library/cell-types/` for local rebuilds
 5. rebuild the RDF library artifacts
 6. reference the type IRI from cell-instance records
 
@@ -105,4 +108,5 @@ without turning `battinfo.ttl` into a data dump.
 If a Turtle export becomes necessary later, it should be added as another
 generated artifact from the same canonical descriptor library rather than as a
 hand-maintained ontology file.
+
 

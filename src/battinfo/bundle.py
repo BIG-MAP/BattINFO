@@ -15,6 +15,7 @@ BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
 CELL_TYPE_FILENAME = "cell-type.json"
 CELL_INSTANCE_FILENAME = "cell-instance.json"
+TEST_PROTOCOL_FILENAME = "test-protocol.json"
 TEST_FILENAME = "test.json"
 DATASET_FILENAME = "dataset.json"
 OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
@@ -189,6 +190,10 @@ def _property_key_from_type(value: Any) -> str | None:
             return "nominal_voltage"
         if type_name == "NominalCapacity":
             return "nominal_capacity"
+        if type_name == "TypicalEnergy":
+            return "typical_energy"
+        if type_name == "RatedEnergy":
+            return "rated_energy"
         if type_name == "Mass":
             return "mass"
     return None
@@ -246,6 +251,30 @@ def _citation_url_value(citation: Any = None, citation_doi: Any = None) -> str |
 def _citation_doi_value(citation: Any = None, citation_doi: Any = None) -> str | None:
     citation_url = _citation_url_value(citation, citation_doi)
     return _citation_doi_from_url(citation_url)
+
+
+def _country_name_value(value: Any) -> str | None:
+    if isinstance(value, str):
+        normalized = value.strip()
+        return normalized or None
+    if isinstance(value, Mapping):
+        name = value.get("schema:name") or value.get("name")
+        if isinstance(name, str):
+            normalized = name.strip()
+            return normalized or None
+    return None
+
+
+def _year_value(value: Any) -> int | None:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip()
+        if len(normalized) == 4 and normalized.isdigit():
+            return int(normalized)
+        if len(normalized) >= 4 and normalized[:4].isdigit():
+            return int(normalized[:4])
+    return None
 
 
 class ProvenanceInfo(BaseModel):
@@ -328,9 +357,15 @@ CELL_TYPE_AUTHORING_PROPERTY_FIELDS: tuple[str, ...] = (
     "nominal_capacity",
     "min_capacity",
     "rated_capacity",
+    "typical_energy",
+    "rated_energy",
     "nominal_voltage",
     "charging_voltage",
     "discharging_cutoff_voltage",
+    "specific_energy",
+    "energy_density",
+    "specific_power",
+    "power_density",
     "internal_resistance",
     "impedance",
     "mass",
@@ -1027,6 +1062,9 @@ class CellType(BundleJsonModel):
     positive_electrode_basis: str | None = None
     negative_electrode_basis: str | None = None
     size_code: str | None = None
+    iec_code: str | None = None
+    country_of_origin: str | None = None
+    year: int | None = None
     datasheet_revision: str | None = None
     cell_specification_id: str | None = None
     nominal_properties: dict[str, Any] = Field(default_factory=dict)
@@ -1065,9 +1103,15 @@ class CellType(BundleJsonModel):
     nominal_capacity = _mapping_property("nominal_capacity")
     min_capacity = _mapping_property("min_capacity")
     rated_capacity = _mapping_property("rated_capacity")
+    typical_energy = _mapping_property("typical_energy")
+    rated_energy = _mapping_property("rated_energy")
     nominal_voltage = _mapping_property("nominal_voltage")
     charging_voltage = _mapping_property("charging_voltage")
     discharging_cutoff_voltage = _mapping_property("discharging_cutoff_voltage")
+    specific_energy = _mapping_property("specific_energy")
+    energy_density = _mapping_property("energy_density")
+    specific_power = _mapping_property("specific_power")
+    power_density = _mapping_property("power_density")
     internal_resistance = _mapping_property("internal_resistance")
     impedance = _mapping_property("impedance")
     mass = _mapping_property("mass")
@@ -1112,6 +1156,9 @@ class CellType(BundleJsonModel):
             positive_electrode_basis=product.get("positiveElectrodeBasis"),
             negative_electrode_basis=product.get("negativeElectrodeBasis"),
             size_code=product.get("sizeCode"),
+            iec_code=product.get("iecCode"),
+            country_of_origin=product.get("countryOfOrigin"),
+            year=_year_value(product.get("year")),
             datasheet_revision=product.get("datasheetRevision"),
             cell_specification_id=cell_specification_id,
             nominal_properties=dict(record.get("specs", {})) if isinstance(record.get("specs"), Mapping) else {},
@@ -1158,7 +1205,7 @@ class CellType(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("CellType.id is required before serialization. Use battinfo.publish(...) to finalize IDs.")
+            raise ValueError("CellType.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
         if self.name is None:
             raise ValueError("CellType.name is required before serialization.")
         record: dict[str, Any] = {
@@ -1182,6 +1229,12 @@ class CellType(BundleJsonModel):
             record["product"]["negativeElectrodeBasis"] = self.negative_electrode_basis
         if self.size_code is not None:
             record["product"]["sizeCode"] = self.size_code
+        if self.iec_code is not None:
+            record["product"]["iecCode"] = self.iec_code
+        if self.country_of_origin is not None:
+            record["product"]["countryOfOrigin"] = self.country_of_origin
+        if self.year is not None:
+            record["product"]["year"] = self.year
         if self.datasheet_revision is not None:
             record["product"]["datasheetRevision"] = self.datasheet_revision
         if self.source.type is not None:
@@ -1279,7 +1332,7 @@ class CellInstance(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("CellInstance.id is required before serialization. Use battinfo.publish(...) to finalize IDs.")
+            raise ValueError("CellInstance.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
         if self.cell_type_id is None:
             raise ValueError("CellInstance.cell_type_id is required before serialization.")
         record: dict[str, Any] = {
@@ -1313,6 +1366,152 @@ class CellInstance(BundleJsonModel):
         return record
 
 
+class TestProtocol(BundleJsonModel):
+    default_filename: ClassVar[str] = TEST_PROTOCOL_FILENAME
+
+    kind: str = "TestProtocol"
+    __test__ = False
+    id: str | None = None
+    name: str | None = None
+    test_type: BatteryTestType = Field(
+        default=BatteryTestType.OTHER,
+        validation_alias=AliasChoices("test_type", "test_kind", "kind"),
+    )
+    description: str | None = None
+    version: str | None = None
+    protocol: ProtocolInfo = Field(default_factory=ProtocolInfo)
+    conditions: dict[str, Any] = Field(default_factory=dict)
+    setpoints: dict[str, Any] = Field(default_factory=dict)
+    termination_criteria: dict[str, Any] = Field(default_factory=dict)
+    measurement_outputs: list[dict[str, Any]] = Field(default_factory=list)
+    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
+    comment: list[str] = Field(default_factory=list)
+
+    @field_validator("protocol", mode="before")
+    @classmethod
+    def _coerce_protocol(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return {"name": value}
+        return value
+
+    @property
+    def test_kind(self) -> BatteryTestType:
+        return self.test_type
+
+    @test_kind.setter
+    def test_kind(self, value: BatteryTestType | str) -> None:
+        self.test_type = BatteryTestType(value)
+
+    @property
+    def protocol_name(self) -> str | None:
+        return self.protocol.name
+
+    @protocol_name.setter
+    def protocol_name(self, value: str | None) -> None:
+        self.protocol.name = value
+
+    @property
+    def protocol_url(self) -> str | None:
+        return self.protocol.url
+
+    @protocol_url.setter
+    def protocol_url(self, value: str | None) -> None:
+        self.protocol.url = value
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> Self:
+        protocol = record.get("test_protocol")
+        if not isinstance(protocol, Mapping):
+            raise ValueError("test-protocol record must contain a 'test_protocol' object.")
+        provenance = record.get("provenance", {})
+        if not isinstance(provenance, Mapping):
+            provenance = {}
+        notes = record.get("notes")
+        if not isinstance(notes, list):
+            notes = []
+        measurement_outputs = record.get("measurement_outputs")
+        if not isinstance(measurement_outputs, list):
+            measurement_outputs = []
+        conditions = record.get("conditions")
+        if not isinstance(conditions, Mapping):
+            conditions = {}
+        setpoints = record.get("setpoints")
+        if not isinstance(setpoints, Mapping):
+            setpoints = {}
+        termination_criteria = record.get("termination_criteria")
+        if not isinstance(termination_criteria, Mapping):
+            termination_criteria = {}
+        return cls(
+            schema_version=str(record.get("schema_version", "0.1.0")),
+            id=str(protocol["id"]),
+            name=str(protocol["name"]),
+            test_type=protocol["kind"],
+            description=protocol.get("description"),
+            version=protocol.get("version"),
+            protocol=ProtocolInfo(url=protocol.get("protocol_url")),
+            conditions=dict(conditions),
+            setpoints=dict(setpoints),
+            termination_criteria=dict(termination_criteria),
+            measurement_outputs=[dict(item) for item in measurement_outputs if isinstance(item, Mapping)],
+            source=ProvenanceInfo(
+                type=provenance.get("source_type"),
+                file=provenance.get("source_file"),
+                url=provenance.get("source_url"),
+                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
+                retrieved_at=provenance.get("retrieved_at"),
+                workflow_version=provenance.get("workflow_version"),
+            ),
+            comment=[str(item) for item in notes],
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        if self.id is None:
+            raise ValueError("TestProtocol.id is required before serialization.")
+        if self.name is None:
+            raise ValueError("TestProtocol.name is required before serialization.")
+        record: dict[str, Any] = {
+            "schema_version": self.schema_version,
+            "test_protocol": {
+                "id": self.id,
+                "short_id": _short_id(self.id),
+                "identifier": _identifier("test-protocol", self.id),
+                "name": self.name,
+                "kind": self.test_type,
+            },
+            "provenance": {},
+        }
+        if self.description is not None:
+            record["test_protocol"]["description"] = self.description
+        if self.version is not None:
+            record["test_protocol"]["version"] = self.version
+        if self.protocol.url is not None:
+            record["test_protocol"]["protocol_url"] = self.protocol.url
+        if self.conditions:
+            record["conditions"] = copy.deepcopy(self.conditions)
+        if self.setpoints:
+            record["setpoints"] = copy.deepcopy(self.setpoints)
+        if self.termination_criteria:
+            record["termination_criteria"] = copy.deepcopy(self.termination_criteria)
+        if self.measurement_outputs:
+            record["measurement_outputs"] = copy.deepcopy(self.measurement_outputs)
+        if self.source.type is not None:
+            record["provenance"]["source_type"] = self.source.type
+        if self.source.file is not None:
+            record["provenance"]["source_file"] = self.source.file
+        if self.source.url is not None:
+            record["provenance"]["source_url"] = self.source.url
+        citation = _citation_url_value(self.source.citation)
+        if citation is not None:
+            record["provenance"]["citation"] = citation
+        if self.source.retrieved_at is not None:
+            record["provenance"]["retrieved_at"] = self.source.retrieved_at
+        if self.source.workflow_version is not None:
+            record["provenance"]["workflow_version"] = self.source.workflow_version
+        if self.comment:
+            record["notes"] = list(self.comment)
+        return record
+
+
 class Test(BundleJsonModel):
     default_filename: ClassVar[str] = TEST_FILENAME
 
@@ -1324,6 +1523,8 @@ class Test(BundleJsonModel):
         default=BatteryTestType.OTHER,
         validation_alias=AliasChoices("test_type", "test_kind", "kind"),
     )
+    protocol_id: str | None = None
+    protocol_entity: TestProtocol | None = Field(default=None, exclude=True, repr=False)
     cell_instance_id: str | None = None
     cell: CellInstance | None = Field(default=None, exclude=True, repr=False)
     description: str | None = None
@@ -1409,6 +1610,7 @@ class Test(BundleJsonModel):
             id=str(test["id"]),
             name=str(test["name"]),
             test_type=test["kind"],
+            protocol_id=test.get("protocol_id"),
             cell_instance_id=str(test["cell_id"]),
             description=test.get("description"),
             status=test.get("status"),
@@ -1433,7 +1635,7 @@ class Test(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("Test.id is required before serialization. Use battinfo.publish(...) to finalize IDs.")
+            raise ValueError("Test.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
         if self.name is None:
             raise ValueError("Test.name is required before serialization.")
         if self.cell_instance_id is None:
@@ -1452,6 +1654,8 @@ class Test(BundleJsonModel):
         }
         if self.description is not None:
             record["test"]["description"] = self.description
+        if self.protocol_id is not None:
+            record["test"]["protocol_id"] = self.protocol_id
         if self.status is not None:
             record["test"]["status"] = self.status
         if self.protocol.name is not None:
@@ -1761,7 +1965,7 @@ class Dataset(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("Dataset.id is required before serialization. Use battinfo.publish(...) to finalize IDs.")
+            raise ValueError("Dataset.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
         if self.name is None:
             raise ValueError("Dataset.name is required before serialization.")
         dataset_obj: dict[str, Any] = {
@@ -2083,6 +2287,8 @@ class BattinfoBundle(BundleJsonModel):
                 or "unknown"
             ),
             size_code=cell_type_node.get("schema:size") or (cell_specification_node.get("schema:size") if isinstance(cell_specification_node, Mapping) else None),
+            country_of_origin=_country_name_value(cell_type_node.get("schema:countryOfOrigin")),
+            year=_year_value(cell_type_node.get("schema:releaseDate")),
             cell_specification_id=str(cell_specification_node.get("@id")) if isinstance(cell_specification_node, Mapping) else None,
             nominal_properties=properties,
             source=ProvenanceInfo(
@@ -2255,6 +2461,8 @@ __all__ = [
     "Salt",
     "Separator",
     "SolventMixture",
+    "TEST_PROTOCOL_FILENAME",
     "TEST_FILENAME",
+    "TestProtocol",
     "Test",
 ]

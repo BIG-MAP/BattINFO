@@ -1,17 +1,25 @@
 # Assets
 
-Canonical schemas, mappings, and examples live here. These are the tracked source-of-truth assets.
+Canonical schema and mapping assets live here.
 
 Generated review batches, ingest bridge outputs, and scratch reports should go under
 ignored local paths such as `.battinfo/`, not back into `assets/`.
 
 Subdirectories:
-- `compat.yaml` Compatibility metadata for domain-battery and Battery Pass
-- `examples/` Human-readable canonical examples and profile fixtures
 - `schemas/` Normative JSON Schemas used by CLI/API validation
-- `library/` Canonical reusable source records
-- `library-rdf/` Generated RDF/JSON-LD library artifacts
-- `mappings/` Mapping rules and candidate mapping artifacts
+- `mappings/` Canonical mapping tables plus review artifacts used by maintainer tooling
+
+Author by hand:
+- `schemas/`
+- the canonical mapping tables under `mappings/domain-battery/`
+
+Do not treat as hand-authored source of truth:
+- generated review JSON-LD examples such as `*.domain-battery.review.jsonld`
+- generated review reports under `mappings/domain-battery/`
+
+Examples and notebooks now live under the top-level `examples/` tree. Reusable
+shared record corpora should live outside this repo, for example in a dedicated
+`battinfo-records` repository, not under `assets/`.
 
 Identifier-constrained resource schemas include:
 - `schemas/cell-type.schema.json`

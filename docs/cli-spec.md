@@ -59,7 +59,7 @@ JSON output contract:
   "ok": true,
   "mode": "profile",
   "policy": "default",
-  "profile": "battery-descriptor",
+  "profile": "cell-descriptor",
   "source_root": null,
   "issue_count": 0,
   "error_count": 0,
@@ -209,7 +209,7 @@ Output contract:
   "status": "created",
   "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
   "type_id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
-  "path": "assets/examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json"
+  "path": "examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json"
 }
 ```
 
@@ -227,7 +227,7 @@ battinfo save batch --source-dir <dir> [--source-dir <dir> ...] [options]
 
 Common options:
 
-- `--source-root <dir>` (default `assets/examples`)
+- `--source-root <dir>` (default `examples`)
 - `--mode <create_only|upsert>`
 - `--duplicate-policy <error|return_existing>`
 - `--dry-run`
@@ -248,7 +248,7 @@ Typical result:
   "status": "created",
   "entity_type": "cell-type",
   "id": "https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8",
-  "path": "assets/examples/cell-types/cell-type-3m6k-9t2p-7x4h-9nq8.json",
+  "path": "examples/cell-types/cell-type-3m6k-9t2p-7x4h-9nq8.json",
   "mode": "create_only",
   "published": false
 }
@@ -338,7 +338,7 @@ Output contract:
 
 ```text
 battinfo index build \
-  --source-root assets/examples \
+  --source-root examples \
   --out .battinfo/index.json
 ```
 
@@ -404,5 +404,7 @@ CLI wiring:
   - `create`
   - `publish`
   - `index`
+
+
 
 

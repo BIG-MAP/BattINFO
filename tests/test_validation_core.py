@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,79 +21,62 @@ from battinfo.validate import (
     validate_publication_report,
     validate_references_report,
 )
+import battinfo.validate.jsonld as validate_jsonld_module
 
 
 def test_validate_json_report_exposes_structured_schema_issue() -> None:
     doc = {
-        "version": "1.0.0",
-        "product": {
-            "type": "Product",
-            "identifier": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
-            "short_id": "7d9k2m",
-            "name": "A123 ANR26650M1-B",
-            "brand": "A123",
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
             "manufacturer": "A123",
             "model": "ANR26650M1-B",
+            "format": "cylindrical",
             "chemistry": "Li-ion",
             "positive_electrode_basis": "LFP",
             "negative_electrode_basis": "graphite",
-            "format": "cylindrical",
-            "category": "battery cell",
         },
-        "specs": {
-            "nominal_capacity": {"value": 2.5, "unit": "Ah"},
-        },
-        "lineage": {
-            "source_record": "A123__ANR26650M1-B",
+        "provenance": {
             "source_type": "datasheet",
             "source_file": "A123__ANR26650M1-B.pdf",
-            "extracted_at": "not-a-datetime",
+            "retrieved_at": "not-an-integer",
         },
     }
-    report = validate_json_report(doc, profile="cell-type-datasheet")
+    report = validate_json_report(doc, profile="cell-descriptor")
     assert not report.ok
     assert report.policy.name == "default"
     assert report.errors
     issue = report.errors[0]
-    assert issue.code == "schema.format.date_time"
-    assert issue.path == "lineage.extracted_at"
-    assert issue.profile == "cell-type-datasheet"
-    assert issue.validator == "format"
+    assert issue.code == "schema.type"
+    assert issue.path == "provenance.retrieved_at"
+    assert issue.profile == "cell-descriptor"
+    assert issue.validator == "type"
 
 
 def test_validate_json_result_preserves_structured_issues() -> None:
     doc = {
-        "version": "1.0.0",
-        "product": {
-            "type": "Product",
-            "identifier": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
-            "short_id": "7d9k2m",
-            "name": "A123 ANR26650M1-B",
-            "brand": "A123",
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
             "manufacturer": "A123",
             "model": "ANR26650M1-B",
+            "format": "cylindrical",
             "chemistry": "Li-ion",
             "positive_electrode_basis": "LFP",
             "negative_electrode_basis": "graphite",
-            "format": "cylindrical",
-            "category": "battery cell",
         },
-        "specs": {
-            "nominal_capacity": {"value": 2.5, "unit": "Ah"},
-        },
-        "lineage": {
-            "source_record": "A123__ANR26650M1-B",
+        "provenance": {
             "source_type": "datasheet",
             "source_file": "A123__ANR26650M1-B.pdf",
-            "extracted_at": "not-a-datetime",
+            "retrieved_at": "not-an-integer",
         },
     }
-    result = validate_json(doc, profile="cell-type-datasheet")
+    result = validate_json(doc, profile="cell-descriptor")
     assert not result.ok
     assert result.policy == "default"
     assert result.issues
-    assert result.issues[0].code == "schema.format.date_time"
-    assert any("extracted_at" in err for err in result.errors)
+    assert result.issues[0].code == "schema.type"
+    assert any("retrieved_at" in err for err in result.errors)
 
 
 def test_validate_json_report_unknown_profile_has_stable_issue_code() -> None:
@@ -146,6 +130,63 @@ def test_validate_jsonld_report_accepts_valid_payload_with_urdna2015() -> None:
         ],
     }
     report = validate_jsonld_report(payload)
+    assert report.ok
+
+
+def test_validate_jsonld_report_falls_back_when_requests_loader_is_unavailable(monkeypatch) -> None:
+    payload = {
+        "@context": "https://w3id.org/emmo/domain/battery/context",
+        "@graph": [
+            {
+                "@id": "https://example.org/x",
+                "@type": ["BatteryCell", "schema:ProductModel"],
+                "schema:name": "Example battery",
+            }
+        ],
+    }
+
+    class _FakeResponse:
+        def __init__(self, document: dict[str, object]) -> None:
+            self._document = document
+            self.headers = self
+
+        def get_content_charset(self) -> str:
+            return "utf-8"
+
+        def geturl(self) -> str:
+            return "https://w3id.org/emmo/domain/battery/context"
+
+        def read(self) -> bytes:
+            return json.dumps(self._document).encode("utf-8")
+
+        def __enter__(self) -> "_FakeResponse":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    validate_jsonld_module._pyld_base_document_loader.cache_clear()
+    validate_jsonld_module._cached_pyld_document.cache_clear()
+
+    def _broken_requests_loader(*, timeout: int = 10):
+        raise ModuleNotFoundError("No module named 'requests'")
+
+    monkeypatch.setattr(validate_jsonld_module.pyld_jsonld, "requests_document_loader", _broken_requests_loader)
+    monkeypatch.setattr(
+        validate_jsonld_module,
+        "urlopen",
+        lambda request, timeout=10: _FakeResponse(
+            {
+                "@context": {
+                    "schema": "https://schema.org/",
+                    "BatteryCell": "https://w3id.org/emmo/domain/battery#BatteryCell",
+                }
+            }
+        ),
+    )
+
+    report = validate_jsonld_report(payload)
+
     assert report.ok
 
 

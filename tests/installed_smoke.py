@@ -20,7 +20,7 @@ def main() -> None:
         app,
         [
             "validate",
-            str(ROOT / "assets" / "examples" / "battery-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
             "--format",
             "json",
         ],
@@ -81,10 +81,12 @@ def main() -> None:
         assert bundle.dataset is not None
 
         index_path = tmp_root / "index.json"
-        stats = battinfo.build_index(source_root=ROOT / "assets" / "examples", out_path=index_path)
+        stats = battinfo.build_index(source_root=ROOT / "examples", out_path=index_path)
         assert stats["total_count"] >= 4
         assert index_path.exists()
 
 
 if __name__ == "__main__":
     main()
+
+

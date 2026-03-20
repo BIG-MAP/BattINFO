@@ -24,10 +24,15 @@ DEFAULT_CR2032_DATASHEET = Path("ENERGIZER__CR2032.pdf")
 DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "assets" / "library" / "cell-types" / "ENERGIZER__CR2032.json"
 DEFAULT_CR2032_DATASET_DIRS: tuple[Path, ...] = ()
 DEFAULT_PUBLISH_FILENAME = "battinfo.publish.jsonld"
+DEFAULT_RO_CRATE_METADATA_FILENAME = "ro-crate-metadata.json"
+DEFAULT_DATACITE_METADATA_FILENAME = "datacite-metadata.json"
+DEFAULT_DCAT_EXPORT_FILENAME = "battinfo.dcat.jsonld"
 DEFAULT_PUBLICATION_REPORT_FILENAME = "battinfo-publication-report.json"
 DEFAULT_CR2032_REPORT_FILENAME = "cr2032-publication-report.json"
 DEFAULT_REPORT_FILENAME = DEFAULT_CR2032_REPORT_FILENAME
 DOMAIN_BATTERY_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
+RO_CRATE_CONTEXT_URL = "https://w3id.org/ro/crate/1.2/context"
+RO_CRATE_PROFILE_URL = "https://w3id.org/ro/crate/1.2"
 OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
 RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
@@ -37,6 +42,8 @@ PROPERTY_TYPE_MAP = {
     "height": "Height",
     "mass": "Mass",
     "nominal_capacity": "NominalCapacity",
+    "typical_energy": "TypicalEnergy",
+    "rated_energy": "RatedEnergy",
     "nominal_voltage": "NominalVoltage",
 }
 UNIT_IRI_MAP = {
@@ -383,6 +390,24 @@ def _schema_agent_node(value: Any) -> dict[str, Any] | None:
     return node
 
 
+def _schema_country_node(value: Any) -> dict[str, Any] | str | None:
+    if not isinstance(value, str):
+        return None
+    name = value.strip()
+    if not name:
+        return None
+    return {
+        "@type": "schema:Country",
+        "schema:name": name,
+    }
+
+
+def _schema_release_date_from_year(value: Any) -> str | None:
+    if isinstance(value, int):
+        return f"{value:04d}-01-01"
+    return None
+
+
 def _schema_data_catalog_node(value: Any) -> Any:
     if isinstance(value, str):
         return {"@id": value} if "://" in value else value
@@ -622,6 +647,256 @@ def save_publication_html(
     return out
 
 
+def _iso_date(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return datetime.fromtimestamp(value, tz=timezone.utc).date().isoformat()
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        if len(text) >= 10:
+            return text[:10]
+    return None
+
+
+def _publication_year(value: Any) -> str:
+    iso_date = _iso_date(value)
+    if iso_date is not None:
+        return iso_date[:4]
+    return str(datetime.now(timezone.utc).year)
+
+
+def _agent_name(agent: Mapping[str, Any] | None) -> str | None:
+    if not isinstance(agent, Mapping):
+        return None
+    name = agent.get("name") or agent.get("schema:name")
+    return str(name) if isinstance(name, str) and name.strip() else None
+
+
+def _agent_affiliations(agent: Mapping[str, Any]) -> list[dict[str, str]]:
+    value = agent.get("affiliation")
+    if value is None:
+        return []
+    items = value if isinstance(value, list) else [value]
+    out: list[dict[str, str]] = []
+    for item in items:
+        if isinstance(item, Mapping):
+            name = _agent_name(item)
+            if name is not None:
+                out.append({"name": name})
+    return out
+
+
+def _agent_same_as(agent: Mapping[str, Any]) -> str | None:
+    value = agent.get("sameAs") or agent.get("schema:sameAs")
+    return str(value) if isinstance(value, str) and value.strip() else None
+
+
+def _datacite_creators(dataset: Dataset) -> list[dict[str, Any]]:
+    creators: list[dict[str, Any]] = []
+    for agent in dataset.creators:
+        if not isinstance(agent, Mapping):
+            continue
+        name = _agent_name(agent)
+        if name is None:
+            continue
+        creator: dict[str, Any] = {"name": name}
+        same_as = _agent_same_as(agent)
+        if isinstance(same_as, str) and "orcid.org/" in same_as:
+            creator["nameIdentifiers"] = [
+                {
+                    "nameIdentifier": same_as,
+                    "nameIdentifierScheme": "ORCID",
+                    "schemeUri": "https://orcid.org",
+                }
+            ]
+        affiliations = _agent_affiliations(agent)
+        if affiliations:
+            creator["affiliation"] = affiliations
+        creators.append(creator)
+    return creators
+
+
+def _datacite_publisher(dataset: Dataset) -> str:
+    publisher = _agent_name(dataset.publisher) if isinstance(dataset.publisher, Mapping) else None
+    return publisher or "BattINFO"
+
+
+def _datacite_metadata(dataset: Dataset, *, dataset_dir: Path) -> dict[str, Any]:
+    publication_year = _publication_year(dataset.published_at or dataset.created_at)
+    metadata: dict[str, Any] = {
+        "types": {
+            "resourceType": "Battery test dataset",
+            "resourceTypeGeneral": "Dataset",
+        },
+        "titles": [{"title": dataset.name or dataset_dir.name}],
+        "creators": _datacite_creators(dataset),
+        "publisher": _datacite_publisher(dataset),
+        "publicationYear": publication_year,
+        "url": dataset.access_url or dataset_dir.resolve().as_uri(),
+    }
+    if dataset.description is not None:
+        metadata["descriptions"] = [{"description": dataset.description, "descriptionType": "Abstract"}]
+    if dataset.license is not None:
+        rights: dict[str, Any] = {"rights": dataset.license}
+        if dataset.license.startswith("http://") or dataset.license.startswith("https://"):
+            rights["rightsUri"] = dataset.license
+        metadata["rightsList"] = [rights]
+    if dataset.keywords:
+        metadata["subjects"] = [{"subject": keyword} for keyword in dataset.keywords]
+    if dataset.version is not None:
+        metadata["version"] = dataset.version
+    if dataset.data_format is not None:
+        metadata["formats"] = [dataset.data_format]
+    return metadata
+
+
+def _publication_file_nodes(dataset_dir: Path, *, publish_filename: str, datacite_filename: str, dcat_filename: str | None) -> list[dict[str, Any]]:
+    nodes: list[dict[str, Any]] = []
+    for filename, media_type in (
+        (publish_filename, "application/ld+json"),
+        (DEFAULT_RO_CRATE_METADATA_FILENAME, "application/ld+json"),
+        (datacite_filename, "application/json"),
+        (dcat_filename, "application/ld+json" if dcat_filename is not None else None),
+    ):
+        if filename is None or media_type is None:
+            continue
+        path = dataset_dir / filename
+        if not path.exists():
+            continue
+        nodes.append(
+            {
+                "@id": filename,
+                "@type": "File",
+                "name": path.name,
+                "encodingFormat": media_type,
+                "contentSize": path.stat().st_size,
+                "sha256": _sha256(path),
+            }
+        )
+    return nodes
+
+
+def _ro_crate_metadata(
+    dataset: Dataset,
+    *,
+    dataset_dir: Path,
+    dataset_files: list[Path],
+    publish_filename: str,
+    datacite_filename: str,
+    dcat_filename: str | None = None,
+) -> dict[str, Any]:
+    has_part = [{"@id": path.relative_to(dataset_dir).as_posix()} for path in dataset_files]
+    has_part.extend({"@id": node["@id"]} for node in _publication_file_nodes(dataset_dir, publish_filename=publish_filename, datacite_filename=datacite_filename, dcat_filename=dcat_filename))
+    root_dataset: dict[str, Any] = {
+        "@id": "./",
+        "@type": "Dataset",
+        "name": dataset.name or dataset_dir.name,
+        "description": dataset.description,
+        "license": dataset.license,
+        "hasPart": has_part,
+    }
+    if dataset.creators:
+        creators = [creator for creator in dataset.creators if isinstance(creator, Mapping)]
+        if creators:
+            root_dataset["creator"] = creators
+    if isinstance(dataset.publisher, Mapping):
+        root_dataset["publisher"] = dict(dataset.publisher)
+    if dataset.keywords:
+        root_dataset["keywords"] = list(dataset.keywords)
+    if dataset.version is not None:
+        root_dataset["version"] = dataset.version
+
+    graph: list[dict[str, Any]] = [
+        {
+            "@id": DEFAULT_RO_CRATE_METADATA_FILENAME,
+            "@type": "CreativeWork",
+            "about": {"@id": "./"},
+            "conformsTo": {"@id": RO_CRATE_PROFILE_URL},
+        },
+        _without_none(root_dataset),
+    ]
+    for path in dataset_files:
+        relpath = path.relative_to(dataset_dir).as_posix()
+        graph.append(
+            {
+                "@id": relpath,
+                "@type": "File",
+                "name": path.name,
+                "encodingFormat": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
+                "contentSize": path.stat().st_size,
+                "sha256": _sha256(path),
+            }
+        )
+    graph.extend(_publication_file_nodes(dataset_dir, publish_filename=publish_filename, datacite_filename=datacite_filename, dcat_filename=dcat_filename))
+    return {
+        "@context": RO_CRATE_CONTEXT_URL,
+        "@graph": graph,
+    }
+
+
+def _dcat_agent_node(agent: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    name = _agent_name(agent)
+    if name is None:
+        return None
+    node: dict[str, Any] = {"@type": "foaf:Agent", "foaf:name": name}
+    same_as = _agent_same_as(agent) if isinstance(agent, Mapping) else None
+    if same_as is not None:
+        node["foaf:page"] = {"@id": same_as}
+    return node
+
+
+def _dcat_export(dataset: Dataset, *, dataset_dir: Path, dataset_files: list[Path]) -> dict[str, Any]:
+    dataset_id = dataset.id or dataset_dir.resolve().as_uri()
+    graph: list[dict[str, Any]] = []
+    distribution_refs: list[dict[str, str]] = []
+    for index, path in enumerate(dataset_files, start=1):
+        relpath = path.relative_to(dataset_dir).as_posix()
+        dist_id = f"{dataset_id}#distribution-{index}"
+        distribution_refs.append({"@id": dist_id})
+        graph.append(
+            {
+                "@id": dist_id,
+                "@type": "dcat:Distribution",
+                "dct:title": path.name,
+                "dcat:accessURL": {"@id": path.resolve().as_uri()},
+                "dcat:downloadURL": {"@id": path.resolve().as_uri()},
+                "dcat:mediaType": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
+                "dcat:byteSize": path.stat().st_size,
+            }
+        )
+    dataset_node: dict[str, Any] = {
+        "@id": dataset_id,
+        "@type": "dcat:Dataset",
+        "dct:title": dataset.name or dataset_dir.name,
+        "dcat:landingPage": {"@id": dataset.access_url or dataset_dir.resolve().as_uri()},
+        "dcat:distribution": distribution_refs,
+    }
+    if dataset.description is not None:
+        dataset_node["dct:description"] = dataset.description
+    if dataset.license is not None:
+        dataset_node["dct:license"] = {"@id": dataset.license} if dataset.license.startswith(("http://", "https://")) else dataset.license
+    if dataset.keywords:
+        dataset_node["dcat:keyword"] = list(dataset.keywords)
+    if dataset.created_at is not None:
+        dataset_node["dct:issued"] = _iso_date(dataset.created_at)
+    if dataset.modified_at is not None:
+        dataset_node["dct:modified"] = _iso_date(dataset.modified_at)
+    creator = _dcat_agent_node(dataset.creators[0]) if dataset.creators else None
+    if creator is not None:
+        dataset_node["dct:creator"] = creator
+    publisher = _dcat_agent_node(dataset.publisher) if isinstance(dataset.publisher, Mapping) else None
+    if publisher is not None:
+        dataset_node["dct:publisher"] = publisher
+    graph.insert(0, _without_none(dataset_node))
+    return {
+        "@context": ["https://www.w3.org/ns/dcat.jsonld", {"foaf": "http://xmlns.com/foaf/0.1/"}],
+        "@graph": graph,
+    }
+
+
 def _dataset_jsonld_node(
     dataset: Dataset,
     files: list[Path],
@@ -837,6 +1112,12 @@ def _cell_type_jsonld_node(cell_type: CellType, *, cell_specification: CellSpeci
     }
     if cell_type.size_code is not None:
         node["schema:size"] = cell_type.size_code
+    country_node = _schema_country_node(cell_type.country_of_origin)
+    if country_node is not None:
+        node["schema:countryOfOrigin"] = country_node
+    release_date = _schema_release_date_from_year(cell_type.year)
+    if release_date is not None:
+        node["schema:releaseDate"] = release_date
     if cell_type.comment:
         node["schema:description"] = list(cell_type.comment)
     if cell_specification is not None:
@@ -973,7 +1254,7 @@ def _normalize_cell_specification(
     else:
         payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
         if isinstance(payload.get("specification"), Mapping):
-            result = validate_json(payload, profile="battery-descriptor")
+            result = validate_json(payload, profile="cell-descriptor")
             if not result.ok:
                 raise ValueError(f"cell specification validation failed: {'; '.join(result.errors)}")
             spec = CellSpecification.from_library_record(payload)
@@ -1244,6 +1525,12 @@ def publish(
     dataset_glob: str = "**/*",
     emit_bundle_dir: bool = False,
     emit_html_page: bool = False,
+    emit_ro_crate_metadata: bool = True,
+    emit_datacite_metadata: bool = True,
+    emit_dcat_export: bool = False,
+    ro_crate_filename: str = DEFAULT_RO_CRATE_METADATA_FILENAME,
+    datacite_filename: str = DEFAULT_DATACITE_METADATA_FILENAME,
+    dcat_filename: str = DEFAULT_DCAT_EXPORT_FILENAME,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
 ) -> dict[str, Any]:
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
@@ -1290,6 +1577,31 @@ def publish(
     publish_path = dataset_dir / publish_filename
     _write_json(publish_path, publish_payload)
 
+    datacite_path = None
+    if emit_datacite_metadata:
+        datacite_path = dataset_dir / datacite_filename
+        _write_json(datacite_path, _datacite_metadata(bundle.dataset, dataset_dir=dataset_dir))
+
+    dcat_path = None
+    if emit_dcat_export:
+        dcat_path = dataset_dir / dcat_filename
+        _write_json(dcat_path, _dcat_export(bundle.dataset, dataset_dir=dataset_dir, dataset_files=dataset_files))
+
+    ro_crate_path = None
+    if emit_ro_crate_metadata:
+        ro_crate_path = dataset_dir / ro_crate_filename
+        _write_json(
+            ro_crate_path,
+            _ro_crate_metadata(
+                bundle.dataset,
+                dataset_dir=dataset_dir,
+                dataset_files=dataset_files,
+                publish_filename=publish_filename,
+                datacite_filename=datacite_filename,
+                dcat_filename=dcat_filename if emit_dcat_export else None,
+            ),
+        )
+
     result = {
         "status": "ok",
         "generated_at": _now_iso(),
@@ -1301,6 +1613,9 @@ def publish(
         "cell_instance_id": bundle.cell_instance.id,
         "test_id": bundle.test.id,
         "dataset_id": bundle.dataset.id,
+        "ro_crate_path": str(ro_crate_path) if ro_crate_path is not None else None,
+        "datacite_metadata_path": str(datacite_path) if datacite_path is not None else None,
+        "dcat_export_path": str(dcat_path) if dcat_path is not None else None,
     }
     if emit_html_page:
         html_path = save_publication_html(
@@ -1321,6 +1636,51 @@ def publish(
         result["bundle_dir"] = str(bundle_dir)
         result["bundle_manifest_path"] = str(bundle_dir / "bundle.json")
     return result
+
+
+def build_publication_package(
+    *,
+    cell_type: CellType,
+    cell_instance: CellInstance,
+    test: Test,
+    dataset: Dataset,
+    cell_specification: CellSpecification | Mapping[str, Any] | PathLike | None = None,
+    datasheet_path: PathLike | None = None,
+    publish_filename: str = DEFAULT_PUBLISH_FILENAME,
+    html_filename: str = "index.html",
+    dataset_glob: str = "**/*",
+    emit_bundle_dir: bool = False,
+    emit_html_page: bool = False,
+    emit_ro_crate_metadata: bool = True,
+    emit_datacite_metadata: bool = True,
+    emit_dcat_export: bool = False,
+    ro_crate_filename: str = DEFAULT_RO_CRATE_METADATA_FILENAME,
+    datacite_filename: str = DEFAULT_DATACITE_METADATA_FILENAME,
+    dcat_filename: str = DEFAULT_DCAT_EXPORT_FILENAME,
+    validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
+) -> dict[str, Any]:
+    """Preferred name for locally building a publication package on disk."""
+
+    return publish(
+        cell_type=cell_type,
+        cell_instance=cell_instance,
+        test=test,
+        dataset=dataset,
+        cell_specification=cell_specification,
+        datasheet_path=datasheet_path,
+        publish_filename=publish_filename,
+        html_filename=html_filename,
+        dataset_glob=dataset_glob,
+        emit_bundle_dir=emit_bundle_dir,
+        emit_html_page=emit_html_page,
+        emit_ro_crate_metadata=emit_ro_crate_metadata,
+        emit_datacite_metadata=emit_datacite_metadata,
+        emit_dcat_export=emit_dcat_export,
+        ro_crate_filename=ro_crate_filename,
+        datacite_filename=datacite_filename,
+        dcat_filename=dcat_filename,
+        validation_policy=validation_policy,
+    )
 
 
 def publish_dataset_metadata(
@@ -1550,18 +1910,30 @@ def load_publication(path: PathLike) -> BattinfoBundle:
     return BattinfoBundle.from_jsonld(path)
 
 
+def load_publication_package(path: PathLike) -> BattinfoBundle:
+    """Preferred name for loading a locally built publication package."""
+
+    return load_publication(path)
+
+
 __all__ = [
     "DEFAULT_CR2032_DATASET_DIRS",
     "DEFAULT_CR2032_DATASHEET",
     "DEFAULT_CR2032_LIBRARY_SPEC",
+    "DEFAULT_DATACITE_METADATA_FILENAME",
+    "DEFAULT_DCAT_EXPORT_FILENAME",
     "DEFAULT_CR2032_REPORT_FILENAME",
     "DEFAULT_PUBLISH_FILENAME",
     "DEFAULT_PUBLICATION_REPORT_FILENAME",
     "DEFAULT_REPORT_FILENAME",
+    "DEFAULT_RO_CRATE_METADATA_FILENAME",
+    "build_publication_package",
     "derive_cell_type",
     "load_publication",
+    "load_publication_package",
     "publish",
     "publish_cr2032_dataset_metadata",
     "publish_dataset_metadata",
     "save_publication_html",
 ]
+

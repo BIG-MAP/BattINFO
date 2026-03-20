@@ -18,9 +18,18 @@ def _load_json(path: str) -> dict:
 
 def test_validate_record_report_accepts_canonical_cell_type_example() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc["specs"]["specific_energy"] = {"value": 130.0, "unit": "Wh/kg"}
+    doc["specs"]["energy_density"] = {"value": 250.0, "unit": "Wh/L"}
+    doc["specs"]["specific_power"] = {"value": 900.0, "unit": "W/kg"}
+    doc["specs"]["power_density"] = {"value": 1700.0, "unit": "W/L"}
+    doc["specs"]["typical_energy"] = {"value": 8.25, "unit": "Wh"}
+    doc["specs"]["rated_energy"] = {"value": 8.0, "unit": "Wh"}
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
     assert not report.issues
+    assert doc["product"]["iecCode"] == "IFpR26650"
+    assert doc["product"]["countryOfOrigin"] == "United States"
+    assert doc["product"]["year"] == 2012
 
 
 def test_validate_record_report_accepts_linked_dataset_example_with_source_root() -> None:
@@ -28,6 +37,21 @@ def test_validate_record_report_accepts_linked_dataset_example_with_source_root(
     report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert report.ok
     assert not report.issues
+
+
+def test_validate_record_report_accepts_test_protocol_example() -> None:
+    doc = _load_json("src/battinfo/data/examples/test-protocols/test-protocol-8r2m-4v6k-9p3t-7n5x.json")
+    report = validate_record_report(doc, policy=STRICT)
+    assert report.ok
+    assert not report.issues
+
+
+def test_validate_record_report_includes_test_protocol_reference_issues() -> None:
+    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["protocol_id"] = "https://w3id.org/battinfo/test-protocol/eysh-4h5s-k4bx-zkgg"
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
+    assert not report.ok
+    assert any(issue.code == "reference.missing" and issue.path == "test.protocol_id" for issue in report.errors)
 
 
 def test_validate_record_report_combines_schema_and_semantic_issues() -> None:

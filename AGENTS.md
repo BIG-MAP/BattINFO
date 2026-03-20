@@ -42,12 +42,13 @@ For humans and agents writing new workflows:
 Avoid starting from:
 
 - raw nested dict payloads
-- direct edits under `assets/examples/` unless the task is fixture maintenance
+- direct edits under `examples/` unless the task is fixture maintenance
 - generated/package copies under `src/battinfo/data/` unless you are intentionally syncing source-of-truth assets
 
 ## Source Of Truth
 
-- canonical examples and schemas: `assets/`
+- canonical schemas and mappings: `assets/`
+- canonical examples and notebooks: `examples/`
 - packaged copies used by the installed library: `src/battinfo/data/`
 - public Python API: `src/battinfo/__init__.py`
 - human-first workflow API: `src/battinfo/workspace.py`
@@ -85,7 +86,7 @@ Useful focused checks:
 
 ## Notebook Intent
 
-The notebooks under `notebooks/` are executable onboarding workflows, not
+The notebooks under `examples/notebooks/` are executable onboarding workflows, not
 scratchpads. They should stay:
 
 - public-API-first

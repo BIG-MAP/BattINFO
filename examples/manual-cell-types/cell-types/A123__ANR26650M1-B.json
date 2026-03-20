@@ -1,0 +1,35 @@
+{
+  "manufacturer": "A123",
+  "model": "ANR26650M1-B",
+  "format": "cylindrical",
+  "chemistry": "Li-ion",
+  "positive_electrode_basis": "LFP",
+  "negative_electrode_basis": "graphite",
+  "size_code": "R26650",
+  "iec_code": "IFpR26650",
+  "country_of_origin": "United States",
+  "year": 2012,
+  "specs": {
+    "nominal_capacity": {
+      "value": 2.5,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.3,
+      "unit": "V"
+    },
+    "diameter": {
+      "value": 26.0,
+      "unit": "mm"
+    },
+    "height": {
+      "value": 65.0,
+      "unit": "mm"
+    },
+    "mass": {
+      "value": 76.0,
+      "unit": "g"
+    }
+  },
+  "comment": "Manual cell-type authoring draft. Canonical IDs and default provenance are added when the workspace saves the record."
+}

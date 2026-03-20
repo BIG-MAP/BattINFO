@@ -10,16 +10,16 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-PROFILE_PATH = ROOT / "src" / "battinfo" / "data" / "profiles" / "battery-descriptor" / "profile.json"
+PROFILE_PATH = ROOT / "src" / "battinfo" / "data" / "profiles" / "cell-descriptor" / "profile.json"
 
 
 def test_profile_asset_exists() -> None:
-    assert PROFILE_PATH.exists(), "Missing packaged battery-descriptor profile asset"
+    assert PROFILE_PATH.exists(), "Missing packaged cell-descriptor profile asset"
 
 
 def test_profile_top_level_contract_matches_descriptor_schema() -> None:
     profile = _load_json(PROFILE_PATH)
-    schema = _load_json(ROOT / "assets" / "schemas" / "battery-descriptor.schema.json")
+    schema = _load_json(ROOT / "assets" / "schemas" / "cell-descriptor.schema.json")
 
     assert profile["contract"]["top_level"]["required"] == schema["required"]
     assert sorted(profile["contract"]["top_level"]["optional"]) == sorted(
@@ -80,3 +80,4 @@ def test_profile_references_current_mapping_assets() -> None:
 
     for field, expected in expected_paths.items():
         assert bindings[field]["binding_source"] == expected
+

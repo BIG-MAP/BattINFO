@@ -100,6 +100,161 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
     assert workspace.query("cells", type_id=cell_type.id, dataset_id=dataset.id)[0]["id"] == cell.id
 
 
+def test_workspace_loads_cell_type_from_validated_json_record(tmp_path: Path) -> None:
+    workspace = Workspace(root=tmp_path / "workspace")
+
+    cell_type = workspace.load_cell_type(
+        ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json"
+    )
+
+    assert len(workspace.cell_types) == 1
+    assert cell_type.manufacturer == "A123"
+    assert cell_type.model == "ANR26650M1-B"
+    assert cell_type.id == "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
+    assert cell_type.iec_code == "IFpR26650"
+    assert cell_type.country_of_origin == "United States"
+    assert cell_type.year == 2012
+
+
+def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp_path: Path) -> None:
+    workspace = Workspace(root=tmp_path / "workspace")
+    draft_path = tmp_path / "cell-types" / "A123__ANR26650M1-B.json"
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "A123",
+                "model": "ANR26650M1-B",
+                "format": "cylindrical",
+                "chemistry": "Li-ion",
+                "size_code": "R26650",
+                "iec_code": "IFpR26650",
+                "country_of_origin": "United States",
+                "year": 2012,
+                "positive_electrode_basis": "LFP",
+                "negative_electrode_basis": "graphite",
+                "specs": {
+                    "nominal_capacity": {"value": 2.5, "unit": "Ah"},
+                    "typical_energy": {"value": 8.25, "unit": "Wh"},
+                    "rated_energy": {"value": 8.0, "unit": "Wh"},
+                    "nominal_voltage": {"value": 3.3, "unit": "V"},
+                    "specific_energy": {"value": 130.0, "unit": "Wh/kg"},
+                    "energy_density": {"value": 250.0, "unit": "Wh/L"},
+                    "specific_power": {"value": 900.0, "unit": "W/kg"},
+                    "power_density": {"value": 1700.0, "unit": "W/L"},
+                },
+                "comment": "Manual authoring draft without canonical identifiers.",
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    cell_type = workspace.load_cell_type(draft_path)
+
+    assert cell_type.manufacturer == "A123"
+    assert cell_type.model == "ANR26650M1-B"
+    assert cell_type.id is None
+    assert cell_type.source.type is None
+    assert cell_type.source.file is None
+
+    save_result = workspace.save()
+
+    assert save_result["index"]["cell_type_count"] == 1
+    assert isinstance(cell_type.id, str)
+    assert cell_type.id.startswith("https://w3id.org/battinfo/cell-type/")
+    record_path = tmp_path / "workspace" / "examples" / "cell-types" / f"cell-type-{cell_type.id.rsplit('/', 1)[-1]}.json"
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    assert isinstance(record["product"]["short_id"], str)
+    assert len(record["product"]["short_id"]) == 6
+    assert record["product"]["identifier"] == f"cell-type:{cell_type.id.rsplit('/', 1)[-1]}"
+    assert record["product"]["iecCode"] == "IFpR26650"
+    assert record["product"]["countryOfOrigin"] == "United States"
+    assert record["product"]["year"] == 2012
+    assert record["specs"]["typical_energy"] == {"value": 8.25, "unit": "Wh"}
+    assert record["specs"]["rated_energy"] == {"value": 8.0, "unit": "Wh"}
+    assert record["specs"]["specific_energy"] == {"value": 130.0, "unit": "Wh/kg"}
+    assert record["specs"]["energy_density"] == {"value": 250.0, "unit": "Wh/L"}
+    assert record["specs"]["specific_power"] == {"value": 900.0, "unit": "W/kg"}
+    assert record["specs"]["power_density"] == {"value": 1700.0, "unit": "W/L"}
+    assert record["provenance"]["source_type"] == "datasheet"
+    assert record["provenance"]["source_file"] == "manual.json"
+    assert isinstance(record["provenance"]["retrieved_at"], int)
+
+
+def test_workspace_loads_multiple_cell_types_from_directory(tmp_path: Path) -> None:
+    records_dir = tmp_path / "cell-types"
+    records_dir.mkdir(parents=True, exist_ok=True)
+    first = {
+        "manufacturer": "A123",
+        "model": "ANR26650M1-B",
+        "chemistry": "LFP",
+        "format": "cylindrical",
+        "specs": {"nominal_voltage": {"value": 3.3, "unit": "V"}},
+    }
+    second = {
+        "manufacturer": "Energizer",
+        "model": "CR2032",
+        "chemistry": "Li-primary",
+        "format": "coin",
+        "iec_code": "CR2032",
+        "country_of_origin": "United States",
+        "year": 2023,
+        "specs": {"nominal_voltage": {"value": 3.0, "unit": "V"}},
+        "provenance": {"source_file": "ENERGIZER__CR2032.pdf"},
+    }
+    (records_dir / "A123__ANR26650M1-B.json").write_text(json.dumps(first, indent=2), encoding="utf-8")
+    (records_dir / "ENERGIZER__CR2032.json").write_text(json.dumps(second, indent=2), encoding="utf-8")
+
+    workspace = Workspace(root=tmp_path / "workspace")
+    loaded = workspace.load_cell_types(directory=records_dir)
+
+    assert len(loaded) == 2
+    assert {item.manufacturer for item in loaded} == {"A123", "Energizer"}
+    assert {item.model for item in loaded} == {"ANR26650M1-B", "CR2032"}
+    assert {item.iec_code for item in loaded} == {None, "CR2032"}
+    assert {item.country_of_origin for item in loaded} == {None, "United States"}
+    assert {item.year for item in loaded} == {None, 2023}
+    assert all(item.id is None for item in loaded)
+
+
+def test_workspace_saves_and_queries_test_protocols(tmp_path: Path) -> None:
+    workspace = Workspace(root=tmp_path / "workspace")
+
+    cell_type = workspace.cell_type(
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        source_file="A123__ANR26650M1-B.pdf",
+    )
+    cell = workspace.cell(cell_type, serial_number="LAB-001")
+    protocol = workspace.test_protocol(
+        name="1C Cycle Life at 25 C",
+        kind="cycle_life",
+        version="1.0",
+        protocol_url="https://example.org/protocols/cycle-life-1c",
+        conditions={"ambient_temperature": quantity(25.0, "degC")},
+        setpoints={"charge_rate": quantity(1.0, "C")},
+    )
+    test = workspace.test(
+        cell,
+        protocol_ref=protocol,
+        instrument="Biologic VSP-300",
+        status="completed",
+    )
+
+    records = workspace.render()
+    assert records["test_protocols"][0]["test_protocol"]["kind"] == "cycle_life"
+    assert records["tests"][0]["test"]["protocol_id"] == records["test_protocols"][0]["test_protocol"]["id"]
+
+    result = workspace.save(validation_policy="strict")
+    assert result["index"]["test_protocol_count"] == 1
+    assert workspace.query_test_protocols(kind="cycle_life")[0]["id"] == protocol.id
+    assert workspace.query_tests(kind="cycle_life")[0]["protocol_id"] == protocol.id
+    assert test.protocol_id == protocol.id
+
+
 def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
 
@@ -336,6 +491,8 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
         format="coin",
         chemistry="Li-primary",
         size_code="R2032",
+        country_of_origin="Japan",
+        year=2022,
         positive_electrode_basis="MnO2",
         negative_electrode_basis="Li-metal",
         specs={"nominal_voltage": quantity(3.0, "V")},
@@ -362,6 +519,8 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
 
     publish_path = Path(publish_result["publish_path"])
     payload = json.loads(publish_path.read_text(encoding="utf-8"))
+    ro_crate_payload = json.loads(Path(publish_result["ro_crate_path"]).read_text(encoding="utf-8"))
+    datacite_payload = json.loads(Path(publish_result["datacite_metadata_path"]).read_text(encoding="utf-8"))
     dataset_node = next(node for node in payload["@graph"] if node.get("@id") == publish_result["dataset_id"])
     distribution_names = {
         entry.get("schema:name")
@@ -373,10 +532,19 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     assert Path(publish_result["dataset_dir"]).is_dir()
     assert (Path(publish_result["dataset_dir"]) / dataset_file.name).exists()
     assert publish_result["triple_count"] > 0
+    assert Path(publish_result["ro_crate_path"]).exists()
+    assert Path(publish_result["datacite_metadata_path"]).exists()
+    assert publish_result["dcat_export_path"] is None
     assert dataset.dataset_path == str(dataset_file)
     assert dataset.data_format == "text/csv"
     assert dataset_node["schema:url"] == Path(publish_result["dataset_dir"]).resolve().as_uri()
     assert dataset_file.name in distribution_names
+    cell_type_node = next(node for node in payload["@graph"] if node.get("@id") == publish_result["cell_type_id"])
+    assert cell_type_node["schema:countryOfOrigin"]["schema:name"] == "Japan"
+    assert cell_type_node["schema:releaseDate"] == "2022-01-01"
+    assert ro_crate_payload["@graph"][0]["@id"] == "ro-crate-metadata.json"
+    assert datacite_payload["types"]["resourceTypeGeneral"] == "Dataset"
+    assert datacite_payload["titles"][0]["title"] == "Energizer CR2032 capacity dataset"
 
 
 def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_path: Path) -> None:
@@ -420,6 +588,112 @@ def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_pa
     assert publish_result["test_id"] is not None
     assert publish_result["cell_instance_id"] is not None
     assert publish_result["cell_type_id"] is not None
+
+
+def test_workspace_build_publication_package_can_emit_dcat_export(tmp_path: Path) -> None:
+    workspace = Workspace(root=tmp_path / "workspace")
+    dataset_file = tmp_path / "inputs" / "cycle-life.csv"
+    dataset_file.parent.mkdir(parents=True, exist_ok=True)
+    dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
+
+    cell_type = workspace.cell_type(
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        size_code="R26650",
+        positive_electrode_basis="LFP",
+        negative_electrode_basis="graphite",
+        specs={"nominal_voltage": quantity(3.3, "V")},
+        source_file="a123-anr26650m1-b.manual.json",
+    )
+    cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
+    test = workspace.test(
+        cell,
+        kind="cycle_life",
+        protocol="1C charge / 1C discharge",
+        instrument="Biologic VSP-300",
+        status="completed",
+    )
+    dataset = workspace.dataset(
+        cell,
+        title="Cycle life dataset",
+        test=test,
+        path=dataset_file,
+        license="CC-BY-4.0",
+    )
+
+    result = workspace.build_publication_package(dataset, emit_dcat_export=True)
+    dcat_payload = json.loads(Path(result["dcat_export_path"]).read_text(encoding="utf-8"))
+
+    assert Path(result["publish_path"]).exists()
+    assert Path(result["ro_crate_path"]).exists()
+    assert Path(result["datacite_metadata_path"]).exists()
+    assert Path(result["dcat_export_path"]).exists()
+    assert dcat_payload["@graph"][0]["@type"] == "dcat:Dataset"
+
+
+def test_workspace_build_release_exports_registry_ready_local_workspace(tmp_path: Path) -> None:
+    workspace = Workspace(root=tmp_path / "workspace")
+    dataset_file = tmp_path / "inputs" / "cycle-life.csv"
+    dataset_file.parent.mkdir(parents=True, exist_ok=True)
+    dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
+
+    cell_type = workspace.cell_type(
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        size_code="R26650",
+        positive_electrode_basis="LFP",
+        negative_electrode_basis="graphite",
+        specs={"nominal_voltage": quantity(3.3, "V")},
+        source_file="a123-anr26650m1-b.manual.json",
+    )
+    cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
+    test = workspace.test(
+        cell,
+        kind="cycle_life",
+        protocol="1C charge / 1C discharge",
+        instrument="Biologic VSP-300",
+        status="completed",
+    )
+    dataset = workspace.dataset(
+        cell,
+        title="Cycle life dataset",
+        test=test,
+        path=dataset_file,
+        license="CC-BY-4.0",
+    )
+    dataset.test = None
+    dataset.cell = None
+
+    release_root = tmp_path / "release"
+    result = workspace.build_submission_package(
+        dataset,
+        root=release_root,
+        registry="digibatt/hello-world",
+        publisher_id="demo-lab",
+        version="1.0.0",
+        title="A123 hello world cycling dataset",
+        description="Workspace-built release bundle.",
+        force=True,
+    )
+
+    manifest = json.loads((release_root / "battinfo-workspace.json").read_text(encoding="utf-8"))
+    assert Path(result["submission_package_path"]).exists()
+    intake = json.loads(Path(result["submission_package_path"]).read_text(encoding="utf-8"))
+
+    assert manifest["workspace_id"] == "hello-world"
+    assert manifest["registry"] == {"tenant": "digibatt", "project": "hello-world"}
+    assert (release_root / "artifacts" / dataset_file.name).exists()
+    assert intake["kind"] == "BattinfoSubmission"
+    assert intake["project_id"] == "hello-world"
+    assert intake["publisher_id"] == "demo-lab"
+    assert intake["workspace"]["registry"] == {"tenant": "digibatt", "project": "hello-world"}
+    assert intake["validation"]["ok"] is True
+    assert result["resource_count"] == 3
+    assert result["artifact_count"] == 1
 
 
 def test_battery_cell_design_and_battery_cell_aliases_work_for_object_authoring(tmp_path: Path) -> None:
@@ -481,5 +755,6 @@ def test_test_uses_enum_backed_test_type_and_rejects_unknown_values() -> None:
         assert "made_up_test" in str(exc)
     else:
         raise AssertionError("Expected invalid test_type to fail validation")
+
 
 

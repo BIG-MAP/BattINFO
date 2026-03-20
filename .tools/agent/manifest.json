@@ -47,9 +47,10 @@
   },
   "source_of_truth": {
     "canonical_assets": "assets",
+    "examples": "examples",
     "packaged_assets": "src/battinfo/data",
     "tests": "tests",
-    "notebooks": "notebooks"
+    "notebooks": "examples/notebooks"
   },
   "safe_write_roots": [
     ".battinfo"
@@ -64,6 +65,8 @@
     "readme": "README.md",
     "alpha_scope": "docs/alpha-scope.md",
     "python_api": "docs/python-api.md",
-    "notebooks": "notebooks/README.md"
+    "notebooks": "examples/notebooks/README.md"
   }
 }
+
+

@@ -1,6 +1,0 @@
-battinfo_version: "0.1.0"
-domain_battery_version: "unversioned"
-battery_pass_version: "1.2.0"
-notes:
-  - "Domain-battery is currently consumed via its rolling w3id reference; no upstream release tag is pinned in this repository."
-  - "Pin BatteryPassDataModel v1.2.0 for JSON-LD mapping."

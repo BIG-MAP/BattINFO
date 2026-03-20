@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/test-protocol.schema.json",
+  "title": "BattINFO Test Protocol",
+  "description": "Canonical BattINFO reusable test protocol metadata describing a procedure that can be referenced by executed tests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "test_protocol",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "test_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TestProtocolIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "cycle_life",
+            "capacity_check",
+            "rate_capability",
+            "hppc",
+            "ici",
+            "gitt",
+            "dcir",
+            "eis",
+            "impedance",
+            "calendar_ageing",
+            "formation",
+            "other"
+          ]
+        },
+        "version": {
+          "type": "string"
+        },
+        "protocol_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "setpoints": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "termination_criteria": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "measurement_outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type",
+        "retrieved_at"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "lab",
+            "simulation",
+            "other"
+          ]
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "workflow_version": {
+          "type": "string"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "TestProtocolIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/test-protocol/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    }
+  }
+}

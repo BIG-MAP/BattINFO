@@ -1,0 +1,53 @@
+{
+  "schema_version": "0.1.0",
+  "test_protocol": {
+    "id": "https://w3id.org/battinfo/test-protocol/8r2m-4v6k-9p3t-7n5x",
+    "short_id": "8r2m4v",
+    "identifier": "test-protocol:8r2m-4v6k-9p3t-7n5x",
+    "name": "1C Cycle Life at 25 C",
+    "kind": "cycle_life",
+    "description": "Repeated 1C charge and 1C discharge at nominal room temperature.",
+    "version": "1.0",
+    "protocol_url": "https://example.org/protocols/cycle-life-1c"
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "setpoints": {
+    "charge_rate": {
+      "value": 1.0,
+      "unit": "C"
+    },
+    "discharge_rate": {
+      "value": 1.0,
+      "unit": "C"
+    }
+  },
+  "termination_criteria": {
+    "capacity_retention": {
+      "value": 80.0,
+      "unit": "%"
+    }
+  },
+  "measurement_outputs": [
+    {
+      "name": "Voltage",
+      "unit_text": "V"
+    },
+    {
+      "name": "Capacity",
+      "unit_text": "Ah"
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_file": "cycle-life-1c.protocol.json",
+    "retrieved_at": 1773811200
+  },
+  "notes": [
+    "Example reusable BattINFO test protocol."
+  ]
+}

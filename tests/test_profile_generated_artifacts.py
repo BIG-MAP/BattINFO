@@ -10,7 +10,7 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-GENERATED_DIR = ROOT / "src" / "battinfo" / "data" / "profiles" / "battery-descriptor" / "generated"
+GENERATED_DIR = ROOT / "src" / "battinfo" / "data" / "profiles" / "cell-descriptor" / "generated"
 
 
 def test_generated_profile_fragments_exist() -> None:
@@ -29,7 +29,7 @@ def test_generated_profile_fragments_exist() -> None:
 
 def test_generated_top_level_fragment_matches_descriptor_schema_subset() -> None:
     fragment = _load_json(GENERATED_DIR / "top-level.schema.fragment.json")
-    schema = _load_json(ROOT / "assets" / "schemas" / "battery-descriptor.schema.json")
+    schema = _load_json(ROOT / "assets" / "schemas" / "cell-descriptor.schema.json")
 
     assert fragment["required"] == schema["required"]
     assert fragment["properties"] == schema["properties"]
@@ -81,3 +81,4 @@ def test_generated_quantitative_properties_fragment_matches_schema() -> None:
     comparable = {key: fragment[key] for key in ("type", "patternProperties", "additionalProperties")}
     expected = {key: schema[key] for key in ("type", "patternProperties", "additionalProperties")}
     assert comparable == expected
+

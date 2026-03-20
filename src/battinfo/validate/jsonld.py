@@ -5,6 +5,7 @@ import json
 from functools import lru_cache
 from importlib import resources
 from typing import Any
+from urllib.request import Request, urlopen
 
 from rdflib import Dataset
 try:
@@ -145,7 +146,28 @@ def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]
 def _pyld_base_document_loader() -> Any:
     if pyld_jsonld is None:
         return None
-    return pyld_jsonld.requests_document_loader(timeout=10)
+    try:
+        return pyld_jsonld.requests_document_loader(timeout=10)
+    except ModuleNotFoundError:
+        return _stdlib_document_loader
+
+
+def _stdlib_document_loader(url: str, _options: dict[str, Any]) -> dict[str, Any]:
+    request = Request(
+        url,
+        headers={
+            "Accept": "application/ld+json, application/json;q=0.9, */*;q=0.1",
+            "User-Agent": "battinfo-jsonld-loader/0.1",
+        },
+    )
+    with urlopen(request, timeout=10) as response:  # noqa: S310 - JSON-LD contexts are fetched from caller-provided URLs.
+        charset = response.headers.get_content_charset() or "utf-8"
+        document = json.loads(response.read().decode(charset))
+        return {
+            "contextUrl": None,
+            "documentUrl": response.geturl(),
+            "document": document,
+        }
 
 
 @lru_cache(maxsize=32)

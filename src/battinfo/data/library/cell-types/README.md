@@ -5,4 +5,5 @@ shipped with the BattINFO Python package.
 
 The canonical editable source remains:
 
-- `assets/library/cell-types/`
+- `.battinfo/library/cell-types/`
+

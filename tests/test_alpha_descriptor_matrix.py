@@ -16,7 +16,7 @@ def _load_json(path: Path) -> dict:
 
 
 def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path: Path) -> None:
-    examples_dir = ROOT / "assets" / "examples" / "battery-descriptors"
+    examples_dir = ROOT / "examples" / "cell-descriptors"
     example_names = [
         "alpha-coin-detailed.example.json",
         "alpha-cylindrical-detailed.example.json",
@@ -33,7 +33,7 @@ def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path:
 
     for example_name in example_names:
         record = _load_json(examples_dir / example_name)
-        result = validate_json(record, profile="battery-descriptor")
+        result = validate_json(record, profile="cell-descriptor")
         assert result.ok, f"{example_name} failed validation: {result.errors}"
 
         payload = save_library_cell_type(
@@ -70,4 +70,6 @@ def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path:
     prismatic_rows = query_library_cell_types(directory=library_root, format="prismatic")
     assert len(prismatic_rows) == 1
     assert prismatic_rows[0]["construction"]["layer_count"] == 24
+
+
 

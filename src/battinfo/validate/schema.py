@@ -15,10 +15,10 @@ from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPo
 
 PROFILE_TO_SCHEMA = {
     "base": "battinfo.base.schema.json",
-    "battery-descriptor": "battery-descriptor.schema.json",
+    "cell-descriptor": "cell-descriptor.schema.json",
     "batterypass": "profiles/batterypass.schema.json",
+    "test-protocol": "test-protocol.schema.json",
     "test": "test.schema.json",
-    "cell-type-datasheet": "cell-type-datasheet.schema.json",
 }
 
 FORMAT_CHECKER = FormatChecker()
@@ -91,10 +91,8 @@ def _validator_code(error: ValidationError) -> str:
 
 
 def _resource_type_from_profile(profile: str | None) -> str | None:
-    if profile == "battery-descriptor":
-        return "battery-descriptor"
-    if profile == "cell-type-datasheet":
-        return "cell-type-datasheet"
+    if profile == "cell-descriptor":
+        return "cell-descriptor"
     return None
 
 
@@ -142,3 +140,4 @@ def validate_profile(
         )
         return ValidationReport(issues=(issue,), policy=policy)
     return validate_schema_data(data, schema_for_profile(profile), profile=profile, policy=policy)
+

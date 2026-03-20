@@ -45,7 +45,7 @@ Purpose:
 
 Scope:
 - All canonical records.
-- Authoring profiles such as `battery-descriptor`, `cell-type-datasheet`, and ingest manifests.
+- Authoring profiles such as `cell-descriptor`, plus ingest manifests and canonical record validation.
 
 Required outcomes:
 - Enforce JSON Schema formats such as `uri`, `email`, `date`, and `date-time`.
@@ -247,4 +247,5 @@ BattINFO validation is robust enough for downstream systems when:
 - semantic and publication validation exist for core resources,
 - CI exercises both positive and negative fixtures,
 - downstream clients can pin a policy and trust pass/fail behavior.
+
 

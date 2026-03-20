@@ -138,7 +138,7 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     raw.write_text("dummy-a", encoding="utf-8")
 
     report = publish_dataset_metadata(
-        cell_specification=ROOT / "assets" / "library" / "cell-types" / "ENERGIZER__CR2032.json",
+        cell_specification=ROOT / "src" / "battinfo" / "data" / "library" / "cell-types" / "ENERGIZER__CR2032.json",
         datasheet_path=datasheet,
         dataset_dirs=[dataset_dir],
         staging_root=tmp_path / "staging",
@@ -335,3 +335,4 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     html_text = Path(result["html_path"]).read_text(encoding="utf-8")
     assert "application/ld+json" in html_text
     assert "Energizer CR2032 dataset" in html_text
+

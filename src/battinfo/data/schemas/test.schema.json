@@ -42,6 +42,9 @@
           "type": "string",
           "minLength": 1
         },
+        "protocol_id": {
+          "$ref": "#/$defs/TestProtocolIri"
+        },
         "description": {
           "type": "string"
         },
@@ -173,6 +176,10 @@
     "TestIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "TestProtocolIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/test-protocol/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     }
   }
 }

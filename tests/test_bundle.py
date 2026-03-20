@@ -282,7 +282,7 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
 
 
 def test_load_cell_specification_from_library_record() -> None:
-    spec = load_cell_specification(ROOT / "assets" / "library" / "cell-types" / "A123__ANR26650M1-B.json")
+    spec = load_cell_specification(ROOT / "src" / "battinfo" / "data" / "library" / "cell-types" / "A123__ANR26650M1-B.json")
 
     assert spec.model == "ANR26650M1-B"
     assert spec.positive_electrode is not None
@@ -297,7 +297,7 @@ def test_load_cell_specification_from_library_record() -> None:
 
 
 def test_derive_cell_type_from_library_record_mapping() -> None:
-    spec_record = json.loads((ROOT / "assets" / "library" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
+    spec_record = json.loads((ROOT / "src" / "battinfo" / "data" / "library" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
 
     cell_type = derive_cell_type(spec_record)
 
@@ -418,4 +418,5 @@ def test_cell_specification_accepts_human_first_helper_objects() -> None:
     assert record["specification"]["construction"]["layer_count"] == 18
     assert record["specification"]["positive_electrode"]["coating"]["component"]["additive"][0]["name"] == "Carbon black"
     assert record["specification"]["electrolyte"]["salt"]["property"]["concentration"]["value"] == 1.0
+
 

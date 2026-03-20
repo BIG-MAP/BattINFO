@@ -167,6 +167,19 @@
           "type": "string",
           "pattern": "^[RP][A-Za-z0-9]+(?:[/-][A-Za-z0-9]+)*$"
         },
+        "iecCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "countryOfOrigin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1800,
+          "maximum": 3000
+        },
         "chemistry": {
           "type": "string",
           "minLength": 1
