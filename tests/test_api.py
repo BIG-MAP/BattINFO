@@ -329,6 +329,80 @@ def test_promote_staging_cell_type_writes_curated_record_json(tmp_path: Path) ->
     assert record["provenance"]["source_file"] == "SUNWODA__BM68.json"
 
 
+def test_promote_staging_cell_type_reuses_existing_curated_identifier(tmp_path: Path) -> None:
+    draft_path = tmp_path / "staging" / "GOOGLE__G20M7.json"
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Google",
+                "model": "G20M7",
+                "year": 2025,
+                "format": "prismatic",
+                "chemistry": "Li-ion",
+                "positive_electrode_basis": "LCO",
+                "negative_electrode_basis": "Graphite",
+                "specs": {"nominal_voltage": {"value": 3.9, "unit": "V"}},
+                "provenance": {"source_type": "label"},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    curated_root = tmp_path / "records" / "cell-types"
+    target_path = curated_root / "google-g20m7-2025" / "record.json"
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.0",
+                "product": {
+                    "id": "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0",
+                    "short_id": "123456",
+                    "identifier": "cell-type:1234-5678-9abc-def0",
+                    "name": "Google G20M7",
+                    "model": "G20M7",
+                    "manufacturer": {"type": "Organization", "name": "Google"},
+                    "cellFormat": "prismatic",
+                    "chemistry": "Li-ion",
+                    "positiveElectrodeBasis": "LCO",
+                    "negativeElectrodeBasis": "Graphite",
+                    "year": 2025,
+                },
+                "specs": {"nominal_voltage": {"value": 3.9, "unit": "V"}},
+                "provenance": {
+                    "source_type": "label",
+                    "source_file": "GOOGLE__G20M7.json",
+                    "retrieved_at": 1771804800,
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    dry_run_payload = promote_staging_cell_type(
+        draft_path,
+        curated_root=curated_root,
+        validation_policy="strict",
+        dry_run=True,
+    )
+    assert dry_run_payload["record"]["product"]["id"] == "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0"
+    assert dry_run_payload["record"]["product"]["short_id"] == "123456"
+
+    payload = promote_staging_cell_type(
+        draft_path,
+        curated_root=curated_root,
+        validation_policy="strict",
+    )
+    assert payload["record"]["product"]["id"] == "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0"
+
+    record = json.loads(target_path.read_text(encoding="utf-8"))
+    assert record["product"]["id"] == "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0"
+    assert record["product"]["short_id"] == "123456"
+
+
 def test_validate_staging_cell_type_uses_revision_when_year_missing(tmp_path: Path) -> None:
     draft_path = tmp_path / "GOOGLE__G20M7.json"
     draft_path.write_text(

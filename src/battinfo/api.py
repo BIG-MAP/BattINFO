@@ -923,6 +923,19 @@ def validate_staging_cell_types(
     }
 
 
+def _existing_curated_cell_type_id(target_path: Path) -> str | None:
+    if not target_path.exists():
+        return None
+    try:
+        payload = _load_json(target_path)
+    except Exception:  # noqa: BLE001
+        return None
+    product = payload.get("product")
+    if isinstance(product, Mapping) and isinstance(product.get("id"), str):
+        return product["id"]
+    return None
+
+
 def promote_staging_cell_type(
     source: dict[str, Any] | PathLike,
     *,
@@ -942,13 +955,18 @@ def promote_staging_cell_type(
                 "staging cell-type does not have a safe automatic record id. "
                 f"Provide --record-id explicitly; suggested pattern: {identity['record_id_hint']}."
             )
+
+    curated_root_path = _as_path(curated_root)
+    target_path = curated_root_path / resolved_record_id / "record.json"
+    existing_id = _existing_curated_cell_type_id(target_path)
+    if existing_id is not None:
+        draft = draft.model_copy(update={"id": existing_id, "uid": None})
+
     record = _record_from_cell_type(draft)
     report = validate_record_report(record, policy=validation_policy)
     if not report.ok:
         raise ValueError(f"staging cell-type validation failed: {'; '.join(report.render_errors())}")
 
-    curated_root_path = _as_path(curated_root)
-    target_path = curated_root_path / resolved_record_id / "record.json"
     if not dry_run:
         _write_json(target_path, record)
     return {
