@@ -687,19 +687,22 @@ def _upload_workspace_artifacts(
                 raw_path = matches[0]
                 distribution["access_url"] = uploader(key, raw_path)
 
-                # Process timeseries distributions when a processor is supplied
+                # Process timeseries distributions when a processor is supplied.
+                # Keys follow the layout dataset/<short_id>/<filename> (or
+                # timeseries/raw/<short_id>/<filename> if the ingest builder
+                # uses that scheme).  Detect CSV files regardless of prefix.
                 is_timeseries = (
                     processor is not None
                     and resource.get("resource_type") == "dataset"
-                    and distribution.get("media_type") in ("text/csv", "application/vnd.ms-excel", None)
-                    and "timeseries/raw" in key
+                    and filename.lower().endswith(".csv")
                 )
                 if not is_timeseries:
                     continue
 
-                # Derive the short_id from the storage key: timeseries/raw/<id>/file
+                # Derive the short_id from the storage key.
+                # Handles both "dataset/<id>/file" and "timeseries/raw/<id>/file".
                 parts = key.split("/")
-                short_id = parts[2] if len(parts) >= 4 else Path(key).parent.name
+                short_id = parts[-2] if len(parts) >= 3 else Path(key).stem
 
                 try:
                     processed = processor(raw_path, work_dir / short_id)
