@@ -6,6 +6,8 @@ from typing import Any
 
 import typer
 
+from battinfo.bundle import CellType
+from battinfo.publish import publish as publish_object
 from battinfo.runtime import recover_notebook_runtime
 from battinfo.api import (
     CellSpecificationInput,
@@ -49,6 +51,9 @@ from battinfo.api import (
     validate_staging_cell_type as api_validate_staging_cell_type,
     validate_staging_cell_types as api_validate_staging_cell_types,
 )
+from battinfo.demo import run_demo_pipeline, setup_demo_environment
+from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
+from battinfo.storage import build_uploader_from_env
 from battinfo.local_workspace import LocalWorkspace
 from battinfo.workflows.map import run_mapping
 from battinfo.validate import get_validation_policy
@@ -69,6 +74,9 @@ library_template_app = typer.Typer(add_completion=False, no_args_is_help=True, h
 editorial_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Validate and promote battinfo-records style staging drafts.")
 workspace_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Author BattINFO workspaces on disk.")
 notebook_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Notebook runtime recovery helpers.")
+demo_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and verify end-to-end BattINFO demos.")
+ingest_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Register typed resource instances from folder-based evidence.")
+registry_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers.")
 
 app.add_typer(query_app, name="query")
 app.add_typer(create_app, name="create")
@@ -80,6 +88,9 @@ app.add_typer(library_app, name="library")
 app.add_typer(editorial_app, name="editorial")
 app.add_typer(workspace_app, name="workspace")
 app.add_typer(notebook_app, name="notebook")
+app.add_typer(demo_app, name="demo")
+app.add_typer(ingest_app, name="ingest")
+app.add_typer(registry_app, name="registry")
 library_app.add_typer(library_query_app, name="query")
 library_app.add_typer(library_save_app, name="save")
 library_app.add_typer(library_template_app, name="template")
@@ -169,7 +180,7 @@ def _check_workspace_output_format(output_format: str) -> str:
 
 
 def _render_notebook_recovery(payload: dict[str, Any]) -> None:
-    typer.echo(f"Project root: {payload['project_root']}")
+    typer.echo(f"Workspace root: {payload['workspace_root']}")
     typer.echo(f"Kernel processes found: {payload['kernel_process_count']}")
     typer.echo(f"Processes terminated: {payload['terminated_pid_count']}")
     typer.echo(f"Processes killed: {payload['killed_pid_count']}")
@@ -178,6 +189,13 @@ def _render_notebook_recovery(payload: dict[str, Any]) -> None:
         typer.echo("Cleared runtime state:")
         for path in payload["cleared_runtime_paths"]:
             typer.echo(f"- {path}")
+
+
+def _load_cell_type_input(path: Path) -> CellType:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload.get("product"), dict):
+        return CellType.from_record(payload)
+    return CellType(**payload)
 
 
 def _init_example_document(profile: str) -> dict[str, Any]:
@@ -301,18 +319,18 @@ def validate(
 
 @app.command()
 def init(
-    project_dir: Path = typer.Argument(...),
+    workspace_dir: Path = typer.Argument(...),
     profile: str = typer.Option("cell-descriptor", help="Profile to scaffold."),
 ) -> None:
-    """Create a minimal project scaffold with an example JSON file."""
-    project_dir.mkdir(parents=True, exist_ok=True)
-    example_path = project_dir / "battinfo.json"
+    """Create a minimal workspace scaffold with an example JSON file."""
+    workspace_dir.mkdir(parents=True, exist_ok=True)
+    example_path = workspace_dir / "battinfo.json"
     if not example_path.exists():
         example_path.write_text(
             json.dumps(_init_example_document(profile), indent=2),
             encoding="utf-8",
         )
-    typer.echo(f"Initialized {project_dir}")
+    typer.echo(f"Initialized {workspace_dir}")
 
 
 @workspace_app.command("init")
@@ -382,9 +400,330 @@ def workspace_bundle(
     typer.echo(f"Registry intake: {payload['registry_intake_path']}")
 
 
+@demo_app.command("setup")
+def demo_setup(
+    root: Path = typer.Argument(Path(".battinfo/demo-e2e")),
+    registry: str = typer.Option("digibatt/hello-world", help="Registry tenant/workspace slug."),
+    publisher_id: str = typer.Option("demo-lab", help="Publisher id used for the generated submission package."),
+    version: str = typer.Option("1.0.0", help="Release version and submission source_version."),
+    force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Author a BattINFO demo environment from Python objects and write a submission package."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = setup_demo_environment(
+            root,
+            registry=registry,
+            publisher_id=publisher_id,
+            version=version,
+            force=force,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Demo root: {payload['demo_root']}")
+    typer.echo(f"Workspace root: {payload['workspace_root']}")
+    typer.echo(f"Submission package: {payload['submission_package_path']}")
+
+
+@demo_app.command("verify")
+def demo_verify(
+    root: Path = typer.Argument(Path(".battinfo/demo-e2e")),
+    registry_url: str = typer.Option(..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."),
+    api_key: str = typer.Option(..., "--api-key", help="Registry submission API key."),
+    platform_url: str | None = typer.Option(
+        None,
+        "--platform-url",
+        help="Optional Battery Genome base URL, for example https://www.battery-genome.org.",
+    ),
+    registry: str = typer.Option("digibatt/hello-world", help="Registry tenant/workspace slug."),
+    publisher_id: str = typer.Option("demo-lab", help="Publisher id used for the generated submission package."),
+    version: str = typer.Option("1.0.0", help="Release version and submission source_version."),
+    api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."),
+    timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="Timeout window for registry and platform checks."),
+    poll_interval_sec: float = typer.Option(1.0, "--poll-interval-sec", help="Polling interval while waiting for responses."),
+    force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Run the BattINFO demo pipeline through registry publication and optional platform verification."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = run_demo_pipeline(
+            root,
+            registry_base_url=registry_url,
+            api_key=api_key,
+            platform_base_url=platform_url,
+            registry=registry,
+            publisher_id=publisher_id,
+            version=version,
+            api_key_header=api_key_header,
+            timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec,
+            force=force,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    target = payload["verification_target"]
+    typer.echo(f"Published {target['resource_type']} {target['canonical_id']}")
+    typer.echo(f"Registry page model: {payload['registry']['page_model_url']}")
+    if payload["platform"] is not None:
+        typer.echo(f"Battery Genome page: {payload['platform']['url']}")
+
+
+@ingest_app.command("inspect")
+def ingest_inspect(
+    ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
+    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
+    manifest: Path | None = typer.Option(None, "--manifest", help="Optional battinfo.ingest.json path."),
+    resource_iri: str | None = typer.Option(None, "--resource-iri", help="Existing BattINFO resource IRI to preserve."),
+    resource_name: str | None = typer.Option(None, "--resource-name", help="Human-facing instance label."),
+    workspace_id: str | None = typer.Option(None, "--workspace-id", help="Workspace id used for bundling/publication."),
+    publisher_id: str | None = typer.Option(None, "--publisher-id", help="Publisher id used for bundling/publication."),
+    source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
+    license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Inspect one ingest folder and infer tests/datasets without writing any records."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = inspect_ingest_root(
+            ingest_root,
+            manifest_path=manifest,
+            resource_type=resource_type,
+            type_record=type_record,
+            resource_iri=resource_iri,
+            resource_name=resource_name,
+            workspace_id=workspace_id,
+            publisher_id=publisher_id,
+            source_version=source_version,
+            license=license,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Ingest root: {payload['ingest_root']}")
+    typer.echo(f"Resource type: {payload['resource_type']}")
+    typer.echo(f"Type record: {payload['type_record']}")
+    typer.echo(f"Resource name: {payload['resource_name']}")
+    typer.echo(f"Photos: {payload['photo_count']}")
+    typer.echo(f"CSV datasets: {payload['csv_count']}")
+    typer.echo(f"Workspace id: {payload['workspace_id']}")
+
+
+@ingest_app.command("init")
+def ingest_init(
+    ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
+    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
+    manifest: Path | None = typer.Option(None, "--manifest", help="Where to write battinfo.ingest.json."),
+    resource_iri: str | None = typer.Option(None, "--resource-iri", help="Existing BattINFO resource IRI to preserve."),
+    resource_name: str | None = typer.Option(None, "--resource-name", help="Human-facing instance label."),
+    workspace_id: str | None = typer.Option(None, "--workspace-id", help="Workspace id used for bundling/publication."),
+    publisher_id: str | None = typer.Option(None, "--publisher-id", help="Publisher id used for bundling/publication."),
+    source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
+    license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
+    overwrite: bool = typer.Option(False, "--force", help="Overwrite an existing manifest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Write battinfo.ingest.json so later build/publish commands only need the folder path."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = write_ingest_manifest(
+            ingest_root,
+            manifest_path=manifest,
+            resource_type=resource_type,
+            type_record=type_record,
+            resource_iri=resource_iri,
+            resource_name=resource_name,
+            workspace_id=workspace_id,
+            publisher_id=publisher_id,
+            source_version=source_version,
+            license=license,
+            overwrite=overwrite,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Manifest: {payload['manifest_path']}")
+    typer.echo(f"Ingest root: {payload['ingest_root']}")
+
+
+@ingest_app.command("build")
+def ingest_build(
+    ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
+    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
+    manifest: Path | None = typer.Option(None, "--manifest", help="Optional battinfo.ingest.json path."),
+    workspace_root: Path | None = typer.Option(None, "--workspace-root", help="Where to write the authored workspace."),
+    resource_iri: str | None = typer.Option(None, "--resource-iri", help="Existing BattINFO resource IRI to preserve."),
+    resource_name: str | None = typer.Option(None, "--resource-name", help="Human-facing instance label."),
+    workspace_id: str | None = typer.Option(None, "--workspace-id", help="Workspace id used for bundling/publication."),
+    tenant: str | None = typer.Option(None, "--tenant", help="Optional tenant id recorded in the workspace manifest."),
+    publisher_id: str | None = typer.Option(None, "--publisher-id", help="Publisher id used for bundling/publication."),
+    source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
+    license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
+    artifact_base_url: str | None = typer.Option(None, "--artifact-base-url", help="Optional public base URL for packaged artifact files."),
+    clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
+    bundle: bool = typer.Option(True, "--bundle/--no-bundle", help="Also build the submission package after authoring the workspace."),
+    validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Create the linked ingest workspace from one evidence folder."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = build_ingest_workspace(
+            ingest_root,
+            resource_type=resource_type,
+            type_record=type_record,
+            manifest_path=manifest,
+            resource_iri=resource_iri,
+            resource_name=resource_name,
+            workspace_root=workspace_root,
+            workspace_id=workspace_id,
+            tenant=tenant,
+            publisher_id=publisher_id,
+            source_version=source_version,
+            license=license,
+            artifact_base_url=artifact_base_url,
+            clean=clean,
+            validation_policy=validation_policy,
+            bundle=bundle,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Resource type: {payload['resource_type']}")
+    typer.echo(f"Workspace root: {payload['workspace_root']}")
+    typer.echo(f"Cells: {payload['counts']['cells']}")
+    typer.echo(f"Tests: {payload['counts']['tests']}")
+    typer.echo(f"Datasets: {payload['counts']['datasets']}")
+    if payload.get("submission_package_path") is not None:
+        typer.echo(f"Submission package: {payload['submission_package_path']}")
+
+
+@ingest_app.command("publish")
+def ingest_publish(
+    ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
+    registry_url: str | None = typer.Option(None, "--registry-url", help="Registry base URL. Env: BATTINFO_REGISTRY_URL."),
+    api_key: str | None = typer.Option(None, "--api-key", help="Registry submission API key. Env: BATTINFO_API_KEY."),
+    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
+    manifest: Path | None = typer.Option(None, "--manifest", help="Optional battinfo.ingest.json path."),
+    workspace_root: Path | None = typer.Option(None, "--workspace-root", help="Where to write the authored workspace."),
+    resource_iri: str | None = typer.Option(None, "--resource-iri", help="Existing BattINFO resource IRI to preserve."),
+    resource_name: str | None = typer.Option(None, "--resource-name", help="Human-facing instance label."),
+    workspace_id: str | None = typer.Option(None, "--workspace-id", help="Workspace id used for bundling/publication."),
+    tenant: str | None = typer.Option(None, "--tenant", help="Optional tenant id recorded in the workspace manifest."),
+    publisher_id: str | None = typer.Option(None, "--publisher-id", help="Publisher id used for publication."),
+    source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
+    license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
+    artifact_base_url: str | None = typer.Option(None, "--artifact-base-url", help="Public base URL for packaged artifact files. Env: BATTINFO_STORAGE_PUBLIC_BASE_URL."),
+    platform_url: str | None = typer.Option(None, "--platform-url", help="Optional Battery Genome base URL."),
+    api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry API key header."),
+    timeout_sec: float = typer.Option(300.0, "--timeout-sec", help="Registry submission timeout in seconds."),
+    clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
+    validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Build and publish one ingest workspace in a single command.
+
+    Registry credentials and artifact storage are read from environment
+    variables when not supplied as flags:
+
+    \b
+      BATTINFO_REGISTRY_URL          registry base URL
+      BATTINFO_API_KEY               publisher API key
+      BATTINFO_STORAGE_BUCKET        S3/R2 bucket name (enables artifact upload)
+      BATTINFO_STORAGE_ENDPOINT_URL  S3-compatible endpoint (for R2, Minio, etc.)
+      BATTINFO_STORAGE_ACCESS_KEY_ID
+      BATTINFO_STORAGE_SECRET_ACCESS_KEY
+      BATTINFO_STORAGE_PUBLIC_BASE_URL  public CDN base URL for artifact links
+    """
+    import os
+
+    resolved_registry_url = registry_url or os.environ.get("BATTINFO_REGISTRY_URL", "").strip()
+    if not resolved_registry_url:
+        typer.echo("Registry URL is required. Pass --registry-url or set BATTINFO_REGISTRY_URL.")
+        raise typer.Exit(code=1)
+
+    resolved_api_key = api_key or os.environ.get("BATTINFO_API_KEY", "").strip()
+    if not resolved_api_key:
+        typer.echo("API key is required. Pass --api-key or set BATTINFO_API_KEY.")
+        raise typer.Exit(code=1)
+
+    # Resolve artifact_base_url from env if not passed
+    resolved_artifact_base_url = artifact_base_url or os.environ.get("BATTINFO_STORAGE_PUBLIC_BASE_URL", "").strip() or None
+
+    # Wire artifact uploader from env when storage is configured
+    uploader = build_uploader_from_env()
+
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        payload = publish_ingest_workspace(
+            ingest_root,
+            resource_type=resource_type,
+            type_record=type_record,
+            manifest_path=manifest,
+            resource_iri=resource_iri,
+            resource_name=resource_name,
+            workspace_root=workspace_root,
+            workspace_id=workspace_id,
+            tenant=tenant,
+            publisher_id=publisher_id,
+            source_version=source_version,
+            license=license,
+            artifact_base_url=resolved_artifact_base_url,
+            clean=clean,
+            validation_policy=validation_policy,
+            registry_base_url=resolved_registry_url,
+            api_key=resolved_api_key,
+            api_key_header=api_key_header,
+            artifact_uploader=uploader,
+            platform_base_url=platform_url,
+            timeout_sec=timeout_sec,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    typer.echo(f"Resource type: {payload['resource_type']}")
+    typer.echo(f"Workspace root: {payload['build']['workspace_root']}")
+    typer.echo(f"Primary canonical id: {payload['canonical_ids']['cell']}")
+    if payload["registry"]["page_model_url"] is not None:
+        typer.echo(f"Registry page model: {payload['registry']['page_model_url']}")
+    if payload["platform"] is not None:
+        typer.echo(f"Battery Genome page: {payload['platform']['url']}")
+
+
 @notebook_app.command("recover")
 def notebook_recover(
-    project_root: Path = typer.Option(Path("."), "--project-root", file_okay=False, dir_okay=True, readable=True),
+    workspace_root: Path = typer.Option(Path("."), "--workspace-root", file_okay=False, dir_okay=True, readable=True),
     venv_path: Path = typer.Option(Path(".venv"), "--venv-path", help="Relative or absolute venv root."),
     clear_local_runtime: bool = typer.Option(
         True,
@@ -402,7 +741,7 @@ def notebook_recover(
     fmt = _check_workspace_output_format(output_format)
     try:
         payload = recover_notebook_runtime(
-            project_root=project_root,
+            workspace_root=workspace_root,
             venv_path=venv_path,
             clear_local_runtime=clear_local_runtime,
             force_kill=force_kill,
@@ -806,7 +1145,7 @@ def library_template_cell_type(
     _emit_table([payload], ["status", "resource", "id", "path"])
 
 
-@library_query_app.command("cell-types")
+@library_query_app.command("cell-type")
 def library_query_cell_types(
     id: str | None = typer.Option(None, help="Filter by reusable cell-type IRI."),
     manufacturer: str | None = typer.Option(None, help="Filter by manufacturer."),
@@ -820,7 +1159,7 @@ def library_query_cell_types(
     nominal_capacity_max: float | None = typer.Option(None, help="Filter maximum nominal capacity."),
     nominal_voltage_min: float | None = typer.Option(None, help="Filter minimum nominal voltage."),
     nominal_voltage_max: float | None = typer.Option(None, help="Filter maximum nominal voltage."),
-    library_dir: Path = typer.Option(Path(".battinfo/library/cell-types"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(Path(".battinfo/library/cell-type"), help="Reusable library cell-specification directory."),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -845,7 +1184,7 @@ def library_query_cell_types(
         offset=offset,
     )
     payload = {
-        "resource": "library-cell-types",
+        "resource": "library-cell-type",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -890,9 +1229,9 @@ def library_save_cell_type(
         readable=True,
         help="Optional JSON object for cell-specification specification.property.",
     ),
-    library_dir: Path = typer.Option(Path(".battinfo/library/cell-types"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(Path(".battinfo/library/cell-type"), help="Reusable library cell-specification directory."),
     packaged_dir: Path = typer.Option(
-        Path("src/battinfo/data/library/cell-types"),
+        Path("src/battinfo/data/library/cell-type"),
         help="Packaged reusable library cell-specification directory.",
     ),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
@@ -903,15 +1242,15 @@ def library_save_cell_type(
     ),
     build_rdf: bool = typer.Option(False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after saving."),
     output_jsonld_dir: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-types"),
+        Path(".battinfo/library-rdf/cell-type"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path(".battinfo/ontology/library/cell-types.jsonld"),
+        Path(".battinfo/ontology/library/cell-type.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-types.index.json"),
+        Path(".battinfo/library-rdf/cell-type.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
     clean_output: bool = typer.Option(False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."),
@@ -980,7 +1319,7 @@ def library_save_cell_type(
 @library_app.command("build-rdf")
 def library_build_rdf(
     input_dir: Path = typer.Option(
-        Path(".battinfo/library/cell-types"),
+        Path(".battinfo/library/cell-type"),
         "--input-dir",
         exists=True,
         file_okay=False,
@@ -989,15 +1328,15 @@ def library_build_rdf(
         help="Directory containing reusable library cell-specification JSON files.",
     ),
     output_jsonld_dir: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-types"),
+        Path(".battinfo/library-rdf/cell-type"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path(".battinfo/ontology/library/cell-types.jsonld"),
+        Path(".battinfo/ontology/library/cell-type.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-types.index.json"),
+        Path(".battinfo/library-rdf/cell-type.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
     glob: str = typer.Option("*.json", help="File glob used to select library cell specifications."),
@@ -1024,7 +1363,7 @@ def library_build_rdf(
     _emit_table([payload], ["status", "entry_count", "output_jsonld_dir", "aggregate_jsonld", "manifest_json"])
 
 
-@query_app.command("cell-types")
+@query_app.command("cell-type")
 def query_cell_types(
     id: str | None = typer.Option(None, help="Filter by canonical cell-type IRI."),
     manufacturer: str | None = typer.Option(None, help="Filter by manufacturer."),
@@ -1055,7 +1394,7 @@ def query_cell_types(
         offset=offset,
     )
     payload = {
-        "resource": "cell-types",
+        "resource": "cell-type",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -1110,7 +1449,7 @@ def query_cell_instances(
     _emit_table(rows, ["id", "type_id", "short_id", "serial_number", "dataset_id", "source_type"])
 
 
-@query_app.command("datasets")
+@query_app.command("dataset")
 def query_datasets(
     id: str | None = typer.Option(None, help="Filter by canonical dataset IRI."),
     title_contains: str | None = typer.Option(None, help="Filter by title substring."),
@@ -1123,7 +1462,7 @@ def query_datasets(
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
 ) -> None:
-    """Query canonical datasets."""
+    """Query canonical dataset records."""
     fmt = _check_output_format(output_format)
     rows = api_query_datasets(
         id=id,
@@ -1137,7 +1476,7 @@ def query_datasets(
         offset=offset,
     )
     payload = {
-        "resource": "datasets",
+        "resource": "dataset",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -1273,7 +1612,7 @@ def save_record(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True),
     source_root: Path = typer.Option(
         Path("examples"),
-        help="Root directory containing cell-types, cell-instances, and datasets.",
+        help="Root directory containing cell-type, cell-instances, and dataset.",
     ),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
@@ -1758,7 +2097,7 @@ def validate_staging_cell_type(
     _emit_table([payload], ["ok", "record_id", "record_id_basis", "requires_record_id", "source_path"])
 
 
-@editorial_app.command("validate-staging-cell-types")
+@editorial_app.command("validate-staging-cell-type")
 def validate_staging_cell_types(
     input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
@@ -1793,13 +2132,13 @@ def validate_staging_cell_types(
 @editorial_app.command("promote-staging-cell-type")
 def promote_staging_cell_type(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
-    curated_root: Path = typer.Option(Path("records/cell-types"), help="Curated cell-types root."),
+    curated_root: Path = typer.Option(Path("records/cell-type"), help="Curated cell-type root."),
     record_id: str | None = typer.Option(None, "--record-id", help="Override the curated record id."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Promote one staging cell-type draft into records/cell-types/<record-id>/record.json."""
+    """Promote one staging cell-type draft into records/cell-type/<record-id>/record.json."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
@@ -1819,10 +2158,10 @@ def promote_staging_cell_type(
     _emit_table([payload], ["status", "record_id", "record_id_basis", "source_path", "target_path", "dry_run"])
 
 
-@editorial_app.command("promote-staging-cell-types")
+@editorial_app.command("promote-staging-cell-type-batch")
 def promote_staging_cell_types(
     input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
-    curated_root: Path = typer.Option(Path("records/cell-types"), help="Curated cell-types root."),
+    curated_root: Path = typer.Option(Path("records/cell-type"), help="Curated cell-type root."),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
@@ -1858,7 +2197,7 @@ def promote_staging_cell_types(
 @editorial_app.command("build-curated-cell-type-submission")
 def build_curated_cell_type_submission(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-type record.json or equivalent canonical JSON."),
-    project_id: str = typer.Option(..., help="Registry project id."),
+    workspace_id: str = typer.Option(..., "--workspace-id", help="Registry workspace id."),
     publisher_id: str = typer.Option(..., help="Registry publisher id."),
     source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
     source_local_id: str | None = typer.Option(None, help="Override source_local_id; defaults to the curated record id inferred from the path."),
@@ -1876,7 +2215,7 @@ def build_curated_cell_type_submission(
     try:
         payload = api_build_curated_cell_type_submission(
             input_path,
-            project_id=project_id,
+            workspace_id=workspace_id,
             publisher_id=publisher_id,
             source_version=source_version,
             source_local_id=source_local_id,
@@ -1896,20 +2235,20 @@ def build_curated_cell_type_submission(
         return
     resource = payload.get("resource") if isinstance(payload, dict) else None
     summary = {
-        "project_id": payload.get("project_id"),
+        "workspace_id": workspace_id,
         "publisher_id": payload.get("publisher_id"),
         "source_version": payload.get("source_version"),
         "resource_type": resource.get("resource_type") if isinstance(resource, dict) else None,
         "source_local_id": resource.get("source_local_id") if isinstance(resource, dict) else None,
         "out_path": str(out_path) if out_path is not None else "",
     }
-    _emit_table([summary], ["project_id", "publisher_id", "source_version", "resource_type", "source_local_id", "out_path"])
+    _emit_table([summary], ["workspace_id", "publisher_id", "source_version", "resource_type", "source_local_id", "out_path"])
 
 
 @editorial_app.command("publish-curated-cell-type")
 def publish_curated_cell_type(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-type record.json or equivalent canonical JSON."),
-    project_id: str = typer.Option(..., help="Registry project id."),
+    workspace_id: str = typer.Option(..., "--workspace-id", help="Registry workspace id."),
     publisher_id: str = typer.Option(..., help="Registry publisher id."),
     source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
     registry_url: str = typer.Option(..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."),
@@ -1932,7 +2271,7 @@ def publish_curated_cell_type(
         if out_path is not None:
             request_payload = api_build_curated_cell_type_submission(
                 input_path,
-                project_id=project_id,
+                workspace_id=workspace_id,
                 publisher_id=publisher_id,
                 source_version=source_version,
                 source_local_id=source_local_id,
@@ -1945,7 +2284,7 @@ def publish_curated_cell_type(
             _write_json_file(out_path, request_payload)
         payload = api_publish_curated_cell_type(
             input_path,
-            project_id=project_id,
+            workspace_id=workspace_id,
             publisher_id=publisher_id,
             source_version=source_version,
             registry_base_url=registry_url,
@@ -1974,6 +2313,97 @@ def publish_curated_cell_type(
         "created_count": response_payload.get("created_count") if isinstance(response_payload, dict) else None,
     }
     _emit_table([summary], ["status", "status_code", "submission_mode", "resource_count", "created_count"])
+
+
+@publish_app.command("cell-type")
+def publish_cell_type(
+    input_path: Path | None = typer.Option(
+        None,
+        "--input",
+        exists=True,
+        dir_okay=False,
+        readable=True,
+        help="Optional JSON draft or canonical cell-type record to load.",
+    ),
+    manufacturer: str | None = typer.Option(None, help="Cell manufacturer."),
+    model: str | None = typer.Option(None, help="Cell model."),
+    cell_format: str | None = typer.Option(None, "--cell-format", help="Cell format, for example cylindrical or pouch."),
+    chemistry: str | None = typer.Option(None, help="Cell chemistry."),
+    name: str | None = typer.Option(None, help="Optional display name."),
+    size_code: str | None = typer.Option(None, "--size-code", help="Optional size code."),
+    iec_code: str | None = typer.Option(None, "--iec-code", help="Optional IEC code."),
+    country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin."),
+    year: int | None = typer.Option(None, help="Optional release or production year."),
+    source_type: str | None = typer.Option(None, "--source-type", help="Optional provenance source type."),
+    source_file: str | None = typer.Option(None, "--source-file", help="Optional provenance source file."),
+    destination: str = typer.Option("local", help="Publish destination: local|registry|battery-genome|staging|production."),
+    root: Path | None = typer.Option(None, "--root", help="Optional workspace root for generated artifacts."),
+    force: bool = typer.Option(False, "--force", help="Replace an existing generated workspace root."),
+    validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    registry_url: str | None = typer.Option(None, "--registry-url", help="Optional registry base URL override."),
+    api_key: str | None = typer.Option(None, "--api-key", help="Optional registry API key override."),
+    api_key_header: str | None = typer.Option(None, "--api-key-header", help="Optional registry API key header."),
+    platform_url: str | None = typer.Option(None, "--platform-url", help="Optional Battery Genome base URL override."),
+    workspace_id: str | None = typer.Option(None, "--workspace-id", help="Optional workspace id override."),
+    publisher_id: str | None = typer.Option(None, "--publisher-id", help="Optional publisher id override."),
+    source_version: str | None = typer.Option(None, "--source-version", help="Optional source version override."),
+    output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
+) -> None:
+    """Publish one cell type through the simplified BattINFO publish surface."""
+    fmt = _check_workspace_output_format(output_format)
+    try:
+        if input_path is not None:
+            cell_type = _load_cell_type_input(input_path)
+        else:
+            if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model, cell_format, chemistry)):
+                raise typer.BadParameter(
+                    "Provide --input or all of --manufacturer, --model, --cell-format, and --chemistry."
+                )
+            cell_type = CellType(
+                manufacturer=manufacturer.strip(),
+                model=model.strip(),
+                format=cell_format.strip(),
+                chemistry=chemistry.strip(),
+                name=name,
+                size_code=size_code,
+                iec_code=iec_code,
+                country_of_origin=country_of_origin,
+                year=year,
+                source={"type": source_type, "file": source_file},
+            )
+
+        result = publish_object(
+            cell_type,
+            destination=destination,
+            root=root,
+            force=force,
+            validation_policy=_check_validation_policy(validation_policy),
+            registry_base_url=registry_url,
+            api_key=api_key,
+            api_key_header=api_key_header,
+            platform_base_url=platform_url,
+            workspace_id=workspace_id,
+            publisher_id=publisher_id,
+            source_version=source_version,
+        )
+    except typer.BadParameter:
+        raise
+    except (OSError, RuntimeError, ValueError, TypeError) as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+
+    payload = result.model_dump(mode="json")
+    if fmt == "json":
+        _emit_json(payload)
+        return
+
+    typer.echo(f"Published cell type to {payload['destination']}")
+    typer.echo(f"Canonical id: {payload.get('canonical_id')}")
+    typer.echo(f"Canonical IRI: {payload.get('canonical_iri')}")
+    if payload.get("registry_resource_url"):
+        typer.echo(f"Registry resource: {payload['registry_resource_url']}")
+    if payload.get("page_url"):
+        typer.echo(f"Battery Genome page: {payload['page_url']}")
 
 
 @publish_app.command("record")
@@ -2055,7 +2485,7 @@ def index_build(
         file_okay=False,
         dir_okay=True,
         readable=True,
-        help="Root directory containing cell-types, cell-instances, and datasets subdirectories.",
+        help="Root directory containing cell-type, cell-instances, and dataset subdirectories.",
     ),
     out: Path = typer.Option(Path(".battinfo/index.json"), help="Output index JSON path."),
     glob: str = typer.Option("*.json", help="File glob to include in index build."),
@@ -2131,5 +2561,115 @@ def index_stats(
     )
 
 
+# ── registry commands ─────────────────────────────────────────────────────────
+
+@registry_app.command("bootstrap")
+def registry_bootstrap(
+    tenant_id: str = typer.Option("battinfo", "--tenant-id", help="Tenant id to create or verify."),
+    tenant_name: str = typer.Option("BattINFO", "--tenant-name", help="Tenant display name."),
+    workspace_id: str = typer.Option(..., "--workspace-id", help="Workspace id to create or verify."),
+    workspace_name: str | None = typer.Option(None, "--workspace-name", help="Workspace display name (defaults to workspace-id)."),
+    publisher_id: str = typer.Option(..., "--publisher-id", help="Publisher id to create or verify."),
+    publisher_name: str | None = typer.Option(None, "--publisher-name", help="Publisher display name (defaults to publisher-id)."),
+    api_key_file: Path | None = typer.Option(None, "--api-key-file", help="File to write the publisher API key to. Env: BATTINFO_API_KEY_FILE."),
+    registry_url: str | None = typer.Option(None, "--registry-url", help="Registry base URL. Env: BATTINFO_REGISTRY_URL."),
+    admin_token: str | None = typer.Option(None, "--admin-token", help="Registry admin token. Env: BATTINFO_ADMIN_TOKEN."),
+    output_format: str = typer.Option("text", "--format", help="Output format: json|text."),
+) -> None:
+    """Idempotently create a tenant, workspace, and publisher on the registry.
+
+    Writes the publisher API key to --api-key-file (or BATTINFO_API_KEY_FILE)
+    when a new publisher is created.  Safe to re-run; existing resources
+    return HTTP 409 and are silently accepted.
+
+    \b
+    Required env vars (or pass as flags):
+      BATTINFO_REGISTRY_URL    registry base URL
+      BATTINFO_ADMIN_TOKEN     registry admin token
+    """
+    import json as _json
+    import os
+    import urllib.error
+    import urllib.request
+
+    resolved_url = registry_url or os.environ.get("BATTINFO_REGISTRY_URL", "").strip()
+    if not resolved_url:
+        typer.echo("Registry URL is required. Pass --registry-url or set BATTINFO_REGISTRY_URL.")
+        raise typer.Exit(code=1)
+
+    resolved_token = admin_token or os.environ.get("BATTINFO_ADMIN_TOKEN", "").strip()
+    if not resolved_token:
+        typer.echo("Admin token is required. Pass --admin-token or set BATTINFO_ADMIN_TOKEN.")
+        raise typer.Exit(code=1)
+
+    resolved_key_file: Path | None = api_key_file
+    if resolved_key_file is None:
+        env_path = os.environ.get("BATTINFO_API_KEY_FILE", "").strip()
+        resolved_key_file = Path(env_path) if env_path else None
+
+    def _api(method: str, path: str, data: dict) -> tuple[int, dict]:
+        url = resolved_url.rstrip("/") + path
+        body = _json.dumps(data).encode()
+        headers = {
+            "Content-Type": "application/json",
+            "X-Battinfo-Admin-Token": resolved_token,
+        }
+        req = urllib.request.Request(url, data=body, headers=headers, method=method)
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                return resp.status, _json.loads(resp.read())
+        except urllib.error.HTTPError as exc:
+            return exc.code, _json.loads(exc.read())
+
+    results: dict[str, str] = {}
+
+    # Tenant
+    s, _ = _api("POST", "/tenants", {"tenant_id": tenant_id, "display_name": tenant_name})
+    results["tenant"] = "created" if s in (200, 201) else "exists" if s == 409 else f"error-{s}"
+    if s not in (200, 201, 409):
+        typer.echo(f"Tenant creation failed [{s}]")
+        raise typer.Exit(code=1)
+
+    # Workspace
+    s, _ = _api("POST", "/workspaces", {
+        "workspace_id": workspace_id,
+        "tenant_id": tenant_id,
+        "display_name": workspace_name or workspace_id,
+    })
+    results["workspace"] = "created" if s in (200, 201) else "exists" if s == 409 else f"error-{s}"
+    if s not in (200, 201, 409):
+        typer.echo(f"Workspace creation failed [{s}]")
+        raise typer.Exit(code=1)
+
+    # Publisher
+    s, body = _api("POST", "/publishers", {
+        "publisher_id": publisher_id,
+        "workspace_id": workspace_id,
+        "display_name": publisher_name or publisher_id,
+    })
+    results["publisher"] = "created" if s in (200, 201) else "exists" if s == 409 else f"error-{s}"
+    if s not in (200, 201, 409):
+        typer.echo(f"Publisher creation failed [{s}]")
+        raise typer.Exit(code=1)
+
+    api_key: str | None = body.get("api_key") if s in (200, 201) else None
+
+    if api_key and resolved_key_file:
+        resolved_key_file.write_text(api_key, encoding="utf-8")
+        results["api_key_file"] = str(resolved_key_file)
+
+    fmt = _check_output_format(output_format)
+    if fmt == "json":
+        _emit_json({**results, "api_key": api_key})
+        return
+
+    for resource, status in results.items():
+        typer.echo(f"  {resource:12s} {status}")
+    if api_key:
+        typer.echo(f"\n  API key: {api_key}")
+        if resolved_key_file:
+            typer.echo(f"  Saved to: {resolved_key_file}")
+        else:
+            typer.echo("  (pass --api-key-file or set BATTINFO_API_KEY_FILE to save it)")
 
 
