@@ -37,6 +37,11 @@ dependencies = [
 storage = [
   "boto3>=1.34"
 ]
+processing = [
+  "batterydf>=0.1",
+  "matplotlib>=3.8",
+  "plotly>=5.20",
+]
 dev = [
   "build>=1.2",
   "datamodel-code-generator>=0.25",

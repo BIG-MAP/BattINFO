@@ -646,6 +646,7 @@ def ingest_publish(
     timeout_sec: float = typer.Option(300.0, "--timeout-sec", help="Registry submission timeout in seconds."),
     clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
+    process_artifacts: bool = typer.Option(False, "--process-artifacts", help="Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo[processing]."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Build and publish one ingest workspace in a single command.
@@ -680,6 +681,18 @@ def ingest_publish(
     # Wire artifact uploader from env when storage is configured
     uploader = build_uploader_from_env()
 
+    # Wire timeseries processor when --process-artifacts is set
+    processor = None
+    if process_artifacts:
+        try:
+            from battinfo.processing import process_timeseries_csv
+            processor = process_timeseries_csv
+        except ImportError:
+            typer.echo(
+                "Warning: --process-artifacts requires battinfo[processing]. "
+                "Install with: pip install 'battinfo[processing]'"
+            )
+
     fmt = _check_workspace_output_format(output_format)
     try:
         payload = publish_ingest_workspace(
@@ -702,6 +715,7 @@ def ingest_publish(
             api_key=resolved_api_key,
             api_key_header=api_key_header,
             artifact_uploader=uploader,
+            artifact_processor=processor,
             platform_base_url=platform_url,
             timeout_sec=timeout_sec,
         )

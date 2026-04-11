@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import mimetypes
 import re
+import tempfile
 from collections.abc import Callable
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -635,34 +636,117 @@ def _upload_workspace_artifacts(
     submission_package: dict[str, Any],
     ingest_root: Path,
     uploader: Callable[[str, Path], str],
+    processor: Callable[[Path, Path], Any] | None = None,
 ) -> None:
     """Upload distribution files and write access_url on each distribution in-place.
+
+    For timeseries distributions, if *processor* is provided it is called as
+    ``processor(raw_csv_path, work_dir) -> ProcessedTimeseries`` before uploading.
+    The BDF CSV, static PNG, and interactive HTML outputs are added as additional
+    distributions on the same dataset resource and uploaded alongside the raw file.
+    The storage layout is:
+
+        timeseries/raw/<short_id>/<filename>        ← raw CSV (as before)
+        timeseries/bdf/<short_id>/<stem>.bdf.csv    ← BDF-normalised CSV
+        timeseries/plot/<short_id>/<stem>.png        ← static voltage/time plot
+        timeseries/plot/<short_id>/<stem>.html       ← interactive HTML (Plotly)
 
     Args:
         submission_package: The submission package dict (mutated in-place).
         ingest_root: Root directory to search for source files by filename.
-        uploader: Callable ``(key, source_path) -> access_url``. ``key`` is the
-            storage key derived from ``package_path`` with the leading
-            ``artifacts/`` prefix stripped.  The callable is responsible for
-            uploading the file and returning its public access URL.
+        uploader: Callable ``(key, source_path) -> access_url``.
+        processor: Optional callable ``(raw_csv_path, work_dir) -> ProcessedTimeseries``.
+            Import :func:`battinfo.processing.process_timeseries_csv` to use the
+            built-in processor, or supply your own.
     """
-    for resource in submission_package.get("resources", []):
-        if not isinstance(resource, dict):
-            continue
-        for distribution in resource.get("distributions", []):
-            if not isinstance(distribution, dict):
+    with tempfile.TemporaryDirectory(prefix="battinfo-processing-") as _tmpdir:
+        work_dir = Path(_tmpdir)
+
+        for resource in submission_package.get("resources", []):
+            if not isinstance(resource, dict):
                 continue
-            package_path = distribution.get("package_path")
-            if not package_path:
+            distributions = resource.get("distributions", [])
+            if not isinstance(distributions, list):
                 continue
-            key = package_path.replace("\\", "/").lstrip("/")
-            if key.startswith("artifacts/"):
-                key = key[len("artifacts/"):]
-            filename = Path(key).name
-            matches = list(ingest_root.rglob(filename))
-            if not matches:
-                continue
-            distribution["access_url"] = uploader(key, matches[0])
+
+            extra_distributions: list[dict[str, Any]] = []
+
+            for distribution in distributions:
+                if not isinstance(distribution, dict):
+                    continue
+                package_path = distribution.get("package_path")
+                if not package_path:
+                    continue
+                key = package_path.replace("\\", "/").lstrip("/")
+                if key.startswith("artifacts/"):
+                    key = key[len("artifacts/"):]
+                filename = Path(key).name
+                matches = list(ingest_root.rglob(filename))
+                if not matches:
+                    continue
+                raw_path = matches[0]
+                distribution["access_url"] = uploader(key, raw_path)
+
+                # Process timeseries distributions when a processor is supplied
+                is_timeseries = (
+                    processor is not None
+                    and resource.get("resource_type") == "dataset"
+                    and distribution.get("media_type") in ("text/csv", "application/vnd.ms-excel", None)
+                    and "timeseries/raw" in key
+                )
+                if not is_timeseries:
+                    continue
+
+                # Derive the short_id from the storage key: timeseries/raw/<id>/file
+                parts = key.split("/")
+                short_id = parts[2] if len(parts) >= 4 else Path(key).parent.name
+
+                try:
+                    processed = processor(raw_path, work_dir / short_id)
+                except Exception:
+                    continue
+
+                # BDF CSV → timeseries/bdf/<short_id>/<stem>.bdf.csv
+                if processed.bdf_path is not None and processed.bdf_path.exists():
+                    bdf_key = f"timeseries/bdf/{short_id}/{processed.bdf_path.name}"
+                    bdf_url = uploader(bdf_key, processed.bdf_path)
+                    extra_distributions.append({
+                        "title": f"{distribution.get('title', filename)} (BDF)",
+                        "access_url": bdf_url,
+                        "media_type": "text/csv",
+                        "role": "bdf",
+                    })
+
+                # Static PNG → timeseries/plot/<short_id>/<stem>.png
+                if processed.plot_png_path is not None and processed.plot_png_path.exists():
+                    png_key = f"timeseries/plot/{short_id}/{processed.plot_png_path.name}"
+                    png_url = uploader(png_key, processed.plot_png_path)
+                    extra_distributions.append({
+                        "title": f"{distribution.get('title', filename)} (plot)",
+                        "access_url": png_url,
+                        "media_type": "image/png",
+                        "role": "plot_static",
+                    })
+                    # Set as preview image on the dataset's semantic_payload
+                    semantic_payload = resource.get("semantic_payload")
+                    if isinstance(semantic_payload, dict):
+                        semantic_payload.setdefault("preview", {})["image"] = {
+                            "src": png_url,
+                            "alt": distribution.get("title", filename),
+                        }
+
+                # Interactive HTML → timeseries/plot/<short_id>/<stem>.html
+                if processed.plot_html_path is not None and processed.plot_html_path.exists():
+                    html_key = f"timeseries/plot/{short_id}/{processed.plot_html_path.name}"
+                    html_url = uploader(html_key, processed.plot_html_path)
+                    extra_distributions.append({
+                        "title": f"{distribution.get('title', filename)} (interactive)",
+                        "access_url": html_url,
+                        "media_type": "text/html",
+                        "role": "plot_interactive",
+                    })
+
+            distributions.extend(extra_distributions)
 
 
 def publish_ingest_workspace(
@@ -683,6 +767,7 @@ def publish_ingest_workspace(
     clean: bool = False,
     validation_policy: str = "strict",
     artifact_uploader: Callable[[str, Path], str] | None = None,
+    artifact_processor: Callable[[Path, Path], Any] | None = None,
     registry_base_url: str | None = None,
     api_key: str | None = None,
     api_key_header: str = "X-Battinfo-API-Key",
@@ -694,8 +779,15 @@ def publish_ingest_workspace(
     If ``artifact_uploader`` is provided it is called for every distribution
     that has a ``package_path`` before the submission is sent to the registry.
     The callable receives ``(key: str, source_path: Path)`` and must return the
-    public access URL for the uploaded file.  Use this to push files to R2 or
-    another object store as part of the publish flow.
+    public access URL for the uploaded file.
+
+    If ``artifact_processor`` is provided it is called for each timeseries
+    CSV distribution as ``processor(raw_csv_path, work_dir) -> ProcessedTimeseries``
+    before upload.  The built-in processor is
+    :func:`battinfo.processing.process_timeseries_csv` (requires
+    ``battinfo[processing]``).  The processor generates a BDF-normalised CSV,
+    a static PNG plot, and an interactive HTML plot; all three are uploaded to
+    the object store alongside the raw file.
     """
     if registry_base_url is None or not registry_base_url.strip():
         raise ValueError("registry_base_url is required for ingest publication.")
@@ -723,7 +815,12 @@ def publish_ingest_workspace(
     submission_payload = build["submission_package"]
 
     if artifact_uploader is not None:
-        _upload_workspace_artifacts(submission_payload, _as_path(ingest_root), artifact_uploader)
+        _upload_workspace_artifacts(
+            submission_payload,
+            _as_path(ingest_root),
+            artifact_uploader,
+            processor=artifact_processor,
+        )
 
     submit_result = submit_publication_package(
         submission_payload,
