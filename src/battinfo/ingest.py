@@ -738,6 +738,21 @@ def _upload_workspace_artifacts(
                             "alt": distribution.get("title", filename),
                         }
 
+                    # Propagate thumbnail to every other resource in the bundle
+                    # that references this dataset via related_resources, so it
+                    # shows up on cell/test pages as the dataset's preview image.
+                    dataset_local_id = resource.get("source_local_id")
+                    if dataset_local_id:
+                        for other_resource in submission_package.get("resources", []):
+                            if other_resource is resource:
+                                continue
+                            for rel in other_resource.get("related_resources", []):
+                                if rel.get("source_local_id") == dataset_local_id:
+                                    rel.setdefault("preview", {})["thumbnail"] = {
+                                        "src": png_url,
+                                        "alt": distribution.get("title", filename),
+                                    }
+
                 # Plotly JSON → timeseries/plot/<short_id>/<stem>.plot.json
                 if processed.plot_json_path is not None and processed.plot_json_path.exists():
                     json_key = f"timeseries/plot/{short_id}/{processed.plot_json_path.name}"
