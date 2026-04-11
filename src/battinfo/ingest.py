@@ -738,15 +738,15 @@ def _upload_workspace_artifacts(
                             "alt": distribution.get("title", filename),
                         }
 
-                # Interactive HTML → timeseries/plot/<short_id>/<stem>.html
-                if processed.plot_html_path is not None and processed.plot_html_path.exists():
-                    html_key = f"timeseries/plot/{short_id}/{processed.plot_html_path.name}"
-                    html_url = uploader(html_key, processed.plot_html_path)
+                # Plotly JSON → timeseries/plot/<short_id>/<stem>.plot.json
+                if processed.plot_json_path is not None and processed.plot_json_path.exists():
+                    json_key = f"timeseries/plot/{short_id}/{processed.plot_json_path.name}"
+                    json_url = uploader(json_key, processed.plot_json_path)
                     extra_distributions.append({
                         "title": f"{distribution.get('title', filename)} (interactive)",
-                        "access_url": html_url,
-                        "media_type": "text/html",
-                        "role": "plot_interactive",
+                        "access_url": json_url,
+                        "media_type": "application/json",
+                        "role": "plot_data",
                     })
 
             distributions.extend(extra_distributions)

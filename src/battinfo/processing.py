@@ -32,9 +32,10 @@ class ProcessedTimeseries(NamedTuple):
     """Static PNG plot (voltage + current vs time).  ``None`` if matplotlib
     is not installed or reading the BDF CSV failed."""
 
-    plot_html_path: Path | None
-    """Self-contained interactive HTML (Plotly).  ``None`` if plotly is not
-    installed or reading the BDF CSV failed."""
+    plot_json_path: Path | None
+    """Plotly figure JSON (``*.plot.json``).  Suitable for client-side rendering
+    via ``Plotly.react(el, data, layout)``.  ``None`` if plotly is not installed
+    or reading the BDF CSV failed."""
 
 
 def process_timeseries_csv(
@@ -75,12 +76,12 @@ def process_timeseries_csv(
     source_for_plots = bdf_path if bdf_path is not None else csv_path
 
     plot_png_path = _make_static_plot(source_for_plots, work_dir, stem, plot_title, xunit, yunit, yyunit)
-    plot_html_path = _make_interactive_plot(source_for_plots, work_dir, stem, plot_title, xunit, yunit, yyunit)
+    plot_json_path = _make_interactive_plot(source_for_plots, work_dir, stem, plot_title, xunit, yunit, yyunit)
 
     return ProcessedTimeseries(
         bdf_path=bdf_path,
         plot_png_path=plot_png_path,
-        plot_html_path=plot_html_path,
+        plot_json_path=plot_json_path,
     )
 
 
@@ -184,14 +185,20 @@ def _make_interactive_plot(
     yunit: str,
     yyunit: str,
 ) -> Path | None:
-    """Generate a self-contained interactive HTML via bdf.explore (plotly)."""
+    """Generate a Plotly figure JSON file for client-side rendering.
+
+    The JSON file contains the serialised Plotly figure (data + layout) and can
+    be rendered in a browser via ``Plotly.react(el, fig.data, fig.layout)``.
+    Storing JSON rather than a self-contained HTML file avoids the content-type
+    and download-forcing behaviour of R2 public CDN URLs for HTML.
+    """
     try:
         import plotly  # noqa: F401
         import bdf
     except ImportError:
         return None
 
-    out_path = work_dir / f"{stem}.html"
+    out_path = work_dir / f"{stem}.plot.json"
     if out_path.exists():
         return out_path
 
@@ -218,7 +225,7 @@ def _make_interactive_plot(
             backend="plotly",
             title=title,
         )
-        fig.write_html(str(out_path), include_plotlyjs="cdn", full_html=True)
+        out_path.write_text(fig.to_json(), encoding="utf-8")
         return out_path if out_path.exists() else None
     except Exception:
         return None
