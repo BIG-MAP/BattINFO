@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/organization.schema.json",
+  "title": "BattINFO Organization",
+  "description": "Canonical organization record (manufacturer, research lab, university, etc.) using schema.org Organization terms.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "organization",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/OrganizationIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Organization",
+            "Corporation",
+            "Manufacturer",
+            "ResearchOrganization",
+            "EducationalOrganization",
+            "GovernmentOrganization",
+            "NGO",
+            "Other"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Current preferred name of the organization."
+        },
+        "legalName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full legal name, if different from name."
+        },
+        "alternateName": {
+          "anyOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          ],
+          "description": "Former names, abbreviations, or brand names (e.g. 'LG Chem' for LG Energy Solution)."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sameAs": {
+          "anyOf": [
+            { "type": "string", "format": "uri" },
+            {
+              "type": "array",
+              "items": { "type": "string", "format": "uri" },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          ],
+          "description": "Canonical external IRIs (Wikidata, ROR, GRID, LEI) that identify this organization."
+        },
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "addressCountry": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO 3166-1 alpha-2 country code."
+            },
+            "addressRegion": {
+              "type": "string",
+              "description": "State, province, or region."
+            },
+            "addressLocality": {
+              "type": "string",
+              "description": "City or locality."
+            }
+          }
+        },
+        "foundingDate": {
+          "type": "string",
+          "description": "Year or ISO 8601 date the organization was founded."
+        },
+        "dissolutionDate": {
+          "type": "string",
+          "description": "Year or ISO 8601 date the organization was dissolved, if applicable."
+        },
+        "description": {
+          "type": "string"
+        },
+        "parentOrganization": {
+          "anyOf": [
+            { "$ref": "#/$defs/OrganizationIri" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name"],
+              "properties": {
+                "id": { "$ref": "#/$defs/OrganizationIri" },
+                "name": { "type": "string", "minLength": 1 }
+              }
+            }
+          ],
+          "description": "Parent organization, if this is a subsidiary or division."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type",
+        "retrieved_at"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": ["inferred", "manual", "external", "other"]
+        },
+        "source_url": {
+          "anyOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
+      }
+    },
+    "editorial": {
+      "type": "object",
+      "description": "Internal editorial metadata — not forwarded to the registry semantic payload.",
+      "additionalProperties": true
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    }
+  }
+}

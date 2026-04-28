@@ -248,11 +248,28 @@
         }
       }
     },
+    "bibliography": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BibliographyEntry"
+          }
+        }
+      }
+    },
     "notes": {
       "type": "array",
       "items": {
         "type": "string"
       }
+    },
+    "editorial": {
+      "type": "object",
+      "description": "Internal editorial and review metadata — stored in the source record but not forwarded to the registry semantic payload.",
+      "additionalProperties": true
     }
   },
   "$defs": {
@@ -260,6 +277,48 @@
       "type": "integer",
       "minimum": 0,
       "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "BibliographyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "date_published": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1800,
+              "maximum": 3000
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        }
+      }
     },
     "ShortId": {
       "type": "string",
@@ -322,6 +381,11 @@
       "properties": {
         "type": {
           "const": "Organization"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Canonical BattINFO organization IRI."
         },
         "name": {
           "type": "string",
