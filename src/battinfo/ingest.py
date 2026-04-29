@@ -30,7 +30,15 @@ DEFAULT_TEST_LABELS = {
     "capacity_check": "Capacity check",
     "other": "Other",
 }
+# Short labels used in dataset record titles (cell-type + label + temp + date format)
+DATASET_TITLE_LABELS = {
+    "rate_capability": "Rate",
+    "ici": "ICI",
+    "capacity_check": "Capacity",
+    "other": "Other",
+}
 DATE_RE = re.compile(r"(?P<date>\d{4}-\d{2}-\d{2})")
+TEMP_RE = re.compile(r"(\d+(?:[.,]\d+)?deg[CF])", re.IGNORECASE)
 
 
 def _as_path(path: PathLike) -> Path:
@@ -176,6 +184,20 @@ def _infer_date_text(path: Path) -> str | None:
     return match.group("date") if match else None
 
 
+def _infer_temp_text(path: Path) -> str | None:
+    match = TEMP_RE.search(path.name)
+    return match.group(1) if match else None
+
+
+def _dataset_title(resource_name: str | None, kind: str, path: Path, date_text: str | None) -> str:
+    """Build a human-readable dataset title: 'Cell ICI 25degC dataset 2026-03-05'."""
+    short_label = DATASET_TITLE_LABELS.get(kind, DATASET_TITLE_LABELS["other"])
+    temp = _infer_temp_text(path)
+    suffix = date_text or path.stem
+    parts = [p for p in [resource_name, short_label, temp, "dataset", suffix] if p]
+    return " ".join(parts)
+
+
 def _label_for_kind(kind: str) -> str:
     return DEFAULT_TEST_LABELS.get(kind, kind.replace("_", " ").title())
 
@@ -316,7 +338,7 @@ def inspect_ingest_root(
             {
                 "role": "timeseries",
                 "kind": kind,
-                "title": f"{label} dataset {suffix}",
+                "title": _dataset_title(resolved_resource_name, kind, csv_path, date_text),
                 "path": str(csv_path),
                 "format": "text/csv",
                 "hero_candidate": False,
