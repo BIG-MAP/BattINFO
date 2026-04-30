@@ -1,0 +1,37 @@
+# BattINFO Dataset Contribution
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 1 → Fill in the fields below
+# Step 2 → Put data files in  data/  (see README.md for naming rules)
+# Step 3 → Run:  battinfo dataset process .
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Cell identity ─────────────────────────────────────────────────────────────
+
+# Short label for this specific cell (serial number, lab code, etc.)
+cell_name: "My Cell 001"
+
+# BattINFO cell-type IRI for the model that was tested.
+# Find the IRI at https://www.battery-genome.org/registry/cell-type
+# Example: https://w3id.org/battinfo/cell-type/e5rn-ep3s-hwxr-kwzc
+cell_type_iri: null
+
+# Leave null unless you are republishing a cell that already has a BattINFO IRI.
+cell_iri: null
+
+# ── Provenance ────────────────────────────────────────────────────────────────
+
+# Your institution or lab name (appears in the registry record)
+lab: null
+
+# Optional: who ran the experiments
+experimenter: null
+
+# ── Data licence ──────────────────────────────────────────────────────────────
+
+# Recommended: CC-BY-4.0  (Creative Commons Attribution 4.0)
+# Other options: CC0-1.0, CC-BY-SA-4.0
+license: "CC-BY-4.0"
+
+# ── Leave these blank — Battery Genome fills them in ─────────────────────────
+publisher_id: null
+source_version: null

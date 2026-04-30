@@ -77,6 +77,7 @@ notebook_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Not
 demo_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and verify end-to-end BattINFO demos.")
 ingest_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Register typed resource instances from folder-based evidence.")
 registry_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers.")
+dataset_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init → process → publish.")
 
 app.add_typer(query_app, name="query")
 app.add_typer(create_app, name="create")
@@ -91,6 +92,7 @@ app.add_typer(notebook_app, name="notebook")
 app.add_typer(demo_app, name="demo")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(registry_app, name="registry")
+app.add_typer(dataset_app, name="dataset")
 library_app.add_typer(library_query_app, name="query")
 library_app.add_typer(library_save_app, name="save")
 library_app.add_typer(library_template_app, name="template")
@@ -2685,5 +2687,213 @@ def registry_bootstrap(
             typer.echo(f"  Saved to: {resolved_key_file}")
         else:
             typer.echo("  (pass --api-key-file or set BATTINFO_API_KEY_FILE to save it)")
+
+
+# ── Dataset contribution commands ─────────────────────────────────────────────
+
+@dataset_app.command("init")
+def dataset_init(
+    output: Path = typer.Argument(..., help="Path for the new contribution folder."),
+    cell_name: str | None = typer.Option(None, "--cell-name", "-n", help="Short label for this cell (e.g. serial number)."),
+    cell_type_iri: str | None = typer.Option(None, "--cell-type-iri", help="BattINFO cell-type IRI."),
+    lab: str | None = typer.Option(None, "--lab", help="Your institution or lab name."),
+    license: str = typer.Option("CC-BY-4.0", "--license", help="Data licence identifier."),
+    overwrite: bool = typer.Option(False, "--force", help="Overwrite an existing folder."),
+) -> None:
+    """Create a new dataset contribution folder with template and instructions.
+
+    \b
+    After running this command:
+      1. Open battinfo.yaml and fill in the required fields.
+      2. Put your CSV data files in the data/ sub-folder.
+         Name them: YYYY-MM-DD__testtype__temperature.csv
+         e.g. 2026-03-05__ici__25degC.csv
+      3. Run:  battinfo dataset process <folder>
+    """
+    from battinfo.contribution import init_contribution
+
+    try:
+        path = init_contribution(
+            output,
+            cell_name=cell_name,
+            cell_type_iri=cell_type_iri,
+            lab=lab,
+            license=license,
+            overwrite=overwrite,
+        )
+    except (FileExistsError, OSError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(f"Created contribution folder: {path}")
+    typer.echo(f"  1. Edit {path / 'battinfo.yaml'}")
+    typer.echo(f"  2. Add CSV files to {path / 'data'}/")
+    typer.echo(f"  3. Run: battinfo dataset process {path}")
+
+
+@dataset_app.command("process")
+def dataset_process(
+    folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    clean: bool = typer.Option(False, "--force", help="Rebuild from scratch."),
+    validation_policy: str = typer.Option("strict", "--validation-policy", help="strict|set|quick"),
+) -> None:
+    """Validate metadata, infer tests from data files, and build the submission package.
+
+    Run this after filling in battinfo.yaml and adding data files.
+    Output is written to the dist/ sub-folder inside the contribution folder.
+    """
+    from rich.console import Console
+    from rich.table import Table
+    from rich import box
+    from battinfo.contribution import process_contribution
+
+    console = Console(highlight=False)
+
+    try:
+        result = process_contribution(folder, clean=clean, validation_policy=validation_policy)
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+    except (RuntimeError, ValueError) as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print()
+    console.print("[bold]BattINFO Dataset Processor[/bold]")
+    console.print()
+
+    # Identity summary
+    if result.get("cell_type_iri"):
+        console.print(f"  Cell type IRI  {result['cell_type_iri']}")
+    if result.get("cell_name"):
+        console.print(f"  Cell name      {result['cell_name']}")
+    if result.get("lab"):
+        console.print(f"  Lab            {result['lab']}")
+    console.print(f"  Licence        {result.get('license', 'CC-BY-4.0')}")
+    console.print()
+
+    # Manifest errors
+    if result["errors"]:
+        console.print("[bold red]Please fix battinfo.yaml before processing:[/bold red]")
+        for err in result["errors"]:
+            console.print(f"  [red]✗[/red]  {err}")
+        console.print()
+        raise typer.Exit(code=1)
+
+    # File table
+    files = result["files"]
+    if not files:
+        console.print("[yellow]Warning:[/yellow] No CSV files found in data/")
+        console.print("  Add files named: YYYY-MM-DD__testtype__temperature.csv")
+        console.print()
+    else:
+        table = Table(box=box.SIMPLE, show_header=True, header_style="bold")
+        table.add_column("File")
+        table.add_column("Test type")
+        table.add_column("Temp")
+        table.add_column("Date")
+        table.add_column("", style="bold")
+        for f in files:
+            ok = f["recognised"]
+            table.add_row(
+                f["name"],
+                f["label"] if ok else "—",
+                f["temp"] or "—",
+                f["date"] or "—",
+                "[green]ok[/green]" if ok else "[yellow]?[/yellow]",
+            )
+        console.print(table)
+
+    if result["warnings"]:
+        console.print("[yellow]Warning:[/yellow] some filenames were not fully recognised.")
+        console.print("  Expected: YYYY-MM-DD__testtype__temperature.csv")
+        console.print()
+
+    # Build result
+    build = result.get("build")
+    if build:
+        counts = build.get("counts", {})
+        console.print(
+            f"[green]Validation passed.[/green]  "
+            f"{counts.get('datasets', 0)} dataset(s), "
+            f"{counts.get('tests', 0)} test(s)"
+        )
+        if pkg := build.get("submission_package_path"):
+            console.print(f"  Submission package: {pkg}")
+        console.print()
+        console.print("Ready to publish. Run:")
+        console.print(f"  [bold]battinfo dataset publish {folder} --zenodo --token YOUR_TOKEN[/bold]")
+    else:
+        console.print("[red]Build did not complete — check the errors above.[/red]")
+        raise typer.Exit(code=1)
+
+    console.print()
+
+
+@dataset_app.command("publish")
+def dataset_publish(
+    folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    zenodo: bool = typer.Option(False, "--zenodo", help="Publish to Zenodo (creates a draft deposit)."),
+    sandbox: bool = typer.Option(False, "--sandbox", help="Use the Zenodo sandbox (for testing)."),
+    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_TOKEN."),
+    community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
+    no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
+) -> None:
+    """Publish the processed contribution folder.
+
+    \b
+    Options:
+      --zenodo      Upload to Zenodo (creates a draft for your review)
+      --sandbox     Use the Zenodo sandbox for testing
+      --token       Your Zenodo personal access token
+                    (or set the ZENODO_TOKEN environment variable)
+
+    Get a Zenodo token at:
+      https://zenodo.org/account/settings/applications/tokens/new/
+      Required scopes: deposit:write
+    """
+    import os
+    from rich.console import Console
+    from battinfo.contribution import publish_to_zenodo
+
+    console = Console()
+
+    if not zenodo:
+        console.print("[yellow]Nothing to do.[/yellow] Pass --zenodo to upload to Zenodo.")
+        raise typer.Exit(code=0)
+
+    resolved_token = token or os.environ.get("ZENODO_TOKEN", "").strip()
+    if not resolved_token:
+        console.print("[red]Error:[/red] Zenodo token required. Pass --token or set ZENODO_TOKEN.")
+        raise typer.Exit(code=1)
+
+    resolved_community = "" if no_community else community
+
+    console.print()
+    console.print(f"[bold]Uploading to {'Zenodo Sandbox' if sandbox else 'Zenodo'}…[/bold]")
+    console.print()
+
+    try:
+        result = publish_to_zenodo(
+            folder,
+            token=resolved_token,
+            sandbox=sandbox,
+            community=resolved_community,
+        )
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+    except Exception as exc:
+        console.print(f"[red]Upload failed:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(f"[green]Deposit created (draft).[/green]")
+    console.print(f"  DOI:     {result.get('doi') or '(assigned on publication)'}")
+    console.print(f"  Files:   {result['files_uploaded']} uploaded")
+    console.print(f"  Review and publish at:")
+    console.print(f"  [bold]{result['deposit_url']}[/bold]")
+    console.print()
+    console.print("The deposit is a [bold]draft[/bold] — review it on Zenodo before clicking Publish.")
+    console.print()
 
 
