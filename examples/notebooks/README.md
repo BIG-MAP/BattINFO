@@ -13,5 +13,3 @@ The guide notebooks live in [`docs/guides/`](../../docs/guides/).
 Open notebooks from the **repo root** with the `.venv` kernel selected.
 
 Notebooks write temporary data under `.battinfo/notebooks/` and do not modify curated repository examples.
-
-The `legacy/` subdirectory contains the earlier alpha walkthrough notebooks, retained for reference.

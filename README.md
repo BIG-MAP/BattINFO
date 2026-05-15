@@ -72,8 +72,6 @@ Alpha scope
 - Core: stable cell-descriptor validation/mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
 - Preview: reusable cell-type library flows beyond the alpha walkthrough fixtures.
 - In development: registry sync/query flows and large-scale reference validation.
-- Implementation plan for closing alpha blockers: `docs/alpha-implementation-plan.md`
-
 Alpha hardening targets
 - simple commercial cell records with specification-sheet-level metadata
 - detailed cell descriptors covering coin, cylindrical, pouch, and prismatic formats

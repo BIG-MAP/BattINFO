@@ -67,6 +67,5 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 | | |
 |---|---|
 | **[Agent guide](../AGENTS.md)** | Machine-readable manifest for AI agents working on this repo |
-| **[Alpha implementation plan](alpha-implementation-plan.md)** | Implementation sequencing (internal reference) |
 | **[Validation roadmap](validation-roadmap.md)** | Planned validation enhancements |
 | **[Converter compatibility](converter-compatibility.md)** | Compatibility notes for external format converters |

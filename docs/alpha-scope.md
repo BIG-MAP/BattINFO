@@ -2,9 +2,6 @@
 
 This document defines the BattINFO feature boundary for alpha testing.
 
-Implementation sequencing for closing current alpha blockers is tracked in
-`docs/alpha-implementation-plan.md`.
-
 Status:
 - pre-release
 - alpha-ready scope defined
