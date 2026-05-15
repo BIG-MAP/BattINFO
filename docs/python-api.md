@@ -1,32 +1,20 @@
 # BattINFO Python API
 
-BattINFO currently exposes four practical Python surfaces:
+## Where to start
 
-- object-first publication packaging for `CellType -> CellInstance -> TestProtocol -> Test -> Dataset`
-- the human-facing `Workspace` helper for linked canonical records, save/query, publish, and release export
-- the ingest-first helpers for turning one evidence folder into a linked `Workspace`
-- record/query/save helpers from `battinfo.api`
+| Goal | Surface to use |
+|------|---------------|
+| Publish a cell type or build a linked cell→test→dataset chain from Python objects | [`Workspace`](#workspace-release-export) — the primary authoring surface |
+| Turn an existing folder of photos and CSV files into a linked BattINFO submission | [Ingest helpers](#ingest-first-intake) — one-command folder intake |
+| Load, query, or save canonical records from disk | [`battinfo.api` helpers](#query-and-save) |
+| Author records as JSON files and drive the workflow from the CLI | `LocalWorkspace` — disk-first submission scaffold behind `battinfo workspace ...` |
 
-`LocalWorkspace` is related but separate. It is the disk-first release scaffold used
-by `battinfo workspace ...` for one publication bundle authored from JSON resource
-files on disk.
-
-## Choosing Between `Workspace` and `LocalWorkspace`
-
-- Use `Workspace` for object-first Python authoring when you want to build linked BattINFO records, save them, query them locally, publish JSON-LD, or export a registry-ready release workspace.
-- Use `LocalWorkspace` when you want an explicit on-disk workspace contract with `battinfo-workspace.json`, resource JSON files, and the `battinfo workspace validate` and `battinfo workspace bundle` CLI flow.
-
-In short: `Workspace` is the primary Python authoring surface, and
-`LocalWorkspace` remains the disk-first submission workflow.
-
-If the user already has an instance folder with photos and CSV datasets, prefer the
-ingest-first helpers over hand-building `Workspace` objects. That is the fastest
-path for routine intake.
+If you are new here, start with `Workspace`. The [guide notebooks](../docs/guides/)
+walk through the full authoring flow end to end.
 
 Alpha scope:
-
-- core: publication, canonical record save/query/publish/index helpers, and the alpha walkthrough notebooks
-- preview: reusable library workflows beyond the alpha walkthrough fixtures
+- core: `Workspace`, publication, canonical record save/query/publish/index helpers, and the guide notebooks
+- preview: reusable cell-type library workflows beyond the guide walkthrough fixtures
 
 ## Install
 
