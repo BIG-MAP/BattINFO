@@ -1,11 +1,27 @@
 {
   "version": "0.1.0-draft",
-  "generated_at": "2026-03-03T22:11:09.996047+00:00",
+  "generated_at": "2026-03-03T23:11:09.996047+01:00",
   "ontology_source": "https://w3id.org/emmo/domain/battery/inferred",
-  "key_count": 29,
+  "key_count": 40,
   "mappings": [
     {
+      "key": "maximum_charging_temperature",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
+      "class_pref_label": "Charging",
+      "class_label": "Charging",
+      "confidence": 0.75
+    },
+    {
       "key": "charging_temperature_max",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
+      "class_pref_label": "Charging",
+      "class_label": "Charging",
+      "confidence": 0.75
+    },
+    {
+      "key": "minimum_charging_temperature",
       "status": "candidate",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
       "class_pref_label": "Charging",
@@ -45,7 +61,39 @@
       "confidence": 0.9
     },
     {
+      "key": "nominal_continuous_charging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/battery#nominalContinuousChargingCurrent",
+      "class_pref_label": "NominalContinuousChargingCurrent",
+      "class_label": "NominalContinuousChargingCurrent",
+      "confidence": 0.6
+    },
+    {
+      "key": "maximum_continuous_charging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+      "class_pref_label": "MaximumContinuousChargingCurrent",
+      "class_label": "MaximumContinuousChargingCurrent",
+      "confidence": 0.9
+    },
+    {
       "key": "continuous_discharging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+      "class_pref_label": "MaximumContinuousDischargingCurrent",
+      "class_label": "MaximumContinuousDischargingCurrent",
+      "confidence": 0.9
+    },
+    {
+      "key": "nominal_continuous_discharging_current",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/battery#nominalContinuousDischargingCurrent",
+      "class_pref_label": "NominalContinuousDischargingCurrent",
+      "class_label": "NominalContinuousDischargingCurrent",
+      "confidence": 0.6
+    },
+    {
+      "key": "maximum_continuous_discharging_current",
       "status": "candidate",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
       "class_pref_label": "MaximumContinuousDischargingCurrent",
@@ -78,7 +126,23 @@
       "confidence": 1.0
     },
     {
+      "key": "maximum_discharging_temperature",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_06d8e1ee_924a_4915_998d_33a69f41dadc",
+      "class_pref_label": "Discharging",
+      "class_label": "Discharging",
+      "confidence": 0.75
+    },
+    {
       "key": "discharging_temperature_max",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_06d8e1ee_924a_4915_998d_33a69f41dadc",
+      "class_pref_label": "Discharging",
+      "class_label": "Discharging",
+      "confidence": 0.75
+    },
+    {
+      "key": "minimum_discharging_temperature",
       "status": "candidate",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_06d8e1ee_924a_4915_998d_33a69f41dadc",
       "class_pref_label": "Discharging",
@@ -142,6 +206,14 @@
       "confidence": 1.0
     },
     {
+      "key": "minimum_capacity",
+      "status": "candidate",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_791c1915_a791_4450_acd8_7f94764743b5",
+      "class_pref_label": "Capacity",
+      "class_label": "Capacity",
+      "confidence": 0.75
+    },
+    {
       "key": "min_capacity",
       "status": "candidate",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_791c1915_a791_4450_acd8_7f94764743b5",
@@ -198,7 +270,23 @@
       "confidence": 1.0
     },
     {
+      "key": "maximum_storage_temperature",
+      "status": "unmapped",
+      "class_iri": null,
+      "class_pref_label": null,
+      "class_label": null,
+      "confidence": 0.0
+    },
+    {
       "key": "storage_temperature_max",
+      "status": "unmapped",
+      "class_iri": null,
+      "class_pref_label": null,
+      "class_label": null,
+      "confidence": 0.0
+    },
+    {
+      "key": "minimum_storage_temperature",
       "status": "unmapped",
       "class_iri": null,
       "class_pref_label": null,

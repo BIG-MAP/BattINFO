@@ -138,7 +138,130 @@ def test_battery_descriptor_schema_accepts_construction_metadata() -> None:
                 "assembly_type": "stacked",
                 "layering": "single_layer",
                 "layer_count": 1,
+                "assembly_sequence": ["CellCan", "NegativeElectrode", "Separator", "Electrolyte", "Spring", "CellLid"],
                 "comment": "Single-layer alpha fixture."
+            }
+        }
+    }
+
+    errors = list(validator.iter_errors(sample))
+    assert errors == []
+
+
+def test_battery_descriptor_schema_accepts_coin_hardware_metadata() -> None:
+    schema_root = ROOT / "src" / "battinfo" / "data" / "schemas"
+    schema_path = schema_root / "cell-descriptor.schema.json"
+    schema_doc = json.loads(schema_path.read_text(encoding="utf-8"))
+    registry = _schema_registry(schema_root)
+    validator = Draft202012Validator(schema_doc, registry=registry)
+
+    sample = {
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/cell-type/4p7m-2q8v-6n3t-9k5r",
+            "manufacturer": "ExampleCells",
+            "model": "CR2032-ALPHA",
+            "format": "coin",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "NMC",
+            "negative_electrode_basis": "graphite",
+            "coin_hardware": {
+                "case": {
+                    "size_code": "R2032",
+                    "material": "Stainless steel",
+                    "supplier": "CaseVendor GmbH",
+                    "product_id": "2032, SUS316L"
+                },
+                "lid": {
+                    "material": "Stainless steel",
+                    "coating": "Au",
+                    "manufacturer": "LidCo"
+                },
+                "can": {
+                    "material": "Stainless steel",
+                    "coating": "Ni",
+                    "supplier": "CanParts"
+                },
+                "spring": {
+                    "supplier": "SpringParts",
+                    "property": {
+                        "diameter": {"value": 15.0, "unit": "mm"},
+                        "thickness": {"value": 1.4, "unit": "mm"}
+                    }
+                },
+                "spacer": {
+                    "property": {
+                        "diameter": {"value": 16.0, "unit": "mm"},
+                        "thickness": {"value": 1.0, "unit": "mm"}
+                    }
+                }
+            }
+        }
+    }
+
+    errors = list(validator.iter_errors(sample))
+    assert errors == []
+
+
+def test_battery_descriptor_schema_accepts_component_provenance_fields() -> None:
+    schema_root = ROOT / "src" / "battinfo" / "data" / "schemas"
+    schema_path = schema_root / "cell-descriptor.schema.json"
+    schema_doc = json.loads(schema_path.read_text(encoding="utf-8"))
+    registry = _schema_registry(schema_root)
+    validator = Draft202012Validator(schema_doc, registry=registry)
+
+    sample = {
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/cell-type/7p8m-2q4v-6n3t-9k5r",
+            "manufacturer": "ExampleCells",
+            "model": "COIN-PROV-01",
+            "format": "coin",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "NMC",
+            "negative_electrode_basis": "graphite",
+            "positive_electrode": {
+                "manufacturer": "ElectrodeCo",
+                "product_id": "PE-001",
+                "current_collector": {
+                    "name": "Aluminium",
+                    "supplier": "FoilSource",
+                    "product_id": "AL-15"
+                },
+                "coating": {
+                    "supplier": "CathodeMix BV",
+                    "component": {
+                        "active_material": [
+                            {
+                                "name": "NMC",
+                                "manufacturer": "CAM Inc.",
+                                "product_id": "NMC-622"
+                            }
+                        ]
+                    }
+                }
+            },
+            "electrolyte": {
+                "family": "organic",
+                "manufacturer": "ElectrolyteLab",
+                "solvent_mixture": {
+                    "supplier": "BlendSupplier",
+                    "component": [
+                        {"name": "EC", "manufacturer": "SolventCo"},
+                        {"name": "EMC", "product_id": "EMC-70"}
+                    ]
+                },
+                "salt": {
+                    "name": "LiPF6",
+                    "supplier": "SaltVendor",
+                    "product_id": "LPF6-1M"
+                }
+            },
+            "separator": {
+                "material": "PP",
+                "manufacturer": "SeparatorCo",
+                "supplier": "SeparatorDistributor",
+                "product_id": "PP-25"
             }
         }
     }

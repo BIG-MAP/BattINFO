@@ -1,0 +1,16 @@
+{
+  "_schema": "battinfo/schema/modules/components/separator.schema.json",
+  "_description": "Celgard 2400 — single-layer polypropylene separator commonly used in lithium-ion research cells.",
+  "name": "Celgard 2400",
+  "material": "polypropylene",
+  "structure": "monolayer",
+  "manufacturer": "Celgard LLC",
+  "product_id": "2400",
+  "property": {
+    "thickness": { "value": 25.0, "unit": "mm" },
+    "porosity": { "value": 41.0, "unit": "%" },
+    "gurley_number": { "value": 620.0, "unit": "s/100mL" },
+    "tortuosity": { "value": 3.0, "unit": "count" }
+  },
+  "comment": "Dry-process membrane with slit-like pores. Shutdown temperature ~135 degC. Widely used in coin, cylindrical, and pouch research cells. Celgard 2325 (trilayer PP/PE/PP) is the preferred choice where shutdown functionality is required."
+}

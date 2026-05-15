@@ -1,7 +1,8 @@
 # Examples
 
 Packaged copy of BattINFO example records:
-- `cell-types/`
+- `cell-type/`
 - `cell-instances/`
-- `datasets/`
+- `dataset/`
 - `profiles/`
+

@@ -1,11 +1,81 @@
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix battinfo: <https://w3id.org/battinfo#> .
-@prefix schema: <https://schema.org/> .
+@prefix schema:  <https://schema.org/> .
+
+# ---------------------------------------------------------------------------
+# BattINFO application ontology
+#
+# This ontology is the application/profile layer for the BattINFO battery
+# data ecosystem.  It imports the EMMO domain modules that cover battery
+# cells and electrochemical processes, and provides the semantic foundation
+# for BattINFO records, schemas, and JSON-LD exports.
+#
+# EMMO dependency versions (pinned):
+#   domain-battery          0.19.0   (2026-05-04)
+#   domain-electrochemistry 0.34.0   (2026-05-04)
+#
+# To check for upstream updates run:
+#   python .tools/quality/check_emmo_versions.py
+# ---------------------------------------------------------------------------
 
 battinfo: a owl:Ontology ;
+
+    owl:versionIRI <https://w3id.org/battinfo/0.1.0/battinfo> ;
+    owl:versionInfo "0.1.0" ;
+
+    # Pinned EMMO domain imports.  Use versioned IRIs so that records
+    # published against this ontology remain interpretable even after
+    # upstream releases.  domain-battery imports domain-electrochemistry
+    # and domain-chemical-substance transitively; we declare them
+    # explicitly here for transparency and to document the exact versions
+    # tested against this application ontology.
+    owl:imports <https://w3id.org/emmo/domain/battery/0.19.0/battery> ;
+    owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.34.0/electrochemistry> ;
+
+    dcterms:title "Battery Interface Ontology (BattINFO)"@en ;
+
+    dcterms:description """Application/profile ontology for the BattINFO battery data ecosystem.
+Imports the EMMO domain-battery and domain-electrochemistry modules and provides
+the semantic foundation for BattINFO canonical records, JSON schemas, and JSON-LD exports."""@en ;
+
+    dcterms:abstract """BattINFO is an implementation and interoperability layer for the
+EMMO-based domain-battery ontology. It provides Python tooling, JSON schemas,
+semantic mapping tables, and JSON-LD transformation pipelines for authoring,
+validating, and publishing battery cell records, test protocols, and datasets
+as Linked Data."""@en ;
+
+    dcterms:creator
+        "Simon Clark (SINTEF Industry, NO)"@en ,
+        "Casper Welzel Andersen"@en ,
+        "Francesca Lønstad Bleken"@en ;
+    dcterms:contributor
+        "BattINFO contributors — see https://w3id.org/battinfo for full list"@en ;
+
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/legalcode> ;
+    dcterms:rights "Creative Commons Attribution 4.0 International (CC BY 4.0)"@en ;
+    dcterms:source <https://github.com/BIG-MAP/BattINFO> ;
+
+    rdfs:seeAlso <https://w3id.org/emmo/domain/battery> ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry> ;
+
     rdfs:label "BattINFO application ontology"@en ;
-    rdfs:comment "Application/profile ontology for BattINFO battery descriptor extensions and operational semantics."@en ;
-    owl:imports <https://w3id.org/emmo/domain/battery> .
+    rdfs:comment "EMMO dependency versions pinned in owl:imports. Run .tools/quality/check_emmo_versions.py to check for upstream updates."@en .
+
+# ---------------------------------------------------------------------------
+# Annotation properties declared so OWL tools do not warn about unknown
+# annotation properties from the dcterms vocabulary.
+# ---------------------------------------------------------------------------
+
+dcterms:title       a owl:AnnotationProperty .
+dcterms:description a owl:AnnotationProperty .
+dcterms:abstract    a owl:AnnotationProperty .
+dcterms:creator     a owl:AnnotationProperty .
+dcterms:contributor a owl:AnnotationProperty .
+dcterms:license     a owl:AnnotationProperty .
+dcterms:rights      a owl:AnnotationProperty .
+dcterms:source      a owl:AnnotationProperty .

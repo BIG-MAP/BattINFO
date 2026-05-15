@@ -138,7 +138,7 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     raw.write_text("dummy-a", encoding="utf-8")
 
     report = publish_dataset_metadata(
-        cell_specification=ROOT / "src" / "battinfo" / "data" / "library" / "cell-types" / "ENERGIZER__CR2032.json",
+        cell_specification=ROOT / "src" / "battinfo" / "data" / "library" / "cell-type" / "ENERGIZER__CR2032.json",
         datasheet_path=datasheet,
         dataset_dirs=[dataset_dir],
         staging_root=tmp_path / "staging",
@@ -166,10 +166,11 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     type_values = instance_node.get("@type")
     assert isinstance(type_values, list)
     assert bundle.cell_type.id not in type_values
-    assert instance_node["schema:isVariantOf"]["@id"] == bundle.cell_type.id
+    assert instance_node["hasDescription"]["@id"] == bundle.cell_type.id
     class_node = next(node for node in graph if node.get("@id") == bundle.cell_type.id)
     class_types = class_node["@type"] if isinstance(class_node["@type"], list) else [class_node["@type"]]
-    assert "schema:ProductModel" in class_types
+    assert "BatteryCellSpecification" in class_types
+    assert "schema:CreativeWork" in class_types
     test_node = next(node for node in graph if node.get("@id") == bundle.test.id)
     test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
     assert "schema:Action" in test_types
@@ -335,4 +336,5 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     html_text = Path(result["html_path"]).read_text(encoding="utf-8")
     assert "application/ld+json" in html_text
     assert "Energizer CR2032 dataset" in html_text
+
 

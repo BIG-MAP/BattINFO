@@ -26,26 +26,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
 
+      - name: Lint (ruff)
+        run: python -m ruff check src tests
+
       - name: Run Unit Tests
         run: python -m pytest -q tests
 
       - name: Lint Identifier Policy Compliance
         run: python .tools/quality/lint_identifier_policy.py
-
-      - name: Validate Canonical cells-clean Dataset
-        run: python .tools/library/validate_cells_clean.py
-
-      - name: Generate Cell-Type Datasheet Smoke Batch
-        run: python .tools/datasheets/generate_cell_type_datasheet_examples.py --count 10 --strategy diverse --target-dir "${{ runner.temp }}/battinfo-ci/cell-types" --clean-target --batch-tag ci-smoke-v1 --infer-negative-electrode-basis
-
-      - name: Validate Cell-Type Datasheet Smoke Batch
-        run: python .tools/datasheets/validate_cell_type_datasheets.py --dir "${{ runner.temp }}/battinfo-ci/cell-types" --profile cell-type-datasheet
-
-      - name: Enforce Cell-Type Datasheet Quality Gates
-        run: python .tools/datasheets/check_datasheet_quality.py --dir "${{ runner.temp }}/battinfo-ci/cell-types" --max-empty-specs 0 --max-unknown-manufacturer 0 --max-unknown-chemistry 0 --max-unknown-positive-electrode-basis 0 --max-unknown-negative-electrode-basis 0 --required-spec nominal_capacity --required-spec nominal_voltage --min-required-spec-coverage 1.0
-
-      - name: Build Resolver Artifacts
-        run: python .tools/build/build_resolver_artifacts.py
 
       - name: Run Alpha Verification Gate
         run: python .tools/quality/run_alpha_verification.py

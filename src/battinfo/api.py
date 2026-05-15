@@ -1,22 +1,26 @@
 from __future__ import annotations
 
 import copy
+import difflib
 import html
 import json
 import re
 import secrets
 from datetime import datetime, timezone
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping, Sequence
 from urllib.error import HTTPError, URLError
-from urllib.request import Request as UrlRequest, urlopen
+from urllib.request import Request as UrlRequest
+from urllib.request import urlopen
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
-from battinfo.bundle import BatteryTestType
+
+from battinfo.bundle import BatteryTestType, CellProductType
+from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+from battinfo.transform.json_to_jsonld import _descriptor_quantity_node as _jsonld_quantity_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
-from battinfo.validate.pydantic import validate_json
 from battinfo.validate.publication import validate_publication_report
+from battinfo.validate.pydantic import validate_json
 from battinfo.validate.record import validate_record, validate_record_report
 from battinfo.validate.references import validate_references_report
 from battinfo.validate.schema import validate_schema_data
@@ -49,16 +53,16 @@ PACKAGE_ROOT = Path(__file__).resolve().parent
 EXAMPLES_ROOT = PACKAGE_ROOT / "data" / "examples"
 SCHEMAS_ROOT = PACKAGE_ROOT / "data" / "schemas"
 
-DEFAULT_CELL_TYPES_DIR = EXAMPLES_ROOT / "cell-types"
+DEFAULT_CELL_TYPES_DIR = EXAMPLES_ROOT / "cell-type"
 DEFAULT_CELL_INSTANCES_DIR = EXAMPLES_ROOT / "cell-instances"
 DEFAULT_TEST_PROTOCOLS_DIR = EXAMPLES_ROOT / "test-protocols"
 DEFAULT_TESTS_DIR = EXAMPLES_ROOT / "tests"
-DEFAULT_DATASETS_DIR = EXAMPLES_ROOT / "datasets"
-DEFAULT_LIBRARY_CELL_TYPES_DIR = Path(".battinfo") / "library" / "cell-types"
-DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR = Path(".battinfo") / "library-rdf" / "cell-types"
-DEFAULT_LIBRARY_AGGREGATE_JSONLD = Path(".battinfo") / "ontology" / "library" / "cell-types.jsonld"
-DEFAULT_LIBRARY_MANIFEST_JSON = Path(".battinfo") / "library-rdf" / "cell-types.index.json"
-DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR = Path("src") / "battinfo" / "data" / "library" / "cell-types"
+DEFAULT_DATASETS_DIR = EXAMPLES_ROOT / "dataset"
+DEFAULT_LIBRARY_CELL_TYPES_DIR = Path(".battinfo") / "library" / "cell-type"
+DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR = Path(".battinfo") / "library-rdf" / "cell-type"
+DEFAULT_LIBRARY_AGGREGATE_JSONLD = Path(".battinfo") / "ontology" / "library" / "cell-type.jsonld"
+DEFAULT_LIBRARY_MANIFEST_JSON = Path(".battinfo") / "library-rdf" / "cell-type.index.json"
+DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR = Path("src") / "battinfo" / "data" / "library" / "cell-type"
 DEFAULT_PUBLISH_SOURCES = (
     DEFAULT_CELL_TYPES_DIR,
     DEFAULT_CELL_INSTANCES_DIR,
@@ -127,6 +131,7 @@ class CellTypeInput(BaseModel):
     manufacturer: str
     format: Literal["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"] = "unknown"
     chemistry: str = "unknown"
+    product_type: CellProductType | None = None
     positive_electrode_basis: str | None = None
     negative_electrode_basis: str | None = None
     size_code: str | None = None
@@ -156,6 +161,7 @@ class CellSpecificationInput(BaseModel):
     model: str
     format: Literal["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"]
     chemistry: str
+    product_type: CellProductType | None = None
     positive_electrode_basis: str
     negative_electrode_basis: str
     size_code: str | None = None
@@ -531,7 +537,7 @@ def _as_path(path: PathLike) -> Path:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _write_json(path: Path, data: dict[str, Any]) -> None:
@@ -570,6 +576,27 @@ def _str_contains(value: object, needle: str | None) -> bool:
     if value is None:
         return False
     return needle.lower() in str(value).lower()
+
+
+def _str_fuzzy_match(left: object, right: str | None, threshold: float = 0.80) -> bool:
+    """Match a stored value against a query string with tolerance for name variants and typos.
+
+    Passes when:
+    - right is None (no filter)
+    - either string is a substring of the other (case-insensitive) — catches "LG" vs
+      "LG Chem", "Samsung" vs "Samsung SDI", etc.
+    - difflib similarity ratio >= threshold — catches single-character typos and
+      transpositions like "Energizer" vs "Enegizer"
+    """
+    if right is None:
+        return True
+    if left is None:
+        return False
+    left_s = str(left).lower().strip()
+    r = right.lower().strip()
+    if r in left_s or left_s in r:
+        return True
+    return difflib.SequenceMatcher(None, left_s, r).ratio() >= threshold
 
 
 def _in_range(value: float | None, minimum: float | None, maximum: float | None) -> bool:
@@ -653,9 +680,17 @@ def _library_cell_type_filename(manufacturer: str, model: str) -> str:
 
 
 def _editorial_record_id(*values: object) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", "-".join(str(value).strip().lower() for value in values if str(value).strip()))
-    slug = re.sub(r"-+", "-", slug).strip("-")
-    return slug or "record"
+    tokens: list[str] = []
+    for raw in values:
+        text = str(raw).strip().lower()
+        if not text:
+            continue
+        parts = re.split(r"-{2,}", text)
+        for part in parts:
+            normalized = re.sub(r"[^a-z0-9]+", "-", part).strip("-")
+            if normalized:
+                tokens.append(normalized)
+    return "--".join(tokens) or "record"
 
 
 def _comment_list(value: object) -> list[str]:
@@ -736,7 +771,7 @@ def _staging_cell_type_identity(
     return {
         "record_id": None,
         "record_id_basis": None,
-        "record_id_hint": f"{base_record_id}-<year-or-revision>",
+        "record_id_hint": f"{base_record_id}--<year-or-revision>",
         "requires_record_id": True,
     }
 
@@ -770,20 +805,20 @@ def _staging_cell_type_input(
                 uid=uid,
                 model_name=str(product.get("model") or product.get("model_name") or ""),
                 manufacturer=str(manufacturer or ""),
-                format=str(product.get("cellFormat") or product.get("format") or "unknown"),
+                format=str(product.get("cell_format") or product.get("cellFormat") or product.get("format") or "unknown"),
                 chemistry=str(product.get("chemistry") or "unknown"),
-                positive_electrode_basis=product.get("positiveElectrodeBasis")
-                if isinstance(product.get("positiveElectrodeBasis"), str)
+                positive_electrode_basis=(product.get("positive_electrode_basis") or product.get("positiveElectrodeBasis"))
+                if isinstance(product.get("positive_electrode_basis") or product.get("positiveElectrodeBasis"), str)
                 else None,
-                negative_electrode_basis=product.get("negativeElectrodeBasis")
-                if isinstance(product.get("negativeElectrodeBasis"), str)
+                negative_electrode_basis=(product.get("negative_electrode_basis") or product.get("negativeElectrodeBasis"))
+                if isinstance(product.get("negative_electrode_basis") or product.get("negativeElectrodeBasis"), str)
                 else None,
-                size_code=product.get("sizeCode") if isinstance(product.get("sizeCode"), str) else None,
-                iec_code=product.get("iecCode") if isinstance(product.get("iecCode"), str) else None,
-                country_of_origin=product.get("countryOfOrigin") if isinstance(product.get("countryOfOrigin"), str) else None,
+                size_code=(product.get("size_code") if isinstance(product.get("size_code"), str) else product.get("sizeCode") if isinstance(product.get("sizeCode"), str) else None),
+                iec_code=(product.get("iec_code") if isinstance(product.get("iec_code"), str) else product.get("iecCode") if isinstance(product.get("iecCode"), str) else None),
+                country_of_origin=(product.get("country_of_origin") if isinstance(product.get("country_of_origin"), str) else product.get("countryOfOrigin") if isinstance(product.get("countryOfOrigin"), str) else None),
                 year=product.get("year") if isinstance(product.get("year"), int) else None,
-                datasheet_revision=product.get("datasheetRevision")
-                if isinstance(product.get("datasheetRevision"), str)
+                datasheet_revision=(product.get("datasheet_revision") or product.get("datasheetRevision"))
+                if isinstance(product.get("datasheet_revision") or product.get("datasheetRevision"), str)
                 else None,
                 specs=dict(record_payload.get("specs") or {}),
                 source_type=str(provenance.get("source_type") or "datasheet") if isinstance(provenance, Mapping) else "datasheet",
@@ -874,6 +909,12 @@ def validate_staging_cell_type(
     *,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> dict[str, Any]:
+    """Validate a staging cell-type draft without writing anything to disk.
+
+    Returns a dict with keys ``ok`` (bool), ``source_path``, ``record_id``,
+    ``record_id_basis``, ``issues`` (list of validation issue dicts), and
+    ``errors`` (list of error-severity issues only).
+    """
     draft, source_path = _staging_cell_type_input(source)
     identity = _staging_cell_type_identity(source, draft)
     record = _record_from_cell_type(draft)
@@ -944,6 +985,14 @@ def promote_staging_cell_type(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
+    """Promote a validated staging cell-type draft to the curated record store.
+
+    Validates the draft, assigns or resolves the canonical record IRI, writes
+    the canonical JSON file to ``curated_root``, and returns a result dict with
+    keys ``ok``, ``record_id``, ``path``, ``dry_run``, and ``issues``.
+
+    Pass ``dry_run=True`` to validate and resolve the IRI without writing files.
+    """
     draft, source_path = _staging_cell_type_input(source)
     identity = _staging_cell_type_identity(source, draft)
     if record_id is not None:
@@ -1051,30 +1100,12 @@ def _curated_cell_type_submission_resource(
     source_local_id: str,
     title: str,
 ) -> dict[str, Any]:
-    product = record.get("product")
-    if not isinstance(product, Mapping):
-        raise ValueError("cell-type record is missing product.")
-    manufacturer_obj = product.get("manufacturer")
-    manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
-    metadata = {
-        "manufacturer": manufacturer,
-        "model": product.get("model"),
-        "format": product.get("cellFormat"),
-        "chemistry": product.get("chemistry"),
-        "size_code": product.get("sizeCode"),
-        "iec_code": product.get("iecCode"),
-        "country_of_origin": product.get("countryOfOrigin"),
-        "year": product.get("year"),
-        "positive_electrode_basis": product.get("positiveElectrodeBasis"),
-        "negative_electrode_basis": product.get("negativeElectrodeBasis"),
-    }
     return {
         "resource_type": "cell_type",
         "source_local_id": source_local_id,
         "title": title,
         "semantic_payload": {
             "@type": "CellType",
-            "metadata": {key: value for key, value in metadata.items() if value is not None},
             "battinfo_records": {"cell_type": dict(record)},
         },
         "related_resources": [],
@@ -1085,7 +1116,7 @@ def _curated_cell_type_submission_resource(
 def build_curated_cell_type_submission(
     source: dict[str, Any] | PathLike,
     *,
-    project_id: str,
+    workspace_id: str,
     publisher_id: str,
     source_version: str,
     source_local_id: str | None = None,
@@ -1120,7 +1151,7 @@ def build_curated_cell_type_submission(
         "kind": "BattinfoSubmission",
         "submission_mode": "resource",
         "generated_at": generated_at,
-        "project_id": project_id,
+        "workspace_id": workspace_id,
         "publisher_id": publisher_id,
         "source_version": source_version,
         "title": resolved_title,
@@ -1155,7 +1186,8 @@ def submit_publication_package(
     timeout_sec: float = 30.0,
 ) -> dict[str, Any]:
     request_url = registry_base_url.rstrip("/") + "/publication-packages"
-    request_body = json.dumps(dict(payload), ensure_ascii=False).encode("utf-8")
+    request_payload = dict(payload)
+    request_body = json.dumps(request_payload, ensure_ascii=False).encode("utf-8")
     request = UrlRequest(
         request_url,
         data=request_body,
@@ -1189,7 +1221,7 @@ def submit_publication_package(
 def publish_curated_cell_type(
     source: dict[str, Any] | PathLike,
     *,
-    project_id: str,
+    workspace_id: str,
     publisher_id: str,
     source_version: str,
     registry_base_url: str,
@@ -1205,7 +1237,7 @@ def publish_curated_cell_type(
 ) -> dict[str, Any]:
     payload = build_curated_cell_type_submission(
         source,
-        project_id=project_id,
+        workspace_id=workspace_id,
         publisher_id=publisher_id,
         source_version=source_version,
         source_local_id=source_local_id,
@@ -1330,6 +1362,7 @@ def query_library_cell_types(
             "format": specification.get("format"),
             "size_code": specification.get("size_code"),
             "construction": specification.get("construction"),
+            "coin_hardware": specification.get("coin_hardware"),
             "positive_electrode_basis": specification.get("positive_electrode_basis"),
             "negative_electrode_basis": specification.get("negative_electrode_basis"),
             "nominal_capacity": _quantity_numeric_value(properties, "nominal_capacity")
@@ -1351,7 +1384,7 @@ def query_library_cell_types(
     for rec in records:
         if id is not None and rec.get("id") != id:
             continue
-        if not _str_eq(rec.get("manufacturer"), manufacturer):
+        if not _str_fuzzy_match(rec.get("manufacturer"), manufacturer):
             continue
         if not _str_contains(rec.get("model"), model_contains):
             continue
@@ -1418,10 +1451,10 @@ def query_cell_types(
                 else manufacturer_obj
             )
             model_name = product.get("model")
-            format_name = product.get("cellFormat")
-            size_code = product.get("sizeCode")
-            iec_code = product.get("iecCode")
-            country_of_origin = product.get("countryOfOrigin")
+            format_name = product.get("cell_format") or product.get("cellFormat")
+            size_code = product.get("size_code") or product.get("sizeCode")
+            iec_code = product.get("iec_code") or product.get("iecCode")
+            country_of_origin = product.get("country_of_origin") or product.get("countryOfOrigin")
             year = product.get("year")
             chemistry_name = product.get("chemistry")
             short_id = product.get("short_id")
@@ -1457,7 +1490,7 @@ def query_cell_types(
                 "nominal_capacity": _spec_numeric_value(specs, "nominal_capacity"),
                 "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
                 "specs": specs,
-                "source": "cell-types",
+                "source": "cell-type",
                 "path": str(path),
             }
         )
@@ -1466,7 +1499,7 @@ def query_cell_types(
     for rec in records:
         if id is not None and rec.get("id") != id:
             continue
-        if not _str_eq(rec.get("manufacturer"), manufacturer):
+        if not _str_fuzzy_match(rec.get("manufacturer"), manufacturer):
             continue
         if not _str_eq(rec.get("chemistry"), chemistry):
             continue
@@ -1606,6 +1639,9 @@ def query_datasets(
         distribution = dataset.get("distribution")
         if isinstance(distribution, list):
             for entry in distribution:
+                if isinstance(entry, Mapping) and isinstance(entry.get("encoding_format"), str):
+                    dist_format = entry.get("encoding_format")
+                    break
                 if isinstance(entry, Mapping) and isinstance(entry.get("encodingFormat"), str):
                     dist_format = entry.get("encodingFormat")
                     break
@@ -1617,7 +1653,7 @@ def query_datasets(
             "name": dataset.get("name") or dataset.get("title"),
             "format": dist_format or dataset.get("format"),
             "license": dataset.get("license"),
-            "access_url": dataset.get("url") or dataset.get("access_url"),
+            "access_url": dataset.get("access_url") or dataset.get("url"),
             "related_cell_ids": related_cells,
             "related_test_ids": [
                 item for item in about if isinstance(item, str) and TEST_IRI_RE.fullmatch(item)
@@ -1947,7 +1983,7 @@ def create_cell_instance(
 
 def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     if entity_type == "cell-type":
-        return source_root / "cell-types" / f"cell-type-{uid}.json"
+        return source_root / "cell-type" / f"cell-type-{uid}.json"
     if entity_type == "cell":
         return source_root / "cell-instances" / f"cell-{uid}.json"
     if entity_type == "test-protocol":
@@ -1955,13 +1991,13 @@ def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     if entity_type == "test":
         return source_root / "tests" / f"test-{uid}.json"
     if entity_type == "dataset":
-        return source_root / "datasets" / f"dataset-{uid}.json"
+        return source_root / "dataset" / f"dataset-{uid}.json"
     raise ValueError(f"Unsupported entity type for save path: {entity_type}")
 
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     if entity_type == "cell-type":
-        directory = source_root / "cell-types"
+        directory = source_root / "cell-type"
     elif entity_type == "cell":
         directory = source_root / "cell-instances"
     elif entity_type == "test-protocol":
@@ -1969,7 +2005,7 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     elif entity_type == "test":
         directory = source_root / "tests"
     elif entity_type == "dataset":
-        directory = source_root / "datasets"
+        directory = source_root / "dataset"
     else:
         return []
     if not directory.exists():
@@ -2071,7 +2107,7 @@ def _record_from_cell_type(draft: CellTypeInput) -> dict[str, Any]:
         record["provenance"]["file_hash"] = draft.file_hash
     if draft.notes:
         record["notes"] = list(draft.notes)
-    return record
+    return record_to_snake_aliases(record)
 
 
 def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
@@ -2252,7 +2288,7 @@ def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
         record["provenance"]["curated_by"] = draft.curated_by
     if draft.notes:
         record["notes"] = list(draft.notes)
-    return record
+    return record_to_snake_aliases(record)
 
 
 def _record_from_test(draft: TestInput) -> dict[str, Any]:
@@ -2326,7 +2362,7 @@ def _record_from_test(draft: TestInput) -> dict[str, Any]:
         record["provenance"]["workflow_version"] = draft.workflow_version
     if draft.notes:
         record["notes"] = list(draft.notes)
-    return record
+    return record_to_snake_aliases(record)
 
 
 def _record_from_test_protocol(draft: TestProtocolInput) -> dict[str, Any]:
@@ -2381,7 +2417,7 @@ def _record_from_test_protocol(draft: TestProtocolInput) -> dict[str, Any]:
         record["provenance"]["workflow_version"] = draft.workflow_version
     if draft.notes:
         record["notes"] = list(draft.notes)
-    return record
+    return record_to_snake_aliases(record)
 
 
 def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None:
@@ -3496,14 +3532,105 @@ def _schema_main_entity_value(value: Any) -> dict[str, Any] | None:
     return None
 
 
+
+
+_PYBAMM_STEP_EMMO_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"^\s*(discharge|rest|charge|hold)\s+at\s+\S+\s+[acwv]", re.I), ""),  # router
+    (re.compile(r"^\s*discharge\s+at\s+\S+\s+[cw]", re.I), "ConstantCurrentDischarging"),
+    (re.compile(r"^\s*discharge\s+at\s+\S+\s+a\b", re.I), "ConstantCurrentDischarging"),
+    (re.compile(r"^\s*charge\s+at\s+\S+\s+[caw]\s+until\s+\S+\s+[va]\b", re.I), "ConstantCurrentConstantVoltageCharging"),
+    (re.compile(r"^\s*charge\s+at\s+\S+\s+[cw]", re.I), "ConstantCurrentCharging"),
+    (re.compile(r"^\s*charge\s+at\s+\S+\s+a\b", re.I), "ConstantCurrentCharging"),
+    (re.compile(r"^\s*hold\s+at\s+\S+\s+v\b", re.I), "ConstantVoltageCharging"),
+    (re.compile(r"^\s*rest\b", re.I), "Resting"),
+]
+
+
+def _pybamm_step_emmo_type(step_text: str) -> str | None:
+    """Return the EMMO electrochemistry process class for a PyBaMM step string, or None."""
+    t = step_text.strip().lower()
+    if t.startswith("rest"):
+        return "Resting"
+    if t.startswith("hold at") and " v" in t:
+        return "ConstantVoltageCharging"
+    if t.startswith("discharge"):
+        return "ConstantCurrentDischarging"
+    if t.startswith("charge"):
+        # CC-CV if the step has a current condition AND a voltage cut-off
+        if re.search(r"until\s+\S+\s*v\b", t):
+            return "ConstantCurrentConstantVoltageCharging"
+        return "ConstantCurrentCharging"
+    return None
+
+
+_INSTRUMENT_EMMO_MAP: dict[str, str] = {
+    # Battery cyclers (galvanostatic instruments)
+    "maccor": "BatteryCycler",
+    "arbin": "BatteryCycler",
+    "neware": "BatteryCycler",
+    "landt": "BatteryCycler",
+    "basytec": "BatteryCycler",
+    "novonix": "BatteryCycler",
+    "digatron": "BatteryCycler",
+    # Biologic can be either, but VMP/MPG/SP lines are potentiostats/galvanostats
+    "biologic": "Potentiostat",
+    "vmp": "Potentiostat",
+    "mpg": "Potentiostat",
+    "sp-": "Potentiostat",
+    "hcp": "Potentiostat",
+    # Dedicated potentiostats / galvanostats
+    "gamry": "Potentiostat",
+    "autolab": "Potentiostat",
+    "zahner": "Potentiostat",
+    "ivium": "Potentiostat",
+    "metrohm": "Potentiostat",
+    "solartron": "Potentiostat",
+    "galvanostat": "Galvanostat",
+    "potentiostat": "Potentiostat",
+    "cycler": "BatteryCycler",
+}
+
+
+def _instrument_emmo_type(name: str) -> str:
+    """Return the EMMO equipment class for a test instrument name string."""
+    lower = (name or "").lower()
+    for keyword, emmo_class in _INSTRUMENT_EMMO_MAP.items():
+        if keyword in lower:
+            return emmo_class
+    return "MeasuringInstrument"
+
+
+def _instrument_node(name: str) -> dict[str, Any]:
+    """Build an equipment node with EMMO type + schema.org name."""
+    return {"@type": _instrument_emmo_type(name), "schema:name": name}
+
+
+def _pybamm_step_to_jsonld(step_text: str, position: int) -> dict[str, Any]:
+    """Convert a single PyBaMM experiment step string to a schema:HowToStep node.
+
+    The step text is stored verbatim so it can be fed directly back into
+    pybamm.Experiment(steps).  The EMMO type is added when it can be
+    determined unambiguously from the step text.
+    """
+    emmo_type = _pybamm_step_emmo_type(step_text)
+    node_type: str | list[str] = (
+        ["schema:HowToStep", emmo_type] if emmo_type else "schema:HowToStep"
+    )
+    return {
+        "@type": node_type,
+        "schema:position": position,
+        "schema:text": step_text,
+    }
+
+
 def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
     entity_iri = _entity_id(doc)
     entity_type, uid = _iri_tail(entity_iri)
+    # csvw: is used by _schema_main_entity_value helpers called from the dataset block.
     context = [
         "https://w3id.org/emmo/domain/battery/context",
         {
             "schema": "https://schema.org/",
-            "battinfo": "https://w3id.org/battinfo#",
             "csvw": "http://www.w3.org/ns/csvw#",
         },
     ]
@@ -3520,19 +3647,29 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         out: dict[str, Any] = {
             "@context": context,
             "@id": entity_iri,
-            "@type": "battinfo:BatteryCellType",
+            "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
             "schema:identifier": uid,
             "schema:name": cell.get("name") or cell.get("model") or cell.get("model_name"),
             "schema:manufacturer": {"@type": "schema:Organization", "schema:name": manufacturer_name},
-            "battinfo:chemistry": cell.get("chemistry"),
-            "battinfo:format": cell.get("cellFormat") or cell.get("format"),
         }
-        if cell.get("sizeCode") or cell.get("size_code"):
-            out["battinfo:sizeCode"] = cell.get("sizeCode") or cell.get("size_code")
-        if cell.get("positiveElectrodeBasis"):
-            out["battinfo:positiveElectrodeBasis"] = cell.get("positiveElectrodeBasis")
-        if cell.get("negativeElectrodeBasis"):
-            out["battinfo:negativeElectrodeBasis"] = cell.get("negativeElectrodeBasis")
+        product_type = cell.get("productType") or cell.get("product_type")
+        if product_type:
+            out["schema:additionalType"] = str(product_type)
+        size_code = cell.get("sizeCode") or cell.get("size_code")
+        if size_code:
+            out["schema:size"] = size_code
+        # Quantitative specifications as EMMO ConventionalProperty nodes.
+        # Chemistry and format are already expressed through @type stacking.
+        specs = doc.get("specs") or {}
+        if isinstance(specs, Mapping):
+            prop_nodes = [
+                node
+                for key, value in specs.items()
+                if isinstance(value, Mapping)
+                if (node := _jsonld_quantity_node(key, value)) is not None
+            ]
+            if prop_nodes:
+                out["hasProperty"] = prop_nodes
         return out
 
     if entity_type == "cell":
@@ -3540,18 +3677,19 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         out = {
             "@context": context,
             "@id": entity_iri,
-            "@type": "battinfo:BatteryCellInstance",
+            "@type": ["BatteryCell", "schema:IndividualProduct"],
             "schema:identifier": uid,
-            "battinfo:typeId": {"@id": inst.get("type_id")},
+            "hasDescription": {"@id": inst.get("type_id")},
+            "schema:isVariantOf": {"@id": inst.get("type_id")},
         }
         if inst.get("serial_number"):
-            out["battinfo:serialNumber"] = inst.get("serial_number")
+            out["schema:serialNumber"] = inst.get("serial_number")
         datasets: list[dict[str, str]] = []
         for dataset in doc.get("datasets", []):
             if isinstance(dataset, Mapping) and isinstance(dataset.get("id"), str):
                 datasets.append({"@id": dataset["id"]})
         if datasets:
-            out["battinfo:hasDataset"] = datasets
+            out["schema:workExample"] = datasets
         return out
 
     if entity_type == "test-protocol":
@@ -3559,10 +3697,9 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         out = {
             "@context": context,
             "@id": entity_iri,
-            "@type": "battinfo:BatteryTestProtocol",
+            "@type": ["ElectrochemicalTestingProcedure", "schema:HowTo"],
             "schema:identifier": uid,
             "schema:name": protocol.get("name"),
-            "battinfo:testKind": protocol.get("kind"),
         }
         if protocol.get("description"):
             out["schema:description"] = protocol.get("description")
@@ -3570,30 +3707,51 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             out["schema:url"] = protocol.get("protocol_url")
         if protocol.get("version"):
             out["schema:version"] = protocol.get("version")
+        steps = protocol.get("steps")
+        if isinstance(steps, list) and steps:
+            step_nodes = [
+                _pybamm_step_to_jsonld(step_text, position=i + 1)
+                for i, step_text in enumerate(steps)
+            ]
+            out["schema:step"] = step_nodes
+        cycles = protocol.get("cycles")
+        if isinstance(cycles, int) and cycles > 1:
+            out["schema:repeatCount"] = cycles
         return out
 
     if entity_type == "test":
         test = doc["test"]
+        cell_ref = {"@id": test.get("cell_id")}
         out = {
             "@context": context,
             "@id": entity_iri,
-            "@type": "battinfo:BatteryCellTest",
+            "@type": ["BatteryTest", "schema:Action"],
             "schema:identifier": uid,
             "schema:name": test.get("name"),
-            "battinfo:aboutCell": {"@id": test.get("cell_id")},
-            "battinfo:testKind": test.get("kind"),
+            # EMMO-native: the battery cell is an input to the test
+            "hasTestObject": cell_ref,
+            # schema.org alignment
+            "schema:object": cell_ref,
         }
         if test.get("description"):
             out["schema:description"] = test.get("description")
         if test.get("status"):
-            out["schema:creativeWorkStatus"] = test.get("status")
+            out["schema:actionStatus"] = test.get("status")
         if isinstance(test.get("protocol_id"), str):
-            out["battinfo:usesTestProtocol"] = {"@id": test["protocol_id"]}
+            protocol_ref = {"@id": test["protocol_id"]}
+            out["schema:instrument"] = protocol_ref
+        instrument_name = test.get("instrument_name")
+        if isinstance(instrument_name, str) and instrument_name:
+            equip_node = _instrument_node(instrument_name)
+            out["hasTestEquipment"] = equip_node
+            out["schema:instrument"] = [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
         datasets = test.get("dataset_ids")
         if isinstance(datasets, list):
-            refs = [{"@id": dataset_id} for dataset_id in datasets if isinstance(dataset_id, str)]
+            refs = [{"@id": did} for did in datasets if isinstance(did, str)]
             if refs:
-                out["battinfo:hasDataset"] = refs
+                result = refs[0] if len(refs) == 1 else refs
+                out["hasOutput"] = result
+                out["schema:result"] = result
         return out
 
     if entity_type == "dataset":
@@ -3716,18 +3874,17 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
                 out["schema:mainEntity"] = value
         about = dataset.get("about")
         if isinstance(about, list):
-            cells = [cell_id for cell_id in about if isinstance(cell_id, str) and CELL_IRI_RE.fullmatch(cell_id)]
-            if cells:
-                out["battinfo:aboutCell"] = [{"@id": cell_id} for cell_id in cells]
-            tests = [test_id for test_id in about if isinstance(test_id, str) and TEST_IRI_RE.fullmatch(test_id)]
-            if tests:
-                out["battinfo:aboutTest"] = [{"@id": test_id} for test_id in tests]
+            about_nodes = [{"@id": item} for item in about if isinstance(item, str) and (CELL_IRI_RE.fullmatch(item) or TEST_IRI_RE.fullmatch(item))]
+            if about_nodes:
+                out["schema:about"] = about_nodes
         else:
             related = dataset.get("related_entities", {})
             if isinstance(related, Mapping):
                 cells = related.get("cell_ids")
                 if isinstance(cells, list):
-                    out["battinfo:aboutCell"] = [{"@id": cell_id} for cell_id in cells if isinstance(cell_id, str)]
+                    cell_nodes = [{"@id": cell_id} for cell_id in cells if isinstance(cell_id, str)]
+                    if cell_nodes:
+                        out["schema:about"] = cell_nodes
         return out
 
     raise ValueError(f"Unsupported entity type '{entity_type}' for {entity_iri}.")
@@ -3876,11 +4033,11 @@ def build_index(
     datasets: list[dict[str, Any]] = []
     failures: list[dict[str, str]] = []
 
-    cell_types_dir = src_root / "cell-types"
+    cell_types_dir = src_root / "cell-type"
     cell_instances_dir = src_root / "cell-instances"
     test_protocols_dir = src_root / "test-protocols"
     tests_dir = src_root / "tests"
-    datasets_dir = src_root / "datasets"
+    datasets_dir = src_root / "dataset"
 
     for path in sorted(cell_types_dir.glob(glob)) if cell_types_dir.exists() else []:
         try:

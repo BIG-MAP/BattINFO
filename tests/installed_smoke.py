@@ -6,7 +6,6 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -66,13 +65,13 @@ def main() -> None:
         graph = publication_payload["@graph"]
         cell_type_node = next(node for node in graph if node.get("@id") == publish_result["cell_type_id"])
         cell_instance_node = next(node for node in graph if node.get("@id") == publish_result["cell_instance_id"])
-        assert "schema:ProductModel" in (
-            cell_type_node["@type"] if isinstance(cell_type_node["@type"], list) else [cell_type_node["@type"]]
-        )
+        cell_type_types = cell_type_node["@type"] if isinstance(cell_type_node["@type"], list) else [cell_type_node["@type"]]
+        assert "BatteryCellSpecification" in cell_type_types
+        assert "schema:CreativeWork" in cell_type_types
         assert publish_result["cell_type_id"] not in (
             cell_instance_node["@type"] if isinstance(cell_instance_node["@type"], list) else [cell_instance_node["@type"]]
         )
-        assert cell_instance_node["schema:isVariantOf"]["@id"] == publish_result["cell_type_id"]
+        assert cell_instance_node["hasDescription"]["@id"] == publish_result["cell_type_id"]
         test_node = next(node for node in graph if node.get("@id") == publish_result["test_id"])
         test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
         assert "schema:Action" in test_types

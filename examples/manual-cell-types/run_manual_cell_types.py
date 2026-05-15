@@ -8,8 +8,8 @@ from battinfo import Workspace
 
 def main() -> None:
     example_root = Path(__file__).resolve().parent
-    cell_type_dir = example_root / "cell-types"
-    workspace_root = Path(".battinfo/manual-cell-types-demo")
+    cell_type_dir = example_root / "cell-type"
+    workspace_root = Path(".battinfo/manual-cell-type-demo")
     sources = sorted(
         path
         for path in cell_type_dir.glob("*.json")
@@ -38,3 +38,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

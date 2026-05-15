@@ -33,15 +33,15 @@ should not become a hand-maintained dump of every commercial cell type.
 
 - external curated records repo, for example `battinfo-records/`
   - maintained shared cell-type corpus
-- `.battinfo/library/cell-types/`
+- `.battinfo/library/cell-type/`
   - local working copy or sync target used during rebuilds
-- `src/battinfo/data/library/cell-types/`
+- `src/battinfo/data/library/cell-type/`
   - packaged copies when the library is shipped with the Python package
-- `.battinfo/library-rdf/cell-types/`
+- `.battinfo/library-rdf/cell-type/`
   - output location for per-record generated RDF/JSON-LD artifacts
-- `.battinfo/library-rdf/cell-types.index.json`
+- `.battinfo/library-rdf/cell-type.index.json`
   - generated manifest over the library
-- `.battinfo/ontology/library/cell-types.jsonld`
+- `.battinfo/ontology/library/cell-type.jsonld`
   - aggregated generated RDF publication artifact
 
 ## Reuse Model
@@ -80,12 +80,12 @@ python .tools/build/build_cell_type_library_rdf.py --clean-output
 
 This does three things:
 
-1. validates every descriptor in `.battinfo/library/cell-types/`
+1. validates every descriptor in `.battinfo/library/cell-type/`
 2. generates per-record domain-battery JSON-LD into
-   `.battinfo/library-rdf/cell-types/`
+   `.battinfo/library-rdf/cell-type/`
 3. generates:
-   - `.battinfo/library-rdf/cell-types.index.json`
-   - `.battinfo/ontology/library/cell-types.jsonld`
+   - `.battinfo/library-rdf/cell-type.index.json`
+   - `.battinfo/ontology/library/cell-type.jsonld`
 
 ## Curation Workflow
 
@@ -95,7 +95,7 @@ Recommended workflow for a new commercial cell type:
 2. create a BattINFO battery descriptor draft
 3. review and enrich the specification
 4. place the curated descriptor in the external curated records repo, or sync it
-   into `.battinfo/library/cell-types/` for local rebuilds
+   into `.battinfo/library/cell-type/` for local rebuilds
 5. rebuild the RDF library artifacts
 6. reference the type IRI from cell-instance records
 
@@ -108,5 +108,6 @@ without turning `battinfo.ttl` into a data dump.
 If a Turtle export becomes necessary later, it should be added as another
 generated artifact from the same canonical descriptor library rather than as a
 hand-maintained ontology file.
+
 
 

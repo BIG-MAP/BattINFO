@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy, ValidationReport, ValidationResult, get_validation_policy
+from battinfo.validate.core import (
+    DEFAULT_POLICY,
+    ValidationPolicy,
+    ValidationReport,
+    ValidationResult,
+    get_validation_policy,
+)
 from battinfo.validate.schema import validate_profile
 
 

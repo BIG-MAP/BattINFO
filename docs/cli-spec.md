@@ -74,7 +74,7 @@ JSON output contract:
 ### 4.1 Query Cell Types
 
 ```text
-battinfo query cell-types [filters...]
+battinfo query cell-type [filters...]
 ```
 
 Filters:
@@ -123,7 +123,7 @@ Behavior:
 ### 4.3 Query Datasets
 
 ```text
-battinfo query datasets [filters...]
+battinfo query dataset [filters...]
 ```
 
 Filters:
@@ -168,7 +168,7 @@ JSON mode (`--format json`) for all query commands:
 
 ```json
 {
-  "resource": "cell-types",
+  "resource": "cell-type",
   "count": 2,
   "limit": 50,
   "offset": 0,
@@ -248,7 +248,7 @@ Typical result:
   "status": "created",
   "entity_type": "cell-type",
   "id": "https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8",
-  "path": "examples/cell-types/cell-type-3m6k-9t2p-7x4h-9nq8.json",
+  "path": "examples/cell-type/cell-type-3m6k-9t2p-7x4h-9nq8.json",
   "mode": "create_only",
   "published": false
 }
@@ -360,7 +360,7 @@ Minimum stats output:
 
 ### Query
 
-- `query cell-types`, `query cell-instances`, `query tests`, and `query datasets` implemented.
+- `query cell-type`, `query cell-instances`, `query tests`, and `query dataset` implemented.
 - Each command supports meaningful resource-specific filters.
 - JSON output contract stable and documented.
 
@@ -404,6 +404,8 @@ CLI wiring:
   - `create`
   - `publish`
   - `index`
+
+
 
 
 

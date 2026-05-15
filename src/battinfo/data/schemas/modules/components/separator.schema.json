@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/separator.schema.json",
+  "title": "Separator",
+  "description": "Separator layer placed between the positive and negative electrodes to prevent short circuits while permitting ionic conduction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Common material or product name, e.g. 'Celgard 2400', 'glass fibre', 'ceramic-coated PP'."
+    },
+    "material": {
+      "type": "string",
+      "description": "Base material family, e.g. 'polyethylene', 'polypropylene', 'polyethylene-polypropylene', 'glass fibre', 'ceramic'."
+    },
+    "structure": {
+      "type": "string",
+      "enum": [
+        "monolayer",
+        "bilayer",
+        "trilayer",
+        "composite",
+        "other",
+        "unknown"
+      ],
+      "description": "Physical layer structure of the separator membrane."
+    },
+    "coating": {
+      "type": "string",
+      "description": "Surface coating applied to the base membrane, e.g. 'Al2O3', 'SiO2', 'PVDF', 'ceramic'."
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "Name of the manufacturer or supplier."
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Manufacturer or supplier product code."
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Quantitative physical or electrochemical properties, e.g. thickness, porosity, Gurley number, ionic conductivity."
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

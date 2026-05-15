@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from battinfo import PublishResult
 from battinfo.cli import app
 
 
@@ -18,7 +19,7 @@ def test_query_cell_types_json() -> None:
         app,
         [
             "query",
-            "cell-types",
+            "cell-type",
             "--manufacturer",
             "A123",
             "--chemistry",
@@ -31,7 +32,7 @@ def test_query_cell_types_json() -> None:
     )
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)
-    assert payload["resource"] == "cell-types"
+    assert payload["resource"] == "cell-type"
     assert payload["count"] >= 1
 
 
@@ -108,7 +109,7 @@ def test_query_datasets_by_related_cell_and_test_json() -> None:
         app,
         [
             "query",
-            "datasets",
+            "dataset",
             "--related-cell-id",
             "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
             "--related-test-id",
@@ -119,7 +120,7 @@ def test_query_datasets_by_related_cell_and_test_json() -> None:
     )
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)
-    assert payload["resource"] == "datasets"
+    assert payload["resource"] == "dataset"
     assert payload["count"] >= 1
     assert all(
         "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8" in item["related_cell_ids"] for item in payload["items"]
@@ -127,6 +128,109 @@ def test_query_datasets_by_related_cell_and_test_json() -> None:
     assert all(
         "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r" in item["related_test_ids"] for item in payload["items"]
     )
+
+
+def test_publish_cell_type_cli_json(monkeypatch) -> None:
+    runner = CliRunner()
+
+    monkeypatch.setattr(
+        "battinfo.cli.publish_object",
+        lambda *args, **kwargs: PublishResult(
+            status="ok",
+            destination="local",
+            resource_type="cell_type",
+            canonical_id="cell-type-001",
+            canonical_iri="https://w3id.org/battinfo/cell-type/cell-type-001",
+            source_local_id="cell-type-001",
+            debug_paths={"canonical_record_path": "C:/tmp/cell-type.json"},
+        ),
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "publish",
+            "cell-type",
+            "--manufacturer",
+            "Google",
+            "--model",
+            "G20M7",
+            "--cell-format",
+            "pouch",
+            "--chemistry",
+            "Li-ion",
+            "--destination",
+            "local",
+            "--format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["destination"] == "local"
+    assert payload["canonical_id"] == "cell-type-001"
+    assert payload["resource_type"] == "cell_type"
+
+
+def test_publish_cell_type_cli_accepts_input_file(tmp_path: Path, monkeypatch) -> None:
+    runner = CliRunner()
+    input_path = tmp_path / "cell-type.json"
+    input_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "Google",
+                "model": "G20M7",
+                "format": "pouch",
+                "chemistry": "Li-ion",
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        "battinfo.cli.publish_object",
+        lambda cell_type, **kwargs: PublishResult(
+            status="ok",
+            destination=kwargs["destination"],
+            resource_type="cell_type",
+            canonical_id="cell-type-002",
+            canonical_iri="https://w3id.org/battinfo/cell-type/cell-type-002",
+            page_url="https://battery-genome.org/registry/cell-type/cell-type-002",
+            source_local_id="cell-type-002",
+            debug_paths={"canonical_record_path": "C:/tmp/cell-type.json"},
+        ),
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "publish",
+            "cell-type",
+            "--input",
+            str(input_path),
+            "--destination",
+            "battery-genome",
+            "--registry-url",
+            "https://registry.example.org",
+            "--api-key",
+            "secret",
+            "--platform-url",
+            "https://battery-genome.org",
+            "--workspace-id",
+            "hello-world",
+            "--publisher-id",
+            "demo-lab",
+            "--format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["destination"] == "battery-genome"
+    assert payload["page_url"] == "https://battery-genome.org/registry/cell-type/cell-type-002"
 
 
 def test_save_record_with_resolve_references_defers_missing_targets(tmp_path: Path) -> None:
@@ -402,7 +506,7 @@ def test_validate_can_run_canonical_record_validation_with_source_root() -> None
         app,
         [
             "validate",
-            str(ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json"),
+            str(ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json"),
             "--source-root",
             str(ROOT / "examples"),
         ],
@@ -525,12 +629,12 @@ def test_save_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> No
 
 def test_init_defaults_to_battery_descriptor_scaffold(tmp_path: Path) -> None:
     runner = CliRunner()
-    project_dir = tmp_path / "descriptor-project"
+    workspace_dir = tmp_path / "descriptor-workspace"
 
-    result = runner.invoke(app, ["init", str(project_dir)])
+    result = runner.invoke(app, ["init", str(workspace_dir)])
     assert result.exit_code == 0, result.stdout
 
-    scaffold_path = project_dir / "battinfo.json"
+    scaffold_path = workspace_dir / "battinfo.json"
     assert scaffold_path.exists()
     scaffold = json.loads(scaffold_path.read_text(encoding="utf-8"))
     assert scaffold["schema_version"] == "1.0.0"
@@ -559,9 +663,15 @@ def test_map_descriptor_example_to_domain_battery_jsonld(tmp_path: Path) -> None
     mapped = json.loads(out_path.read_text(encoding="utf-8"))
     assert "@graph" in mapped
     battery = mapped["@graph"][0]
-    assert "BatteryCell" in battery["@type"]
-    assert "CylindricalBattery" in battery["@type"]
-    assert "LithiumIonBattery" in battery["@type"]
+    battery_types = battery["@type"] if isinstance(battery["@type"], list) else [battery["@type"]]
+    assert "BatteryCellSpecification" in battery_types
+    assert "schema:CreativeWork" in battery_types
+    physical_types = battery["isDescriptionFor"]["@type"]
+    if isinstance(physical_types, str):
+        physical_types = [physical_types]
+    assert "BatteryCell" in physical_types
+    assert "CylindricalBattery" in physical_types
+    assert "LithiumIonBattery" in physical_types
     assert battery["schema:name"] == "A123 ANR26650M1-B"
 
 
@@ -621,13 +731,13 @@ def test_publish_batch_json(tmp_path: Path) -> None:
             "publish",
             "batch",
             "--source-dir",
-            str(ROOT / "examples" / "cell-types"),
+            str(ROOT / "examples" / "cell-type"),
             "--source-dir",
             str(ROOT / "examples" / "cell-instances"),
             "--source-dir",
             str(ROOT / "examples" / "tests"),
             "--source-dir",
-            str(ROOT / "examples" / "datasets"),
+            str(ROOT / "examples" / "dataset"),
             "--target-root",
             str(tmp_path / "site"),
             "--format",
@@ -795,10 +905,10 @@ def test_save_batch_cli_json(tmp_path: Path) -> None:
     runner = CliRunner()
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
-    cell_types_dir = batch_root / "cell-types"
+    cell_types_dir = batch_root / "cell-type"
     cell_instances_dir = batch_root / "cell-instances"
     tests_dir = batch_root / "tests"
-    datasets_dir = batch_root / "datasets"
+    datasets_dir = batch_root / "dataset"
     cell_types_dir.mkdir(parents=True)
     cell_instances_dir.mkdir(parents=True)
     tests_dir.mkdir(parents=True)
@@ -1125,11 +1235,11 @@ def test_template_cli_then_save_record(tmp_path: Path) -> None:
 def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
     runner = CliRunner()
     template_path = tmp_path / "A123__ANR26650M1-B.json"
-    library_root = tmp_path / "library" / "cell-types"
-    packaged_root = tmp_path / "package" / "cell-types"
-    rdf_root = tmp_path / "library-rdf" / "cell-types"
-    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-types.jsonld"
-    manifest_json = tmp_path / "library-rdf" / "cell-types.index.json"
+    library_root = tmp_path / "library" / "cell-type"
+    packaged_root = tmp_path / "package" / "cell-type"
+    rdf_root = tmp_path / "library-rdf" / "cell-type"
+    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-type.jsonld"
+    manifest_json = tmp_path / "library-rdf" / "cell-type.index.json"
 
     template_result = runner.invoke(
         app,
@@ -1196,7 +1306,7 @@ def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
         [
             "library",
             "query",
-            "cell-types",
+            "cell-type",
             "--manufacturer",
             "A123",
             "--library-dir",
@@ -1207,7 +1317,7 @@ def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
     )
     assert query_result.exit_code == 0, query_result.stdout
     query_payload = json.loads(query_result.stdout)
-    assert query_payload["resource"] == "library-cell-types"
+    assert query_payload["resource"] == "library-cell-type"
     assert query_payload["count"] == 1
     assert query_payload["items"][0]["model"] == "ANR26650M1-B"
 
@@ -1234,6 +1344,9 @@ def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
     assert build_payload["entry_count"] == 1
     assert aggregate_jsonld.exists()
     assert manifest_json.exists()
+
+
+
 
 
 

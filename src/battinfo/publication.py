@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import html
 import hashlib
+import html
 import json
 import mimetypes
 import re
+import shutil
+import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -12,16 +14,28 @@ from urllib.parse import unquote, urlparse
 
 from rdflib import Dataset as RdfDataset
 
-from battinfo.bundle import BattinfoBundle, CellInstance, CellSpecification, CellType, Dataset, ProtocolInfo, ProvenanceInfo, Test
+from battinfo.bundle import (
+    ZENODO_CELL_RECORD_FILENAME,
+    BattinfoBundle,
+    CellInstance,
+    CellSpecification,
+    CellType,
+    Dataset,
+    ProtocolInfo,
+    ProvenanceInfo,
+    Test,
+    ZenodoCellRecord,
+)
+from battinfo.canonical_aliases import record_to_legacy_aliases
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
-from battinfo.validate.pydantic import validate_json
 from battinfo.validate.publication import validate_publication_report
+from battinfo.validate.pydantic import validate_json
 
 PathLike = str | Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CR2032_DATASHEET = Path("ENERGIZER__CR2032.pdf")
-DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "assets" / "library" / "cell-types" / "ENERGIZER__CR2032.json"
+DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "src" / "battinfo" / "data" / "library" / "cell-type" / "ENERGIZER__CR2032.json"
 DEFAULT_CR2032_DATASET_DIRS: tuple[Path, ...] = ()
 DEFAULT_PUBLISH_FILENAME = "battinfo.publish.jsonld"
 DEFAULT_RO_CRATE_METADATA_FILENAME = "ro-crate-metadata.json"
@@ -37,12 +51,50 @@ OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
 RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
+_INSTRUMENT_EMMO_MAP: dict[str, str] = {
+    "maccor": "BatteryCycler",
+    "arbin": "BatteryCycler",
+    "neware": "BatteryCycler",
+    "landt": "BatteryCycler",
+    "basytec": "BatteryCycler",
+    "novonix": "BatteryCycler",
+    "digatron": "BatteryCycler",
+    "biologic": "Potentiostat",
+    "vmp": "Potentiostat",
+    "mpg": "Potentiostat",
+    "sp-": "Potentiostat",
+    "hcp": "Potentiostat",
+    "gamry": "Potentiostat",
+    "autolab": "Potentiostat",
+    "zahner": "Potentiostat",
+    "ivium": "Potentiostat",
+    "metrohm": "Potentiostat",
+    "solartron": "Potentiostat",
+    "galvanostat": "Galvanostat",
+    "potentiostat": "Potentiostat",
+    "cycler": "BatteryCycler",
+}
+
+
+def _instrument_emmo_type(name: str) -> str:
+    lower = (name or "").lower()
+    for keyword, emmo_class in _INSTRUMENT_EMMO_MAP.items():
+        if keyword in lower:
+            return emmo_class
+    return "MeasuringInstrument"
+
+
+def _instrument_node(name: str) -> dict[str, Any]:
+    return {"@type": _instrument_emmo_type(name), "schema:name": name}
+
+
 PROPERTY_TYPE_MAP = {
     "diameter": "Diameter",
     "height": "Height",
     "mass": "Mass",
     "nominal_capacity": "NominalCapacity",
-    "typical_energy": "TypicalEnergy",
+    "nominal_energy": "NominalEnergy",
+    "typical_energy": "NominalEnergy",
     "rated_energy": "RatedEnergy",
     "nominal_voltage": "NominalVoltage",
 }
@@ -67,7 +119,7 @@ def _as_path(path: PathLike) -> Path:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -76,8 +128,10 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _triple_count(payload: Mapping[str, Any]) -> int:
-    dataset = RdfDataset()
-    dataset.parse(data=json.dumps(payload), format="json-ld")
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
+        dataset = RdfDataset()
+        dataset.parse(data=json.dumps(payload), format="json-ld")
     return len(dataset)
 
 
@@ -853,7 +907,6 @@ def _dcat_export(dataset: Dataset, *, dataset_dir: Path, dataset_files: list[Pat
     graph: list[dict[str, Any]] = []
     distribution_refs: list[dict[str, str]] = []
     for index, path in enumerate(dataset_files, start=1):
-        relpath = path.relative_to(dataset_dir).as_posix()
         dist_id = f"{dataset_id}#distribution-{index}"
         distribution_refs.append({"@id": dist_id})
         graph.append(
@@ -903,17 +956,20 @@ def _dataset_jsonld_node(
     dataset_dir: Path,
     test_id: str,
     cell_id: str,
+    *,
+    distribution_entries: list[dict[str, Any]] | None = None,
+    url_override: str | None = None,
 ) -> dict[str, Any]:
     about_refs = [{"@id": cell_id}, {"@id": test_id}]
     node: dict[str, Any] = {
         "@id": dataset.id,
-        "@type": "schema:Dataset",
+        "@type": ["BatteryTestResult", "schema:Dataset"],
         "schema:identifier": _schema_identifier_value(dataset.identifier),
         "schema:name": dataset.name,
         "schema:description": dataset.description,
-        "schema:url": dataset.access_url or dataset_dir.resolve().as_uri(),
+        "schema:url": url_override or dataset.access_url or dataset_dir.resolve().as_uri(),
         "schema:about": about_refs,
-        "schema:distribution": _publication_distribution_entries(dataset, dataset_dir, files),
+        "schema:distribution": distribution_entries if distribution_entries is not None else _publication_distribution_entries(dataset, dataset_dir, files),
     }
     if dataset.license is not None:
         node["schema:license"] = dataset.license
@@ -990,20 +1046,24 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
         description_value = f"Protocol: {protocol_name}"
     elif description_value is not None and protocol_name is not None:
         description_value = [description_value, f"Protocol: {protocol_name}"]
+    cell_ref = {"@id": test["cell_id"]}
+    dataset_ref = {"@id": dataset_id}
     node: dict[str, Any] = {
         "@id": test["id"],
-        "@type": ["schema:Action", "BatteryTest"],
+        "@type": ["BatteryTest", "schema:Action"],
         "schema:identifier": test.get("identifier"),
         "schema:name": test.get("name"),
         "schema:description": description_value,
-        "schema:object": {"@id": test["cell_id"]},
-        "schema:result": {"@id": dataset_id},
+        "hasTestObject": cell_ref,
+        "schema:object": cell_ref,
+        "hasOutput": dataset_ref,
+        "schema:result": dataset_ref,
     }
-    if test.get("instrument_name") is not None:
-        node["schema:instrument"] = {
-            "@type": "schema:Thing",
-            "schema:name": test["instrument_name"],
-        }
+    instrument_name = test.get("instrument_name")
+    if instrument_name is not None:
+        equip_node = _instrument_node(instrument_name)
+        node["hasTestEquipment"] = equip_node
+        node["schema:instrument"] = equip_node
     if test.get("status") is not None:
         node["schema:actionStatus"] = test.get("status")
     if test.get("kind") is not None:
@@ -1015,7 +1075,7 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
 
 def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_type: CellType) -> dict[str, Any]:
     inst = cell_instance_record["cell_instance"]
-    type_list = ["schema:IndividualProduct", "BatteryCell"]
+    type_list = ["BatteryCell", "schema:IndividualProduct"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_type.format)
     if subclass_term is not None:
         type_list.append(subclass_term)
@@ -1025,6 +1085,7 @@ def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: 
         "schema:identifier": inst.get("short_id"),
         "schema:name": label,
         "schema:description": "Dataset-local cell instance included in the publication graph.",
+        "hasDescription": {"@id": inst["type_id"]},
         "schema:isVariantOf": {"@id": inst["type_id"]},
     }
     if inst.get("serial_number"):
@@ -1092,13 +1153,14 @@ def _cell_type_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
 
 
 def _cell_type_jsonld_node(cell_type: CellType, *, cell_specification: CellSpecification | None = None) -> dict[str, Any]:
-    type_list = ["schema:ProductModel", "BatteryCell"]
+    physical_types: list[str] = ["BatteryCell"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_type.format)
     if subclass_term is not None:
-        type_list.append(subclass_term)
+        physical_types.append(subclass_term)
     node: dict[str, Any] = {
         "@id": cell_type.id,
-        "@type": type_list,
+        "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+        "isDescriptionFor": {"@type": physical_types if len(physical_types) > 1 else physical_types[0]},
         "schema:identifier": _tail_id(cell_type.id),
         "schema:name": cell_type.name,
         "schema:model": cell_type.model,
@@ -1106,10 +1168,10 @@ def _cell_type_jsonld_node(cell_type: CellType, *, cell_specification: CellSpeci
             "@type": "schema:Organization",
             "schema:name": cell_type.manufacturer,
         },
-        "schema:category": cell_type.format,
-        "schema:material": cell_type.chemistry,
         "schema:schemaVersion": cell_type.schema_version,
     }
+    if cell_type.product_type is not None:
+        node["schema:additionalType"] = str(cell_type.product_type)
     if cell_type.size_code is not None:
         node["schema:size"] = cell_type.size_code
     country_node = _schema_country_node(cell_type.country_of_origin)
@@ -1150,9 +1212,8 @@ def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, ce
     ]
     node: dict[str, Any] = {
         "@id": cell_specification.id,
-        "@type": "schema:CreativeWork",
+        "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
         "schema:identifier": _tail_id(cell_specification.id),
-        "schema:additionalType": "cell-specification",
         "schema:name": f"{cell_specification.manufacturer} {cell_specification.model} specification",
         "schema:about": {"@id": cell_type.id},
         "schema:model": cell_specification.model,
@@ -1160,10 +1221,10 @@ def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, ce
             "@type": "schema:Organization",
             "schema:name": cell_specification.manufacturer,
         },
-        "schema:category": cell_specification.format,
-        "schema:material": cell_specification.chemistry,
         "schema:schemaVersion": cell_specification.schema_version,
     }
+    if cell_specification.product_type is not None:
+        node["schema:additionalType"] = str(cell_specification.product_type)
     if cell_specification.size_code is not None:
         node["schema:size"] = cell_specification.size_code
     if descriptions:
@@ -1291,6 +1352,7 @@ def _build_cell_type_from_specification(cell_specification: CellSpecification) -
         model=cell_specification.model,
         chemistry=cell_specification.chemistry,
         format=cell_specification.format,
+        product_type=cell_specification.product_type,
         positive_electrode_basis=cell_specification.positive_electrode_basis,
         negative_electrode_basis=cell_specification.negative_electrode_basis,
         size_code=cell_specification.size_code,
@@ -1916,6 +1978,246 @@ def load_publication_package(path: PathLike) -> BattinfoBundle:
     return load_publication(path)
 
 
+# ── Zenodo package builder ─────────────────────────────────────────────────────
+
+def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any]:
+    guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    return {
+        "@type": "schema:DataDownload",
+        "schema:name": path.name,
+        "schema:contentUrl": f"{files_base_url}/{path.name}",
+        "schema:encodingFormat": guessed_format,
+        "schema:contentSize": str(path.stat().st_size),
+        "schema:sha256": _sha256(path),
+    }
+
+
+def _zenodo_publication_graph(
+    record: ZenodoCellRecord,
+    entry_files: list[list[Path]],
+    zenodo_record_url: str,
+) -> dict[str, Any]:
+    files_base_url = f"{zenodo_record_url}/files"
+    graph: list[dict[str, Any]] = [
+        _cell_type_jsonld_node(record.cell_type, cell_specification=record.cell_specification)
+    ]
+    if record.cell_specification is not None:
+        graph.append(_cell_specification_jsonld_node(record.cell_specification, cell_type=record.cell_type))
+
+    all_dataset_refs: list[dict[str, str]] = []
+    for i, entry in enumerate(record.datasets):
+        files = entry_files[i]
+
+        for ci in entry.cell_instances:
+            label = ci.name or ci.serial_number or ci.id or f"cell-{i + 1}"
+            _upsert_graph_node(graph, _cell_instance_summary_node(
+                ci.to_record(), label=label, cell_type=record.cell_type,
+            ))
+
+        test_record = entry.test.to_record()
+        dataset_record = entry.dataset.to_record()
+        dataset_id = dataset_record["dataset"]["id"]
+
+        _upsert_graph_node(graph, _test_jsonld_node(test_record, dataset_id=dataset_id))
+
+        dist_entries = [_zenodo_distribution_entry(f, files_base_url) for f in files]
+        _upsert_graph_node(graph, _dataset_jsonld_node(
+            entry.dataset,
+            files=[],
+            dataset_dir=Path("."),
+            test_id=test_record["test"]["id"],
+            cell_id=test_record["test"]["cell_id"],
+            distribution_entries=dist_entries,
+            url_override=zenodo_record_url,
+        ))
+
+        all_dataset_refs.append({"@id": dataset_id})
+
+    _upsert_graph_node(graph, _without_none({
+        "@id": zenodo_record_url,
+        "@type": "schema:Dataset",
+        "schema:name": record.cell_type.name,
+        "schema:url": zenodo_record_url,
+        "schema:hasPart": all_dataset_refs,
+    }))
+
+    include_bibo = any(
+        _citation_doi_value(source) is not None
+        for source in (
+            record.cell_specification.source if record.cell_specification is not None else None,
+            record.cell_type.source,
+        )
+        if source is not None
+    )
+    context: Any = DOMAIN_BATTERY_CONTEXT_URL
+    if include_bibo:
+        context = [DOMAIN_BATTERY_CONTEXT_URL, {"bibo": "http://purl.org/ontology/bibo/"}]
+    return {"@context": context, "@graph": graph}
+
+
+def _zenodo_ro_crate(
+    record: ZenodoCellRecord,
+    all_data_files: list[Path],
+    staging_dir: Path,
+    zenodo_record_url: str,
+    *,
+    publish_filename: str,
+    bundle_filename: str,
+    ro_crate_filename: str,
+) -> dict[str, Any]:
+    files_base_url = f"{zenodo_record_url}/files"
+
+    meta_filenames = [publish_filename, bundle_filename]
+    has_part = (
+        [{"@id": f.name} for f in all_data_files]
+        + [{"@id": fname} for fname in meta_filenames]
+    )
+
+    root_dataset: dict[str, Any] = _without_none({
+        "@id": "./",
+        "@type": "Dataset",
+        "name": record.cell_type.name,
+        "url": zenodo_record_url,
+        "hasPart": has_part,
+    })
+    if record.cell_type.manufacturer:
+        root_dataset["publisher"] = {"@type": "Organization", "name": record.cell_type.manufacturer}
+
+    graph: list[dict[str, Any]] = [
+        {
+            "@id": ro_crate_filename,
+            "@type": "CreativeWork",
+            "about": {"@id": "./"},
+            "conformsTo": {"@id": RO_CRATE_PROFILE_URL},
+        },
+        root_dataset,
+    ]
+
+    for path in all_data_files:
+        guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        graph.append({
+            "@id": path.name,
+            "@type": "File",
+            "name": path.name,
+            "encodingFormat": guessed_format,
+            "contentSize": path.stat().st_size,
+            "sha256": _sha256(path),
+            "url": f"{files_base_url}/{path.name}",
+        })
+
+    for fname, media_type in (
+        (publish_filename, "application/ld+json"),
+        (bundle_filename, "application/json"),
+    ):
+        fpath = staging_dir / fname
+        if fpath.exists():
+            graph.append({
+                "@id": fname,
+                "@type": "File",
+                "name": fname,
+                "encodingFormat": media_type,
+                "contentSize": fpath.stat().st_size,
+                "sha256": _sha256(fpath),
+                "url": f"{files_base_url}/{fname}",
+            })
+
+    return {"@context": RO_CRATE_CONTEXT_URL, "@graph": graph}
+
+
+def build_zenodo_package(
+    record: ZenodoCellRecord,
+    staging_dir: PathLike,
+    file_sets: list[tuple[PathLike | None, PathLike | None]],
+    *,
+    zenodo_record_id_placeholder: str = "ZENODO_RECORD_ID",
+    publish_filename: str = DEFAULT_PUBLISH_FILENAME,
+    ro_crate_filename: str = DEFAULT_RO_CRATE_METADATA_FILENAME,
+) -> dict[str, Any]:
+    """Build a flat Zenodo upload package from a ZenodoCellRecord.
+
+    Writes to staging_dir:
+      - battinfo.bundle.json            (harvest ingestion target)
+      - battinfo.publish.jsonld         (full semantic graph)
+      - ro-crate-metadata.json          (file inventory with placeholder Zenodo URLs)
+      - dataset-001.{ext}               (raw cycler file, canonical name)
+      - dataset-001.bdf.parquet         (BDF converted, canonical name)
+      - dataset-002.{ext}, ...
+
+    Distribution URLs use zenodo_record_id_placeholder as the Zenodo record ID.
+    After upload, call patch_zenodo_urls() to substitute the real record ID.
+
+    Args:
+        record: ZenodoCellRecord with all entities already having IDs.
+        staging_dir: Output directory (created if absent).
+        file_sets: One (raw_path, bdf_path) tuple per record.datasets entry.
+                   Either member may be None when not available.
+        zenodo_record_id_placeholder: Token used in placeholder URLs.
+        publish_filename: Override for the JSON-LD output filename.
+        ro_crate_filename: Override for the RO-Crate output filename.
+    """
+    if len(file_sets) != len(record.datasets):
+        raise ValueError(
+            f"file_sets length ({len(file_sets)}) must match record.datasets "
+            f"length ({len(record.datasets)})."
+        )
+
+    staging = _as_path(staging_dir)
+    staging.mkdir(parents=True, exist_ok=True)
+
+    zenodo_record_url = f"https://zenodo.org/records/{zenodo_record_id_placeholder}"
+    files_base_url = f"{zenodo_record_url}/files"
+
+    entry_files: list[list[Path]] = [[] for _ in record.datasets]
+    for i, (raw, bdf) in enumerate(file_sets, start=1):
+        if raw is not None:
+            raw_path = _as_path(raw)
+            staged = staging / f"dataset-{i:03d}{raw_path.suffix}"
+            shutil.copy2(raw_path, staged)
+            entry_files[i - 1].append(staged)
+        if bdf is not None:
+            staged_bdf = staging / f"dataset-{i:03d}.bdf.parquet"
+            shutil.copy2(_as_path(bdf), staged_bdf)
+            entry_files[i - 1].append(staged_bdf)
+
+    all_data_files: list[Path] = [f for files in entry_files for f in files]
+
+    bundle_path = staging / ZENODO_CELL_RECORD_FILENAME
+    record.to_path(bundle_path)
+
+    publish_payload = _zenodo_publication_graph(record, entry_files, zenodo_record_url)
+    publish_path = staging / publish_filename
+    _write_json(publish_path, publish_payload)
+
+    ro_crate_path = staging / ro_crate_filename
+    _write_json(ro_crate_path, _zenodo_ro_crate(
+        record,
+        all_data_files,
+        staging,
+        zenodo_record_url,
+        publish_filename=publish_filename,
+        bundle_filename=ZENODO_CELL_RECORD_FILENAME,
+        ro_crate_filename=ro_crate_filename,
+    ))
+
+    file_url_map: dict[str, str] = {f.name: f"{files_base_url}/{f.name}" for f in all_data_files}
+    for fname in (publish_filename, ZENODO_CELL_RECORD_FILENAME, ro_crate_filename):
+        file_url_map[fname] = f"{files_base_url}/{fname}"
+
+    return {
+        "status": "ok",
+        "staging_dir": str(staging),
+        "bundle_path": str(bundle_path),
+        "publish_path": str(publish_path),
+        "ro_crate_path": str(ro_crate_path),
+        "staged_data_files": [str(f) for f in all_data_files],
+        "file_url_map": file_url_map,
+        "zenodo_record_id_placeholder": zenodo_record_id_placeholder,
+        "zenodo_record_url": zenodo_record_url,
+        "cell_type_id": record.cell_type.id,
+        "dataset_count": len(record.datasets),
+    }
+
+
 __all__ = [
     "DEFAULT_CR2032_DATASET_DIRS",
     "DEFAULT_CR2032_DATASHEET",
@@ -1928,6 +2230,7 @@ __all__ = [
     "DEFAULT_REPORT_FILENAME",
     "DEFAULT_RO_CRATE_METADATA_FILENAME",
     "build_publication_package",
+    "build_zenodo_package",
     "derive_cell_type",
     "load_publication",
     "load_publication_package",

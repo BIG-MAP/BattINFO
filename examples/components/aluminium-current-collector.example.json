@@ -1,0 +1,13 @@
+{
+  "_schema": "battinfo/schema/modules/components/current-collector.schema.json",
+  "_description": "Aluminium foil current collector — standard choice for positive electrodes in lithium-ion cells.",
+  "name": "Aluminium foil",
+  "manufacturer": "Targray",
+  "product_id": "ALF-016-EL",
+  "property": {
+    "thickness": { "value": 16.0, "unit": "mm" },
+    "density": { "value": 2.7, "unit": "g/cm3" },
+    "tensile_strength": { "value": 165.0, "unit": "MPa" }
+  },
+  "comment": "16 µm electrolytic-grade aluminium foil with double-sided roughness for improved coating adhesion. Standard for LFP, NMC, and NCA positive electrodes. Copper foil is used instead for negative electrodes due to the more negative anode potential."
+}

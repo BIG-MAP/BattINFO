@@ -2,18 +2,33 @@ from __future__ import annotations
 
 import copy
 import json
+import warnings
 from functools import lru_cache
 from importlib import resources
 from typing import Any
 from urllib.request import Request, urlopen
 
 from rdflib import Dataset
+
 try:
     from pyld import jsonld as pyld_jsonld
 except ImportError:  # pragma: no cover - exercised only when the dependency is missing at runtime.
     pyld_jsonld = None
 
-from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPolicy, ValidationReport, ValidationResult, get_validation_policy
+from battinfo.validate.core import (
+    DEFAULT_POLICY,
+    ValidationIssue,
+    ValidationPolicy,
+    ValidationReport,
+    ValidationResult,
+    get_validation_policy,
+)
+
+# Canonical URL for the EMMO domain-battery JSON-LD context.  A bundled copy lives at
+# src/battinfo/data/context/domain-battery.context.json and is served as a local
+# fallback so that JSON-LD processing works without network access.  Run
+# .tools/quality/refresh_emmo_context.py to update the bundled copy.
+_EMMO_BATTERY_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 
 _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "BatteryCell",
@@ -25,19 +40,90 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "ConventionalProperty",
     "CylindricalBattery",
     "GraphiteElectrode",
+    "HardCarbonElectrode",
+    "LithiumCobaltOxideElectrode",
     "LithiumIonBattery",
+    "LithiumIonCobaltOxideBattery",
     "LithiumIonGraphiteBattery",
     "LithiumIonIronPhosphateBattery",
+    "LithiumIonNickelCobaltAluminiumOxideBattery",
+    "LithiumIonNickelManganeseCobaltOxideBattery",
     "LithiumIronPhosphateElectrode",
+    "LithiumManganeseDioxideBattery",
+    "LithiumMetalBattery",
     "PouchCell",
     "PrismaticBattery",
+    "RatedEnergy",
     "RealData",
+    "SiliconGraphiteElectrode",
+    "SodiumIonBattery",
     "MaximumChargingTemperature",
     "MinimumChargingTemperature",
     "MaximumDischargingTemperature",
     "MinimumDischargingTemperature",
     "MaximumStorageTemperature",
     "MinimumStorageTemperature",
+    # New in domain-electrochemistry 0.34.0 / domain-battery 0.18.8
+    "ACInternalResistance",
+    "CalendarLife",
+    "DCInternalResistance",
+    "InitialCoulombicEfficiency",
+    "NominalEnergy",
+    "SelfDischargeRate",
+    "StateOfHealth",
+    # Electrochemical process step types (test protocol step nodes)
+    "ConstantCurrentCharging",
+    "ConstantCurrentConstantVoltageCharging",
+    "ConstantCurrentConstantVoltageCycling",
+    "ConstantCurrentDischarging",
+    "ConstantVoltageCharging",
+    "ConstantVoltageDischarging",
+    "ElectrochemicalTestingProcedure",
+    "Resting",
+    # New in domain-battery 0.19.0
+    "BatterySpecification",
+    "BatteryCellSpecification",
+    "BatteryModuleSpecification",
+    "BatteryPackSpecification",
+    "BatterySystemSpecification",
+    # BatteryTest semantic model
+    "BatteryTestResult",
+    "BatteryCycler",
+    "Galvanostat",
+    "MeasuringInstrument",
+    "Potentiostat",
+    # Electrode composition, electrolyte, separator (descriptor pipeline)
+    "ActiveMassLoading",
+    "ActiveMaterial",
+    "AmountConcentration",
+    "AqueousElectrolyte",
+    "Binder",
+    "CalenderedDensity",
+    "ConductiveAdditive",
+    "CurrentCollector",
+    "ElectrodeCoating",
+    "ElectrolyteAdditive",
+    "ElectrolyteSolution",
+    "ExpandedMesh",
+    "ElectrospunMesh",
+    "Foil",
+    "IonicLiquidElectrolyte",
+    "LiquidElectrolyte",
+    "MassFraction",
+    "OrganicElectrolyte",
+    "PerforatedFoil",
+    "PolymerElectrolyte",
+    "Porosity",
+    "PorousSeparator",
+    "Separator",
+    "SeparatorPorosity",
+    "SeparatorThickness",
+    "SolidElectrolyte",
+    "Solute",
+    "Solvent",
+    "Thickness",
+    "VolumeFraction",
+    "WovenMesh",
 }
 
 
@@ -79,6 +165,13 @@ def _allowed_type_terms() -> set[str]:
                 value = item.get(key)
                 if isinstance(value, str) and value:
                     allowed.add(value)
+
+    material_map = _load_mapping_json("material_map.json")
+    for item in material_map.get("mappings", []):
+        emmo_class = item.get("emmo_class")
+        if isinstance(emmo_class, str) and emmo_class:
+            allowed.add(emmo_class)
+
     return allowed
 
 
@@ -110,9 +203,15 @@ def _walk_relative_type_errors(node: Any, path: str, errors: list[str]) -> None:
 
 def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
+    # rdflib 7.x emits DeprecationWarning for internal APIs (Dataset.default_context,
+    # Dataset.contexts, ConjunctiveGraph) used by its own JSON-LD parser and nquads
+    # serializer.  These are rdflib-internal calls, not our code; suppress them so
+    # they don't surface as false parse errors when callers run with -W error.
     try:
-        dataset = Dataset()
-        dataset.parse(data=json.dumps(data), format="json-ld")
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
+            dataset = Dataset()
+            dataset.parse(data=json.dumps(data), format="json-ld")
     except Exception as exc:  # noqa: BLE001
         issues.append(
             ValidationIssue(
@@ -127,7 +226,9 @@ def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]
         return issues
 
     try:
-        dataset.serialize(format="nquads")
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
+            dataset.serialize(format="nquads")
     except Exception as exc:  # noqa: BLE001
         issues.append(
             ValidationIssue(
@@ -178,7 +279,20 @@ def _cached_pyld_document(url: str) -> dict[str, Any]:
     return loader(url, {})
 
 
+@lru_cache(maxsize=1)
+def _local_emmo_context() -> dict[str, Any]:
+    path = resources.files("battinfo").joinpath("data", "context", "domain-battery.context.json")
+    with path.open("r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def _pyld_document_loader(url: str, options: dict[str, Any]) -> dict[str, Any]:
+    # Serve the bundled EMMO context from the local file to avoid a live network
+    # dependency at validation time.  This makes JSON-LD processing reproducible and
+    # allows offline use.  The bundled copy is refreshed via
+    # .tools/quality/refresh_emmo_context.py when EMMO releases a new version.
+    if url == _EMMO_BATTERY_CONTEXT_URL or url.rstrip("/") == _EMMO_BATTERY_CONTEXT_URL:
+        return {"contextUrl": None, "documentUrl": url, "document": _local_emmo_context()}
     return copy.deepcopy(_cached_pyld_document(url))
 
 

@@ -24,9 +24,9 @@ from battinfo.validate.record import validate_record
 from battinfo.workspace import Workspace
 
 PathLike = str | Path
-ProjectTarget = CellType | CellInstance | Test | Dataset
-PROJECT_SCHEMA_VERSION = "0.1.0"
-PROJECT_FILENAME = "battinfo-project.json"
+WorkspaceTarget = CellType | CellInstance | Test | Dataset
+WORKSPACE_STATE_SCHEMA_VERSION = "0.1.0"
+WORKSPACE_STATE_FILENAME = "battinfo-authoring-workspace.json"
 
 
 def _as_path(path: PathLike) -> Path:
@@ -92,47 +92,42 @@ def _dir_size(path: Path) -> int:
     return total
 
 
-class ProjectPaths(BaseModel):
+class WorkspacePaths(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    cell_types: str = "records/cell-types"
+    cell_types: str = "records/cell-type"
     cells: str = "records/cell-instances"
     tests: str = "records/tests"
-    datasets: str = "records/datasets"
+    datasets: str = "records/dataset"
 
 
-class ProjectArtifact(BaseModel):
+class WorkspaceArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dataset_id: str
     path: str
 
 
-class ProjectManifest(BaseModel):
+class WorkspaceManifest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = PROJECT_SCHEMA_VERSION
-    kind: str = "BattinfoProject"
-    name: str | None = None
+    schema_version: str = WORKSPACE_STATE_SCHEMA_VERSION
+    kind: str = "BattinfoAuthoringWorkspace"
+    workspace_id: str | None = None
     title: str | None = None
     description: str | None = None
     tenant: str | None = None
     publisher: str | None = None
     version: str | None = None
     comment: list[str] = Field(default_factory=list)
-    paths: ProjectPaths = Field(default_factory=ProjectPaths)
+    paths: WorkspacePaths = Field(default_factory=WorkspacePaths)
     artifacts_dir: str = "artifacts"
     dist_dir: str = "dist"
-    dataset_artifacts: list[ProjectArtifact] = Field(default_factory=list)
+    dataset_artifacts: list[WorkspaceArtifact] = Field(default_factory=list)
 
 
-class Project:
-    """Compatibility wrapper around `Workspace` for project-shaped workflows.
-
-    Use `Project` when the same linked object graph needs a named local project,
-    validation reports, copied dataset artifacts, or a registry-ready submission package.
-    For pure Python authoring without the project layer, use `Workspace` directly.
-    """
+class WorkspaceStateStore:
+    """Internal persistence and bundle helper for `Workspace`."""
 
     def __init__(
         self,
@@ -147,7 +142,17 @@ class Project:
         comment: list[str] | None = None,
         clean: bool = False,
     ) -> None:
-        self.workspace = Workspace(root=root, clean=clean)
+        self.workspace = Workspace(
+            root=root,
+            name=name,
+            title=title,
+            description=description,
+            tenant=tenant,
+            publisher=publisher,
+            version=version,
+            comment=comment,
+            clean=clean,
+        )
         self.name = name
         self.title = title
         self.description = description
@@ -155,7 +160,7 @@ class Project:
         self.publisher = publisher
         self.version = version
         self.comment = list(comment or [])
-        self.manifest_path = self.root / PROJECT_FILENAME
+        self.manifest_path = self.root / WORKSPACE_STATE_FILENAME
 
     @property
     def root(self) -> Path:
@@ -181,7 +186,7 @@ class Project:
     def descriptions(self) -> list[CellSpecification]:
         return self.workspace.descriptions
 
-    def add(self, *objects: Any) -> "Project":
+    def add(self, *objects: Any) -> "WorkspaceStateStore":
         self.workspace.add(*objects)
         return self
 
@@ -213,7 +218,7 @@ class Project:
         manifest, records, artifact_map = self._persist()
         return {
             "status": "ok",
-            "project_root": str(self.root),
+            "workspace_root": str(self.root),
             "manifest_path": str(self.manifest_path),
             "cell_type_count": len(records["cell_types"]),
             "cell_count": len(records["cell_instances"]),
@@ -221,7 +226,7 @@ class Project:
             "dataset_count": len(records["datasets"]),
             "artifact_count": sum(1 for value in artifact_map.values() if value is not None),
             "title": manifest.title,
-            "name": manifest.name,
+            "workspace_id": manifest.workspace_id,
         }
 
     def check(self, *, policy: str = "strict", write_report: bool = True) -> dict[str, Any]:
@@ -241,10 +246,10 @@ class Project:
         error_count = sum(item["error_count"] for group in validation_groups.values() for item in group)
         warning_count = sum(item["warning_count"] for group in validation_groups.values() for item in group)
         report = {
-            "schema_version": PROJECT_SCHEMA_VERSION,
-            "kind": "BattinfoProjectValidationReport",
+            "schema_version": WORKSPACE_STATE_SCHEMA_VERSION,
+            "kind": "BattinfoWorkspaceValidationReport",
             "generated_at": _now_iso(),
-            "project_root": str(self.root),
+            "workspace_root": str(self.root),
             "policy": policy,
             "ok": error_count == 0,
             "issue_count": issue_count,
@@ -266,7 +271,7 @@ class Project:
 
     def bundle(
         self,
-        target: ProjectTarget | None = None,
+        target: WorkspaceTarget | None = None,
         *,
         name: str | None = None,
         title: str | None = None,
@@ -291,7 +296,7 @@ class Project:
 
     def build_submission_package(
         self,
-        target: ProjectTarget | None = None,
+        target: WorkspaceTarget | None = None,
         *,
         name: str | None = None,
         title: str | None = None,
@@ -317,12 +322,12 @@ class Project:
         manifest, records, artifact_map = self._persist()
         validation_report = self.check(policy=policy, write_report=True)
         if not validation_report["ok"]:
-            raise ValueError("project validation failed; see dist/validation-report.json")
+            raise ValueError("workspace validation failed; see dist/validation-report.json")
 
-        if manifest.name is None:
-            raise ValueError("Project.bundle() requires project.name.")
+        if manifest.workspace_id is None:
+            raise ValueError("Workspace.bundle_workspace() requires workspace.name.")
         if manifest.publisher is None:
-            raise ValueError("Project.bundle() requires project.publisher.")
+            raise ValueError("Workspace.bundle_workspace() requires workspace.publisher.")
 
         normalized_dir = self.root / manifest.dist_dir / "normalized"
         self._write_record_groups(records, target_root=normalized_dir)
@@ -386,23 +391,23 @@ class Project:
         submission = BattinfoSubmission(
             submission_mode=submission_mode,
             generated_at=_now_iso(),
-            project_id=manifest.name,
+            workspace_id=manifest.workspace_id,
             publisher_id=manifest.publisher,
             source_version=manifest.version,
-            title=manifest.title or manifest.name,
+            title=manifest.title or manifest.workspace_id,
             publication_intent=SubmissionIntent(mode="canonical-publication"),
             provenance=SubmissionProvenance(
                 source_system="battinfo",
-                workflow_name="project",
+                workflow_name="workspace",
                 generated_at=_now_iso(),
             ),
             release={"version": manifest.version} if manifest.version is not None else {},
             workspace={
-                "name": manifest.name,
+                "workspace_id": manifest.workspace_id,
                 "title": manifest.title,
                 "description": manifest.description,
                 "root": str(self.root),
-                "registry": {key: value for key, value in {"tenant": manifest.tenant, "project": manifest.name}.items() if value is not None},
+                "registry": {key: value for key, value in {"tenant": manifest.tenant, "workspace": manifest.workspace_id}.items() if value is not None},
             },
             resource=resource,
             resources=resources,
@@ -424,7 +429,7 @@ class Project:
             "status": "ok",
             "submission_mode": submission_mode,
             "generated_at": payload["generated_at"],
-            "project_root": str(self.root),
+            "workspace_root": str(self.root),
             "manifest_path": str(self.manifest_path),
             "validation_report_path": str(self.root / manifest.dist_dir / "validation-report.json"),
             "normalized_dir": str(normalized_dir),
@@ -436,12 +441,12 @@ class Project:
         }
 
     @classmethod
-    def open(cls, root: PathLike) -> "Project":
+    def open(cls, root: PathLike) -> "WorkspaceStateStore":
         root_path = _as_path(root)
-        manifest = ProjectManifest.model_validate(_read_json(root_path / PROJECT_FILENAME))
-        project = cls(
+        manifest = WorkspaceManifest.model_validate(_read_json(root_path / WORKSPACE_STATE_FILENAME))
+        store = cls(
             root_path,
-            name=manifest.name,
+            name=manifest.workspace_id,
             title=manifest.title,
             description=manifest.description,
             tenant=manifest.tenant,
@@ -449,11 +454,11 @@ class Project:
             version=manifest.version,
             comment=list(manifest.comment),
         )
-        project.workspace.descriptions.clear()
-        project.workspace.cell_types.clear()
-        project.workspace.cells.clear()
-        project.workspace.tests.clear()
-        project.workspace.datasets.clear()
+        store.workspace.descriptions.clear()
+        store.workspace.cell_types.clear()
+        store.workspace.cells.clear()
+        store.workspace.tests.clear()
+        store.workspace.datasets.clear()
 
         paths = manifest.paths
         cell_type_records = cls._load_records(root_path / paths.cell_types)
@@ -496,19 +501,19 @@ class Project:
                 dataset.test = test_by_id.get(dataset.test_id)
             datasets.append(dataset)
 
-        project.workspace.cell_types.extend(cell_types)
-        project.workspace.cells.extend(cells)
-        project.workspace.tests.extend(tests)
-        project.workspace.datasets.extend(datasets)
-        return project
+        store.workspace.cell_types.extend(cell_types)
+        store.workspace.cells.extend(cells)
+        store.workspace.tests.extend(tests)
+        store.workspace.datasets.extend(datasets)
+        return store
 
     def _ensure_supported_state(self) -> None:
         if self.descriptions:
-            raise ValueError("Project currently supports cell types, cells, tests, and datasets, but not saved cell descriptions.")
+            raise ValueError("Workspace state currently supports cell types, cells, tests, and datasets, but not saved cell descriptions.")
 
-    def _manifest(self) -> ProjectManifest:
-        return ProjectManifest(
-            name=self.name,
+    def _manifest(self) -> WorkspaceManifest:
+        return WorkspaceManifest(
+            workspace_id=self.name,
             title=self.title or self.name,
             description=self.description,
             tenant=self.tenant,
@@ -517,14 +522,14 @@ class Project:
             comment=list(self.comment),
         )
 
-    def _persist(self) -> tuple[ProjectManifest, dict[str, list[dict[str, Any]]], dict[str, str | None]]:
+    def _persist(self) -> tuple[WorkspaceManifest, dict[str, list[dict[str, Any]]], dict[str, str | None]]:
         self._ensure_supported_state()
         records = self.render()
         manifest = self._manifest()
-        artifact_map = self._write_project(manifest, records)
+        artifact_map = self._write_workspace(manifest, records)
         return manifest, records, artifact_map
 
-    def _write_project(self, manifest: ProjectManifest, records: dict[str, list[dict[str, Any]]]) -> dict[str, str | None]:
+    def _write_workspace(self, manifest: WorkspaceManifest, records: dict[str, list[dict[str, Any]]]) -> dict[str, str | None]:
         record_groups = {
             "cell_types": records["cell_types"],
             "cells": records["cell_instances"],
@@ -548,14 +553,14 @@ class Project:
                 _write_json(roots[key] / filename, record)
 
         dataset_by_id = {dataset.id: dataset for dataset in self.datasets if dataset.id is not None}
-        artifacts_root = self.root / manifest.artifacts_dir / "datasets"
+        artifacts_root = self.root / manifest.artifacts_dir / "dataset"
         source_paths, staged_roots = self._stage_dataset_sources(dataset_by_id, artifacts_root)
         try:
             if artifacts_root.exists():
                 shutil.rmtree(artifacts_root)
             artifacts_root.mkdir(parents=True, exist_ok=True)
 
-            dataset_artifacts: list[ProjectArtifact] = []
+            dataset_artifacts: list[WorkspaceArtifact] = []
             artifact_map: dict[str, str | None] = {}
             for record in records["datasets"]:
                 dataset_payload = record.get("dataset", {})
@@ -565,7 +570,7 @@ class Project:
                 source_path = source_paths.get(dataset_id)
                 artifact_path = None
                 if source_path is not None and source_path.exists():
-                    target_root = artifacts_root / self._record_short_id("datasets", record)
+                    target_root = artifacts_root / self._record_short_id("dataset", record)
                     if source_path.is_file():
                         target_root.mkdir(parents=True, exist_ok=True)
                         copied = target_root / source_path.name
@@ -576,7 +581,7 @@ class Project:
                         artifact_path = target_root
                 if artifact_path is not None:
                     relpath = _relative_to(self.root, artifact_path)
-                    dataset_artifacts.append(ProjectArtifact(dataset_id=dataset_id, path=relpath))
+                    dataset_artifacts.append(WorkspaceArtifact(dataset_id=dataset_id, path=relpath))
                     artifact_map[dataset_id] = relpath
                 else:
                     artifact_map[dataset_id] = None
@@ -606,7 +611,7 @@ class Project:
                 staged[dataset_id] = source_path
                 continue
 
-            temp_root = Path(tempfile.mkdtemp(prefix="battinfo-project-artifact-"))
+            temp_root = Path(tempfile.mkdtemp(prefix="battinfo-workspace-artifact-"))
             staged_roots.append(temp_root)
             if source_path.is_file():
                 staged_path = temp_root / source_path.name
@@ -649,10 +654,10 @@ class Project:
 
     def _write_record_groups(self, records: dict[str, list[dict[str, Any]]], *, target_root: Path) -> None:
         groups = {
-            "cell_types": target_root / "cell-types",
+            "cell_types": target_root / "cell-type",
             "cell_instances": target_root / "cell-instances",
             "tests": target_root / "tests",
-            "datasets": target_root / "datasets",
+            "datasets": target_root / "dataset",
         }
         for key, path in groups.items():
             if path.exists():
@@ -675,7 +680,7 @@ class Project:
             payload = record.get("cell_instance", {})
         elif kind == "tests":
             payload = record.get("test", {})
-        elif kind == "datasets":
+        elif kind in {"dataset", "datasets"}:
             payload = record.get("dataset", {})
         else:
             raise ValueError(f"Unsupported record kind: {kind}")
@@ -701,28 +706,12 @@ class Project:
         return str(product.get("name") or f"{manufacturer or 'Battery'} {product.get('model') or 'Cell'}").strip()
 
     def _cell_type_resource(self, record: dict[str, Any]) -> SubmissionResource:
-        product = record["product"]
-        manufacturer_obj = product.get("manufacturer")
-        manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, dict) else manufacturer_obj
-        metadata = {
-            "manufacturer": manufacturer,
-            "model": product.get("model"),
-            "format": product.get("cellFormat"),
-            "chemistry": product.get("chemistry"),
-            "size_code": product.get("sizeCode"),
-            "iec_code": product.get("iecCode"),
-            "country_of_origin": product.get("countryOfOrigin"),
-            "year": product.get("year"),
-            "positive_electrode_basis": product.get("positiveElectrodeBasis"),
-            "negative_electrode_basis": product.get("negativeElectrodeBasis"),
-        }
         return SubmissionResource(
             resource_type="cell_type",
             source_local_id=self._source_local_id("cell_type", record),
             title=self._cell_type_title(record),
             semantic_payload={
                 "@type": "CellType",
-                "metadata": {key: value for key, value in metadata.items() if value is not None},
                 "battinfo_records": {"cell_type": record},
             },
         )
@@ -747,21 +736,6 @@ class Project:
         cell_payload = record["cell_instance"]
         cell_type_id = cell_payload.get("type_id")
         cell_type_record = cell_type_by_id.get(cell_type_id) if isinstance(cell_type_id, str) else None
-        product = cell_type_record.get("product", {}) if isinstance(cell_type_record, dict) else {}
-        manufacturer_obj = product.get("manufacturer") if isinstance(product, dict) else None
-        manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, dict) else manufacturer_obj
-        metadata = {
-            "manufacturer": manufacturer,
-            "model": product.get("model") if isinstance(product, dict) else None,
-            "format": product.get("cellFormat") if isinstance(product, dict) else None,
-            "chemistry": product.get("chemistry") if isinstance(product, dict) else None,
-            "size_code": product.get("sizeCode") if isinstance(product, dict) else None,
-            "iec_code": product.get("iecCode") if isinstance(product, dict) else None,
-            "country_of_origin": product.get("countryOfOrigin") if isinstance(product, dict) else None,
-            "year": product.get("year") if isinstance(product, dict) else None,
-            "serial_number": cell_payload.get("serial_number"),
-            "batch_id": cell_payload.get("batch_id"),
-        }
         battinfo_records = {"cell": record}
         if cell_type_record is not None:
             battinfo_records["cell_type"] = cell_type_record
@@ -771,7 +745,6 @@ class Project:
             title=self._cell_title(record, cell_type_by_id),
             semantic_payload={
                 "@type": "Cell",
-                "metadata": {key: value for key, value in metadata.items() if value is not None},
                 "battinfo_records": battinfo_records,
             },
         )
@@ -801,18 +774,6 @@ class Project:
             title=self._test_title(record),
             semantic_payload={
                 "@type": "Test",
-                "metadata": {
-                    key: value
-                    for key, value in {
-                        "kind": test_payload.get("kind"),
-                        "status": test_payload.get("status"),
-                        "protocol": test_payload.get("protocol_name"),
-                        "instrument": test_payload.get("instrument_name"),
-                        "started_at": test_payload.get("started_at"),
-                        "ended_at": test_payload.get("ended_at"),
-                    }.items()
-                    if value is not None
-                },
                 "battinfo_records": {"test": record},
             },
             related_resources=related,
@@ -896,16 +857,6 @@ class Project:
             title=str(dataset_payload.get("name") or dataset_payload["id"]),
             semantic_payload={
                 "@type": "Dataset",
-                "metadata": {
-                    key: value
-                    for key, value in {
-                        "license": dataset_payload.get("license"),
-                        "created_at": dataset_payload.get("dateCreated"),
-                        "version": dataset_payload.get("version"),
-                        "access_url": dataset_payload.get("url"),
-                    }.items()
-                    if value is not None
-                },
                 "battinfo_records": {"dataset": record},
             },
             related_resources=related,
@@ -930,7 +881,7 @@ class Project:
 
     def _resource_submission(
         self,
-        target: ProjectTarget,
+        target: WorkspaceTarget,
         *,
         cell_type_by_id: dict[str, dict[str, Any]],
         cell_records: list[dict[str, Any]],
@@ -952,14 +903,14 @@ class Project:
             record = self._find_record("tests", target.id, test_records)
             return self._test_resource(record, cell_titles, cell_local_ids)
         if isinstance(target, Dataset):
-            record = self._find_record("datasets", target.id, dataset_records)
+            record = self._find_record("dataset", target.id, dataset_records)
             return self._dataset_resource(record, artifact_map, cell_titles, test_titles, cell_local_ids, test_local_ids)
-        raise TypeError("Project.bundle() target must be a CellType, CellInstance, Test, or Dataset.")
+        raise TypeError("Workspace.bundle_workspace() target must be a CellType, CellInstance, Test, or Dataset.")
 
     def _resource_artifacts(
         self,
         *,
-        target: ProjectTarget,
+        target: WorkspaceTarget,
         artifact_map: dict[str, str | None],
     ) -> list[dict[str, Any]]:
         if not isinstance(target, Dataset) or target.id is None:
@@ -970,8 +921,8 @@ class Project:
     def _submission_package_path(
         self,
         *,
-        manifest: ProjectManifest,
-        target: ProjectTarget | None,
+        manifest: WorkspaceManifest,
+        target: WorkspaceTarget | None,
         resource: SubmissionResource | None,
     ) -> Path:
         dist_dir = self.root / manifest.dist_dir
@@ -983,8 +934,8 @@ class Project:
     def _registry_intake_path(
         self,
         *,
-        manifest: ProjectManifest,
-        target: ProjectTarget | None,
+        manifest: WorkspaceManifest,
+        target: WorkspaceTarget | None,
         resource: SubmissionResource | None,
     ) -> Path:
         dist_dir = self.root / manifest.dist_dir
@@ -1000,12 +951,12 @@ class Project:
         records: Any,
     ) -> dict[str, Any]:
         if entity_id is None:
-            raise ValueError(f"Project.bundle() target must have an id before it can be bundled as a {kind}.")
+            raise ValueError(f"Workspace.bundle_workspace() target must have an id before it can be bundled as a {kind}.")
         for record in records:
             payload = self._record_payload(kind, record)
             if isinstance(payload.get("id"), str) and payload["id"] == entity_id:
                 return record
-        raise ValueError(f"Project.bundle() target {entity_id!r} is not present in this project.")
+        raise ValueError(f"Workspace.bundle_workspace() target {entity_id!r} is not present in this workspace.")
 
     def _record_payload(self, kind: str, record: dict[str, Any]) -> dict[str, Any]:
         if kind == "cell_types":
@@ -1014,7 +965,7 @@ class Project:
             payload = record.get("cell_instance", {})
         elif kind == "tests":
             payload = record.get("test", {})
-        elif kind == "datasets":
+        elif kind == "dataset":
             payload = record.get("dataset", {})
         else:
             raise ValueError(f"Unsupported record kind: {kind}")
@@ -1023,4 +974,70 @@ class Project:
         return payload
 
 
-__all__ = ["PROJECT_FILENAME", "PROJECT_SCHEMA_VERSION", "Project", "ProjectManifest"]
+def workspace_open(root: PathLike) -> Workspace:
+    return WorkspaceStateStore.open(root).workspace
+
+
+def _store_for_workspace(workspace: Workspace) -> WorkspaceStateStore:
+    store = WorkspaceStateStore(
+        workspace.root,
+        name=workspace.name,
+        title=workspace.title,
+        description=workspace.description,
+        tenant=workspace.tenant,
+        publisher=workspace.publisher,
+        version=workspace.version,
+        comment=list(workspace.comment),
+    )
+    store.add(*workspace.cell_types, *workspace.cells, *workspace.tests, *workspace.datasets)
+    return store
+
+
+def workspace_save(workspace: Workspace) -> dict[str, Any]:
+    return _store_for_workspace(workspace).save()
+
+
+def workspace_check(workspace: Workspace, *, policy: str = "strict", write_report: bool = True) -> dict[str, Any]:
+    return _store_for_workspace(workspace).check(policy=policy, write_report=write_report)
+
+
+def workspace_build_submission_package(
+    workspace: Workspace,
+    target: WorkspaceTarget | None = None,
+    *,
+    name: str | None = None,
+    title: str | None = None,
+    description: str | None = None,
+    tenant: str | None = None,
+    publisher: str | None = None,
+    version: str | None = None,
+    policy: str = "strict",
+) -> dict[str, Any]:
+    return _store_for_workspace(workspace).build_submission_package(
+        target,
+        name=name,
+        title=title,
+        description=description,
+        tenant=tenant,
+        publisher=publisher,
+        version=version,
+        policy=policy,
+    )
+
+
+__all__ = [
+    "WORKSPACE_STATE_FILENAME",
+    "WORKSPACE_STATE_SCHEMA_VERSION",
+    "WorkspaceManifest",
+    "WorkspaceStateStore",
+    "WorkspaceArtifact",
+    "WorkspacePaths",
+    "workspace_build_submission_package",
+    "workspace_check",
+    "workspace_open",
+    "workspace_save",
+]
+
+
+
+

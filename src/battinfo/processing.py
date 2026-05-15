@@ -14,7 +14,7 @@ which pulls in: batterydf, matplotlib, plotly.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 
 class ProcessedTimeseries(NamedTuple):
@@ -112,7 +112,6 @@ def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
     try:
         sniff = bdf.detect(csv_path)
         if sniff.id == "abstract" or sniff.confidence <= 0:
-            # Already-BDF or unrecognised — try reading directly
             df = bdf.read(csv_path, validate=False)
         else:
             df = bdf.read(csv_path, validate=True)
@@ -120,6 +119,78 @@ def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
         return out_path
     except Exception:
         return None
+
+
+def _infer_test_type_from_df(df: "Any") -> str | None:
+    """Infer BatteryTestType string from a BDF DataFrame's column names.
+
+    Returns one of the standard test type strings, or ``None`` if no confident
+    inference can be made.
+    """
+    cols = {c.lower() for c in df.columns}
+
+    def _has(*keywords: str) -> bool:
+        return any(any(kw in c for c in cols) for kw in keywords)
+
+    # EIS: frequency axis + impedance (real/imaginary)
+    if _has("freq") and (_has("re_z", "rez", "z_re", "real") or _has("im_z", "imz", "z_im", "imag")):
+        return "eis"
+    # Capacity check: short run with energy/capacity, no cycle index
+    if _has("capacity", "charge_capacity", "discharge_capacity") and not _has("cycle_index", "cycle_number"):
+        return "capacity_check"
+    # Cycle life: cycle index column present
+    if _has("cycle_index", "cycle_number", "cycle"):
+        return "cycle_life"
+    # HPPC: rest periods + pulses — heuristic via column names
+    if _has("hppc", "pulse"):
+        return "hppc"
+    # ICI: internal resistance measurements
+    if _has("ici", "internal_resistance", "dcir"):
+        return "ici"
+    # Rate capability: c_rate or multiple rates
+    if _has("c_rate", "crate", "rate"):
+        return "rate_capability"
+    # Formation: first few cycles, often distinguished by file name elsewhere
+    if _has("formation"):
+        return "formation"
+
+    return None
+
+
+def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
+    """Convert any raw cycler file to a ``.bdf.parquet`` file next to the source.
+
+    Uses ``bdf.read`` which handles CSV, NDA, NDAX, MPT, XLSX, and other formats
+    supported by installed batterydf plugins.  Returns ``(parquet_path,
+    inferred_test_type)`` on success, or ``(None, None)`` if batterydf is not
+    installed or the file cannot be parsed.  Skips conversion if the
+    ``.bdf.parquet`` already exists (test type re-inferred from the parquet).
+    """
+    try:
+        import bdf
+        from bdf.io import save as bdf_save
+    except ImportError:
+        return None, None
+
+    stem = raw_path.stem
+    if stem.endswith(".bdf"):
+        stem = stem[:-4]
+    out_path = raw_path.parent / f"{stem}.bdf.parquet"
+
+    try:
+        import contextlib as _cl
+        import io as _io
+        if out_path.exists():
+            import pandas as pd
+            df = pd.read_parquet(out_path)
+        else:
+            # Suppress any diagnostic prints from batterydf plugins
+            with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
+                df = bdf.read(raw_path, validate=False)
+            bdf_save(df, out_path, index=False)
+        return out_path, _infer_test_type_from_df(df)
+    except Exception:
+        return None, None
 
 
 def _make_static_plot(
@@ -193,8 +264,8 @@ def _make_interactive_plot(
     and download-forcing behaviour of R2 public CDN URLs for HTML.
     """
     try:
-        import plotly  # noqa: F401
         import bdf
+        import plotly  # noqa: F401
     except ImportError:
         return None
 

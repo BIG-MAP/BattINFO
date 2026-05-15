@@ -12,6 +12,8 @@ dist
 !assets/examples/workspaces/**/dist/**
 build
 .battinfo
+WORK_LOG.md
+CLAUDE.md
 
 # Documentation
 site

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/ingest-manifest.schema.json",
+  "title": "BattINFO Ingest Manifest",
+  "description": "Contract for battinfo.ingest.json, the folder-local manifest that drives typed instance ingest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resource_type",
+    "type_record"
+  ],
+  "properties": {
+    "resource_type": {
+      "type": "string",
+      "enum": [
+        "cell-instance"
+      ],
+      "description": "Typed ingest subject. Additional values may be introduced in future schema revisions."
+    },
+    "type_record": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path to the curated reusable type record that this instance points to."
+    },
+    "resource_iri": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional existing canonical IRI to preserve for the ingested resource."
+    },
+    "resource_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-facing instance label used as the default serial/name in generated records."
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Registry workspace id used when bundling or publishing."
+    },
+    "publisher_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Publisher id used when bundling or publishing."
+    },
+    "source_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Submission source version written into the generated workspace/package."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default dataset license applied to generated dataset records."
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "photo_glob": {
+          "$ref": "#/$defs/globSelector",
+          "description": "Glob or ordered glob list used to discover photo datasets under the ingest root."
+        },
+        "timeseries_glob": {
+          "$ref": "#/$defs/globSelector",
+          "description": "Glob or ordered glob list used to discover CSV-backed timeseries datasets under the ingest root."
+        },
+        "test_kind_from_filename": {
+          "type": "object",
+          "description": "Lowercase filename token to BattINFO test kind mapping used during CSV inference.",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "globSelector": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "resource_type": "cell-instance",
+      "type_record": "battinfo-records/records/cell-type/google--g20m7--2025/record.json",
+      "resource_iri": "https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
+      "resource_name": "google--g20m7--2025--15qnrp",
+      "workspace_id": "google-g20m7-instance-demo",
+      "publisher_id": "demo-lab",
+      "source_version": "2026-04-10",
+      "license": "CC-BY-4.0",
+      "rules": {
+        "photo_glob": [
+          "image/photo/*.jpg",
+          "image/photo/*.jpeg",
+          "image/photo/*.png"
+        ],
+        "timeseries_glob": [
+          "timeseries/raw/*.csv"
+        ],
+        "test_kind_from_filename": {
+          "rate": "rate_capability",
+          "ici": "ici",
+          "capacity": "capacity_check"
+        }
+      }
+    }
+  ]
+}

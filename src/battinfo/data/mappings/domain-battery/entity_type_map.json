@@ -1,10 +1,11 @@
 {
-  "version": "0.1.0-draft",
-  "status": "draft",
+  "version": "0.2.0",
+  "status": "curated",
   "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
   "notes": [
     "Normative mapping table for descriptor entity-type enrichment.",
-    "Keys are normalized to lower-case for deterministic lookup in the JSON-LD renderer."
+    "Keys are normalized to lower-case for deterministic lookup in the JSON-LD renderer.",
+    "IRIs verified against EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0."
   ],
   "mappings": {
     "format": {
@@ -48,6 +49,16 @@
         "battery_types": [
           "LithiumIonBattery"
         ]
+      },
+      "li-primary": {
+        "battery_types": [
+          "LithiumMetalBattery"
+        ]
+      },
+      "na-ion": {
+        "battery_types": [
+          "SodiumIonBattery"
+        ]
       }
     },
     "positive_electrode_basis": {
@@ -57,6 +68,33 @@
         "battery_types": [
           "LithiumIonIronPhosphateBattery"
         ]
+      },
+      "nmc": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonNickelManganeseCobaltOxideBattery"
+        ]
+      },
+      "nca": {
+        "relation": "hasPositiveElectrode",
+        "battery_types": [
+          "LithiumIonNickelCobaltAluminiumOxideBattery"
+        ]
+      },
+      "lco": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonCobaltOxideBattery"
+        ]
+      },
+      "mno2": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "ManganeseDioxideElectrode",
+        "battery_types": [
+          "LithiumManganeseDioxideBattery"
+        ]
       }
     },
     "negative_electrode_basis": {
@@ -65,6 +103,23 @@
         "node_type": "GraphiteElectrode",
         "battery_types": [
           "LithiumIonGraphiteBattery"
+        ]
+      },
+      "silicon-graphite": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "SiliconGraphiteElectrode",
+        "battery_types": []
+      },
+      "hard-carbon": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "HardCarbonElectrode",
+        "battery_types": []
+      },
+      "lithium": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "LithiumElectrode",
+        "battery_types": [
+          "LithiumMetalBattery"
         ]
       }
     }

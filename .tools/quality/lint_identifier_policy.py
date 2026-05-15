@@ -36,9 +36,10 @@ def _check_cell_types(dir_path: Path, errors: list[str]) -> None:
     for path in sorted(dir_path.glob("*.json")):
         _check_filename_policy(path, errors)
         doc = _load(path)
-        cell_type = doc.get("cell_type")
+        # Accept both new-style "product" key and legacy "cell_type" key
+        cell_type = doc.get("product") or doc.get("cell_type")
         if not isinstance(cell_type, dict):
-            errors.append(f"{path}: missing cell_type object")
+            errors.append(f"{path}: missing product/cell_type object")
             continue
         cell_id = cell_type.get("id")
         if not isinstance(cell_id, str) or not CELL_TYPE_IRI_RE.fullmatch(cell_id):
@@ -107,12 +108,12 @@ def _check_datasets(dir_path: Path, errors: list[str]) -> None:
 
 
 def _dirs() -> Iterable[tuple[str, Path]]:
-    yield "assets cell-types", ROOT / "assets" / "examples" / "cell-types"
-    yield "assets cell-instances", ROOT / "assets" / "examples" / "cell-instances"
-    yield "assets datasets", ROOT / "assets" / "examples" / "datasets"
-    yield "pkg cell-types", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-types"
+    yield "examples cell-type", ROOT / "examples" / "cell-type"
+    yield "examples cell-instances", ROOT / "examples" / "cell-instances"
+    yield "examples dataset", ROOT / "examples" / "dataset"
+    yield "pkg cell-type", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type"
     yield "pkg cell-instances", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instances"
-    yield "pkg datasets", ROOT / "src" / "battinfo" / "data" / "examples" / "datasets"
+    yield "pkg dataset", ROOT / "src" / "battinfo" / "data" / "examples" / "dataset"
 
 def main() -> None:
     errors: list[str] = []
@@ -121,13 +122,13 @@ def main() -> None:
         if not path.exists():
             errors.append(f"missing directory: {path}")
 
-    _check_cell_types(ROOT / "assets" / "examples" / "cell-types", errors)
-    _check_cell_instances(ROOT / "assets" / "examples" / "cell-instances", errors)
-    _check_datasets(ROOT / "assets" / "examples" / "datasets", errors)
+    _check_cell_types(ROOT / "examples" / "cell-type", errors)
+    _check_cell_instances(ROOT / "examples" / "cell-instances", errors)
+    _check_datasets(ROOT / "examples" / "dataset", errors)
 
-    _check_cell_types(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-types", errors)
+    _check_cell_types(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type", errors)
     _check_cell_instances(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instances", errors)
-    _check_datasets(ROOT / "src" / "battinfo" / "data" / "examples" / "datasets", errors)
+    _check_datasets(ROOT / "src" / "battinfo" / "data" / "examples" / "dataset", errors)
 
     if errors:
         print(f"identifier-policy-lint: FAIL ({len(errors)} issues)")

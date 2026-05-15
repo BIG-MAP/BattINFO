@@ -4,22 +4,24 @@ BattINFO currently exposes four practical Python surfaces:
 
 - object-first publication packaging for `CellType -> CellInstance -> TestProtocol -> Test -> Dataset`
 - the human-facing `Workspace` helper for linked canonical records, save/query, publish, and release export
-- `Project`, a compatibility wrapper around one `Workspace` for project-shaped workflows
+- the ingest-first helpers for turning one evidence folder into a linked `Workspace`
 - record/query/save helpers from `battinfo.api`
 
 `LocalWorkspace` is related but separate. It is the disk-first release scaffold used
 by `battinfo workspace ...` for one publication bundle authored from JSON resource
 files on disk.
 
-## Choosing Between `Workspace`, `Project`, and `LocalWorkspace`
+## Choosing Between `Workspace` and `LocalWorkspace`
 
 - Use `Workspace` for object-first Python authoring when you want to build linked BattINFO records, save them, query them locally, publish JSON-LD, or export a registry-ready release workspace.
-- Use `Project` only when you need compatibility with the older project-shaped wrapper API.
 - Use `LocalWorkspace` when you want an explicit on-disk workspace contract with `battinfo-workspace.json`, resource JSON files, and the `battinfo workspace validate` and `battinfo workspace bundle` CLI flow.
 
-In short: `Workspace` is now the primary Python authoring surface, `Project` is a
-compatibility wrapper over it, and `LocalWorkspace` remains the disk-first submission
-workflow.
+In short: `Workspace` is the primary Python authoring surface, and
+`LocalWorkspace` remains the disk-first submission workflow.
+
+If the user already has an instance folder with photos and CSV datasets, prefer the
+ingest-first helpers over hand-building `Workspace` objects. That is the fastest
+path for routine intake.
 
 Alpha scope:
 
@@ -31,6 +33,56 @@ Alpha scope:
 ```bash
 python -m pip install -e .
 ```
+
+## Ingest-First Intake
+
+Use the ingest helpers when you want one-command registration for a typed
+resource instance plus its evidence files.
+
+```python
+from battinfo import build_ingest_workspace, publish_ingest_workspace, write_ingest_manifest
+
+write_ingest_manifest(
+    r"D:\cell_phone\novonix\google--g20m7--2025--15qnrp",
+    resource_type="cell-instance",
+    type_record="battinfo-records/records/cell-type/google--g20m7--2025/record.json",
+    resource_iri="https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
+    publisher_id="demo-lab",
+    license="CC-BY-4.0",
+)
+
+build = build_ingest_workspace(
+    r"D:\cell_phone\novonix\google--g20m7--2025--15qnrp",
+    resource_type="cell-instance",
+    workspace_id="google-g20m7-instance-demo",
+    source_version="demo-2026-04-09",
+    artifact_base_url="http://127.0.0.1:8040",
+)
+
+published = publish_ingest_workspace(
+    r"D:\cell_phone\novonix\google--g20m7--2025--15qnrp",
+    resource_type="cell-instance",
+    workspace_id="google-g20m7-instance-demo",
+    source_version="demo-2026-04-09",
+    registry_base_url="https://registry.example.org",
+    api_key="...",
+    platform_base_url="https://www.battery-genome.org",
+)
+```
+
+Behavior today:
+
+- the folder-local `battinfo.ingest.json` manifest carries stable ingest metadata
+- `resource_type="cell-instance"` is the currently implemented typed ingest subject
+- one photo becomes one standalone photo dataset
+- one CSV becomes one `Test` plus one `Dataset`
+- the first photo dataset becomes the Battery Genome hero image for the cell page
+- the returned payload includes the canonical cell id plus registry/platform URLs
+
+Contract note:
+
+- the manifest shape is defined by `docs/ingest-manifest-contract.md`
+- runtime validation uses `assets/schemas/ingest-manifest.schema.json`
 
 ## Publication Package
 
@@ -93,9 +145,9 @@ Notes:
 
 ## Workspace Release Export
 
-Use `Workspace` directly when you want a disk-backed submission workspace or a
-registry-ready submission package without instantiating `LocalWorkspace`
-yourself.
+Use `Workspace` directly when you want the primary BattINFO authoring surface and
+also need a disk-backed submission workspace or a registry-ready submission
+package without instantiating `LocalWorkspace` yourself.
 
 ```python
 from pathlib import Path
@@ -131,6 +183,45 @@ submission = workspace.build_submission_package(
 Use `LocalWorkspace` directly only when the disk workspace itself is your source of
 truth or when you are driving the `battinfo workspace ...` CLI.
 
+Submission note:
+
+- BattINFO-generated submission packages are now transport envelopes around canonical BattINFO records.
+- The package still carries workflow and release fields such as `workspace_id`, `publisher_id`, `source_version`, and `publication_intent`.
+- BattINFO no longer duplicates lightweight display metadata inside the submission `semantic_payload`; `battinfo-registry` derives normalized page metadata from `battinfo_records`.
+
+Terminology note:
+
+- The BattINFO authoring surface uses `workspace_id`.
+- `battinfo-registry` now uses `workspace_id` as well, so the publication boundary is vocabulary-aligned end to end.
+
+Cell-type publish shortcut:
+
+```python
+from battinfo import CellType, publish
+
+cell_type = CellType(
+    manufacturer="Google",
+    model="G20M7",
+    format="pouch",
+    chemistry="Li-ion",
+)
+
+local_result = publish(cell_type, destination="local")
+registry_result = publish(
+    cell_type,
+    destination="registry",
+    registry_base_url="https://registry.example.org",
+    api_key="...",
+    workspace_id="hello-world",
+    publisher_id="demo-lab",
+)
+```
+
+- `destination="local"` writes the canonical BattINFO record and returns its path in `debug_paths`.
+- `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
+- `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.
+- The existing package-oriented dataset publication helper remains available via `publish(cell_type=..., cell_instance=..., test=..., dataset=...)`.
+
 ## Load Cell Types From JSON
 
 If you want to manually define cell types as JSON first, load them directly into
@@ -143,8 +234,8 @@ from battinfo import Workspace
 
 workspace = Workspace(root=Path(".battinfo/manual-cell-types"))
 
-cell_type = workspace.load_cell_type("cell-types/A123__ANR26650M1-B.json")
-more_cell_types = workspace.load_cell_types(directory="cell-types")
+cell_type = workspace.load_cell_type("cell-type/A123__ANR26650M1-B.json")
+more_cell_types = workspace.load_cell_types(directory="cell-type")
 ```
 
 If you want a starter draft file to fill in first, generate one with the API:
@@ -240,11 +331,16 @@ stats = index_stats(".battinfo/index.json")
 - Use `build_publication_package(...)` for local publication-package generation.
 - Use `publish(...)` as the compatibility alias for the same operation.
 - Use `Workspace.export_submission_workspace(...)` or `Workspace.build_submission_package(...)` for registry-ready submission handoff from Python workflows.
+- Use `setup_demo_environment(...)` to scaffold a repeatable demo workspace and submission package from Python-authored objects.
+- Use `run_demo_pipeline(...)` to publish the demo through a registry and optionally verify the Battery Genome `/registry/...` page.
 - Use `Workspace.export_release(...)` and `Workspace.build_release(...)` as compatibility aliases.
 - Use `load_publication_package(...)` to reconstruct Python objects from the publication package.
 - Use `load_publication(...)` as the compatibility alias for the same operation.
 - Use `BattinfoBundle.to_directory(...)` only for optional debug inspection bundles.
 - Prefer opaque BattINFO IRIs under `https://w3id.org/battinfo/`.
 - For validation policy and machine-readable issue output, see `docs/validation-contract.md`.
+
+
+
 
 

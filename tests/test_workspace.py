@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-
 import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -73,15 +72,15 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
     )
 
     records = workspace.render()
-    assert records["cell_types"][0]["product"]["sizeCode"] == "R2032"
+    assert records["cell_types"][0]["product"]["size_code"] == "R2032"
     assert records["cell_instances"][0]["datasets"] == [{"id": records["datasets"][0]["dataset"]["id"], "role": "raw"}]
     assert records["tests"][0]["test"]["dataset_ids"] == [records["datasets"][0]["dataset"]["id"]]
     assert records["datasets"][0]["dataset"]["about"] == [
         records["cell_instances"][0]["cell_instance"]["id"],
         records["tests"][0]["test"]["id"],
     ]
-    distribution = records["datasets"][0]["dataset"]["distribution"][0]
-    assert distribution["encodingFormat"] == "text/csv"
+    distribution = records["datasets"][0]["dataset"]["distributions"][0]
+    assert distribution["encoding_format"] == "text/csv"
     assert distribution["checksum"]["algorithm"] == "sha256"
     assert len(distribution["checksum"]["value"]) == 64
 
@@ -104,7 +103,7 @@ def test_workspace_loads_cell_type_from_validated_json_record(tmp_path: Path) ->
     workspace = Workspace(root=tmp_path / "workspace")
 
     cell_type = workspace.load_cell_type(
-        ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json"
+        ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
     )
 
     assert len(workspace.cell_types) == 1
@@ -118,7 +117,7 @@ def test_workspace_loads_cell_type_from_validated_json_record(tmp_path: Path) ->
 
 def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
-    draft_path = tmp_path / "cell-types" / "A123__ANR26650M1-B.json"
+    draft_path = tmp_path / "cell-type" / "A123__ANR26650M1-B.json"
     draft_path.parent.mkdir(parents=True, exist_ok=True)
     draft_path.write_text(
         json.dumps(
@@ -163,13 +162,13 @@ def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp
     assert save_result["index"]["cell_type_count"] == 1
     assert isinstance(cell_type.id, str)
     assert cell_type.id.startswith("https://w3id.org/battinfo/cell-type/")
-    record_path = tmp_path / "workspace" / "examples" / "cell-types" / f"cell-type-{cell_type.id.rsplit('/', 1)[-1]}.json"
+    record_path = tmp_path / "workspace" / "examples" / "cell-type" / f"cell-type-{cell_type.id.rsplit('/', 1)[-1]}.json"
     record = json.loads(record_path.read_text(encoding="utf-8"))
     assert isinstance(record["product"]["short_id"], str)
     assert len(record["product"]["short_id"]) == 6
     assert record["product"]["identifier"] == f"cell-type:{cell_type.id.rsplit('/', 1)[-1]}"
-    assert record["product"]["iecCode"] == "IFpR26650"
-    assert record["product"]["countryOfOrigin"] == "United States"
+    assert record["product"]["iec_code"] == "IFpR26650"
+    assert record["product"]["country_of_origin"] == "United States"
     assert record["product"]["year"] == 2012
     assert record["specs"]["typical_energy"] == {"value": 8.25, "unit": "Wh"}
     assert record["specs"]["rated_energy"] == {"value": 8.0, "unit": "Wh"}
@@ -183,7 +182,7 @@ def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp
 
 
 def test_workspace_loads_multiple_cell_types_from_directory(tmp_path: Path) -> None:
-    records_dir = tmp_path / "cell-types"
+    records_dir = tmp_path / "cell-type"
     records_dir.mkdir(parents=True, exist_ok=True)
     first = {
         "manufacturer": "A123",
@@ -313,6 +312,9 @@ def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> 
         negative_electrode=negative_electrode,
         electrolyte=electrolyte,
         separator=separator,
+        coin_hardware={
+            "case": {"size_code": "Pouch-custom", "material": "Al laminate"},
+        },
         construction=construction(
             assembly_type="stacked",
             layering="multilayer",
@@ -345,6 +347,7 @@ def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> 
     assert len(records) == 1
     assert records[0]["id"] == specification.id
     assert records[0]["construction"]["layer_count"] == 18
+    assert records[0]["coin_hardware"]["case"]["material"] == "Al laminate"
 
 
 def test_workspace_record_test_creates_linked_dataset(tmp_path: Path) -> None:
@@ -495,7 +498,10 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
         year=2022,
         positive_electrode_basis="MnO2",
         negative_electrode_basis="Li-metal",
-        specs={"nominal_voltage": quantity(3.0, "V")},
+        specs={
+            "nominal_voltage": quantity(3.0, "V"),
+            "rated_energy": quantity(0.69, "Wh"),
+        },
         source_file="energizer-cr2032.manual.json",
     )
     cell = workspace.cell(cell_type, serial_number="energizer-cr2032-lot-a-001", source_type="lab")
@@ -542,6 +548,12 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     cell_type_node = next(node for node in payload["@graph"] if node.get("@id") == publish_result["cell_type_id"])
     assert cell_type_node["schema:countryOfOrigin"]["schema:name"] == "Japan"
     assert cell_type_node["schema:releaseDate"] == "2022-01-01"
+    property_types = {
+        entry.get("@type")
+        for entry in cell_type_node.get("hasProperty", [])
+        if isinstance(entry, dict)
+    }
+    assert "RatedEnergy" in property_types
     assert ro_crate_payload["@graph"][0]["@id"] == "ro-crate-metadata.json"
     assert datacite_payload["types"]["resourceTypeGeneral"] == "Dataset"
     assert datacite_payload["titles"][0]["title"] == "Energizer CR2032 capacity dataset"
@@ -685,12 +697,12 @@ def test_workspace_build_release_exports_registry_ready_local_workspace(tmp_path
     intake = json.loads(Path(result["submission_package_path"]).read_text(encoding="utf-8"))
 
     assert manifest["workspace_id"] == "hello-world"
-    assert manifest["registry"] == {"tenant": "digibatt", "project": "hello-world"}
+    assert manifest["registry"] == {"tenant": "digibatt", "workspace": "hello-world"}
     assert (release_root / "artifacts" / dataset_file.name).exists()
     assert intake["kind"] == "BattinfoSubmission"
-    assert intake["project_id"] == "hello-world"
+    assert intake["workspace_id"] == "hello-world"
     assert intake["publisher_id"] == "demo-lab"
-    assert intake["workspace"]["registry"] == {"tenant": "digibatt", "project": "hello-world"}
+    assert intake["workspace"]["registry"] == {"tenant": "digibatt", "workspace": "hello-world"}
     assert intake["validation"]["ok"] is True
     assert result["resource_count"] == 3
     assert result["artifact_count"] == 1
@@ -755,6 +767,9 @@ def test_test_uses_enum_backed_test_type_and_rejects_unknown_values() -> None:
         assert "made_up_test" in str(exc)
     else:
         raise AssertionError("Expected invalid test_type to fail validation")
+
+
+
 
 
 

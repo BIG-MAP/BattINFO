@@ -9,9 +9,9 @@ from typer.testing import CliRunner
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from battinfo import BatteryCell, BatteryCellType, BatteryTestType, BattinfoBundle, Dataset, Test, publish, quantity
 from battinfo.cli import app
 from battinfo.local_workspace import WORKSPACE_FILENAME, LocalWorkspace
-from battinfo import BattinfoBundle, BatteryCell, BatteryCellType, BatteryTestType, Dataset, Test, publish, quantity
 
 
 def _build_sample_objects(tmp_path: Path) -> tuple[BatteryCellType, BatteryCell, Test, Dataset]:
@@ -86,23 +86,26 @@ def test_workspace_cli_init_validate_bundle_happy_path(tmp_path: Path) -> None:
     assert submission_package_path.exists()
     assert registry_intake_path.exists()
     assert zenodo_metadata_path.exists()
-    assert (normalized_dir / "cell-types" / "cell-type.json").exists()
+    assert (normalized_dir / "cell-type" / "cell-type.json").exists()
     assert (normalized_dir / "cell-instances" / "cell.json").exists()
     assert (normalized_dir / "tests" / "test.json").exists()
-    assert (normalized_dir / "datasets" / "dataset.json").exists()
-    normalized_dataset = json.loads((normalized_dir / "datasets" / "dataset.json").read_text(encoding="utf-8"))
+    assert (normalized_dir / "dataset" / "dataset.json").exists()
+    normalized_dataset = json.loads((normalized_dir / "dataset" / "dataset.json").read_text(encoding="utf-8"))
     assert normalized_dataset["provenance"]["citation"] == "https://doi.org/10.5281/zenodo.1234567"
 
     registry_intake = json.loads(registry_intake_path.read_text(encoding="utf-8"))
     assert registry_intake["kind"] == "BattinfoSubmission"
     assert registry_intake["submission_mode"] == "bundle"
-    assert registry_intake["project_id"] == "cr2032-baseline"
+    assert registry_intake["workspace_id"] == "cr2032-baseline"
     assert registry_intake["publisher_id"] == "demo-lab"
-    assert registry_intake["workspace"]["registry"] == {"tenant": "digibatt", "project": "cr2032-baseline"}
+    assert registry_intake["workspace"]["registry"] == {"tenant": "digibatt", "workspace": "cr2032-baseline"}
     assert registry_intake["release"]["community"] == "digibatt"
     assert registry_intake["release"]["doi"] == "10.5281/zenodo.1234567"
     assert registry_intake["validation"]["ok"] is True
     resources = {item["resource_type"]: item for item in registry_intake["resources"]}
+    assert "metadata" not in resources["cell"]["semantic_payload"]
+    assert "metadata" not in resources["test"]["semantic_payload"]
+    assert "metadata" not in resources["dataset"]["semantic_payload"]
     assert resources["test"]["semantic_payload"]["battinfo_records"]["test"]["test"]["cell_id"] == resources["cell"]["semantic_payload"]["battinfo_records"]["cell"]["cell_instance"]["id"]
     assert resources["dataset"]["semantic_payload"]["battinfo_records"]["dataset"]["dataset"]["about"] == [
         resources["cell"]["semantic_payload"]["battinfo_records"]["cell"]["cell_instance"]["id"],
@@ -144,7 +147,7 @@ def test_notebook_recover_cli_reports_json_payload(tmp_path: Path, monkeypatch) 
         "battinfo.cli.recover_notebook_runtime",
         lambda **kwargs: {
             "status": "ok",
-            "project_root": str(tmp_path),
+            "workspace_root": str(tmp_path),
             "venv_python": str(tmp_path / ".venv" / "Scripts" / "python.exe"),
             "scanned_processes": 4,
             "kernel_process_count": 1,
@@ -158,7 +161,7 @@ def test_notebook_recover_cli_reports_json_payload(tmp_path: Path, monkeypatch) 
         },
     )
 
-    result = runner.invoke(app, ["notebook", "recover", "--project-root", str(tmp_path), "--format", "json"])
+    result = runner.invoke(app, ["notebook", "recover", "--workspace-root", str(tmp_path), "--format", "json"])
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)
     assert payload["kernel_process_count"] == 1
@@ -228,7 +231,7 @@ def test_local_workspace_object_flow_clone_and_intake_rehydration(tmp_path: Path
     )
     release_v2_manifest = release_v2.read_json("battinfo-workspace.json")
     assert release_v2_manifest["workspace_id"] == "hello-world"
-    assert release_v2_manifest["registry"] == {"tenant": "digibatt", "project": "hello-world"}
+    assert release_v2_manifest["registry"] == {"tenant": "digibatt", "workspace": "hello-world"}
     assert not (release_v2.root / "dist").exists()
     bundle_v2 = release_v2.bundle(policy="strict")
     intake_workspace = LocalWorkspace.import_registry_intake(
@@ -308,13 +311,13 @@ def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path)
     )
     submission = json.loads(Path(workspace.bundle(policy="strict")["submission_package_path"]).read_text(encoding="utf-8"))
     export_payload = {
-        "project_id": submission["project_id"],
+        "workspace_id": submission["workspace_id"],
         "publisher_id": submission["publisher_id"],
         "source_version": submission["source_version"],
         "raw_submission": submission,
         "normalized_export": {
-            "kind": "BattinfoProjectExport",
-            "project_id": submission["project_id"],
+            "kind": "BattinfoWorkspaceExport",
+            "workspace_id": submission["workspace_id"],
             "publisher_id": submission["publisher_id"],
             "source_version": submission["source_version"],
             "workspace": submission["workspace"],
@@ -347,3 +350,6 @@ def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path)
     assert objects["test"].cell_instance_id == objects["cell"].id
     assert objects["dataset"].test_id == objects["test"].id
     assert objects["dataset"].cell_instance_id == objects["cell"].id
+
+
+

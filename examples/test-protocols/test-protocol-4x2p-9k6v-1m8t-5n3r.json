@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "test_protocol": {
+    "id": "https://w3id.org/battinfo/test-protocol/4x2p-9k6v-1m8t-5n3r",
+    "short_id": "4x2p9k",
+    "identifier": "test-protocol:4x2p-9k6v-1m8t-5n3r",
+    "name": "Calendar Ageing — Storage at 40°C, 50% SOC with Monthly Check-ups",
+    "kind": "calendar_ageing",
+    "description": "Calendar ageing study to characterise capacity fade and impedance growth during storage. Cells are fully characterised (C/10 capacity, HPPC, EIS), set to 50% SOC, and stored at 40°C in a climate chamber. Every 30 days the cells are removed, allowed to equilibrate at 25°C for 4 hours, and subjected to a check-up: C/10 capacity measurement and EIS at 50% SOC. After the check-up the cells are returned to 50% SOC and replaced in storage. The protocol runs for up to 12 months or until 80% capacity retention is reached.",
+    "version": "1.0",
+    "protocol_url": "https://example.org/protocols/calendar-ageing-40c-50soc"
+  },
+  "conditions": {
+    "storage_temperature": {
+      "value": 40.0,
+      "unit": "degC"
+    },
+    "storage_state_of_charge": {
+      "value": 50.0,
+      "unit": "%"
+    },
+    "checkup_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "setpoints": {
+    "checkup_interval": {
+      "value": 30.0,
+      "unit": "days"
+    },
+    "checkup_capacity_rate": {
+      "value": 0.1,
+      "unit": "C"
+    },
+    "soc_set_charge_rate": {
+      "value": 0.2,
+      "unit": "C"
+    },
+    "equilibration_rest": {
+      "value": 4.0,
+      "unit": "h"
+    }
+  },
+  "termination_criteria": {
+    "capacity_retention": {
+      "value": 80.0,
+      "unit": "%"
+    },
+    "max_duration": {
+      "value": 365.0,
+      "unit": "days"
+    }
+  },
+  "measurement_outputs": [
+    { "name": "Capacity", "unit_text": "Ah" },
+    { "name": "Voltage", "unit_text": "V" },
+    { "name": "Temperature", "unit_text": "degC" },
+    { "name": "ImpedanceMagnitude", "unit_text": "Ohm" },
+    { "name": "PhaseAngle", "unit_text": "deg" }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_file": "calendar-ageing-40c-50soc.protocol.json",
+    "retrieved_at": 1746230400
+  },
+  "notes": [
+    "Initial characterisation before storage: 3x C/10 cycles for capacity stabilisation, 1x HPPC, 1x EIS at 50% SOC.",
+    "Self-discharge is tracked by measuring OCV before and after each storage period.",
+    "SOC is set by CC-CV charge to upper voltage limit (C/20 cut-off) then CC discharge at C/5 to the target Ah from nominal capacity.",
+    "All EIS check-ups follow protocol test-protocol:2k9p-7t4r-3m6x-5n1v (EIS at 50% SOC, 25°C)."
+  ]
+}

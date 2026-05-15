@@ -1,0 +1,216 @@
+{
+  "version": "0.2.0",
+  "description": "Curated mapping from common battery material names/abbreviations to EMMO class terms. Used to type constituent nodes in electrode coating and electrolyte JSON-LD. All class terms must resolve in the bundled domain-battery context.",
+  "mappings": [
+    {
+      "symbol": "LFP",
+      "aliases": [
+        "lfp",
+        "lifepo4",
+        "lithium iron phosphate",
+        "lithium iron phosphate (lfp)"
+      ],
+      "emmo_class": "LithiumIronPhosphate"
+    },
+    {
+      "symbol": "NMC",
+      "aliases": [
+        "nmc",
+        "lithium nickel manganese cobalt oxide",
+        "linimnco2"
+      ],
+      "emmo_class": "LithiumNickelManganeseCobaltOxide"
+    },
+    {
+      "symbol": "NCA",
+      "aliases": [
+        "nca",
+        "lithium nickel cobalt aluminium oxide"
+      ],
+      "emmo_class": "LithiumNickelCobaltAluminiumOxide"
+    },
+    {
+      "symbol": "LCO",
+      "aliases": [
+        "lco",
+        "licoo2",
+        "lithium cobalt oxide"
+      ],
+      "emmo_class": "LithiumCobaltOxide"
+    },
+    {
+      "symbol": "LNMO",
+      "aliases": [
+        "lnmo",
+        "lithium nickel manganese oxide"
+      ],
+      "emmo_class": "LithiumNickelManganeseOxide"
+    },
+    {
+      "symbol": "Graphite",
+      "aliases": [
+        "graphite",
+        "natural graphite",
+        "synthetic graphite",
+        "mesocarbon microbead"
+      ],
+      "emmo_class": "Graphite"
+    },
+    {
+      "symbol": "HardCarbon",
+      "aliases": [
+        "hard carbon",
+        "hc"
+      ],
+      "emmo_class": "HardCarbon"
+    },
+    {
+      "symbol": "Silicon",
+      "aliases": [
+        "silicon",
+        "si"
+      ],
+      "emmo_class": "Silicon"
+    },
+    {
+      "symbol": "SiliconOxide",
+      "aliases": [
+        "sio",
+        "sio2",
+        "silicon oxide",
+        "silicon dioxide"
+      ],
+      "emmo_class": "SiliconOxide"
+    },
+    {
+      "symbol": "CarbonBlack",
+      "aliases": [
+        "carbon black",
+        "cb",
+        "super p",
+        "super c65",
+        "c65",
+        "c45",
+        "ketjenblack"
+      ],
+      "emmo_class": "CarbonBlack"
+    },
+    {
+      "symbol": "PVDF",
+      "aliases": [
+        "pvdf",
+        "polyvinylidene fluoride",
+        "polyvinylidene difluoride"
+      ],
+      "emmo_class": "PolyvinylideneFluoride"
+    },
+    {
+      "symbol": "CMC",
+      "aliases": [
+        "cmc",
+        "carboxymethyl cellulose",
+        "carboxymethylcellulose"
+      ],
+      "emmo_class": "CarboxymethylCellulose"
+    },
+    {
+      "symbol": "SBR",
+      "aliases": [
+        "sbr",
+        "styrene butadiene rubber",
+        "styrene-butadiene"
+      ],
+      "emmo_class": "StyreneButadiene"
+    },
+    {
+      "symbol": "LiPF6",
+      "aliases": [
+        "lipf6",
+        "lithium hexafluorophosphate"
+      ],
+      "emmo_class": "LithiumHexafluorophosphate"
+    },
+    {
+      "symbol": "EC",
+      "aliases": [
+        "ec",
+        "ethylene carbonate"
+      ],
+      "emmo_class": "EthyleneCarbonate"
+    },
+    {
+      "symbol": "DMC",
+      "aliases": [
+        "dmc",
+        "dimethyl carbonate",
+        "dimethylcarbonate"
+      ],
+      "emmo_class": "DimethylCarbonate"
+    },
+    {
+      "symbol": "PC",
+      "aliases": [
+        "pc",
+        "propylene carbonate"
+      ],
+      "emmo_class": "PropyleneCarbonate"
+    },
+    {
+      "symbol": "FEC",
+      "aliases": [
+        "fec",
+        "fluoroethylene carbonate"
+      ],
+      "emmo_class": "FluoroethyleneCarbonate"
+    },
+    {
+      "symbol": "VC",
+      "aliases": [
+        "vc",
+        "vinylene carbonate"
+      ],
+      "emmo_class": "VinyleneCarbonate"
+    },
+    {
+      "symbol": "VEC",
+      "aliases": [
+        "vec",
+        "vinyl ethylene carbonate"
+      ],
+      "emmo_class": "VinylEthyleneCarbonate"
+    },
+    {
+      "symbol": "Polypropylene",
+      "aliases": [
+        "polypropylene",
+        "pp"
+      ],
+      "emmo_class": "Polypropylene"
+    },
+    {
+      "symbol": "Polyethylene",
+      "aliases": [
+        "polyethylene",
+        "pe"
+      ],
+      "emmo_class": "Polyethylene"
+    },
+    {
+      "symbol": "Aluminium",
+      "aliases": [
+        "aluminium",
+        "aluminum",
+        "al"
+      ],
+      "emmo_class": "Aluminium"
+    },
+    {
+      "symbol": "Copper",
+      "aliases": [
+        "copper",
+        "cu"
+      ],
+      "emmo_class": "Copper"
+    }
+  ]
+}

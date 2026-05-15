@@ -10,6 +10,9 @@ from battinfo import (  # noqa: E402
     BatteryTestType,
     Cell,
     CellType,
+    Dataset,
+    TableColumn,
+    TableSchema,
     Test,
     checksum,
     csvw_table,
@@ -18,11 +21,8 @@ from battinfo import (  # noqa: E402
     distribution,
     infer_variable_measured,
     measured_variable,
-    Dataset,
     organization,
     person,
-    TableColumn,
-    TableSchema,
 )
 
 

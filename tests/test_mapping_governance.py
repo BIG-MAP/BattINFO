@@ -34,6 +34,8 @@ def test_entity_type_map_and_extension_policy_packaged_copies_match_assets() -> 
     tracked = [
         ROOT / "assets" / "mappings" / "domain-battery" / "entity_type_map.json",
         ROOT / "assets" / "mappings" / "domain-battery" / "extension_policy.json",
+        ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json",
+        ROOT / "assets" / "mappings" / "domain-battery" / "unit_map.curated.json",
     ]
     assets_root = ROOT / "assets"
     packaged_root = ROOT / "src" / "battinfo" / "data"
@@ -68,10 +70,76 @@ def test_entity_type_map_covers_current_descriptor_core_values() -> None:
             assert normalized in mapping[field], f"Missing entity mapping for {field}={specification[field]!r}"
 
 
-def test_battinfo_application_ontology_declares_has_instance_extension() -> None:
+def _type_stack(specification: dict[str, Any]) -> list[str]:
+    """Return the physical EMMO @type list from the isDescriptionFor node in descriptor pipeline output."""
+    from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+    node = _descriptor_specification_to_jsonld(specification)
+    types = node.get("isDescriptionFor", {}).get("@type", [])
+    return types if isinstance(types, list) else [types]
+
+
+def test_entity_type_map_na_ion_chemistry_stacks_sodium_ion_battery() -> None:
+    spec = {"format": "prismatic", "chemistry": "na-ion",
+            "positive_electrode_basis": "unknown", "negative_electrode_basis": "hard-carbon"}
+    types = _type_stack(spec)
+    assert "SodiumIonBattery" in types, f"SodiumIonBattery not in @type: {types}"
+
+
+def test_entity_type_map_lco_uses_specific_battery_class() -> None:
+    spec = {"format": "cylindrical", "chemistry": "li-ion",
+            "positive_electrode_basis": "lco", "negative_electrode_basis": "graphite"}
+    types = _type_stack(spec)
+    assert "LithiumIonCobaltOxideBattery" in types, f"LithiumIonCobaltOxideBattery not in @type: {types}"
+    assert "LithiumIonBattery" not in types or "LithiumIonCobaltOxideBattery" in types
+
+
+def test_entity_type_map_nca_uses_specific_battery_class_without_electrode_node() -> None:
+    spec = {"format": "cylindrical", "chemistry": "li-ion",
+            "positive_electrode_basis": "nca", "negative_electrode_basis": "graphite"}
+    from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+    full_node = _descriptor_specification_to_jsonld(spec)
+    types = full_node.get("isDescriptionFor", {}).get("@type", [])
+    if isinstance(types, str):
+        types = [types]
+    assert "LithiumIonNickelCobaltAluminiumOxideBattery" in types
+    # NCA has no node_type — hasPositiveElectrode must not be present on the specification node
+    assert "hasPositiveElectrode" not in full_node
+
+
+def test_entity_type_map_silicon_graphite_anode_emits_electrode_node() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+    spec = {"format": "cylindrical", "chemistry": "li-ion",
+            "positive_electrode_basis": "nmc", "negative_electrode_basis": "silicon-graphite"}
+    node = _descriptor_specification_to_jsonld(spec)
+    neg = node.get("hasNegativeElectrode", {})
+    assert neg.get("@type") == "SiliconGraphiteElectrode", f"Expected SiliconGraphiteElectrode, got: {neg}"
+
+
+def test_entity_type_map_hard_carbon_anode_emits_electrode_node() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+    spec = {"format": "prismatic", "chemistry": "na-ion",
+            "positive_electrode_basis": "unknown", "negative_electrode_basis": "hard-carbon"}
+    node = _descriptor_specification_to_jsonld(spec)
+    neg = node.get("hasNegativeElectrode", {})
+    assert neg.get("@type") == "HardCarbonElectrode", f"Expected HardCarbonElectrode, got: {neg}"
+
+
+def test_battinfo_application_ontology_imports_are_pinned() -> None:
+    """battinfo.ttl must import domain-battery at a pinned version IRI, not a floating latest."""
     ontology_path = ROOT / "ontology" / "battinfo.ttl"
     content = ontology_path.read_text(encoding="utf-8")
-    assert "owl:imports <https://w3id.org/emmo/domain/battery>" in content
+    # Versioned IRI must be present; floating (unversioned) import is not acceptable.
+    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.19.0/battery>" in content, (
+        "battinfo.ttl must import domain-battery at a pinned version IRI. "
+        "Update the import and this assertion together when upgrading."
+    )
+    # domain-electrochemistry must also be declared explicitly.
+    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.34.0/electrochemistry>" in content, (
+        "battinfo.ttl must explicitly import domain-electrochemistry at a pinned version IRI."
+    )
+    # The ontology must carry a versionIRI.
+    assert "owl:versionIRI" in content, "battinfo.ttl must declare owl:versionIRI."
+    # No local hasInstance property should be defined (it belongs to domain-battery).
     assert "battinfo:hasInstance a owl:ObjectProperty" not in content
 
 

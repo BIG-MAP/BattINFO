@@ -1,34 +1,53 @@
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import mimetypes
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
+
+if TYPE_CHECKING:
+    from battinfo.local_workspace import LocalWorkspace
 
 from battinfo.api import (
     build_cell_type_library_rdf,
-    build_index as build_index_api,
-    query as query_api,
     query_cell_instances,
-    query_library_cell_types,
     query_cell_types,
     query_datasets,
+    query_library_cell_types,
     query_test_protocols,
     query_tests,
     save_cell_instance,
     save_cell_type,
     save_dataset,
     save_library_cell_type,
-    save_test_protocol,
     save_test,
+    save_test_protocol,
+)
+from battinfo.api import (
+    build_index as build_index_api,
+)
+from battinfo.api import (
+    query as query_api,
 )
 from battinfo.authoring import cell_description as build_cell_description
-from battinfo.bundle import CellInstance, CellSpecification, CellType, ChecksumInfo, Dataset, ProtocolInfo, ProvenanceInfo, Test, TestProtocol
-from battinfo.publication import DEFAULT_PUBLISH_FILENAME, publish as publish_bundle
+from battinfo.bundle import (
+    CellInstance,
+    CellSpecification,
+    CellType,
+    ChecksumInfo,
+    Dataset,
+    ProtocolInfo,
+    ProvenanceInfo,
+    Test,
+    TestProtocol,
+)
+from battinfo.canonical_aliases import record_to_legacy_aliases
+from battinfo.publication import DEFAULT_PUBLISH_FILENAME
+from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
 
 PathLike = str | Path
@@ -118,7 +137,7 @@ def _as_path(path: PathLike) -> Path:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
@@ -173,9 +192,9 @@ class Workspace:
     """Human-facing BattINFO authoring surface for linked records.
 
     Use `Workspace` when you want to create, link, save, query, build publication
-    packages, and export BattINFO objects directly from Python. `LocalWorkspace`
-    remains the separate disk-first scaffold used by the `battinfo workspace` CLI,
-    while `Project` is the older compatibility wrapper around one `Workspace`.
+    packages, persist authoring state, and export BattINFO objects directly from
+    Python. `LocalWorkspace` remains the separate disk-first scaffold used by the
+    `battinfo workspace` CLI.
     """
 
     def __init__(
@@ -184,6 +203,13 @@ class Workspace:
         *,
         source_dir_name: str = "examples",
         index_name: str = "index.json",
+        name: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        tenant: str | None = None,
+        publisher: str | None = None,
+        version: str | None = None,
+        comment: list[str] | None = None,
         clean: bool = False,
     ) -> None:
         self.root = _as_path(root)
@@ -191,12 +217,19 @@ class Workspace:
             shutil.rmtree(self.root)
         self.source_root = self.root / source_dir_name
         self.index_path = self.root / index_name
-        self.library_root = self.root / "library" / "cell-types"
-        self.package_root = self.root / "package" / "cell-types"
-        self.library_rdf_root = self.root / "library-rdf" / "cell-types"
-        self.library_aggregate_jsonld = self.root / "ontology" / "library" / "cell-types.jsonld"
-        self.library_manifest_json = self.root / "library-rdf" / "cell-types.index.json"
+        self.library_root = self.root / "library" / "cell-type"
+        self.package_root = self.root / "package" / "cell-type"
+        self.library_rdf_root = self.root / "library-rdf" / "cell-type"
+        self.library_aggregate_jsonld = self.root / "ontology" / "library" / "cell-type.jsonld"
+        self.library_manifest_json = self.root / "library-rdf" / "cell-type.index.json"
         self.root.mkdir(parents=True, exist_ok=True)
+        self.name = name
+        self.title = title
+        self.description = description
+        self.tenant = tenant
+        self.publisher = publisher
+        self.version = version
+        self.comment = list(comment or [])
 
         self.descriptions: list[CellSpecification] = []
         self.cell_types: list[CellType] = []
@@ -204,6 +237,48 @@ class Workspace:
         self.test_protocols: list[TestProtocol] = []
         self.tests: list[Test] = []
         self.datasets: list[Dataset] = []
+
+    @classmethod
+    def open(cls, root: PathLike) -> "Workspace":
+        from battinfo.workspace_state import workspace_open
+
+        return workspace_open(root)
+
+    def save_workspace(self) -> dict[str, Any]:
+        from battinfo.workspace_state import workspace_save
+
+        return workspace_save(self)
+
+    def check_workspace(self, *, policy: str = "strict", write_report: bool = True) -> dict[str, Any]:
+        from battinfo.workspace_state import workspace_check
+
+        return workspace_check(self, policy=policy, write_report=write_report)
+
+    def bundle_workspace(
+        self,
+        target: CellType | CellInstance | Test | Dataset | None = None,
+        *,
+        name: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        tenant: str | None = None,
+        publisher: str | None = None,
+        version: str | None = None,
+        policy: str = "strict",
+    ) -> dict[str, Any]:
+        from battinfo.workspace_state import workspace_build_submission_package
+
+        return workspace_build_submission_package(
+            self,
+            target=target,
+            name=name,
+            title=title,
+            description=description,
+            tenant=tenant,
+            publisher=publisher,
+            version=version,
+            policy=policy,
+        )
 
     def add(self, *objects: Any) -> "Workspace":
         """Add one or more authoring objects to the workspace by type."""
@@ -260,6 +335,9 @@ class Workspace:
             if isinstance(payload.get("cell_type"), dict) and "product" not in payload:
                 payload = dict(payload)
                 payload["product"] = dict(payload["cell_type"])
+            if isinstance(payload.get("specification"), dict) and "product" not in payload:
+                # Library cell-type format: promote specification fields for authoring path
+                payload = dict(payload["specification"])
             if isinstance(payload.get("product"), dict):
                 if validate:
                     report = validate_record_report(payload, policy=validation_policy)
@@ -522,6 +600,7 @@ class Workspace:
         negative_electrode: Any = None,
         electrolyte: Any = None,
         separator: Any = None,
+        coin_hardware: Any = None,
         source: ProvenanceInfo | None = None,
         specification_comment: str | list[str] | None = None,
         comment: str | list[str] | None = None,
@@ -552,6 +631,7 @@ class Workspace:
             negative_electrode=negative_electrode,
             electrolyte=electrolyte,
             separator=separator,
+            coin_hardware=coin_hardware,
             source=source,
             specification_comment=specification_comment,
             comment=comment,
@@ -570,6 +650,7 @@ class Workspace:
         model: str,
         format: str,
         chemistry: str,
+        product_type: str | None = None,
         specs: Any = None,
         size_code: str | None = None,
         iec_code: str | None = None,
@@ -585,11 +666,14 @@ class Workspace:
         retrieved_at: int | str | None = None,
         comment: list[str] | None = None,
     ) -> CellType:
+        from battinfo.bundle import CellProductType
+        resolved_pt = CellProductType(product_type) if product_type is not None else None
         cell_type = CellType(
             manufacturer=manufacturer,
             model=model,
             format=format,
             chemistry=chemistry,
+            product_type=resolved_pt,
             size_code=size_code,
             iec_code=iec_code,
             country_of_origin=country_of_origin,
@@ -647,6 +731,8 @@ class Workspace:
         name: str,
         kind: str,
         description: str | None = None,
+        steps: list[str] | None = None,
+        cycles: int | None = None,
         version: str | None = None,
         protocol_url: str | None = None,
         conditions: Any = None,
@@ -665,6 +751,8 @@ class Workspace:
             name=name,
             test_kind=kind,
             description=description,
+            steps=list(steps) if steps else [],
+            cycles=cycles,
             version=version,
             protocol=ProtocolInfo(url=protocol_url),
             conditions=_mapping_value(conditions),
@@ -1289,13 +1377,13 @@ class Workspace:
         )
 
     def query_cell_types(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("cell_types_dir", self.source_root / "cell-types")
+        filters.setdefault("cell_types_dir", self.source_root / "cell-type")
         return query_cell_types(**filters)
 
     def query(self, kind: str, /, **filters: Any) -> list[dict[str, Any]]:
         normalized = kind.strip().lower().replace("-", "_")
         if normalized in {"cell_type", "cell_types"}:
-            filters.setdefault("cell_types_dir", self.source_root / "cell-types")
+            filters.setdefault("cell_types_dir", self.source_root / "cell-type")
             return query_api(kind, **filters)
         if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
             filters.setdefault("directory", self.source_root / "cell-instances")
@@ -1307,7 +1395,7 @@ class Workspace:
             filters.setdefault("directory", self.source_root / "tests")
             return query_api(kind, **filters)
         if normalized in {"dataset", "datasets"}:
-            filters.setdefault("directory", self.source_root / "datasets")
+            filters.setdefault("directory", self.source_root / "dataset")
             return query_api(kind, **filters)
         if normalized in {"description", "descriptions", "library_cell_type", "library_cell_types"}:
             filters.setdefault("directory", self.library_root)
@@ -1327,7 +1415,7 @@ class Workspace:
         return query_test_protocols(**filters)
 
     def query_datasets(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "datasets")
+        filters.setdefault("directory", self.source_root / "dataset")
         return query_datasets(**filters)
 
     def query_descriptions(self, **filters: Any) -> list[dict[str, Any]]:

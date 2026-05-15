@@ -57,12 +57,12 @@ class _FakePsutil:
 
 
 def test_recover_notebook_runtime_stops_repo_local_ipykernel_process_tree(tmp_path: Path, monkeypatch) -> None:
-    project_root = tmp_path
-    venv_python = project_root / ".venv" / "Scripts" / "python.exe"
+    workspace_root = tmp_path
+    venv_python = workspace_root / ".venv" / "Scripts" / "python.exe"
     venv_python.parent.mkdir(parents=True, exist_ok=True)
     venv_python.write_text("", encoding="utf-8")
 
-    runtime_dir = project_root / ".jupyter-runtime-test"
+    runtime_dir = workspace_root / ".jupyter-runtime-test"
     runtime_dir.mkdir()
     (runtime_dir / "kernel.json").write_text("{}", encoding="utf-8")
 
@@ -75,7 +75,7 @@ def test_recover_notebook_runtime_stops_repo_local_ipykernel_process_tree(tmp_pa
     monkeypatch.setattr("battinfo.runtime._load_psutil", lambda: fake_psutil)
     monkeypatch.setattr("battinfo.runtime.os.getpid", lambda: 99999)
 
-    payload = recover_notebook_runtime(project_root=project_root)
+    payload = recover_notebook_runtime(workspace_root=workspace_root)
 
     assert payload["kernel_process_count"] == 1
     assert payload["terminated_pid_count"] == 2
@@ -85,4 +85,5 @@ def test_recover_notebook_runtime_stops_repo_local_ipykernel_process_tree(tmp_pa
     assert kernel.killed is True
     assert unrelated.terminated is False
     assert runtime_dir.exists() is False
+
 

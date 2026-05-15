@@ -7,8 +7,9 @@ fixtures and examples that are meant to be validated, queried, published, or
 referenced from tests and docs.
 
 Key folders:
-- `cell-types/` Canonical cell type examples derived from datasheets.
+- `cell-type/` Canonical cell type examples derived from datasheets.
 - `cell-instances/` Example physical cell instances derived from types.
 - `tests/` Example explicit test activities performed on physical cell instances.
-- `datasets/` Example BattINFO dataset records linked to cells/tests.
+- `dataset/` Example BattINFO dataset records linked to cells/tests.
 - `profiles/` Profile-specific examples (for example Battery Pass).
+

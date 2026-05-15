@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
+from battinfo.canonical_aliases import record_to_legacy_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -32,7 +33,7 @@ TEST_IRI_RE = re.compile(
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _iri_tail(iri: str) -> tuple[str, str]:
@@ -74,7 +75,7 @@ def _entity_type_from_doc(doc: dict[str, Any]) -> str:
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     if entity_type == "cell-type":
-        directory = source_root / "cell-types"
+        directory = source_root / "cell-type"
     elif entity_type == "cell":
         directory = source_root / "cell-instances"
     elif entity_type == "test-protocol":
@@ -82,7 +83,7 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     elif entity_type == "test":
         directory = source_root / "tests"
     elif entity_type == "dataset":
-        directory = source_root / "datasets"
+        directory = source_root / "dataset"
     else:
         return []
     if not directory.exists():
@@ -93,7 +94,7 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
 def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     filename = f"{entity_type}-{uid}.json" if entity_type != "cell-type" else f"cell-type-{uid}.json"
     if entity_type == "cell-type":
-        return source_root / "cell-types" / filename
+        return source_root / "cell-type" / filename
     if entity_type == "cell":
         return source_root / "cell-instances" / filename
     if entity_type == "test-protocol":
@@ -101,7 +102,7 @@ def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     if entity_type == "test":
         return source_root / "tests" / filename
     if entity_type == "dataset":
-        return source_root / "datasets" / filename
+        return source_root / "dataset" / filename
     raise ValueError(f"Unsupported entity type: {entity_type}")
 
 

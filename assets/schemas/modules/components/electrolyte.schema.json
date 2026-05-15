@@ -41,6 +41,15 @@
         "anion": {
           "type": "string"
         },
+        "manufacturer": {
+          "type": "string"
+        },
+        "supplier": {
+          "type": "string"
+        },
+        "product_id": {
+          "type": "string"
+        },
         "property": {
           "$ref": "../common/quantitative-properties.schema.json"
         },
@@ -54,6 +63,15 @@
       "items": {
         "$ref": "material-component.schema.json"
       }
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
     },
     "property": {
       "$ref": "../common/quantitative-properties.schema.json"

@@ -25,11 +25,11 @@ def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path:
         "alpha-prismatic-detailed.example.json",
     ]
 
-    library_root = tmp_path / "library" / "cell-types"
-    package_root = tmp_path / "package" / "cell-types"
-    rdf_root = tmp_path / "library-rdf" / "cell-types"
-    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-types.jsonld"
-    manifest_json = tmp_path / "library-rdf" / "cell-types.index.json"
+    library_root = tmp_path / "library" / "cell-type"
+    package_root = tmp_path / "package" / "cell-type"
+    rdf_root = tmp_path / "library-rdf" / "cell-type"
+    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-type.jsonld"
+    manifest_json = tmp_path / "library-rdf" / "cell-type.index.json"
 
     for example_name in example_names:
         record = _load_json(examples_dir / example_name)
@@ -70,6 +70,8 @@ def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path:
     prismatic_rows = query_library_cell_types(directory=library_root, format="prismatic")
     assert len(prismatic_rows) == 1
     assert prismatic_rows[0]["construction"]["layer_count"] == 24
+
+
 
 
 

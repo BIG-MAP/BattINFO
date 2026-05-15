@@ -5,7 +5,8 @@ here.
 
 Current target:
 
-- `cell-types.jsonld`
+- `cell-type.jsonld`
 
 These files are generated from canonical JSON sources, may be absent in a clean
 checkout, and should not be edited manually.
+

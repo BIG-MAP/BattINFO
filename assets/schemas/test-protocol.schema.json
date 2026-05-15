@@ -64,6 +64,19 @@
         "protocol_url": {
           "type": "string",
           "format": "uri"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "PyBaMM-compatible experiment step strings. Pass directly to pybamm.Experiment(steps)."
+        },
+        "cycles": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of times to repeat the step sequence. pybamm.Experiment(steps * cycles)."
         }
       }
     },

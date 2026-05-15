@@ -1,34 +1,72 @@
 # BattINFO Documentation
 
-BattINFO is the implementation layer for the domain-battery ontology.
+BattINFO is the implementation layer for the EMMO domain-battery ontology — providing JSON schemas, a Python library, a CLI, and canonical mapping tables for authoring, validating, and publishing battery metadata as Linked Data.
 
-Status: Pre-release with alpha-ready scope defined.
-- Core query/create/publish/index interfaces are available.
-- Contracts may still be refined during alpha testing.
-- Alpha scope boundaries are defined for core, preview, and in-development features.
+---
 
-Sections:
-- `Agent Guide`: see `../AGENTS.md`
-- `Alpha Scope`: see `alpha-scope.md`
-- `Alpha Implementation Plan`: see `alpha-implementation-plan.md`
-- `Identifier Policy`: see `../IDENTIFIER_POLICY.md`
-- `Cell Descriptor Standard (Normative v1.0-draft)`: see `cell-descriptor-standard.md`
-- `Cell Descriptor Stable Subset`: see `cell-descriptor-stable-subset.md`
-- `Cell Descriptor Integration`: see `cell-descriptor-integration.md`
-- `Reusable Cell-Type Library`: see `cell-type-library.md`
-- `Instance / Test / Dataset Workflow`: see `instance-test-dataset-workflow.md`
-- `Ontology / Profile Architecture`: see `ontology-profile-architecture.md`
-- `Validation Roadmap`: see `validation-roadmap.md`
-- `Validation Contract`: see `validation-contract.md`
-- `Cell Descriptor Profile Assets`: see `../src/battinfo/data/profiles/cell-descriptor/`
-- `Dataset Registry Intake Spec (v1 Draft)`: see `dataset-registry-intake-spec.md`
-- `Domain-Battery Mapping Candidates (quantitative properties)`: `assets/mappings/domain-battery/`
-- `Shared Cell Descriptor Schema (BattINFO/BDF)`: `assets/schemas/cell-descriptor.schema.json`
-- `Profiles and Schemas`: `assets/schemas/`
-- `CLI Usage`: `battinfo validate`, `battinfo map`, `battinfo query`, `battinfo create`, `battinfo publish`, `battinfo index`
-- `CLI Spec (Query/Create/Publish/Index)`: see `cli-spec.md`
-- `Python API`: see `python-api.md`
-- `Resolver Deployment`: see `resolver.md`
-- `Interactive Notebooks`: see `../examples/notebooks/README.md`
+## Getting started
 
+| | |
+|---|---|
+| **[Quickstart](../QUICKSTART.md)** | Create and publish your first cell-type record in 5 minutes |
+| **[01 — Concepts](guides/01-concepts.ipynb)** | Data model, record types, IRIs, and the semantic layer |
+| **[02 — First cell type](guides/02-first-cell-type.ipynb)** | Materials → components → cell type → publish |
+| **[03 — Linked records](guides/03-linked-records.ipynb)** | Cell instance → test → dataset → registry submission |
+| **[04 — Semantic layer](guides/04-semantic-layer.ipynb)** | JSON-LD anatomy, EMMO type stacking, RDF validation, SPARQL |
+| **[05 — Descriptors](guides/05-descriptors.ipynb)** | Research-grade descriptors: electrode composition, electrolyte, separator |
 
+Open notebooks from the repo root with the `.venv` kernel selected.
+
+---
+
+## Reference
+
+| | |
+|---|---|
+| **[Python API](python-api.md)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
+| **[CLI spec](cli-spec.md)** | All CLI commands, options, and output formats |
+| **[Validation contract](validation-contract.md)** | Validation policies, machine-readable issue output |
+| **[Identifier policy](../IDENTIFIER_POLICY.md)** | IRI minting, governance, and stability guarantees |
+
+---
+
+## Domain and schemas
+
+| | |
+|---|---|
+| **[Cell descriptor standard](cell-descriptor-standard.md)** | Normative cell descriptor specification |
+| **[Ontology / profile architecture](ontology-profile-architecture.md)** | How BattINFO, EMMO, and schema.org compose |
+| **[Schemas](../assets/schemas/)** | JSON Schema (draft 2020-12) files for all record types |
+| **[Property mappings](../assets/mappings/domain-battery/)** | Curated property → EMMO IRI and unit → EMMO/QUDT IRI tables |
+
+---
+
+## Workflows
+
+| | |
+|---|---|
+| **[Instance / test / dataset workflow](instance-test-dataset-workflow.md)** | Detailed workflow reference for linked records |
+| **[Editorial cell-type workflow](editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-type library |
+| **[Ingest manifest contract](ingest-manifest-contract.md)** | Batch intake from a folder of raw data files |
+| **[Dataset registry intake spec](dataset-registry-intake-spec.md)** | Submission package format for registry intake |
+| **[Resolver deployment](resolver.md)** | Building and deploying static resolver artifacts |
+
+---
+
+## Scope and status
+
+| | |
+|---|---|
+| **[Alpha scope](alpha-scope.md)** | What is in scope for alpha testing, what is in development |
+| **[CHANGELOG](../CHANGELOG.md)** | Release history and notable changes |
+
+---
+
+## Internal / maintainer
+
+| | |
+|---|---|
+| **[Agent guide](../AGENTS.md)** | Machine-readable manifest for AI agents working on this repo |
+| **[Alpha implementation plan](alpha-implementation-plan.md)** | Implementation sequencing (internal reference) |
+| **[Validation roadmap](validation-roadmap.md)** | Planned validation enhancements |
+| **[Converter compatibility](converter-compatibility.md)** | Compatibility notes for external format converters |

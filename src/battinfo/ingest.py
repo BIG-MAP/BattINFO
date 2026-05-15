@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import mimetypes
 import re
 import tempfile
 from collections.abc import Callable

@@ -142,7 +142,10 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                     )
                     continue
                 ref_id = ref["@id"]
-                if ref_id.startswith("https://w3id.org/battinfo/") and ref_id not in node_ids:
+                # Only enforce intra-graph referential integrity inside a @graph publication
+                # package.  Resolver documents are single-node and carry cross-document
+                # references to external BattINFO records — those are expected to be absent.
+                if has_graph and ref_id.startswith("https://w3id.org/battinfo/") and ref_id not in node_ids:
                     _append_issue(
                         issues,
                         code="publication.reference_missing_node",

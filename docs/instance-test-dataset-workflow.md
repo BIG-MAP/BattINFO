@@ -58,7 +58,7 @@ Dataset linkage policy for alpha:
 - test:
   - `examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
 - dataset:
-  - `examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json`
+  - `examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json`
 
 ## CLI Workflow
 
@@ -83,9 +83,9 @@ battinfo query tests --cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq
 
 battinfo query tests --dataset-id https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x --format json
 
-battinfo query datasets --related-cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8 --format json
+battinfo query dataset --related-cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8 --format json
 
-battinfo query datasets --related-test-id https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r --format json
+battinfo query dataset --related-test-id https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r --format json
 ```
 
 ## Current Boundaries
@@ -100,6 +100,8 @@ What is now first-class:
 What is still intentionally light:
 - the descriptor `instances` block remains a lightweight reference layer, not the full canonical `cell-instance` contract
 - test result content is still represented at the dataset layer rather than as a deeply modeled measurement/event ontology
+
+
 
 
 

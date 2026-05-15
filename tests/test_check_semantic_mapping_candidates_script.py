@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -28,7 +27,7 @@ def _write_candidate_maps(tmp_path: Path) -> tuple[Path, Path]:
                         "confidence": 1.0,
                     },
                     {
-                        "key": "storage_temperature_max",
+                        "key": "maximum_storage_temperature",
                         "status": "unmapped",
                         "class_iri": None,
                         "class_pref_label": None,
@@ -91,7 +90,7 @@ def test_semantic_mapping_gate_fails_on_unmapped(tmp_path: Path) -> None:
     assert report.exists()
     text = report.read_text(encoding="utf-8")
     assert "Result: `FAIL`" in text
-    assert "`storage_temperature_max`" in text
+    assert "`maximum_storage_temperature`" in text
     assert "`Ah`" in text
 
 

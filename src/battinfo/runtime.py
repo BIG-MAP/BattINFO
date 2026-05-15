@@ -28,10 +28,10 @@ def _load_psutil() -> Any:
     return psutil
 
 
-def _default_venv_python(project_root: Path, venv_path: Path) -> Path:
+def _default_venv_python(workspace_root: Path, venv_path: Path) -> Path:
     candidates = [
-        (project_root / venv_path / "Scripts" / "python.exe"),
-        (project_root / venv_path / "bin" / "python"),
+        (workspace_root / venv_path / "Scripts" / "python.exe"),
+        (workspace_root / venv_path / "bin" / "python"),
     ]
     for candidate in candidates:
         if candidate.exists():
@@ -52,14 +52,14 @@ def _looks_like_notebook_kernel_process(info: dict[str, Any], venv_python: Path,
 
 def recover_notebook_runtime(
     *,
-    project_root: PathLike = ".",
+    workspace_root: PathLike = ".",
     venv_path: PathLike = ".venv",
     clear_local_runtime: bool = True,
     force_kill: bool = True,
 ) -> dict[str, Any]:
     psutil = _load_psutil()
 
-    root = _as_path(project_root).resolve()
+    root = _as_path(workspace_root).resolve()
     venv_python = _default_venv_python(root, _as_path(venv_path))
     current_pid = os.getpid()
 
@@ -114,7 +114,7 @@ def recover_notebook_runtime(
 
     return {
         "status": "ok",
-        "project_root": str(root),
+        "workspace_root": str(root),
         "venv_python": str(venv_python),
         "scanned_processes": scanned,
         "kernel_process_count": len(kernel_processes),

@@ -13,10 +13,10 @@ def _load_json(path: Path) -> dict:
 
 
 def test_build_cell_type_library_rdf_from_descriptor(tmp_path: Path) -> None:
-    input_dir = tmp_path / "cell-types"
-    output_jsonld_dir = tmp_path / "library-rdf" / "cell-types"
-    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-types.jsonld"
-    manifest_json = tmp_path / "library-rdf" / "cell-types.index.json"
+    input_dir = tmp_path / "cell-type"
+    output_jsonld_dir = tmp_path / "library-rdf" / "cell-type"
+    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-type.jsonld"
+    manifest_json = tmp_path / "library-rdf" / "cell-type.index.json"
 
     input_dir.mkdir(parents=True)
     descriptor = _load_json(ROOT / "examples" / "cell-descriptors" / "minimal.example.json")
@@ -56,5 +56,7 @@ def test_build_cell_type_library_rdf_from_descriptor(tmp_path: Path) -> None:
     assert manifest_payload["entries"][0]["id"] == descriptor["specification"]["id"]
     assert manifest_payload["entries"][0]["manufacturer"] == descriptor["specification"]["manufacturer"]
     assert manifest_payload["entries"][0]["model"] == descriptor["specification"]["model"]
+
+
 
 

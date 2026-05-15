@@ -15,7 +15,7 @@
       "value": 0.0,
       "unit": "Ah"
     },
-    "min_capacity": {
+    "minimum_capacity": {
       "value": 0.0,
       "unit": "Ah"
     },
@@ -95,7 +95,11 @@
       "value": 0.0,
       "unit": "A"
     },
-    "continuous_charging_current": {
+    "nominal_continuous_charging_current": {
+      "value": 0.0,
+      "unit": "A"
+    },
+    "maximum_continuous_charging_current": {
       "value": 0.0,
       "unit": "A"
     },
@@ -103,31 +107,35 @@
       "value": 0.0,
       "unit": "A"
     },
-    "continuous_discharging_current": {
+    "nominal_continuous_discharging_current": {
       "value": 0.0,
       "unit": "A"
     },
-    "charging_temperature_min": {
+    "maximum_continuous_discharging_current": {
+      "value": 0.0,
+      "unit": "A"
+    },
+    "minimum_charging_temperature": {
       "value": 0.0,
       "unit": "degC"
     },
-    "charging_temperature_max": {
+    "maximum_charging_temperature": {
       "value": 0.0,
       "unit": "degC"
     },
-    "discharging_temperature_min": {
+    "minimum_discharging_temperature": {
       "value": 0.0,
       "unit": "degC"
     },
-    "discharging_temperature_max": {
+    "maximum_discharging_temperature": {
       "value": 0.0,
       "unit": "degC"
     },
-    "storage_temperature_min": {
+    "minimum_storage_temperature": {
       "value": 0.0,
       "unit": "degC"
     },
-    "storage_temperature_max": {
+    "maximum_storage_temperature": {
       "value": 0.0,
       "unit": "degC"
     },
@@ -141,3 +149,4 @@
   },
   "comment": "Template-generated cell-type authoring draft. Replace placeholder values before loading into Workspace."
 }
+

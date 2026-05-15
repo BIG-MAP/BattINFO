@@ -6,59 +6,124 @@ from typing import Any
 
 import typer
 
-from battinfo.bundle import CellType
-from battinfo.publish import publish as publish_object
-from battinfo.runtime import recover_notebook_runtime
 from battinfo.api import (
-    CellSpecificationInput,
     CellInstanceInput,
+    CellSpecificationInput,
     CellTypeInput,
     DatasetInput,
-    TestProtocolInput,
     TestInput,
+    TestProtocolInput,
+)
+from battinfo.api import (
     build_cell_type_library_rdf as api_build_cell_type_library_rdf,
-    build_index as api_build_index,
+)
+from battinfo.api import (
     build_curated_cell_type_submission as api_build_curated_cell_type_submission,
+)
+from battinfo.api import (
+    build_index as api_build_index,
+)
+from battinfo.api import (
     create_cell_instance as api_create_cell_instance,
+)
+from battinfo.api import (
     index_stats as api_index_stats,
-    publish_batch as api_publish_batch,
-    publish_curated_cell_type as api_publish_curated_cell_type,
-    publish_record as api_publish_record,
+)
+from battinfo.api import (
     promote_staging_cell_type as api_promote_staging_cell_type,
+)
+from battinfo.api import (
     promote_staging_cell_types as api_promote_staging_cell_types,
+)
+from battinfo.api import (
+    publish_batch as api_publish_batch,
+)
+from battinfo.api import (
+    publish_curated_cell_type as api_publish_curated_cell_type,
+)
+from battinfo.api import (
+    publish_record as api_publish_record,
+)
+from battinfo.api import (
     query_cell_instances as api_query_cell_instances,
-    query_library_cell_types as api_query_library_cell_types,
-    query_test_protocols as api_query_test_protocols,
-    query_tests as api_query_tests,
+)
+from battinfo.api import (
     query_cell_types as api_query_cell_types,
+)
+from battinfo.api import (
     query_datasets as api_query_datasets,
+)
+from battinfo.api import (
+    query_library_cell_types as api_query_library_cell_types,
+)
+from battinfo.api import (
+    query_test_protocols as api_query_test_protocols,
+)
+from battinfo.api import (
+    query_tests as api_query_tests,
+)
+from battinfo.api import (
     save_batch as api_save_batch,
+)
+from battinfo.api import (
     save_cell_instance as api_save_cell_instance,
+)
+from battinfo.api import (
     save_cell_type as api_save_cell_type,
+)
+from battinfo.api import (
     save_dataset as api_save_dataset,
+)
+from battinfo.api import (
     save_library_cell_type as api_save_library_cell_type,
-    save_test_protocol as api_save_test_protocol,
-    save_test as api_save_test,
+)
+from battinfo.api import (
     save_record as api_save_record,
-    template_cell_specification as api_template_cell_specification,
+)
+from battinfo.api import (
+    save_test as api_save_test,
+)
+from battinfo.api import (
+    save_test_protocol as api_save_test_protocol,
+)
+from battinfo.api import (
     template_cell_instance as api_template_cell_instance,
-    template_cell_type_draft as api_template_cell_type_draft,
+)
+from battinfo.api import (
+    template_cell_specification as api_template_cell_specification,
+)
+from battinfo.api import (
     template_cell_type as api_template_cell_type,
+)
+from battinfo.api import (
+    template_cell_type_draft as api_template_cell_type_draft,
+)
+from battinfo.api import (
     template_dataset as api_template_dataset,
-    template_test_protocol_draft as api_template_test_protocol_draft,
-    template_test_protocol as api_template_test_protocol,
+)
+from battinfo.api import (
     template_test as api_template_test,
+)
+from battinfo.api import (
+    template_test_protocol as api_template_test_protocol,
+)
+from battinfo.api import (
     validate_staging_cell_type as api_validate_staging_cell_type,
+)
+from battinfo.api import (
     validate_staging_cell_types as api_validate_staging_cell_types,
 )
+from battinfo.bundle import CellType
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
-from battinfo.storage import build_uploader_from_env
 from battinfo.local_workspace import LocalWorkspace
-from battinfo.workflows.map import run_mapping
+from battinfo.publish import publish as publish_object
+from battinfo.runtime import recover_notebook_runtime
+from battinfo.storage import build_uploader_from_env
 from battinfo.validate import get_validation_policy
 from battinfo.validate.pydantic import validate_json
 from battinfo.validate.record import validate_record
+from battinfo.workflows.map import run_mapping
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 query_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Query BattINFO resources.")
@@ -77,7 +142,9 @@ notebook_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Not
 demo_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and verify end-to-end BattINFO demos.")
 ingest_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Register typed resource instances from folder-based evidence.")
 registry_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers.")
-dataset_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init → process → publish.")
+dataset_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish.")
+batch_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions.")
+config_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage user preferences (creator, license, community).")
 
 app.add_typer(query_app, name="query")
 app.add_typer(create_app, name="create")
@@ -93,6 +160,8 @@ app.add_typer(demo_app, name="demo")
 app.add_typer(ingest_app, name="ingest")
 app.add_typer(registry_app, name="registry")
 app.add_typer(dataset_app, name="dataset")
+app.add_typer(batch_app, name="batch")
+app.add_typer(config_app, name="config")
 library_app.add_typer(library_query_app, name="query")
 library_app.add_typer(library_save_app, name="save")
 library_app.add_typer(library_template_app, name="template")
@@ -2731,103 +2800,216 @@ def dataset_init(
     typer.echo(f"  3. Run: battinfo dataset process {path}")
 
 
+def _process_single_cell(
+    folder: Path,
+    *,
+    clean: bool,
+    validation_policy: str,
+    console: Any,
+    bundle: bool = True,
+) -> tuple[bool, dict]:
+    """Process one cell contribution folder.  Returns (success, result_dict)."""
+    from rich import box
+    from rich.table import Table
+
+    from battinfo.contribution import process_contribution
+
+    try:
+        result = process_contribution(
+            folder, clean=clean, validation_policy=validation_policy, bundle=bundle,
+        )
+    except FileNotFoundError as exc:
+        console.print(f"  [red]Error:[/red] {exc}")
+        return False, {}
+    except (RuntimeError, ValueError) as exc:
+        console.print(f"  [red]Error:[/red] {exc}")
+        return False, {}
+
+    if result["errors"]:
+        console.print("  [red]Manifest errors -- fix battinfo.yaml:[/red]")
+        for err in result["errors"]:
+            console.print(f"    x  {err}")
+        return False, result
+
+    files = result["files"]
+    conversions: dict = result.get("conversions") or {}
+    if not files:
+        console.print("  [yellow]Warning:[/yellow] No data files found in data/")
+    else:
+        table = Table(box=box.SIMPLE, show_header=True, header_style="bold",
+                      show_edge=False, pad_edge=True)
+        table.add_column("File")
+        table.add_column("Test type")
+        table.add_column("Temp")
+        table.add_column("Date")
+        table.add_column("BDF")
+        table.add_column("")
+        for f in files:
+            ok = f["recognised"]
+            bdf_result = conversions.get(f["name"])
+            if f["name"] not in conversions:
+                bdf_cell = "--"
+            elif bdf_result:
+                bdf_cell = "[green]ok[/green]"
+            else:
+                bdf_cell = "[yellow]skip[/yellow]"
+            table.add_row(
+                f["name"],
+                f["label"] if ok else "--",
+                f["temp"] or "--",
+                f["date"] or "--",
+                bdf_cell,
+                "[green]ok[/green]" if ok else "[yellow]?[/yellow]",
+            )
+        console.print(table)
+
+    if result.get("needs_review"):
+        annotations_path = result.get("annotations_path", "battinfo-annotations.yaml")
+        console.print(f"  [yellow]Action needed:[/yellow] fill in '?' entries in {Path(annotations_path).name}")
+
+    build = result.get("build")
+    if not bundle:
+        file_count = len([f for f in files if f["recognised"]])
+        bdf_count = sum(1 for v in conversions.values() if v)
+        bdf_note = f", {bdf_count} converted to BDF" if conversions else ""
+        console.print(f"  [green]OK[/green]  {file_count} file(s) recognised{bdf_note}")
+        return True, result
+    if build:
+        counts = build.get("counts", {})
+        console.print(
+            f"  [green]OK[/green]  "
+            f"{counts.get('datasets', 0)} dataset(s), "
+            f"{counts.get('tests', 0)} test(s)"
+        )
+        return True, result
+    else:
+        console.print("  [red]Build did not complete.[/red]")
+        return False, result
+
+
 @dataset_app.command("process")
 def dataset_process(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
     clean: bool = typer.Option(False, "--force", help="Rebuild from scratch."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="strict|set|quick"),
+    json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
     """Validate metadata, infer tests from data files, and build the submission package.
 
-    Run this after filling in battinfo.yaml and adding data files.
-    Output is written to the dist/ sub-folder inside the contribution folder.
+    Accepts either a single cell folder (with battinfo.yaml) or a batch
+    folder (with batch.yaml).  When given a batch folder, all cell
+    sub-folders are processed automatically.
     """
     from rich.console import Console
-    from rich.table import Table
-    from rich import box
-    from battinfo.contribution import process_contribution
 
-    console = Console(highlight=False)
+    from battinfo.contribution import BATCH_MANIFEST, CONTRIBUTION_MANIFEST
 
-    try:
-        result = process_contribution(folder, clean=clean, validation_policy=validation_policy)
-    except FileNotFoundError as exc:
-        console.print(f"[red]Error:[/red] {exc}")
-        raise typer.Exit(code=1) from exc
-    except (RuntimeError, ValueError) as exc:
-        console.print(f"[red]Error:[/red] {exc}")
-        raise typer.Exit(code=1) from exc
+    console = Console(highlight=False, quiet=json_output)
 
-    console.print()
-    console.print("[bold]BattINFO Dataset Processor[/bold]")
-    console.print()
+    # ── Batch directory: iterate all cell sub-folders ──────────────────────────
+    if (folder / BATCH_MANIFEST).exists():
+        cell_dirs = sorted(
+            d for d in folder.iterdir()
+            if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
+        )
+        if not cell_dirs:
+            if json_output:
+                typer.echo(json.dumps({"ok": True, "cells": [], "ok_count": 0, "fail_count": 0}))
+            else:
+                console.print("[yellow]No cell folders with battinfo.yaml found.[/yellow]")
+            raise typer.Exit(code=0)
 
-    # Identity summary
-    if result.get("cell_type_iri"):
-        console.print(f"  Cell type IRI  {result['cell_type_iri']}")
-    if result.get("cell_name"):
-        console.print(f"  Cell name      {result['cell_name']}")
-    if result.get("lab"):
-        console.print(f"  Lab            {result['lab']}")
-    console.print(f"  Licence        {result.get('license', 'CC-BY-4.0')}")
-    console.print()
+        if not json_output:
+            console.print()
+            console.print(f"[bold]Batch:[/bold] {folder.name}  ({len(cell_dirs)} cell(s))")
+            console.print()
 
-    # Manifest errors
-    if result["errors"]:
-        console.print("[bold red]Please fix battinfo.yaml before processing:[/bold red]")
-        for err in result["errors"]:
-            console.print(f"  [red]✗[/red]  {err}")
+        ok_count = 0
+        fail_count = 0
+        cell_results = []
+
+        for i, cell_dir in enumerate(cell_dirs, 1):
+            if not json_output:
+                console.print(f"[bold][{i}/{len(cell_dirs)}][/bold] {cell_dir.name}")
+            success, cell_result = _process_single_cell(
+                cell_dir, clean=clean, validation_policy=validation_policy,
+                console=console, bundle=False,
+            )
+            if json_output:
+                cell_results.append({
+                    "folder": cell_dir.name,
+                    "ok": success,
+                    "files": len(cell_result.get("files", [])),
+                    "needs_review": cell_result.get("needs_review", False),
+                    "errors": cell_result.get("errors", []),
+                    "conversions": {k: bool(v) for k, v in cell_result.get("conversions", {}).items()},
+                })
+            if success:
+                ok_count += 1
+            else:
+                fail_count += 1
+            if not json_output:
+                console.print()
+
+        if json_output:
+            typer.echo(json.dumps({
+                "ok": fail_count == 0,
+                "ok_count": ok_count,
+                "fail_count": fail_count,
+                "cells": cell_results,
+            }))
+        else:
+            if fail_count == 0:
+                console.print(f"[green]All {ok_count} cell(s) processed successfully.[/green]")
+                console.print()
+                console.print("Build Zenodo package with:")
+                console.print(f"  [bold]battinfo batch package {folder} --creator \"Name; Institution\"[/bold]")
+            else:
+                console.print(
+                    f"[green]{ok_count} ok[/green]  [red]{fail_count} failed[/red] -- "
+                    "fix the errors above and re-run."
+                )
+
+        if fail_count > 0:
+            raise typer.Exit(code=1)
         console.print()
+        return
+
+    # ── Single cell folder ─────────────────────────────────────────────────────
+    if not (folder / CONTRIBUTION_MANIFEST).exists():
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": f"No {CONTRIBUTION_MANIFEST} found in {folder}"}))
+        else:
+            console.print(
+                f"[red]Error:[/red] No {CONTRIBUTION_MANIFEST} found in {folder}. "
+                "Run `battinfo dataset init` to create one, or point at a batch folder."
+            )
         raise typer.Exit(code=1)
 
-    # File table
-    files = result["files"]
-    if not files:
-        console.print("[yellow]Warning:[/yellow] No CSV files found in data/")
-        console.print("  Add files named: YYYY-MM-DD__testtype__temperature.csv")
+    if not json_output:
         console.print()
+        console.print("[bold]BattINFO Dataset Processor[/bold]")
+        console.print()
+
+    success, cell_result = _process_single_cell(folder, clean=clean, validation_policy=validation_policy, console=console)
+
+    if json_output:
+        typer.echo(json.dumps({
+            "ok": success,
+            "folder": str(folder),
+            "files": len(cell_result.get("files", [])),
+            "needs_review": cell_result.get("needs_review", False),
+            "errors": cell_result.get("errors", []),
+        }))
     else:
-        table = Table(box=box.SIMPLE, show_header=True, header_style="bold")
-        table.add_column("File")
-        table.add_column("Test type")
-        table.add_column("Temp")
-        table.add_column("Date")
-        table.add_column("", style="bold")
-        for f in files:
-            ok = f["recognised"]
-            table.add_row(
-                f["name"],
-                f["label"] if ok else "—",
-                f["temp"] or "—",
-                f["date"] or "—",
-                "[green]ok[/green]" if ok else "[yellow]?[/yellow]",
-            )
-        console.print(table)
-
-    if result["warnings"]:
-        console.print("[yellow]Warning:[/yellow] some filenames were not fully recognised.")
-        console.print("  Expected: YYYY-MM-DD__testtype__temperature.csv")
-        console.print()
-
-    # Build result
-    build = result.get("build")
-    if build:
-        counts = build.get("counts", {})
-        console.print(
-            f"[green]Validation passed.[/green]  "
-            f"{counts.get('datasets', 0)} dataset(s), "
-            f"{counts.get('tests', 0)} test(s)"
-        )
-        if pkg := build.get("submission_package_path"):
-            console.print(f"  Submission package: {pkg}")
-        console.print()
+        if not success:
+            raise typer.Exit(code=1)
         console.print("Ready to publish. Run:")
         console.print(f"  [bold]battinfo dataset publish {folder} --zenodo --token YOUR_TOKEN[/bold]")
-    else:
-        console.print("[red]Build did not complete — check the errors above.[/red]")
-        raise typer.Exit(code=1)
+        console.print()
 
-    console.print()
+    if not success:
+        raise typer.Exit(code=1)
 
 
 @dataset_app.command("publish")
@@ -2853,7 +3035,9 @@ def dataset_publish(
       Required scopes: deposit:write
     """
     import os
+
     from rich.console import Console
+
     from battinfo.contribution import publish_to_zenodo
 
     console = Console()
@@ -2870,7 +3054,7 @@ def dataset_publish(
     resolved_community = "" if no_community else community
 
     console.print()
-    console.print(f"[bold]Uploading to {'Zenodo Sandbox' if sandbox else 'Zenodo'}…[/bold]")
+    console.print(f"[bold]Uploading to {'Zenodo Sandbox' if sandbox else 'Zenodo'}...[/bold]")
     console.print()
 
     try:
@@ -2887,13 +3071,622 @@ def dataset_publish(
         console.print(f"[red]Upload failed:[/red] {exc}")
         raise typer.Exit(code=1) from exc
 
-    console.print(f"[green]Deposit created (draft).[/green]")
+    console.print("[green]Deposit created (draft).[/green]")
     console.print(f"  DOI:     {result.get('doi') or '(assigned on publication)'}")
     console.print(f"  Files:   {result['files_uploaded']} uploaded")
-    console.print(f"  Review and publish at:")
+    console.print("  Review and publish at:")
     console.print(f"  [bold]{result['deposit_url']}[/bold]")
     console.print()
-    console.print("The deposit is a [bold]draft[/bold] — review it on Zenodo before clicking Publish.")
+    console.print("The deposit is a [bold]draft[/bold] -- review it on Zenodo before clicking Publish.")
     console.print()
 
 
+# ── batch commands ─────────────────────────────────────────────────────────────
+
+@batch_app.command("init")
+def batch_init(
+    output_dir: Path = typer.Argument(..., help="Directory to create for this batch."),
+    cell_type: str = typer.Option(..., "--cell-type", "-t", help='Cell type IRI or name, e.g. "Energizer CR2032".'),
+    count: int = typer.Option(..., "--count", "-n", help="Number of cells received."),
+    batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
+    lab: str | None = typer.Option(None, "--lab", help="Institution or lab name."),
+    operator: str | None = typer.Option(None, "--operator", help="Person who operated the test equipment."),
+    project: str | None = typer.Option(None, "--project", help="Project name or ID this batch belongs to."),
+    license: str = typer.Option("CC-BY-4.0", "--license", help="SPDX licence identifier."),
+    iris: str | None = typer.Option(
+        None,
+        "--iris",
+        help="Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).",
+    ),
+    serials: str | None = typer.Option(
+        None,
+        "--serials",
+        help="Comma-separated serial numbers (one per cell, used as folder names).",
+    ),
+    overwrite: bool = typer.Option(False, "--force", help="Overwrite an existing output directory."),
+) -> None:
+    """Scaffold a multi-cell batch directory.
+
+    \b
+    Creates one sub-folder per cell, each with:
+      battinfo.yaml   <- pre-filled cell identity and provenance
+      data/           <- drop raw CSV/data files here
+      photos/         <- optional microscopy or label images
+
+    \b
+    After running this command:
+      1. Drop data files into each cell's  data/  folder.
+         Name them: YYYY-MM-DD__testtype__temperature.csv
+         e.g. 2025-06-01__capacity_check__25degC.csv
+      2. Edit battinfo.yaml in each cell folder if you have more metadata.
+      3. Process each cell:  battinfo dataset process <cell-folder>
+    """
+    from battinfo.contribution import init_batch
+
+    cell_iris_list = [s.strip() for s in iris.split(",")] if iris else None
+    serial_list = [s.strip() for s in serials.split(",")] if serials else None
+
+    try:
+        result = init_batch(
+            output_dir,
+            cell_type=cell_type,
+            count=count,
+            batch_id=batch_id,
+            lab=lab,
+            operator=operator,
+            project=project,
+            license=license,
+            cell_iris=cell_iris_list,
+            serial_numbers=serial_list,
+            overwrite=overwrite,
+        )
+    except (FileExistsError, ValueError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(f"Initialised batch: {result['output_dir']}")
+    typer.echo(f"  Cell type : {result['cell_type_name']}  ({result['cell_type_iri']})")
+    typer.echo(f"  Cells     : {result['count']}")
+    typer.echo()
+    for cell in result["cells"]:
+        iri_note = f"  [{cell['cell_iri']}]" if cell.get("cell_iri") else ""
+        typer.echo(f"  {cell['folder']}/  {iri_note}")
+    typer.echo()
+    typer.echo("Next steps:")
+    typer.echo("  1. Drop data files into each cell's  data/  sub-folder.")
+    typer.echo(f"  2. Run:  battinfo dataset process {output_dir}/<cell-folder>")
+
+
+@batch_app.command("add")
+def batch_add(
+    batch_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Existing batch directory."),
+    count: int = typer.Option(..., "--count", "-n", help="Number of additional cells to add."),
+    batch_id: str | None = typer.Option(None, "--batch-id", help="Override batch / lot ID for the new cells."),
+    lab: str | None = typer.Option(None, "--lab", help="Override lab name for the new cells."),
+    operator: str | None = typer.Option(None, "--operator", help="Override operator for the new cells."),
+    project: str | None = typer.Option(None, "--project", help="Override project for the new cells."),
+    license: str | None = typer.Option(None, "--license", help="Override SPDX licence for the new cells."),
+    iris: str | None = typer.Option(
+        None,
+        "--iris",
+        help="Comma-separated pre-assigned BattINFO cell IRIs for the new cells.",
+    ),
+    serials: str | None = typer.Option(
+        None,
+        "--serials",
+        help="Comma-separated serial numbers for the new cells.",
+    ),
+) -> None:
+    """Add more cells to an existing batch directory.
+
+    \b
+    Reads batch.yaml to inherit cell type, lab, operator, and project.
+    New cells are numbered after the existing ones.
+    Provide --batch-id / --operator / --project to override for the new cells.
+    Updates the count in batch.yaml automatically.
+    """
+    from battinfo.contribution import add_to_batch
+
+    cell_iris_list = [s.strip() for s in iris.split(",")] if iris else None
+    serial_list = [s.strip() for s in serials.split(",")] if serials else None
+
+    try:
+        result = add_to_batch(
+            batch_dir,
+            count,
+            batch_id=batch_id,
+            lab=lab,
+            operator=operator,
+            project=project,
+            license=license,
+            cell_iris=cell_iris_list,
+            serial_numbers=serial_list,
+        )
+    except (FileNotFoundError, FileExistsError, ValueError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(f"Added {result['added']} cell(s) to {result['batch_dir']}")
+    typer.echo(f"  Cell type  : {result['cell_type_name']}  ({result['cell_type_iri']})")
+    typer.echo(f"  New total  : {result['total_count']}")
+    typer.echo()
+    for cell in result["new_cells"]:
+        iri_note = f"  [{cell['cell_iri']}]" if cell.get("cell_iri") else ""
+        typer.echo(f"  {cell['folder']}/  {iri_note}")
+    typer.echo()
+    typer.echo("Next steps:")
+    typer.echo("  1. Drop data files into each new cell folder.")
+    typer.echo(f"  2. Run:  battinfo dataset process {batch_dir}")
+
+
+@batch_app.command("status")
+def batch_status(
+    batch_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Batch directory."),
+    json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
+) -> None:
+    """Show the current state of a batch at a glance.
+
+    Reports how many cells have data, how many are annotated, BDF conversion
+    status, and what to run next.
+    """
+    import re as _re
+
+    from rich.console import Console
+
+    from battinfo.contribution import (
+        BATCH_MANIFEST,
+        CONTRIBUTION_MANIFEST,
+        _collect_data_files,
+        _scan_data_files,
+        load_batch_manifest,
+    )
+
+    console = Console(highlight=False)
+
+    if not (batch_dir / BATCH_MANIFEST).exists():
+        msg = f"No {BATCH_MANIFEST} found. Is this a batch directory?"
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": msg}))
+        else:
+            console.print(f"[red]Error:[/red] {msg}")
+        raise typer.Exit(code=1)
+
+    manifest = load_batch_manifest(batch_dir)
+    cell_dirs = sorted(
+        d for d in batch_dir.iterdir()
+        if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
+    )
+    total = len(cell_dirs)
+
+    _DATE_RE = _re.compile(r"(?P<date>\d{4}-\d{2}-\d{2})")
+    has_data = sum(1 for d in cell_dirs if _scan_data_files(d))
+    needs_annotation = 0
+    bdf_pending = 0
+    for d in cell_dirs:
+        raw_files = _scan_data_files(d)
+        if not raw_files:
+            continue
+        if any(not _DATE_RE.search(f.name) for f in raw_files):
+            needs_annotation += 1
+        pairs = _collect_data_files(d)
+        if any(bdf is None for _, bdf in pairs):
+            bdf_pending += 1
+
+    staging_exists = (batch_dir / "staging").exists()
+
+    if has_data < total:
+        next_cmd = f"battinfo dataset process {batch_dir}"
+    elif needs_annotation > 0:
+        next_cmd = f"battinfo dataset process {batch_dir}"
+    elif not staging_exists:
+        next_cmd = f"battinfo batch package {batch_dir}"
+    else:
+        next_cmd = f"battinfo batch upload {batch_dir / 'staging'} --token $ZENODO_TOKEN --sandbox"
+
+    if json_output:
+        typer.echo(json.dumps({
+            "batch_dir": str(batch_dir),
+            "cell_type": manifest.get("cell_type_name", manifest.get("cell_type_iri")),
+            "total_cells": total,
+            "cells_with_data": has_data,
+            "needs_annotation": needs_annotation,
+            "bdf_pending": bdf_pending,
+            "staged": staging_exists,
+            "ok": True,
+            "ready": has_data == total and needs_annotation == 0 and staging_exists,
+            "next_command": next_cmd,
+        }))
+        return
+
+    def _status(ok: bool) -> str:
+        return "[green]ok[/green]" if ok else "[yellow]--[/yellow]"
+
+    console.print()
+    console.print(f"[bold]Batch:[/bold] {batch_dir.name}")
+    console.print(f"  Cell type  : {manifest.get('cell_type_name', manifest.get('cell_type_iri', '?'))}")
+    console.print(f"  Cells      : {total}")
+    console.print()
+    console.print(f"  Cells with data      : {has_data}/{total}  {_status(has_data == total)}")
+    console.print(f"  Need annotation      : {needs_annotation}/{total}  {_status(needs_annotation == 0)}")
+    console.print(f"  BDF conversion done  : {total - bdf_pending}/{total}  {_status(bdf_pending == 0)}")
+    console.print(f"  Package staged       : {'yes' if staging_exists else 'no'}  {_status(staging_exists)}")
+    console.print()
+    console.print(f"[bold]Next:[/bold]  {next_cmd}")
+    console.print()
+
+
+@batch_app.command("package")
+def batch_package(
+    batch_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Batch directory created by `batch init`."),
+    staging_dir: Path | None = typer.Option(None, "--staging", "-s", help="Output directory for the Zenodo package. Default: <batch-dir>/staging/."),
+    creator: list[str] | None = typer.Option(
+        None,
+        "--creator",
+        "-c",
+        help='Creator: "Family, Given; Affiliation". Repeat for multiple. Falls back to `battinfo config set creator`.',
+    ),
+    community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."),
+    no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
+    placeholder: str = typer.Option("ZENODO_RECORD_ID", "--placeholder", help="Placeholder token for Zenodo record ID in URLs."),
+    json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
+) -> None:
+    """Build a flat Zenodo upload package from a batch of cells.
+
+    \b
+    Discovers all cell sub-folders, collects raw data files, and produces:
+      staging/
+        battinfo.bundle.json    <- harvest ingestion target
+        battinfo.publish.jsonld <- full semantic graph
+        ro-crate-metadata.json  <- file inventory with placeholder URLs
+        dataset-001.csv         <- raw cycler files (canonical naming)
+        dataset-001.bdf.parquet <- BDF converted (if present)
+        ...
+
+    \b
+    After packaging, upload with:
+      battinfo batch upload <staging-dir> --token $ZENODO_TOKEN --sandbox
+    """
+    from battinfo.config import load_user_config, resolve_creators
+    from battinfo.contribution import package_batch
+
+    creators = resolve_creators(creator)
+    if not creators:
+        typer.echo(
+            "Error: no creator specified. Pass --creator or run:\n"
+            "  battinfo config set creator \"Family, Given; Institution\"",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    cfg = load_user_config()
+    effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
+
+    try:
+        result = package_batch(
+            batch_dir,
+            staging_dir,
+            creators=creators,
+            community=effective_community,
+            zenodo_record_id_placeholder=placeholder,
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": str(exc)}))
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    staging = result["staging_dir"]
+    if json_output:
+        typer.echo(json.dumps({
+            "ok": True,
+            "staging_dir": staging,
+            "cell_count": result["cell_count"],
+            "entry_count": result["entry_count"],
+            "file_count": len(result["staged_data_files"]),
+            "files": [Path(staging, f).name for f in result["staged_data_files"]],
+        }))
+        return
+
+    typer.echo(f"Package built: {staging}")
+    typer.echo(f"  Cells       : {result['cell_count']}")
+    typer.echo(f"  Datasets    : {result['entry_count']}")
+    typer.echo(f"  Data files  : {len(result['staged_data_files'])}")
+    typer.echo()
+    typer.echo("Files in staging directory:")
+    for fname in sorted(Path(staging).iterdir()):
+        typer.echo(f"  {fname.name}")
+    typer.echo()
+    typer.echo("Upload to Zenodo sandbox with:")
+    typer.echo(f"  battinfo batch upload {staging} --token $ZENODO_TOKEN --sandbox")
+
+
+@batch_app.command("upload")
+def batch_upload(
+    staging_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Staging directory produced by `batch package`."),
+    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN."),
+    sandbox: bool = typer.Option(False, "--sandbox", help="Use Zenodo sandbox (sandbox.zenodo.org)."),
+    community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."),
+    no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
+    creator: list[str] | None = typer.Option(
+        None,
+        "--creator",
+        "-c",
+        help='Creator: "Family, Given; Affiliation". Repeat for multiple. Falls back to `battinfo config set creator`.',
+    ),
+    publish: bool = typer.Option(False, "--publish", help="Publish immediately (default: leave as draft)."),
+    placeholder: str = typer.Option("ZENODO_RECORD_ID", "--placeholder", help="Placeholder token used in package."),
+    json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
+) -> None:
+    """Upload a staged Zenodo package to Zenodo (or sandbox).
+
+    \b
+    Workflow:
+      1. Creates an empty deposit to obtain the pre-reserved record ID.
+      2. Patches placeholder URLs in staged files with the real record ID.
+      3. Uploads all files to the deposit.
+      4. Sets metadata (title, keywords, community, creators).
+      5. Leaves as draft for review, or publishes if --publish is set.
+
+    \b
+    The deposit URL is printed at the end -- open it to review and publish.
+    """
+
+    from battinfo.config import load_user_config, resolve_creators, resolve_zenodo_token
+    from battinfo.zenodo import upload_zenodo_package
+
+    resolved_token = resolve_zenodo_token(token)
+    if not resolved_token:
+        typer.echo(
+            "Error: Zenodo token required. Pass --token, set ZENODO_API_TOKEN, or run:\n"
+            "  battinfo config set zenodo_token <token>",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    creators = resolve_creators(creator)
+    if not creators:
+        typer.echo(
+            "Error: no creator specified. Pass --creator or run:\n"
+            "  battinfo config set creator \"Family, Given; Institution\"",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    cfg = load_user_config()
+    effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
+
+    if not json_output:
+        target = "Zenodo Sandbox" if sandbox else "Zenodo"
+        typer.echo(f"Uploading to {target}...")
+
+    try:
+        result = upload_zenodo_package(
+            staging_dir,
+            creators,
+            token=resolved_token,
+            sandbox=sandbox,
+            community=effective_community,
+            publish=publish,
+            zenodo_record_id_placeholder=placeholder,
+        )
+    except Exception as exc:
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": str(exc)}))
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    if json_output:
+        typer.echo(json.dumps({
+            "ok": True,
+            "record_id": result.get("record_id"),
+            "doi": result.get("doi"),
+            "deposit_url": result.get("deposit_url"),
+            "files": len(result.get("uploaded_files", [])),
+            "published": result.get("published", False),
+        }))
+        return
+
+    typer.echo()
+    typer.echo("[OK] Deposit created.")
+    typer.echo(f"  Record ID  : {result['record_id']}")
+    typer.echo(f"  DOI        : {result['doi']}")
+    typer.echo(f"  Files      : {len(result['uploaded_files'])}")
+    typer.echo(f"  Published  : {'yes' if result['published'] else 'no (draft)'}")
+    typer.echo()
+    typer.echo("Review at:")
+    typer.echo(f"  {result['deposit_url']}")
+    if not result["published"]:
+        typer.echo()
+        typer.echo("The deposit is a draft. Review it on Zenodo before clicking Publish.")
+
+
+# ── Push (end-to-end single command) ──────────────────────────────────────────
+
+@app.command("push")
+def push(
+    folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True,
+                                  help="Folder containing raw data files or an existing batch."),
+    cell_type: str | None = typer.Option(None, "--cell-type", "-t",
+                                         help="Cell type, e.g. 'Energizer CR2032'. Required for unstructured folders."),
+    cells: int | None = typer.Option(None, "--cells", "-n",
+                                     help="Number of cells (auto-detected from filenames if omitted)."),
+    batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
+    lab: str | None = typer.Option(None, "--lab", help="Lab name."),
+    operator: str | None = typer.Option(None, "--operator", help="Operator name."),
+    creator: list[str] | None = typer.Option(None, "--creator", "-c",
+                                              help='Creator: "Family, Given; Affiliation". Falls back to config.'),
+    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Falls back to config / ZENODO_API_TOKEN."),
+    sandbox: bool = typer.Option(False, "--sandbox", help="Upload to sandbox.zenodo.org instead of production."),
+    community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: from config."),
+    no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Package only — do not upload."),
+    staging: Path | None = typer.Option(None, "--staging", help="Override staging directory."),
+    json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
+) -> None:
+    """Publish battery data to Zenodo in one command.
+
+    \b
+    Accepts three layouts:
+      battinfo push ./flat_files/    --cell-type "Energizer CR2032"   # groups by filename
+      battinfo push ./cell_folders/  --cell-type "Energizer CR2032"   # one subdir per cell
+      battinfo push ./my_batch/                                        # existing batch.yaml
+
+    \b
+    One-time setup:
+      battinfo config set creator "Family, Given; Institution"
+      battinfo config set zenodo_token <token>
+    """
+    from rich.console import Console
+
+    from battinfo.config import load_user_config, resolve_creators, resolve_zenodo_token
+    from battinfo.contribution import BATCH_MANIFEST, _group_files_by_cell, push_batch
+
+    console = Console(highlight=False)
+    cfg = load_user_config()
+
+    def _err(msg: str) -> None:
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": msg}))
+        else:
+            console.print(f"[red]Error:[/red] {msg}")
+        raise typer.Exit(code=1)
+
+    creators = resolve_creators(creator)
+    if not creators:
+        _err('no creator specified. Pass --creator or run: battinfo config set creator "Family, Given; Institution"')
+
+    resolved_token = resolve_zenodo_token(token)
+    if not dry_run and not resolved_token:
+        _err("Zenodo token required. Pass --token or run: battinfo config set zenodo_token <token>")
+
+    effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
+
+    # ── Preview (human mode only) ──────────────────────────────────────────────
+    is_batch = (folder / BATCH_MANIFEST).exists()
+    if not is_batch and not cell_type:
+        msg = "--cell-type is required for unstructured folders."
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": msg}))
+        else:
+            console.print(f"[red]Error:[/red] {msg}")
+        raise typer.Exit(code=1)
+
+    if not json_output:
+        console.print()
+        console.print(f"[bold]Push:[/bold] {folder}")
+        if cell_type:
+            console.print(f"  Cell type : {cell_type}")
+        if not is_batch:
+            groups = _group_files_by_cell(folder)
+            if groups:
+                file_count = sum(len(v) for v in groups.values())
+                console.print(f"  Cells     : {len(groups)} (detected from {file_count} file(s))")
+                for key, files in list(groups.items())[:4]:
+                    console.print(f"    Cell {key}: {', '.join(f.name for f in files[:3])}" +
+                                   ("..." if len(files) > 3 else ""))
+                if len(groups) > 4:
+                    console.print(f"    ... and {len(groups) - 4} more cells")
+        creator_str = ", ".join(c["name"] for c in creators)
+        console.print(f"  Creator(s): {creator_str}")
+        target = "Zenodo Sandbox" if sandbox else "Zenodo"
+        console.print(f"  Upload to : {'(dry run)' if dry_run else target}")
+        console.print()
+
+    # Skip confirm when --json, --yes, dry-run, or non-interactive (piped/agent)
+    import sys as _sys
+    non_interactive = json_output or yes or dry_run or not _sys.stdin.isatty()
+    if not non_interactive:
+        confirm = typer.confirm("Proceed?", default=False)
+        if not confirm:
+            console.print("Aborted.")
+            raise typer.Exit(code=0)
+
+    # ── Execute ────────────────────────────────────────────────────────────────
+    try:
+        result = push_batch(
+            folder,
+            cell_type=cell_type,
+            staging_dir=staging,
+            creators=creators,
+            zenodo_token=resolved_token,
+            sandbox=sandbox,
+            community=effective_community,
+            confirm=False,
+            dry_run=dry_run,
+            n_cells=cells,
+            batch_id=batch_id,
+            lab=lab,
+            operator=operator,
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": str(exc)}))
+        else:
+            console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    if json_output:
+        typer.echo(json.dumps({
+            "ok": True,
+            "status": result.get("status"),
+            "cells": result.get("cells"),
+            "files": result.get("files"),
+            "staging_dir": result.get("staging_dir"),
+            "zenodo_url": result.get("zenodo_url"),
+        }))
+        return
+
+    console.print(f"[green]Done.[/green]  {result['cells']} cell(s), {result['files']} dataset(s)")
+    console.print(f"  Staging : {result['staging_dir']}")
+    if result.get("zenodo_url"):
+        console.print(f"  Draft   : {result['zenodo_url']}")
+        console.print()
+        console.print("Review and publish at the URL above.")
+    elif dry_run:
+        console.print()
+        console.print("Dry run complete. Upload with:")
+        console.print(f"  battinfo batch upload {result['staging_dir']} --sandbox")
+    console.print()
+
+
+# ── Config commands ────────────────────────────────────────────────────────────
+
+@config_app.command("set")
+def config_set(
+    key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token."),
+    value: str = typer.Argument(..., help="Value to store."),
+) -> None:
+    """Set a user preference that is applied as the default across all commands.
+
+    \b
+    Examples:
+      battinfo config set creator "Clark, Simon; SINTEF"
+      battinfo config set creator "Clark, Simon; SINTEF | Smith, Jane; NTNU"
+      battinfo config set license CC-BY-4.0
+      battinfo config set community battinfo-reference
+    """
+    from battinfo.config import USER_CONFIG_PATH, set_user_config_value
+    try:
+        set_user_config_value(key, value)
+        typer.echo(f"Set {key} = {value!r}  (saved to {USER_CONFIG_PATH})")
+    except ValueError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+
+@config_app.command("show")
+def config_show() -> None:
+    """Show current user preferences."""
+    from battinfo.config import USER_CONFIG_PATH, load_user_config
+    cfg = load_user_config()
+    if not cfg:
+        typer.echo(f"No config file at {USER_CONFIG_PATH}")
+        typer.echo("Set defaults with: battinfo config set creator \"Family, Given; Institution\"")
+        return
+    typer.echo(f"Config file: {USER_CONFIG_PATH}")
+    typer.echo()
+    for k, v in sorted(cfg.items()):
+        typer.echo(f"  {k}: {v}")

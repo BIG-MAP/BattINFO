@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import sys
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+import battinfo.validate.jsonld as validate_jsonld_module
 from battinfo.validate import (
     DEFAULT_POLICY,
     INGEST_POLICY,
@@ -21,7 +22,6 @@ from battinfo.validate import (
     validate_publication_report,
     validate_references_report,
 )
-import battinfo.validate.jsonld as validate_jsonld_module
 
 
 def test_validate_json_report_exposes_structured_schema_issue() -> None:
@@ -272,7 +272,7 @@ def test_validate_references_report_detects_missing_reference(tmp_path: Path) ->
 
 
 def test_validate_references_report_detects_wrong_reference_type(tmp_path: Path) -> None:
-    datasets_dir = tmp_path / "datasets"
+    datasets_dir = tmp_path / "dataset"
     datasets_dir.mkdir(parents=True)
     dataset_path = datasets_dir / "dataset-87fr-c4vr-wfyh-21td.json"
     dataset_path.write_text(
@@ -311,3 +311,4 @@ def test_validate_references_report_detects_wrong_reference_type(tmp_path: Path)
     assert not report.ok
     assert report.errors[0].code == "reference.type_mismatch"
     assert report.errors[0].path == "cell_instance.type_id"
+

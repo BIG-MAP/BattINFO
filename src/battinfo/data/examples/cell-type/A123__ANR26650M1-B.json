@@ -34,7 +34,7 @@
         "confidence": 0.8
       }
     },
-    "min_capacity": {
+    "minimum_capacity": {
       "value": 2.4,
       "unit": "Ah",
       "raw": {
@@ -97,7 +97,7 @@
         "confidence": 0.8
       }
     },
-    "continuous_charging_current": {
+    "nominal_continuous_charging_current": {
       "value": 2.5,
       "unit": "A",
       "raw": {
@@ -106,7 +106,16 @@
         "confidence": 0.8
       }
     },
-    "pulse_discharging_current": {
+    "maximum_continuous_charging_current": {
+      "value": 2.5,
+      "unit": "A",
+      "raw": {
+        "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
+        "page": 1,
+        "confidence": 0.8
+      }
+    },
+    "maximum_continuous_discharging_current": {
       "value": 50.0,
       "unit": "A",
       "raw": {
@@ -115,7 +124,7 @@
         "confidence": 0.8
       }
     },
-    "discharging_temperature_min": {
+    "minimum_discharging_temperature": {
       "value": -30,
       "unit": "°C",
       "raw": {
@@ -124,7 +133,7 @@
         "confidence": 0.8
       }
     },
-    "discharging_temperature_max": {
+    "maximum_discharging_temperature": {
       "value": 55,
       "unit": "°C",
       "raw": {
@@ -133,7 +142,7 @@
         "confidence": 0.8
       }
     },
-    "storage_temperature_min": {
+    "minimum_storage_temperature": {
       "value": -40,
       "unit": "°C",
       "raw": {
@@ -142,7 +151,7 @@
         "confidence": 0.8
       }
     },
-    "storage_temperature_max": {
+    "maximum_storage_temperature": {
       "value": 60,
       "unit": "°C",
       "raw": {
@@ -169,3 +178,4 @@
     "retrieved_at": 1769585584
   }
 }
+

@@ -17,7 +17,7 @@ def _load_json(path: str) -> dict:
 
 
 def test_semantic_validation_accepts_canonical_cell_type_example() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert report.ok
     assert not report.errors
@@ -32,24 +32,32 @@ def test_semantic_validation_rejects_short_id_mismatch() -> None:
 
 
 def test_semantic_validation_rejects_unit_mismatch_for_specs() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
     doc["specs"]["nominal_capacity"]["unit"] = "V"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
 
 
+def test_semantic_validation_rejects_unit_mismatch_for_nominal_continuous_current_specs() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
+    doc["specs"]["nominal_continuous_charging_current"]["unit"] = "V"
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not report.ok
+    assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
+
+
 def test_semantic_validation_rejects_invalid_spec_range_ordering() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
-    doc["specs"]["storage_temperature_min"]["value"] = 70
-    doc["specs"]["storage_temperature_max"]["value"] = 60
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
+    doc["specs"]["minimum_storage_temperature"]["value"] = 70
+    doc["specs"]["maximum_storage_temperature"]["value"] = 60
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.range_invalid" for issue in report.errors)
 
 
 def test_semantic_validation_rejects_invalid_dataset_temporal_order_and_checksum() -> None:
-    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
     doc["dataset"]["dateModified"] = doc["dataset"]["dateCreated"] - 1
     doc["dataset"]["distribution"][0]["checksum"]["value"] = "xyz"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
@@ -60,22 +68,29 @@ def test_semantic_validation_rejects_invalid_dataset_temporal_order_and_checksum
 
 
 def test_semantic_validation_rejects_dataset_without_cell_link() -> None:
-    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
     doc["dataset"]["about"] = ["https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"]
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.errors)
 
 
+def test_semantic_validation_allows_dataset_with_cell_type_link_only() -> None:
+    doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["about"] = ["https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"]
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert report.ok
+
+
 def test_semantic_validation_allows_dataset_without_test_link_when_cell_is_present() -> None:
-    doc = _load_json("src/battinfo/data/examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
     doc["dataset"]["about"] = ["https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"]
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert report.ok
 
 
 def test_semantic_validation_warns_for_unmapped_controlled_value() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
     doc["product"]["chemistry"] = "VeryNewChem"
     report = validate_semantic_report(doc)
     assert report.ok
@@ -93,16 +108,17 @@ def test_semantic_validation_defaults_to_warning_mode_for_hard_rules() -> None:
 
 
 def test_semantic_validation_rejects_size_code_without_round_or_pouch_prefix() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
-    doc["product"]["sizeCode"] = "26650"
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
+    doc["product"]["size_code"] = "26650"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.size_code_invalid" for issue in report.errors)
 
 
 def test_semantic_validation_rejects_size_code_prefix_mismatch_for_format() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-types/A123__ANR26650M1-B.json")
-    doc["product"]["sizeCode"] = "P20/50/50"
+    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
+    doc["product"]["size_code"] = "P20/50/50"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.size_code_prefix_mismatch" for issue in report.errors)
+

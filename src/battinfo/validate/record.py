@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
+from battinfo.canonical_aliases import record_to_legacy_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationPolicy,
@@ -52,15 +53,16 @@ def validate_record_report(
     source_root: str | Path | None = None,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
+    normalized_doc = record_to_legacy_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     reports: list[ValidationReport] = []
-    resource_type = _resource_type(doc)
+    resource_type = _resource_type(normalized_doc)
 
     if resolved_policy.schema != "off":
-        schema_rel_path = _entity_schema_rel_path(doc)
+        schema_rel_path = _entity_schema_rel_path(normalized_doc)
         reports.append(
             validate_schema_data(
-                doc,
+                normalized_doc,
                 schema_for_rel_path(schema_rel_path),
                 resource_type=resource_type,
                 policy=resolved_policy,
@@ -68,10 +70,10 @@ def validate_record_report(
         )
 
     if source_root is not None and resolved_policy.references != "off":
-        reports.append(validate_references_report(doc, source_root, policy=resolved_policy))
+        reports.append(validate_references_report(normalized_doc, source_root, policy=resolved_policy))
 
     if resolved_policy.semantic != "off":
-        reports.append(validate_semantic_report(doc, policy=resolved_policy))
+        reports.append(validate_semantic_report(normalized_doc, policy=resolved_policy))
 
     return combine_reports(*reports, policy=resolved_policy)
 

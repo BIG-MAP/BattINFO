@@ -6,6 +6,7 @@ from functools import lru_cache
 from importlib import resources
 from typing import Any, Mapping
 
+from battinfo.canonical_aliases import record_to_legacy_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -17,6 +18,7 @@ from battinfo.validate.core import (
 
 SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
     "nominal_capacity": {"ah", "mah"},
+    "minimum_capacity": {"ah", "mah"},
     "min_capacity": {"ah", "mah"},
     "rated_capacity": {"ah", "mah"},
     "typical_energy": {"wh", "kwh", "mwh"},
@@ -34,8 +36,12 @@ SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
     "volume": {"l", "ml", "cm3", "cc", "mm3"},
     "pulse_charging_current": {"a", "ma", "c"},
     "continuous_charging_current": {"a", "ma", "c"},
+    "nominal_continuous_charging_current": {"a", "ma", "c"},
+    "maximum_continuous_charging_current": {"a", "ma", "c"},
     "pulse_discharging_current": {"a", "ma", "c"},
     "continuous_discharging_current": {"a", "ma", "c"},
+    "nominal_continuous_discharging_current": {"a", "ma", "c"},
+    "maximum_continuous_discharging_current": {"a", "ma", "c"},
     "charging_time": {"s", "sec", "second", "seconds", "min", "minute", "minutes", "h", "hr", "hour", "hours"},
     "cycle_life": {"count", "cycle", "cycles"},
     "diameter": {"mm", "cm", "m", "um", "μm"},
@@ -43,22 +49,33 @@ SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
     "width": {"mm", "cm", "m", "um", "μm"},
     "length": {"mm", "cm", "m", "um", "μm"},
     "thickness": {"mm", "cm", "m", "um", "μm"},
+    "minimum_charging_temperature": {"°c", "c", "degc", "k"},
+    "maximum_charging_temperature": {"°c", "c", "degc", "k"},
     "charging_temperature_min": {"°c", "c", "degc", "k"},
     "charging_temperature_max": {"°c", "c", "degc", "k"},
+    "minimum_discharging_temperature": {"°c", "c", "degc", "k"},
+    "maximum_discharging_temperature": {"°c", "c", "degc", "k"},
     "discharging_temperature_min": {"°c", "c", "degc", "k"},
     "discharging_temperature_max": {"°c", "c", "degc", "k"},
+    "minimum_storage_temperature": {"°c", "c", "degc", "k"},
+    "maximum_storage_temperature": {"°c", "c", "degc", "k"},
     "storage_temperature_min": {"°c", "c", "degc", "k"},
     "storage_temperature_max": {"°c", "c", "degc", "k"},
 }
 
 PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
+    ("minimum_charging_temperature", "maximum_charging_temperature"),
     ("charging_temperature_min", "charging_temperature_max"),
+    ("minimum_discharging_temperature", "maximum_discharging_temperature"),
     ("discharging_temperature_min", "discharging_temperature_max"),
+    ("minimum_storage_temperature", "maximum_storage_temperature"),
     ("storage_temperature_min", "storage_temperature_max"),
+    ("minimum_capacity", "nominal_capacity"),
     ("min_capacity", "nominal_capacity"),
 )
 
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
+CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/cell-type/"
 
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
     "cell-type": ("product", "cell_type"),
@@ -364,20 +381,24 @@ def _validate_dataset_semantics(
 ) -> None:
     about = dataset.get("about")
     related_entities = dataset.get("related_entities")
-    has_cell_link = False
+    has_battery_link = False
     if isinstance(about, list):
-        has_cell_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in about)
+        has_battery_link = any(
+            isinstance(item, str)
+            and (item.startswith(CELL_IRI_PREFIX) or item.startswith(CELL_TYPE_IRI_PREFIX))
+            for item in about
+        )
     elif isinstance(related_entities, Mapping):
         cell_ids = related_entities.get("cell_ids")
         if isinstance(cell_ids, list):
-            has_cell_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in cell_ids)
-    if not has_cell_link:
+            has_battery_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in cell_ids)
+    if not has_battery_link:
         _append_issue(
             issues,
             code="semantic.dataset_missing_cell_link",
             severity=issue_severity,
             path="dataset.about",
-            message="dataset must reference at least one BattINFO cell IRI.",
+            message="dataset must reference at least one BattINFO cell or cell_type IRI.",
             resource_type=resource_type,
         )
 
@@ -454,6 +475,7 @@ def validate_semantic_report(
     *,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
+    doc = record_to_legacy_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     if resolved_policy.semantic == "off":
         return ValidationReport(policy=resolved_policy)

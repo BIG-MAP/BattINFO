@@ -10,46 +10,44 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
-    CellSpecificationInput,
     CellInstanceInput,
+    CellSpecificationInput,
     CellTypeInput,
     DatasetInput,
-    TestProtocolInput,
     TestInput,
+    TestProtocolInput,
     build_cell_type_library_rdf,
-    build_index,
     build_curated_cell_type_submission,
+    build_index,
     create_cell_instance,
     index_stats,
-    publish_batch,
-    publish_curated_cell_type,
-    publish_record,
     promote_staging_cell_type,
+    publish_batch,
+    publish_record,
     query,
     query_cell_instances,
+    query_cell_types,
+    query_datasets,
     query_library_cell_types,
     query_test_protocols,
     query_tests,
-    query_cell_types,
-    query_datasets,
+    resolve_cell_type_id,
     save_batch,
     save_cell_instance,
     save_cell_type,
     save_dataset,
     save_library_cell_type,
-    save_test_protocol,
     save_record,
     save_test,
-    resolve_cell_type_id,
-    template_cell_specification,
+    save_test_protocol,
     template_cell_instance,
-    template_cell_type_draft,
+    template_cell_specification,
     template_cell_type,
+    template_cell_type_draft,
     template_dataset,
-    template_test_protocol_draft,
-    template_test_protocol,
     template_test,
-    submit_publication_package,
+    template_test_protocol,
+    template_test_protocol_draft,
     validate_staging_cell_type,
 )
 from battinfo.validate import validate_references_report
@@ -129,7 +127,7 @@ def test_shipped_example_chain_is_consistent() -> None:
         )
     )
     cell_type = json.loads(
-        (ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
+        (ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
     )
     cell_instance = json.loads(
         (ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(
@@ -140,7 +138,7 @@ def test_shipped_example_chain_is_consistent() -> None:
         (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
     )
     dataset = json.loads(
-        (ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(
+        (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(
             encoding="utf-8"
         )
     )
@@ -172,8 +170,8 @@ def test_template_cell_type_and_create_cell_instance(tmp_path: Path) -> None:
     )
     assert cell_type["product"]["id"] == "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
     assert cell_type["product"]["model"] == "ANR26650M1-B"
-    assert cell_type["product"]["iecCode"] == "IFpR26650"
-    assert cell_type["product"]["countryOfOrigin"] == "United States"
+    assert cell_type["product"]["iec_code"] == "IFpR26650"
+    assert cell_type["product"]["country_of_origin"] == "United States"
     assert cell_type["product"]["year"] == 2012
 
     out_path = tmp_path / "cell-instance.json"
@@ -204,7 +202,7 @@ def test_query_cell_types_exposes_iec_code(tmp_path: Path) -> None:
     )
     save_cell_type(record, source_root=tmp_path)
 
-    rows = query_cell_types(cell_types_dir=tmp_path / "cell-types")
+    rows = query_cell_types(cell_types_dir=tmp_path / "cell-type")
 
     assert len(rows) == 1
     assert rows[0]["iec_code"] == "IFpR26650"
@@ -279,7 +277,7 @@ def test_validate_staging_cell_type_accepts_single_file_authoring_draft(tmp_path
     payload = validate_staging_cell_type(draft_path, validation_policy="strict")
 
     assert payload["ok"] is True
-    assert payload["record_id"] == "google-g20m7-2025"
+    assert payload["record_id"] == "google--g20m7--2025"
     assert payload["record_id_basis"] == "year"
     assert payload["requires_record_id"] is False
     assert payload["record"]["product"]["model"] == "G20M7"
@@ -312,14 +310,14 @@ def test_promote_staging_cell_type_writes_curated_record_json(tmp_path: Path) ->
 
     payload = promote_staging_cell_type(
         draft_path,
-        curated_root=tmp_path / "records" / "cell-types",
+        curated_root=tmp_path / "records" / "cell-type",
         validation_policy="strict",
     )
 
     target_path = Path(payload["target_path"])
-    assert payload["record_id"] == "sunwoda-bm68-2024"
+    assert payload["record_id"] == "sunwoda--bm68--2024"
     assert payload["record_id_basis"] == "year"
-    assert target_path == tmp_path / "records" / "cell-types" / "sunwoda-bm68-2024" / "record.json"
+    assert target_path == tmp_path / "records" / "cell-type" / "sunwoda--bm68--2024" / "record.json"
     assert target_path.exists()
 
     record = json.loads(target_path.read_text(encoding="utf-8"))
@@ -350,8 +348,8 @@ def test_promote_staging_cell_type_reuses_existing_curated_identifier(tmp_path: 
         encoding="utf-8",
     )
 
-    curated_root = tmp_path / "records" / "cell-types"
-    target_path = curated_root / "google-g20m7-2025" / "record.json"
+    curated_root = tmp_path / "records" / "cell-type"
+    target_path = curated_root / "google--g20m7--2025" / "record.json"
     target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_text(
         json.dumps(
@@ -425,7 +423,7 @@ def test_validate_staging_cell_type_uses_revision_when_year_missing(tmp_path: Pa
 
     payload = validate_staging_cell_type(draft_path, validation_policy="strict")
 
-    assert payload["record_id"] == "google-g20m7-sd12"
+    assert payload["record_id"] == "google--g20m7--sd12"
     assert payload["record_id_basis"] == "revision"
     assert payload["requires_record_id"] is False
 
@@ -451,7 +449,7 @@ def test_validate_staging_cell_type_uses_evidence_date_when_year_and_revision_mi
 
     payload = validate_staging_cell_type(draft_path, validation_policy="strict")
 
-    assert payload["record_id"] == "google-g20m7-20260320"
+    assert payload["record_id"] == "google--g20m7--20260320"
     assert payload["record_id_basis"] == "evidence_date"
     assert payload["requires_record_id"] is False
 
@@ -478,12 +476,12 @@ def test_promote_staging_cell_type_requires_explicit_record_id_when_ambiguous(tm
     payload = validate_staging_cell_type(draft_path, validation_policy="strict")
     assert payload["record_id"] is None
     assert payload["requires_record_id"] is True
-    assert payload["record_id_hint"] == "energizer-cr2032-<year-or-revision>"
+    assert payload["record_id_hint"] == "energizer--cr2032--<year-or-revision>"
 
     with pytest.raises(ValueError, match="Provide --record-id explicitly"):
         promote_staging_cell_type(
             draft_path,
-            curated_root=tmp_path / "records" / "cell-types",
+            curated_root=tmp_path / "records" / "cell-type",
             validation_policy="strict",
         )
 
@@ -512,7 +510,7 @@ def test_save_cell_type_accepts_label_source_type(tmp_path: Path) -> None:
 
 
 def test_build_curated_cell_type_submission_infers_source_local_id_from_record_directory(tmp_path: Path) -> None:
-    record_dir = tmp_path / "records" / "cell-types" / "google-g20m7-2025"
+    record_dir = tmp_path / "records" / "cell-type" / "google--g20m7--2025"
     record_dir.mkdir(parents=True, exist_ok=True)
     record_path = record_dir / "record.json"
     record_path.write_text(
@@ -541,7 +539,7 @@ def test_build_curated_cell_type_submission_infers_source_local_id_from_record_d
                 },
                 "provenance": {
                     "source_type": "label",
-                    "source_file": "google-g20m7-2025.json",
+                    "source_file": "google--g20m7--2025.json",
                     "retrieved_at": 1771804800,
                 },
                 "notes": ["Curated cell type record."],
@@ -553,20 +551,52 @@ def test_build_curated_cell_type_submission_infers_source_local_id_from_record_d
 
     payload = build_curated_cell_type_submission(
         record_path,
-        project_id="battinfo-records-cell-types",
+        workspace_id="battinfo-records-cell-type",
         publisher_id="demo-editorial",
         source_version="demo-2026-03-20",
         validation_policy="strict",
     )
 
     assert payload["submission_mode"] == "resource"
-    assert payload["project_id"] == "battinfo-records-cell-types"
+    assert payload["workspace_id"] == "battinfo-records-cell-type"
     assert payload["publisher_id"] == "demo-editorial"
     assert payload["source_version"] == "demo-2026-03-20"
     assert payload["resource"]["resource_type"] == "cell_type"
-    assert payload["resource"]["source_local_id"] == "google-g20m7-2025"
+    assert payload["resource"]["source_local_id"] == "google--g20m7--2025"
+    assert "metadata" not in payload["resource"]["semantic_payload"]
     assert payload["resource"]["semantic_payload"]["battinfo_records"]["cell_type"]["product"]["model"] == "G20M7"
-    assert payload["workspace"]["editorial"]["record_id"] == "google-g20m7-2025"
+    assert payload["workspace"]["editorial"]["record_id"] == "google--g20m7--2025"
+
+
+def test_promote_staging_cell_type_preserves_double_hyphen_record_id(tmp_path: Path) -> None:
+    draft_path = tmp_path / "staging" / "LG__JP3.json"
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.write_text(
+        json.dumps(
+            {
+                "manufacturer": "LG",
+                "model": "JP3",
+                "format": "pouch",
+                "chemistry": "Li-ion",
+                "positive_electrode_basis": "NMC",
+                "negative_electrode_basis": "graphite",
+                "specs": {"nominal_voltage": {"value": 3.68, "unit": "V"}},
+                "provenance": {"source_type": "datasheet", "source_file": "LG__JP3.pdf"},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = promote_staging_cell_type(
+        draft_path,
+        curated_root=tmp_path / "records" / "cell-type",
+        record_id="lg--jp3",
+        validation_policy="strict",
+    )
+
+    assert payload["record_id"] == "lg--jp3"
+    assert Path(payload["target_path"]) == tmp_path / "records" / "cell-type" / "lg--jp3" / "record.json"
 
 
 def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> None:
@@ -723,10 +753,10 @@ def test_publish_record_dataset_jsonld_preserves_rich_metadata(tmp_path: Path) -
 def test_publish_batch_summary(tmp_path: Path) -> None:
     summary = publish_batch(
         source_dirs=[
-            ROOT / "examples" / "cell-types",
+            ROOT / "examples" / "cell-type",
             ROOT / "examples" / "cell-instances",
             ROOT / "examples" / "tests",
-            ROOT / "examples" / "datasets",
+            ROOT / "examples" / "dataset",
         ],
         target_root=tmp_path,
     )
@@ -926,7 +956,7 @@ def test_save_record_dry_run(tmp_path: Path) -> None:
         dry_run=True,
     )
     assert dry_run_payload["status"] == "dry-run"
-    assert not (source_root / "datasets" / "dataset-87fr-c4vr-wfyh-21td.json").exists()
+    assert not (source_root / "dataset" / "dataset-87fr-c4vr-wfyh-21td.json").exists()
 
 
 def test_save_record_rejects_invalid_dataset_url_format(tmp_path: Path) -> None:
@@ -1012,10 +1042,10 @@ def test_save_cell_instance_rejects_reference_with_wrong_record_type(tmp_path: P
 def test_save_batch_summary_and_partial(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
-    cell_types_dir = batch_root / "cell-types"
+    cell_types_dir = batch_root / "cell-type"
     cell_instances_dir = batch_root / "cell-instances"
     tests_dir = batch_root / "tests"
-    datasets_dir = batch_root / "datasets"
+    datasets_dir = batch_root / "dataset"
     cell_types_dir.mkdir(parents=True)
     cell_instances_dir.mkdir(parents=True)
     tests_dir.mkdir(parents=True)
@@ -1095,17 +1125,17 @@ def test_save_batch_summary_and_partial(tmp_path: Path) -> None:
 def test_save_batch_handles_circular_linked_examples_as_a_set(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
-    cell_types_dir = batch_root / "cell-types"
+    cell_types_dir = batch_root / "cell-type"
     cell_instances_dir = batch_root / "cell-instances"
     tests_dir = batch_root / "tests"
-    datasets_dir = batch_root / "datasets"
+    datasets_dir = batch_root / "dataset"
     cell_types_dir.mkdir(parents=True)
     cell_instances_dir.mkdir(parents=True)
     tests_dir.mkdir(parents=True)
     datasets_dir.mkdir(parents=True)
 
     (cell_types_dir / "A123__ANR26650M1-B.json").write_text(
-        (ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"),
+        (ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (cell_instances_dir / "cell-3m6k-9t2p-7x4h-9nq8.json").write_text(
@@ -1113,7 +1143,7 @@ def test_save_batch_handles_circular_linked_examples_as_a_set(tmp_path: Path) ->
         encoding="utf-8",
     )
     (datasets_dir / "dataset-1f8r-6v2k-9p4m-3t7x.json").write_text(
-        (ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8"),
+        (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     for path in sorted((ROOT / "examples" / "tests").glob("*.json")):
@@ -1179,11 +1209,11 @@ def test_template_builders_are_saveable(tmp_path: Path) -> None:
 
 
 def test_save_query_and_build_library_cell_type(tmp_path: Path) -> None:
-    library_root = tmp_path / "library" / "cell-types"
-    packaged_root = tmp_path / "package" / "cell-types"
-    rdf_root = tmp_path / "library-rdf" / "cell-types"
-    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-types.jsonld"
-    manifest_json = tmp_path / "library-rdf" / "cell-types.index.json"
+    library_root = tmp_path / "library" / "cell-type"
+    packaged_root = tmp_path / "package" / "cell-type"
+    rdf_root = tmp_path / "library-rdf" / "cell-type"
+    aggregate_jsonld = tmp_path / "ontology" / "library" / "cell-type.jsonld"
+    manifest_json = tmp_path / "library-rdf" / "cell-type.index.json"
 
     payload = save_library_cell_type(
         CellSpecificationInput(
@@ -1259,8 +1289,8 @@ def test_save_query_and_build_library_cell_type(tmp_path: Path) -> None:
 
 
 def test_template_cell_specification_is_saveable(tmp_path: Path) -> None:
-    library_root = tmp_path / "library" / "cell-types"
-    packaged_root = tmp_path / "package" / "cell-types"
+    library_root = tmp_path / "library" / "cell-type"
+    packaged_root = tmp_path / "package" / "cell-type"
 
     record = template_cell_specification(
         manufacturer="Energizer",
@@ -1282,8 +1312,8 @@ def test_template_cell_specification_is_saveable(tmp_path: Path) -> None:
 
 
 def test_save_library_cell_type_persists_construction_metadata(tmp_path: Path) -> None:
-    library_root = tmp_path / "library" / "cell-types"
-    packaged_root = tmp_path / "package" / "cell-types"
+    library_root = tmp_path / "library" / "cell-type"
+    packaged_root = tmp_path / "package" / "cell-type"
 
     payload = save_library_cell_type(
         CellSpecificationInput(
@@ -1311,5 +1341,8 @@ def test_save_library_cell_type_persists_construction_metadata(tmp_path: Path) -
 
     rows = query_library_cell_types(directory=library_root)
     assert rows[0]["construction"]["assembly_type"] == "stacked"
+
+
+
 
 

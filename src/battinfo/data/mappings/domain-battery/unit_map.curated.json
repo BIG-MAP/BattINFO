@@ -1,8 +1,321 @@
 {
-  "version": "0.1.0-draft",
-  "status": "draft",
+  "version": "0.4.0",
+  "status": "review",
   "notes": [
-    "Packaged copy of curated unit mapping table."
+    "Curated unit mappings promoted from decisions in interactive review.",
+    "These entries are treated as authoritative for JSON->RDF conversion.",
+    "IRIs verified against EMMO 1.0.x and domain-battery 0.18.7 context.",
+    "All candidates with confidence 1.0 promoted. MANUAL_UNIT_TYPES entries consolidated here.",
+    "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core)."
   ],
-  "mappings": []
+  "mappings": [
+    {
+      "symbol": "Ah",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#AmpereHour",
+      "unit_qname": "emmo:AmpereHour",
+      "unit_pref_label": "AmpereHour",
+      "unit_label": "AmpereHour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mAh",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliAmpereHour",
+      "unit_qname": "emmo:MilliAmpereHour",
+      "unit_pref_label": "MilliAmpereHour",
+      "unit_label": "MilliAmpereHour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "V",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Volt",
+      "unit_qname": "emmo:Volt",
+      "unit_pref_label": "Volt",
+      "unit_label": "Volt",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mV",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliVolt",
+      "unit_qname": "emmo:MilliVolt",
+      "unit_pref_label": "MilliVolt",
+      "unit_label": "MilliVolt",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "A",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Ampere",
+      "unit_qname": "emmo:Ampere",
+      "unit_pref_label": "Ampere",
+      "unit_label": "Ampere",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mA",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliAmpere",
+      "unit_qname": "emmo:MilliAmpere",
+      "unit_pref_label": "MilliAmpere",
+      "unit_label": "MilliAmpere",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "W",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Watt",
+      "unit_qname": "emmo:Watt",
+      "unit_pref_label": "Watt",
+      "unit_label": "Watt",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Wh",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#WattHour",
+      "unit_qname": "emmo:WattHour",
+      "unit_pref_label": "WattHour",
+      "unit_label": "WattHour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "kWh",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#KiloWattHour",
+      "unit_qname": "emmo:KiloWattHour",
+      "unit_pref_label": "KiloWattHour",
+      "unit_label": "KiloWattHour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Ω",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Ohm",
+      "unit_qname": "emmo:Ohm",
+      "unit_pref_label": "Ohm",
+      "unit_label": "Ohm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mΩ",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliOhm",
+      "unit_qname": "emmo:MilliOhm",
+      "unit_pref_label": "MilliOhm",
+      "unit_label": "MilliOhm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "°C",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+      "unit_qname": "emmo:CelsiusTemperature",
+      "unit_pref_label": "CelsiusTemperature",
+      "unit_label": "C",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "degC",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+      "unit_qname": "emmo:CelsiusTemperature",
+      "unit_pref_label": "CelsiusTemperature",
+      "unit_label": "C",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "K",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Kelvin",
+      "unit_qname": "emmo:Kelvin",
+      "unit_pref_label": "Kelvin",
+      "unit_label": "Kelvin",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "g",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Gram",
+      "unit_qname": "emmo:Gram",
+      "unit_pref_label": "Gram",
+      "unit_label": "Gram",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "kg",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Kilogram",
+      "unit_qname": "emmo:Kilogram",
+      "unit_pref_label": "Kilogram",
+      "unit_label": "Kilogram",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mm",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliMetre",
+      "unit_qname": "emmo:MilliMetre",
+      "unit_pref_label": "MilliMetre",
+      "unit_label": "MilliMetre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "cm",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#CentiMetre",
+      "unit_qname": "emmo:CentiMetre",
+      "unit_pref_label": "CentiMetre",
+      "unit_label": "CentiMetre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "m",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Metre",
+      "unit_qname": "emmo:Metre",
+      "unit_pref_label": "Metre",
+      "unit_label": "Metre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "L",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Litre",
+      "unit_qname": "emmo:Litre",
+      "unit_pref_label": "Litre",
+      "unit_label": "Litre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mL",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliLitre",
+      "unit_qname": "emmo:MilliLitre",
+      "unit_pref_label": "MilliLitre",
+      "unit_label": "MilliLitre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "count",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "unit_qname": "emmo:UnitOne",
+      "unit_pref_label": "UnitOne",
+      "unit_label": "UnitOne",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "h",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Hour",
+      "unit_qname": "emmo:Hour",
+      "unit_pref_label": "Hour",
+      "unit_label": "Hour",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "min",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Minute",
+      "unit_qname": "emmo:Minute",
+      "unit_pref_label": "Minute",
+      "unit_label": "Minute",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "s",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Second",
+      "unit_qname": "emmo:Second",
+      "unit_pref_label": "Second",
+      "unit_label": "Second",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Wh/kg",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#WattHourPerKilogram",
+      "unit_qname": "emmo:WattHourPerKilogram",
+      "unit_pref_label": "WattHourPerKilogram",
+      "unit_label": "WattHourPerKilogram",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Wh/L",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#WattHourPerLitre",
+      "unit_qname": "emmo:WattHourPerLitre",
+      "unit_pref_label": "WattHourPerLitre",
+      "unit_label": "WattHourPerLitre",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "W/kg",
+      "status": "curated",
+      "unit_iri": "http://qudt.org/vocab/unit/W-PER-KiloGM",
+      "unit_qname": "qudt:W-PER-KiloGM",
+      "unit_pref_label": "WattPerKilogram",
+      "unit_label": "W/kg",
+      "confidence": 1.0,
+      "notes": "Not defined in EMMO core; QUDT IRI used as authoritative fallback."
+    },
+    {
+      "symbol": "%",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
+      "unit_qname": "electrochemistry:WeightPercent",
+      "unit_pref_label": "WeightPercent",
+      "unit_label": "wt%",
+      "confidence": 1.0,
+      "note": "Fraction quantities (MassFraction, VolumeFraction, Porosity) use UnitOne with value converted to [0,1]. This entry is retained for other percent quantities."
+    },
+    {
+      "symbol": "vol%",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
+      "unit_qname": "electrochemistry:VolumePercent",
+      "unit_pref_label": "VolumePercent",
+      "unit_label": "vol%",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "µm",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MicroMetre",
+      "unit_qname": "emmo:MicroMetre",
+      "unit_pref_label": "MicroMetre",
+      "unit_label": "µm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mg/cm2",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre",
+      "unit_qname": "emmo:MilliGramPerSquareCentiMetre",
+      "unit_pref_label": "MilliGramPerSquareCentiMetre",
+      "unit_label": "mg/cm²",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "g/cm3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#GramPerCubicCentiMetre",
+      "unit_qname": "emmo:GramPerCubicCentiMetre",
+      "unit_pref_label": "GramPerCubicCentiMetre",
+      "unit_label": "g/cm³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mol/L",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MolePerLitre",
+      "unit_qname": "emmo:MolePerLitre",
+      "unit_pref_label": "MolePerLitre",
+      "unit_label": "mol/L",
+      "confidence": 1.0
+    }
+  ]
 }

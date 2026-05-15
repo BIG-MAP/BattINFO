@@ -1,0 +1,432 @@
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org",
+      "emmo": "https://w3id.org/emmo#",
+      "unit": "https://qudt.org/vocab/unit/",
+      "rdfs": "https://www.w3.org/TR/rdf-schema/#ch_comment"
+    }
+  ],
+  "@type": "CoinCell",
+  "schema:version": "1.1.12",
+  "schema:productID": "Empa-bco-000007",
+  "schema:dateCreated": "16/6/2024",
+  "schema:creator": {
+    "@type": "schema:Person",
+    "@id": "https://orcid.org/0000-0002-5003-1134",
+    "schema:name": "Corsin Battaglia"
+  },
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "@id": "https://www.wikidata.org/wiki/Q683116",
+    "schema:name": "Empa"
+  },
+  "rdfs:comment": [
+    "BattINFO Converter version: 2.2.4",
+    "Project: Battery2030+/PREMISE",
+    "Cell assembly sequence: CellCan, NegativeElectrode, Separator, 100.0 uL Electrolyte, PositiveElectrode, 1.0 mm Spacer, Spring, CellLid"
+  ],
+  "hasPositiveElectrode": {
+    "@type": "Electrode",
+    "hasCurrentCollector": {
+      "@type": [
+        "CurrentCollector",
+        "Aluminium"
+      ],
+      "hasMeasuredProperty": {
+        "@type": "Thickness",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 15
+        },
+        "hasMeasurementUnit": "emmo:MicroMetre"
+      }
+    },
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": "LithiumNickelManganeseCobaltOxide",
+        "hasMeasuredProperty": [
+          {
+            "@type": "molecularFormula",
+            "hasStringValue": "LiNi0.6Mn0.2Co0.2"
+          },
+          {
+            "@type": "MassFraction",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 96
+            },
+            "hasMeasurementUnit": "unit:PERCENT"
+          },
+          {
+            "@type": "MassLoading",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 6.6
+            },
+            "hasMeasurementUnit": "unit:MilliGM-PER-CentiM2"
+          },
+          {
+            "@type": "D50ParticleSize",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 8
+            },
+            "hasMeasurementUnit": "emmo:MicroMetre"
+          }
+        ]
+      },
+      "hasBinder": {
+        "@type": [
+          "Binder",
+          "PolyvinylideneFluoride"
+        ],
+        "hasMeasuredProperty": {
+          "@type": "MassFraction",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 2
+          },
+          "hasMeasurementUnit": "unit:PERCENT"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "ConductiveAdditive",
+          "CarbonBlack"
+        ],
+        "hasMeasuredProperty": {
+          "@type": "MassFraction",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 2
+          },
+          "hasMeasurementUnit": "unit:PERCENT"
+        }
+      },
+      "hasMeasuredProperty": [
+        {
+          "@type": "CalenderedCoatingThickness",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 16
+          },
+          "hasMeasurementUnit": "emmo:MicroMetre"
+        },
+        {
+          "@type": "Porosity",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 35
+          },
+          "hasMeasurementUnit": "unit:PERCENT"
+        }
+      ]
+    },
+    "hasMeasuredProperty": {
+      "@type": "Diameter",
+      "hasNumericalPart": {
+        "@type": "emmo:RealData",
+        "hasNumberValue": 15
+      },
+      "hasMeasurementUnit": "unit:MilliM"
+    }
+  },
+  "hasNegativeElectrode": {
+    "@type": "Electrode",
+    "hasCurrentCollector": {
+      "@type": [
+        "CurrentCollector",
+        "Copper"
+      ],
+      "hasMeasuredProperty": {
+        "@type": "Thickness",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 14
+        },
+        "hasMeasurementUnit": "emmo:MicroMetre"
+      }
+    },
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": "Graphite",
+        "hasMeasuredProperty": [
+          {
+            "@type": "MassFraction",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 95
+            },
+            "hasMeasurementUnit": "unit:PERCENT"
+          },
+          {
+            "@type": "MassLoading",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 3.4
+            },
+            "hasMeasurementUnit": "unit:MilliGM-PER-CentiM2"
+          }
+        ]
+      },
+      "hasBinder": {
+        "@type": [
+          "Binder",
+          "PolyvinylideneFluoride"
+        ],
+        "hasMeasuredProperty": {
+          "@type": "MassFraction",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 3
+          },
+          "hasMeasurementUnit": "unit:PERCENT"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "ConductiveAdditive",
+          "CarbonBlack"
+        ],
+        "hasMeasuredProperty": {
+          "@type": "MassFraction",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 2
+          },
+          "hasMeasurementUnit": "unit:PERCENT"
+        }
+      },
+      "hasMeasuredProperty": [
+        {
+          "@type": "CalenderedCoatingThickness",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 20
+          },
+          "hasMeasurementUnit": "emmo:MicroMetre"
+        },
+        {
+          "@type": "Porosity",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 34
+          },
+          "hasMeasurementUnit": "unit:PERCENT"
+        }
+      ]
+    },
+    "hasMeasuredProperty": {
+      "@type": "Diameter",
+      "hasNumericalPart": {
+        "@type": "emmo:RealData",
+        "hasNumberValue": 16
+      },
+      "hasMeasurementUnit": "unit:MilliM"
+    }
+  },
+  "hasElectrolyte": {
+    "@type": "OrganicElectrolyte",
+    "hasSolvent": {
+      "@type": "Solvent",
+      "hasConstituent": [
+        {
+          "@type": "EthyleneCarbonate",
+          "hasMeasuredProperty": {
+            "@type": "VolumeFraction",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 30
+            },
+            "hasMeasurementUnit": "unit:PERCENT"
+          }
+        },
+        {
+          "@type": "EthylMethylCarbonate",
+          "hasMeasuredProperty": {
+            "@type": "VolumeFraction",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 70
+            },
+            "hasMeasurementUnit": "unit:PERCENT"
+          }
+        }
+      ]
+    },
+    "hasSolute": {
+      "@type": "Solute",
+      "hasConstituent": [
+        {
+          "@type": "LithiumHexafluorophosphate",
+          "hasMeasuredProperty": {
+            "@type": "AmountConcentration",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 1
+            },
+            "hasMeasurementUnit": "unit:MOL-PER-L"
+          }
+        },
+        {
+          "@type": "LithiumBisfluorosulfonylimide",
+          "hasMeasuredProperty": {
+            "@type": "AmountConcentration",
+            "hasNumericalPart": {
+              "@type": "emmo:RealData",
+              "hasNumberValue": 0
+            },
+            "hasMeasurementUnit": "unit:MOL-PER-L"
+          }
+        }
+      ],
+      "hasAdditive": {
+        "@type": "Additive",
+        "hasConstituent": [
+          {
+            "@type": "VinyleneCarbonate",
+            "hasMeasuredProperty": {
+              "@type": "AmountConcentration",
+              "hasNumericalPart": {
+                "@type": "emmo:RealData",
+                "hasNumberValue": 0.16
+              },
+              "hasMeasurementUnit": "unit:MOL-PER-L"
+            }
+          }
+        ]
+      }
+    },
+    "hasMeasuredProperty": [
+      {
+        "@type": "ElectrolyticConductivity",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 8
+        },
+        "hasMeasurementUnit": "unit:MilliS-PER-CentiM"
+      },
+      {
+        "@type": "DynamicViscosity",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 3
+        },
+        "hasMeasurementUnit": "unit:MilliPA-SEC"
+      },
+      {
+        "@type": "Density",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 1.3
+        },
+        "hasMeasurementUnit": "emmo:GramPerCubicCentiMetre"
+      },
+      {
+        "@type": "CelsiusTemperature",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 25
+        },
+        "hasMeasurementUnit": "emmo:CelsiusTemperature"
+      },
+      {
+        "@type": "Volume",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 100
+        },
+        "hasMeasurementUnit": "unit:MicroL"
+      }
+    ]
+  },
+  "hasSeparator": {
+    "@type": [
+      "Separator",
+      "Polypropylene"
+    ],
+    "hasMeasuredProperty": [
+      {
+        "@type": "Thickness",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 25
+        },
+        "hasMeasurementUnit": "emmo:MicroMetre"
+      },
+      {
+        "@type": "Porosity",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 55
+        },
+        "hasMeasurementUnit": "unit:PERCENT"
+      },
+      {
+        "@type": "Diameter",
+        "hasNumericalPart": {
+          "@type": "emmo:RealData",
+          "hasNumberValue": 16
+        },
+        "hasMeasurementUnit": "unit:MilliM"
+      }
+    ]
+  },
+  "hasCase": {
+    "@type": [
+      "R2032",
+      "StainlessSteel"
+    ],
+    "schema:productID": {
+      "rdfs:comment": "2032, SUS316L"
+    }
+  },
+  "hasConstituent": [
+    {
+      "@type": "Spring",
+      "hasMeasuredProperty": [
+        {
+          "@type": "Diameter",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 15
+          },
+          "hasMeasurementUnit": "unit:MilliM"
+        },
+        {
+          "@type": "Thickness",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 1.4
+          },
+          "hasMeasurementUnit": "unit:MilliM"
+        }
+      ]
+    },
+    {
+      "@type": "Spacer",
+      "hasMeasuredProperty": [
+        {
+          "@type": "Diameter",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 16
+          },
+          "hasMeasurementUnit": "unit:MilliM"
+        },
+        {
+          "@type": "Thickness",
+          "hasNumericalPart": {
+            "@type": "emmo:RealData",
+            "hasNumberValue": 1.0
+          },
+          "hasMeasurementUnit": "unit:MilliM"
+        }
+      ]
+    }
+  ]
+}

@@ -94,7 +94,7 @@ Primary files:
 - `examples/cell-descriptors/a123-anr26650m1-b.example.json`
 - `examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json`
 - `examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
-- `examples/datasets/dataset-1f8r-6v2k-9p4m-3t7x.json`
+- `examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json`
 - `tests/test_alpha_workflow.py`
 - `tests/test_api.py`
 
@@ -211,7 +211,7 @@ Acceptance criteria:
 Primary files:
 - `examples/cell-descriptors/`
 - `src/battinfo/data/examples/cell-descriptors/`
-- `.battinfo/library/cell-types/`
+- `.battinfo/library/cell-type/`
 - `tests/test_battery_descriptor_contract.py`
 - `tests/test_mapping.py`
 
@@ -239,7 +239,7 @@ Acceptance criteria:
 - users can query from either side of the cell/test/dataset chain
 
 Primary files:
-- `examples/datasets/`
+- `examples/dataset/`
 - `src/battinfo/api.py`
 - `src/battinfo/cli.py`
 - `docs/instance-test-dataset-workflow.md`
@@ -347,6 +347,7 @@ BattINFO is ready for the stated alpha scope when:
 - linked datasets are validated and queryable through the cell/test chain
 - a clean environment can install, validate, publish, index, and query the supported cases
 - the dedicated alpha acceptance suite passes
+
 
 
 

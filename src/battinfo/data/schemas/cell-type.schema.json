@@ -152,6 +152,11 @@
             }
           ]
         },
+        "productType": {
+          "type": "string",
+          "enum": ["commercial", "research", "prototype"],
+          "description": "Whether this cell type is a commercial product, a research cell, or a prototype."
+        },
         "cellFormat": {
           "type": "string",
           "enum": [

@@ -9,6 +9,8 @@ from typing import Any, ClassVar, Mapping, Self
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+
 PathLike = str | Path
 
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
@@ -18,6 +20,7 @@ CELL_INSTANCE_FILENAME = "cell-instance.json"
 TEST_PROTOCOL_FILENAME = "test-protocol.json"
 TEST_FILENAME = "test.json"
 DATASET_FILENAME = "dataset.json"
+ZENODO_CELL_RECORD_FILENAME = "battinfo.bundle.json"
 OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
 RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 
@@ -37,12 +40,18 @@ class BatteryTestType(StrEnum):
     OTHER = "other"
 
 
+class CellProductType(StrEnum):
+    COMMERCIAL = "commercial"
+    RESEARCH = "research"
+    PROTOTYPE = "prototype"
+
+
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
@@ -182,6 +191,8 @@ def _property_key_from_type(value: Any) -> str | None:
     else:
         types = []
     for type_name in types:
+        if ":" in type_name:
+            type_name = type_name.rsplit(":", 1)[-1]
         if type_name == "Diameter":
             return "diameter"
         if type_name == "Height":
@@ -355,6 +366,7 @@ def _mapping_property(name: str) -> property:
 
 CELL_TYPE_AUTHORING_PROPERTY_FIELDS: tuple[str, ...] = (
     "nominal_capacity",
+    "minimum_capacity",
     "min_capacity",
     "rated_capacity",
     "typical_energy",
@@ -376,12 +388,22 @@ CELL_TYPE_AUTHORING_PROPERTY_FIELDS: tuple[str, ...] = (
     "thickness",
     "pulse_charging_current",
     "continuous_charging_current",
+    "nominal_continuous_charging_current",
+    "maximum_continuous_charging_current",
     "pulse_discharging_current",
     "continuous_discharging_current",
+    "nominal_continuous_discharging_current",
+    "maximum_continuous_discharging_current",
+    "minimum_charging_temperature",
+    "maximum_charging_temperature",
     "charging_temperature_min",
     "charging_temperature_max",
+    "minimum_discharging_temperature",
+    "maximum_discharging_temperature",
     "discharging_temperature_min",
     "discharging_temperature_max",
+    "minimum_storage_temperature",
+    "maximum_storage_temperature",
     "storage_temperature_min",
     "storage_temperature_max",
     "cycle_life",
@@ -749,6 +771,9 @@ class MaterialComponent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -762,6 +787,9 @@ class Coating(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: dict[str, list[MaterialComponent]] = Field(default_factory=dict)
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -787,6 +815,9 @@ class CurrentCollector(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -801,6 +832,9 @@ class Electrode(BaseModel):
 
     coating: Coating | None = None
     current_collector: CurrentCollector | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -814,6 +848,9 @@ class SolventMixture(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: list[MaterialComponent] = Field(default_factory=list)
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -829,6 +866,9 @@ class Salt(BaseModel):
     name: str | None = None
     cation: str | None = None
     anion: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -842,6 +882,9 @@ class Separator(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     material: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -858,6 +901,9 @@ class Electrolyte(BaseModel):
     solvent_mixture: SolventMixture | None = None
     salt: Salt | None = None
     additive: list[MaterialComponent] = Field(default_factory=list)
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -899,6 +945,7 @@ class CellSpecification(BundleJsonModel):
     model: str
     format: str
     chemistry: str
+    product_type: CellProductType | None = None
     positive_electrode_basis: str | None = None
     negative_electrode_basis: str | None = None
     size_code: str | None = None
@@ -908,11 +955,12 @@ class CellSpecification(BundleJsonModel):
     negative_electrode: Electrode | None = None
     electrolyte: Electrolyte | None = None
     separator: Separator | None = None
+    coin_hardware: dict[str, Any] = Field(default_factory=dict)
     specification_comment: list[str] = Field(default_factory=list)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
 
-    @field_validator("construction", "properties", mode="before")
+    @field_validator("construction", "properties", "coin_hardware", mode="before")
     @classmethod
     def _coerce_mapping_fields(cls, value: Any) -> Any:
         return _mapping_from_object(value)
@@ -959,6 +1007,8 @@ class CellSpecification(BundleJsonModel):
         comment = record.get("comment")
         if not isinstance(comment, list):
             comment = []
+        raw_pt = specification.get("product_type")
+        product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(specification["id"]),
@@ -966,6 +1016,7 @@ class CellSpecification(BundleJsonModel):
             model=str(specification["model"]),
             format=str(specification["format"]),
             chemistry=str(specification["chemistry"]),
+            product_type=product_type,
             positive_electrode_basis=specification.get("positive_electrode_basis"),
             negative_electrode_basis=specification.get("negative_electrode_basis"),
             size_code=specification.get("size_code"),
@@ -977,6 +1028,9 @@ class CellSpecification(BundleJsonModel):
             negative_electrode=copy.deepcopy(specification.get("negative_electrode")),
             electrolyte=copy.deepcopy(specification.get("electrolyte")),
             separator=copy.deepcopy(specification.get("separator")),
+            coin_hardware=dict(specification.get("coin_hardware", {}))
+            if isinstance(specification.get("coin_hardware"), Mapping)
+            else {},
             specification_comment=[str(item) for item in specification_comment],
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
@@ -999,6 +1053,8 @@ class CellSpecification(BundleJsonModel):
             "format": self.format,
             "chemistry": self.chemistry,
         }
+        if self.product_type is not None:
+            specification["product_type"] = str(self.product_type)
         if self.positive_electrode_basis is not None:
             specification["positive_electrode_basis"] = self.positive_electrode_basis
         if self.negative_electrode_basis is not None:
@@ -1017,6 +1073,8 @@ class CellSpecification(BundleJsonModel):
             specification["electrolyte"] = self.electrolyte.model_dump(mode="json", exclude_none=True)
         if self.separator is not None:
             specification["separator"] = self.separator.model_dump(mode="json", exclude_none=True)
+        if self.coin_hardware:
+            specification["coin_hardware"] = copy.deepcopy(self.coin_hardware)
         if self.specification_comment:
             specification["comment"] = list(self.specification_comment)
 
@@ -1059,6 +1117,7 @@ class CellType(BundleJsonModel):
     model: str = ""
     format: str = "unknown"
     chemistry: str = "unknown"
+    product_type: CellProductType | None = None
     positive_electrode_basis: str | None = None
     negative_electrode_basis: str | None = None
     size_code: str | None = None
@@ -1068,6 +1127,7 @@ class CellType(BundleJsonModel):
     datasheet_revision: str | None = None
     cell_specification_id: str | None = None
     nominal_properties: dict[str, Any] = Field(default_factory=dict)
+    bibliography: dict[str, Any] = Field(default_factory=dict)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
 
@@ -1101,6 +1161,7 @@ class CellType(BundleJsonModel):
         return _AttributeMappingProxy(self.nominal_properties)
 
     nominal_capacity = _mapping_property("nominal_capacity")
+    minimum_capacity = _mapping_property("minimum_capacity")
     min_capacity = _mapping_property("min_capacity")
     rated_capacity = _mapping_property("rated_capacity")
     typical_energy = _mapping_property("typical_energy")
@@ -1122,18 +1183,29 @@ class CellType(BundleJsonModel):
     thickness = _mapping_property("thickness")
     pulse_charging_current = _mapping_property("pulse_charging_current")
     continuous_charging_current = _mapping_property("continuous_charging_current")
+    nominal_continuous_charging_current = _mapping_property("nominal_continuous_charging_current")
+    maximum_continuous_charging_current = _mapping_property("maximum_continuous_charging_current")
     pulse_discharging_current = _mapping_property("pulse_discharging_current")
     continuous_discharging_current = _mapping_property("continuous_discharging_current")
+    nominal_continuous_discharging_current = _mapping_property("nominal_continuous_discharging_current")
+    maximum_continuous_discharging_current = _mapping_property("maximum_continuous_discharging_current")
+    minimum_charging_temperature = _mapping_property("minimum_charging_temperature")
+    maximum_charging_temperature = _mapping_property("maximum_charging_temperature")
     charging_temperature_min = _mapping_property("charging_temperature_min")
     charging_temperature_max = _mapping_property("charging_temperature_max")
+    minimum_discharging_temperature = _mapping_property("minimum_discharging_temperature")
+    maximum_discharging_temperature = _mapping_property("maximum_discharging_temperature")
     discharging_temperature_min = _mapping_property("discharging_temperature_min")
     discharging_temperature_max = _mapping_property("discharging_temperature_max")
+    minimum_storage_temperature = _mapping_property("minimum_storage_temperature")
+    maximum_storage_temperature = _mapping_property("maximum_storage_temperature")
     storage_temperature_min = _mapping_property("storage_temperature_min")
     storage_temperature_max = _mapping_property("storage_temperature_max")
     cycle_life = _mapping_property("cycle_life")
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any], *, cell_specification_id: str | None = None) -> Self:
+        record = record_to_legacy_aliases(record)
         product = record.get("product")
         if not isinstance(product, Mapping):
             raise ValueError("cell type record must contain a 'product' object.")
@@ -1145,6 +1217,8 @@ class CellType(BundleJsonModel):
         notes = record.get("notes")
         if not isinstance(notes, list):
             notes = []
+        raw_pt = product.get("productType")
+        product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(product["id"]),
@@ -1153,6 +1227,7 @@ class CellType(BundleJsonModel):
             model=str(product["model"]),
             format=str(product.get("cellFormat", "unknown")),
             chemistry=str(product.get("chemistry", "unknown")),
+            product_type=product_type,
             positive_electrode_basis=product.get("positiveElectrodeBasis"),
             negative_electrode_basis=product.get("negativeElectrodeBasis"),
             size_code=product.get("sizeCode"),
@@ -1162,6 +1237,9 @@ class CellType(BundleJsonModel):
             datasheet_revision=product.get("datasheetRevision"),
             cell_specification_id=cell_specification_id,
             nominal_properties=dict(record.get("specs", {})) if isinstance(record.get("specs"), Mapping) else {},
+            bibliography=dict(record.get("bibliography", {}))
+            if isinstance(record.get("bibliography"), Mapping)
+            else {},
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
                 file=provenance.get("source_file"),
@@ -1188,6 +1266,7 @@ class CellType(BundleJsonModel):
             model=specification.model,
             format=specification.format,
             chemistry=specification.chemistry,
+            product_type=specification.product_type,
             positive_electrode_basis=specification.positive_electrode_basis,
             negative_electrode_basis=specification.negative_electrode_basis,
             size_code=specification.size_code,
@@ -1223,6 +1302,8 @@ class CellType(BundleJsonModel):
             "specs": self.nominal_properties,
             "provenance": {},
         }
+        if self.product_type is not None:
+            record["product"]["productType"] = str(self.product_type)
         if self.positive_electrode_basis is not None:
             record["product"]["positiveElectrodeBasis"] = self.positive_electrode_basis
         if self.negative_electrode_basis is not None:
@@ -1250,9 +1331,11 @@ class CellType(BundleJsonModel):
             record["provenance"]["retrieved_at"] = self.source.retrieved_at
         if self.source.file_hash is not None:
             record["provenance"]["file_hash"] = self.source.file_hash
+        if self.bibliography:
+            record["bibliography"] = dict(self.bibliography)
         if self.comment:
             record["notes"] = list(self.comment)
-        return record
+        return record_to_snake_aliases(record)
 
 
 class CellInstance(BundleJsonModel):
@@ -1363,7 +1446,7 @@ class CellInstance(BundleJsonModel):
         record["cell_instance"] = {key: value for key, value in record["cell_instance"].items() if value is not None}
         if self.comment:
             record["notes"] = list(self.comment)
-        return record
+        return record_to_snake_aliases(record)
 
 
 class TestProtocol(BundleJsonModel):
@@ -1380,6 +1463,8 @@ class TestProtocol(BundleJsonModel):
     description: str | None = None
     version: str | None = None
     protocol: ProtocolInfo = Field(default_factory=ProtocolInfo)
+    steps: list[str] = Field(default_factory=list)
+    cycles: int | None = None
     conditions: dict[str, Any] = Field(default_factory=dict)
     setpoints: dict[str, Any] = Field(default_factory=dict)
     termination_criteria: dict[str, Any] = Field(default_factory=dict)
@@ -1449,6 +1534,8 @@ class TestProtocol(BundleJsonModel):
             description=protocol.get("description"),
             version=protocol.get("version"),
             protocol=ProtocolInfo(url=protocol.get("protocol_url")),
+            steps=[str(s) for s in protocol.get("steps", []) if isinstance(s, str)],
+            cycles=int(protocol["cycles"]) if isinstance(protocol.get("cycles"), int) else None,
             conditions=dict(conditions),
             setpoints=dict(setpoints),
             termination_criteria=dict(termination_criteria),
@@ -1486,6 +1573,10 @@ class TestProtocol(BundleJsonModel):
             record["test_protocol"]["version"] = self.version
         if self.protocol.url is not None:
             record["test_protocol"]["protocol_url"] = self.protocol.url
+        if self.steps:
+            record["test_protocol"]["steps"] = list(self.steps)
+        if self.cycles is not None:
+            record["test_protocol"]["cycles"] = self.cycles
         if self.conditions:
             record["conditions"] = copy.deepcopy(self.conditions)
         if self.setpoints:
@@ -1884,6 +1975,7 @@ class Dataset(BundleJsonModel):
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any], *, dataset_path: str | None = None) -> Self:
+        record = record_to_legacy_aliases(record)
         dataset = record.get("dataset")
         if not isinstance(dataset, Mapping):
             raise ValueError("dataset record must contain a 'dataset' object.")
@@ -2070,7 +2162,7 @@ class Dataset(BundleJsonModel):
             record["provenance"]["curated_by"] = self.source.curated_by
         if self.comment:
             record["notes"] = list(self.comment)
-        return record
+        return record_to_snake_aliases(record)
 
 
 class BattinfoBundle(BundleJsonModel):
@@ -2145,32 +2237,16 @@ class BattinfoBundle(BundleJsonModel):
             if isinstance(node.get("@id"), str)
         }
 
-        for node in graph:
-            # Backward-compatible reader for older bundle-style JSON-LD payloads.
-            if _node_has_type(node, "battinfo:MetadataBundle"):
-                return cls(
-                    bundle_name=node.get("schema:name") if isinstance(node.get("schema:name"), str) else None,
-                    cell_specification=CellSpecification.from_json(node["battinfo:cellSpecificationRecord"])
-                    if isinstance(node.get("battinfo:cellSpecificationRecord"), Mapping)
-                    else None,
-                    cell_type=CellType.from_json(node["battinfo:cellTypeRecord"]),
-                    cell_instance=CellInstance.from_json(node["battinfo:cellInstanceRecord"]),
-                    test=Test.from_json(node["battinfo:testRecord"]),
-                    dataset=Dataset.from_json(node["battinfo:datasetRecord"]),
-                    comment=_text_list(node.get("schema:description")),
-                )
-
-        cell_instance_node = next((node for node in graph if _node_has_type(node, "battinfo:BatteryCellInstance")), None)
-        if cell_instance_node is None:
-            cell_instance_node = next(
-                (node for node in graph if _node_has_type(node, "schema:IndividualProduct")),
-                None,
-            )
+        cell_instance_node = next(
+            (node for node in graph if _node_has_type(node, "BatteryCell") or _node_has_type(node, "schema:IndividualProduct")),
+            None,
+        )
         cell_type_id = None
         if cell_instance_node is not None:
             cell_type_id = next((value for value in _type_values(cell_instance_node) if "/cell-type/" in value), None)
             if cell_type_id is None:
-                cell_type_id = _ref_id(cell_instance_node.get("schema:isVariantOf"))
+                # hasDescription is the current term; schema:isVariantOf is kept for backward compatibility
+                cell_type_id = _ref_id(cell_instance_node.get("hasDescription") or cell_instance_node.get("schema:isVariantOf"))
         cell_type_node = graph_by_id.get(cell_type_id) if cell_type_id is not None else None
         if cell_type_node is None:
             cell_type_node = next(
@@ -2178,33 +2254,30 @@ class BattinfoBundle(BundleJsonModel):
                     node
                     for node in graph
                     if _node_has_type(node, OWL_CLASS_IRI)
-                    or _node_has_type(node, "schema:ProductModel")
-                    or _node_has_type(node, "BatteryCell")
+                    or _node_has_type(node, "BatteryCellSpecification")
                 ),
                 None,
             )
-        test_node = next((node for node in graph if _node_has_type(node, "battinfo:BatteryCellTest")), None)
-        if test_node is None:
-            test_node = next(
-                (
-                    node
-                    for node in graph
-                    if _node_has_type(node, "schema:Action")
-                    and (_ref_id(node.get("schema:object")) or _ref_id(node.get("schema:about")))
-                ),
-                None,
-            )
+        test_node = next(
+            (
+                node
+                for node in graph
+                if _node_has_type(node, "BatteryTest")
+                or (
+                    _node_has_type(node, "schema:Action")
+                    and (_ref_id(node.get("hasTestObject")) or _ref_id(node.get("schema:object")))
+                )
+            ),
+            None,
+        )
         dataset_node = next(
             (
                 node
                 for node in graph
-                if _node_has_type(node, "schema:Dataset")
-                and (
-                    (
-                        node.get("battinfo:aboutCell") is not None
-                        and node.get("battinfo:aboutTest") is not None
-                    )
-                    or (
+                if _node_has_type(node, "BatteryTestResult")
+                or (
+                    _node_has_type(node, "schema:Dataset")
+                    and (
                         any("/cell/" in ref_id for ref_id in _ref_ids(node.get("schema:about")))
                         and any("/test/" in ref_id for ref_id in _ref_ids(node.get("schema:about")))
                     )
@@ -2216,22 +2289,20 @@ class BattinfoBundle(BundleJsonModel):
         if cell_type_node is None or cell_instance_node is None or test_node is None or dataset_node is None:
             raise ValueError("Could not reconstruct BattinfoBundle from JSON-LD graph.")
 
+        _cell_type_id = str(cell_type_node.get("@id"))
         cell_specification_node = next(
             (
                 node
                 for node in graph
-                if _node_has_type(node, "schema:CreativeWork")
-                and (
-                    node.get("schema:additionalType") == "cell-specification"
-                    or _ref_id(node.get("schema:about")) == str(cell_type_node.get("@id"))
-                )
+                if _node_has_type(node, "BatteryCellSpecification")
+                and _ref_id(node.get("schema:about")) == _cell_type_id
             ),
             None,
         )
         if cell_specification_node is None:
             spec_ref_id = _ref_id(cell_type_node.get("schema:isBasedOn"))
             candidate = graph_by_id.get(spec_ref_id) if spec_ref_id is not None else None
-            if isinstance(candidate, Mapping) and _node_has_type(candidate, "schema:CreativeWork"):
+            if isinstance(candidate, Mapping) and _node_has_type(candidate, "BatteryCellSpecification"):
                 cell_specification_node = candidate
 
         manufacturer_obj = cell_type_node.get("schema:manufacturer")
@@ -2259,16 +2330,18 @@ class BattinfoBundle(BundleJsonModel):
         if not isinstance(source_obj, Mapping):
             source_obj = {}
         subclass_ids = _subclass_ref_ids(cell_type_node)
+        is_desc = cell_type_node.get("isDescriptionFor")
+        is_desc_types = _type_values(is_desc) if isinstance(is_desc, Mapping) else []
         format_value = (
             "coin"
-            if "CoinCell" in subclass_ids or _node_has_type(cell_instance_node, "CoinCell")
+            if "CoinCell" in subclass_ids or _node_has_type(cell_instance_node, "CoinCell") or "CoinCell" in is_desc_types
             else "cylindrical"
-            if "CylindricalBattery" in subclass_ids or _node_has_type(cell_instance_node, "CylindricalBattery")
+            if "CylindricalBattery" in subclass_ids or _node_has_type(cell_instance_node, "CylindricalBattery") or "CylindricalBattery" in is_desc_types
             else "pouch"
-            if "PouchCell" in subclass_ids or _node_has_type(cell_instance_node, "PouchCell")
+            if "PouchCell" in subclass_ids or _node_has_type(cell_instance_node, "PouchCell") or "PouchCell" in is_desc_types
             else "prismatic"
-            if "PrismaticBattery" in subclass_ids or _node_has_type(cell_instance_node, "PrismaticBattery")
-            else str(cell_type_node.get("schema:category") or cell_specification_node.get("schema:category") if isinstance(cell_specification_node, Mapping) else "unknown")
+            if "PrismaticBattery" in subclass_ids or _node_has_type(cell_instance_node, "PrismaticBattery") or "PrismaticBattery" in is_desc_types
+            else "unknown"
         )
         cell_type = CellType(
             id=str(cell_type_node["@id"]),
@@ -2281,11 +2354,7 @@ class BattinfoBundle(BundleJsonModel):
                 or "unknown"
             ),
             format=format_value,
-            chemistry=str(
-                cell_type_node.get("schema:material")
-                or (cell_specification_node.get("schema:material") if isinstance(cell_specification_node, Mapping) else None)
-                or "unknown"
-            ),
+            chemistry="unknown",
             size_code=cell_type_node.get("schema:size") or (cell_specification_node.get("schema:size") if isinstance(cell_specification_node, Mapping) else None),
             country_of_origin=_country_name_value(cell_type_node.get("schema:countryOfOrigin")),
             year=_year_value(cell_type_node.get("schema:releaseDate")),
@@ -2318,8 +2387,8 @@ class BattinfoBundle(BundleJsonModel):
                 id=str(cell_specification_node["@id"]),
                 manufacturer=str(spec_manufacturer or manufacturer or "unknown"),
                 model=str(cell_specification_node.get("schema:model") or cell_type.model),
-                format=str(cell_specification_node.get("schema:category") or cell_type.format),
-                chemistry=str(cell_specification_node.get("schema:material") or cell_type.chemistry),
+                format=cell_type.format,
+                chemistry=cell_type.chemistry,
                 size_code=cell_specification_node.get("schema:size"),
                 properties=properties,
                 specification_comment=_text_list(cell_specification_node.get("schema:description")),
@@ -2342,32 +2411,28 @@ class BattinfoBundle(BundleJsonModel):
             name=str(cell_instance_node.get("schema:name") or cell_instance_node["@id"]),
             cell_type_id=str(cell_type_id or cell_type.id),
             serial_number=cell_instance_node.get("schema:serialNumber"),
-            batch_id=cell_instance_node.get("battinfo:batchId"),
         )
         protocol_name, test_description = _protocol_from_description(test_node.get("schema:description"))
         instrument_name = _instrument_name(test_node.get("schema:instrument"))
         test = Test(
             id=str(test_node["@id"]),
             name=str(test_node.get("schema:name") or test_node["@id"]),
-            test_kind=str(test_node.get("battinfo:testKind") or test_node.get("schema:additionalType") or "other"),
+            test_kind=str(test_node.get("schema:additionalType") or "other"),
             cell_instance_id=str(
-                _ref_id(test_node.get("battinfo:aboutCell"))
+                _ref_id(test_node.get("hasTestObject"))
                 or _ref_id(test_node.get("schema:object"))
                 or _ref_id(test_node.get("schema:about"))
                 or cell_instance.id
             ),
             description=test_description,
-            status=test_node.get("schema:creativeWorkStatus") or test_node.get("schema:actionStatus"),
+            status=test_node.get("schema:actionStatus") or test_node.get("schema:creativeWorkStatus"),
             protocol=ProtocolInfo(
                 name=protocol_name,
             ),
             instrument=instrument_name,
             dataset_ids=[
                 ref_id
-                for ref_id in (
-                    [_ref_id(item) for item in test_node.get("battinfo:hasDataset", [])]
-                    + _ref_ids(test_node.get("schema:result"))
-                )
+                for ref_id in _ref_ids(test_node.get("hasOutput") or test_node.get("schema:result"))
                 if ref_id is not None
             ],
             started_at=test_node.get("schema:startTime"),
@@ -2414,13 +2479,11 @@ class BattinfoBundle(BundleJsonModel):
             ),
             main_entity=[entity for item in _mapping_list(dataset_main_entity) if (entity := _canonical_main_entity(item)) is not None],
             distributions=[dist for item in _mapping_list(dataset_distribution) if (dist := _canonical_distribution(item)) is not None],
-            cell_instance_id=(
-                _ref_id(dataset_node.get("battinfo:aboutCell"))
-                or next((ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/cell/" in ref_id), None)
+            cell_instance_id=next(
+                (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/cell/" in ref_id), None
             ),
-            test_id=(
-                _ref_id(dataset_node.get("battinfo:aboutTest"))
-                or next((ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/test/" in ref_id), None)
+            test_id=next(
+                (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/test/" in ref_id), None
             ),
         )
         return cls(
@@ -2430,6 +2493,144 @@ class BattinfoBundle(BundleJsonModel):
             cell_instance=cell_instance,
             test=test,
             dataset=dataset,
+        )
+
+
+class ZenodoDatasetEntry(BaseModel):
+    """One test/dataset entry within a ZenodoCellRecord.
+
+    cell_instances is empty when the contributing cells are not individually
+    tracked (aggregate records), or contains one or more CellInstance records
+    when per-cell provenance is available.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    cell_instances: list[CellInstance] = Field(default_factory=list)
+    test: Test
+    dataset: Dataset
+
+
+class ZenodoCellRecord(BaseModel):
+    """
+    Multi-dataset flat JSON container for a single Zenodo record.
+
+    Serialises to / from battinfo.bundle.json — the file that battery-genome's
+    Zenodo harvester ingests.  One record covers one manufacturer × cell model
+    and may contain multiple (test, dataset) entries, each optionally annotated
+    with one or more CellInstance records.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: str = "1.0.0"
+    kind: str = "BattinfoCellRecord"
+    cell_type: CellType
+    cell_specification: CellSpecification | None = None
+    datasets: list[ZenodoDatasetEntry]
+
+    def to_flat_json(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "schema_version": self.schema_version,
+            "kind": self.kind,
+            "cell_type": self.cell_type.to_record(),
+        }
+        if self.cell_specification is not None:
+            payload["cell_specification"] = self.cell_specification.to_library_record()
+        payload["datasets"] = [
+            {
+                "cell_instances": [ci.to_record() for ci in entry.cell_instances],
+                "test": entry.test.to_record(),
+                "dataset": entry.dataset.to_record(),
+            }
+            for entry in self.datasets
+        ]
+        return payload
+
+    def to_path(self, path: PathLike) -> Path:
+        out_path = _as_path(path)
+        _write_json(out_path, self.to_flat_json())
+        return out_path
+
+    @classmethod
+    def from_flat_json(cls, data: Mapping[str, Any]) -> "ZenodoCellRecord":
+        data = dict(data)
+        cell_type_raw = data.get("cell_type")
+        if not isinstance(cell_type_raw, Mapping):
+            raise ValueError("ZenodoCellRecord must contain a 'cell_type' object.")
+        datasets_raw = data.get("datasets")
+        if not isinstance(datasets_raw, list):
+            raise ValueError("ZenodoCellRecord must contain a 'datasets' list.")
+
+        cell_specification: CellSpecification | None = None
+        spec_raw = data.get("cell_specification")
+        if isinstance(spec_raw, Mapping):
+            cell_specification = CellSpecification.from_library_record(spec_raw)
+
+        cell_type = CellType.from_record(
+            cell_type_raw,
+            cell_specification_id=cell_specification.id if cell_specification is not None else None,
+        )
+
+        entries: list[ZenodoDatasetEntry] = []
+        for i, entry_raw in enumerate(datasets_raw):
+            if not isinstance(entry_raw, Mapping):
+                raise ValueError(f"datasets[{i}] must be a mapping.")
+            test_raw = entry_raw.get("test")
+            ds_raw = entry_raw.get("dataset")
+            if not isinstance(test_raw, Mapping):
+                raise ValueError(f"datasets[{i}].test must be a mapping.")
+            if not isinstance(ds_raw, Mapping):
+                raise ValueError(f"datasets[{i}].dataset must be a mapping.")
+            ci_raws = entry_raw.get("cell_instances") or []
+            if not isinstance(ci_raws, list):
+                raise ValueError(f"datasets[{i}].cell_instances must be a list.")
+            entries.append(ZenodoDatasetEntry(
+                cell_instances=[CellInstance.from_record(ci) for ci in ci_raws if isinstance(ci, Mapping)],
+                test=Test.from_record(test_raw),
+                dataset=Dataset.from_record(ds_raw),
+            ))
+
+        return cls(
+            schema_version=str(data.get("schema_version", "1.0.0")),
+            kind=str(data.get("kind", "BattinfoCellRecord")),
+            cell_type=cell_type,
+            cell_specification=cell_specification,
+            datasets=entries,
+        )
+
+    @classmethod
+    def from_path(cls, path: PathLike) -> "ZenodoCellRecord":
+        return cls.from_flat_json(_read_json(_as_path(path)))
+
+    @classmethod
+    def from_battinfo_bundles(
+        cls,
+        bundles: list[BattinfoBundle],
+        *,
+        cell_specification: CellSpecification | None = None,
+    ) -> "ZenodoCellRecord":
+        """Build a ZenodoCellRecord from one or more single-dataset BattinfoBundles.
+
+        All bundles must share the same cell_type (checked by id).
+        """
+        if not bundles:
+            raise ValueError("At least one BattinfoBundle is required.")
+        cell_type = bundles[0].cell_type
+        if any(b.cell_type.id != cell_type.id for b in bundles[1:]):
+            raise ValueError("All bundles must share the same cell_type.id.")
+        spec = cell_specification or bundles[0].cell_specification
+        return cls(
+            cell_type=cell_type,
+            cell_specification=spec,
+            datasets=[
+                ZenodoDatasetEntry(
+                    cell_instances=[b.cell_instance],
+                    test=b.test,
+                    dataset=b.dataset,
+                )
+                for b in bundles
+            ],
         )
 
 
@@ -2465,4 +2666,7 @@ __all__ = [
     "TEST_FILENAME",
     "TestProtocol",
     "Test",
+    "ZENODO_CELL_RECORD_FILENAME",
+    "ZenodoCellRecord",
+    "ZenodoDatasetEntry",
 ]

@@ -26,3 +26,6 @@ Identifier-constrained resource schemas include:
 - `schemas/cell-instance.schema.json`
 - `schemas/dataset.schema.json`
 - `schemas/test.schema.json`
+
+Workflow/support schemas also include:
+- `schemas/ingest-manifest.schema.json`

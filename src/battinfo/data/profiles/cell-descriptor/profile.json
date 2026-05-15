@@ -43,6 +43,7 @@
         "negative_electrode",
         "electrolyte",
         "separator",
+        "coin_hardware",
         "comment"
       ]
     },
@@ -159,6 +160,13 @@
               "type": "integer",
               "minimum": 1
             },
+            "assembly_sequence": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
             "comment": {
               "type": "string"
             }
@@ -187,8 +195,161 @@
               "type": "string",
               "minLength": 1
             },
+            "manufacturer": {
+              "type": "string"
+            },
+            "supplier": {
+              "type": "string"
+            },
+            "product_id": {
+              "type": "string"
+            },
             "property": {
               "$ref": "../common/quantitative-properties.schema.json"
+            },
+            "comment": {
+              "type": "string"
+            }
+          }
+        },
+        "coin_hardware": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "case": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "size_code": {
+                  "type": "string"
+                },
+                "material": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "supplier": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                },
+                "lid_coating": {
+                  "type": "string"
+                },
+                "can_coating": {
+                  "type": "string"
+                },
+                "property": {
+                  "$ref": "../common/quantitative-properties.schema.json"
+                },
+                "comment": {
+                  "type": "string"
+                }
+              }
+            },
+            "lid": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "material": {
+                  "type": "string"
+                },
+                "coating": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "supplier": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                },
+                "property": {
+                  "$ref": "../common/quantitative-properties.schema.json"
+                },
+                "comment": {
+                  "type": "string"
+                }
+              }
+            },
+            "can": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "material": {
+                  "type": "string"
+                },
+                "coating": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "supplier": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                },
+                "property": {
+                  "$ref": "../common/quantitative-properties.schema.json"
+                },
+                "comment": {
+                  "type": "string"
+                }
+              }
+            },
+            "spring": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "material": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "supplier": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                },
+                "property": {
+                  "$ref": "../common/quantitative-properties.schema.json"
+                },
+                "comment": {
+                  "type": "string"
+                }
+              }
+            },
+            "spacer": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "material": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "supplier": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                },
+                "property": {
+                  "$ref": "../common/quantitative-properties.schema.json"
+                },
+                "comment": {
+                  "type": "string"
+                }
+              }
             },
             "comment": {
               "type": "string"
@@ -481,13 +642,9 @@
       "kind": "generic_metadata",
       "jsonld_target": "schema:description"
     },
-    "instances.type": {
-      "kind": "generic_metadata",
-      "jsonld_target": "schema:IndividualProduct"
-    },
     "instances.relation_to_specification": {
       "kind": "generic_metadata",
-      "jsonld_target": "schema:isVariantOf"
+      "jsonld_target": "hasDescription"
     },
     "provenance": {
       "kind": "generic_metadata",

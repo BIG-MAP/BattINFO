@@ -16,6 +16,8 @@ from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPo
 PROFILE_TO_SCHEMA = {
     "base": "battinfo.base.schema.json",
     "cell-descriptor": "cell-descriptor.schema.json",
+    "cell-instance": "cell-instance.schema.json",
+    "dataset": "dataset.schema.json",
     "batterypass": "profiles/batterypass.schema.json",
     "test-protocol": "test-protocol.schema.json",
     "test": "test.schema.json",

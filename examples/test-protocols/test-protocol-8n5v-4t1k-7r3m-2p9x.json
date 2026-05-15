@@ -1,0 +1,68 @@
+{
+  "schema_version": "0.1.0",
+  "test_protocol": {
+    "id": "https://w3id.org/battinfo/test-protocol/8n5v-4t1k-7r3m-2p9x",
+    "short_id": "8n5v4t",
+    "identifier": "test-protocol:8n5v-4t1k-7r3m-2p9x",
+    "name": "ICI — Intermittent Current Interruption during 1C Cycling at 25°C",
+    "kind": "ici",
+    "description": "Intermittent Current Interruption (ICI) interleaved with standard 1C galvanostatic cycling. The current is interrupted for 10 seconds every 10 minutes of charge or discharge. The instantaneous voltage step at interruption gives the ohmic resistance (R_0); the subsequent relaxation gives the polarisation resistance. ICI enables continuous monitoring of internal resistance as a function of cycle number without dedicated HPPC check-ups.",
+    "version": "1.0",
+    "protocol_url": "https://example.org/protocols/ici-1c-25c"
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "setpoints": {
+    "charge_rate": {
+      "value": 1.0,
+      "unit": "C"
+    },
+    "discharge_rate": {
+      "value": 1.0,
+      "unit": "C"
+    },
+    "interruption_period": {
+      "value": 10.0,
+      "unit": "min"
+    },
+    "interruption_duration": {
+      "value": 10.0,
+      "unit": "s"
+    }
+  },
+  "termination_criteria": {
+    "upper_voltage_limit": {
+      "value_text": "upper_voltage_limit per cell specification (charge cut-off)"
+    },
+    "lower_voltage_limit": {
+      "value_text": "lower_voltage_limit per cell specification (discharge cut-off)"
+    },
+    "capacity_retention": {
+      "value": 80.0,
+      "unit": "%",
+      "note": "End-of-test criterion for the ageing study"
+    }
+  },
+  "measurement_outputs": [
+    { "name": "Voltage", "unit_text": "V" },
+    { "name": "Current", "unit_text": "A" },
+    { "name": "Capacity", "unit_text": "Ah" },
+    { "name": "DCInternalResistance", "unit_text": "Ohm" },
+    { "name": "Temperature", "unit_text": "degC" }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_file": "ici-1c-25c.protocol.json",
+    "retrieved_at": 1746230400
+  },
+  "notes": [
+    "Ohmic resistance R_0 is extracted from the instantaneous voltage step at current interruption: R_0 = delta_V / I.",
+    "ICI adds ~1.4% extra capacity to each half-cycle due to interruption rest periods; correct capacity bookkeeping accordingly.",
+    "High-frequency data sampling (>=10 Hz) is required during the 10-second interruption window.",
+    "Reference: Koseoglou et al., Journal of Power Sources, 2020."
+  ]
+}

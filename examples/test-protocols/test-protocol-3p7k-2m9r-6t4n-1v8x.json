@@ -1,0 +1,62 @@
+{
+  "schema_version": "0.1.0",
+  "test_protocol": {
+    "id": "https://w3id.org/battinfo/test-protocol/3p7k-2m9r-6t4n-1v8x",
+    "short_id": "3p7k2m",
+    "identifier": "test-protocol:3p7k-2m9r-6t4n-1v8x",
+    "name": "GITT — Galvanostatic Intermittent Titration at 25°C",
+    "kind": "gitt",
+    "description": "Galvanostatic Intermittent Titration Technique (GITT) applied during discharge from 100% to ~5% SOC at 25°C. A 10-minute C/10 current pulse is applied followed by a 60-minute rest at open-circuit. The OCV relaxation transient after each pulse is used to calculate the apparent solid-state lithium diffusion coefficient (D_Li) in the electrode as a function of SOC. The full discharge GITT curve also yields a pseudo-equilibrium OCV profile.",
+    "version": "1.0",
+    "protocol_url": "https://example.org/protocols/gitt-discharge-25c"
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    },
+    "initial_state_of_charge": {
+      "value": 100.0,
+      "unit": "%"
+    }
+  },
+  "setpoints": {
+    "current_pulse_rate": {
+      "value": 0.1,
+      "unit": "C"
+    },
+    "current_pulse_duration": {
+      "value": 10.0,
+      "unit": "min"
+    },
+    "rest_duration": {
+      "value": 60.0,
+      "unit": "min"
+    },
+    "discharge_cutoff_voltage": {
+      "value_text": "lower_voltage_limit per cell specification"
+    }
+  },
+  "termination_criteria": {
+    "discharge_cutoff_voltage": {
+      "value_text": "lower_voltage_limit per cell specification — or ~5% SOC"
+    }
+  },
+  "measurement_outputs": [
+    { "name": "Voltage", "unit_text": "V" },
+    { "name": "Current", "unit_text": "A" },
+    { "name": "Capacity", "unit_text": "Ah" },
+    { "name": "Temperature", "unit_text": "degC" }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_file": "gitt-discharge-25c.protocol.json",
+    "retrieved_at": 1746230400
+  },
+  "notes": [
+    "D_Li is calculated from Weppner-Huggins equation: D = (4/pi) * (I_0 * V_m / (z_A * F * A))^2 * (delta_E_s / delta_E_t)^2.",
+    "A minimum 1-hour rest is needed for the voltage to approach equilibrium in most lithium-ion electrode materials.",
+    "Equivalent protocol can be applied during charge (GITT-charge) to probe kinetics in the opposite direction.",
+    "Full charge pre-conditioning: C/5 CC-CV charge with C/20 cut-off, then 2-hour rest before GITT discharge."
+  ]
+}

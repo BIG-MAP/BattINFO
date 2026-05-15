@@ -21,8 +21,9 @@ Generate first-pass candidates:
 ```bash
 python .tools/semantic/generate_semantic_mapping_candidates.py \
   --ontology https://w3id.org/emmo/domain/battery/inferred \
-  --sample-json examples/cell-types/A123__ANR26650M1-B.json \
+  --sample-json examples/cell-type/A123__ANR26650M1-B.json \
   --out-dir assets/mappings/domain-battery \
   --overwrite
 ```
+
 

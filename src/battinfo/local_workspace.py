@@ -10,7 +10,16 @@ from typing import Any, Mapping
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError, model_validator
 
-from battinfo.bundle import BattinfoBundle, CellInstance, CellType, ChecksumInfo, Dataset, ProtocolInfo, ProvenanceInfo, Test
+from battinfo.bundle import (
+    BattinfoBundle,
+    CellInstance,
+    CellType,
+    ChecksumInfo,
+    Dataset,
+    ProtocolInfo,
+    ProvenanceInfo,
+    Test,
+)
 from battinfo.publication import load_publication
 from battinfo.validate.record import validate_record
 from battinfo.workspace import Workspace
@@ -109,10 +118,10 @@ class RegistryTarget(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     tenant: str
-    project: str
+    workspace: str
 
 
-DEFAULT_SCAFFOLD_REGISTRY = RegistryTarget(tenant="digibatt", project="cr2032-baseline")
+DEFAULT_SCAFFOLD_REGISTRY = RegistryTarget(tenant="digibatt", workspace="cr2032-baseline")
 
 
 class ReleaseInfo(BaseModel):
@@ -221,7 +230,7 @@ class BattinfoSubmission(BaseModel):
     kind: str = "BattinfoSubmission"
     submission_mode: str
     generated_at: str
-    project_id: str
+    workspace_id: str
     publisher_id: str
     source_version: str | None = None
     title: str
@@ -365,10 +374,10 @@ class WorkspaceDatasetDocument(BaseModel):
 
 def _coerce_registry_target(value: RegistryTarget | Mapping[str, Any]) -> RegistryTarget:
     if isinstance(value, str):
-        tenant, sep, project = value.partition("/")
-        if not sep or not tenant or not project:
-            raise ValueError("registry must be 'tenant/project' when passed as a string.")
-        return RegistryTarget(tenant=tenant, project=project)
+        tenant, sep, workspace = value.partition("/")
+        if not sep or not tenant or not workspace:
+            raise ValueError("registry must be 'tenant/workspace' when passed as a string.")
+        return RegistryTarget(tenant=tenant, workspace=workspace)
     if isinstance(value, RegistryTarget):
         return value.model_copy(deep=True)
     return RegistryTarget.model_validate(dict(value))
@@ -421,7 +430,7 @@ class LocalWorkspace:
             workspace_id="digibatt-cr2032-release",
             title="DigiBatt CR2032 baseline release",
             description="Minimal BattINFO workspace for one DigiBatt-style dataset publication happy path.",
-            registry=RegistryTarget(tenant="digibatt", project="cr2032-baseline"),
+            registry=RegistryTarget(tenant="digibatt", workspace="cr2032-baseline"),
             release=ReleaseInfo(
                 version="1.0.0",
                 community="digibatt",
@@ -587,7 +596,7 @@ class LocalWorkspace:
         resolved_workspace_id = (
             workspace_id
             or (existing_manifest.workspace_id if existing_manifest is not None else None)
-            or (parsed_registry.project if parsed_registry is not None else None)
+            or (parsed_registry.workspace if parsed_registry is not None else None)
         )
         resolved_publisher_id = publisher_id or (existing_manifest.publisher_id if existing_manifest is not None else None) or "demo-lab"
         if resolved_workspace_id is None:
@@ -1006,7 +1015,7 @@ class LocalWorkspace:
             if submission.submission_mode != "bundle":
                 raise ValueError("LocalWorkspace.import_registry_intake currently supports bundle submissions only.")
             workspace_payload = submission.workspace or {}
-            registry = workspace_payload.get("registry", {"tenant": "imported", "project": submission.project_id})
+            registry = workspace_payload.get("registry", {"tenant": "imported", "workspace": submission.workspace_id})
             release = submission.release
             resource_payloads = {resource.resource_type: resource for resource in submission.resources}
             bundle = cls._bundle_from_resource_payloads(
@@ -1016,7 +1025,7 @@ class LocalWorkspace:
             resolved_publisher_id = submission.publisher_id
         else:
             workspace_payload = payload.get("workspace", {})
-            registry = workspace_payload.get("registry", {"tenant": "imported", "project": "registry-intake"})
+            registry = workspace_payload.get("registry", {"tenant": "imported", "workspace": "registry-intake"})
             release = payload.get("release", {})
             resources = payload.get("resources", {})
             resource_payloads = (
@@ -1419,10 +1428,10 @@ class LocalWorkspace:
 
     def _write_normalized_records(self, records: dict[str, dict[str, Any]], *, target_root: Path) -> None:
         mapping = {
-            "cell_type": target_root / "cell-types" / "cell-type.json",
+            "cell_type": target_root / "cell-type" / "cell-type.json",
             "cell": target_root / "cell-instances" / "cell.json",
             "test": target_root / "tests" / "test.json",
-            "dataset": target_root / "datasets" / "dataset.json",
+            "dataset": target_root / "dataset" / "dataset.json",
         }
         for name, payload in records.items():
             _write_json(mapping[name], payload)
@@ -1459,22 +1468,12 @@ class LocalWorkspace:
     def _cell_submission_payload(self, manifest: WorkspaceManifest, records: dict[str, dict[str, Any]]) -> SubmissionResource:
         cell_record = records["cell"]["cell_instance"]
         cell_type_record = records["cell_type"]["product"]
-        metadata = {
-            "manufacturer": cell_type_record.get("manufacturer"),
-            "model": cell_type_record.get("model"),
-            "format": cell_type_record.get("format"),
-            "chemistry": cell_type_record.get("chemistry"),
-            "size_code": cell_type_record.get("size_code"),
-            "serial_number": cell_record.get("serial_number"),
-            "batch_id": cell_record.get("batch_id"),
-        }
         return SubmissionResource(
             resource_type="cell",
             source_local_id=self._submission_source_local_id(manifest, "cell"),
             title=cell_record.get("name") or f"{cell_type_record.get('manufacturer', 'Battery')} {cell_type_record.get('model', 'Cell')}",
             semantic_payload={
                 "@type": "Cell",
-                "metadata": {key: value for key, value in metadata.items() if value is not None},
                 "battinfo_records": {
                     "cell_type": records["cell_type"],
                     "cell": records["cell"],
@@ -1490,18 +1489,6 @@ class LocalWorkspace:
             title=test_record.get("name") or f"{manifest.title} test",
             semantic_payload={
                 "@type": "Test",
-                "metadata": {
-                    key: value
-                    for key, value in {
-                        "kind": test_record.get("kind"),
-                        "status": test_record.get("status"),
-                        "protocol": test_record.get("protocol"),
-                        "instrument": test_record.get("instrument"),
-                        "started_at": test_record.get("started_at"),
-                        "ended_at": test_record.get("ended_at"),
-                    }.items()
-                    if value is not None
-                },
                 "battinfo_records": {"test": records["test"]},
             },
             related_resources=[
@@ -1520,7 +1507,6 @@ class LocalWorkspace:
         dataset_doc: WorkspaceDatasetDocument,
         records: dict[str, dict[str, Any]],
     ) -> SubmissionResource:
-        dataset_record = records["dataset"]["dataset"]
         distribution = dataset_doc.dataset.distribution
         distributions: list[SubmissionDistribution] = []
         access_url = distribution.download_url or distribution.access_url
@@ -1541,19 +1527,6 @@ class LocalWorkspace:
             title=dataset_doc.dataset.title,
             semantic_payload={
                 "@type": "Dataset",
-                "metadata": {
-                    key: value
-                    for key, value in {
-                        "license": dataset_doc.dataset.license,
-                        "created_at": dataset_record.get("date_created"),
-                        "media_type": distribution.media_type,
-                        "record_url": dataset_doc.dataset.release.record_url,
-                        "doi": dataset_doc.dataset.release.doi,
-                        "community": dataset_doc.dataset.release.community,
-                        "version": dataset_doc.dataset.release.version,
-                    }.items()
-                    if value is not None
-                },
                 "battinfo_records": {"dataset": records["dataset"]},
             },
             related_resources=[
@@ -1586,7 +1559,7 @@ class LocalWorkspace:
         submission = BattinfoSubmission(
             submission_mode="bundle",
             generated_at=_now_iso(),
-            project_id=manifest.registry.project,
+            workspace_id=manifest.registry.workspace,
             publisher_id=manifest.publisher_id or "demo-lab",
             source_version=dataset_doc.dataset.release.version,
             title=manifest.title,
@@ -1713,3 +1686,4 @@ __all__ = [
     "WorkspaceManifest",
     "WORKSPACE_FILENAME",
 ]
+

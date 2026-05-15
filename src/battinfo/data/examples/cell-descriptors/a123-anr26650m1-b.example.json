@@ -30,43 +30,51 @@
         "value": 2.0,
         "unit": "V"
       },
-      "continuous_charging_current": {
-        "max_value": 2.5,
+      "nominal_continuous_charging_current": {
+        "value": 2.5,
+        "unit": "A"
+      },
+      "maximum_continuous_charging_current": {
+        "value": 2.5,
         "unit": "A"
       },
       "pulse_charging_current": {
         "max_value": 5.0,
         "unit": "A"
       },
-      "continuous_discharging_current": {
-        "max_value": 50.0,
+      "nominal_continuous_discharging_current": {
+        "value": 50.0,
+        "unit": "A"
+      },
+      "maximum_continuous_discharging_current": {
+        "value": 50.0,
         "unit": "A"
       },
       "pulse_discharging_current": {
         "max_value": 120.0,
         "unit": "A"
       },
-      "charging_temperature_min": {
+      "minimum_charging_temperature": {
         "value": 0.0,
         "unit": "degC"
       },
-      "charging_temperature_max": {
+      "maximum_charging_temperature": {
         "value": 45.0,
         "unit": "degC"
       },
-      "discharging_temperature_min": {
+      "minimum_discharging_temperature": {
         "value": -20.0,
         "unit": "degC"
       },
-      "discharging_temperature_max": {
+      "maximum_discharging_temperature": {
         "value": 60.0,
         "unit": "degC"
       },
-      "storage_temperature_min": {
+      "minimum_storage_temperature": {
         "value": -20.0,
         "unit": "degC"
       },
-      "storage_temperature_max": {
+      "maximum_storage_temperature": {
         "value": 45.0,
         "unit": "degC"
       },
@@ -375,3 +383,4 @@
     "Update this file whenever schema or mapping decisions change."
   ]
 }
+

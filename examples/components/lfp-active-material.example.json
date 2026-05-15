@@ -1,0 +1,15 @@
+{
+  "_schema": "battinfo/schema/modules/components/material-component.schema.json",
+  "_description": "LFP (LiFePO4) positive electrode active material — standalone material component example.",
+  "name": "LFP",
+  "manufacturer": "Sumitomo Osaka Cement",
+  "product_id": "SE-4800",
+  "property": {
+    "theoretical_specific_capacity": { "value": 170.0, "unit": "mAh/g" },
+    "practical_specific_capacity": { "value": 155.0, "unit": "mAh/g" },
+    "density": { "value": 3.6, "unit": "g/cm3" },
+    "d50_particle_size": { "value": 0.5, "unit": "mm" },
+    "specific_surface_area": { "value": 15.0, "unit": "m2/g" }
+  },
+  "comment": "Carbon-coated LiFePO4 with olivine crystal structure. Nominal redox potential ~3.45 V vs. Li/Li+. Excellent thermal stability and cycle life. Low energy density compared to NMC/NCA but preferred for safety-critical and long-life applications."
+}

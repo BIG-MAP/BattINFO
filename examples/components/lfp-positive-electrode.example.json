@@ -1,0 +1,56 @@
+{
+  "_schema": "battinfo/schema/modules/components/electrode.schema.json",
+  "_description": "Standalone LFP positive electrode example. Demonstrates the electrode component schema with a coating (active material + binder + carbon black) and an aluminium current collector.",
+  "coating": {
+    "component": {
+      "active_material": [
+        {
+          "name": "LFP",
+          "manufacturer": "Sumitomo Osaka Cement",
+          "product_id": "SE-4800",
+          "property": {
+            "mass_fraction": { "value": 90.0, "unit": "%" },
+            "density": { "value": 3.6, "unit": "g/cm3" }
+          },
+          "comment": "Carbon-coated LiFePO4 with olivine structure."
+        }
+      ],
+      "binder": [
+        {
+          "name": "PVDF",
+          "manufacturer": "Solvay",
+          "product_id": "Solef 5130",
+          "property": {
+            "mass_fraction": { "value": 5.0, "unit": "%" }
+          }
+        }
+      ],
+      "additive": [
+        {
+          "name": "Carbon black",
+          "manufacturer": "Imerys",
+          "product_id": "C-NERGY C65",
+          "property": {
+            "mass_fraction": { "value": 5.0, "unit": "%" }
+          }
+        }
+      ]
+    },
+    "property": {
+      "thickness": { "value": 80.0, "unit": "mm" },
+      "loading": { "value": 12.5, "unit": "mg/cm2" },
+      "porosity": { "value": 35.0, "unit": "%" }
+    }
+  },
+  "current_collector": {
+    "name": "Aluminium foil",
+    "manufacturer": "Targray",
+    "property": {
+      "thickness": { "value": 16.0, "unit": "mm" }
+    }
+  },
+  "property": {
+    "areal_capacity": { "value": 2.0, "unit": "mAh/cm2" }
+  },
+  "comment": "NMP-cast LFP positive electrode; calendered to 35% porosity target. Paired with the graphite-negative-electrode example at n/p ratio ~1.2."
+}

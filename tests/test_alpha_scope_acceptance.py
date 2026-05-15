@@ -28,7 +28,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     source_root = tmp_path / "examples"
     index_path = tmp_path / ".battinfo" / "index.json"
 
-    cell_type_doc = _load_json(ROOT / "examples" / "cell-types" / "A123__ANR26650M1-B.json")
+    cell_type_doc = _load_json(ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json")
     cell_type_payload = save_cell_type(
         cell_type_doc,
         source_root=source_root,
@@ -46,7 +46,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert cell_instance_payload["status"] == "created"
 
-    dataset_doc = _load_json(ROOT / "examples" / "datasets" / "dataset-1f8r-6v2k-9p4m-3t7x.json")
+    dataset_doc = _load_json(ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json")
     dataset_payload = save_dataset(
         dataset_doc,
         source_root=source_root,
@@ -83,7 +83,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     cell_rows = query_cell_types(
         manufacturer="A123",
         format="cylindrical",
-        cell_types_dir=source_root / "cell-types",
+        cell_types_dir=source_root / "cell-type",
     )
     assert len(cell_rows) == 1
     assert cell_rows[0]["model_name"] == "ANR26650M1-B"
@@ -105,12 +105,13 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     assert len(hppc_rows) == 1
 
     dataset_rows = query_datasets(
-        directory=source_root / "datasets",
+        directory=source_root / "dataset",
         related_cell_id=cell_instance_doc["cell_instance"]["id"],
         related_test_id="https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r",
         format="application/x-hdf5",
     )
     assert len(dataset_rows) == 1
     assert dataset_rows[0]["id"] == dataset_doc["dataset"]["id"]
+
 
 
