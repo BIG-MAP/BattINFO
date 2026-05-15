@@ -19,7 +19,7 @@ def test_build_cell_type_library_rdf_from_descriptor(tmp_path: Path) -> None:
     manifest_json = tmp_path / "library-rdf" / "cell-type.index.json"
 
     input_dir.mkdir(parents=True)
-    descriptor = _load_json(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json")
+    descriptor = _load_json(ROOT / "examples" / "cell-type" / "research" / "minimal.example.json")
     (input_dir / "minimal.json").write_text(json.dumps(descriptor, indent=2) + "\n", encoding="utf-8")
 
     result = subprocess.run(

@@ -287,7 +287,7 @@ def test_validate_defaults_to_battery_descriptor_profile() -> None:
         app,
         [
             "validate",
-            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "research" / "minimal.example.json"),
         ],
     )
     assert result.exit_code == 0, result.stdout
@@ -487,7 +487,7 @@ def test_validate_json_output_success() -> None:
         app,
         [
             "validate",
-            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "research" / "minimal.example.json"),
             "--format",
             "json",
         ],
@@ -650,7 +650,7 @@ def test_map_descriptor_example_to_domain_battery_jsonld(tmp_path: Path) -> None
         app,
         [
             "map",
-            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "research" / "minimal.example.json"),
             "--target",
             "domain-battery",
             "--out",

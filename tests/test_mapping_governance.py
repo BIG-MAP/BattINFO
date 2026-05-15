@@ -51,7 +51,7 @@ def test_descriptor_domain_battery_output_uses_only_approved_battinfo_extensions
     policy = _load_json(policy_path)
     allowed = {item["term"] for item in policy["allowed_extensions"]}
 
-    examples_dir = ROOT / "examples" / "cell-type" / "examples"
+    examples_dir = ROOT / "examples" / "cell-type" / "research"
     for example_path in sorted(examples_dir.glob("*.example.json")):
         mapped = to_jsonld(_load_json(example_path), target="domain-battery")
         used = _collect_battinfo_terms(mapped)
@@ -60,7 +60,7 @@ def test_descriptor_domain_battery_output_uses_only_approved_battinfo_extensions
 
 def test_entity_type_map_covers_current_descriptor_core_values() -> None:
     mapping = _load_json(ROOT / "assets" / "mappings" / "domain-battery" / "entity_type_map.json")["mappings"]
-    examples_dir = ROOT / "examples" / "cell-type" / "examples"
+    examples_dir = ROOT / "examples" / "cell-type" / "research"
 
     for example_path in sorted(examples_dir.glob("*.example.json")):
         document = _load_json(example_path)

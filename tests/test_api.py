@@ -122,7 +122,7 @@ def test_template_test_protocol_accepts_new_alpha_kinds() -> None:
 
 def test_shipped_example_chain_is_consistent() -> None:
     descriptor = json.loads(
-        (ROOT / "examples" / "cell-type" / "examples" / "a123-anr26650m1-b.detailed.example.json").read_text(
+        (ROOT / "examples" / "cell-type" / "research" / "a123-anr26650m1-b.detailed.example.json").read_text(
             encoding="utf-8"
         )
     )
