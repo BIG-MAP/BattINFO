@@ -22,7 +22,7 @@ BATTERY_TYPE_MAP = {
 # published context; EMMO does not publish versioned context IRIs separately from
 # the ontology.  Context terms use UUID-based IRIs so additions are backward-
 # compatible.  The version of domain-battery this codebase was validated against
-# is recorded in ontology/battinfo.ttl (owl:imports) and in this comment: 0.18.7.
+# is recorded in battinfo.ttl (owl:imports) and in this comment: 0.18.7.
 BATTERY_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 
 MANUAL_PROPERTY_TYPES = {

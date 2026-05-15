@@ -11,8 +11,8 @@ The objective is:
 
 Source-of-truth order for the current transition state:
 - `domain-battery`
-- `ontology/battinfo.ttl`
-- `src/battinfo/data/profiles/cell-descriptor/profile.json`
+- `battinfo.ttl`
+- `src/battinfo/data/profiles/cell-type/profile.json`
 - `assets/schemas/...`
 - implementation code
 

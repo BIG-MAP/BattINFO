@@ -135,7 +135,7 @@ def test_entity_type_map_hard_carbon_anode_emits_electrode_node() -> None:
 
 def test_battinfo_application_ontology_imports_are_pinned() -> None:
     """battinfo.ttl must import domain-battery at a pinned version IRI, not a floating latest."""
-    ontology_path = ROOT / "ontology" / "battinfo.ttl"
+    ontology_path = ROOT / "battinfo.ttl"
     content = ontology_path.read_text(encoding="utf-8")
     # Versioned IRI must be present; floating (unversioned) import is not acceptable.
     assert "owl:imports <https://w3id.org/emmo/domain/battery/0.19.0/battery>" in content, (

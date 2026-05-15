@@ -63,7 +63,7 @@ Interactive Jupyter notebooks in `docs/guides/` — open from the repo root with
 
 | Layer | What it provides |
 |-------|-----------------|
-| `ontology/battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0 with pinned versioned IRIs |
+| `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0 with pinned versioned IRIs |
 | `assets/mappings/domain-battery/` | 47 curated property→EMMO-IRI mappings and 27 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 23 JSON Schema (draft 2020-12) files covering cell types, cell instances, electrodes, electrolytes, separators, tests, datasets, and organisations |
 | `src/battinfo/transform/json_to_jsonld.py` | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
@@ -103,6 +103,7 @@ Alpha verification:
 
 | Path | Contents |
 |------|----------|
+| `battinfo.ttl` | OWL application ontology |
 | `assets/` | Canonical schemas and mapping assets |
 | `examples/` | Canonical example records and guide notebooks |
 | `src/battinfo/` | Python package and CLI |

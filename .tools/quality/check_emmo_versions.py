@@ -117,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
             status = "behind"
             msg = (
                 f"{name} declared {declared} but latest is {latest}. "
-                f"Update owl:imports in ontology/battinfo.ttl and re-verify compatibility."
+                f"Update owl:imports in battinfo.ttl and re-verify compatibility."
             )
             any_behind = True
 

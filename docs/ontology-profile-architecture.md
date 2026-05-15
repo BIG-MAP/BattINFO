@@ -69,7 +69,7 @@ BDF should consume:
 
 Target BattINFO layout:
 
-- `ontology/battinfo.ttl`
+- `battinfo.ttl`
   - BattINFO application ontology
   - imports `domain-battery`
   - declares BattINFO-specific extensions only
@@ -236,7 +236,7 @@ The reverse workflow is not allowed. Do not start with ad hoc code or schema edi
 
 Recommended next implementation sequence:
 
-1. Create `ontology/battinfo.ttl`
+1. Create `battinfo.ttl`
    - import `domain-battery`
    - declare existing BattINFO-specific extension terms explicitly
 

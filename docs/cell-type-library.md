@@ -26,7 +26,7 @@ Use this order:
 3. Local working copies and rebuildable artifacts can live under `.battinfo/`
    when you want to validate or regenerate the library locally.
 
-`ontology/battinfo.ttl` should stay focused on ontology/profile terms. It
+`battinfo.ttl` should stay focused on ontology/profile terms. It
 should not become a hand-maintained dump of every commercial cell type.
 
 ## Repository Layout
@@ -41,7 +41,7 @@ should not become a hand-maintained dump of every commercial cell type.
   - output location for per-record generated RDF/JSON-LD artifacts
 - `.battinfo/library-rdf/cell-type.index.json`
   - generated manifest over the library
-- `.battinfo/ontology/library/cell-type.jsonld`
+- `.battinfo/library/cell-type.jsonld`
   - aggregated generated RDF publication artifact
 
 ## Reuse Model
@@ -85,7 +85,7 @@ This does three things:
    `.battinfo/library-rdf/cell-type/`
 3. generates:
    - `.battinfo/library-rdf/cell-type.index.json`
-   - `.battinfo/ontology/library/cell-type.jsonld`
+   - `.battinfo/library/cell-type.jsonld`
 
 ## Curation Workflow
 

@@ -2,7 +2,7 @@
 
 The context is fetched from the canonical w3id.org URL and written to
 src/battinfo/data/context/domain-battery.context.json.  Run this whenever
-upgrading the EMMO domain-battery dependency declared in ontology/battinfo.ttl.
+upgrading the EMMO domain-battery dependency declared in battinfo.ttl.
 
 Usage:
     python .tools/quality/refresh_emmo_context.py

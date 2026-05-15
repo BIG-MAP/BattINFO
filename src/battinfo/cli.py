@@ -1333,7 +1333,7 @@ def library_save_cell_type(
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path(".battinfo/ontology/library/cell-type.jsonld"),
+        Path(".battinfo/library/cell-type.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
@@ -1419,7 +1419,7 @@ def library_build_rdf(
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path(".battinfo/ontology/library/cell-type.jsonld"),
+        Path(".battinfo/library/cell-type.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(

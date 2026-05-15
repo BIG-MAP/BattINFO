@@ -1,12 +1,12 @@
 {
-  "profile_id": "https://w3id.org/battinfo/profile/cell-descriptor",
+  "profile_id": "https://w3id.org/battinfo/profile/cell-type",
   "version": "0.1.0-draft",
   "status": "draft",
   "source_of_truth_order": [
     "domain-battery",
-    "ontology/battinfo.ttl",
-    "src/battinfo/data/profiles/cell-descriptor/profile.json",
-    "assets/schemas/cell-descriptor.schema.json",
+    "battinfo.ttl",
+    "src/battinfo/data/profiles/cell-type/profile.json",
+    "assets/schemas/cell-type.schema.json",
     "src/battinfo/transform/json_to_jsonld.py"
   ],
   "semantic_policy": {
