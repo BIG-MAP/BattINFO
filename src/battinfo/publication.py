@@ -1314,10 +1314,13 @@ def _normalize_cell_specification(
         spec = source.model_copy(deep=True)
     else:
         payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
-        if isinstance(payload.get("specification"), Mapping):
-            result = validate_json(payload, profile="cell-descriptor")
+        if isinstance(payload.get("product"), Mapping):
+            result = validate_json(payload, profile="cell-type")
             if not result.ok:
                 raise ValueError(f"cell specification validation failed: {'; '.join(result.errors)}")
+            spec = CellSpecification.from_library_record(payload)
+        elif isinstance(payload.get("specification"), Mapping):
+            # Internal specification-format record — bypass cell-type schema validation.
             spec = CellSpecification.from_library_record(payload)
         else:
             spec = CellSpecification.from_json(payload)

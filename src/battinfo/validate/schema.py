@@ -15,7 +15,7 @@ from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPo
 
 PROFILE_TO_SCHEMA = {
     "base": "battinfo.base.schema.json",
-    "cell-descriptor": "cell-descriptor.schema.json",
+    "cell-type": "cell-type.schema.json",
     "cell-instance": "cell-instance.schema.json",
     "dataset": "dataset.schema.json",
     "batterypass": "profiles/batterypass.schema.json",
@@ -93,8 +93,8 @@ def _validator_code(error: ValidationError) -> str:
 
 
 def _resource_type_from_profile(profile: str | None) -> str | None:
-    if profile == "cell-descriptor":
-        return "cell-descriptor"
+    if profile == "cell-type":
+        return "cell-type"
     return None
 
 

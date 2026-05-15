@@ -19,7 +19,7 @@ def test_build_cell_type_library_rdf_from_descriptor(tmp_path: Path) -> None:
     manifest_json = tmp_path / "library-rdf" / "cell-type.index.json"
 
     input_dir.mkdir(parents=True)
-    descriptor = _load_json(ROOT / "examples" / "cell-descriptors" / "minimal.example.json")
+    descriptor = _load_json(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json")
     (input_dir / "minimal.json").write_text(json.dumps(descriptor, indent=2) + "\n", encoding="utf-8")
 
     result = subprocess.run(
@@ -46,16 +46,20 @@ def test_build_cell_type_library_rdf_from_descriptor(tmp_path: Path) -> None:
     aggregate_payload = _load_json(aggregate_jsonld)
     manifest_payload = _load_json(manifest_json)
 
+    expected_id = descriptor["product"]["id"]
+    expected_manufacturer = descriptor["product"]["manufacturer"]["name"]
+    expected_model = descriptor["product"]["model"]
+
     assert "@graph" in record_jsonld
-    assert record_jsonld["@graph"][0]["@id"] == descriptor["specification"]["id"]
+    assert record_jsonld["@graph"][0]["@id"] == expected_id
 
     assert aggregate_payload["@graph"]
-    assert aggregate_payload["@graph"][0]["@id"] == descriptor["specification"]["id"]
+    assert aggregate_payload["@graph"][0]["@id"] == expected_id
 
     assert manifest_payload["entry_count"] == 1
-    assert manifest_payload["entries"][0]["id"] == descriptor["specification"]["id"]
-    assert manifest_payload["entries"][0]["manufacturer"] == descriptor["specification"]["manufacturer"]
-    assert manifest_payload["entries"][0]["model"] == descriptor["specification"]["model"]
+    assert manifest_payload["entries"][0]["id"] == expected_id
+    assert manifest_payload["entries"][0]["manufacturer"] == expected_manufacturer
+    assert manifest_payload["entries"][0]["model"] == expected_model
 
 
 

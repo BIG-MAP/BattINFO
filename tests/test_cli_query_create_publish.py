@@ -287,7 +287,7 @@ def test_validate_defaults_to_battery_descriptor_profile() -> None:
         app,
         [
             "validate",
-            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
         ],
     )
     assert result.exit_code == 0, result.stdout
@@ -487,7 +487,7 @@ def test_validate_json_output_success() -> None:
         app,
         [
             "validate",
-            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
             "--format",
             "json",
         ],
@@ -496,7 +496,7 @@ def test_validate_json_output_success() -> None:
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert payload["mode"] == "profile"
-    assert payload["profile"] == "cell-descriptor"
+    assert payload["profile"] == "cell-type"
     assert payload["issue_count"] == 0
 
 
@@ -638,8 +638,8 @@ def test_init_defaults_to_battery_descriptor_scaffold(tmp_path: Path) -> None:
     assert scaffold_path.exists()
     scaffold = json.loads(scaffold_path.read_text(encoding="utf-8"))
     assert scaffold["schema_version"] == "1.0.0"
-    assert scaffold["specification"]["id"] == "https://w3id.org/battinfo/cell-type/0000-0000-0000-0000"
-    assert scaffold["specification"]["manufacturer"] == "ExampleManufacturer"
+    assert scaffold["product"]["id"] == "https://w3id.org/battinfo/cell-type/0000-0000-0000-0000"
+    assert scaffold["product"]["manufacturer"]["name"] == "ExampleManufacturer"
 
 
 def test_map_descriptor_example_to_domain_battery_jsonld(tmp_path: Path) -> None:
@@ -650,7 +650,7 @@ def test_map_descriptor_example_to_domain_battery_jsonld(tmp_path: Path) -> None
         app,
         [
             "map",
-            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
             "--target",
             "domain-battery",
             "--out",

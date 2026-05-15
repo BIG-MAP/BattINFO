@@ -270,18 +270,20 @@ def _load_cell_type_input(path: Path) -> CellType:
 
 
 def _init_example_document(profile: str) -> dict[str, Any]:
-    if profile == "cell-descriptor":
+    if profile == "cell-type":
         return {
             "schema_version": "1.0.0",
-            "specification": {
+            "product": {
                 "id": "https://w3id.org/battinfo/cell-type/0000-0000-0000-0000",
-                "manufacturer": "ExampleManufacturer",
+                "name": "ExampleManufacturer MODEL-001",
+                "manufacturer": {"type": "Organization", "name": "ExampleManufacturer"},
                 "model": "MODEL-001",
-                "format": "unknown",
+                "cellFormat": "unknown",
                 "chemistry": "unknown",
-                "positive_electrode_basis": "unknown",
-                "negative_electrode_basis": "unknown",
+                "positiveElectrodeBasis": "unknown",
+                "negativeElectrodeBasis": "unknown",
             },
+            "provenance": {"source_type": "manual"},
         }
 
     return {
@@ -344,7 +346,7 @@ def _render_validation_issue(issue: Any) -> str:
 @app.command()
 def validate(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    profile: str = typer.Option("cell-descriptor", help="Validation profile name."),
+    profile: str = typer.Option("cell-type", help="Validation profile name."),
     policy: str = typer.Option("default", help="Validation policy: default|strict|publisher|ingest."),
     output_format: str = typer.Option("text", "--format", help="Output format: text|json."),
     source_root: Path | None = typer.Option(
@@ -391,7 +393,7 @@ def validate(
 @app.command()
 def init(
     workspace_dir: Path = typer.Argument(...),
-    profile: str = typer.Option("cell-descriptor", help="Profile to scaffold."),
+    profile: str = typer.Option("cell-type", help="Profile to scaffold."),
 ) -> None:
     """Create a minimal workspace scaffold with an example JSON file."""
     workspace_dir.mkdir(parents=True, exist_ok=True)

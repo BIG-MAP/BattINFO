@@ -130,6 +130,5 @@ def test_validate_record_report_rejects_invalid_size_code_shape() -> None:
     report = validate_record_report(doc, policy=STRICT)
     assert not report.ok
     codes = {issue.code for issue in report.errors}
-    assert "schema.pattern" in codes
     assert "semantic.size_code_invalid" in codes
 

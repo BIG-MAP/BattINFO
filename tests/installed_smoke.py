@@ -19,7 +19,7 @@ def main() -> None:
         app,
         [
             "validate",
-            str(ROOT / "examples" / "cell-descriptors" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-type" / "examples" / "minimal.example.json"),
             "--format",
             "json",
         ],

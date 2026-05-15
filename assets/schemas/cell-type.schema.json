@@ -8,7 +8,6 @@
   "required": [
     "schema_version",
     "product",
-    "specs",
     "provenance"
   ],
   "allOf": [
@@ -97,7 +96,6 @@
       "additionalProperties": false,
       "required": [
         "id",
-        "identifier",
         "name",
         "model",
         "manufacturer",
@@ -170,7 +168,7 @@
         },
         "sizeCode": {
           "type": "string",
-          "pattern": "^[RP][A-Za-z0-9]+(?:[/-][A-Za-z0-9]+)*$"
+          "minLength": 1
         },
         "iecCode": {
           "type": "string",
@@ -207,19 +205,21 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "source_type",
-        "source_file",
-        "retrieved_at"
+        "source_type"
       ],
       "properties": {
         "source_type": {
           "type": "string",
-          "enum": [
-            "datasheet"
-          ]
+          "minLength": 1
+        },
+        "source_name": {
+          "type": "string"
         },
         "source_file": {
-          "type": "string"
+          "anyOf": [
+            {"type": "string"},
+            {"type": "null"}
+          ]
         },
         "source_url": {
           "anyOf": [
@@ -244,8 +244,14 @@
           "type": "string",
           "pattern": "^[A-Fa-f0-9]{64}$"
         },
+        "workflow_version": {
+          "type": "string"
+        },
         "retrieved_at": {
           "$ref": "#/$defs/UnixTime"
+        },
+        "comment": {
+          "type": "string"
         }
       }
     },
@@ -266,6 +272,24 @@
       "items": {
         "type": "string"
       }
+    },
+    "construction": {
+      "$ref": "modules/components/specification.schema.json#/properties/construction"
+    },
+    "positive_electrode": {
+      "$ref": "modules/components/electrode.schema.json"
+    },
+    "negative_electrode": {
+      "$ref": "modules/components/electrode.schema.json"
+    },
+    "electrolyte": {
+      "$ref": "modules/components/electrolyte.schema.json"
+    },
+    "separator": {
+      "$ref": "modules/components/specification.schema.json#/properties/separator"
+    },
+    "coin_hardware": {
+      "$ref": "modules/components/specification.schema.json#/properties/coin_hardware"
     }
   },
   "$defs": {

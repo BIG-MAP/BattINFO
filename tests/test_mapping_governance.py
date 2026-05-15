@@ -51,7 +51,7 @@ def test_descriptor_domain_battery_output_uses_only_approved_battinfo_extensions
     policy = _load_json(policy_path)
     allowed = {item["term"] for item in policy["allowed_extensions"]}
 
-    examples_dir = ROOT / "examples" / "cell-descriptors"
+    examples_dir = ROOT / "examples" / "cell-type" / "examples"
     for example_path in sorted(examples_dir.glob("*.example.json")):
         mapped = to_jsonld(_load_json(example_path), target="domain-battery")
         used = _collect_battinfo_terms(mapped)
@@ -60,14 +60,23 @@ def test_descriptor_domain_battery_output_uses_only_approved_battinfo_extensions
 
 def test_entity_type_map_covers_current_descriptor_core_values() -> None:
     mapping = _load_json(ROOT / "assets" / "mappings" / "domain-battery" / "entity_type_map.json")["mappings"]
-    examples_dir = ROOT / "examples" / "cell-descriptors"
+    examples_dir = ROOT / "examples" / "cell-type" / "examples"
 
     for example_path in sorted(examples_dir.glob("*.example.json")):
         document = _load_json(example_path)
-        specification = document["specification"]
-        for field in ("format", "chemistry", "positive_electrode_basis", "negative_electrode_basis"):
-            normalized = specification[field].strip().lower()
-            assert normalized in mapping[field], f"Missing entity mapping for {field}={specification[field]!r}"
+        product = document.get("product", {})
+        # Map cell-type camelCase fields to entity_type_map snake_case keys
+        field_map = {
+            "format": product.get("cellFormat", ""),
+            "chemistry": product.get("chemistry", ""),
+            "positive_electrode_basis": product.get("positiveElectrodeBasis", ""),
+            "negative_electrode_basis": product.get("negativeElectrodeBasis", ""),
+        }
+        for field, value in field_map.items():
+            if not value:
+                continue
+            normalized = value.strip().lower()
+            assert normalized in mapping[field], f"Missing entity mapping for {field}={value!r}"
 
 
 def _type_stack(specification: dict[str, Any]) -> list[str]:

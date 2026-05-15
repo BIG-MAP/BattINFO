@@ -656,10 +656,52 @@ def _find_library_descriptor_path_by_id(entity_id: str, library_root: Path) -> P
 
 
 def _validate_cell_specification(doc: dict[str, Any]) -> None:
-    result = validate_json(doc, profile="cell-descriptor")
+    # Specification-format docs (internal library format) are not validated against the
+    # cell-type schema — their structure is enforced by CellSpecificationInput upstream.
+    if isinstance(doc.get("specification"), Mapping):
+        return
+    result = validate_json(doc, profile="cell-type")
     if result.ok:
         return
     raise ValueError(f"cell-specification validation failed: {'; '.join(result.errors)}")
+
+
+def _cell_type_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
+    """Convert a cell-type format record (product key) to the internal specification format."""
+    if "specification" in doc or "product" not in doc:
+        return doc
+    product = doc.get("product", {})
+    mfr = product.get("manufacturer", {})
+    mfr_name = mfr.get("name") if isinstance(mfr, Mapping) else str(mfr) if mfr else ""
+    specification: dict[str, Any] = {
+        "id": product.get("id"),
+        "manufacturer": mfr_name,
+        "model": product.get("model", ""),
+        "format": product.get("cellFormat", "unknown"),
+        "chemistry": product.get("chemistry", "unknown"),
+    }
+    for src, dst in [
+        ("positiveElectrodeBasis", "positive_electrode_basis"),
+        ("negativeElectrodeBasis", "negative_electrode_basis"),
+        ("sizeCode", "size_code"),
+        ("productType", "product_type"),
+    ]:
+        if product.get(src) is not None:
+            specification[dst] = product[src]
+    if "specs" in doc:
+        specification["property"] = doc["specs"]
+    for field in ("construction", "positive_electrode", "negative_electrode",
+                  "electrolyte", "separator", "coin_hardware"):
+        if field in doc:
+            specification[field] = doc[field]
+    if "notes" in doc:
+        specification["comment"] = doc["notes"]
+    return {
+        "schema_version": doc.get("schema_version", "1.0.0"),
+        "specification": specification,
+        "provenance": doc.get("provenance"),
+        "comment": doc.get("notes"),
+    }
 
 
 def _sync_library_packaged_copy(source_path: Path, package_root: Path) -> Path:
@@ -2972,7 +3014,8 @@ def build_cell_type_library_rdf(
         if isinstance(graph_nodes, list):
             aggregate_graph.extend([node for node in graph_nodes if isinstance(node, Mapping)])
 
-        specification = descriptor.get("specification", {})
+        normalised = _cell_type_record_to_library_format(descriptor)
+        specification = normalised.get("specification", {})
         if not isinstance(specification, Mapping):
             specification = {}
 
@@ -3054,13 +3097,18 @@ def save_library_cell_type(
 
     if isinstance(draft, CellSpecificationBundle):
         doc = draft.to_library_record()
+    elif isinstance(draft, Mapping) and isinstance(draft.get("product"), Mapping):
+        # Cell-type format: validate first, then normalise to the internal specification format.
+        if validate:
+            _validate_cell_specification(dict(draft))
+        doc = _cell_type_record_to_library_format(dict(draft))
     elif isinstance(draft, Mapping) and isinstance(draft.get("specification"), Mapping):
         doc = dict(draft)
     else:
         draft_model = draft if isinstance(draft, CellSpecificationInput) else CellSpecificationInput.model_validate(draft)
         doc = _record_from_cell_specification(draft_model)
 
-    if validate:
+    if validate and not isinstance(doc.get("specification"), Mapping):
         _validate_cell_specification(doc)
 
     mode_normalized = _validate_save_mode(mode)

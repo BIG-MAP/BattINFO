@@ -122,7 +122,7 @@ def test_template_test_protocol_accepts_new_alpha_kinds() -> None:
 
 def test_shipped_example_chain_is_consistent() -> None:
     descriptor = json.loads(
-        (ROOT / "examples" / "cell-descriptors" / "a123-anr26650m1-b.example.json").read_text(
+        (ROOT / "examples" / "cell-type" / "examples" / "a123-anr26650m1-b.detailed.example.json").read_text(
             encoding="utf-8"
         )
     )
@@ -143,8 +143,8 @@ def test_shipped_example_chain_is_consistent() -> None:
         )
     )
 
-    assert descriptor["specification"]["id"] == cell_type["product"]["id"]
-    assert descriptor["specification"]["id"] == cell_instance["cell_instance"]["type_id"]
+    assert descriptor["product"]["id"] == cell_type["product"]["id"]
+    assert descriptor["product"]["id"] == cell_instance["cell_instance"]["type_id"]
     assert cell_instance["cell_instance"]["id"] == test_record["test"]["cell_id"]
     assert test_record["test"]["id"] in dataset["dataset"]["about"]
     assert cell_instance["cell_instance"]["id"] in dataset["dataset"]["about"]

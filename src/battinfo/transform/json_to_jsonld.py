@@ -200,7 +200,7 @@ def _load_mapping_file(*parts: str) -> dict[str, Any]:
 
 
 def _load_profile_file(*parts: str) -> dict[str, Any]:
-    packaged_path = resources.files("battinfo").joinpath("data", "profiles", "cell-descriptor", *parts)
+    packaged_path = resources.files("battinfo").joinpath("data", "profiles", "cell-type", *parts)
     if packaged_path.is_file():
         with packaged_path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
@@ -1446,6 +1446,35 @@ def _to_domain_battery_jsonld_descriptor(data: dict[str, Any]) -> dict[str, Any]
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("specification"), dict) and data.get("schema_version") is not None:
         return _to_domain_battery_jsonld_descriptor(data)
+    if isinstance(data.get("product"), dict) and data.get("schema_version") is not None:
+        # Cell-type record: normalise to descriptor shape and reuse the descriptor path.
+        product = data["product"]
+        specification: dict[str, Any] = {
+            "id": product.get("id"),
+            "manufacturer": (product.get("manufacturer") or {}).get("name") or product.get("manufacturer", ""),
+            "model": product.get("model", ""),
+            "format": product.get("cellFormat", "unknown"),
+            "chemistry": product.get("chemistry", "unknown"),
+            "positive_electrode_basis": product.get("positiveElectrodeBasis", ""),
+            "negative_electrode_basis": product.get("negativeElectrodeBasis", ""),
+        }
+        if "sizeCode" in product:
+            specification["size_code"] = product["sizeCode"]
+        for field in ("construction", "positive_electrode", "negative_electrode",
+                      "electrolyte", "separator", "coin_hardware"):
+            if field in data:
+                specification[field] = data[field]
+        if "specs" in data:
+            specification["property"] = data["specs"]
+        if "notes" in data:
+            specification["comment"] = data["notes"]
+        descriptor = {
+            "schema_version": data.get("schema_version"),
+            "specification": specification,
+            "provenance": data.get("provenance"),
+            "comment": data.get("notes"),
+        }
+        return _to_domain_battery_jsonld_descriptor(descriptor)
     return _to_domain_battery_jsonld_legacy(data)
 
 

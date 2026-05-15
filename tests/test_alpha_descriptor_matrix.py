@@ -16,7 +16,7 @@ def _load_json(path: Path) -> dict:
 
 
 def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path: Path) -> None:
-    examples_dir = ROOT / "examples" / "cell-descriptors"
+    examples_dir = ROOT / "examples" / "cell-type" / "examples"
     example_names = [
         "alpha-coin-detailed.example.json",
         "alpha-cylindrical-detailed.example.json",
@@ -33,7 +33,7 @@ def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path:
 
     for example_name in example_names:
         record = _load_json(examples_dir / example_name)
-        result = validate_json(record, profile="cell-descriptor")
+        result = validate_json(record, profile="cell-type")
         assert result.ok, f"{example_name} failed validation: {result.errors}"
 
         payload = save_library_cell_type(

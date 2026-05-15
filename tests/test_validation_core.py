@@ -27,14 +27,15 @@ from battinfo.validate import (
 def test_validate_json_report_exposes_structured_schema_issue() -> None:
     doc = {
         "schema_version": "1.0.0",
-        "specification": {
+        "product": {
             "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
-            "manufacturer": "A123",
+            "name": "A123 ANR26650M1-B",
+            "manufacturer": {"type": "Organization", "name": "A123"},
             "model": "ANR26650M1-B",
-            "format": "cylindrical",
+            "cellFormat": "cylindrical",
             "chemistry": "Li-ion",
-            "positive_electrode_basis": "LFP",
-            "negative_electrode_basis": "graphite",
+            "positiveElectrodeBasis": "LFP",
+            "negativeElectrodeBasis": "graphite",
         },
         "provenance": {
             "source_type": "datasheet",
@@ -42,28 +43,29 @@ def test_validate_json_report_exposes_structured_schema_issue() -> None:
             "retrieved_at": "not-an-integer",
         },
     }
-    report = validate_json_report(doc, profile="cell-descriptor")
+    report = validate_json_report(doc, profile="cell-type")
     assert not report.ok
     assert report.policy.name == "default"
     assert report.errors
     issue = report.errors[0]
     assert issue.code == "schema.type"
     assert issue.path == "provenance.retrieved_at"
-    assert issue.profile == "cell-descriptor"
+    assert issue.profile == "cell-type"
     assert issue.validator == "type"
 
 
 def test_validate_json_result_preserves_structured_issues() -> None:
     doc = {
         "schema_version": "1.0.0",
-        "specification": {
+        "product": {
             "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
-            "manufacturer": "A123",
+            "name": "A123 ANR26650M1-B",
+            "manufacturer": {"type": "Organization", "name": "A123"},
             "model": "ANR26650M1-B",
-            "format": "cylindrical",
+            "cellFormat": "cylindrical",
             "chemistry": "Li-ion",
-            "positive_electrode_basis": "LFP",
-            "negative_electrode_basis": "graphite",
+            "positiveElectrodeBasis": "LFP",
+            "negativeElectrodeBasis": "graphite",
         },
         "provenance": {
             "source_type": "datasheet",
@@ -71,7 +73,7 @@ def test_validate_json_result_preserves_structured_issues() -> None:
             "retrieved_at": "not-an-integer",
         },
     }
-    result = validate_json(doc, profile="cell-descriptor")
+    result = validate_json(doc, profile="cell-type")
     assert not result.ok
     assert result.policy == "default"
     assert result.issues

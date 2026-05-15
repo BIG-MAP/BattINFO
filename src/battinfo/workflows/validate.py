@@ -6,7 +6,7 @@ from battinfo.validate.pydantic import ValidationResult, validate_json
 from battinfo.validate.record import validate_record
 
 
-def run_validation(data: dict[str, Any], profile: str = "cell-descriptor") -> ValidationResult:
+def run_validation(data: dict[str, Any], profile: str = "cell-type") -> ValidationResult:
     return validate_json(data, profile=profile)
 
 
