@@ -7,9 +7,10 @@ fixtures and examples that are meant to be validated, queried, published, or
 referenced from tests and docs.
 
 Key folders:
-- `cell-type/` Canonical cell type examples derived from datasheets.
-- `cell-instances/` Example physical cell instances derived from types.
-- `tests/` Example explicit test activities performed on physical cell instances.
-- `dataset/` Example BattINFO dataset records linked to cells/tests.
-- `profiles/` Profile-specific examples (for example Battery Pass).
+- `cell-type/` Canonical commercial cell-type records (datasheet-derived). `cell-type/research/` holds material-grade descriptor examples with electrode/electrolyte/separator detail.
+- `cell-instances/` Physical cell instance records linked to a cell type.
+- `tests/` Test activity records — one per canonical test kind (cycle_life, rate_capability, formation, HPPC, ICI, GITT, DCIR, EIS).
+- `test-protocols/` Reusable test protocol records referenced by tests.
+- `dataset/` Dataset records linked to cells and tests.
+- `organizations/` Organisation records for labs and manufacturers.
 
