@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/2k9p-7t4r-3m6x-5n1v",
+    "id": "https://w3id.org/battinfo/spec/2k9p-7t4r-3m6x-5n1v",
     "short_id": "2k9p7t",
     "identifier": "test-protocol:2k9p-7t4r-3m6x-5n1v",
     "name": "EIS at 50% SOC, 25°C",
@@ -44,11 +44,26 @@
   },
   "termination_criteria": {},
   "measurement_outputs": [
-    { "name": "Frequency", "unit_text": "Hz" },
-    { "name": "ImpedanceMagnitude", "unit_text": "Ohm" },
-    { "name": "PhaseAngle", "unit_text": "deg" },
-    { "name": "RealImpedance", "unit_text": "Ohm" },
-    { "name": "ImaginaryImpedance", "unit_text": "Ohm" }
+    {
+      "name": "Frequency",
+      "unit_text": "Hz"
+    },
+    {
+      "name": "ImpedanceMagnitude",
+      "unit_text": "Ohm"
+    },
+    {
+      "name": "PhaseAngle",
+      "unit_text": "deg"
+    },
+    {
+      "name": "RealImpedance",
+      "unit_text": "Ohm"
+    },
+    {
+      "name": "ImaginaryImpedance",
+      "unit_text": "Ohm"
+    }
   ],
   "provenance": {
     "source_type": "manual",

@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/1c4m-7p9q-2k6t-8v3r",
+    "id": "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r",
     "name": "AlphaLab COIN-LFP-2032",
     "manufacturer": {
       "type": "Organization",
       "name": "AlphaLab"
     },
     "model": "COIN-LFP-2032",
-    "cellFormat": "coin",
+    "cell_format": "coin",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "graphite",
-    "sizeCode": "2032"
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "size_code": "2032"
   },
   "specs": {
     "nominal_capacity": {

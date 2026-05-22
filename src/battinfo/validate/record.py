@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
-from battinfo.canonical_aliases import record_to_legacy_aliases
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationPolicy,
@@ -53,7 +53,7 @@ def validate_record_report(
     source_root: str | Path | None = None,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
-    normalized_doc = record_to_legacy_aliases(doc)
+    normalized_doc = record_to_snake_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     reports: list[ValidationReport] = []
     resource_type = _resource_type(normalized_doc)

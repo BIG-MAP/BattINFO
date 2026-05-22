@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/5j9r-4k7p-2m8t-6v3q",
+    "id": "https://w3id.org/battinfo/spec/5j9r-4k7p-2m8t-6v3q",
     "name": "AlphaLab PRISM-LFP-020",
     "manufacturer": {
       "type": "Organization",
       "name": "AlphaLab"
     },
     "model": "PRISM-LFP-020",
-    "cellFormat": "prismatic",
+    "cell_format": "prismatic",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "graphite"
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite"
   },
   "specs": {
     "nominal_capacity": {

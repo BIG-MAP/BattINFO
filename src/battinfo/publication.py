@@ -26,7 +26,7 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.canonical_aliases import record_to_legacy_aliases
+from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -119,7 +119,7 @@ def _as_path(path: PathLike) -> Path:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
+    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -165,23 +165,34 @@ def _stable_uid(seed: str) -> str:
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
+_PUB_IRI_NAMESPACE: dict[str, str] = {
+    "cell-type": "spec",
+    "cell": "cell",
+    "test-protocol": "spec",
+    "test": "test",
+    "dataset": "dataset",
+    "organization": "organization",
+    "electrode": "electrode",
+    "material": "material",
+}
+
+_BATTINFO_BASE = "https://w3id.org/battinfo/"
+
+
 def _entity_iri(entity_type: str, seed: str) -> str:
-    return f"https://w3id.org/battinfo/{entity_type}/{_stable_uid(seed)}"
+    namespace = _PUB_IRI_NAMESPACE.get(entity_type, entity_type)
+    return f"{_BATTINFO_BASE}{namespace}/{_stable_uid(seed)}"
 
 
 def _cell_specification_iri(entity_id: str) -> str:
-    if "/cell-specification/" in entity_id:
+    if entity_id.startswith(_BATTINFO_BASE):
         return entity_id
-    if "/cell-type/" in entity_id:
-        return entity_id.replace("/cell-type/", "/cell-specification/")
     return _entity_iri("cell-specification", entity_id)
 
 
 def _cell_type_iri(entity_id: str) -> str:
-    if "/cell-type/" in entity_id:
+    if entity_id.startswith(_BATTINFO_BASE):
         return entity_id
-    if "/cell-specification/" in entity_id:
-        return entity_id.replace("/cell-specification/", "/cell-type/")
     return _entity_iri("cell-type", entity_id)
 
 
@@ -329,8 +340,8 @@ def _distribution_entries(dataset_dir: Path, files: list[Path]) -> list[dict[str
 
 
 def _schema_distribution_node(value: Mapping[str, Any], *, part_of_id: str) -> dict[str, Any] | None:
-    content_url = value.get("contentUrl")
-    encoding_format = value.get("encodingFormat")
+    content_url = value.get("content_url") or value.get("contentUrl")
+    encoding_format = value.get("encoding_format") or value.get("encodingFormat")
     checksum = value.get("checksum")
     if not isinstance(content_url, str) and not isinstance(encoding_format, str) and not isinstance(checksum, Mapping):
         return None
@@ -345,10 +356,10 @@ def _schema_distribution_node(value: Mapping[str, Any], *, part_of_id: str) -> d
         node["schema:contentUrl"] = content_url
     if isinstance(encoding_format, str):
         node["schema:encodingFormat"] = encoding_format
-    content_size = value.get("contentSize")
+    content_size = value.get("content_size") or value.get("contentSize")
     if isinstance(content_size, str):
         node["schema:contentSize"] = content_size
-    access_level = value.get("accessLevel")
+    access_level = value.get("access_level") or value.get("accessLevel")
     if isinstance(access_level, str):
         node["schema:accessLevel"] = access_level
     node["schema:isPartOf"] = {"@id": part_of_id}
@@ -433,7 +444,7 @@ def _schema_agent_node(value: Any) -> dict[str, Any] | None:
     family_name = value.get("family_name")
     if isinstance(family_name, str):
         node["schema:familyName"] = family_name
-    same_as = value.get("sameAs")
+    same_as = value.get("same_as") or value.get("sameAs")
     if isinstance(same_as, str):
         node["schema:sameAs"] = same_as
     affiliation = value.get("affiliation")
@@ -480,7 +491,7 @@ def _schema_data_catalog_node(value: Any) -> Any:
     url = value.get("url")
     if isinstance(url, str):
         node["schema:url"] = url
-    same_as = value.get("sameAs")
+    same_as = value.get("same_as") or value.get("sameAs")
     if isinstance(same_as, str):
         node["schema:sameAs"] = same_as
     description = value.get("description")
@@ -530,7 +541,7 @@ def _schema_variable_measured(values: list[dict[str, Any]]) -> list[dict[str, An
         unit_text = value.get("unit_text")
         if isinstance(unit_text, str):
             node["schema:unitText"] = unit_text
-        same_as = value.get("sameAs")
+        same_as = value.get("same_as") or value.get("sameAs")
         if isinstance(same_as, str):
             node["schema:sameAs"] = same_as
             node["schema:propertyID"] = same_as
@@ -562,7 +573,7 @@ def _schema_table_column_node(value: Mapping[str, Any]) -> dict[str, Any] | None
     unit_text = value.get("unit_text")
     if isinstance(unit_text, str):
         node["schema:unitText"] = unit_text
-    same_as = value.get("sameAs")
+    same_as = value.get("same_as") or value.get("sameAs")
     if isinstance(same_as, str):
         node["schema:sameAs"] = same_as
         node["schema:propertyID"] = same_as
@@ -593,7 +604,7 @@ def _schema_table_schema_node(value: Any) -> dict[str, Any] | str | None:
         node["schema:name"] = value["name"]
     if isinstance(value.get("description"), str):
         node["schema:description"] = value["description"]
-    primary_key = value.get("primaryKey")
+    primary_key = value.get("primary_key") or value.get("primaryKey")
     if isinstance(primary_key, str):
         node["csvw:primaryKey"] = primary_key
     elif isinstance(primary_key, list):
@@ -609,7 +620,7 @@ def _schema_main_entity_node(value: Mapping[str, Any]) -> dict[str, Any] | None:
         node_type = node_type.split(":", 1)[1]
     if node_type == "Table":
         url = value.get("url")
-        table_schema = value.get("tableSchema")
+        table_schema = value.get("table_schema") or value.get("tableSchema")
         resolved_table_schema = _schema_table_schema_node(table_schema)
         if not isinstance(url, str) or resolved_table_schema is None:
             return None
@@ -626,7 +637,7 @@ def _schema_main_entity_node(value: Mapping[str, Any]) -> dict[str, Any] | None:
             node["schema:description"] = value["description"]
         return node
     if node_type == "TableGroup":
-        table_items = value.get("table")
+        table_items = value.get("tables") or value.get("table")
         if not isinstance(table_items, list):
             return None
         tables = [table for item in table_items if isinstance(item, Mapping) and (table := _schema_main_entity_node(item)) is not None]
@@ -1263,7 +1274,9 @@ def _publication_graph(
     include_csvw = bool(dataset.main_entity)
     graph = [_cell_type_jsonld_node(cell_type, cell_specification=cell_specification)]
     if cell_specification is not None:
-        graph.append(_cell_specification_jsonld_node(cell_specification, cell_type=cell_type))
+        # Use upsert so that if cell-type and cell-specification share the same IRI
+        # (both now use the cell/ namespace) their nodes are merged rather than duplicated.
+        _upsert_graph_node(graph, _cell_specification_jsonld_node(cell_specification, cell_type=cell_type))
 
     _upsert_graph_node(graph, _cell_instance_summary_node(cell_instance_record, label=instance_label, cell_type=cell_type))
     _upsert_graph_node(graph, _test_jsonld_node(test_record, dataset_id=dataset_record["dataset"]["id"]))
@@ -2005,7 +2018,7 @@ def _zenodo_publication_graph(
         _cell_type_jsonld_node(record.cell_type, cell_specification=record.cell_specification)
     ]
     if record.cell_specification is not None:
-        graph.append(_cell_specification_jsonld_node(record.cell_specification, cell_type=record.cell_type))
+        _upsert_graph_node(graph, _cell_specification_jsonld_node(record.cell_specification, cell_type=record.cell_type))
 
     all_dataset_refs: list[dict[str, str]] = []
     for i, entry in enumerate(record.datasets):

@@ -280,7 +280,7 @@ The 16-character Base32 UID:
 
 BattINFO `cell-type` identifiers MUST remain opaque and policy-compliant:
 
-- `https://w3id.org/battinfo/cell-type/{uid}`
+- `https://w3id.org/battinfo/cell/{uid}`
 
 Human-readable model/manufacturer semantics MUST NOT be encoded in the canonical identifier.
 

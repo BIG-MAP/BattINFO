@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/pvn1-43h7-rm3e-mjqq",
+    "id": "https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq",
     "name": "A123 ANR26650M1-B",
     "manufacturer": {
       "type": "Organization",
       "name": "A123"
     },
     "model": "ANR26650M1-B",
-    "cellFormat": "cylindrical",
+    "cell_format": "cylindrical",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "graphite",
-    "sizeCode": "R26650"
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "size_code": "R26650"
   },
   "specs": {
     "nominal_capacity": {

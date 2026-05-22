@@ -6,7 +6,7 @@ from functools import lru_cache
 from importlib import resources
 from typing import Any, Mapping
 
-from battinfo.canonical_aliases import record_to_legacy_aliases
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -43,7 +43,19 @@ SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
     "nominal_continuous_discharging_current": {"a", "ma", "c"},
     "maximum_continuous_discharging_current": {"a", "ma", "c"},
     "charging_time": {"s", "sec", "second", "seconds", "min", "minute", "minutes", "h", "hr", "hour", "hours"},
+    "nominal_energy": {"wh", "kwh", "mwh"},
+    "certified_usable_energy": {"wh", "kwh", "mwh"},
     "cycle_life": {"count", "cycle", "cycles"},
+    "cycle_life_c_rate": {"c", "a/ah"},
+    "calendar_life": {"year", "years", "month", "months", "day", "days"},
+    "capacity_fade": {"%", "percent"},
+    "capacity_threshold_exhaustion": {"%", "percent"},
+    "power_capability": {"w", "kw", "mw"},
+    "maximum_power": {"w", "kw", "mw"},
+    "power_energy_ratio": {"w/wh", "kw/kwh"},
+    "round_trip_energy_efficiency": {"%", "percent"},
+    "round_trip_energy_efficiency_50pct": {"%", "percent"},
+    "dc_internal_resistance": {"ω", "ohm", "mω", "mohm", "milliohm"},
     "diameter": {"mm", "cm", "m", "um", "μm"},
     "height": {"mm", "cm", "m", "um", "μm"},
     "width": {"mm", "cm", "m", "um", "μm"},
@@ -75,7 +87,7 @@ PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
 )
 
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
-CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/cell-type/"
+CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/spec/"  # cell specs use the spec/ namespace
 
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
     "cell-type": ("product", "cell_type"),
@@ -224,10 +236,10 @@ def _validate_controlled_values(
         return
     value_map = _controlled_value_map()
     field_map = {
-        "cellFormat": "format",
+        "cell_format": "format",
         "chemistry": "chemistry",
-        "positiveElectrodeBasis": "positive_electrode_basis",
-        "negativeElectrodeBasis": "negative_electrode_basis",
+        "positive_electrode_basis": "positive_electrode_basis",
+        "negative_electrode_basis": "negative_electrode_basis",
     }
     for field, mapping_key in field_map.items():
         value = product.get(field)
@@ -256,7 +268,7 @@ def _validate_size_code(
     product = doc.get("product")
     if not isinstance(product, Mapping):
         return
-    size_code = product.get("sizeCode")
+    size_code = product.get("size_code")
     if not isinstance(size_code, str) or not size_code.strip():
         return
     normalized = size_code.strip()
@@ -265,13 +277,13 @@ def _validate_size_code(
             issues,
             code="semantic.size_code_invalid",
             severity=issue_severity,
-            path="product.sizeCode",
+            path="product.size_code",
             message="sizeCode must start with 'R' or 'P', for example 'R26650', 'P20/50/50', or 'P20-50-50'.",
             resource_type=resource_type,
         )
         return
 
-    format_value = product.get("cellFormat")
+    format_value = product.get("cell_format")
     if not isinstance(format_value, str):
         return
     format_key = format_value.strip().lower()
@@ -286,7 +298,7 @@ def _validate_size_code(
             issues,
             code="semantic.size_code_prefix_mismatch",
             severity=issue_severity,
-            path="product.sizeCode",
+            path="product.size_code",
             message=f"sizeCode '{size_code}' must start with '{expected_prefix}' for cellFormat '{format_value}'.",
             resource_type=resource_type,
         )
@@ -305,12 +317,13 @@ def _validate_specs(
         if unit is not None and spec_name in SPEC_UNIT_COMPATIBILITY:
             normalized = _normalized_unit(unit)
             if normalized not in SPEC_UNIT_COMPATIBILITY[spec_name]:
+                valid = ", ".join(sorted(SPEC_UNIT_COMPATIBILITY[spec_name]))
                 _append_issue(
                     issues,
                     code="semantic.unit_mismatch",
                     severity=issue_severity,
                     path=f"specs.{spec_name}",
-                    message=f"unit '{unit}' is not compatible with spec '{spec_name}'.",
+                    message=f"unit '{unit}' is not compatible with spec '{spec_name}' (valid: {valid}).",
                     resource_type=resource_type,
                 )
 
@@ -402,16 +415,16 @@ def _validate_dataset_semantics(
             resource_type=resource_type,
         )
 
-    created = dataset.get("dateCreated")
-    modified = dataset.get("dateModified")
-    published = dataset.get("datePublished")
+    created = dataset.get("created_at")
+    modified = dataset.get("modified_at")
+    published = dataset.get("published_at")
     if isinstance(created, int) and isinstance(modified, int) and modified < created:
         _append_issue(
             issues,
             code="semantic.temporal_order_invalid",
             severity=issue_severity,
-            path="dataset.dateModified",
-            message=f"dateModified {modified} must be >= dateCreated {created}.",
+            path="dataset.modified_at",
+            message=f"modified_at {modified} must be >= created_at {created}.",
             resource_type=resource_type,
         )
     if isinstance(created, int) and isinstance(published, int) and published < created:
@@ -419,12 +432,12 @@ def _validate_dataset_semantics(
             issues,
             code="semantic.temporal_order_invalid",
             severity=issue_severity,
-            path="dataset.datePublished",
-            message=f"datePublished {published} must be >= dateCreated {created}.",
+            path="dataset.published_at",
+            message=f"published_at {published} must be >= created_at {created}.",
             resource_type=resource_type,
         )
 
-    distributions = dataset.get("distribution")
+    distributions = dataset.get("distributions")
     if isinstance(distributions, list):
         for idx, distribution in enumerate(distributions):
             if not isinstance(distribution, Mapping):
@@ -445,7 +458,7 @@ def _validate_dataset_semantics(
                     issues,
                     code="semantic.checksum_invalid",
                     severity=issue_severity,
-                    path=f"dataset.distribution[{idx}].checksum.value",
+                    path=f"dataset.distributions[{idx}].checksum.value",
                     message=f"checksum for algorithm '{algorithm}' must be {expected_length} hex characters.",
                     resource_type=resource_type,
                 )
@@ -475,7 +488,7 @@ def validate_semantic_report(
     *,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
-    doc = record_to_legacy_aliases(doc)
+    doc = record_to_snake_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     if resolved_policy.semantic == "off":
         return ValidationReport(policy=resolved_policy)

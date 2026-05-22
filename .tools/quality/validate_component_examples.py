@@ -24,7 +24,7 @@ EXAMPLES = [
     ("examples/components/lfp-active-material.example.json",
      "https://w3id.org/battinfo/schema/modules/components/material-component.schema.json"),
     # organization example
-    ("examples/organizations/SINTEF.json",
+    ("examples/organization/SINTEF.json",
      "https://w3id.org/battinfo/schema/organization.schema.json"),
 ]
 

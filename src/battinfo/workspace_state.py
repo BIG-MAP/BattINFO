@@ -96,7 +96,7 @@ class WorkspacePaths(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     cell_types: str = "records/cell-type"
-    cells: str = "records/cell-instances"
+    cells: str = "records/cell-instance"
     tests: str = "records/tests"
     datasets: str = "records/dataset"
 
@@ -655,8 +655,8 @@ class WorkspaceStateStore:
     def _write_record_groups(self, records: dict[str, list[dict[str, Any]]], *, target_root: Path) -> None:
         groups = {
             "cell_types": target_root / "cell-type",
-            "cell_instances": target_root / "cell-instances",
-            "tests": target_root / "tests",
+            "cell_instances": target_root / "cell-instance",
+            "tests": target_root / "test",
             "datasets": target_root / "dataset",
         }
         for key, path in groups.items():

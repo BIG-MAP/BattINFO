@@ -54,9 +54,9 @@ Dataset linkage policy for alpha:
 - descriptor:
   - `examples/cell-descriptors/a123-anr26650m1-b.example.json`
 - cell instance:
-  - `examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json`
+  - `examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json`
 - test:
-  - `examples/tests/test-5p7v-2n8k-4m3t-6q9r.json`
+  - `examples/test/test-5p7v-2n8k-4m3t-6q9r.json`
 - dataset:
   - `examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json`
 
@@ -67,7 +67,7 @@ Example commands:
 ```powershell
 battinfo validate examples/cell-descriptors/a123-anr26650m1-b.example.json
 
-battinfo save cell-instance --type-id https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5 --uid 3m6k9t2p7x4h9nq8 --source-type lab
+battinfo save cell-instance --type-id https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5 --uid 3m6k9t2p7x4h9nq8 --source-type lab
 
 battinfo save test --cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8 --name "Baseline cycling" --kind cycle_life --uid 5p7v2n8k4m3t6q9r
 
@@ -77,7 +77,7 @@ battinfo save dataset --title "Baseline cycling dataset" --related-cell-id https
 Query commands over the linked chain:
 
 ```powershell
-battinfo query cell-instances --type-id https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5 --has-dataset --format json
+battinfo query cell-instances --type-id https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5 --has-dataset --format json
 
 battinfo query tests --cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8 --format json
 

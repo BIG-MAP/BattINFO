@@ -17,7 +17,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "manufacturer": {
       "type": "string",
@@ -107,11 +107,11 @@
     "electrolyte": {
       "$ref": "electrolyte.schema.json"
     },
-    "separator": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "material"
+        "separator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "material"
       ],
       "properties": {
             "material": {

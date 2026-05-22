@@ -34,7 +34,7 @@ from battinfo.zenodo import ZenodoClient, _build_zenodo_metadata, upload_zenodo_
 
 # ── helpers ────────────────────────────────────────────────────────────────────
 
-CELL_TYPE_ID = "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj"
+CELL_TYPE_ID = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 CREATORS = [{"name": "Clark, Simon", "affiliation": "SINTEF"}]
 
 

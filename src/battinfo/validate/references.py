@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-from battinfo.canonical_aliases import record_to_legacy_aliases
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -15,17 +15,17 @@ from battinfo.validate.core import (
     get_validation_policy,
 )
 
-CELL_TYPE_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+SPEC_IRI_RE = re.compile(
+    r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
+# Aliases kept for clarity — cell specs and test protocols both use spec/ namespace
+CELL_TYPE_IRI_RE = SPEC_IRI_RE
+TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
 CELL_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
 DATASET_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-TEST_PROTOCOL_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/test-protocol/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
 TEST_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
@@ -33,7 +33,7 @@ TEST_IRI_RE = re.compile(
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
+    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _iri_tail(iri: str) -> tuple[str, str]:
@@ -77,11 +77,11 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     if entity_type == "cell-type":
         directory = source_root / "cell-type"
     elif entity_type == "cell":
-        directory = source_root / "cell-instances"
+        directory = source_root / "cell-instance"
     elif entity_type == "test-protocol":
-        directory = source_root / "test-protocols"
+        directory = source_root / "test-protocol"
     elif entity_type == "test":
-        directory = source_root / "tests"
+        directory = source_root / "test"
     elif entity_type == "dataset":
         directory = source_root / "dataset"
     else:
@@ -96,35 +96,44 @@ def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
     if entity_type == "cell-type":
         return source_root / "cell-type" / filename
     if entity_type == "cell":
-        return source_root / "cell-instances" / filename
+        return source_root / "cell-instance" / filename
     if entity_type == "test-protocol":
-        return source_root / "test-protocols" / filename
+        return source_root / "test-protocol" / filename
     if entity_type == "test":
-        return source_root / "tests" / filename
+        return source_root / "test" / filename
     if entity_type == "dataset":
         return source_root / "dataset" / filename
     raise ValueError(f"Unsupported entity type: {entity_type}")
 
 
+def _candidate_types(namespace: str) -> list[str]:
+    # cell/ covers both cell-type specs and cell instances (shared IRI namespace).
+    # test/ covers both test-protocol specs and test executions.
+    if namespace == "spec":
+        return ["cell-type", "test-protocol"]
+    return [namespace]
+
+
 def _find_record(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
-    entity_type, uid = _iri_tail(entity_id)
-    expected = _save_entity_path(entity_type, uid, source_root)
-    if expected.exists():
-        try:
-            doc = _load_json(expected)
-            if _entity_id(doc) == entity_id:
-                return expected, _entity_type_from_doc(doc)
-        except Exception:  # noqa: BLE001
-            pass
-    for path in _iter_entity_files(entity_type, source_root):
-        if path == expected:
-            continue
-        try:
-            doc = _load_json(path)
-            if _entity_id(doc) == entity_id:
-                return path, _entity_type_from_doc(doc)
-        except Exception:  # noqa: BLE001
-            continue
+    namespace, uid = _iri_tail(entity_id)
+    for entity_type in _candidate_types(namespace):
+        expected = _save_entity_path(entity_type, uid, source_root)
+        if expected.exists():
+            try:
+                doc = _load_json(expected)
+                if _entity_id(doc) == entity_id:
+                    return expected, _entity_type_from_doc(doc)
+            except Exception:  # noqa: BLE001
+                pass
+        for path in _iter_entity_files(entity_type, source_root):
+            if path == expected:
+                continue
+            try:
+                doc = _load_json(path)
+                if _entity_id(doc) == entity_id:
+                    return path, _entity_type_from_doc(doc)
+            except Exception:  # noqa: BLE001
+                continue
     return None
 
 

@@ -22,7 +22,7 @@
         "id",
         "identifier",
         "name",
-        "url"
+        "access_url"
       ],
       "properties": {
         "id": {
@@ -41,11 +41,11 @@
         "description": {
           "type": "string"
         },
-        "url": {
+        "access_url": {
           "type": "string",
           "format": "uri"
         },
-        "sameAs": {
+        "same_as": {
           "type": "array",
           "items": {
             "type": "string",
@@ -60,7 +60,7 @@
           },
           "uniqueItems": true
         },
-        "additionalType": {
+        "additional_type": {
           "anyOf": [
             {
               "type": "string",
@@ -100,7 +100,7 @@
           },
           "uniqueItems": true
         },
-        "creator": {
+        "creators": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/PersonOrOrganization"
@@ -110,20 +110,20 @@
         "publisher": {
           "$ref": "#/$defs/Organization"
         },
-        "funder": {
+        "funders": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/PersonOrOrganization"
           },
           "minItems": 1
         },
-        "citation": {
+        "citations": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/Citation"
           }
         },
-        "measurementTechnique": {
+        "measurement_techniques": {
           "type": "array",
           "items": {
             "anyOf": [
@@ -139,7 +139,7 @@
           },
           "uniqueItems": true
         },
-        "measurementMethod": {
+        "measurement_methods": {
           "type": "array",
           "items": {
             "anyOf": [
@@ -155,45 +155,45 @@
           },
           "uniqueItems": true
         },
-        "variableMeasured": {
+        "variable_measured": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/VariableMeasured"
           }
         },
-        "isAccessibleForFree": {
+        "is_accessible_for_free": {
           "type": "boolean"
         },
-        "conditionsOfAccess": {
+        "conditions_of_access": {
           "type": "string"
         },
-        "inLanguage": {
+        "in_language": {
           "type": "string",
           "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
         },
-        "dateCreated": {
+        "created_at": {
           "$ref": "#/$defs/UnixTime"
         },
-        "dateModified": {
+        "modified_at": {
           "$ref": "#/$defs/UnixTime"
         },
-        "datePublished": {
+        "published_at": {
           "$ref": "#/$defs/UnixTime"
         },
-        "temporalCoverage": {
+        "temporal_coverage": {
           "type": "string"
         },
-        "spatialCoverage": {
+        "spatial_coverage": {
           "type": "string"
         },
-        "distribution": {
+        "distributions": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/DataDistribution"
           },
           "minItems": 1
         },
-        "mainEntity": {
+        "main_entity": {
           "anyOf": [
             {
               "$ref": "#/$defs/CsvwMainEntity"
@@ -207,7 +207,7 @@
             }
           ]
         },
-        "isBasedOn": {
+        "is_based_on": {
           "type": "array",
           "items": {
             "type": "string",
@@ -215,7 +215,7 @@
           },
           "uniqueItems": true
         },
-        "includedInDataCatalog": {
+        "included_in_data_catalog": {
           "anyOf": [
             {
               "type": "string"
@@ -339,7 +339,7 @@
     },
     "CellTypeIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "CellIri": {
       "type": "string",
@@ -440,7 +440,7 @@
           "type": "string",
           "format": "uri"
         },
-        "sameAs": {
+        "same_as": {
           "type": "string",
           "format": "uri"
         },
@@ -467,7 +467,7 @@
           "type": "string",
           "format": "uri"
         },
-        "sameAs": {
+        "same_as": {
           "type": "string",
           "format": "uri"
         }
@@ -505,7 +505,7 @@
           "type": "string",
           "format": "uri"
         },
-        "sameAs": {
+        "same_as": {
           "type": "string",
           "format": "uri"
         },
@@ -569,8 +569,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "contentUrl",
-        "encodingFormat"
+        "content_url",
+        "encoding_format"
       ],
       "properties": {
         "type": {
@@ -582,21 +582,21 @@
         "description": {
           "type": "string"
         },
-        "contentUrl": {
+        "content_url": {
           "type": "string",
           "format": "uri"
         },
-        "encodingFormat": {
+        "encoding_format": {
           "type": "string",
           "minLength": 1
         },
-        "contentSize": {
+        "content_size": {
           "type": "string"
         },
         "checksum": {
           "$ref": "#/$defs/Checksum"
         },
-        "accessLevel": {
+        "access_level": {
           "type": "string",
           "enum": [
             "open",
@@ -605,6 +605,14 @@
             "closed",
             "unknown"
           ]
+        },
+        "conditions": {
+          "type": "object",
+          "description": "Per-file measurement conditions (e.g. {\"soc\": 0.5} for EIS files split by SOC).",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {}
+          },
+          "additionalProperties": false
         }
       }
     },
@@ -614,7 +622,7 @@
       "required": [
         "type",
         "url",
-        "tableSchema"
+        "table_schema"
       ],
       "properties": {
         "type": {
@@ -634,7 +642,7 @@
         "description": {
           "type": "string"
         },
-        "tableSchema": {
+        "table_schema": {
           "anyOf": [
             {
               "type": "string",
@@ -729,7 +737,7 @@
           "type": "string",
           "minLength": 1
         },
-        "sameAs": {
+        "same_as": {
           "type": "string",
           "format": "uri"
         },
@@ -755,7 +763,7 @@
         "description": {
           "type": "string"
         },
-        "primaryKey": {
+        "primary_key": {
           "anyOf": [
             {
               "type": "string",
@@ -797,7 +805,7 @@
         "unit_text": {
           "type": "string"
         },
-        "sameAs": {
+        "same_as": {
           "type": "string",
           "format": "uri"
         }

@@ -214,11 +214,11 @@ def test_import_converter_jsonld_supports_canonical_overrides() -> None:
         manufacturer="AlphaLab",
         model="COIN-LFP-2032",
         chemistry="Li-ion",
-        id="https://w3id.org/battinfo/cell-type/1c4m-7p9q-2k6t-8v3r",
+        id="https://w3id.org/battinfo/cell/1c4m-7p9q-2k6t-8v3r",
     )
     specification = result.record["specification"]
 
-    assert specification["id"] == "https://w3id.org/battinfo/cell-type/1c4m-7p9q-2k6t-8v3r"
+    assert specification["id"] == "https://w3id.org/battinfo/cell/1c4m-7p9q-2k6t-8v3r"
     assert specification["manufacturer"] == "AlphaLab"
     assert specification["model"] == "COIN-LFP-2032"
     assert specification["chemistry"] == "Li-ion"

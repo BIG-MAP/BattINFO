@@ -78,8 +78,8 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
     publish_summary = publish_batch(
         source_dirs=[
             source_root / "cell-type",
-            source_root / "cell-instances",
-            source_root / "tests",
+            source_root / "cell-instance",
+            source_root / "test",
             source_root / "dataset",
         ],
         target_root=publish_root,

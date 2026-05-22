@@ -38,7 +38,7 @@ from battinfo.bundle import ProtocolInfo, ProvenanceInfo  # noqa: E402
 
 def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
     specification = CellSpecification(
-        id="https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj",
+        id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
@@ -57,7 +57,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
         comment=["Example bundle specification."],
     )
     cell_type = CellType(
-        id="https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj",
+        id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
         name="Energizer CR2032",
         manufacturer="Energizer",
         model="CR2032",
@@ -278,21 +278,21 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
     assert loaded.identifier == {"property_id": "doi", "value": "10.1000/example-dataset"}
     assert loaded.same_as == ["https://example.org/datasets/rich-metadata"]
     assert loaded.creators[0]["name"] == "Ada Lovelace"
-    assert loaded.creators[0]["sameAs"] == "https://orcid.org/0000-0000-0000-0001"
+    assert loaded.creators[0]["same_as"] == "https://orcid.org/0000-0000-0000-0001"
     assert loaded.creators[0]["given_name"] == "Ada"
     assert loaded.publisher["name"] == "Example Publisher"
-    assert loaded.publisher["sameAs"] == "https://ror.org/04t3en479"
+    assert loaded.publisher["same_as"] == "https://ror.org/04t3en479"
     assert loaded.funders[0]["name"] == "Battery Research Council"
-    assert loaded.funders[0]["sameAs"] == "https://ror.org/02mhbdp94"
+    assert loaded.funders[0]["same_as"] == "https://ror.org/02mhbdp94"
     assert loaded.citations[0]["doi"] == "10.1000/reference"
     assert loaded.variable_measured[0]["name"] == "Voltage"
     assert loaded.main_entity[0]["type"] == "Table"
-    assert loaded.main_entity[0]["tableSchema"]["id"] == "https://example.org/datasets/rich-metadata/schema"
-    assert loaded.main_entity[0]["tableSchema"]["columns"][0]["sameAs"] == "https://qudt.org/vocab/quantitykind/Voltage"
-    assert loaded.distributions[0]["contentUrl"] == "https://example.org/datasets/rich-metadata/raw.parquet"
+    assert loaded.main_entity[0]["table_schema"]["id"] == "https://example.org/datasets/rich-metadata/schema"
+    assert loaded.main_entity[0]["table_schema"]["columns"][0]["same_as"] == "https://qudt.org/vocab/quantitykind/Voltage"
+    assert loaded.distributions[0]["content_url"] == "https://example.org/datasets/rich-metadata/raw.parquet"
     assert loaded.distributions[0]["checksum"]["value"] == "a" * 64
     assert loaded.included_in_data_catalog["name"] == "Example Battery Catalog"
-    assert loaded.included_in_data_catalog["sameAs"] == "https://example.org/catalog/about"
+    assert loaded.included_in_data_catalog["same_as"] == "https://example.org/catalog/about"
 
 
 def test_load_cell_specification_from_library_record() -> None:
@@ -315,7 +315,7 @@ def test_derive_cell_type_from_library_record_mapping() -> None:
 
     cell_type = derive_cell_type(spec_record)
 
-    assert cell_type.id == "https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw"
+    assert cell_type.id == "https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw"
     assert cell_type.model == "ANR26650M1-B"
     assert cell_type.positive_electrode_basis == "LFP"
     assert cell_type.negative_electrode_basis == "graphite"
@@ -324,7 +324,7 @@ def test_derive_cell_type_from_library_record_mapping() -> None:
 
 def test_cell_specification_accepts_nested_objects() -> None:
     spec = CellSpecification(
-        id="https://w3id.org/battinfo/cell-type/9qfb-4wrn-ynwc-ayjw",
+        id="https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw",
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -382,7 +382,7 @@ def test_cell_specification_accepts_nested_objects() -> None:
 
 def test_cell_specification_accepts_human_first_helper_objects() -> None:
     spec = CellSpecification(
-        id="https://w3id.org/battinfo/cell-type/4f2m-8k7p-1t9x-6q3r",
+        id="https://w3id.org/battinfo/cell/4f2m-8k7p-1t9x-6q3r",
         manufacturer="AlphaLab",
         model="POUCH-ML-NMC-042",
         format="pouch",

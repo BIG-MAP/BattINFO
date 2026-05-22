@@ -130,12 +130,12 @@ def test_shipped_example_chain_is_consistent() -> None:
         (ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
     )
     cell_instance = json.loads(
-        (ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(
+        (ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(
             encoding="utf-8"
         )
     )
     test_record = json.loads(
-        (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
     )
     dataset = json.loads(
         (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(
@@ -153,7 +153,7 @@ def test_shipped_example_chain_is_consistent() -> None:
 
 def test_resolve_cell_type_id_from_metadata() -> None:
     resolved = resolve_cell_type_id(model_name="ANR26650M1-B", manufacturer="A123")
-    assert resolved.startswith("https://w3id.org/battinfo/cell-type/")
+    assert resolved.startswith("https://w3id.org/battinfo/spec/")
 
 
 def test_template_cell_type_and_create_cell_instance(tmp_path: Path) -> None:
@@ -168,7 +168,7 @@ def test_template_cell_type_and_create_cell_instance(tmp_path: Path) -> None:
         uid="7d9k2m4p8t3x6nq5",
         source_file="A123__ANR26650M1-B.pdf",
     )
-    assert cell_type["product"]["id"] == "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
+    assert cell_type["product"]["id"] == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
     assert cell_type["product"]["model"] == "ANR26650M1-B"
     assert cell_type["product"]["iec_code"] == "IFpR26650"
     assert cell_type["product"]["country_of_origin"] == "United States"
@@ -356,16 +356,16 @@ def test_promote_staging_cell_type_reuses_existing_curated_identifier(tmp_path: 
             {
                 "schema_version": "0.1.0",
                 "product": {
-                    "id": "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0",
+                    "id": "https://w3id.org/battinfo/spec/1234-5678-9abc-def0",
                     "short_id": "123456",
                     "identifier": "cell-type:1234-5678-9abc-def0",
                     "name": "Google G20M7",
                     "model": "G20M7",
                     "manufacturer": {"type": "Organization", "name": "Google"},
-                    "cellFormat": "prismatic",
+                    "cell_format": "prismatic",
                     "chemistry": "Li-ion",
-                    "positiveElectrodeBasis": "LCO",
-                    "negativeElectrodeBasis": "Graphite",
+                    "positive_electrode_basis": "LCO",
+                    "negative_electrode_basis": "Graphite",
                     "year": 2025,
                 },
                 "specs": {"nominal_voltage": {"value": 3.9, "unit": "V"}},
@@ -386,7 +386,7 @@ def test_promote_staging_cell_type_reuses_existing_curated_identifier(tmp_path: 
         validation_policy="strict",
         dry_run=True,
     )
-    assert dry_run_payload["record"]["product"]["id"] == "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0"
+    assert dry_run_payload["record"]["product"]["id"] == "https://w3id.org/battinfo/spec/1234-5678-9abc-def0"
     assert dry_run_payload["record"]["product"]["short_id"] == "123456"
 
     payload = promote_staging_cell_type(
@@ -394,10 +394,10 @@ def test_promote_staging_cell_type_reuses_existing_curated_identifier(tmp_path: 
         curated_root=curated_root,
         validation_policy="strict",
     )
-    assert payload["record"]["product"]["id"] == "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0"
+    assert payload["record"]["product"]["id"] == "https://w3id.org/battinfo/spec/1234-5678-9abc-def0"
 
     record = json.loads(target_path.read_text(encoding="utf-8"))
-    assert record["product"]["id"] == "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0"
+    assert record["product"]["id"] == "https://w3id.org/battinfo/spec/1234-5678-9abc-def0"
     assert record["product"]["short_id"] == "123456"
 
 
@@ -518,19 +518,19 @@ def test_build_curated_cell_type_submission_infers_source_local_id_from_record_d
             {
                 "schema_version": "0.1.0",
                 "product": {
-                    "id": "https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0",
+                    "id": "https://w3id.org/battinfo/spec/1234-5678-9abc-def0",
                     "short_id": "123456",
                     "identifier": "cell-type:1234-5678-9abc-def0",
                     "name": "Google G20M7",
                     "model": "G20M7",
                     "manufacturer": {"type": "Organization", "name": "Google"},
-                    "cellFormat": "prismatic",
+                    "cell_format": "prismatic",
                     "chemistry": "Li-ion",
-                    "positiveElectrodeBasis": "LCO",
-                    "negativeElectrodeBasis": "Graphite",
-                    "sizeCode": "P6/65/75",
-                    "iecCode": "ICP6/65/75",
-                    "countryOfOrigin": "Vietnam",
+                    "positive_electrode_basis": "LCO",
+                    "negative_electrode_basis": "Graphite",
+                    "size_code": "P6/65/75",
+                    "iec_code": "ICP6/65/75",
+                    "country_of_origin": "Vietnam",
                     "year": 2025,
                 },
                 "specs": {
@@ -646,17 +646,17 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
     assert protocol["entity_type"] == "test-protocol"
     assert test["entity_type"] == "test"
 
-    protocol_rows = query_test_protocols(directory=tmp_path / "test-protocols")
+    protocol_rows = query_test_protocols(directory=tmp_path / "test-protocol")
     assert len(protocol_rows) == 1
     assert protocol_rows[0]["id"] == protocol["id"]
 
-    test_rows = query_tests(directory=tmp_path / "tests")
+    test_rows = query_tests(directory=tmp_path / "test")
     assert len(test_rows) == 1
     assert test_rows[0]["protocol_id"] == protocol["id"]
 
 
 def test_publish_record_writes_artifacts(tmp_path: Path) -> None:
-    src = ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json"
+    src = ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json"
     result = publish_record(src, target_root=tmp_path)
 
     out_dir = tmp_path / "cell" / "3m6k-9t2p-7x4h-9nq8"
@@ -675,52 +675,52 @@ def test_publish_record_dataset_jsonld_preserves_rich_metadata(tmp_path: Path) -
             "identifier": {"property_id": "doi", "value": "10.1000/rich-dataset"},
             "name": "Rich dataset",
             "description": "Dataset published through the canonical resolver.",
-            "url": "https://example.org/datasets/rich",
+            "access_url": "https://example.org/datasets/rich",
             "license": "https://creativecommons.org/licenses/by/4.0/",
-            "sameAs": ["https://example.org/datasets/rich/canonical"],
+            "same_as": ["https://example.org/datasets/rich/canonical"],
             "keywords": ["battery", "rdf"],
-            "creator": [
+            "creators": [
                 {
                     "type": "Person",
                     "name": "Ada Lovelace",
                     "given_name": "Ada",
                     "family_name": "Lovelace",
-                    "sameAs": "https://orcid.org/0000-0000-0000-0001",
+                    "same_as": "https://orcid.org/0000-0000-0000-0001",
                     "affiliation": {"type": "Organization", "name": "Example Lab"},
                 }
             ],
-            "publisher": {"type": "Organization", "name": "BattINFO", "sameAs": "https://ror.org/03yrm5c26"},
-            "funder": [{"type": "Organization", "name": "Battery Data Alliance", "sameAs": "https://ror.org/02mhbdp94"}],
-            "citation": [{"name": "Example paper", "url": "https://doi.org/10.1000/example-paper", "doi": "10.1000/example-paper"}],
-            "measurementTechnique": ["electrochemical cycling"],
-            "variableMeasured": [{"name": "Voltage", "unit_text": "V"}],
-            "includedInDataCatalog": {
+            "publisher": {"type": "Organization", "name": "BattINFO", "same_as": "https://ror.org/03yrm5c26"},
+            "funders": [{"type": "Organization", "name": "Battery Data Alliance", "same_as": "https://ror.org/02mhbdp94"}],
+            "citations": [{"name": "Example paper", "url": "https://doi.org/10.1000/example-paper", "doi": "10.1000/example-paper"}],
+            "measurement_techniques": ["electrochemical cycling"],
+            "variable_measured": [{"name": "Voltage", "unit_text": "V"}],
+            "included_in_data_catalog": {
                 "type": "DataCatalog",
                 "id": "https://example.org/catalog",
                 "name": "Example Catalog",
                 "url": "https://example.org/catalog",
             },
-            "mainEntity": {
+            "main_entity": {
                 "type": "Table",
                 "id": "https://example.org/datasets/rich#table",
                 "url": "https://example.org/datasets/rich/data.csv",
-                "tableSchema": {
+                "table_schema": {
                     "id": "https://example.org/datasets/rich/table-schema",
                     "columns": [
                         {
                             "name": "voltage",
                             "titles": ["Voltage / V"],
-                            "sameAs": "https://qudt.org/vocab/quantitykind/Voltage",
+                            "same_as": "https://qudt.org/vocab/quantitykind/Voltage",
                             "unit_text": "V",
                         }
                     ],
                 },
             },
-            "distribution": [
+            "distributions": [
                 {
                     "type": "DataDownload",
-                    "contentUrl": "https://example.org/datasets/rich/data.csv",
-                    "encodingFormat": "text/csv",
+                    "content_url": "https://example.org/datasets/rich/data.csv",
+                    "encoding_format": "text/csv",
                     "checksum": {"algorithm": "sha256", "value": "c" * 64},
                 }
             ],
@@ -754,8 +754,8 @@ def test_publish_batch_summary(tmp_path: Path) -> None:
     summary = publish_batch(
         source_dirs=[
             ROOT / "examples" / "cell-type",
-            ROOT / "examples" / "cell-instances",
-            ROOT / "examples" / "tests",
+            ROOT / "examples" / "cell-instance",
+            ROOT / "examples" / "test",
             ROOT / "examples" / "dataset",
         ],
         target_root=tmp_path,
@@ -784,13 +784,13 @@ def test_build_index_and_stats(tmp_path: Path) -> None:
 
 def test_build_index_validate_catches_reference_errors(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
-    cell_instances_dir = source_root / "cell-instances"
+    cell_instances_dir = source_root / "cell-instance"
     cell_instances_dir.mkdir(parents=True)
     bad_cell_instance = {
         "schema_version": "0.1.0",
         "cell_instance": {
             "id": "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x",
-            "type_id": "https://w3id.org/battinfo/cell-type/eysh-4h5s-k4bx-zkgg",
+            "type_id": "https://w3id.org/battinfo/spec/eysh-4h5s-k4bx-zkgg",
             "short_id": "1f8r6v",
         },
         "provenance": {
@@ -823,7 +823,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
         source_root=source_root,
     )
     assert cell_type_payload["status"] == "created"
-    assert cell_type_payload["id"].startswith("https://w3id.org/battinfo/cell-type/")
+    assert cell_type_payload["id"].startswith("https://w3id.org/battinfo/spec/")
 
     exists_payload = save_cell_type(
         CellTypeInput(
@@ -921,7 +921,7 @@ def test_save_cell_instance_missing_reference_is_deferred_until_set_validation(t
     payload = save_cell_instance(
         CellInstanceInput(
             uid="eysh4h5sk4bxzkgg",
-            type_id="https://w3id.org/battinfo/cell-type/pvn1-43h7-rm3e-mjqq",
+            type_id="https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq",
             dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
             source_type="measurement",
         ),
@@ -1043,8 +1043,8 @@ def test_save_batch_summary_and_partial(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
     cell_types_dir = batch_root / "cell-type"
-    cell_instances_dir = batch_root / "cell-instances"
-    tests_dir = batch_root / "tests"
+    cell_instances_dir = batch_root / "cell-instance"
+    tests_dir = batch_root / "test"
     datasets_dir = batch_root / "dataset"
     cell_types_dir.mkdir(parents=True)
     cell_instances_dir.mkdir(parents=True)
@@ -1126,8 +1126,8 @@ def test_save_batch_handles_circular_linked_examples_as_a_set(tmp_path: Path) ->
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
     cell_types_dir = batch_root / "cell-type"
-    cell_instances_dir = batch_root / "cell-instances"
-    tests_dir = batch_root / "tests"
+    cell_instances_dir = batch_root / "cell-instance"
+    tests_dir = batch_root / "test"
     datasets_dir = batch_root / "dataset"
     cell_types_dir.mkdir(parents=True)
     cell_instances_dir.mkdir(parents=True)
@@ -1139,14 +1139,14 @@ def test_save_batch_handles_circular_linked_examples_as_a_set(tmp_path: Path) ->
         encoding="utf-8",
     )
     (cell_instances_dir / "cell-3m6k-9t2p-7x4h-9nq8.json").write_text(
-        (ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(encoding="utf-8"),
+        (ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (datasets_dir / "dataset-1f8r-6v2k-9p4m-3t7x.json").write_text(
         (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
-    for path in sorted((ROOT / "examples" / "tests").glob("*.json")):
+    for path in sorted((ROOT / "examples" / "test").glob("*.json")):
         (tests_dir / path.name).write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
 
     summary = save_batch(

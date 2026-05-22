@@ -16,7 +16,7 @@
         "properties": {
           "product": {
             "properties": {
-              "cellFormat": {
+              "cell_format": {
                 "const": "cylindrical"
               }
             }
@@ -54,7 +54,7 @@
         "properties": {
           "product": {
             "properties": {
-              "cellFormat": {
+              "cell_format": {
                 "enum": [
                   "prismatic",
                   "pouch"
@@ -99,12 +99,12 @@
         "name",
         "model",
         "manufacturer",
-        "cellFormat",
+        "cell_format",
         "chemistry"
       ],
       "properties": {
         "id": {
-          "$ref": "#/$defs/CellTypeIri"
+          "$ref": "#/$defs/SpecIri"
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
@@ -133,7 +133,7 @@
           "type": "string",
           "format": "uri"
         },
-        "additionalType": {
+        "additional_type": {
           "anyOf": [
             {
               "type": "string",
@@ -150,12 +150,16 @@
             }
           ]
         },
-        "productType": {
+        "product_type": {
           "type": "string",
-          "enum": ["commercial", "research", "prototype"],
+          "enum": [
+            "commercial",
+            "research",
+            "prototype"
+          ],
           "description": "Whether this cell type is a commercial product, a research cell, or a prototype."
         },
-        "cellFormat": {
+        "cell_format": {
           "type": "string",
           "enum": [
             "cylindrical",
@@ -166,15 +170,15 @@
             "unknown"
           ]
         },
-        "sizeCode": {
+        "size_code": {
           "type": "string",
           "minLength": 1
         },
-        "iecCode": {
+        "iec_code": {
           "type": "string",
           "minLength": 1
         },
-        "countryOfOrigin": {
+        "country_of_origin": {
           "type": "string",
           "minLength": 1
         },
@@ -187,14 +191,35 @@
           "type": "string",
           "minLength": 1
         },
-        "positiveElectrodeBasis": {
+        "positive_electrode_basis": {
           "type": "string"
         },
-        "negativeElectrodeBasis": {
+        "negative_electrode_basis": {
           "type": "string"
         },
-        "datasheetRevision": {
+        "datasheet_revision": {
           "type": "string"
+        },
+        "manufacturing_place": {
+          "type": "string",
+          "description": "Geographic location of the battery manufacturing plant (EU Battery Regulation Annex VI Part A)."
+        },
+        "battery_category": {
+          "type": "string",
+          "enum": [
+            "EV",
+            "LMT",
+            "industrial",
+            "stationary",
+            "portable",
+            "SLI",
+            "other"
+          ],
+          "description": "Battery category per EU Battery Regulation Article 3."
+        },
+        "reference_electrode": {
+          "type": "string",
+          "description": "Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE')."
         }
       }
     },
@@ -217,8 +242,12 @@
         },
         "source_file": {
           "anyOf": [
-            {"type": "string"},
-            {"type": "null"}
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "source_url": {
@@ -290,6 +319,55 @@
     },
     "coin_hardware": {
       "$ref": "modules/components/specification.schema.json#/properties/coin_hardware"
+    },
+    "hazardous_substances": {
+      "type": "array",
+      "description": "Hazardous substances present in the battery (EU Battery Regulation Annex XIII §7.1).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "cas_number": {
+            "type": "string",
+            "pattern": "^\\d{1,7}-\\d{2}-\\d$"
+          },
+          "concentration_ppm": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "critical_raw_materials": {
+      "type": "array",
+      "description": "Critical raw materials present in the battery at more than 0.1% weight by weight (EU Battery Regulation Annex XIII §7.1).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "weight_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "extinguishing_agent": {
+      "type": "string",
+      "description": "Usable extinguishing agent for the battery (EU Battery Regulation Annex VI Part A)."
     }
   },
   "$defs": {
@@ -343,10 +421,6 @@
     "ShortId": {
       "type": "string",
       "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
-    },
-    "CellTypeIri": {
-      "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "Identifier": {
       "anyOf": [
@@ -441,6 +515,10 @@
           "$ref": "#/$defs/Organization"
         }
       ]
+    },
+    "SpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     }
   }
 }

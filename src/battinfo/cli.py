@@ -145,6 +145,7 @@ registry_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Man
 dataset_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish.")
 batch_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions.")
 config_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage user preferences (creator, license, community).")
+specs_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Browse valid spec property names and their accepted units.")
 
 app.add_typer(query_app, name="query")
 app.add_typer(create_app, name="create")
@@ -162,6 +163,7 @@ app.add_typer(registry_app, name="registry")
 app.add_typer(dataset_app, name="dataset")
 app.add_typer(batch_app, name="batch")
 app.add_typer(config_app, name="config")
+app.add_typer(specs_app, name="specs")
 library_app.add_typer(library_query_app, name="query")
 library_app.add_typer(library_save_app, name="save")
 library_app.add_typer(library_template_app, name="template")
@@ -274,14 +276,14 @@ def _init_example_document(profile: str) -> dict[str, Any]:
         return {
             "schema_version": "1.0.0",
             "product": {
-                "id": "https://w3id.org/battinfo/cell-type/0000-0000-0000-0000",
+                "id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
                 "name": "ExampleManufacturer MODEL-001",
                 "manufacturer": {"type": "Organization", "name": "ExampleManufacturer"},
                 "model": "MODEL-001",
-                "cellFormat": "unknown",
+                "cell_format": "unknown",
                 "chemistry": "unknown",
-                "positiveElectrodeBasis": "unknown",
-                "negativeElectrodeBasis": "unknown",
+                "positive_electrode_basis": "unknown",
+                "negative_electrode_basis": "unknown",
             },
             "provenance": {"source_type": "manual"},
         }
@@ -975,8 +977,8 @@ def template_cell_type_draft(
 @template_app.command("cell-instance")
 def template_cell_instance(
     type_id: str = typer.Option(
-        "https://w3id.org/battinfo/cell-type/0000-0000-0000-0000",
-        help="Canonical cell-type IRI.",
+        "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+        help="Canonical cell-spec IRI.",
     ),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
     uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
@@ -1496,7 +1498,7 @@ def query_cell_types(
     )
 
 
-@query_app.command("cell-instances")
+@query_app.command("cell-instance")
 def query_cell_instances(
     id: str | None = typer.Option(None, help="Filter by canonical cell IRI."),
     type_id: str | None = typer.Option(None, help="Filter by canonical cell-type IRI."),
@@ -1524,7 +1526,7 @@ def query_cell_instances(
         offset=offset,
     )
     payload = {
-        "resource": "cell-instances",
+        "resource": "cell-instance",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -1575,7 +1577,7 @@ def query_datasets(
     _emit_table(rows, ["id", "title", "format", "license", "source_type", "access_url"])
 
 
-@query_app.command("test-protocols")
+@query_app.command("test-protocol")
 def query_test_protocols(
     id: str | None = typer.Option(None, help="Filter by canonical test-protocol IRI."),
     kind: str | None = typer.Option(None, help="Filter by protocol kind."),
@@ -1596,7 +1598,7 @@ def query_test_protocols(
         offset=offset,
     )
     payload = {
-        "resource": "test-protocols",
+        "resource": "test-protocol",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -3692,3 +3694,133 @@ def config_show() -> None:
     typer.echo()
     for k, v in sorted(cfg.items()):
         typer.echo(f"  {k}: {v}")
+
+
+# ---------------------------------------------------------------------------
+# specs — discover valid spec property names and accepted units
+# ---------------------------------------------------------------------------
+
+_SPEC_CATEGORIES: dict[str, str] = {
+    "nominal_capacity": "capacity",
+    "minimum_capacity": "capacity",
+    "min_capacity": "capacity",
+    "rated_capacity": "capacity",
+    "typical_energy": "energy",
+    "rated_energy": "energy",
+    "nominal_energy": "energy",
+    "specific_energy": "energy",
+    "energy_density": "energy",
+    "nominal_voltage": "voltage",
+    "charging_voltage": "voltage",
+    "discharging_cutoff_voltage": "voltage",
+    "specific_power": "power",
+    "power_density": "power",
+    "internal_resistance": "resistance",
+    "impedance": "resistance",
+    "dc_internal_resistance": "resistance",
+    "mass": "mass/dimensions",
+    "volume": "mass/dimensions",
+    "diameter": "mass/dimensions",
+    "height": "mass/dimensions",
+    "width": "mass/dimensions",
+    "length": "mass/dimensions",
+    "thickness": "mass/dimensions",
+    "pulse_charging_current": "current",
+    "continuous_charging_current": "current",
+    "nominal_continuous_charging_current": "current",
+    "maximum_continuous_charging_current": "current",
+    "pulse_discharging_current": "current",
+    "continuous_discharging_current": "current",
+    "nominal_continuous_discharging_current": "current",
+    "maximum_continuous_discharging_current": "current",
+    "charging_time": "time",
+    "minimum_charging_temperature": "temperature",
+    "maximum_charging_temperature": "temperature",
+    "charging_temperature_min": "temperature",
+    "charging_temperature_max": "temperature",
+    "minimum_discharging_temperature": "temperature",
+    "maximum_discharging_temperature": "temperature",
+    "discharging_temperature_min": "temperature",
+    "discharging_temperature_max": "temperature",
+    "minimum_storage_temperature": "temperature",
+    "maximum_storage_temperature": "temperature",
+    "storage_temperature_min": "temperature",
+    "storage_temperature_max": "temperature",
+    "cycle_life": "lifecycle",
+    "calendar_life": "lifecycle",
+}
+
+
+def _all_specs_data() -> list[dict[str, Any]]:
+    from battinfo.validate.schema import schema_for_rel_path
+    from battinfo.validate.semantic import SPEC_UNIT_COMPATIBILITY
+
+    schema = schema_for_rel_path("cell-canonical.schema.json")
+    all_names = sorted(schema["$defs"]["SpecSet"]["properties"].keys())
+    rows = []
+    for name in all_names:
+        units = SPEC_UNIT_COMPATIBILITY.get(name)
+        if units:
+            ascii_units = sorted(u for u in units if u.isascii())
+            display_units = ", ".join(ascii_units) if ascii_units else ", ".join(sorted(units))
+        else:
+            display_units = "any"
+        rows.append({
+            "name": name,
+            "category": _SPEC_CATEGORIES.get(name, "other"),
+            "valid_units": display_units,
+        })
+    return rows
+
+
+@specs_app.command("list")
+def specs_list(
+    category: str | None = typer.Option(None, help="Filter by category (e.g. capacity, voltage, current)."),
+    output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
+) -> None:
+    """List all valid spec property names with their accepted units."""
+    fmt = _check_output_format(output_format)
+    rows = _all_specs_data()
+    if category:
+        rows = [r for r in rows if r["category"] == category]
+        if not rows:
+            typer.echo(f"No specs found for category '{category}'.")
+            raise typer.Exit(code=1)
+    if fmt == "json":
+        _emit_json(rows)
+        return
+    _emit_table(rows, ["name", "category", "valid_units"])
+
+
+@specs_app.command("show")
+def specs_show(
+    name: str = typer.Argument(..., help="Spec property name (e.g. nominal_capacity)."),
+    output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
+) -> None:
+    """Show valid units and an example entry for a single spec property."""
+    from battinfo.validate.semantic import SPEC_UNIT_COMPATIBILITY
+
+    fmt = _check_output_format(output_format)
+    rows = _all_specs_data()
+    match = next((r for r in rows if r["name"] == name), None)
+    if match is None:
+        typer.echo(f"Unknown spec '{name}'. Run 'battinfo specs list' to see all valid names.")
+        raise typer.Exit(code=1)
+
+    units = SPEC_UNIT_COMPATIBILITY.get(name)
+    canonical_unit = sorted(units)[0] if units else "<unit>"
+    example = {"value": 0.0, "unit": canonical_unit}
+
+    detail = {
+        "name": match["name"],
+        "category": match["category"],
+        "valid_units": match["valid_units"],
+        "example": {match["name"]: example},
+    }
+    if fmt == "json":
+        _emit_json(detail)
+        return
+    typer.echo(f"name:        {detail['name']}")
+    typer.echo(f"category:    {detail['category']}")
+    typer.echo(f"valid units: {detail['valid_units']}")
+    typer.echo(f"example:     {json.dumps(detail['example'])}")

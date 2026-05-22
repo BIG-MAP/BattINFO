@@ -51,7 +51,7 @@ def _as_path(path: PathLike) -> Path:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
+    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
@@ -521,9 +521,9 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     url = value.get("url") or value.get("schema:url") or value.get("@id")
     if isinstance(url, str) and "://" in url:
         out["url"] = url
-    same_as = value.get("sameAs") or value.get("schema:sameAs")
+    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     if isinstance(same_as, str) and "://" in same_as:
-        out["sameAs"] = same_as
+        out["same_as"] = same_as
     affiliation = value.get("affiliation") or value.get("schema:affiliation")
     if isinstance(affiliation, Mapping):
         nested = _canonical_agent(affiliation)
@@ -547,9 +547,9 @@ def _canonical_data_catalog(value: Any) -> dict[str, Any] | str | None:
     url = value.get("url") or value.get("schema:url")
     if isinstance(url, str):
         out["url"] = url
-    same_as = value.get("sameAs") or value.get("schema:sameAs")
+    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     if isinstance(same_as, str):
-        out["sameAs"] = same_as
+        out["same_as"] = same_as
     description = value.get("description") or value.get("schema:description")
     if isinstance(description, str):
         out["description"] = description
@@ -593,12 +593,12 @@ def _canonical_variable_measured(value: Any) -> dict[str, Any] | None:
     unit_text = value.get("unit_text") or value.get("schema:unitText")
     if isinstance(unit_text, str):
         out["unit_text"] = unit_text
-    same_as = value.get("sameAs") or value.get("schema:sameAs")
+    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     if isinstance(same_as, str):
-        out["sameAs"] = same_as
+        out["same_as"] = same_as
     property_id = value.get("property_id") or value.get("schema:propertyID")
-    if isinstance(property_id, str) and "sameAs" not in out:
-        out["sameAs"] = property_id
+    if isinstance(property_id, str) and "same_as" not in out:
+        out["same_as"] = property_id
     return out
 
 
@@ -614,10 +614,10 @@ def _canonical_distribution(value: Any) -> dict[str, Any] | None:
     for target_key, source_keys in (
         ("name", ("name", "schema:name")),
         ("description", ("description", "schema:description")),
-        ("contentUrl", ("contentUrl", "schema:contentUrl")),
-        ("encodingFormat", ("encodingFormat", "schema:encodingFormat")),
-        ("contentSize", ("contentSize", "schema:contentSize")),
-        ("accessLevel", ("accessLevel", "schema:accessLevel")),
+        ("content_url", ("content_url", "contentUrl", "schema:contentUrl")),
+        ("encoding_format", ("encoding_format", "encodingFormat", "schema:encodingFormat")),
+        ("content_size", ("content_size", "contentSize", "schema:contentSize")),
+        ("access_level", ("access_level", "accessLevel", "schema:accessLevel")),
     ):
         for source_key in source_keys:
             candidate = value.get(source_key)
@@ -632,7 +632,7 @@ def _canonical_distribution(value: Any) -> dict[str, Any] | None:
             out["checksum"] = {"algorithm": algorithm, "value": checksum_value}
     elif isinstance(value.get("schema:sha256"), str):
         out["checksum"] = {"algorithm": "sha256", "value": value["schema:sha256"]}
-    return out if ("contentUrl" in out or "encodingFormat" in out or "checksum" in out) else None
+    return out if ("content_url" in out or "encoding_format" in out or "checksum" in out) else None
 
 
 def _canonical_table_column(value: Any) -> dict[str, Any] | None:
@@ -658,9 +658,9 @@ def _canonical_table_column(value: Any) -> dict[str, Any] | None:
     unit_text = value.get("unit_text") or value.get("schema:unitText")
     if isinstance(unit_text, str):
         out["unit_text"] = unit_text
-    same_as = value.get("sameAs") or value.get("schema:sameAs") or value.get("property_id") or value.get("schema:propertyID")
+    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs") or value.get("property_id") or value.get("schema:propertyID")
     if isinstance(same_as, str):
-        out["sameAs"] = same_as
+        out["same_as"] = same_as
     required = value.get("required") or value.get("csvw:required")
     if isinstance(required, bool):
         out["required"] = required
@@ -686,13 +686,13 @@ def _canonical_table_schema(value: Any) -> dict[str, Any] | None:
     description = value.get("description") or value.get("schema:description")
     if isinstance(description, str):
         out["description"] = description
-    primary_key = value.get("primaryKey") or value.get("csvw:primaryKey")
+    primary_key = value.get("primary_key") or value.get("primaryKey") or value.get("csvw:primaryKey")
     if isinstance(primary_key, str):
-        out["primaryKey"] = primary_key
+        out["primary_key"] = primary_key
     elif isinstance(primary_key, list):
         values = [str(item) for item in primary_key if isinstance(item, str)]
         if values:
-            out["primaryKey"] = values
+            out["primary_key"] = values
     return out
 
 
@@ -707,7 +707,7 @@ def _canonical_csvw_table(value: Any) -> dict[str, Any] | None:
     url = value.get("url") or value.get("csvw:url")
     if not isinstance(url, str) or not url.strip():
         return None
-    table_schema = value.get("tableSchema") or value.get("csvw:tableSchema")
+    table_schema = value.get("table_schema") or value.get("tableSchema") or value.get("csvw:tableSchema")
     if isinstance(table_schema, Mapping):
         table_schema = _canonical_table_schema(table_schema)
     elif isinstance(table_schema, str) and table_schema.strip():
@@ -719,7 +719,7 @@ def _canonical_csvw_table(value: Any) -> dict[str, Any] | None:
     out: dict[str, Any] = {
         "type": "Table",
         "url": url,
-        "tableSchema": copy.deepcopy(table_schema),
+        "table_schema": copy.deepcopy(table_schema),
     }
     node_id = value.get("id") or value.get("@id")
     if isinstance(node_id, str):
@@ -744,13 +744,13 @@ def _canonical_main_entity(value: Any) -> dict[str, Any] | None:
         node_type = node_type.split(":", 1)[1]
     if node_type != "TableGroup":
         return None
-    table_items = value.get("table") or value.get("csvw:table")
+    table_items = value.get("tables") or value.get("table") or value.get("csvw:table")
     tables = [table for item in _mapping_list(table_items) if (table := _canonical_csvw_table(item)) is not None]
     if not tables:
         return None
     out: dict[str, Any] = {
         "type": "TableGroup",
-        "table": tables,
+        "tables": tables,
     }
     node_id = value.get("id") or value.get("@id")
     if isinstance(node_id, str):
@@ -1205,7 +1205,7 @@ class CellType(BundleJsonModel):
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any], *, cell_specification_id: str | None = None) -> Self:
-        record = record_to_legacy_aliases(record)
+        record = record_to_snake_aliases(record)
         product = record.get("product")
         if not isinstance(product, Mapping):
             raise ValueError("cell type record must contain a 'product' object.")
@@ -1217,7 +1217,7 @@ class CellType(BundleJsonModel):
         notes = record.get("notes")
         if not isinstance(notes, list):
             notes = []
-        raw_pt = product.get("productType")
+        raw_pt = product.get("product_type")
         product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
@@ -1225,16 +1225,16 @@ class CellType(BundleJsonModel):
             name=str(product.get("name") or f"{manufacturer_name} {product.get('model')}"),
             manufacturer=str(manufacturer_name),
             model=str(product["model"]),
-            format=str(product.get("cellFormat", "unknown")),
+            format=str(product.get("cell_format", "unknown")),
             chemistry=str(product.get("chemistry", "unknown")),
             product_type=product_type,
-            positive_electrode_basis=product.get("positiveElectrodeBasis"),
-            negative_electrode_basis=product.get("negativeElectrodeBasis"),
-            size_code=product.get("sizeCode"),
-            iec_code=product.get("iecCode"),
-            country_of_origin=product.get("countryOfOrigin"),
+            positive_electrode_basis=product.get("positive_electrode_basis"),
+            negative_electrode_basis=product.get("negative_electrode_basis"),
+            size_code=product.get("size_code"),
+            iec_code=product.get("iec_code"),
+            country_of_origin=product.get("country_of_origin"),
             year=_year_value(product.get("year")),
-            datasheet_revision=product.get("datasheetRevision"),
+            datasheet_revision=product.get("datasheet_revision"),
             cell_specification_id=cell_specification_id,
             nominal_properties=dict(record.get("specs", {})) if isinstance(record.get("specs"), Mapping) else {},
             bibliography=dict(record.get("bibliography", {}))
@@ -1296,28 +1296,28 @@ class CellType(BundleJsonModel):
                 "name": self.name,
                 "model": self.model,
                 "manufacturer": {"type": "Organization", "name": self.manufacturer},
-                "cellFormat": self.format,
+                "cell_format": self.format,
                 "chemistry": self.chemistry,
             },
             "specs": self.nominal_properties,
             "provenance": {},
         }
         if self.product_type is not None:
-            record["product"]["productType"] = str(self.product_type)
+            record["product"]["product_type"] = str(self.product_type)
         if self.positive_electrode_basis is not None:
-            record["product"]["positiveElectrodeBasis"] = self.positive_electrode_basis
+            record["product"]["positive_electrode_basis"] = self.positive_electrode_basis
         if self.negative_electrode_basis is not None:
-            record["product"]["negativeElectrodeBasis"] = self.negative_electrode_basis
+            record["product"]["negative_electrode_basis"] = self.negative_electrode_basis
         if self.size_code is not None:
-            record["product"]["sizeCode"] = self.size_code
+            record["product"]["size_code"] = self.size_code
         if self.iec_code is not None:
-            record["product"]["iecCode"] = self.iec_code
+            record["product"]["iec_code"] = self.iec_code
         if self.country_of_origin is not None:
-            record["product"]["countryOfOrigin"] = self.country_of_origin
+            record["product"]["country_of_origin"] = self.country_of_origin
         if self.year is not None:
             record["product"]["year"] = self.year
         if self.datasheet_revision is not None:
-            record["product"]["datasheetRevision"] = self.datasheet_revision
+            record["product"]["datasheet_revision"] = self.datasheet_revision
         if self.source.type is not None:
             record["provenance"]["source_type"] = self.source.type
         if self.source.file is not None:
@@ -1975,7 +1975,7 @@ class Dataset(BundleJsonModel):
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any], *, dataset_path: str | None = None) -> Self:
-        record = record_to_legacy_aliases(record)
+        record = record_to_snake_aliases(record)
         dataset = record.get("dataset")
         if not isinstance(dataset, Mapping):
             raise ValueError("dataset record must contain a 'dataset' object.")
@@ -1991,14 +1991,14 @@ class Dataset(BundleJsonModel):
                     related_cell_id = item
                 if isinstance(item, str) and "/test/" in item and related_test_id is None:
                     related_test_id = item
-        distribution = dataset.get("distribution")
+        distribution = dataset.get("distributions")
         checksum = ChecksumInfo()
         data_format = None
         download_url = None
         if isinstance(distribution, list) and distribution and isinstance(distribution[0], Mapping):
             first = distribution[0]
-            data_format = first.get("encodingFormat")
-            download_url = first.get("contentUrl")
+            data_format = first.get("encoding_format")
+            download_url = first.get("content_url")
             checksum_obj = first.get("checksum")
             if isinstance(checksum_obj, Mapping):
                 checksum = ChecksumInfo(
@@ -2015,32 +2015,32 @@ class Dataset(BundleJsonModel):
             name=str(dataset.get("name") or dataset.get("title") or dataset["id"]),
             description=dataset.get("description"),
             license=dataset.get("license"),
-            same_as=_string_list(dataset.get("sameAs")),
-            additional_type=_string_list(dataset.get("additionalType")),
+            same_as=_string_list(dataset.get("same_as")),
+            additional_type=_string_list(dataset.get("additional_type")),
             version=dataset.get("version"),
             keywords=_string_list(dataset.get("keywords")),
-            creators=_mapping_list(dataset.get("creator")),
+            creators=_mapping_list(dataset.get("creators")),
             publisher=_canonical_agent(dataset.get("publisher")),
-            funders=_mapping_list(dataset.get("funder")),
-            citations=[citation for item in (dataset.get("citation") if isinstance(dataset.get("citation"), list) else [dataset.get("citation")] if dataset.get("citation") is not None else []) if (citation := _canonical_citation(item)) is not None],
-            measurement_techniques=_string_list(dataset.get("measurementTechnique")),
-            measurement_methods=_string_list(dataset.get("measurementMethod")),
-            variable_measured=[variable for item in _mapping_list(dataset.get("variableMeasured")) if (variable := _canonical_variable_measured(item)) is not None],
-            is_accessible_for_free=dataset.get("isAccessibleForFree") if isinstance(dataset.get("isAccessibleForFree"), bool) else None,
-            conditions_of_access=dataset.get("conditionsOfAccess"),
-            in_language=dataset.get("inLanguage"),
+            funders=_mapping_list(dataset.get("funders")),
+            citations=[citation for item in (dataset.get("citations") if isinstance(dataset.get("citations"), list) else [dataset.get("citations")] if dataset.get("citations") is not None else []) if (citation := _canonical_citation(item)) is not None],
+            measurement_techniques=_string_list(dataset.get("measurement_techniques")),
+            measurement_methods=_string_list(dataset.get("measurement_methods")),
+            variable_measured=[variable for item in _mapping_list(dataset.get("variable_measured")) if (variable := _canonical_variable_measured(item)) is not None],
+            is_accessible_for_free=dataset.get("is_accessible_for_free") if isinstance(dataset.get("is_accessible_for_free"), bool) else None,
+            conditions_of_access=dataset.get("conditions_of_access"),
+            in_language=dataset.get("in_language"),
             data_format=data_format,
             dataset_path=dataset_path,
-            access_url=dataset.get("url"),
+            access_url=dataset.get("access_url"),
             download_url=download_url,
-            created_at=dataset.get("dateCreated"),
-            modified_at=dataset.get("dateModified"),
-            published_at=dataset.get("datePublished"),
-            temporal_coverage=dataset.get("temporalCoverage"),
-            spatial_coverage=dataset.get("spatialCoverage"),
-            is_based_on=_string_list(dataset.get("isBasedOn")),
-            included_in_data_catalog=_canonical_data_catalog(dataset.get("includedInDataCatalog")),
-            main_entity=[entity for item in _mapping_list(dataset.get("mainEntity")) if (entity := _canonical_main_entity(item)) is not None],
+            created_at=dataset.get("created_at"),
+            modified_at=dataset.get("modified_at"),
+            published_at=dataset.get("published_at"),
+            temporal_coverage=dataset.get("temporal_coverage"),
+            spatial_coverage=dataset.get("spatial_coverage"),
+            is_based_on=_string_list(dataset.get("is_based_on")),
+            included_in_data_catalog=_canonical_data_catalog(dataset.get("included_in_data_catalog")),
+            main_entity=[entity for item in _mapping_list(dataset.get("main_entity")) if (entity := _canonical_main_entity(item)) is not None],
             distributions=[dist for item in _mapping_list(distribution) if (dist := _canonical_distribution(item)) is not None],
             checksum=checksum,
             cell_instance_id=related_cell_id,
@@ -2071,49 +2071,49 @@ class Dataset(BundleJsonModel):
         if self.license is not None:
             dataset_obj["license"] = self.license
         if self.same_as:
-            dataset_obj["sameAs"] = list(self.same_as)
+            dataset_obj["same_as"] = list(self.same_as)
         if self.additional_type:
-            dataset_obj["additionalType"] = list(self.additional_type)
+            dataset_obj["additional_type"] = list(self.additional_type)
         if self.version is not None:
             dataset_obj["version"] = self.version
         if self.keywords:
             dataset_obj["keywords"] = list(self.keywords)
         if self.creators:
-            dataset_obj["creator"] = copy.deepcopy(self.creators)
+            dataset_obj["creators"] = copy.deepcopy(self.creators)
         if self.publisher is not None:
             dataset_obj["publisher"] = copy.deepcopy(self.publisher)
         if self.funders:
-            dataset_obj["funder"] = copy.deepcopy(self.funders)
+            dataset_obj["funders"] = copy.deepcopy(self.funders)
         if self.citations:
-            dataset_obj["citation"] = copy.deepcopy(self.citations)
+            dataset_obj["citations"] = copy.deepcopy(self.citations)
         if self.measurement_techniques:
-            dataset_obj["measurementTechnique"] = list(self.measurement_techniques)
+            dataset_obj["measurement_techniques"] = list(self.measurement_techniques)
         if self.measurement_methods:
-            dataset_obj["measurementMethod"] = list(self.measurement_methods)
+            dataset_obj["measurement_methods"] = list(self.measurement_methods)
         if self.variable_measured:
-            dataset_obj["variableMeasured"] = copy.deepcopy(self.variable_measured)
+            dataset_obj["variable_measured"] = copy.deepcopy(self.variable_measured)
         if self.is_accessible_for_free is not None:
-            dataset_obj["isAccessibleForFree"] = self.is_accessible_for_free
+            dataset_obj["is_accessible_for_free"] = self.is_accessible_for_free
         if self.conditions_of_access is not None:
-            dataset_obj["conditionsOfAccess"] = self.conditions_of_access
+            dataset_obj["conditions_of_access"] = self.conditions_of_access
         if self.in_language is not None:
-            dataset_obj["inLanguage"] = self.in_language
+            dataset_obj["in_language"] = self.in_language
         if self.access_url is not None:
-            dataset_obj["url"] = self.access_url
+            dataset_obj["access_url"] = self.access_url
         if self.created_at is not None:
-            dataset_obj["dateCreated"] = self.created_at
+            dataset_obj["created_at"] = self.created_at
         if self.modified_at is not None:
-            dataset_obj["dateModified"] = self.modified_at
+            dataset_obj["modified_at"] = self.modified_at
         elif self.created_at is not None:
-            dataset_obj["dateModified"] = self.created_at
+            dataset_obj["modified_at"] = self.created_at
         if self.published_at is not None:
-            dataset_obj["datePublished"] = self.published_at
+            dataset_obj["published_at"] = self.published_at
         elif self.created_at is not None:
-            dataset_obj["datePublished"] = self.created_at
+            dataset_obj["published_at"] = self.created_at
         if self.temporal_coverage is not None:
-            dataset_obj["temporalCoverage"] = self.temporal_coverage
+            dataset_obj["temporal_coverage"] = self.temporal_coverage
         if self.spatial_coverage is not None:
-            dataset_obj["spatialCoverage"] = self.spatial_coverage
+            dataset_obj["spatial_coverage"] = self.spatial_coverage
         about: list[str] = []
         if self.cell_instance_id is not None:
             about.append(self.cell_instance_id)
@@ -2122,27 +2122,27 @@ class Dataset(BundleJsonModel):
         if about:
             dataset_obj["about"] = about
         if self.is_based_on:
-            dataset_obj["isBasedOn"] = list(self.is_based_on)
+            dataset_obj["is_based_on"] = list(self.is_based_on)
         if self.included_in_data_catalog is not None:
-            dataset_obj["includedInDataCatalog"] = self.included_in_data_catalog
+            dataset_obj["included_in_data_catalog"] = self.included_in_data_catalog
         if self.main_entity:
-            dataset_obj["mainEntity"] = copy.deepcopy(self.main_entity)
+            dataset_obj["main_entity"] = copy.deepcopy(self.main_entity)
         if self.distributions:
-            dataset_obj["distribution"] = copy.deepcopy(self.distributions)
+            dataset_obj["distributions"] = copy.deepcopy(self.distributions)
         elif self.download_url is not None or self.data_format is not None or self.checksum.value is not None:
             dist: dict[str, Any] = {}
             if self.download_url is not None:
-                dist["contentUrl"] = self.download_url
+                dist["content_url"] = self.download_url
             elif self.access_url is not None:
-                dist["contentUrl"] = self.access_url
+                dist["content_url"] = self.access_url
             if self.data_format is not None:
-                dist["encodingFormat"] = self.data_format
+                dist["encoding_format"] = self.data_format
             if self.checksum.value is not None:
                 dist["checksum"] = {
                     "algorithm": self.checksum.algorithm,
                     "value": self.checksum.value,
                 }
-            dataset_obj["distribution"] = [dist]
+            dataset_obj["distributions"] = [dist]
 
         record: dict[str, Any] = {
             "schema_version": self.schema_version,

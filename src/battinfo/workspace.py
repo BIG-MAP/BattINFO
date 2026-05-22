@@ -45,7 +45,7 @@ from battinfo.bundle import (
     Test,
     TestProtocol,
 )
-from battinfo.canonical_aliases import record_to_legacy_aliases
+from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -123,8 +123,21 @@ def _stable_uid(seed: str) -> str:
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
+_IRI_NAMESPACE: dict[str, str] = {
+    "cell-type": "spec",
+    "cell": "cell",
+    "test-protocol": "spec",
+    "test": "test",
+    "dataset": "dataset",
+    "organization": "organization",
+    "electrode": "electrode",
+    "material": "material",
+}
+
+
 def _entity_iri(entity_type: str, seed: str) -> str:
-    return f"https://w3id.org/battinfo/{entity_type}/{_stable_uid(seed)}"
+    namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
+    return f"https://w3id.org/battinfo/{namespace}/{_stable_uid(seed)}"
 
 
 def _with_default(value: str | None, fallback: str) -> str:
@@ -137,7 +150,7 @@ def _as_path(path: PathLike) -> Path:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    return record_to_legacy_aliases(json.loads(path.read_text(encoding="utf-8")))
+    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
@@ -1386,13 +1399,13 @@ class Workspace:
             filters.setdefault("cell_types_dir", self.source_root / "cell-type")
             return query_api(kind, **filters)
         if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
-            filters.setdefault("directory", self.source_root / "cell-instances")
+            filters.setdefault("directory", self.source_root / "cell-instance")
             return query_api(kind, **filters)
         if normalized in {"test_protocol", "test_protocols"}:
-            filters.setdefault("directory", self.source_root / "test-protocols")
+            filters.setdefault("directory", self.source_root / "test-protocol")
             return query_api(kind, **filters)
         if normalized in {"test", "tests"}:
-            filters.setdefault("directory", self.source_root / "tests")
+            filters.setdefault("directory", self.source_root / "test")
             return query_api(kind, **filters)
         if normalized in {"dataset", "datasets"}:
             filters.setdefault("directory", self.source_root / "dataset")
@@ -1403,15 +1416,15 @@ class Workspace:
         return query_api(kind, **filters)
 
     def query_cells(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "cell-instances")
+        filters.setdefault("directory", self.source_root / "cell-instance")
         return query_cell_instances(**filters)
 
     def query_tests(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "tests")
+        filters.setdefault("directory", self.source_root / "test")
         return query_tests(**filters)
 
     def query_test_protocols(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "test-protocols")
+        filters.setdefault("directory", self.source_root / "test-protocol")
         return query_test_protocols(**filters)
 
     def query_datasets(self, **filters: Any) -> list[dict[str, Any]]:

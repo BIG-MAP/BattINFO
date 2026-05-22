@@ -9,11 +9,9 @@ Purpose:
 - provide the minimum publication metadata needed for repeatable ingest
 - configure folder scanning rules for attached files
 
-Normative schema:
-- [ingest-manifest.schema.json](/c:/Users/simonc/Documents/Github-local/battery-genome/BattINFO/assets/schemas/ingest-manifest.schema.json)
+Normative schema: `assets/schemas/ingest-manifest.schema.json`
 
-Packaged runtime copy:
-- [ingest-manifest.schema.json](/c:/Users/simonc/Documents/Github-local/battery-genome/BattINFO/src/battinfo/data/schemas/ingest-manifest.schema.json)
+Packaged runtime copy: `src/battinfo/data/schemas/ingest-manifest.schema.json`
 
 ## Scope
 

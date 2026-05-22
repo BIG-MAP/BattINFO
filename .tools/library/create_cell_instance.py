@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 CELL_TYPE_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
 DATASET_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
@@ -73,7 +73,7 @@ def main() -> None:
     if not CELL_TYPE_IRI_RE.fullmatch(cell_type_id):
         raise SystemExit(
             "cell_type.id must be a BattINFO cell-type IRI "
-            "(https://w3id.org/battinfo/cell-type/{uid})."
+            "(https://w3id.org/battinfo/cell/{uid})."
         )
 
     uid = normalize_uid(args.uid) if args.uid else mint_uid()

@@ -314,7 +314,7 @@ def cell_description(
 
     Args:
         id: Canonical BattINFO cell-type IRI, e.g.
-            ``"https://w3id.org/battinfo/cell-type/xxxx-xxxx-xxxx-xxxx"``.
+            ``"https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx"``.
         manufacturer: Manufacturer name string.
         model: Model/product code string.
         format: Cell format: ``"coin"``, ``"cylindrical"``, ``"pouch"``,

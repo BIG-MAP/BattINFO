@@ -38,7 +38,7 @@ cell_type = CellType(
 
 result = publish(cell_type, destination="local", root=".battinfo/quickstart")
 print(result.canonical_iri)
-# https://w3id.org/battinfo/cell-type/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx
 ```
 
 BattINFO mints a stable, opaque IRI for the record and writes it to disk.

@@ -109,7 +109,7 @@ def test_workspace_loads_cell_type_from_validated_json_record(tmp_path: Path) ->
     assert len(workspace.cell_types) == 1
     assert cell_type.manufacturer == "A123"
     assert cell_type.model == "ANR26650M1-B"
-    assert cell_type.id == "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"
+    assert cell_type.id == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
     assert cell_type.iec_code == "IFpR26650"
     assert cell_type.country_of_origin == "United States"
     assert cell_type.year == 2012
@@ -161,7 +161,7 @@ def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp
 
     assert save_result["index"]["cell_type_count"] == 1
     assert isinstance(cell_type.id, str)
-    assert cell_type.id.startswith("https://w3id.org/battinfo/cell-type/")
+    assert cell_type.id.startswith("https://w3id.org/battinfo/spec/")
     record_path = tmp_path / "workspace" / "examples" / "cell-type" / f"cell-type-{cell_type.id.rsplit('/', 1)[-1]}.json"
     record = json.loads(record_path.read_text(encoding="utf-8"))
     assert isinstance(record["product"]["short_id"], str)

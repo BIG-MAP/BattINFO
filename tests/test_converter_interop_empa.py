@@ -577,17 +577,17 @@ class TestGenerationA:
     def test_dataset_url_is_zenodo_landing_page(self) -> None:
         ds = import_dataset_record(_gen_a_fixture())
         assert ds is not None
-        assert "zenodo.15481956" in ds["dataset"]["url"]
+        assert "zenodo.15481956" in ds["dataset"]["access_url"]
 
     def test_dataset_has_two_distributions(self) -> None:
         ds = import_dataset_record(_gen_a_fixture())
         assert ds is not None
-        assert len(ds["dataset"]["distribution"]) == 2
+        assert len(ds["dataset"]["distributions"]) == 2
 
     def test_dataset_parquet_format_mapped(self) -> None:
         ds = import_dataset_record(_gen_a_fixture())
         assert ds is not None
-        formats = {d["encodingFormat"] for d in ds["dataset"]["distribution"]}
+        formats = {d["encoding_format"] for d in ds["dataset"]["distributions"]}
         assert "application/vnd.apache.parquet" in formats
 
 

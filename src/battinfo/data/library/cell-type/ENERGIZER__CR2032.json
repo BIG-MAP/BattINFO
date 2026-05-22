@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "specification": {
-    "id": "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj",
+    "id": "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
     "manufacturer": "Energizer",
     "model": "CR2032",
     "format": "coin",

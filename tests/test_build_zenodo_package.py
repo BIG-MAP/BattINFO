@@ -28,7 +28,7 @@ from battinfo.publication import DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_META
 
 # ── fixtures ───────────────────────────────────────────────────────────────────
 
-CELL_TYPE_ID = "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj"
+CELL_TYPE_ID = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 CELL_INSTANCE_ID = "https://w3id.org/battinfo/cell/69ca-scxq-6w58-e9tc"
 TEST_ID = "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
 DATASET_ID = "https://w3id.org/battinfo/dataset/gj1y-pn2n-t5pm-gs9c"

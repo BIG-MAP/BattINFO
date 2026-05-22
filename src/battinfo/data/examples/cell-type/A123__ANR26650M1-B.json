@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "identifier": "cell-type:7d9k-2m4p-8t3x-6nq5",
     "name": "A123 ANR26650M1-B",
@@ -15,13 +15,13 @@
       "name": "A123"
     },
     "category": "battery cell",
-    "cellFormat": "cylindrical",
+    "cell_format": "cylindrical",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "unknown",
-    "sizeCode": "R26650",
-    "iecCode": "IFpR26650",
-    "countryOfOrigin": "United States",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "unknown",
+    "size_code": "R26650",
+    "iec_code": "IFpR26650",
+    "country_of_origin": "United States",
     "year": 2012
   },
   "specs": {
@@ -178,4 +178,3 @@
     "retrieved_at": 1769585584
   }
 }
-

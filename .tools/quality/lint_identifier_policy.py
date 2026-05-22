@@ -9,7 +9,7 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parents[2]
 
 UID = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
-CELL_TYPE_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/cell-type/{UID}$")
+CELL_TYPE_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/cell/{UID}$")
 CELL_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/cell/{UID}$")
 DATASET_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/dataset/{UID}$")
 SHORT_ID_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{6,16}$")
@@ -109,10 +109,10 @@ def _check_datasets(dir_path: Path, errors: list[str]) -> None:
 
 def _dirs() -> Iterable[tuple[str, Path]]:
     yield "examples cell-type", ROOT / "examples" / "cell-type"
-    yield "examples cell-instances", ROOT / "examples" / "cell-instances"
+    yield "examples cell-instance", ROOT / "examples" / "cell-instance"
     yield "examples dataset", ROOT / "examples" / "dataset"
     yield "pkg cell-type", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type"
-    yield "pkg cell-instances", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instances"
+    yield "pkg cell-instance", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance"
     yield "pkg dataset", ROOT / "src" / "battinfo" / "data" / "examples" / "dataset"
 
 def main() -> None:
@@ -123,11 +123,11 @@ def main() -> None:
             errors.append(f"missing directory: {path}")
 
     _check_cell_types(ROOT / "examples" / "cell-type", errors)
-    _check_cell_instances(ROOT / "examples" / "cell-instances", errors)
+    _check_cell_instances(ROOT / "examples" / "cell-instance", errors)
     _check_datasets(ROOT / "examples" / "dataset", errors)
 
     _check_cell_types(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type", errors)
-    _check_cell_instances(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instances", errors)
+    _check_cell_instances(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance", errors)
     _check_datasets(ROOT / "src" / "battinfo" / "data" / "examples" / "dataset", errors)
 
     if errors:

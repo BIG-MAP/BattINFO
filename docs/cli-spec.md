@@ -174,7 +174,7 @@ JSON mode (`--format json`) for all query commands:
   "offset": 0,
   "items": [
     {
-      "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+      "id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
       "short_id": "7d9k2m",
       "manufacturer": "A123",
       "model_name": "ANR26650M1-B"
@@ -208,8 +208,8 @@ Output contract:
 {
   "status": "created",
   "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
-  "type_id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
-  "path": "examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json"
+  "type_id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
+  "path": "examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json"
 }
 ```
 
@@ -247,7 +247,7 @@ Typical result:
 {
   "status": "created",
   "entity_type": "cell-type",
-  "id": "https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8",
+  "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
   "path": "examples/cell-type/cell-type-3m6k-9t2p-7x4h-9nq8.json",
   "mode": "create_only",
   "published": false

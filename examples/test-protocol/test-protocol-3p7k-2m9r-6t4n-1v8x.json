@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/3p7k-2m9r-6t4n-1v8x",
+    "id": "https://w3id.org/battinfo/spec/3p7k-2m9r-6t4n-1v8x",
     "short_id": "3p7k2m",
     "identifier": "test-protocol:3p7k-2m9r-6t4n-1v8x",
     "name": "GITT — Galvanostatic Intermittent Titration at 25°C",
@@ -43,10 +43,22 @@
     }
   },
   "measurement_outputs": [
-    { "name": "Voltage", "unit_text": "V" },
-    { "name": "Current", "unit_text": "A" },
-    { "name": "Capacity", "unit_text": "Ah" },
-    { "name": "Temperature", "unit_text": "degC" }
+    {
+      "name": "Voltage",
+      "unit_text": "V"
+    },
+    {
+      "name": "Current",
+      "unit_text": "A"
+    },
+    {
+      "name": "Capacity",
+      "unit_text": "Ah"
+    },
+    {
+      "name": "Temperature",
+      "unit_text": "degC"
+    }
   ],
   "provenance": {
     "source_type": "manual",

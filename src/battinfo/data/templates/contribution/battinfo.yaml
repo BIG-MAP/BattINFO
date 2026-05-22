@@ -12,7 +12,7 @@ cell_name: "My Cell 001"
 
 # BattINFO cell-type IRI for the model that was tested.
 # Find the IRI at https://www.battery-genome.org/registry/cell-type
-# Example: https://w3id.org/battinfo/cell-type/e5rn-ep3s-hwxr-kwzc
+# Example: https://w3id.org/battinfo/cell/e5rn-ep3s-hwxr-kwzc
 cell_type_iri: null
 
 # Leave null unless you are republishing a cell that already has a BattINFO IRI.

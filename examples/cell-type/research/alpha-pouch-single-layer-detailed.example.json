@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/3f7k-2m9r-4t6p-8v5q",
+    "id": "https://w3id.org/battinfo/spec/3f7k-2m9r-4t6p-8v5q",
     "name": "AlphaLab POUCH-SL-LFP-001",
     "manufacturer": {
       "type": "Organization",
       "name": "AlphaLab"
     },
     "model": "POUCH-SL-LFP-001",
-    "cellFormat": "pouch",
+    "cell_format": "pouch",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "graphite"
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite"
   },
   "specs": {
     "nominal_capacity": {

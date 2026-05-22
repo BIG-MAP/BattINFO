@@ -11,6 +11,11 @@ _CELL_TYPE_PRODUCT_TO_SNAKE = {
     "iecCode": "iec_code",
     "countryOfOrigin": "country_of_origin",
     "datasheetRevision": "datasheet_revision",
+    "productType": "product_type",
+    "additionalType": "additional_type",
+    "manufacturingPlace": "manufacturing_place",
+    "batteryCategory": "battery_category",
+    "referenceElectrode": "reference_electrode",
 }
 _CELL_TYPE_PRODUCT_TO_LEGACY = {value: key for key, value in _CELL_TYPE_PRODUCT_TO_SNAKE.items()}
 

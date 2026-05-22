@@ -49,14 +49,14 @@ def test_metadata_helpers_build_native_battinfo_shapes() -> None:
         checksum_value=checksum("sha256", "a" * 64),
     )
 
-    assert lab["sameAs"] == "https://ror.org/03yrm5c26"
-    assert researcher["sameAs"] == "https://orcid.org/0000-0000-0000-0001"
+    assert lab["same_as"] == "https://ror.org/03yrm5c26"
+    assert researcher["same_as"] == "https://orcid.org/0000-0000-0000-0001"
     assert researcher["affiliation"]["name"] == "Example Lab"
     assert catalog["type"] == "DataCatalog"
-    assert variable["sameAs"] == "https://qudt.org/vocab/quantitykind/Voltage"
+    assert variable["same_as"] == "https://qudt.org/vocab/quantitykind/Voltage"
     assert csvw["type"] == "Table"
-    assert csvw["tableSchema"]["id"] == "https://example.org/table-schema"
-    assert group["table"][0]["tableSchema"]["columns"][0]["sameAs"] == "https://qudt.org/vocab/quantitykind/Voltage"
+    assert csvw["table_schema"]["id"] == "https://example.org/table-schema"
+    assert group["tables"][0]["table_schema"]["columns"][0]["same_as"] == "https://qudt.org/vocab/quantitykind/Voltage"
     assert download["checksum"]["value"] == "a" * 64
 
 
@@ -72,12 +72,12 @@ def test_infer_variable_measured_from_columns_and_metadata() -> None:
     assert variables == [
         {
             "name": "Voltage",
-            "sameAs": "https://qudt.org/vocab/quantitykind/Voltage",
+            "same_as": "https://qudt.org/vocab/quantitykind/Voltage",
             "unit_text": "V",
         },
         {
             "name": "Current",
-            "sameAs": "https://qudt.org/vocab/quantitykind/ElectricCurrent",
+            "same_as": "https://qudt.org/vocab/quantitykind/ElectricCurrent",
             "unit_text": "A",
         },
     ]
@@ -113,7 +113,7 @@ def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
     assert enriched.variable_measured == [
         {
             "name": "Voltage",
-            "sameAs": "https://qudt.org/vocab/quantitykind/Voltage",
+            "same_as": "https://qudt.org/vocab/quantitykind/Voltage",
             "unit_text": "V",
         },
         {
@@ -125,13 +125,13 @@ def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
         {
             "type": "Table",
             "url": "https://example.org/data.csv",
-            "tableSchema": {
+            "table_schema": {
                 "id": "https://example.org/table-schema",
                 "columns": [
                     {
                         "name": "Voltage",
                         "titles": ["Voltage / V"],
-                        "sameAs": "https://qudt.org/vocab/quantitykind/Voltage",
+                        "same_as": "https://qudt.org/vocab/quantitykind/Voltage",
                     },
                     {
                         "name": "Current",

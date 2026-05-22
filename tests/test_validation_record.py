@@ -27,8 +27,8 @@ def test_validate_record_report_accepts_canonical_cell_type_example() -> None:
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
     assert not report.issues
-    assert doc["product"]["iecCode"] == "IFpR26650"
-    assert doc["product"]["countryOfOrigin"] == "United States"
+    assert doc["product"]["iec_code"] == "IFpR26650"
+    assert doc["product"]["country_of_origin"] == "United States"
     assert doc["product"]["year"] == 2012
 
 
@@ -59,15 +59,15 @@ def test_validate_record_report_accepts_linked_dataset_example_with_source_root(
 
 
 def test_validate_record_report_accepts_test_protocol_example() -> None:
-    doc = _load_json("src/battinfo/data/examples/test-protocols/test-protocol-8r2m-4v6k-9p3t-7n5x.json")
+    doc = _load_json("src/battinfo/data/examples/test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json")
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
     assert not report.issues
 
 
 def test_validate_record_report_includes_test_protocol_reference_issues() -> None:
-    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
-    doc["test"]["protocol_id"] = "https://w3id.org/battinfo/test-protocol/eysh-4h5s-k4bx-zkgg"
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["protocol_id"] = "https://w3id.org/battinfo/spec/eysh-4h5s-k4bx-zkgg"
     report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
     assert any(issue.code == "reference.missing" and issue.path == "test.protocol_id" for issue in report.errors)
@@ -76,7 +76,7 @@ def test_validate_record_report_includes_test_protocol_reference_issues() -> Non
 def test_validate_record_report_combines_schema_and_semantic_issues() -> None:
     doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
     doc["dataset"]["access_url"] = "not-a-uri"
-    doc["dataset"]["dateModified"] = doc["dataset"]["dateCreated"] - 1
+    doc["dataset"]["modified_at"] = doc["dataset"]["created_at"] - 1
     report = validate_record_report(doc, policy=STRICT)
     assert not report.ok
     codes = {issue.code for issue in report.errors}
@@ -85,7 +85,7 @@ def test_validate_record_report_combines_schema_and_semantic_issues() -> None:
 
 
 def test_validate_record_report_includes_reference_issues_when_source_root_provided() -> None:
-    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["dataset_ids"] = ["https://w3id.org/battinfo/dataset/eysh-4h5s-k4bx-zkgg"]
     report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
@@ -102,13 +102,13 @@ def test_validate_record_report_rejects_dataset_without_cell_link() -> None:
 
 def test_validate_record_report_accepts_dataset_with_cell_type_link_only() -> None:
     doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
-    doc["dataset"]["about"] = ["https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"]
+    doc["dataset"]["about"] = ["https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"]
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
 
 
 def test_validate_record_result_preserves_issue_metadata() -> None:
-    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["short_id"] = "xxxxxx"
     result = validate_record(doc, policy=STRICT)
     assert not result.ok
@@ -117,7 +117,7 @@ def test_validate_record_result_preserves_issue_metadata() -> None:
 
 
 def test_validate_record_accepts_named_policy_string() -> None:
-    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["short_id"] = "xxxxxx"
     result = validate_record(doc, policy="strict")
     assert not result.ok

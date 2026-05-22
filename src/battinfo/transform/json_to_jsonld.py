@@ -1453,13 +1453,13 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
             "id": product.get("id"),
             "manufacturer": (product.get("manufacturer") or {}).get("name") or product.get("manufacturer", ""),
             "model": product.get("model", ""),
-            "format": product.get("cellFormat", "unknown"),
+            "format": product.get("cell_format", "unknown"),
             "chemistry": product.get("chemistry", "unknown"),
-            "positive_electrode_basis": product.get("positiveElectrodeBasis", ""),
-            "negative_electrode_basis": product.get("negativeElectrodeBasis", ""),
+            "positive_electrode_basis": product.get("positive_electrode_basis", ""),
+            "negative_electrode_basis": product.get("negative_electrode_basis", ""),
         }
-        if "sizeCode" in product:
-            specification["size_code"] = product["sizeCode"]
+        if "size_code" in product:
+            specification["size_code"] = product["size_code"]
         for field in ("construction", "positive_electrode", "negative_electrode",
                       "electrolyte", "separator", "coin_hardware"):
             if field in data:

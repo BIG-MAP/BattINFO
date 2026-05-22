@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/8r2m-4v6k-9p3t-7n5x",
+    "id": "https://w3id.org/battinfo/spec/8r2m-4v6k-9p3t-7n5x",
     "short_id": "8r2m4v",
     "identifier": "test-protocol:8r2m-4v6k-9p3t-7n5x",
     "name": "1C Cycle Life at 25 C",

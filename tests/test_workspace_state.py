@@ -184,8 +184,8 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
     assert registry_intake_path.exists()
     assert validation_report_path.exists()
     assert (normalized_dir / "cell-type").is_dir()
-    assert (normalized_dir / "cell-instances").is_dir()
-    assert (normalized_dir / "tests").is_dir()
+    assert (normalized_dir / "cell-instance").is_dir()
+    assert (normalized_dir / "test").is_dir()
     assert (normalized_dir / "dataset").is_dir()
 
     intake = json.loads(registry_intake_path.read_text(encoding="utf-8"))

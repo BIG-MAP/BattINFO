@@ -22,7 +22,7 @@ from battinfo.contribution import (
 
 runner = CliRunner()
 
-ENERGIZER_IRI = "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj"
+ENERGIZER_IRI = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 
 
 # ── _resolve_cell_type_for_batch ───────────────────────────────────────────────

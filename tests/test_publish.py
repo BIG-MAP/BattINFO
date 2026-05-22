@@ -33,7 +33,7 @@ def test_publish_cell_type_local_writes_canonical_record(tmp_path: Path) -> None
     assert result.destination == "local"
     assert result.resource_type == "cell_type"
     assert result.canonical_id is not None
-    assert result.canonical_iri == f"https://w3id.org/battinfo/cell-type/{result.canonical_id}"
+    assert result.canonical_iri == f"https://w3id.org/battinfo/spec/{result.canonical_id}"
 
     canonical_record_path = Path(result.debug_paths["canonical_record_path"])
     assert canonical_record_path.exists()
@@ -57,7 +57,7 @@ def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(t
             "response": {
                 "canonical_id_map": {source_local_id: "registry-cell-type-001"},
                 "canonical_iri_map": {
-                    source_local_id: "https://w3id.org/battinfo/cell-type/registry-cell-type-001",
+                    source_local_id: "https://w3id.org/battinfo/cell/registry-cell-type-001",
                 },
             },
         }
@@ -80,7 +80,7 @@ def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(t
     assert result.status == "ok"
     assert result.destination == "registry"
     assert result.canonical_id == "registry-cell-type-001"
-    assert result.canonical_iri == "https://w3id.org/battinfo/cell-type/registry-cell-type-001"
+    assert result.canonical_iri == "https://w3id.org/battinfo/cell/registry-cell-type-001"
     assert result.registry_resource_url == "https://registry.example.org/resources/cell-type/registry-cell-type-001"
     assert result.page_url is None
     assert result.workspace_id == "hello-world"
@@ -110,7 +110,7 @@ def test_publish_cell_type_battery_genome_returns_page_url(tmp_path: Path, monke
             "response": {
                 "canonical_id_map": {source_local_id: "registry-cell-type-002"},
                 "canonical_iri_map": {
-                    source_local_id: "https://w3id.org/battinfo/cell-type/registry-cell-type-002",
+                    source_local_id: "https://w3id.org/battinfo/cell/registry-cell-type-002",
                 },
             },
         }
@@ -173,9 +173,9 @@ def test_publish_requires_object_or_legacy_keywords() -> None:
 # ---------------------------------------------------------------------------
 
 _EXAMPLE_CELL_TYPE = ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
-_EXAMPLE_CELL_INSTANCE = ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json"
+_EXAMPLE_CELL_INSTANCE = ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json"
 _EXAMPLE_DATASET = ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json"
-_EXAMPLE_TEST_PROTOCOL = ROOT / "examples" / "test-protocols" / "test-protocol-8r2m-4v6k-9p3t-7n5x.json"
+_EXAMPLE_TEST_PROTOCOL = ROOT / "examples" / "test-protocol" / "test-protocol-8r2m-4v6k-9p3t-7n5x.json"
 
 
 def test_publish_record_cell_type_writes_three_files(tmp_path: Path) -> None:

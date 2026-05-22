@@ -27,8 +27,8 @@ from battinfo.bundle import (
 
 # ── shared fixtures ────────────────────────────────────────────────────────────
 
-CELL_TYPE_ID = "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj"
-CELL_SPEC_ID = "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj"
+CELL_TYPE_ID = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
+CELL_SPEC_ID = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 CELL_INSTANCE_ID = "https://w3id.org/battinfo/cell/69ca-scxq-6w58-e9tc"
 CELL_INSTANCE_ID_2 = "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd"
 TEST_ID = "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
@@ -254,7 +254,7 @@ def test_from_battinfo_bundles_multi() -> None:
 def test_from_battinfo_bundles_rejects_mixed_cell_types() -> None:
     cell_type_a = _make_cell_type()
     cell_type_b = _make_cell_type()
-    cell_type_b = cell_type_b.model_copy(update={"id": "https://w3id.org/battinfo/cell-type/different"})
+    cell_type_b = cell_type_b.model_copy(update={"id": "https://w3id.org/battinfo/cell/different"})
     ci = _make_cell_instance()
     entry = _make_dataset_entry(cell_instances=[ci])
     bundles = [

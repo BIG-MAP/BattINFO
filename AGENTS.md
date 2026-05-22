@@ -84,15 +84,6 @@ Useful focused checks:
 - `python -m pytest -q tests/test_api.py tests/test_cli_query_create_publish.py`
 - `python tests/installed_smoke.py`
 
-## Notebook Intent
-
-The notebooks under `examples/notebooks/` are executable onboarding workflows, not
-scratchpads. They should stay:
-
-- public-API-first
-- human-first in narrative and code style
-- free of repo-local `sys.path` manipulation and ad hoc helper scaffolding
-
 ## Agent Contract
 
 Machine-readable agent metadata lives at:

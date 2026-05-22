@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/8n5v-4t1k-7r3m-2p9x",
+    "id": "https://w3id.org/battinfo/spec/8n5v-4t1k-7r3m-2p9x",
     "short_id": "8n5v4t",
     "identifier": "test-protocol:8n5v-4t1k-7r3m-2p9x",
     "name": "ICI — Intermittent Current Interruption during 1C Cycling at 25°C",
@@ -48,11 +48,26 @@
     }
   },
   "measurement_outputs": [
-    { "name": "Voltage", "unit_text": "V" },
-    { "name": "Current", "unit_text": "A" },
-    { "name": "Capacity", "unit_text": "Ah" },
-    { "name": "DCInternalResistance", "unit_text": "Ohm" },
-    { "name": "Temperature", "unit_text": "degC" }
+    {
+      "name": "Voltage",
+      "unit_text": "V"
+    },
+    {
+      "name": "Current",
+      "unit_text": "A"
+    },
+    {
+      "name": "Capacity",
+      "unit_text": "Ah"
+    },
+    {
+      "name": "DCInternalResistance",
+      "unit_text": "Ohm"
+    },
+    {
+      "name": "Temperature",
+      "unit_text": "degC"
+    }
   ],
   "provenance": {
     "source_type": "manual",

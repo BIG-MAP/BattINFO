@@ -25,7 +25,7 @@
       ],
       "properties": {
         "id": {
-          "$ref": "#/$defs/TestProtocolIri"
+          "$ref": "#/$defs/SpecIri"
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
@@ -163,9 +163,9 @@
       "type": "string",
       "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
     },
-    "TestProtocolIri": {
+    "SpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/test-protocol/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     }
   }
 }

@@ -17,6 +17,7 @@ CLAUDE.md
 
 # Documentation
 site
+docs/_build
 
 # Editor
 .vscode/

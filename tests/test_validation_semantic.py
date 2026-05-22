@@ -24,7 +24,7 @@ def test_semantic_validation_accepts_canonical_cell_type_example() -> None:
 
 
 def test_semantic_validation_rejects_short_id_mismatch() -> None:
-    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["short_id"] = "xxxxxx"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
@@ -58,8 +58,8 @@ def test_semantic_validation_rejects_invalid_spec_range_ordering() -> None:
 
 def test_semantic_validation_rejects_invalid_dataset_temporal_order_and_checksum() -> None:
     doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
-    doc["dataset"]["dateModified"] = doc["dataset"]["dateCreated"] - 1
-    doc["dataset"]["distribution"][0]["checksum"]["value"] = "xyz"
+    doc["dataset"]["modified_at"] = doc["dataset"]["created_at"] - 1
+    doc["dataset"]["distributions"][0]["checksum"]["value"] = "xyz"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     codes = {issue.code for issue in report.errors}
@@ -77,7 +77,7 @@ def test_semantic_validation_rejects_dataset_without_cell_link() -> None:
 
 def test_semantic_validation_allows_dataset_with_cell_type_link_only() -> None:
     doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
-    doc["dataset"]["about"] = ["https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5"]
+    doc["dataset"]["about"] = ["https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"]
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert report.ok
 
@@ -99,7 +99,7 @@ def test_semantic_validation_warns_for_unmapped_controlled_value() -> None:
 
 
 def test_semantic_validation_defaults_to_warning_mode_for_hard_rules() -> None:
-    doc = _load_json("src/battinfo/data/examples/tests/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["short_id"] = "xxxxxx"
     report = validate_semantic_report(doc)
     assert report.ok

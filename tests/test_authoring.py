@@ -364,7 +364,7 @@ class TestSeparatorSpec:
 # cell_description()
 # ---------------------------------------------------------------------------
 
-_CELL_ID = "https://w3id.org/battinfo/cell-type/1234-5678-abcd-efgh"
+_CELL_ID = "https://w3id.org/battinfo/cell/1234-5678-abcd-efgh"
 
 
 class TestCellDescription:

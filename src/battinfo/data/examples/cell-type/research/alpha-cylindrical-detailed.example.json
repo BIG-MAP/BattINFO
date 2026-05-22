@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/2d5n-8r4k-3p7t-6v9m",
+    "id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m",
     "name": "AlphaLab CYL-LFP-18650",
     "manufacturer": {
       "type": "Organization",
       "name": "AlphaLab"
     },
     "model": "CYL-LFP-18650",
-    "cellFormat": "cylindrical",
+    "cell_format": "cylindrical",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "graphite",
-    "sizeCode": "18650"
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "size_code": "18650"
   },
   "specs": {
     "nominal_capacity": {

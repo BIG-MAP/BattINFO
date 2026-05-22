@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "cell_instance": {
     "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
-    "type_id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+    "type_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "3m6k9t",
     "serial_number": "SN0001"
   },

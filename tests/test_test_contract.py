@@ -27,7 +27,7 @@ def test_test_examples_validate_against_normative_schema() -> None:
     registry = _schema_registry(schema_root)
     validator = Draft202012Validator(schema_doc, registry=registry)
 
-    examples_dir = ROOT / "examples" / "tests"
+    examples_dir = ROOT / "examples" / "test"
     example_paths = sorted(examples_dir.glob("*.json"))
     assert example_paths, f"No test examples found in {examples_dir}"
 
@@ -42,8 +42,8 @@ def test_test_schema_and_examples_are_synced_between_assets_and_package() -> Non
     package_schema = ROOT / "src" / "battinfo" / "data" / "schemas" / "test.schema.json"
     assert json.loads(assets_schema.read_text(encoding="utf-8")) == json.loads(package_schema.read_text(encoding="utf-8"))
 
-    assets_examples = ROOT / "examples" / "tests"
-    package_examples = ROOT / "src" / "battinfo" / "data" / "examples" / "tests"
+    assets_examples = ROOT / "examples" / "test"
+    package_examples = ROOT / "src" / "battinfo" / "data" / "examples" / "test"
     asset_files = sorted(path.name for path in assets_examples.glob("*.json"))
     package_files = sorted(path.name for path in package_examples.glob("*.json"))
     assert asset_files == package_files
@@ -57,7 +57,7 @@ def test_test_schema_and_examples_are_synced_between_assets_and_package() -> Non
 
 
 def test_test_examples_cover_alpha_hardening_kinds() -> None:
-    examples_dir = ROOT / "examples" / "tests"
+    examples_dir = ROOT / "examples" / "test"
     observed = {
         json.loads(path.read_text(encoding="utf-8"))["test"]["kind"]
         for path in sorted(examples_dir.glob("*.json"))

@@ -28,14 +28,14 @@ def test_validate_json_report_exposes_structured_schema_issue() -> None:
     doc = {
         "schema_version": "1.0.0",
         "product": {
-            "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+            "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
             "name": "A123 ANR26650M1-B",
             "manufacturer": {"type": "Organization", "name": "A123"},
             "model": "ANR26650M1-B",
-            "cellFormat": "cylindrical",
+            "cell_format": "cylindrical",
             "chemistry": "Li-ion",
-            "positiveElectrodeBasis": "LFP",
-            "negativeElectrodeBasis": "graphite",
+            "positive_electrode_basis": "LFP",
+            "negative_electrode_basis": "graphite",
         },
         "provenance": {
             "source_type": "datasheet",
@@ -58,14 +58,14 @@ def test_validate_json_result_preserves_structured_issues() -> None:
     doc = {
         "schema_version": "1.0.0",
         "product": {
-            "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+            "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
             "name": "A123 ANR26650M1-B",
             "manufacturer": {"type": "Organization", "name": "A123"},
             "model": "ANR26650M1-B",
-            "cellFormat": "cylindrical",
+            "cell_format": "cylindrical",
             "chemistry": "Li-ion",
-            "positiveElectrodeBasis": "LFP",
-            "negativeElectrodeBasis": "graphite",
+            "positive_electrode_basis": "LFP",
+            "negative_electrode_basis": "graphite",
         },
         "provenance": {
             "source_type": "datasheet",
@@ -259,7 +259,7 @@ def test_validate_references_report_detects_missing_reference(tmp_path: Path) ->
             "cell_instance": {
                 "id": "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x",
                 "identifier": "cell:1f8r-6v2k-9p4m-3t7x",
-                "type_id": "https://w3id.org/battinfo/cell-type/eysh-4h5s-k4bx-zkgg",
+                "type_id": "https://w3id.org/battinfo/cell/eysh-4h5s-k4bx-zkgg",
             },
             "provenance": {
                 "source_type": "measurement",

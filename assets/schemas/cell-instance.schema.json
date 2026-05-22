@@ -5,7 +5,11 @@
   "description": "Physical cell instance derived from a cell type.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "cell_instance", "provenance"],
+  "required": [
+    "schema_version",
+    "cell_instance",
+    "provenance"
+  ],
   "properties": {
     "schema_version": {
       "type": "string",
@@ -14,14 +18,59 @@
     "cell_instance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "type_id"],
+      "required": [
+        "id",
+        "type_id"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/CellIri" },
-        "type_id": { "$ref": "#/$defs/CellTypeIri" },
-        "short_id": { "$ref": "#/$defs/ShortId" },
-        "serial_number": { "type": "string" },
-        "batch_id": { "type": "string" },
-        "manufactured_at": { "$ref": "#/$defs/UnixTime" }
+        "id": {
+          "$ref": "#/$defs/CellIri"
+        },
+        "type_id": {
+          "$ref": "#/$defs/SpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "serial_number": {
+          "type": "string"
+        },
+        "batch_id": {
+          "type": "string"
+        },
+        "manufactured_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "service_start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date when the battery was first put into service."
+        },
+        "battery_status": {
+          "type": "string",
+          "enum": [
+            "original",
+            "repurposed",
+            "re-used",
+            "remanufactured",
+            "waste"
+          ],
+          "description": "Current status of the battery per EU Battery Regulation Annex XIII."
+        },
+        "dpp_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "archived",
+            "inactive",
+            "marked-for-deletion"
+          ],
+          "description": "Status of this digital product passport record."
+        },
+        "supersedes": {
+          "$ref": "#/$defs/CellIri",
+          "description": "IRI of the previous cell record this passport replaces, e.g. after repurposing."
+        }
       }
     },
     "measured": {
@@ -30,13 +79,28 @@
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source_type"],
+      "required": [
+        "source_type"
+      ],
       "properties": {
-        "source_type": { "type": "string", "enum": ["measurement", "lab", "bms", "other"] },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "measurement",
+            "lab",
+            "bms",
+            "other"
+          ]
+        },
         "source_url": {
           "oneOf": [
-            { "type": "string", "format": "uri" },
-            { "type": "null" }
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "citation": {
@@ -47,17 +111,23 @@
           "type": "string",
           "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
         },
-        "retrieved_at": { "$ref": "#/$defs/UnixTime" }
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
       }
     },
     "datasets": {
       "type": "array",
-      "items": { "$ref": "#/$defs/DatasetLink" },
+      "items": {
+        "$ref": "#/$defs/DatasetLink"
+      },
       "uniqueItems": true
     },
     "notes": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     }
   },
   "$defs": {
@@ -74,10 +144,6 @@
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
-    "CellTypeIri": {
-      "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell-type/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-    },
     "DatasetIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
@@ -85,14 +151,28 @@
     "DatasetLink": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/DatasetIri" },
+        "id": {
+          "$ref": "#/$defs/DatasetIri"
+        },
         "role": {
           "type": "string",
-          "enum": ["raw", "processed", "report", "metadata", "other"]
+          "enum": [
+            "raw",
+            "processed",
+            "report",
+            "metadata",
+            "other"
+          ]
         }
       }
+    },
+    "SpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     }
   }
 }

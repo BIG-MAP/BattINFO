@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/4x2p-9k6v-1m8t-5n3r",
+    "id": "https://w3id.org/battinfo/spec/4x2p-9k6v-1m8t-5n3r",
     "short_id": "4x2p9k",
     "identifier": "test-protocol:4x2p-9k6v-1m8t-5n3r",
     "name": "Calendar Ageing — Storage at 40°C, 50% SOC with Monthly Check-ups",
@@ -53,11 +53,26 @@
     }
   },
   "measurement_outputs": [
-    { "name": "Capacity", "unit_text": "Ah" },
-    { "name": "Voltage", "unit_text": "V" },
-    { "name": "Temperature", "unit_text": "degC" },
-    { "name": "ImpedanceMagnitude", "unit_text": "Ohm" },
-    { "name": "PhaseAngle", "unit_text": "deg" }
+    {
+      "name": "Capacity",
+      "unit_text": "Ah"
+    },
+    {
+      "name": "Voltage",
+      "unit_text": "V"
+    },
+    {
+      "name": "Temperature",
+      "unit_text": "degC"
+    },
+    {
+      "name": "ImpedanceMagnitude",
+      "unit_text": "Ohm"
+    },
+    {
+      "name": "PhaseAngle",
+      "unit_text": "deg"
+    }
   ],
   "provenance": {
     "source_type": "manual",

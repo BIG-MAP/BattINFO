@@ -43,7 +43,7 @@
           "minLength": 1
         },
         "protocol_id": {
-          "$ref": "#/$defs/TestProtocolIri"
+          "$ref": "#/$defs/SpecIri"
         },
         "description": {
           "type": "string"
@@ -54,6 +54,7 @@
             "cycle_life",
             "capacity_check",
             "rate_capability",
+            "quasi_ocv",
             "hppc",
             "ici",
             "gitt",
@@ -62,6 +63,8 @@
             "impedance",
             "calendar_ageing",
             "formation",
+            "sem",
+            "characterization",
             "other"
           ]
         },
@@ -97,6 +100,14 @@
             "$ref": "#/$defs/DatasetIri"
           },
           "uniqueItems": true
+        },
+        "conditions": {
+          "type": "object",
+          "description": "Test conditions and parameters (temperature, voltage window, C-rate, frequency range, etc.).",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {}
+          },
+          "additionalProperties": false
         }
       }
     },
@@ -177,9 +188,9 @@
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
-    "TestProtocolIri": {
+    "SpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/test-protocol/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     }
   }
 }

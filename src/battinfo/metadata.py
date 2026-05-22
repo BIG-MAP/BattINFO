@@ -34,7 +34,7 @@ class TableColumn(BaseModel):
         if self.unit_text is not None:
             payload["unit_text"] = self.unit_text
         if self.same_as is not None:
-            payload["sameAs"] = self.same_as
+            payload["same_as"] = self.same_as
         if self.required is not None:
             payload["required"] = self.required
         return payload
@@ -95,7 +95,7 @@ def organization(
     if resolved_same_as is None and ror is not None:
         resolved_same_as = ror if ror.startswith("http") else f"https://ror.org/{ror}"
     if resolved_same_as is not None:
-        node["sameAs"] = resolved_same_as
+        node["same_as"] = resolved_same_as
     return node
 
 
@@ -119,7 +119,7 @@ def person(
     if resolved_same_as is None and orcid is not None:
         resolved_same_as = orcid if orcid.startswith("http") else f"https://orcid.org/{orcid}"
     if resolved_same_as is not None:
-        node["sameAs"] = resolved_same_as
+        node["same_as"] = resolved_same_as
     if given_name is not None:
         node["given_name"] = given_name
     if family_name is not None:
@@ -143,7 +143,7 @@ def data_catalog(
     if url is not None:
         node["url"] = url
     if same_as is not None:
-        node["sameAs"] = same_as
+        node["same_as"] = same_as
     if description is not None:
         node["description"] = description
     return node
@@ -160,7 +160,7 @@ def measured_variable(
     node: dict[str, Any] = {"name": name}
     resolved_same_as = same_as or property_id
     if resolved_same_as is not None:
-        node["sameAs"] = resolved_same_as
+        node["same_as"] = resolved_same_as
     if unit_text is not None:
         node["unit_text"] = unit_text
     if description is not None:
@@ -232,7 +232,7 @@ def csvw_table(
     node: dict[str, Any] = {
         "type": "Table",
         "url": url,
-        "tableSchema": _table_schema_mapping(table_schema),
+        "table_schema": _table_schema_mapping(table_schema),
     }
     if id is not None:
         node["id"] = id
@@ -250,7 +250,7 @@ def csvw_table_group(
     name: str | None = None,
     description: str | None = None,
 ) -> dict[str, Any]:
-    node: dict[str, Any] = {"type": "TableGroup", "table": [dict(table) for table in tables]}
+    node: dict[str, Any] = {"type": "TableGroup", "tables": [dict(table) for table in tables]}
     if id is not None:
         node["id"] = id
     if url is not None:
@@ -355,7 +355,9 @@ def _coerce_table_schema_metadata(table_schema: TableSchema | Mapping[str, Any] 
             info["description"] = candidate["description"]
         if isinstance(candidate.get("unit_text"), str):
             info["unit"] = candidate["unit_text"]
-        if isinstance(candidate.get("sameAs"), str):
+        if isinstance(candidate.get("same_as"), str):
+            info["iri"] = candidate["same_as"]
+        elif isinstance(candidate.get("sameAs"), str):
             info["iri"] = candidate["sameAs"]
         elif isinstance(candidate.get("property_id"), str):
             info["iri"] = candidate["property_id"]
@@ -397,7 +399,7 @@ def infer_variable_measured(
             unit_text = info.get("unit")
             if not isinstance(unit_text, str):
                 _, unit_text = _split_label_and_unit(column_label)
-            property_id = info.get("sameAs") or info.get("property_id") or info.get("iri")
+            property_id = info.get("same_as") or info.get("sameAs") or info.get("property_id") or info.get("iri")
             description = info.get("description")
         else:
             name, unit_text = _split_label_and_unit(column_label)
@@ -418,7 +420,7 @@ def infer_variable_measured(
     for item in out:
         key = (
             item["name"],
-            item.get("sameAs") if isinstance(item.get("sameAs"), str) else None,
+            (item.get("same_as") or item.get("sameAs")) if (item.get("same_as") or item.get("sameAs")) else None,
             item.get("unit_text") if isinstance(item.get("unit_text"), str) else None,
         )
         if key in seen:
@@ -437,7 +439,7 @@ def _merge_variable_measured(
     for item in [*existing, *inferred]:
         key = (
             str(item.get("name", "")),
-            str(item.get("sameAs")) if isinstance(item.get("sameAs"), str) else None,
+            str(item.get("same_as") or item.get("sameAs")) if (item.get("same_as") or item.get("sameAs")) else None,
             str(item.get("unit_text")) if isinstance(item.get("unit_text"), str) else None,
         )
         if not key[0] or key in seen:
@@ -456,7 +458,7 @@ def _merge_main_entity(
     out: list[dict[str, Any]] = []
     seen: set[tuple[str | None, str | None, str | None]] = set()
     for item in [*existing, inferred]:
-        table_schema = item.get("tableSchema")
+        table_schema = item.get("table_schema") or item.get("tableSchema")
         if isinstance(table_schema, Mapping):
             table_schema_key = (
                 str(table_schema.get("id"))
@@ -483,8 +485,8 @@ def _infer_csvw_url(dataset: Any) -> str | None:
     for item in getattr(dataset, "distributions", []):
         if not isinstance(item, Mapping):
             continue
-        content_url = item.get("contentUrl")
-        encoding_format = item.get("encodingFormat")
+        content_url = item.get("content_url") or item.get("contentUrl")
+        encoding_format = item.get("encoding_format") or item.get("encodingFormat")
         if not isinstance(content_url, str):
             continue
         if isinstance(encoding_format, str) and any(token in encoding_format.lower() for token in ("csv", "tsv", "tabular", "parquet")):

@@ -1258,8 +1258,21 @@ def _stable_uid(seed: str) -> str:
     return "-".join(token[i : i + 4] for i in range(0, 16, 4))
 
 
+_IRI_NAMESPACE: dict[str, str] = {
+    "cell-type": "spec",
+    "cell": "cell",
+    "test-protocol": "spec",
+    "test": "test",
+    "dataset": "dataset",
+    "organization": "organization",
+    "electrode": "electrode",
+    "material": "material",
+}
+
+
 def _entity_iri(entity_type: str, seed: str) -> str:
-    return f"https://w3id.org/battinfo/{entity_type}/{_stable_uid(seed)}"
+    namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
+    return f"https://w3id.org/battinfo/{namespace}/{_stable_uid(seed)}"
 
 
 # ---------------------------------------------------------------------------
@@ -1282,7 +1295,7 @@ def _map_person(node: Any) -> dict[str, Any] | None:
     person: dict[str, Any] = {"type": "Person", "name": name}
     orcid = _string_value(node.get("@id"))
     if orcid and orcid.startswith("https://orcid.org/"):
-        person["sameAs"] = orcid
+        person["same_as"] = orcid
     affiliation = _mapping_or_none(node.get("schema:affiliation"))
     if affiliation is not None:
         org_name = _string_value(affiliation.get("schema:name"))
@@ -1290,7 +1303,7 @@ def _map_person(node: Any) -> dict[str, Any] | None:
         if org_name is not None:
             aff: dict[str, Any] = {"name": org_name}
             if org_id:
-                aff["sameAs"] = org_id
+                aff["same_as"] = org_id
             person["affiliation"] = aff
     return person
 
@@ -1305,8 +1318,8 @@ def _map_distributions(dcat_distributions: list[Any]) -> list[dict[str, Any]]:
         if url is None or media_type is None:
             continue
         dist: dict[str, Any] = {
-            "contentUrl": url,
-            "encodingFormat": _MEDIA_TYPE_FORMAT.get(media_type, media_type),
+            "content_url": url,
+            "encoding_format": _MEDIA_TYPE_FORMAT.get(media_type, media_type),
         }
         out.append(dist)
     return out
@@ -1347,7 +1360,7 @@ def import_dataset_record(
     dataset_url = (
         _string_value(has_output.get("dcat:accessURL"))
         or _string_value(has_output.get("schema:url"))
-        or distributions[0]["contentUrl"]
+        or distributions[0]["content_url"]
     )
 
     title = (
@@ -1363,8 +1376,8 @@ def import_dataset_record(
         "id": dataset_id,
         "identifier": identifier,
         "name": title,
-        "url": dataset_url,
-        "distribution": distributions,
+        "access_url": dataset_url,
+        "distributions": distributions,
     }
 
     description = _string_value(has_output.get("dc:description") or has_output.get("schema:description"))
@@ -1374,18 +1387,18 @@ def import_dataset_record(
     license_val = _string_value(has_output.get("dc:license") or has_output.get("schema:license"))
     if license_val:
         dataset["license"] = license_val
-        dataset["isAccessibleForFree"] = True
+        dataset["is_accessible_for_free"] = True
 
     # Creators
     raw_creators = has_output.get("dc:creator") or has_output.get("schema:creator")
     if isinstance(raw_creators, list):
         persons = [p for p in (_map_person(c) for c in raw_creators) if p is not None]
         if persons:
-            dataset["creator"] = persons
+            dataset["creators"] = persons
     elif isinstance(raw_creators, Mapping):
         person = _map_person(raw_creators)
         if person:
-            dataset["creator"] = [person]
+            dataset["creators"] = [person]
 
     # Publisher
     raw_publisher = has_output.get("dc:publisher")
@@ -1419,17 +1432,17 @@ def import_dataset_record(
             doi = _extract_doi_from_url(citation_url)
             if doi:
                 citation_entry["doi"] = doi
-        dataset["citation"] = [citation_entry]
+        dataset["citations"] = [citation_entry]
 
     # Published date → unix timestamp
     issued = _string_value(has_output.get("dc:issued") or has_output.get("schema:datePublished"))
     if issued:
         ts = _parse_converter_date(issued)
         if ts is not None:
-            dataset["datePublished"] = ts
+            dataset["published_at"] = ts
 
     # Measurement technique (always cycling for these files)
-    dataset["measurementTechnique"] = ["Galvanostatic cycling", "Electrochemical impedance spectroscopy"]
+    dataset["measurement_techniques"] = ["Galvanostatic cycling", "Electrochemical impedance spectroscopy"]
 
     retrieved_at = _parse_converter_date(
         _string_value(has_output.get("dc:issued") or has_output.get("schema:datePublished"))

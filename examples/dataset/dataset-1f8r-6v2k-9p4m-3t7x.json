@@ -6,8 +6,7 @@
     "identifier": "doi:10.5281/zenodo.1234567",
     "name": "Cell cycling run for BattINFO cell 3m6k9t",
     "description": "Raw cycling and metadata export for one physical cell.",
-    "url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
-    "sameAs": [
+    "same_as": [
       "https://doi.org/10.5281/zenodo.1234567"
     ],
     "license": "https://creativecommons.org/licenses/by/4.0/",
@@ -17,7 +16,7 @@
       "time series",
       "lithium-ion"
     ],
-    "creator": [
+    "creators": [
       {
         "type": "Organization",
         "name": "BattINFO Maintainers"
@@ -27,7 +26,7 @@
       "type": "Organization",
       "name": "BattINFO"
     },
-    "citation": [
+    "citations": [
       {
         "kind": "dataset",
         "url": "https://doi.org/10.5281/zenodo.1234567",
@@ -39,13 +38,13 @@
       "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
       "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
     ],
-    "measurementTechnique": [
+    "measurement_techniques": [
       "cycling"
     ],
-    "measurementMethod": [
+    "measurement_methods": [
       "galvanostatic cycling"
     ],
-    "variableMeasured": [
+    "variable_measured": [
       {
         "name": "voltage",
         "unit_text": "V"
@@ -55,24 +54,25 @@
         "unit_text": "A"
       }
     ],
-    "isAccessibleForFree": true,
-    "inLanguage": "en",
-    "dateCreated": 1771718400,
-    "dateModified": 1771718400,
-    "datePublished": 1771718400,
-    "distribution": [
+    "is_accessible_for_free": true,
+    "in_language": "en",
+    "created_at": 1771718400,
+    "modified_at": 1771718400,
+    "published_at": 1771718400,
+    "distributions": [
       {
         "type": "DataDownload",
         "name": "Raw cycling HDF5 archive",
-        "contentUrl": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x/raw.h5",
-        "encodingFormat": "application/x-hdf5",
+        "content_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x/raw.h5",
+        "encoding_format": "application/x-hdf5",
         "checksum": {
           "algorithm": "sha256",
           "value": "8fbf34bd0f8a0caef6f5ce6cc1f8e6a2d8f0123982fc624d6f7f3f7e27b95a89"
         },
-        "accessLevel": "open"
+        "access_level": "open"
       }
-    ]
+    ],
+    "access_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
   },
   "provenance": {
     "source_type": "measurement",

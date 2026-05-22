@@ -92,6 +92,13 @@ def _validator_code(error: ValidationError) -> str:
     return f"schema.{validator}"
 
 
+def _enhance_message(error: ValidationError) -> str:
+    msg = error.message
+    if error.validator == "additionalProperties" and list(error.path) == ["specs"]:
+        msg += " Run 'battinfo specs list' to see all valid property names."
+    return msg
+
+
 def _resource_type_from_profile(profile: str | None) -> str | None:
     if profile == "cell-type":
         return "cell-type"
@@ -116,7 +123,7 @@ def validate_schema_data(
                 code=_validator_code(err),
                 severity="error",
                 path=_render_path(err),
-                message=err.message,
+                message=_enhance_message(err),
                 validator=str(err.validator) if err.validator is not None else None,
                 resource_type=resolved_resource_type,
                 profile=profile,

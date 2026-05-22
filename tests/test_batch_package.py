@@ -22,7 +22,7 @@ from battinfo.publication import DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_META
 
 runner = CliRunner()
 
-ENERGIZER_IRI = "https://w3id.org/battinfo/cell-type/7r2m-4q8v-k6nt-c3pj"
+ENERGIZER_IRI = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 CREATORS = [{"name": "Clark, Simon", "affiliation": "SINTEF"}]
 
 

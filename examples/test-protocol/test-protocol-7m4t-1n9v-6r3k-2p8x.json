@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/7m4t-1n9v-6r3k-2p8x",
+    "id": "https://w3id.org/battinfo/spec/7m4t-1n9v-6r3k-2p8x",
     "short_id": "7m4t1n",
     "identifier": "test-protocol:7m4t-1n9v-6r3k-2p8x",
     "name": "HPPC — Pulse Power Characterisation at 25°C",
@@ -62,11 +62,26 @@
     }
   },
   "measurement_outputs": [
-    { "name": "Voltage", "unit_text": "V" },
-    { "name": "Current", "unit_text": "A" },
-    { "name": "Temperature", "unit_text": "degC" },
-    { "name": "DCInternalResistance", "unit_text": "Ohm" },
-    { "name": "Capacity", "unit_text": "Ah" }
+    {
+      "name": "Voltage",
+      "unit_text": "V"
+    },
+    {
+      "name": "Current",
+      "unit_text": "A"
+    },
+    {
+      "name": "Temperature",
+      "unit_text": "degC"
+    },
+    {
+      "name": "DCInternalResistance",
+      "unit_text": "Ohm"
+    },
+    {
+      "name": "Capacity",
+      "unit_text": "Ah"
+    }
   ],
   "provenance": {
     "source_type": "manual",

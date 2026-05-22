@@ -68,7 +68,7 @@
           "type": "string",
           "format": "uri"
         },
-        "sameAs": {
+        "same_as": {
           "anyOf": [
             { "type": "string", "format": "uri" },
             {

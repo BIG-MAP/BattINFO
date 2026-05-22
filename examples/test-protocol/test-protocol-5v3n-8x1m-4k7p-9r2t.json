@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "test_protocol": {
-    "id": "https://w3id.org/battinfo/test-protocol/5v3n-8x1m-4k7p-9r2t",
+    "id": "https://w3id.org/battinfo/spec/5v3n-8x1m-4k7p-9r2t",
     "short_id": "5v3n8x",
     "identifier": "test-protocol:5v3n-8x1m-4k7p-9r2t",
     "name": "Rate Capability: C/10 to 5C Discharge at 25°C",
@@ -49,11 +49,26 @@
     }
   },
   "measurement_outputs": [
-    { "name": "Voltage", "unit_text": "V" },
-    { "name": "Current", "unit_text": "A" },
-    { "name": "Capacity", "unit_text": "Ah" },
-    { "name": "Energy", "unit_text": "Wh" },
-    { "name": "Temperature", "unit_text": "degC" }
+    {
+      "name": "Voltage",
+      "unit_text": "V"
+    },
+    {
+      "name": "Current",
+      "unit_text": "A"
+    },
+    {
+      "name": "Capacity",
+      "unit_text": "Ah"
+    },
+    {
+      "name": "Energy",
+      "unit_text": "Wh"
+    },
+    {
+      "name": "Temperature",
+      "unit_text": "degC"
+    }
   ],
   "provenance": {
     "source_type": "manual",

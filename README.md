@@ -27,7 +27,7 @@ result = publish(
     root=".battinfo/my-library",
 )
 print(result.canonical_iri)
-# https://w3id.org/battinfo/cell-type/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx
 ```
 
 **→ [Full quickstart](QUICKSTART.md)** · **[Documentation index](docs/index.md)**

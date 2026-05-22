@@ -87,8 +87,8 @@ def test_workspace_cli_init_validate_bundle_happy_path(tmp_path: Path) -> None:
     assert registry_intake_path.exists()
     assert zenodo_metadata_path.exists()
     assert (normalized_dir / "cell-type" / "cell-type.json").exists()
-    assert (normalized_dir / "cell-instances" / "cell.json").exists()
-    assert (normalized_dir / "tests" / "test.json").exists()
+    assert (normalized_dir / "cell-instance" / "cell.json").exists()
+    assert (normalized_dir / "test" / "test.json").exists()
     assert (normalized_dir / "dataset" / "dataset.json").exists()
     normalized_dataset = json.loads((normalized_dir / "dataset" / "dataset.json").read_text(encoding="utf-8"))
     assert normalized_dataset["provenance"]["citation"] == "https://doi.org/10.5281/zenodo.1234567"

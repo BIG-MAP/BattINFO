@@ -9,7 +9,7 @@
 | Load, query, or save canonical records from disk | [`battinfo.api` helpers](#query-and-save) |
 | Author records as JSON files and drive the workflow from the CLI | `LocalWorkspace` — disk-first submission scaffold behind `battinfo workspace ...` |
 
-If you are new here, start with `Workspace`. The [guide notebooks](../docs/guides/)
+If you are new here, start with `Workspace`. The [guide notebooks](guides/01-concepts.ipynb)
 walk through the full authoring flow end to end.
 
 Alpha scope:
@@ -286,7 +286,7 @@ from battinfo import query_cell_types, save_cell_instance, template_cell_instanc
 
 rows = query_cell_types(manufacturer="A123", chemistry="LFP", limit=5)
 
-draft = template_cell_instance(type_id="https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8")
+draft = template_cell_instance(type_id="https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8")
 draft["cell_instance"]["serial_number"] = "LAB-001"
 
 result = save_cell_instance(
@@ -306,7 +306,7 @@ Migration note:
 from battinfo import build_index, index_stats, publish_record
 
 publish_record(
-    "examples/cell-instances/cell-3m6k-9t2p-7x4h-9nq8.json",
+    "examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json",
     target_root=".battinfo/resolver-site",
 )
 

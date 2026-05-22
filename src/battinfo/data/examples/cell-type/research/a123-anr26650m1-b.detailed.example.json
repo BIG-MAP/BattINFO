@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0.0",
   "product": {
-    "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "name": "A123 ANR26650M1-B",
     "manufacturer": {
       "type": "Organization",
       "name": "A123"
     },
     "model": "ANR26650M1-B",
-    "cellFormat": "cylindrical",
+    "cell_format": "cylindrical",
     "chemistry": "Li-ion",
-    "positiveElectrodeBasis": "LFP",
-    "negativeElectrodeBasis": "graphite",
-    "sizeCode": "R26650"
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "size_code": "R26650"
   },
   "specs": {
     "nominal_capacity": {
@@ -362,10 +362,10 @@
     "source_name": "Catenaro 2021 ingestion pilot",
     "source_file": "sources/a123/anr26650m1-b/catenaro-2021/battery.json",
     "source_url": "https://doi.org/10.17632/kxsbr4x3j2.2",
-    "citation": "https://doi.org/10.17632/kxsbr4x3j2.2",
     "retrieved_at": 1772556000,
     "workflow_version": "battinfo-ingest-0.2.0",
-    "comment": "Manually curated example for schema validation and RDF mapping review."
+    "comment": "Manually curated example for schema validation and RDF mapping review.",
+    "citation": "https://doi.org/10.17632/kxsbr4x3j2.2"
   },
   "notes": [
     "Primary review artifact for BattINFO/BDF battery descriptor structure.",

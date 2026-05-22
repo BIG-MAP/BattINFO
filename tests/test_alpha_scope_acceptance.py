@@ -37,7 +37,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert cell_type_payload["status"] == "created"
 
-    cell_instance_doc = _load_json(ROOT / "examples" / "cell-instances" / "cell-3m6k-9t2p-7x4h-9nq8.json")
+    cell_instance_doc = _load_json(ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json")
     cell_instance_payload = save_cell_instance(
         cell_instance_doc,
         source_root=source_root,
@@ -55,7 +55,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     )
     assert dataset_payload["status"] == "created"
 
-    test_dir = ROOT / "examples" / "tests"
+    test_dir = ROOT / "examples" / "test"
     expected_kinds = {"cycle_life", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
 
     for path in sorted(test_dir.glob("*.json")):
@@ -90,7 +90,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     assert cell_rows[0]["nominal_capacity"] == 2.5
 
     instance_rows = query_cell_instances(
-        directory=source_root / "cell-instances",
+        directory=source_root / "cell-instance",
         type_id=cell_type_doc["product"]["id"],
         has_dataset=True,
         dataset_id=dataset_doc["dataset"]["id"],
@@ -98,10 +98,10 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     assert len(instance_rows) == 1
     assert instance_rows[0]["id"] == cell_instance_doc["cell_instance"]["id"]
 
-    observed_kinds = {row["kind"] for row in query_tests(directory=source_root / "tests", cell_id=cell_instance_doc["cell_instance"]["id"])}
+    observed_kinds = {row["kind"] for row in query_tests(directory=source_root / "test", cell_id=cell_instance_doc["cell_instance"]["id"])}
     assert expected_kinds.issubset(observed_kinds)
 
-    hppc_rows = query_tests(directory=source_root / "tests", kind="hppc", dataset_id=dataset_doc["dataset"]["id"])
+    hppc_rows = query_tests(directory=source_root / "test", kind="hppc", dataset_id=dataset_doc["dataset"]["id"])
     assert len(hppc_rows) == 1
 
     dataset_rows = query_datasets(

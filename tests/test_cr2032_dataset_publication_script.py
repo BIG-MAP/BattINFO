@@ -149,7 +149,7 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
 
     assert report["status"] == "ok"
     assert report["dataset_count"] == 1
-    assert report["cell_specification_id"].startswith("https://w3id.org/battinfo/cell-specification/")
+    assert report["cell_specification_id"].startswith("https://w3id.org/battinfo/spec/")
     assert Path(report["report_path"]).name == "battinfo-publication-report.json"
 
     bundle = load_publication(dataset_dir / "battinfo.publish.jsonld")
@@ -186,7 +186,7 @@ def test_publish_dataset_metadata_with_cell_type_only(tmp_path: Path) -> None:
     raw.write_text("time,voltage\n0,3.7\n", encoding="utf-8")
 
     cell_type = CellType(
-        id="https://w3id.org/battinfo/cell-type/1234-5678-9abc-def0",
+        id="https://w3id.org/battinfo/spec/1234-5678-9abc-def0",
         name="ExampleCell 21700-A",
         manufacturer="ExampleCell",
         model="21700-A",
@@ -297,7 +297,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert Path(result["publish_path"]).exists()
     assert Path(result["bundle_dir"]).exists()
     assert Path(result["html_path"]).exists()
-    assert result["cell_type_id"].startswith("https://w3id.org/battinfo/cell-type/")
+    assert result["cell_type_id"].startswith("https://w3id.org/battinfo/spec/")
 
     loaded = load_publication(dataset_dir / "battinfo.publish.jsonld")
     assert loaded.cell_type.id == result["cell_type_id"]
@@ -309,8 +309,8 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert loaded.dataset.publisher["name"] == "BattINFO"
     assert loaded.dataset.funders[0]["name"] == "Battery Data Alliance"
     assert loaded.dataset.main_entity[0]["type"] == "Table"
-    assert loaded.dataset.main_entity[0]["tableSchema"]["id"] == "https://example.org/datasets/cr2032/table-schema"
-    assert any(dist["contentUrl"] == "https://example.org/downloads/cr2032.csv" for dist in loaded.dataset.distributions)
+    assert loaded.dataset.main_entity[0]["table_schema"]["id"] == "https://example.org/datasets/cr2032/table-schema"
+    assert any(dist["content_url"] == "https://example.org/downloads/cr2032.csv" for dist in loaded.dataset.distributions)
     assert loaded.cell_type.model == "CR2032"
     assert loaded.cell_instance.serial_number == "energizer-cr2032-202602-dtjrga"
     assert loaded.test.protocol.name == "constant current discharging"

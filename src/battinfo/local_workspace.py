@@ -1429,8 +1429,8 @@ class LocalWorkspace:
     def _write_normalized_records(self, records: dict[str, dict[str, Any]], *, target_root: Path) -> None:
         mapping = {
             "cell_type": target_root / "cell-type" / "cell-type.json",
-            "cell": target_root / "cell-instances" / "cell.json",
-            "test": target_root / "tests" / "test.json",
+            "cell": target_root / "cell-instance" / "cell.json",
+            "test": target_root / "test" / "test.json",
             "dataset": target_root / "dataset" / "dataset.json",
         }
         for name, payload in records.items():

@@ -64,7 +64,7 @@ def test_query_test_protocols_json() -> None:
         app,
         [
             "query",
-            "test-protocols",
+            "test-protocol",
             "--kind",
             "cycle_life",
             "--limit",
@@ -75,7 +75,7 @@ def test_query_test_protocols_json() -> None:
     )
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)
-    assert payload["resource"] == "test-protocols"
+    assert payload["resource"] == "test-protocol"
     assert payload["count"] >= 1
     assert all(item["kind"] == "cycle_life" for item in payload["items"])
 
@@ -140,7 +140,7 @@ def test_publish_cell_type_cli_json(monkeypatch) -> None:
             destination="local",
             resource_type="cell_type",
             canonical_id="cell-type-001",
-            canonical_iri="https://w3id.org/battinfo/cell-type/cell-type-001",
+            canonical_iri="https://w3id.org/battinfo/cell/cell-type-001",
             source_local_id="cell-type-001",
             debug_paths={"canonical_record_path": "C:/tmp/cell-type.json"},
         ),
@@ -196,7 +196,7 @@ def test_publish_cell_type_cli_accepts_input_file(tmp_path: Path, monkeypatch) -
             destination=kwargs["destination"],
             resource_type="cell_type",
             canonical_id="cell-type-002",
-            canonical_iri="https://w3id.org/battinfo/cell-type/cell-type-002",
+            canonical_iri="https://w3id.org/battinfo/cell/cell-type-002",
             page_url="https://battery-genome.org/registry/cell-type/cell-type-002",
             source_local_id="cell-type-002",
             debug_paths={"canonical_record_path": "C:/tmp/cell-type.json"},
@@ -243,7 +243,7 @@ def test_save_record_with_resolve_references_defers_missing_targets(tmp_path: Pa
                 "schema_version": "0.1.0",
                 "cell_instance": {
                     "id": "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x",
-                    "type_id": "https://w3id.org/battinfo/cell-type/eysh-4h5s-k4bx-zkgg",
+                    "type_id": "https://w3id.org/battinfo/spec/eysh-4h5s-k4bx-zkgg",
                     "short_id": "1f8r6v",
                 },
                 "provenance": {
@@ -384,7 +384,7 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
             {
                 "schema_version": "0.1.0",
                 "product": {
-                    "id": "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+                    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
                     "short_id": "7d9k2m",
                     "identifier": "cell-type:7d9k-2m4p-8t3x-6nq5",
                     "name": "A123 ANR26650M1-B",
@@ -393,7 +393,7 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
                         "type": "Organization",
                         "name": "A123"
                     },
-                    "cellFormat": "cylindrical",
+                    "cell_format": "cylindrical",
                     "chemistry": "Li-ion"
                 },
                 "specs": {},
@@ -419,7 +419,7 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
             "save",
             "cell-instance",
             "--type-id",
-            "https://w3id.org/battinfo/cell-type/7d9k-2m4p-8t3x-6nq5",
+            "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
             "--uid",
             "3m6k9t2p7x4h9nq8",
             "--source-root",
@@ -520,7 +520,7 @@ def test_validate_json_output_includes_warnings_on_success() -> None:
     with runner.isolated_filesystem():
         warn_path = Path("warn-test.json")
         source = json.loads(
-            (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+            (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
         )
         source["test"]["short_id"] = "xxxxxx"
         warn_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -548,7 +548,7 @@ def test_validate_strict_policy_fails_on_semantic_issue() -> None:
     with runner.isolated_filesystem():
         bad_path = Path("bad-test.json")
         source = json.loads(
-            (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+            (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
         )
         source["test"]["short_id"] = "xxxxxx"
         bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -573,7 +573,7 @@ def test_validate_json_output_failure_has_structured_issue_metadata() -> None:
     with runner.isolated_filesystem():
         bad_path = Path("bad-test.json")
         source = json.loads(
-            (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+            (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
         )
         source["test"]["short_id"] = "xxxxxx"
         bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -601,7 +601,7 @@ def test_save_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> No
     runner = CliRunner()
     bad_path = tmp_path / "bad-test.json"
     source = json.loads(
-        (ROOT / "examples" / "tests" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
     )
     source["test"]["short_id"] = "xxxxxx"
     bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
@@ -638,7 +638,7 @@ def test_init_defaults_to_battery_descriptor_scaffold(tmp_path: Path) -> None:
     assert scaffold_path.exists()
     scaffold = json.loads(scaffold_path.read_text(encoding="utf-8"))
     assert scaffold["schema_version"] == "1.0.0"
-    assert scaffold["product"]["id"] == "https://w3id.org/battinfo/cell-type/0000-0000-0000-0000"
+    assert scaffold["product"]["id"] == "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
     assert scaffold["product"]["manufacturer"]["name"] == "ExampleManufacturer"
 
 
@@ -733,9 +733,9 @@ def test_publish_batch_json(tmp_path: Path) -> None:
             "--source-dir",
             str(ROOT / "examples" / "cell-type"),
             "--source-dir",
-            str(ROOT / "examples" / "cell-instances"),
+            str(ROOT / "examples" / "cell-instance"),
             "--source-dir",
-            str(ROOT / "examples" / "tests"),
+            str(ROOT / "examples" / "test"),
             "--source-dir",
             str(ROOT / "examples" / "dataset"),
             "--target-root",
@@ -906,8 +906,8 @@ def test_save_batch_cli_json(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     batch_root = tmp_path / "batch"
     cell_types_dir = batch_root / "cell-type"
-    cell_instances_dir = batch_root / "cell-instances"
-    tests_dir = batch_root / "tests"
+    cell_instances_dir = batch_root / "cell-instance"
+    tests_dir = batch_root / "test"
     datasets_dir = batch_root / "dataset"
     cell_types_dir.mkdir(parents=True)
     cell_instances_dir.mkdir(parents=True)
@@ -915,7 +915,7 @@ def test_save_batch_cli_json(tmp_path: Path) -> None:
     datasets_dir.mkdir(parents=True)
 
     type_uid = "3m6k9t2p7x4h9nq8"
-    type_iri = "https://w3id.org/battinfo/cell-type/3m6k-9t2p-7x4h-9nq8"
+    type_iri = "https://w3id.org/battinfo/spec/3m6k-9t2p-7x4h-9nq8"
     cell_uid = "1f8r6v2k9p4m3t7x"
     cell_iri = "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x"
     test_iri = "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"

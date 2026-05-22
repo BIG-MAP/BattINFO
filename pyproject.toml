@@ -49,6 +49,13 @@ dev = [
   "ruff>=0.6",
   "pytest>=8.0"
 ]
+docs = [
+  "sphinx>=7.3",
+  "pydata-sphinx-theme>=0.15",
+  "myst-parser>=3.0",
+  "nbsphinx>=0.9",
+  "sphinx-design>=0.6",
+]
 
 [project.scripts]
 battinfo = "battinfo.cli:app"

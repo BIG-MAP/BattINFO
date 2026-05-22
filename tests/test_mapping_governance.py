@@ -65,12 +65,11 @@ def test_entity_type_map_covers_current_descriptor_core_values() -> None:
     for example_path in sorted(examples_dir.glob("*.example.json")):
         document = _load_json(example_path)
         product = document.get("product", {})
-        # Map cell-type camelCase fields to entity_type_map snake_case keys
         field_map = {
-            "format": product.get("cellFormat", ""),
+            "format": product.get("cell_format", ""),
             "chemistry": product.get("chemistry", ""),
-            "positive_electrode_basis": product.get("positiveElectrodeBasis", ""),
-            "negative_electrode_basis": product.get("negativeElectrodeBasis", ""),
+            "positive_electrode_basis": product.get("positive_electrode_basis", ""),
+            "negative_electrode_basis": product.get("negative_electrode_basis", ""),
         }
         for field, value in field_map.items():
             if not value:
