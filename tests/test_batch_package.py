@@ -37,7 +37,7 @@ def _make_batch(tmp_path: Path, n_cells: int = 2, n_files_per_cell: int = 2) -> 
     for cell_info in result["cells"]:
         cell = batch_dir / cell_info["folder"]
         for j in range(1, n_files_per_cell + 1):
-            kinds = ["capacity_check", "cycle_life"]
+            kinds = ["capacity_check", "cycling"]
             kind = kinds[(j - 1) % len(kinds)]
             (cell / f"2025-06-0{j}__{kind}__25degC.csv").write_text(
                 f"time,voltage\n0,3.0\n1,{2.9 + 0.01*j}\n", encoding="utf-8"
@@ -110,8 +110,8 @@ class TestCollectDataFiles:
 class TestTestKindFromPath:
     @pytest.mark.parametrize("filename,subdir,expected", [
         ("2025-06-01__capacity_check__25degC.csv", "timeseries", "capacity_check"),
-        ("cycle_life_test.nda", "timeseries", "cycle_life"),
-        ("cycling_001.csv", "timeseries", "cycle_life"),
+        ("cycle_life_test.nda", "timeseries", "cycling"),
+        ("cycling_001.csv", "timeseries", "cycling"),
         ("rate_capability.csv", "timeseries", "rate_capability"),
         ("ici_test.csv", "timeseries", "ici"),
         ("hppc.csv", "timeseries", "hppc"),

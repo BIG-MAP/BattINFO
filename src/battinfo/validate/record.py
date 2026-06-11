@@ -24,7 +24,7 @@ def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
         return "cell-type.schema.json"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell-instance.schema.json"
-    if isinstance(doc.get("test_protocol"), Mapping):
+    if isinstance(doc.get("test_spec"), Mapping):
         return "test-protocol.schema.json"
     if isinstance(doc.get("test"), Mapping):
         return "test.schema.json"
@@ -38,7 +38,7 @@ def _resource_type(doc: dict[str, Any]) -> str | None:
         return "cell-type"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
-    if isinstance(doc.get("test_protocol"), Mapping):
+    if isinstance(doc.get("test_spec"), Mapping):
         return "test-protocol"
     if isinstance(doc.get("test"), Mapping):
         return "test"

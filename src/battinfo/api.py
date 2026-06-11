@@ -280,7 +280,7 @@ class TestInput(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
-class TestProtocolInput(BaseModel):
+class TestSpecInput(BaseModel):
     """Typed input for saving a reusable canonical test-protocol resource."""
 
     model_config = ConfigDict(extra="forbid")
@@ -469,7 +469,7 @@ def template_test(
     return _record_from_test(draft)
 
 
-def template_test_protocol(
+def template_test_spec(
     *,
     name: str = "Example Test Protocol",
     kind: TestKind = BatteryTestType.OTHER,
@@ -477,7 +477,7 @@ def template_test_protocol(
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
     """Build a starter canonical test-protocol document for save workflows."""
-    draft = TestProtocolInput(
+    draft = TestSpecInput(
         uid=uid,
         name=name,
         kind=kind,
@@ -487,7 +487,7 @@ def template_test_protocol(
     return _record_from_test_protocol(draft)
 
 
-def template_test_protocol_draft(
+def template_test_spec_draft(
     *,
     name: str = "Example Test Protocol",
     kind: TestKind = BatteryTestType.OTHER,
@@ -1792,6 +1792,7 @@ def query_tests(
                 "name": test.get("name"),
                 "kind": test.get("kind"),
                 "status": test.get("status"),
+                "conformance": test.get("conformance"),
                 "dataset_ids": [item for item in dataset_ids if isinstance(item, str)],
                 "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
                 "path": str(path),
@@ -1816,7 +1817,7 @@ def query_tests(
     return _paginate(filtered, limit=limit, offset=offset)
 
 
-def query_test_protocols(
+def query_test_specs(
     *,
     id: str | None = None,
     kind: str | None = None,
@@ -1830,7 +1831,7 @@ def query_test_protocols(
     records: list[dict[str, Any]] = []
     for path in _iter_json_files(_as_path(directory)):
         doc = _load_json(path)
-        protocol = doc.get("test_protocol", {})
+        protocol = doc.get("test_spec", {})
         prov = doc.get("provenance", {})
         if not isinstance(protocol, Mapping):
             continue
@@ -1871,8 +1872,8 @@ def query(kind: str, /, **filters: Any) -> list[dict[str, Any]]:
         return query_cell_types(**filters)
     if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
         return query_cell_instances(**filters)
-    if normalized in {"test_protocol", "test_protocols"}:
-        return query_test_protocols(**filters)
+    if normalized in {"test_spec", "test_specs"}:
+        return query_test_specs(**filters)
     if normalized in {"test", "tests"}:
         return query_tests(**filters)
     if normalized in {"dataset", "datasets"}:
@@ -1881,7 +1882,7 @@ def query(kind: str, /, **filters: Any) -> list[dict[str, Any]]:
         return query_library_cell_types(**filters)
 
     raise ValueError(
-        "kind must be one of: cell_types, cells, test_protocols, tests, datasets, descriptions."
+        "kind must be one of: cell_types, cells, test_specs, tests, datasets, descriptions."
     )
 
 
@@ -2095,7 +2096,7 @@ def _logical_entity_type_from_doc(doc: Mapping[str, Any]) -> str:
         return "cell-type"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
-    if isinstance(doc.get("test_protocol"), Mapping):
+    if isinstance(doc.get("test_spec"), Mapping):
         return "test-protocol"
     if isinstance(doc.get("test"), Mapping):
         return "test"
@@ -2468,7 +2469,7 @@ def _record_from_test(draft: TestInput) -> dict[str, Any]:
     return record_to_snake_aliases(record)
 
 
-def _record_from_test_protocol(draft: TestProtocolInput) -> dict[str, Any]:
+def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
     if draft.id is not None:
         if not TEST_PROTOCOL_IRI_RE.fullmatch(draft.id):
             raise ValueError("test protocol id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -2483,7 +2484,7 @@ def _record_from_test_protocol(draft: TestProtocolInput) -> dict[str, Any]:
 
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
-        "test_protocol": {
+        "test_spec": {
             "id": entity_id,
             "short_id": dashed_uid.replace("-", "")[:6],
             "identifier": f"test-protocol:{dashed_uid}",
@@ -2496,11 +2497,11 @@ def _record_from_test_protocol(draft: TestProtocolInput) -> dict[str, Any]:
         },
     }
     if draft.description is not None:
-        record["test_protocol"]["description"] = draft.description
+        record["test_spec"]["description"] = draft.description
     if draft.version is not None:
-        record["test_protocol"]["version"] = draft.version
+        record["test_spec"]["version"] = draft.version
     if draft.protocol_url is not None:
-        record["test_protocol"]["protocol_url"] = draft.protocol_url
+        record["test_spec"]["protocol_url"] = draft.protocol_url
     if draft.conditions:
         record["conditions"] = copy.deepcopy(draft.conditions)
     if draft.setpoints:
@@ -2938,8 +2939,8 @@ def save_test(
     )
 
 
-def save_test_protocol(
-    draft: TestProtocolInput | dict[str, Any] | PathLike,
+def save_test_spec(
+    draft: TestSpecInput | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2954,11 +2955,11 @@ def save_test_protocol(
     dry_run: bool = False,
 ) -> dict[str, Any]:
     """Save a test protocol from either draft payload or canonical record."""
-    from battinfo.bundle import TestProtocol as TestProtocolBundle
+    from battinfo.bundle import TestSpec
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return save_test_protocol(
+        return save_test_spec(
             loaded,
             source_root=source_root,
             mode=mode,
@@ -2972,7 +2973,7 @@ def save_test_protocol(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, TestProtocolBundle):
+    if isinstance(draft, TestSpec):
         return save_record(
             draft.to_record(),
             source_root=source_root,
@@ -2987,7 +2988,7 @@ def save_test_protocol(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, Mapping) and isinstance(draft.get("test_protocol"), Mapping):
+    if isinstance(draft, Mapping) and isinstance(draft.get("test_spec"), Mapping):
         return save_record(
             dict(draft),
             source_root=source_root,
@@ -3002,7 +3003,7 @@ def save_test_protocol(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, TestProtocolInput) else TestProtocolInput.model_validate(draft)
+    draft_model = draft if isinstance(draft, TestSpecInput) else TestSpecInput.model_validate(draft)
     record = _record_from_test_protocol(draft_model)
     return save_record(
         record,
@@ -3362,8 +3363,8 @@ def _entity_id(doc: dict[str, Any]) -> str:
         return doc["cell_type"]["id"]
     if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
         return doc["cell_instance"]["id"]
-    if isinstance(doc.get("test_protocol"), Mapping) and isinstance(doc["test_protocol"].get("id"), str):
-        return doc["test_protocol"]["id"]
+    if isinstance(doc.get("test_spec"), Mapping) and isinstance(doc["test_spec"].get("id"), str):
+        return doc["test_spec"]["id"]
     if isinstance(doc.get("test"), Mapping) and isinstance(doc["test"].get("id"), str):
         return doc["test"]["id"]
     if isinstance(doc.get("dataset"), Mapping) and isinstance(doc["dataset"].get("id"), str):
@@ -3378,7 +3379,7 @@ def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
         return "cell-type.schema.json"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell-instance.schema.json"
-    if isinstance(doc.get("test_protocol"), Mapping):
+    if isinstance(doc.get("test_spec"), Mapping):
         return "test-protocol.schema.json"
     if isinstance(doc.get("test"), Mapping):
         return "test.schema.json"
@@ -3804,7 +3805,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         return out
 
     if entity_type == "test-protocol":
-        protocol = doc["test_protocol"]
+        protocol = doc["test_spec"]
         out = {
             "@context": context,
             "@id": entity_iri,
@@ -4140,7 +4141,7 @@ def build_index(
 
     cell_types: list[dict[str, Any]] = []
     cell_instances: list[dict[str, Any]] = []
-    test_protocols: list[dict[str, Any]] = []
+    test_specs: list[dict[str, Any]] = []
     tests: list[dict[str, Any]] = []
     datasets: list[dict[str, Any]] = []
     failures: list[dict[str, str]] = []
@@ -4226,11 +4227,11 @@ def build_index(
             doc = _load_json(path)
             if validate:
                 _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
-            protocol = doc.get("test_protocol", {})
+            protocol = doc.get("test_spec", {})
             prov = doc.get("provenance", {})
             if not isinstance(protocol, Mapping) or not isinstance(protocol.get("id"), str):
                 raise ValueError("missing test_protocol.id")
-            test_protocols.append(
+            test_specs.append(
                 {
                     "id": protocol["id"],
                     "short_id": protocol.get("short_id") or _short_id_from_iri(protocol["id"]),
@@ -4316,15 +4317,15 @@ def build_index(
         "source_root": str(src_root),
         "cell_type_count": len(cell_types),
         "cell_instance_count": len(cell_instances),
-        "test_protocol_count": len(test_protocols),
+        "test_spec_count": len(test_specs),
         "test_count": len(tests),
         "dataset_count": len(datasets),
-        "total_count": len(cell_types) + len(cell_instances) + len(test_protocols) + len(tests) + len(datasets),
+        "total_count": len(cell_types) + len(cell_instances) + len(test_specs) + len(tests) + len(datasets),
         "failed": len(failures),
         "failures": failures,
         "cell_types": cell_types,
         "cell_instances": cell_instances,
-        "test_protocols": test_protocols,
+        "test_specs": test_specs,
         "tests": tests,
         "datasets": datasets,
     }
@@ -4360,10 +4361,10 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         if isinstance(doc.get("test_count"), int)
         else len(doc.get("tests", [])) if isinstance(doc.get("tests"), list) else 0
     )
-    test_protocol_count = (
-        int(doc["test_protocol_count"])
-        if isinstance(doc.get("test_protocol_count"), int)
-        else len(doc.get("test_protocols", [])) if isinstance(doc.get("test_protocols"), list) else 0
+    test_spec_count = (
+        int(doc["test_spec_count"])
+        if isinstance(doc.get("test_spec_count"), int)
+        else len(doc.get("test_specs", [])) if isinstance(doc.get("test_specs"), list) else 0
     )
     dataset_count = (
         int(doc["dataset_count"])
@@ -4373,7 +4374,7 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
     total_count = (
         int(doc["total_count"])
         if isinstance(doc.get("total_count"), int)
-        else cell_type_count + cell_instance_count + test_protocol_count + test_count + dataset_count
+        else cell_type_count + cell_instance_count + test_spec_count + test_count + dataset_count
     )
     failed = int(doc["failed"]) if isinstance(doc.get("failed"), int) else 0
 
@@ -4381,7 +4382,7 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         "build_timestamp": doc.get("build_timestamp"),
         "cell_type_count": cell_type_count,
         "cell_instance_count": cell_instance_count,
-        "test_protocol_count": test_protocol_count,
+        "test_spec_count": test_spec_count,
         "test_count": test_count,
         "dataset_count": dataset_count,
         "total_count": total_count,
@@ -4397,7 +4398,7 @@ __all__ = [
     "CellInstanceInput",
     "CellTypeInput",
     "DatasetInput",
-    "TestProtocolInput",
+    "TestSpecInput",
     "TestInput",
     "build_cell_type_library_rdf",
     "build_index",
@@ -4414,14 +4415,14 @@ __all__ = [
     "query_library_cell_types",
     "query_cell_types",
     "query_datasets",
-    "query_test_protocols",
+    "query_test_specs",
     "query_tests",
     "save_batch",
     "save_cell_instance",
     "save_cell_type",
     "save_dataset",
     "save_library_cell_type",
-    "save_test_protocol",
+    "save_test_spec",
     "resolve_cell_type_id",
     "save_record",
     "save_test",
@@ -4430,11 +4431,22 @@ __all__ = [
     "template_cell_type_draft",
     "template_cell_type",
     "template_dataset",
-    "template_test_protocol_draft",
-    "template_test_protocol",
+    "template_test_spec_draft",
+    "template_test_spec",
     "template_test",
     "submit_publication_package",
     "validate_staging_cell_type",
     "validate_staging_cell_types",
+    "TestProtocolInput",
+    "save_test_protocol",
+    "template_test_protocol",
+    "template_test_protocol_draft",
+    "query_test_protocols",
 ]
+
+TestProtocolInput = TestSpecInput  # backward compat alias
+save_test_protocol = save_test_spec  # backward compat alias
+template_test_protocol = template_test_spec  # backward compat alias
+template_test_protocol_draft = template_test_spec_draft  # backward compat alias
+query_test_protocols = query_test_specs  # backward compat alias
 

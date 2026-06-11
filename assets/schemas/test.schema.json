@@ -51,7 +51,7 @@
         "kind": {
           "type": "string",
           "enum": [
-            "cycle_life",
+            "cycling",
             "capacity_check",
             "rate_capability",
             "quasi_ocv",
@@ -63,6 +63,11 @@
             "impedance",
             "calendar_ageing",
             "formation",
+            "rpt",
+            "field",
+            "duty_cycle",
+            "wltp",
+            "nedc",
             "sem",
             "characterization",
             "other"
@@ -108,6 +113,55 @@
             "^[a-z][a-z0-9_]*$": {}
           },
           "additionalProperties": false
+        },
+        "conformance": {
+          "type": "object",
+          "description": "Assessment of how well the test followed its referenced test specification.",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["conformant", "partial", "non-conformant", "unknown"]
+            },
+            "note": {
+              "type": "string",
+              "description": "Free-text summary of any deviations or assessment rationale."
+            },
+            "deviations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "power_outage",
+                      "equipment_failure",
+                      "temperature_excursion",
+                      "software_error",
+                      "operator_intervention",
+                      "premature_termination",
+                      "communication_loss",
+                      "parameter_drift",
+                      "calibration_issue",
+                      "other"
+                    ]
+                  },
+                  "description": { "type": "string" },
+                  "occurred_at": { "$ref": "#/$defs/UnixTime" },
+                  "duration_s": { "type": "integer", "minimum": 0 },
+                  "step_index": { "type": "integer", "minimum": 0 },
+                  "impact": {
+                    "type": "string",
+                    "enum": ["minor", "moderate", "major"]
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

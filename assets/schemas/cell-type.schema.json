@@ -17,7 +17,7 @@
           "product": {
             "properties": {
               "cell_format": {
-                "const": "cylindrical"
+                "enum": ["cylindrical", "coin"]
               }
             }
           }
@@ -28,21 +28,9 @@
           "specs": {
             "not": {
               "anyOf": [
-                {
-                  "required": [
-                    "length"
-                  ]
-                },
-                {
-                  "required": [
-                    "width"
-                  ]
-                },
-                {
-                  "required": [
-                    "thickness"
-                  ]
-                }
+                {"required": ["length"]},
+                {"required": ["width"]},
+                {"required": ["thickness"]}
               ]
             }
           }
@@ -55,10 +43,7 @@
           "product": {
             "properties": {
               "cell_format": {
-                "enum": [
-                  "prismatic",
-                  "pouch"
-                ]
+                "enum": ["prismatic", "pouch"]
               }
             }
           }
@@ -68,18 +53,7 @@
         "properties": {
           "specs": {
             "not": {
-              "anyOf": [
-                {
-                  "required": [
-                    "diameter"
-                  ]
-                },
-                {
-                  "required": [
-                    "height"
-                  ]
-                }
-              ]
+              "required": ["diameter"]
             }
           }
         }
@@ -181,6 +155,10 @@
         "country_of_origin": {
           "type": "string",
           "minLength": 1
+        },
+        "rechargeable": {
+          "type": "boolean",
+          "description": "Whether this cell is rechargeable (true) or primary/single-use (false)."
         },
         "year": {
           "type": "integer",

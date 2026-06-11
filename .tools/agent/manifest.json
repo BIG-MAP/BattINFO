@@ -22,7 +22,7 @@
     ]
   },
   "preferred_surfaces": {
-    "workflow_api": "src/battinfo/workspace.py",
+    "workflow_api": "src/battinfo/ws.py",
     "authoring_api": "src/battinfo/authoring.py",
     "public_exports": "src/battinfo/__init__.py",
     "low_level_api": "src/battinfo/api.py"

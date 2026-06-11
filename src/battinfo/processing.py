@@ -140,7 +140,7 @@ def _infer_test_type_from_df(df: "Any") -> str | None:
         return "capacity_check"
     # Cycle life: cycle index column present
     if _has("cycle_index", "cycle_number", "cycle"):
-        return "cycle_life"
+        return "cycling"
     # HPPC: rest periods + pulses — heuristic via column names
     if _has("hppc", "pulse"):
         return "hppc"

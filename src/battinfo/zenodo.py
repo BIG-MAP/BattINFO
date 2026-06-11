@@ -9,7 +9,6 @@ References:
 from __future__ import annotations
 
 import json
-import mimetypes
 import os
 import urllib.error
 import urllib.request
@@ -106,6 +105,36 @@ class ZenodoClient:
         """Discard (delete) an unpublished draft deposit."""
         self._json("DELETE", f"/deposit/depositions/{deposit_id}")
 
+    def create_new_version(self, published_record_id: int | str) -> dict:
+        """Fork a new draft from an existing published record.
+
+        Returns the new draft deposit dict (same shape as ``create_empty_deposit``).
+        """
+        resp = self._json(
+            "POST",
+            f"/deposit/depositions/{published_record_id}/actions/newversion",
+        )
+        # The API returns the published record; the new draft is at latest_draft.
+        draft_url = resp.get("links", {}).get("latest_draft", "")
+        if not draft_url:
+            raise ZenodoError(
+                f"No latest_draft link in newversion response for {published_record_id}. "
+                "Check that the record is published."
+            )
+        new_id = draft_url.rstrip("/").split("/")[-1]
+        return self.get_deposit(new_id)
+
+    def delete_all_files(self, deposit_id: int | str) -> int:
+        """Delete every file from a draft deposit.  Returns the count deleted."""
+        files = self.list_files(deposit_id)
+        for f in files:
+            self._request(
+                "DELETE",
+                f"/deposit/depositions/{deposit_id}/files/{f['id']}",
+                data=b"",
+            )
+        return len(files)
+
     # ── Files ──────────────────────────────────────────────────────────────────
 
     def upload_files(
@@ -135,14 +164,15 @@ class ZenodoClient:
             if not local_path.is_file():
                 continue
             upload_url = f"{bucket_url}/{zenodo_name}"
-            media_type = mimetypes.guess_type(local_path.name)[0] or "application/octet-stream"
+            # Zenodo's S3-compatible bucket endpoint requires application/octet-stream
+            # regardless of actual file type — it rejects other Content-Type values.
             data = local_path.read_bytes()
             req = urllib.request.Request(
                 upload_url,
                 data=data,
                 headers={
                     "Authorization": f"Bearer {self._token}",
-                    "Content-Type": media_type,
+                    "Content-Type": "application/octet-stream",
                 },
                 method="PUT",
             )

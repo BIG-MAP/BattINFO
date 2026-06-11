@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": [
     "schema_version",
-    "test_protocol",
+    "test_spec",
     "provenance"
   ],
   "properties": {
@@ -15,7 +15,7 @@
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
     },
-    "test_protocol": {
+    "test_spec": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -44,7 +44,7 @@
         "kind": {
           "type": "string",
           "enum": [
-            "cycle_life",
+            "cycling",
             "capacity_check",
             "rate_capability",
             "hppc",
@@ -55,6 +55,11 @@
             "impedance",
             "calendar_ageing",
             "formation",
+            "rpt",
+            "field",
+            "duty_cycle",
+            "wltp",
+            "nedc",
             "other"
           ]
         },

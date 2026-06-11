@@ -38,8 +38,17 @@
         "batch_id": {
           "type": "string"
         },
+        "grade": {
+          "type": "string",
+          "description": "Quality grade assigned to this cell (e.g. 'A', 'B', 'C', 'reject')."
+        },
         "manufactured_at": {
-          "$ref": "#/$defs/UnixTime"
+          "$ref": "#/$defs/FlexDate",
+          "description": "Production date. ISO 8601 string (YYYY-MM-DD, YYYY-MM) or Unix timestamp."
+        },
+        "expires_at": {
+          "$ref": "#/$defs/FlexDate",
+          "description": "Expiration / best-before date. ISO 8601 string (YYYY-MM-DD, YYYY-MM) or Unix timestamp."
         },
         "service_start_date": {
           "type": "string",
@@ -135,6 +144,12 @@
       "type": "integer",
       "minimum": 0,
       "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "FlexDate": {
+      "oneOf": [
+        {"$ref": "#/$defs/UnixTime"},
+        {"type": "string", "description": "ISO 8601 date string (YYYY-MM-DD or YYYY-MM)."}
+      ]
     },
     "ShortId": {
       "type": "string",

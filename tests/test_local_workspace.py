@@ -41,7 +41,7 @@ def _build_sample_objects(tmp_path: Path) -> tuple[BatteryCellType, BatteryCell,
     )
     test = Test(
         cell,
-        test_type=BatteryTestType.CYCLE_LIFE,
+        test_type=BatteryTestType.CYCLING,
         protocol={"name": "1C charge / 1C discharge"},
         instrument="Biologic VSP-300",
         status="completed",

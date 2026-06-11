@@ -7,7 +7,7 @@
     "cell_id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
     "name": "A123 ANR26650M1-B baseline cycling",
     "description": "Galvanostatic cycling test for one physical cell instance.",
-    "kind": "cycle_life",
+    "kind": "cycling",
     "status": "completed",
     "protocol_name": "0.5C charge/discharge baseline cycling",
     "started_at": 1771718400,

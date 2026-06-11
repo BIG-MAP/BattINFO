@@ -20,7 +20,7 @@ SPEC_IRI_RE = re.compile(
 )
 # Aliases kept for clarity — cell specs and test protocols both use spec/ namespace
 CELL_TYPE_IRI_RE = SPEC_IRI_RE
-TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
+TEST_SPEC_IRI_RE = SPEC_IRI_RE
 CELL_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
@@ -50,8 +50,8 @@ def _entity_id(doc: dict[str, Any]) -> str:
         return doc["cell_type"]["id"]
     if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
         return doc["cell_instance"]["id"]
-    if isinstance(doc.get("test_protocol"), Mapping) and isinstance(doc["test_protocol"].get("id"), str):
-        return doc["test_protocol"]["id"]
+    if isinstance(doc.get("test_spec"), Mapping) and isinstance(doc["test_spec"].get("id"), str):
+        return doc["test_spec"]["id"]
     if isinstance(doc.get("test"), Mapping) and isinstance(doc["test"].get("id"), str):
         return doc["test"]["id"]
     if isinstance(doc.get("dataset"), Mapping) and isinstance(doc["dataset"].get("id"), str):
@@ -64,7 +64,7 @@ def _entity_type_from_doc(doc: dict[str, Any]) -> str:
         return "cell-type"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
-    if isinstance(doc.get("test_protocol"), Mapping):
+    if isinstance(doc.get("test_spec"), Mapping):
         return "test-protocol"
     if isinstance(doc.get("test"), Mapping):
         return "test"

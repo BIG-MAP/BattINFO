@@ -18,14 +18,14 @@ from battinfo.api import (
     query_cell_types,
     query_datasets,
     query_library_cell_types,
-    query_test_protocols,
+    query_test_specs,
     query_tests,
     save_cell_instance,
     save_cell_type,
     save_dataset,
     save_library_cell_type,
     save_test,
-    save_test_protocol,
+    save_test_spec,
 )
 from battinfo.api import (
     build_index as build_index_api,
@@ -43,7 +43,7 @@ from battinfo.bundle import (
     ProtocolInfo,
     ProvenanceInfo,
     Test,
-    TestProtocol,
+    TestSpec,
 )
 from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
@@ -247,7 +247,7 @@ class Workspace:
         self.descriptions: list[CellSpecification] = []
         self.cell_types: list[CellType] = []
         self.cells: list[CellInstance] = []
-        self.test_protocols: list[TestProtocol] = []
+        self.test_specs: list[TestSpec] = []
         self.tests: list[Test] = []
         self.datasets: list[Dataset] = []
 
@@ -300,8 +300,8 @@ class Workspace:
                 _append_unique(self.descriptions, obj)
             elif isinstance(obj, CellType):
                 _append_unique(self.cell_types, obj)
-            elif isinstance(obj, TestProtocol):
-                _append_unique(self.test_protocols, obj)
+            elif isinstance(obj, TestSpec):
+                _append_unique(self.test_specs, obj)
             elif isinstance(obj, CellInstance):
                 if obj.cell_type is not None:
                     _add(obj.cell_type)
@@ -320,7 +320,7 @@ class Workspace:
                 _append_unique(self.datasets, obj)
             else:
                 raise TypeError(
-                    "Workspace.add() supports CellSpecification, CellType, TestProtocol, Cell/CellInstance, Test, and Dataset objects."
+                    "Workspace.add() supports CellSpecification, CellType, TestSpec, Cell/CellInstance, Test, and Dataset objects."
                 )
         for obj in objects:
             _add(obj)
@@ -390,54 +390,58 @@ class Workspace:
             for item in inputs
         ]
 
-    def load_test_protocol(
+    def load_test_spec(
         self,
-        source: TestProtocol | dict[str, Any] | PathLike,
+        source: TestSpec | dict[str, Any] | PathLike,
         *,
         validate: bool = True,
         validation_policy: str = "strict",
-    ) -> TestProtocol:
+    ) -> TestSpec:
         """Load one test-protocol JSON source into the workspace."""
 
-        if isinstance(source, TestProtocol):
+        if isinstance(source, TestSpec):
             protocol = source.model_copy(deep=True)
         else:
             payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
-            if isinstance(payload.get("testProtocol"), dict) and "test_protocol" not in payload:
+            if isinstance(payload.get("TestSpec"), dict) and "test_spec" not in payload and "test_protocol" not in payload:
                 payload = dict(payload)
-                payload["test_protocol"] = dict(payload["testProtocol"])
-            if isinstance(payload.get("test_protocol"), dict):
+                payload["test_spec"] = dict(payload["TestSpec"])
+            # accept both "test_spec" (current) and "test_protocol" (legacy) record key
+            if "test_protocol" in payload and "test_spec" not in payload:
+                payload = dict(payload)
+                payload["test_spec"] = payload["test_protocol"]
+            if isinstance(payload.get("test_spec"), dict):
                 if validate:
                     report = validate_record_report(payload, policy=validation_policy)
                     if not report.ok:
                         raise ValueError(f"test-protocol validation failed: {'; '.join(report.render_errors())}")
-                protocol = TestProtocol.from_record(payload)
+                protocol = TestSpec.from_record(payload)
             else:
-                protocol = self._test_protocol_from_authoring_payload(payload)
+                protocol = self._test_spec_from_authoring_payload(payload)
 
-        _append_unique(self.test_protocols, protocol)
+        _append_unique(self.test_specs, protocol)
         return protocol
 
-    def load_test_protocols(
+    def load_test_specs(
         self,
-        *sources: TestProtocol | dict[str, Any] | PathLike,
+        *sources: TestSpec | dict[str, Any] | PathLike,
         directory: PathLike | None = None,
         glob: str = "*.json",
         validate: bool = True,
         validation_policy: str = "strict",
-    ) -> list[TestProtocol]:
+    ) -> list[TestSpec]:
         """Load multiple test-protocol JSON sources into the workspace."""
 
-        inputs: list[TestProtocol | dict[str, Any] | PathLike] = list(sources)
+        inputs: list[TestSpec | dict[str, Any] | PathLike] = list(sources)
         if directory is not None:
             directory_path = _as_path(directory)
             if not directory_path.exists() or not directory_path.is_dir():
-                raise ValueError(f"test protocol directory does not exist: {directory_path}")
+                raise ValueError(f"test spec directory does not exist: {directory_path}")
             inputs.extend(sorted(directory_path.glob(glob)))
         if not inputs:
-            raise ValueError("load_test_protocols requires one or more sources or a directory.")
+            raise ValueError("load_test_specs requires one or more sources or a directory.")
         return [
-            self.load_test_protocol(
+            self.load_test_spec(
                 item,
                 validate=validate,
                 validation_policy=validation_policy,
@@ -518,7 +522,7 @@ class Workspace:
             comment=comment_list,
         )
 
-    def _test_protocol_from_authoring_payload(self, payload: dict[str, Any]) -> TestProtocol:
+    def _test_spec_from_authoring_payload(self, payload: dict[str, Any]) -> TestSpec:
         name = payload.get("name")
         kind = payload.get("kind")
         if not (isinstance(name, str) and name.strip() and isinstance(kind, str) and kind.strip()):
@@ -576,7 +580,7 @@ class Workspace:
         retrieved_at = payload.get("retrieved_at", provenance.get("retrieved_at"))
         workflow_version = payload.get("workflow_version", provenance.get("workflow_version"))
 
-        return TestProtocol(
+        return TestSpec(
             name=name,
             test_kind=kind,
             description=payload.get("description"),
@@ -668,6 +672,7 @@ class Workspace:
         size_code: str | None = None,
         iec_code: str | None = None,
         country_of_origin: str | None = None,
+        rechargeable: bool | None = None,
         year: int | None = None,
         positive_electrode_basis: str | None = None,
         negative_electrode_basis: str | None = None,
@@ -690,6 +695,7 @@ class Workspace:
             size_code=size_code,
             iec_code=iec_code,
             country_of_origin=country_of_origin,
+            rechargeable=rechargeable,
             year=year,
             positive_electrode_basis=positive_electrode_basis,
             negative_electrode_basis=negative_electrode_basis,
@@ -713,7 +719,9 @@ class Workspace:
         *,
         serial_number: str | None = None,
         batch_id: str | None = None,
+        grade: str | None = None,
         manufactured_at: int | str | None = None,
+        expires_at: int | str | None = None,
         measured: Any = None,
         source_type: str = "measurement",
         source_url: str | None = None,
@@ -725,7 +733,9 @@ class Workspace:
             cell_type=cell_type,
             serial_number=serial_number,
             batch_id=batch_id,
+            grade=grade,
             manufactured_at=manufactured_at,
+            expires_at=expires_at,
             measured=_mapping_value(measured),
             source=ProvenanceInfo(
                 type=source_type,
@@ -738,7 +748,7 @@ class Workspace:
         self.cells.append(cell)
         return cell
 
-    def test_protocol(
+    def test_spec(
         self,
         *,
         name: str,
@@ -759,8 +769,8 @@ class Workspace:
         retrieved_at: int | str | None = None,
         workflow_version: str | None = None,
         comment: list[str] | None = None,
-    ) -> TestProtocol:
-        protocol = TestProtocol(
+    ) -> TestSpec:
+        protocol = TestSpec(
             name=name,
             test_kind=kind,
             description=description,
@@ -782,7 +792,7 @@ class Workspace:
             ),
             comment=list(comment or []),
         )
-        self.test_protocols.append(protocol)
+        self.test_specs.append(protocol)
         return protocol
 
     def test(
@@ -790,13 +800,14 @@ class Workspace:
         cell: CellInstance,
         *,
         kind: str | None = None,
-        protocol_ref: TestProtocol | None = None,
+        protocol_ref: TestSpec | None = None,
         name: str | None = None,
         description: str | None = None,
         protocol: str | None = None,
         protocol_url: str | None = None,
         instrument: str | None = None,
         status: str | None = None,
+        conformance: "TestConformance | dict[str, Any] | None" = None,
         started_at: int | str | None = None,
         ended_at: int | str | None = None,
         source_type: str = "measurement",
@@ -807,6 +818,9 @@ class Workspace:
         workflow_version: str | None = None,
         comment: list[str] | None = None,
     ) -> Test:
+        from battinfo.bundle import TestConformance as _TestConformance
+        if isinstance(conformance, dict):
+            conformance = _TestConformance.from_record(conformance)
         protocol_name = protocol or (protocol_ref.name if protocol_ref is not None else None)
         protocol_link = protocol_url or (protocol_ref.protocol_url if protocol_ref is not None else None)
         resolved_kind = kind or (str(protocol_ref.test_kind) if protocol_ref is not None else None)
@@ -820,6 +834,7 @@ class Workspace:
             cell=cell,
             description=description,
             status=status,
+            conformance=conformance,
             protocol=ProtocolInfo(name=protocol_name, url=protocol_link),
             instrument=instrument,
             started_at=started_at,
@@ -1243,7 +1258,7 @@ class Workspace:
         return {
             "cell_types": [item.to_record() for item in finalized["cell_types"]],
             "cell_instances": [item.to_record() for item in finalized["cells"]],
-            "test_protocols": [item.to_record() for item in finalized["test_protocols"]],
+            "test_specs": [item.to_record() for item in finalized["test_specs"]],
             "tests": [item.to_record() for item in finalized["tests"]],
             "datasets": [item.to_record() for item in finalized["datasets"]],
         }
@@ -1281,15 +1296,15 @@ class Workspace:
                 )
                 for item in finalized["cells"]
             ],
-            "test_protocols": [
-                save_test_protocol(
+            "test_specs": [
+                save_test_spec(
                     item,
                     source_root=target_root,
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                 )
-                for item in finalized["test_protocols"]
+                for item in finalized["test_specs"]
             ],
             "tests": [
                 save_test(
@@ -1401,7 +1416,7 @@ class Workspace:
         if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
             filters.setdefault("directory", self.source_root / "cell-instance")
             return query_api(kind, **filters)
-        if normalized in {"test_protocol", "test_protocols"}:
+        if normalized in {"test_spec", "test_specs"}:
             filters.setdefault("directory", self.source_root / "test-protocol")
             return query_api(kind, **filters)
         if normalized in {"test", "tests"}:
@@ -1423,9 +1438,9 @@ class Workspace:
         filters.setdefault("directory", self.source_root / "test")
         return query_tests(**filters)
 
-    def query_test_protocols(self, **filters: Any) -> list[dict[str, Any]]:
+    def query_test_specs(self, **filters: Any) -> list[dict[str, Any]]:
         filters.setdefault("directory", self.source_root / "test-protocol")
-        return query_test_protocols(**filters)
+        return query_test_specs(**filters)
 
     def query_datasets(self, **filters: Any) -> list[dict[str, Any]]:
         filters.setdefault("directory", self.source_root / "dataset")
@@ -1435,6 +1450,12 @@ class Workspace:
         filters.setdefault("directory", self.library_root)
         return query_library_cell_types(**filters)
 
+    # backward compat aliases
+    test_protocol = test_spec
+    load_test_protocol = load_test_spec
+    load_test_protocols = load_test_specs
+    query_test_protocols = query_test_specs
+
     def _finalize(self) -> dict[str, list[Any]]:
         finalized_cell_types = [self._finalize_cell_type(item) for item in self.cell_types]
         cell_type_map = {id(original): finalized for original, finalized in zip(self.cell_types, finalized_cell_types, strict=True)}
@@ -1442,12 +1463,12 @@ class Workspace:
         finalized_cells = [self._finalize_cell(item, cell_type_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
 
-        finalized_test_protocols = [self._finalize_test_protocol(item) for item in self.test_protocols]
-        test_protocol_map = {
-            id(original): finalized for original, finalized in zip(self.test_protocols, finalized_test_protocols, strict=True)
+        finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
+        test_spec_map = {
+            id(original): finalized for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True)
         }
 
-        finalized_tests = [self._finalize_test(item, cell_map, test_protocol_map) for item in self.tests]
+        finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
@@ -1476,7 +1497,7 @@ class Workspace:
             _sync_model_state(original, finalized)
         for original, finalized in zip(self.cells, finalized_cells, strict=True):
             _sync_model_state(original, finalized)
-        for original, finalized in zip(self.test_protocols, finalized_test_protocols, strict=True):
+        for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True):
             _sync_model_state(original, finalized)
         for original, finalized in zip(self.tests, finalized_tests, strict=True):
             _sync_model_state(original, finalized)
@@ -1486,7 +1507,7 @@ class Workspace:
         return {
             "cell_types": self.cell_types,
             "cells": self.cells,
-            "test_protocols": self.test_protocols,
+            "test_specs": self.test_specs,
             "tests": self.tests,
             "datasets": self.datasets,
         }
@@ -1646,7 +1667,7 @@ class Workspace:
             finalized.source.retrieved_at = _now_unix()
         return finalized
 
-    def _finalize_test_protocol(self, protocol: TestProtocol) -> TestProtocol:
+    def _finalize_test_spec(self, protocol: TestSpec) -> TestSpec:
         finalized = protocol.model_copy(deep=True)
         if finalized.id is None:
             finalized.id = _entity_iri(
@@ -1671,11 +1692,11 @@ class Workspace:
         self,
         test: Test,
         cell_map: dict[int, CellInstance],
-        test_protocol_map: dict[int, TestProtocol],
+        test_spec_map: dict[int, TestSpec],
     ) -> Test:
         finalized = test.model_copy(deep=True, update={"cell": None, "protocol_entity": None})
         linked_cell = cell_map.get(id(test.cell)) if test.cell is not None else None
-        linked_protocol = test_protocol_map.get(id(test.protocol_entity)) if test.protocol_entity is not None else None
+        linked_protocol = test_spec_map.get(id(test.protocol_entity)) if test.protocol_entity is not None else None
         if finalized.cell_instance_id is None and linked_cell is not None:
             finalized.cell_instance_id = linked_cell.id
         if finalized.protocol_id is None and linked_protocol is not None:

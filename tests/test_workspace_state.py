@@ -49,7 +49,7 @@ def test_workspace_save_open_and_extend_same_cell(tmp_path: Path) -> None:
     )
     test_a = workspace.test(
         cell,
-        kind="cycle_life",
+        kind="cycling",
         protocol="1C charge / 1C discharge",
         instrument="Biologic VSP-300",
         status="completed",
@@ -251,7 +251,7 @@ def test_workspace_bundle_can_emit_single_dataset_submission(tmp_path: Path) -> 
     cell = workspace.cell(cell_type, serial_number="hello-world-001", source_type="lab")
     test = workspace.test(
         cell,
-        kind="cycle_life",
+        kind="cycling",
         protocol="1C charge / 1C discharge",
         instrument="Biologic VSP-300",
         status="completed",

@@ -17,7 +17,8 @@ BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
 CELL_TYPE_FILENAME = "cell-type.json"
 CELL_INSTANCE_FILENAME = "cell-instance.json"
-TEST_PROTOCOL_FILENAME = "test-protocol.json"
+TEST_SPEC_FILENAME = "test-spec.json"
+TEST_PROTOCOL_FILENAME = TEST_SPEC_FILENAME  # backward compat alias
 TEST_FILENAME = "test.json"
 DATASET_FILENAME = "dataset.json"
 ZENODO_CELL_RECORD_FILENAME = "battinfo.bundle.json"
@@ -26,7 +27,7 @@ RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 
 
 class BatteryTestType(StrEnum):
-    CYCLE_LIFE = "cycle_life"
+    CYCLING = "cycling"
     CAPACITY_CHECK = "capacity_check"
     RATE_CAPABILITY = "rate_capability"
     HPPC = "hppc"
@@ -37,6 +38,14 @@ class BatteryTestType(StrEnum):
     IMPEDANCE = "impedance"
     CALENDAR_AGEING = "calendar_ageing"
     FORMATION = "formation"
+    RPT = "rpt"
+    QUASI_OCV = "quasi_ocv"
+    FIELD = "field"
+    DUTY_CYCLE = "duty_cycle"
+    WLTP = "wltp"
+    NEDC = "nedc"
+    SEM = "sem"
+    CHARACTERIZATION = "characterization"
     OTHER = "other"
 
 
@@ -1123,6 +1132,7 @@ class CellType(BundleJsonModel):
     size_code: str | None = None
     iec_code: str | None = None
     country_of_origin: str | None = None
+    rechargeable: bool | None = None
     year: int | None = None
     datasheet_revision: str | None = None
     cell_specification_id: str | None = None
@@ -1233,6 +1243,7 @@ class CellType(BundleJsonModel):
             size_code=product.get("size_code"),
             iec_code=product.get("iec_code"),
             country_of_origin=product.get("country_of_origin"),
+            rechargeable=product.get("rechargeable"),
             year=_year_value(product.get("year")),
             datasheet_revision=product.get("datasheet_revision"),
             cell_specification_id=cell_specification_id,
@@ -1314,6 +1325,8 @@ class CellType(BundleJsonModel):
             record["product"]["iec_code"] = self.iec_code
         if self.country_of_origin is not None:
             record["product"]["country_of_origin"] = self.country_of_origin
+        if self.rechargeable is not None:
+            record["product"]["rechargeable"] = self.rechargeable
         if self.year is not None:
             record["product"]["year"] = self.year
         if self.datasheet_revision is not None:
@@ -1348,7 +1361,9 @@ class CellInstance(BundleJsonModel):
     cell_type: CellType | None = Field(default=None, exclude=True, repr=False)
     serial_number: str | None = None
     batch_id: str | None = None
+    grade: str | None = None
     manufactured_at: int | str | None = None
+    expires_at: int | str | None = None
     measured: dict[str, Any] = Field(default_factory=dict)
     dataset_ids: list[str] = Field(default_factory=list)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
@@ -1401,7 +1416,9 @@ class CellInstance(BundleJsonModel):
             cell_type_id=str(cell_instance["type_id"]),
             serial_number=cell_instance.get("serial_number"),
             batch_id=cell_instance.get("batch_id"),
+            grade=cell_instance.get("grade"),
             manufactured_at=cell_instance.get("manufactured_at"),
+            expires_at=cell_instance.get("expires_at"),
             measured=dict(record.get("measured", {})) if isinstance(record.get("measured"), Mapping) else {},
             dataset_ids=[str(item) for item in dataset_ids],
             source=ProvenanceInfo(
@@ -1426,7 +1443,9 @@ class CellInstance(BundleJsonModel):
                 "type_id": self.cell_type_id,
                 "serial_number": self.serial_number,
                 "batch_id": self.batch_id,
+                "grade": self.grade,
                 "manufactured_at": self.manufactured_at,
+                "expires_at": self.expires_at,
             },
             "provenance": {},
         }
@@ -1449,10 +1468,85 @@ class CellInstance(BundleJsonModel):
         return record_to_snake_aliases(record)
 
 
-class TestProtocol(BundleJsonModel):
-    default_filename: ClassVar[str] = TEST_PROTOCOL_FILENAME
+CONFORMANCE_STATUS_VALUES = ("conformant", "partial", "non-conformant", "unknown")
 
-    kind: str = "TestProtocol"
+CONFORMANCE_STATUS_IRI: dict[str, str] = {
+    "conformant":     "https://w3id.org/battinfo/ConformanceStatus/Conformant",
+    "partial":        "https://w3id.org/battinfo/ConformanceStatus/PartialConformance",
+    "non-conformant": "https://w3id.org/battinfo/ConformanceStatus/NonConformant",
+    "unknown":        "https://w3id.org/battinfo/ConformanceStatus/ConformanceUnknown",
+}
+
+
+class Deviation(BaseModel):
+    """A single unplanned event that caused a test to depart from its specification."""
+
+    type: str
+    description: str | None = None
+    occurred_at: int | None = None
+    duration_s: int | None = None
+    step_index: int | None = None
+    impact: str | None = None
+
+    @classmethod
+    def from_record(cls, data: Mapping[str, Any]) -> "Deviation":
+        return cls(
+            type=str(data["type"]),
+            description=data.get("description"),
+            occurred_at=data.get("occurred_at"),
+            duration_s=data.get("duration_s"),
+            step_index=data.get("step_index"),
+            impact=data.get("impact"),
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        out: dict[str, Any] = {"type": self.type}
+        if self.description is not None:
+            out["description"] = self.description
+        if self.occurred_at is not None:
+            out["occurred_at"] = self.occurred_at
+        if self.duration_s is not None:
+            out["duration_s"] = self.duration_s
+        if self.step_index is not None:
+            out["step_index"] = self.step_index
+        if self.impact is not None:
+            out["impact"] = self.impact
+        return out
+
+
+class TestConformance(BaseModel):
+    """Assessment of how well a test activity followed its referenced test specification."""
+
+    status: str = "unknown"
+    note: str | None = None
+    deviations: list[Deviation] = Field(default_factory=list)
+
+    @classmethod
+    def from_record(cls, data: Mapping[str, Any]) -> "TestConformance":
+        deviations = [
+            Deviation.from_record(d)
+            for d in (data.get("deviations") or [])
+            if isinstance(d, Mapping)
+        ]
+        return cls(
+            status=str(data.get("status", "unknown")),
+            note=data.get("note"),
+            deviations=deviations,
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        out: dict[str, Any] = {"status": self.status}
+        if self.note is not None:
+            out["note"] = self.note
+        if self.deviations:
+            out["deviations"] = [d.to_record() for d in self.deviations]
+        return out
+
+
+class TestSpec(BundleJsonModel):
+    default_filename: ClassVar[str] = TEST_SPEC_FILENAME
+
+    kind: str = "TestSpec"
     __test__ = False
     id: str | None = None
     name: str | None = None
@@ -1505,7 +1599,7 @@ class TestProtocol(BundleJsonModel):
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any]) -> Self:
-        protocol = record.get("test_protocol")
+        protocol = record.get("test_spec")
         if not isinstance(protocol, Mapping):
             raise ValueError("test-protocol record must contain a 'test_protocol' object.")
         provenance = record.get("provenance", {})
@@ -1553,12 +1647,12 @@ class TestProtocol(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("TestProtocol.id is required before serialization.")
+            raise ValueError("TestSpec.id is required before serialization.")
         if self.name is None:
-            raise ValueError("TestProtocol.name is required before serialization.")
+            raise ValueError("TestSpec.name is required before serialization.")
         record: dict[str, Any] = {
             "schema_version": self.schema_version,
-            "test_protocol": {
+            "test_spec": {
                 "id": self.id,
                 "short_id": _short_id(self.id),
                 "identifier": _identifier("test-protocol", self.id),
@@ -1568,15 +1662,15 @@ class TestProtocol(BundleJsonModel):
             "provenance": {},
         }
         if self.description is not None:
-            record["test_protocol"]["description"] = self.description
+            record["test_spec"]["description"] = self.description
         if self.version is not None:
-            record["test_protocol"]["version"] = self.version
+            record["test_spec"]["version"] = self.version
         if self.protocol.url is not None:
-            record["test_protocol"]["protocol_url"] = self.protocol.url
+            record["test_spec"]["protocol_url"] = self.protocol.url
         if self.steps:
-            record["test_protocol"]["steps"] = list(self.steps)
+            record["test_spec"]["steps"] = list(self.steps)
         if self.cycles is not None:
-            record["test_protocol"]["cycles"] = self.cycles
+            record["test_spec"]["cycles"] = self.cycles
         if self.conditions:
             record["conditions"] = copy.deepcopy(self.conditions)
         if self.setpoints:
@@ -1615,7 +1709,7 @@ class Test(BundleJsonModel):
         validation_alias=AliasChoices("test_type", "test_kind", "kind"),
     )
     protocol_id: str | None = None
-    protocol_entity: TestProtocol | None = Field(default=None, exclude=True, repr=False)
+    protocol_entity: TestSpec | None = Field(default=None, exclude=True, repr=False)
     cell_instance_id: str | None = None
     cell: CellInstance | None = Field(default=None, exclude=True, repr=False)
     description: str | None = None
@@ -1625,6 +1719,7 @@ class Test(BundleJsonModel):
     started_at: int | str | None = None
     ended_at: int | str | None = None
     dataset_ids: list[str] = Field(default_factory=list)
+    conformance: TestConformance | None = None
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
 
@@ -1696,6 +1791,12 @@ class Test(BundleJsonModel):
         dataset_ids = test.get("dataset_ids")
         if not isinstance(dataset_ids, list):
             dataset_ids = []
+        raw_conformance = test.get("conformance")
+        conformance = (
+            TestConformance.from_record(raw_conformance)
+            if isinstance(raw_conformance, Mapping)
+            else None
+        )
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(test["id"]),
@@ -1713,6 +1814,7 @@ class Test(BundleJsonModel):
             started_at=test.get("started_at"),
             ended_at=test.get("ended_at"),
             dataset_ids=[str(item) for item in dataset_ids],
+            conformance=conformance,
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
                 file=provenance.get("source_file"),
@@ -1761,6 +1863,8 @@ class Test(BundleJsonModel):
             record["test"]["ended_at"] = self.ended_at
         if self.dataset_ids:
             record["test"]["dataset_ids"] = list(self.dataset_ids)
+        if self.conformance is not None:
+            record["test"]["conformance"] = self.conformance.to_record()
         if self.source.type is not None:
             record["provenance"]["source_type"] = self.source.type
         if self.source.file is not None:
@@ -2638,6 +2742,9 @@ def load_cell_specification(path: PathLike) -> CellSpecification:
     return CellSpecification.from_path(path)
 
 
+TestProtocol = TestSpec  # backward compat alias
+
+
 __all__ = [
     "BatteryTestType",
     "BUNDLE_MANIFEST_FILENAME",
@@ -2662,8 +2769,14 @@ __all__ = [
     "Salt",
     "Separator",
     "SolventMixture",
+    "CONFORMANCE_STATUS_VALUES",
+    "CONFORMANCE_STATUS_IRI",
+    "Deviation",
+    "TestConformance",
+    "TEST_SPEC_FILENAME",
     "TEST_PROTOCOL_FILENAME",
     "TEST_FILENAME",
+    "TestSpec",
     "TestProtocol",
     "Test",
     "ZENODO_CELL_RECORD_FILENAME",

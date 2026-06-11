@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "test_protocol": {
+  "test_spec": {
     "id": "https://w3id.org/battinfo/spec/5v3n-8x1m-4k7p-9r2t",
     "short_id": "5v3n8x",
     "identifier": "test-protocol:5v3n-8x1m-4k7p-9r2t",

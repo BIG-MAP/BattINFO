@@ -273,22 +273,22 @@ def test_imported_converter_record_renders_to_converter_compatible_jsonld() -> N
 def test_import_converter_jsonld_record_extracts_linked_test_protocols_and_tests() -> None:
     result = import_converter_jsonld_record(_fixture_with_procedures())
 
-    assert len(result.test_protocols) == 2
+    assert len(result.test_specs) == 2
     assert len(result.tests) == 2
 
-    protocol_validation = validate_json(result.test_protocols[0], profile="test-protocol")
+    protocol_validation = validate_json(result.test_specs[0], profile="test-protocol")
     assert protocol_validation.ok, protocol_validation.errors
     test_validation = validate_json(result.tests[0], profile="test")
     assert test_validation.ok, test_validation.errors
 
-    positive_protocol = result.test_protocols[0]["test_protocol"]
-    negative_protocol = result.test_protocols[1]["test_protocol"]
+    positive_protocol = result.test_specs[0]["test_spec"]
+    negative_protocol = result.test_specs[1]["test_spec"]
     assert positive_protocol["kind"] == "capacity_check"
     assert negative_protocol["kind"] == "capacity_check"
-    assert result.test_protocols[0]["setpoints"]["steps"][0]["task"] == "Charging"
-    assert result.test_protocols[1]["setpoints"]["steps"][0]["task"] == "Discharging"
-    assert result.test_protocols[1]["conditions"]["reference_electrode"] == "Li-metal"
-    assert result.tests[0]["test"]["protocol_id"] == result.test_protocols[0]["test_protocol"]["id"]
+    assert result.test_specs[0]["setpoints"]["steps"][0]["task"] == "Charging"
+    assert result.test_specs[1]["setpoints"]["steps"][0]["task"] == "Discharging"
+    assert result.test_specs[1]["conditions"]["reference_electrode"] == "Li-metal"
+    assert result.tests[0]["test"]["protocol_id"] == result.test_specs[0]["test_spec"]["id"]
     assert result.tests[0]["test"]["cell_id"] == result.record["instances"][0]["id"]
 
 
@@ -298,10 +298,10 @@ def test_import_converter_package_builds_linked_objects_and_adds_to_workspace(tm
     assert package.specification.id == package.cell_type.id
     assert package.cell_instance is not None
     assert package.cell_instance.cell_type_id == package.cell_type.id
-    assert len(package.test_protocols) == 2
+    assert len(package.test_specs) == 2
     assert len(package.tests) == 2
     assert package.tests[0].cell is package.cell_instance
-    assert package.tests[0].protocol_entity is package.test_protocols[0]
+    assert package.tests[0].protocol_entity is package.test_specs[0]
 
     workspace = Workspace(root=tmp_path / "workspace")
     package.add_to_workspace(workspace)
@@ -309,5 +309,5 @@ def test_import_converter_package_builds_linked_objects_and_adds_to_workspace(tm
 
     assert len(results["cell_types"]) == 1
     assert len(results["cell_instances"]) == 1
-    assert len(results["test_protocols"]) == 2
+    assert len(results["test_specs"]) == 2
     assert len(results["tests"]) == 2

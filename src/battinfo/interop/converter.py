@@ -8,10 +8,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
-from battinfo.bundle import CellInstance, CellSpecification, CellType, ProvenanceInfo, Test, TestProtocol
+from battinfo.bundle import CellInstance, CellSpecification, CellType, ProvenanceInfo, Test, TestSpec
 
 if TYPE_CHECKING:
-    from battinfo.workspace import Workspace
+    from battinfo._workspace import Workspace
 
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
@@ -141,7 +141,7 @@ class ConverterImportResult:
     specification: CellSpecification
     record: dict[str, Any]
     warnings: list[str]
-    test_protocols: list[dict[str, Any]] = field(default_factory=list)
+    test_specs: list[dict[str, Any]] = field(default_factory=list)
     tests: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -150,7 +150,7 @@ class ConverterImportPackage:
     specification: CellSpecification
     cell_type: CellType
     cell_instance: CellInstance | None
-    test_protocols: list[TestProtocol] = field(default_factory=list)
+    test_specs: list[TestSpec] = field(default_factory=list)
     tests: list[Test] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     record: dict[str, Any] | None = None
@@ -159,7 +159,7 @@ class ConverterImportPackage:
         objects: list[Any] = [self.specification, self.cell_type]
         if self.cell_instance is not None:
             objects.append(self.cell_instance)
-        objects.extend(self.test_protocols)
+        objects.extend(self.test_specs)
         objects.extend(self.tests)
         return objects
 
@@ -391,7 +391,7 @@ def import_converter_jsonld_record(
 
     instance_id = instances[0]["id"] if instances else None
     instance_label = instances[0]["name"] if instances else imported_model
-    test_protocols, tests = _extract_procedure_records(
+    test_specs, tests = _extract_procedure_records(
         positive_electrode_node,
         negative_electrode_node,
         instance_id=instance_id,
@@ -407,7 +407,7 @@ def import_converter_jsonld_record(
         specification=CellSpecification.from_library_record(record),
         record=record,
         warnings=warnings,
-        test_protocols=test_protocols,
+        test_specs=test_specs,
         tests=tests,
     )
 
@@ -459,7 +459,7 @@ def import_converter_package(
                 comment=[str(first["comment"])] if isinstance(first.get("comment"), str) else [],
             )
 
-    protocol_objects = [TestProtocol.from_record(item) for item in imported.test_protocols]
+    protocol_objects = [TestSpec.from_record(item) for item in imported.test_specs]
     protocols_by_id = {item.id: item for item in protocol_objects if item.id is not None}
     test_objects = [Test.from_record(item) for item in imported.tests]
     for test in test_objects:
@@ -473,7 +473,7 @@ def import_converter_package(
         specification=specification,
         cell_type=cell_type,
         cell_instance=cell_instance,
-        test_protocols=protocol_objects,
+        test_specs=protocol_objects,
         tests=test_objects,
         warnings=list(imported.warnings),
         record=imported.record,
@@ -1202,7 +1202,7 @@ def _extract_procedure_records(
                 )
 
             protocol_id = _entity_iri("test-protocol", f"{instance_id}::{role}::capacity-check::{procedure_index}")
-            protocol = TestProtocol(
+            protocol = TestSpec(
                 schema_version=schema_version,
                 id=protocol_id,
                 name=protocol_name,

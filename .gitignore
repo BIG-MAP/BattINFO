@@ -14,6 +14,7 @@ build
 .battinfo
 WORK_LOG.md
 CLAUDE.md
+battinfo-ontology-todos.md
 
 # Documentation
 site
@@ -21,3 +22,4 @@ docs/_build
 
 # Editor
 .vscode/
+catalog-v001.xml

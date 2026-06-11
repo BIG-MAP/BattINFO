@@ -21,7 +21,7 @@ from battinfo.local_workspace import (
     SubmissionResource,
 )
 from battinfo.validate.record import validate_record
-from battinfo.workspace import Workspace
+from battinfo._workspace import Workspace
 
 PathLike = str | Path
 WorkspaceTarget = CellType | CellInstance | Test | Dataset

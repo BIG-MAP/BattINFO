@@ -62,6 +62,6 @@ def test_test_examples_cover_alpha_hardening_kinds() -> None:
         json.loads(path.read_text(encoding="utf-8"))["test"]["kind"]
         for path in sorted(examples_dir.glob("*.json"))
     }
-    expected = {"cycle_life", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
+    expected = {"cycling", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
     assert expected.issubset(observed)
 

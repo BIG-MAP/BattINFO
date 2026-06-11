@@ -79,3 +79,46 @@ dcterms:contributor a owl:AnnotationProperty .
 dcterms:license     a owl:AnnotationProperty .
 dcterms:rights      a owl:AnnotationProperty .
 dcterms:source      a owl:AnnotationProperty .
+
+# ---------------------------------------------------------------------------
+# ConformanceStatus controlled vocabulary
+#
+# A SKOS concept scheme expressing how closely a battery test followed its
+# test specification.  Used in JSON-LD exports via dqv:value and prov:used.
+# IRIs are under the /ConformanceStatus/ sub-path (slash namespace) because
+# concept schemes are published as independent Linked Data resources.
+# ---------------------------------------------------------------------------
+
+<https://w3id.org/battinfo/ConformanceStatus>
+    a skos:ConceptScheme ;
+    skos:prefLabel "Conformance Status"@en ;
+    skos:definition "A controlled vocabulary expressing how well a physical battery test followed its test specification."@en ;
+    dcterms:isPartOf battinfo: .
+
+<https://w3id.org/battinfo/ConformanceStatus/Conformant>
+    a skos:Concept ;
+    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:prefLabel "Conformant"@en ;
+    skos:definition "The test was carried out in full accordance with the test specification."@en .
+
+<https://w3id.org/battinfo/ConformanceStatus/PartialConformance>
+    a skos:Concept ;
+    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:prefLabel "Partial Conformance"@en ;
+    skos:definition "The test deviated from the specification in one or more steps but produced usable data."@en .
+
+<https://w3id.org/battinfo/ConformanceStatus/NonConformant>
+    a skos:Concept ;
+    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:prefLabel "Non-Conformant"@en ;
+    skos:definition "The test deviated from the specification to such a degree that the results are not considered reliable."@en .
+
+<https://w3id.org/battinfo/ConformanceStatus/ConformanceUnknown>
+    a skos:Concept ;
+    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
+    skos:prefLabel "Conformance Unknown"@en ;
+    skos:definition "It is not known whether the test conformed to the specification."@en .

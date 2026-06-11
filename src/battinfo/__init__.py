@@ -4,7 +4,8 @@ from battinfo.api import (
     CellTypeInput,
     DatasetInput,
     TestInput,
-    TestProtocolInput,
+    TestSpecInput,
+    TestProtocolInput,  # backward compat alias
     build_cell_type_library_rdf,
     build_curated_cell_type_submission,
     build_index,
@@ -20,7 +21,7 @@ from battinfo.api import (
     query_cell_types,
     query_datasets,
     query_library_cell_types,
-    query_test_protocols,
+    query_test_specs,
     query_tests,
     resolve_cell_type_id,
     save_batch,
@@ -30,7 +31,7 @@ from battinfo.api import (
     save_library_cell_type,
     save_record,
     save_test,
-    save_test_protocol,
+    save_test_spec,
     submit_publication_package,
     template_cell_instance,
     template_cell_specification,
@@ -38,11 +39,12 @@ from battinfo.api import (
     template_cell_type_draft,
     template_dataset,
     template_test,
-    template_test_protocol,
-    template_test_protocol_draft,
+    template_test_spec,
+    template_test_spec_draft,
     validate_staging_cell_type,
     validate_staging_cell_types,
 )
+from battinfo.ws import workspace
 from battinfo.authoring import (
     bom,
     cell_description,
@@ -57,6 +59,8 @@ from battinfo.authoring import (
 from battinfo.bundle import (
     BatteryTestType,
     BattinfoBundle,
+    Deviation,
+    TestConformance,
     BillOfMaterials,
     CellConstruction,
     CellInstance,
@@ -77,7 +81,8 @@ from battinfo.bundle import (
     Separator,
     SolventMixture,
     Test,
-    TestProtocol,
+    TestSpec,
+    TestProtocol,  # backward compat alias
     ZenodoCellRecord,
     ZenodoDatasetEntry,
     load_cell_specification,
@@ -125,7 +130,8 @@ from battinfo.publication import (
 )
 from battinfo.publish import PublishResult, publish
 from battinfo.runtime import recover_notebook_runtime
-from battinfo.workspace import Workspace, q, quantity
+from battinfo._workspace import Workspace, q, quantity
+from battinfo.jsonld import record_to_jsonld
 from battinfo.zenodo import ZenodoClient, ZenodoError, patch_zenodo_urls, upload_zenodo_package
 
 BatteryCellType = CellType
@@ -158,6 +164,9 @@ __all__ = [
     "Salt",
     "Separator",
     "SolventMixture",
+    "Deviation",
+    "TestConformance",
+    "TestSpec",
     "TestProtocol",
     "Test",
     "bom",
@@ -187,6 +196,7 @@ __all__ = [
     "CellInstanceInput",
     "CellTypeInput",
     "DatasetInput",
+    "TestSpecInput",
     "TestProtocolInput",
     "TestInput",
     "build_cell_type_library_rdf",
@@ -218,7 +228,7 @@ __all__ = [
     "query",
     "query_cell_instances",
     "query_library_cell_types",
-    "query_test_protocols",
+    "query_test_specs",
     "query_tests",
     "query_cell_types",
     "query_datasets",
@@ -227,7 +237,7 @@ __all__ = [
     "save_cell_type",
     "save_dataset",
     "save_library_cell_type",
-    "save_test_protocol",
+    "save_test_spec",
     "save_test",
     "save_record",
     "resolve_cell_type_id",
@@ -237,8 +247,8 @@ __all__ = [
     "template_cell_type_draft",
     "template_cell_type",
     "template_dataset",
-    "template_test_protocol_draft",
-    "template_test_protocol",
+    "template_test_spec_draft",
+    "template_test_spec",
     "template_test",
     "submit_publication_package",
     "validate_staging_cell_type",
@@ -252,6 +262,8 @@ __all__ = [
     "upload_zenodo_package",
     "LocalWorkspace",
     "Workspace",
+    "workspace",
+    "record_to_jsonld",
     "BatchImportResult",
     "ConverterImportPackage",
     "ConverterImportResult",

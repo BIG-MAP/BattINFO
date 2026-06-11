@@ -201,7 +201,7 @@ def test_publish_dataset_metadata_with_cell_type_only(tmp_path: Path) -> None:
         cell_type=cell_type,
         dataset_dirs=[dataset_dir],
         staging_root=tmp_path / "staging",
-        test_kind="cycle_life",
+        test_kind="cycling",
         protocol_name="cycling",
         dataset_name_template="{cell_type_name} measurements for {dataset_key}",
         emit_bundle_dir=True,

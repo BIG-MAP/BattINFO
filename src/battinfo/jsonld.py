@@ -1,0 +1,313 @@
+"""Serialize BattINFO records as JSON-LD.
+
+Each record type (cell-spec, cell-instance, test, dataset) is transformed into
+valid JSON-LD using the curated property/unit mappings and the BattINFO records
+context at ``data/context/records.context.json``.
+
+The output is immediately usable by any JSON-LD processor (e.g. ``pyld``,
+``rdflib`` + ``rdflib-jsonld``) to expand into RDF triples.
+
+Usage::
+
+    from battinfo.jsonld import record_to_jsonld
+    import json
+
+    raw = json.loads(Path("cell-type-xyz.json").read_text())
+    ld  = record_to_jsonld(raw, "cell-spec")
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+_DATA = Path(__file__).parent / "data"
+_CONTEXT_PATH = _DATA / "context" / "records.context.json"
+_CONTEXT_URL  = "https://w3id.org/battinfo/context/records/v1.json"
+
+# Inline context dict — loaded once so files are self-contained and parseable
+# without network access. The URL above is the future hosted reference.
+_CONTEXT_INLINE: dict = json.loads(_CONTEXT_PATH.read_text(encoding="utf-8"))["@context"]
+
+# ── Mapping tables (loaded once at module import) ─────────────────────────────
+
+def _load_property_map() -> dict[str, str]:
+    path = _DATA / "mappings" / "domain-battery" / "property_map.curated.json"
+    raw  = json.loads(path.read_text(encoding="utf-8"))
+    return {m["key"]: m["class_iri"] for m in raw["mappings"]}
+
+
+def _load_unit_map() -> dict[str, str]:
+    path = _DATA / "mappings" / "domain-battery" / "unit_map.curated.json"
+    raw  = json.loads(path.read_text(encoding="utf-8"))
+    return {m["symbol"]: m["unit_iri"] for m in raw["mappings"]}
+
+
+def _load_entity_type_map() -> dict:
+    path = _DATA / "mappings" / "domain-battery" / "entity_type_map.json"
+    return json.loads(path.read_text(encoding="utf-8"))["mappings"]
+
+
+_PROP_MAP   = _load_property_map()
+_UNIT_MAP   = _load_unit_map()
+_ENTITY_MAP = _load_entity_type_map()
+
+# EMMO battery-type IRIs (from domain-battery.context.json)
+_BATTERY_TYPE_IRIS: dict[str, str] = {
+    "BatteryCell":         "https://w3id.org/emmo/domain/battery#battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "CylindricalBattery":  "https://w3id.org/emmo/domain/battery#battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
+    "PrismaticBattery":    "https://w3id.org/emmo/domain/battery#battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    "PouchCell":           "https://w3id.org/emmo/domain/battery#battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
+    "CoinCell":            "https://w3id.org/emmo/domain/battery#battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
+    "LithiumIonBattery":   "https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
+    "LithiumMetalBattery": "https://w3id.org/emmo/domain/battery#battery_ada13509_4eed_4e40_a7b1_4cc488144154",
+    "SodiumIonBattery":    "https://w3id.org/emmo/domain/battery#battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
+}
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _compact_iri(iri: str) -> str:
+    """Return a compact IRI string (prefix:local) where known, else the full IRI."""
+    prefixes = {
+        "https://w3id.org/emmo/domain/battery#": "battery:",
+        "https://w3id.org/emmo/domain/electrochemistry#": "electrochemistry:",
+        "https://w3id.org/emmo#": "emmo:",
+    }
+    for base, prefix in prefixes.items():
+        if iri.startswith(base):
+            return prefix + iri[len(base):]
+    return iri
+
+
+def _quantity(value: Any, unit: str) -> dict:
+    """Convert {value, unit} to a QUDT-style quantity node."""
+    node: dict = {"qudt:value": value}
+    unit_iri = _UNIT_MAP.get(unit)
+    if unit_iri:
+        node["qudt:unit"] = {"@id": unit_iri}
+    else:
+        node["qudt:unit"] = unit
+    return node
+
+
+def _rdf_types_for(cell_format: str, chemistry: str) -> list[str]:
+    """Return a list of EMMO IRI strings for the given format and chemistry."""
+    types: list[str] = []
+    fmt_entry = _ENTITY_MAP.get("format", {}).get((cell_format or "").lower())
+    if fmt_entry:
+        for t in fmt_entry.get("battery_types", []):
+            iri = _BATTERY_TYPE_IRIS.get(t)
+            if iri:
+                types.append(iri)
+    chem_entry = _ENTITY_MAP.get("chemistry", {}).get((chemistry or "").lower())
+    if chem_entry:
+        for t in chem_entry.get("battery_types", []):
+            iri = _BATTERY_TYPE_IRIS.get(t)
+            if iri and iri not in types:
+                types.append(iri)
+    if not types:
+        types.append(_BATTERY_TYPE_IRIS["BatteryCell"])
+    return types
+
+
+# ── Per-type transformers ─────────────────────────────────────────────────────
+
+def cell_spec_to_jsonld(record: dict) -> dict:
+    """Transform a cell-spec record dict to JSON-LD."""
+    product = record.get("product") or record.get("specification") or {}
+    specs   = record.get("specs") or {}
+    prov    = record.get("provenance") or {}
+
+    node: dict = {
+        "@context":  _CONTEXT_INLINE,
+        "@id":       product.get("id", ""),
+        "@type":     _rdf_types_for(product.get("cell_format", ""), product.get("chemistry", "")),
+        "schema:name":  product.get("name"),
+        "schema:model": product.get("model"),
+    }
+
+    mfr = product.get("manufacturer")
+    if mfr:
+        node["schema:manufacturer"] = {
+            "@type":      "schema:Organization",
+            "schema:name": mfr.get("name") if isinstance(mfr, dict) else mfr,
+        }
+
+    for field in ("cell_format", "chemistry", "positive_electrode_basis",
+                  "negative_electrode_basis", "size_code", "iec_code",
+                  "country_of_origin"):
+        val = product.get(field)
+        if val is not None:
+            node[f"battinfo:{field}"] = val
+
+    for key, qty in specs.items():
+        prop_iri = _PROP_MAP.get(key)
+        if prop_iri and isinstance(qty, dict) and qty.get("value") is not None:
+            node[_compact_iri(prop_iri)] = _quantity(qty["value"], qty.get("unit", ""))
+
+    if prov:
+        node["battinfo:provenance"] = _provenance(prov)
+
+    return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def cell_instance_to_jsonld(record: dict) -> dict:
+    """Transform a cell-instance record dict to JSON-LD."""
+    ci   = record.get("cell_instance") or {}
+    prov = record.get("provenance") or {}
+    datasets = record.get("datasets") or []
+
+    node: dict = {
+        "@context": _CONTEXT_INLINE,
+        "@type":    "https://w3id.org/battinfo/CellInstance",
+        "@id":      ci.get("id", ""),
+        "schema:serialNumber": ci.get("serial_number"),
+    }
+    if ci.get("type_id"):
+        node["battinfo:cellSpecification"] = {"@id": ci["type_id"]}
+    if ci.get("batch_id"):
+        node["battinfo:batchId"] = ci["batch_id"]
+    if ci.get("manufactured_at"):
+        node["schema:productionDate"] = ci["manufactured_at"]
+    if ci.get("expires_at"):
+        node["battinfo:expiresAt"] = ci["expires_at"]
+    if datasets:
+        node["battinfo:hasDataset"] = [{"@id": d["id"]} for d in datasets if d.get("id")]
+    if prov:
+        node["battinfo:provenance"] = _provenance(prov)
+
+    return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def test_to_jsonld(record: dict) -> dict:
+    """Transform a test record dict to JSON-LD."""
+    test = record.get("test") or {}
+    prov = record.get("provenance") or {}
+
+    node: dict = {
+        "@context": _CONTEXT_INLINE,
+        "@type":    "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+        "@id":      test.get("id", ""),
+        "schema:name": test.get("name"),
+        "battinfo:testKind": test.get("kind"),
+        "battinfo:instrumentName": test.get("instrument_name"),
+        "battinfo:protocolName": test.get("protocol_name"),
+        "battinfo:status": test.get("status"),
+    }
+    if test.get("cell_id"):
+        node["battinfo:testedCell"] = {"@id": test["cell_id"]}
+    if test.get("protocol_id"):
+        node["battinfo:testProtocol"] = {"@id": test["protocol_id"]}
+    if test.get("dataset_ids"):
+        node["battinfo:hasDataset"] = [{"@id": d} for d in test["dataset_ids"]]
+    if prov:
+        node["battinfo:provenance"] = _provenance(prov)
+
+    return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def dataset_to_jsonld(record: dict) -> dict:
+    """Transform a dataset record dict to JSON-LD."""
+    ds   = record.get("dataset") or {}
+    prov = record.get("provenance") or {}
+
+    node: dict = {
+        "@context": _CONTEXT_INLINE,
+        "@type":    "http://www.w3.org/ns/dcat#Dataset",
+        "@id":      ds.get("id", ""),
+        "dcterms:title": ds.get("name"),
+    }
+    if ds.get("license"):
+        node["dcterms:license"] = {"@id": ds["license"]}
+    if ds.get("access_url"):
+        node["dcat:accessURL"] = {"@id": ds["access_url"]}
+    if ds.get("created_at"):
+        node["dcterms:created"] = ds["created_at"]
+    if ds.get("about"):
+        node["dcterms:subject"] = [{"@id": iri} for iri in ds["about"]]
+
+    dists = ds.get("distributions") or []
+    if dists:
+        ld_dists = []
+        for d in dists:
+            dist: dict = {"@type": "dcat:Distribution"}
+            if d.get("content_url"):
+                dist["dcat:downloadURL"] = {"@id": d["content_url"]}
+            if d.get("encoding_format"):
+                dist["dcat:mediaType"] = d["encoding_format"]
+            cs = d.get("checksum")
+            if cs:
+                dist["spdx:checksum"] = {
+                    "@type": "spdx:Checksum",
+                    "spdx:checksumAlgorithm": f"spdx:checksumAlgorithm_{cs.get('algorithm', '')}",
+                    "spdx:checksumValue":     cs.get("value", ""),
+                }
+            ld_dists.append(dist)
+        node["dcat:distribution"] = ld_dists
+
+    if prov:
+        node["battinfo:provenance"] = _provenance(prov)
+
+    return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def _provenance(prov: dict) -> dict:
+    out: dict = {}
+    if prov.get("source_type"):
+        out["battinfo:sourceType"] = prov["source_type"]
+    if prov.get("source_file"):
+        out["battinfo:sourceFile"] = prov["source_file"]
+    if prov.get("source_url"):
+        out["battinfo:sourceURL"] = {"@id": prov["source_url"]}
+    if prov.get("citation"):
+        out["dcterms:bibliographicCitation"] = prov["citation"]
+    return out
+
+
+# ── Public dispatcher ─────────────────────────────────────────────────────────
+
+_TRANSFORMERS = {
+    "cell-spec":      cell_spec_to_jsonld,
+    "cell_spec":      cell_spec_to_jsonld,
+    "cell-type":      cell_spec_to_jsonld,
+    "cell_type":      cell_spec_to_jsonld,
+    "cell-instance":  cell_instance_to_jsonld,
+    "cell_instance":  cell_instance_to_jsonld,
+    "test":           test_to_jsonld,
+    "dataset":        dataset_to_jsonld,
+}
+
+
+def record_to_jsonld(record: dict, record_type: str) -> dict:
+    """Transform a BattINFO plain-JSON record to a JSON-LD document.
+
+    Parameters
+    ----------
+    record:
+        The plain-JSON record dict (as loaded from ``.battinfo/records/``).
+    record_type:
+        One of ``"cell-spec"``, ``"cell-instance"``, ``"test"``, ``"dataset"``.
+
+    Returns
+    -------
+    dict
+        A JSON-LD document with ``@context``, ``@id``, ``@type``, and
+        semantically typed properties using EMMO/schema.org IRIs.
+
+    Example::
+
+        import json
+        from battinfo.jsonld import record_to_jsonld
+
+        raw = json.loads(Path("cell-type-xyz.json").read_text())
+        ld  = record_to_jsonld(raw, "cell-spec")
+        print(json.dumps(ld, indent=2))
+    """
+    key = record_type.lower().replace(" ", "-")
+    fn  = _TRANSFORMERS.get(key)
+    if fn is None:
+        raise ValueError(
+            f"Unknown record_type {record_type!r}. "
+            f"Supported: {sorted({k.replace('_','-') for k in _TRANSFORMERS})}."
+        )
+    return fn(record)

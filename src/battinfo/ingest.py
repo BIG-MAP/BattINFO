@@ -11,7 +11,7 @@ from typing import Any
 
 from battinfo.api import submit_publication_package
 from battinfo.validate.schema import build_validator, schema_for_rel_path
-from battinfo.workspace import Workspace
+from battinfo._workspace import Workspace
 
 PathLike = str | Path
 

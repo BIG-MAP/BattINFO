@@ -12,7 +12,7 @@ from battinfo.api import (
     CellTypeInput,
     DatasetInput,
     TestInput,
-    TestProtocolInput,
+    TestSpecInput,
 )
 from battinfo.api import (
     build_cell_type_library_rdf as api_build_cell_type_library_rdf,
@@ -57,7 +57,7 @@ from battinfo.api import (
     query_library_cell_types as api_query_library_cell_types,
 )
 from battinfo.api import (
-    query_test_protocols as api_query_test_protocols,
+    query_test_specs as api_query_test_specs,
 )
 from battinfo.api import (
     query_tests as api_query_tests,
@@ -84,7 +84,7 @@ from battinfo.api import (
     save_test as api_save_test,
 )
 from battinfo.api import (
-    save_test_protocol as api_save_test_protocol,
+    save_test_spec as api_save_test_spec,
 )
 from battinfo.api import (
     template_cell_instance as api_template_cell_instance,
@@ -105,7 +105,7 @@ from battinfo.api import (
     template_test as api_template_test,
 )
 from battinfo.api import (
-    template_test_protocol as api_template_test_protocol,
+    template_test_spec as api_template_test_spec,
 )
 from battinfo.api import (
     validate_staging_cell_type as api_validate_staging_cell_type,
@@ -1078,7 +1078,7 @@ def template_dataset(
 
 
 @template_app.command("test-protocol")
-def template_test_protocol(
+def template_test_spec(
     name: str = typer.Option("Example Test Protocol", help="Human-readable protocol name."),
     kind: str = typer.Option("other", help="Test kind."),
     source_type: str = typer.Option("manual", help="Source type: manual|lab|simulation|other."),
@@ -1089,7 +1089,7 @@ def template_test_protocol(
     """Generate a starter template for a reusable test-protocol record."""
     fmt = _check_output_format(output_format)
     try:
-        record = api_template_test_protocol(
+        record = api_template_test_spec(
             name=name,
             kind=kind,  # type: ignore[arg-type]
             source_type=source_type,  # type: ignore[arg-type]
@@ -1104,7 +1104,7 @@ def template_test_protocol(
         payload = {
             "status": "template",
             "resource": "test-protocol",
-            "id": record["test_protocol"]["id"],
+            "id": record["test_spec"]["id"],
             "path": str(out),
         }
         if fmt == "json":
@@ -1119,7 +1119,7 @@ def template_test_protocol(
     payload = {
         "status": "template",
         "resource": "test-protocol",
-        "id": record["test_protocol"]["id"],
+        "id": record["test_spec"]["id"],
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
@@ -1578,7 +1578,7 @@ def query_datasets(
 
 
 @query_app.command("test-protocol")
-def query_test_protocols(
+def query_test_specs(
     id: str | None = typer.Option(None, help="Filter by canonical test-protocol IRI."),
     kind: str | None = typer.Option(None, help="Filter by protocol kind."),
     name_contains: str | None = typer.Option(None, help="Case-insensitive substring filter on protocol name."),
@@ -1589,7 +1589,7 @@ def query_test_protocols(
 ) -> None:
     """Query canonical test protocols."""
     fmt = _check_output_format(output_format)
-    rows = api_query_test_protocols(
+    rows = api_query_test_specs(
         id=id,
         kind=kind,
         name_contains=name_contains,
@@ -2027,7 +2027,7 @@ def save_dataset(
 
 
 @save_app.command("test-protocol")
-def save_test_protocol(
+def save_test_spec(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
@@ -2058,11 +2058,11 @@ def save_test_protocol(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: TestProtocolInput | dict[str, Any] | Path = input_path
+            draft_obj: TestSpecInput | dict[str, Any] | Path = input_path
         else:
             if not name:
                 raise ValueError("--name is required when --input is not provided.")
-            draft_obj = TestProtocolInput(
+            draft_obj = TestSpecInput(
                 uid=uid,
                 name=name,
                 kind=kind,  # type: ignore[arg-type]
@@ -2071,7 +2071,7 @@ def save_test_protocol(
                 protocol_url=protocol_url,
                 source_type=source_type,  # type: ignore[arg-type]
             )
-        payload = api_save_test_protocol(
+        payload = api_save_test_spec(
             draft_obj,
             source_root=source_root,
             mode=reg_mode,

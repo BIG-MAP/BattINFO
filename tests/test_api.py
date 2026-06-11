@@ -29,7 +29,7 @@ from battinfo.api import (
     query_cell_types,
     query_datasets,
     query_library_cell_types,
-    query_test_protocols,
+    query_test_specs,
     query_tests,
     resolve_cell_type_id,
     save_batch,
@@ -39,15 +39,15 @@ from battinfo.api import (
     save_library_cell_type,
     save_record,
     save_test,
-    save_test_protocol,
+    save_test_spec,
     template_cell_instance,
     template_cell_specification,
     template_cell_type,
     template_cell_type_draft,
     template_dataset,
     template_test,
-    template_test_protocol,
-    template_test_protocol_draft,
+    template_test_spec,
+    template_test_spec_draft,
     validate_staging_cell_type,
 )
 from battinfo.validate import validate_references_report
@@ -76,9 +76,9 @@ def test_query_tests_by_new_alpha_kind() -> None:
 
 
 def test_query_test_protocols_by_kind() -> None:
-    rows = query_test_protocols(kind="cycle_life", limit=10)
+    rows = query_test_specs(kind="cycling", limit=10)
     assert rows
-    assert all(row["kind"] == "cycle_life" for row in rows)
+    assert all(row["kind"] == "cycling" for row in rows)
 
 
 def test_query_dispatches_by_explicit_kind() -> None:
@@ -99,7 +99,7 @@ def test_query_dispatches_by_explicit_kind() -> None:
     cell_rows = query("cells", has_dataset=True, limit=10)
     assert cell_rows
 
-    protocol_rows = query("test_protocols", kind="cycle_life", limit=10)
+    protocol_rows = query("test_specs", kind="cycling", limit=10)
     assert protocol_rows
 
 
@@ -116,8 +116,8 @@ def test_template_test_accepts_new_alpha_kinds() -> None:
 
 def test_template_test_protocol_accepts_new_alpha_kinds() -> None:
     for kind in ("hppc", "ici", "gitt", "dcir", "eis", "formation", "rate_capability"):
-        record = template_test_protocol(kind=kind)
-        assert record["test_protocol"]["kind"] == kind
+        record = template_test_spec(kind=kind)
+        assert record["test_spec"]["kind"] == kind
 
 
 def test_shipped_example_chain_is_consistent() -> None:
@@ -233,17 +233,17 @@ def test_template_cell_type_draft_omits_canonical_fields() -> None:
 
 
 def test_template_test_protocol_draft_omits_canonical_fields() -> None:
-    draft = template_test_protocol_draft(
+    draft = template_test_spec_draft(
         name="1C Cycle Life at 25 C",
-        kind="cycle_life",
+        kind="cycling",
         version="1.0",
         protocol_url="https://example.org/protocols/cycle-life-1c",
     )
 
     assert draft["name"] == "1C Cycle Life at 25 C"
-    assert draft["kind"] == "cycle_life"
+    assert draft["kind"] == "cycling"
     assert draft["version"] == "1.0"
-    assert "test_protocol" not in draft
+    assert "test_spec" not in draft
     assert "provenance" not in draft
 
 
@@ -620,11 +620,11 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
         source_root=tmp_path,
         mode="upsert",
     )
-    protocol = save_test_protocol(
+    protocol = save_test_spec(
         TestProtocolInput(
             uid="8r2m4v6k9p3t7n5x",
             name="1C Cycle Life at 25 C",
-            kind="cycle_life",
+            kind="cycling",
             version="1.0",
             protocol_url="https://example.org/protocols/cycle-life-1c",
         ),
@@ -636,7 +636,7 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell["id"],
             name="A123 cycle life run",
-            kind="cycle_life",
+            kind="cycling",
             protocol_id=protocol["id"],
         ),
         source_root=tmp_path,
@@ -646,7 +646,7 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
     assert protocol["entity_type"] == "test-protocol"
     assert test["entity_type"] == "test"
 
-    protocol_rows = query_test_protocols(directory=tmp_path / "test-protocol")
+    protocol_rows = query_test_specs(directory=tmp_path / "test-protocol")
     assert len(protocol_rows) == 1
     assert protocol_rows[0]["id"] == protocol["id"]
 
@@ -856,7 +856,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell_instance_payload["id"],
             name="Duracell MN1500 baseline cycling",
-            kind="cycle_life",
+            kind="cycling",
             source_type="measurement",
         ),
         source_root=source_root,
@@ -994,7 +994,7 @@ def test_save_record_strict_policy_rejects_semantic_issue(tmp_path: Path) -> Non
                     "identifier": "test:5p7v-2n8k-4m3t-6q9r",
                     "cell_id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
                     "name": "Semantic failure",
-                    "kind": "cycle_life",
+                    "kind": "cycling",
                 },
                 "provenance": {
                     "source_type": "measurement",
@@ -1072,7 +1072,7 @@ def test_save_batch_summary_and_partial(tmp_path: Path) -> None:
     test_record = template_test(
         cell_id=cell_instance_record["cell_instance"]["id"],
         name="MN1500 baseline cycling",
-        kind="cycle_life",
+        kind="cycling",
         source_type="measurement",
         uid="5p7v2n8k4m3t6q9r",
     )
@@ -1190,7 +1190,7 @@ def test_template_builders_are_saveable(tmp_path: Path) -> None:
     test_record = template_test(
         cell_id=cell_instance_record["cell_instance"]["id"],
         name="MN1500 baseline cycling",
-        kind="cycle_life",
+        kind="cycling",
         source_type="measurement",
         uid="5p7v2n8k4m3t6q9r",
     )

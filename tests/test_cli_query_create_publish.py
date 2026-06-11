@@ -66,7 +66,7 @@ def test_query_test_protocols_json() -> None:
             "query",
             "test-protocol",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--limit",
             "5",
             "--format",
@@ -77,7 +77,7 @@ def test_query_test_protocols_json() -> None:
     payload = json.loads(result.stdout)
     assert payload["resource"] == "test-protocol"
     assert payload["count"] >= 1
-    assert all(item["kind"] == "cycle_life" for item in payload["items"])
+    assert all(item["kind"] == "cycling" for item in payload["items"])
 
 
 def test_query_tests_by_cell_and_dataset_json() -> None:
@@ -363,15 +363,15 @@ def test_template_test_protocol_json() -> None:
             "--name",
             "1C Cycle Life at 25 C",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--format",
             "json",
         ],
     )
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)
-    assert payload["test_protocol"]["name"] == "1C Cycle Life at 25 C"
-    assert payload["test_protocol"]["kind"] == "cycle_life"
+    assert payload["test_spec"]["name"] == "1C Cycle Life at 25 C"
+    assert payload["test_spec"]["kind"] == "cycling"
 
 
 def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
@@ -441,7 +441,7 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
             "--name",
             "1C Cycle Life at 25 C",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--uid",
             "8r2m4v6k9p3t7n5x",
             "--source-root",
@@ -465,7 +465,7 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
             "--name",
             "A123 cycle life run",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--protocol-id",
             protocol_payload["id"],
             "--source-root",
@@ -860,7 +860,7 @@ def test_save_cli_flow_json(tmp_path: Path) -> None:
             "--name",
             "MN1500 CLI baseline cycling",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--source-type",
             "measurement",
             "--uid",
@@ -973,7 +973,7 @@ def test_save_batch_cli_json(tmp_path: Path) -> None:
             "--name",
             "MN1500 Batch baseline cycling",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--source-type",
             "measurement",
             "--uid",
@@ -1160,7 +1160,7 @@ def test_template_cli_then_save_record(tmp_path: Path) -> None:
             "--name",
             "MN1500 Template baseline cycling",
             "--kind",
-            "cycle_life",
+            "cycling",
             "--uid",
             "5p7v2n8k4m3t6q9r",
             "--out",

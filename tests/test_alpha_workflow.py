@@ -54,7 +54,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell_instance["id"],
             name="MN1500 alpha baseline cycling",
-            kind="cycle_life",
+            kind="cycling",
             source_type="measurement",
         ),
         source_root=source_root,

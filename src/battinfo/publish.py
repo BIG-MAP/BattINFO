@@ -12,7 +12,7 @@ from battinfo.api import build_curated_cell_type_submission, submit_publication_
 from battinfo.bundle import CellType
 from battinfo.config import resolve_destination_config
 from battinfo.publication import publish as _legacy_publish
-from battinfo.workspace import Workspace
+from battinfo._workspace import Workspace
 
 PathLike = str | Path
 

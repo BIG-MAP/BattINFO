@@ -91,7 +91,7 @@ def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
         chemistry="Li-ion",
     )
     cell = Cell(cell_type, serial_number="alpha-001")
-    test = Test(cell, test_type=BatteryTestType.CYCLE_LIFE)
+    test = Test(cell, test_type=BatteryTestType.CYCLING)
     dataset = Dataset(
         id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
         name="Tabular dataset",
@@ -142,6 +142,6 @@ def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
         }
     ]
     assert enriched.test is not None
-    assert enriched.test.test_type == BatteryTestType.CYCLE_LIFE
+    assert enriched.test.test_type == BatteryTestType.CYCLING
     assert enriched.test.cell is not None
     assert enriched.test.cell.serial_number == "alpha-001"

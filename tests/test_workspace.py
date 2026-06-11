@@ -228,9 +228,9 @@ def test_workspace_saves_and_queries_test_protocols(tmp_path: Path) -> None:
         source_file="A123__ANR26650M1-B.pdf",
     )
     cell = workspace.cell(cell_type, serial_number="LAB-001")
-    protocol = workspace.test_protocol(
+    protocol = workspace.test_spec(
         name="1C Cycle Life at 25 C",
-        kind="cycle_life",
+        kind="cycling",
         version="1.0",
         protocol_url="https://example.org/protocols/cycle-life-1c",
         conditions={"ambient_temperature": quantity(25.0, "degC")},
@@ -244,14 +244,68 @@ def test_workspace_saves_and_queries_test_protocols(tmp_path: Path) -> None:
     )
 
     records = workspace.render()
-    assert records["test_protocols"][0]["test_protocol"]["kind"] == "cycle_life"
-    assert records["tests"][0]["test"]["protocol_id"] == records["test_protocols"][0]["test_protocol"]["id"]
+    assert records["test_specs"][0]["test_spec"]["kind"] == "cycling"
+    assert records["tests"][0]["test"]["protocol_id"] == records["test_specs"][0]["test_spec"]["id"]
 
     result = workspace.save(validation_policy="strict")
-    assert result["index"]["test_protocol_count"] == 1
-    assert workspace.query_test_protocols(kind="cycle_life")[0]["id"] == protocol.id
-    assert workspace.query_tests(kind="cycle_life")[0]["protocol_id"] == protocol.id
+    assert result["index"]["test_spec_count"] == 1
+    assert workspace.query_test_specs(kind="cycling")[0]["id"] == protocol.id
+    assert workspace.query_tests(kind="cycling")[0]["protocol_id"] == protocol.id
     assert test.protocol_id == protocol.id
+
+
+def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
+    from battinfo.bundle import Deviation, TestConformance
+
+    workspace = Workspace(root=tmp_path / "workspace")
+    cell_type = workspace.cell_type(manufacturer="ACME", model="X1", format="cylindrical", chemistry="Li-ion")
+    cell = workspace.cell(cell_type, serial_number="SN-001")
+    spec = workspace.test_spec(name="C/5 capacity check", kind="capacity_check")
+
+    conformance = TestConformance(
+        status="partial",
+        note="Power outage at step 3; 4 min gap before restart.",
+        deviations=[
+            Deviation(
+                type="power_outage",
+                description="Mains cut for ~4 min at C/5 discharge",
+                occurred_at=1780640000,
+                duration_s=240,
+                step_index=3,
+                impact="minor",
+            )
+        ],
+    )
+    test = workspace.test(cell, protocol_ref=spec, status="completed", conformance=conformance)
+
+    # in-memory round-trip via to_record / from_record
+    result = workspace.save(validation_policy="strict")
+    saved_test_records = workspace.query_tests()
+    assert len(saved_test_records) == 1
+    saved = saved_test_records[0]
+
+    assert saved["conformance"]["status"] == "partial"
+    assert saved["conformance"]["note"] == "Power outage at step 3; 4 min gap before restart."
+    assert len(saved["conformance"]["deviations"]) == 1
+    dev = saved["conformance"]["deviations"][0]
+    assert dev["type"] == "power_outage"
+    assert dev["duration_s"] == 240
+    assert dev["step_index"] == 3
+    assert dev["impact"] == "minor"
+
+    # model round-trip
+    from battinfo.bundle import Test
+    from pathlib import Path as _Path
+    test_dir = tmp_path / "workspace" / "examples" / "test"
+    test_files = list(test_dir.glob("*.json"))
+    assert len(test_files) == 1
+    import json
+    reloaded = Test.from_record(json.loads(test_files[0].read_text()))
+    assert reloaded.conformance is not None
+    assert reloaded.conformance.status == "partial"
+    assert len(reloaded.conformance.deviations) == 1
+    assert reloaded.conformance.deviations[0].type == "power_outage"
+    assert reloaded.conformance.deviations[0].duration_s == 240
 
 
 def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> None:
@@ -415,7 +469,7 @@ def test_workspace_add_supports_object_style_authoring_and_dataset_infers_cell_f
     cell.source.type = "lab"
 
     test = Test(cell)
-    test.test_type = BatteryTestType.CYCLE_LIFE
+    test.test_type = BatteryTestType.CYCLING
     test.protocol_name = "1C charge / 1C discharge"
     test.instrument_name = "Biologic VSP-300"
     test.status = "completed"
@@ -460,7 +514,7 @@ def test_workspace_add_dataset_pulls_in_linked_dependencies(tmp_path: Path) -> N
     )
     test = Test(
         cell,
-        test_type=BatteryTestType.CYCLE_LIFE,
+        test_type=BatteryTestType.CYCLING,
         protocol={"name": "1C charge / 1C discharge"},
         status="completed",
     )
@@ -579,7 +633,7 @@ def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_pa
     cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
     test = workspace.test(
         cell,
-        kind="cycle_life",
+        kind="cycling",
         protocol="1C charge / 1C discharge",
         instrument="Biologic VSP-300",
         status="completed",
@@ -622,7 +676,7 @@ def test_workspace_build_publication_package_can_emit_dcat_export(tmp_path: Path
     cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
     test = workspace.test(
         cell,
-        kind="cycle_life",
+        kind="cycling",
         protocol="1C charge / 1C discharge",
         instrument="Biologic VSP-300",
         status="completed",
@@ -665,7 +719,7 @@ def test_workspace_build_release_exports_registry_ready_local_workspace(tmp_path
     cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
     test = workspace.test(
         cell,
-        kind="cycle_life",
+        kind="cycling",
         protocol="1C charge / 1C discharge",
         instrument="Biologic VSP-300",
         status="completed",
@@ -725,7 +779,7 @@ def test_battery_cell_design_and_battery_cell_aliases_work_for_object_authoring(
     cell.serial_number = "alias-001"
 
     test = Test(cell)
-    test.test_type = BatteryTestType.CYCLE_LIFE
+    test.test_type = BatteryTestType.CYCLING
 
     dataset = Dataset(dataset_file, test=test)
     dataset.name = "Alias dataset"

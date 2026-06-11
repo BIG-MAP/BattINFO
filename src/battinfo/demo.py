@@ -9,7 +9,7 @@ from urllib.request import Request as UrlRequest
 from urllib.request import urlopen
 
 from battinfo.api import submit_publication_package
-from battinfo.workspace import Workspace, quantity
+from battinfo._workspace import Workspace, quantity
 
 DEFAULT_DEMO_ROOT = Path(".battinfo/demo-e2e")
 DEFAULT_DEMO_REGISTRY = "digibatt/hello-world"
@@ -54,7 +54,7 @@ def setup_demo_environment(
     cell = workspace.cell(cell_type, serial_number="demo-hello-world-001", batch_id="A123-DEMO-01", source_type="lab")
     test = workspace.test(
         cell,
-        kind="cycle_life",
+        kind="cycling",
         protocol="1C charge / 1C discharge",
         instrument="Biologic VSP-300",
         status="completed",

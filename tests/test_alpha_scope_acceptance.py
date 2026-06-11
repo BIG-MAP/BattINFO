@@ -56,7 +56,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     assert dataset_payload["status"] == "created"
 
     test_dir = ROOT / "examples" / "test"
-    expected_kinds = {"cycle_life", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
+    expected_kinds = {"cycling", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
 
     for path in sorted(test_dir.glob("*.json")):
         payload = save_test(
