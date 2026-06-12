@@ -122,7 +122,7 @@ from battinfo.runtime import recover_notebook_runtime
 from battinfo.storage import build_uploader_from_env
 from battinfo.validate import get_validation_policy
 from battinfo.validate.pydantic import validate_json
-from battinfo.validate.record import validate_record
+from battinfo.validate.record import validate_record, validate_record_report
 from battinfo.workflows.map import run_mapping
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -345,10 +345,32 @@ def _render_validation_issue(issue: Any) -> str:
     return f"[{issue.code}] {location}{issue.message}"
 
 
+def _safe_echo(text: str) -> None:
+    """typer.echo with a fallback for terminals that cannot encode all Unicode characters."""
+    import sys  # noqa: PLC0415
+    try:
+        typer.echo(text)
+    except UnicodeEncodeError:
+        enc = (getattr(sys.stdout, "encoding", None) or "ascii")
+        safe = text.encode(enc, errors="replace").decode(enc, errors="replace")
+        sys.stdout.write(safe + "\n")
+        sys.stdout.flush()
+
+
+_RECORD_TYPE_KEYS = frozenset(
+    {"product", "cell_type", "cell_instance", "test_spec", "test", "dataset"}
+)
+
+
+def _is_full_record(data: dict) -> bool:
+    """Return True if *data* looks like a full BattINFO record (not a raw JSON Schema target)."""
+    return bool(_RECORD_TYPE_KEYS & data.keys())
+
+
 @app.command()
 def validate(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    profile: str = typer.Option("cell-type", help="Validation profile name."),
+    profile: str = typer.Option("cell-type", help="JSON Schema profile (used only for raw JSON, not full records)."),
     policy: str = typer.Option("default", help="Validation policy: default|strict|publisher|ingest."),
     output_format: str = typer.Option("text", "--format", help="Output format: text|json."),
     source_root: Path | None = typer.Option(
@@ -358,16 +380,28 @@ def validate(
         file_okay=False,
         dir_okay=True,
         readable=True,
-        help="Optional canonical source root for full record validation.",
+        help="Canonical source root for cross-reference validation.",
     ),
+    shacl: bool = typer.Option(True, "--shacl/--no-shacl", help="Run SHACL shapes validation (cell-type records only)."),
 ) -> None:
-    """Validate a JSON document against the canonical schema/profile."""
+    """Validate a BattINFO record (JSON Schema + semantic + SHACL) or a raw JSON profile document."""
     data = json.loads(input_path.read_text(encoding="utf-8"))
     policy_name = _check_validation_policy(policy)
     fmt = _check_validation_output_format(output_format)
-    if source_root is not None:
-        result = validate_record(data, source_root=source_root, policy=policy_name)
+
+    if _is_full_record(data) or source_root is not None:
+        # Full record validation: JSON Schema + semantic + SHACL + (optional) references.
+        report = validate_record_report(data, source_root=source_root, policy=policy_name)
+        if not shacl:
+            # Strip any SHACL issues if disabled.
+            from battinfo.validate.core import ValidationReport  # noqa: PLC0415
+            report = ValidationReport(
+                issues=tuple(i for i in report.issues if i.validator != "shacl"),
+                policy=report.policy,
+            )
+        result = report.to_result()
     else:
+        # Raw JSON Schema profile validation only (no semantic / SHACL).
         result = validate_json(data, profile=profile, policy=policy_name)
 
     if fmt == "json":
@@ -378,17 +412,17 @@ def validate(
     if result.ok:
         typer.echo("Validation passed with warnings." if warnings else "Validation passed.")
         for issue in warnings:
-            typer.echo(f"- {_render_validation_issue(issue)}")
+            _safe_echo(f"- {_render_validation_issue(issue)}")
         raise typer.Exit(code=0)
 
     typer.echo("Validation failed.")
     for issue in result.issues:
         if issue.severity == "error":
-            typer.echo(f"- {_render_validation_issue(issue)}")
+            _safe_echo(f"- {_render_validation_issue(issue)}")
     if warnings:
         typer.echo("Warnings:")
         for issue in warnings:
-            typer.echo(f"- {_render_validation_issue(issue)}")
+            _safe_echo(f"- {_render_validation_issue(issue)}")
     raise typer.Exit(code=1)
 
 

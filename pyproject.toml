@@ -48,6 +48,7 @@ dev = [
   "datamodel-code-generator>=0.25",
   "linkml>=1.8",
   "nbformat>=5.9",
+  "pyshacl>=0.25",
   "ruff>=0.6",
   "pytest>=8.0"
 ]

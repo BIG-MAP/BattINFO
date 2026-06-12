@@ -15,6 +15,7 @@ from battinfo.validate.core import (
 from battinfo.validate.references import validate_references_report
 from battinfo.validate.schema import schema_for_rel_path, validate_schema_data
 from battinfo.validate.semantic import validate_semantic_report
+from battinfo.validate.shacl import validate_shacl_report
 
 
 def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
@@ -74,6 +75,7 @@ def validate_record_report(
 
     if resolved_policy.semantic != "off":
         reports.append(validate_semantic_report(normalized_doc, policy=resolved_policy))
+        reports.append(validate_shacl_report(normalized_doc, policy=resolved_policy))
 
     return combine_reports(*reports, policy=resolved_policy)
 

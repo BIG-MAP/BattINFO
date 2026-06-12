@@ -132,6 +132,16 @@ from battinfo.publish import PublishResult, publish
 from battinfo.runtime import recover_notebook_runtime
 from battinfo._workspace import Workspace, q, quantity
 from battinfo.jsonld import record_to_jsonld
+from battinfo.validate import (
+    ValidationIssue,
+    ValidationPolicy,
+    ValidationReport,
+    ValidationResult,
+    validate_record,
+    validate_record_report,
+    validate_shacl,
+    validate_shacl_report,
+)
 from battinfo.zenodo import ZenodoClient, ZenodoError, patch_zenodo_urls, upload_zenodo_package
 
 BatteryCellType = CellType
@@ -274,6 +284,14 @@ __all__ = [
     "import_dataset_record",
     "quantity",
     "q",
+    "ValidationIssue",
+    "ValidationPolicy",
+    "ValidationReport",
+    "ValidationResult",
+    "validate_record",
+    "validate_record_report",
+    "validate_shacl",
+    "validate_shacl_report",
 ]
 
 __version__ = "0.1.0"

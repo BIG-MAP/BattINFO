@@ -86,6 +86,47 @@ PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
     ("min_capacity", "nominal_capacity"),
 )
 
+# Plausibility bounds: (min_inclusive, max_inclusive) per (spec_name, normalised_unit).
+# These are loose sanity checks — clearly-impossible values only — not chemistry-specific.
+# All comparisons use the numeric value as-is in the stated unit (no conversion).
+SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
+    # Voltages — catches decimal-shift errors (e.g. 35 V instead of 3.5 V)
+    "nominal_voltage":              {"v": (0.3, 5.5), "mv": (300.0, 5500.0)},
+    "charging_voltage":             {"v": (0.3, 6.0), "mv": (300.0, 6000.0)},
+    "discharging_cutoff_voltage":   {"v": (0.0, 5.0), "mv": (0.0, 5000.0)},
+    "charging_cutoff_voltage":      {"v": (1.0, 6.0)},
+    "upper_voltage_limit":          {"v": (1.0, 6.0)},
+    # Capacity — catches Ah/mAh confusion and orders-of-magnitude typos
+    "nominal_capacity":             {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
+    "minimum_capacity":             {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
+    "min_capacity":                 {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
+    "rated_capacity":               {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
+    "typical_capacity":             {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
+    # Energy
+    "nominal_energy":               {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "typical_energy":               {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "rated_energy":                 {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "certified_usable_energy":      {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    # Specific energy / energy density — bounded by known cell chemistry physics
+    "specific_energy":              {"wh/kg": (1.0, 1000.0), "mah/g": (1.0, 500.0)},
+    "energy_density":               {"wh/l": (1.0, 2500.0)},
+    # Physical dimensions — single-cell bounds
+    "mass":                         {"g": (0.05, 15_000.0), "kg": (5e-5, 15.0)},
+    "diameter":                     {"mm": (0.5, 500.0)},
+    "height":                       {"mm": (0.3, 2000.0)},
+    "width":                        {"mm": (0.3, 2000.0)},
+    "length":                       {"mm": (0.3, 2000.0)},
+    "thickness":                    {"mm": (0.05, 200.0)},
+    # Cycle life — catches 10x typos (100000 cycles instead of 10000)
+    "cycle_life":                   {"count": (1, 100_000), "cycle": (1, 100_000), "cycles": (1, 100_000)},
+    # Efficiency / fade — must be a percentage
+    "round_trip_energy_efficiency":      {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "round_trip_energy_efficiency_50pct": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "capacity_fade":                     {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "capacity_threshold_exhaustion":     {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "initial_coulombic_efficiency":      {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+}
+
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
 CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/spec/"  # cell specs use the spec/ namespace
 
@@ -304,6 +345,40 @@ def _validate_size_code(
         )
 
 
+def _validate_spec_plausibility(
+    spec_name: str,
+    spec_value: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    unit_raw = _unit_token(spec_value)
+    if unit_raw is None:
+        return
+    unit_norm = _normalized_unit(unit_raw)
+    bounds = SPEC_PLAUSIBILITY_BOUNDS.get(spec_name, {}).get(unit_norm)
+    if bounds is None:
+        return
+    lo, hi = bounds
+    # Check every numeric value in the spec against the bounds.
+    for value_key in ("value", "typical_value", "min_value", "max_value"):
+        raw = spec_value.get(value_key)
+        if not isinstance(raw, (int, float)):
+            continue
+        v = float(raw)
+        if v < lo or v > hi:
+            _append_issue(
+                issues,
+                code="semantic.value_out_of_plausible_range",
+                severity="warning",
+                path=f"specs.{spec_name}.{value_key}",
+                message=(
+                    f"value {v} {unit_raw} for '{spec_name}' is outside the plausible range "
+                    f"[{lo}, {hi}] {unit_raw}. Verify units and magnitude."
+                ),
+                resource_type=resource_type,
+            )
+
+
 def _validate_specs(
     specs: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -326,6 +401,8 @@ def _validate_specs(
                     message=f"unit '{unit}' is not compatible with spec '{spec_name}' (valid: {valid}).",
                     resource_type=resource_type,
                 )
+
+        _validate_spec_plausibility(spec_name, spec_value, issues, resource_type)
 
         min_value = spec_value.get("min_value")
         max_value = spec_value.get("max_value")

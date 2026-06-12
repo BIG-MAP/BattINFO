@@ -17,6 +17,7 @@ from battinfo.validate.pydantic import validate_json, validate_json_report
 from battinfo.validate.record import validate_record, validate_record_report
 from battinfo.validate.references import validate_references, validate_references_report
 from battinfo.validate.semantic import validate_semantic, validate_semantic_report
+from battinfo.validate.shacl import validate_shacl, validate_shacl_report
 
 __all__ = [
     "DEFAULT_POLICY",
@@ -42,4 +43,6 @@ __all__ = [
     "validate_references_report",
     "validate_semantic",
     "validate_semantic_report",
+    "validate_shacl",
+    "validate_shacl_report",
 ]
