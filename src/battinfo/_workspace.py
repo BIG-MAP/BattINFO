@@ -984,6 +984,163 @@ class Workspace:
         self.datasets.append(dataset)
         return dataset
 
+    def from_battdat(
+        self,
+        cell: CellInstance,
+        path: PathLike,
+        *,
+        kind: str | None = None,
+        name: str | None = None,
+        instrument: str | None = None,
+        license: str | None = None,
+        access_url: str | None = None,
+        source_type: str = "measurement",
+        source_file: str | None = None,
+        source_url: str | None = None,
+        comment: list[str] | None = None,
+    ) -> Test:
+        """Create a Test (+ linked Dataset) from a BDF-normalised CSV file.
+
+        Reads *path* with the ``batterydf`` library, infers the test kind from
+        BDF column names, extracts start/end timestamps from the
+        ``unix_time_second`` column, and delegates to
+        :meth:`record_test`.  The Test and Dataset are appended to this
+        workspace automatically.
+
+        Parameters
+        ----------
+        cell:
+            The physical cell instance the test was run on.
+        path:
+            Path to a BDF-normalised CSV file.
+        kind:
+            Test kind.  Inferred from column names when omitted.
+        name:
+            Human-readable test name.  Defaults to ``"<cell_name> <kind> test"``.
+        instrument:
+            Cycler instrument make/model.
+        license:
+            Dataset license URI.
+        access_url:
+            URL where the dataset is accessible.  Defaults to ``file://...`` URI.
+        source_type:
+            Provenance source type (default ``"measurement"``).
+        source_file:
+            Provenance source filename.  Defaults to the CSV file name.
+        source_url:
+            Provenance source URL.
+        comment:
+            Free-text comments attached to the test record.
+        """
+        from battinfo.interop.battdat import from_battdat as _from_battdat  # noqa: PLC0415
+
+        cell_id_str = cell.id or f"urn:staging:{getattr(cell, 'serial_number', 'cell')}"
+        result = _from_battdat(
+            path,
+            cell_id=cell_id_str,
+            kind=kind,
+            name=name,
+            instrument=instrument,
+            license=license,
+            access_url=access_url,
+            source_type=source_type,
+            source_file=source_file,
+            source_url=source_url,
+        )
+        resolved_kind = result.inferred_kind or kind or "other"
+        test_inner = result.test_record.get("test", {})
+        resolved_name = test_inner.get("name", name)
+        resolved_source_file = source_file or Path(path).name
+
+        # Use ws.test() directly so we can pass started_at / ended_at
+        test = self.test(
+            cell,
+            kind=resolved_kind,
+            name=resolved_name,
+            instrument=instrument or test_inner.get("instrument_name"),
+            status="completed",
+            started_at=test_inner.get("started_at"),
+            ended_at=test_inner.get("ended_at"),
+            source_type=source_type,
+            source_file=resolved_source_file,
+            source_url=source_url,
+            comment=list(comment or result.warnings or []),
+        )
+        self.dataset(
+            cell,
+            title=f"{resolved_name} data",
+            test=test,
+            path=path,
+            access_url=access_url,
+            license=license,
+            source_type=source_type,
+            source_url=source_url,
+        )
+        return test
+
+    def from_bpx(
+        self,
+        path: PathLike,
+        *,
+        manufacturer: str,
+        model: str | None = None,
+        format: str = "unknown",
+        chemistry: str | None = None,
+        source_type: str = "simulation",
+        source_file: str | None = None,
+        comment: list[str] | None = None,
+    ) -> CellType:
+        """Create a CellType from a BPX battery parameter file.
+
+        Reads *path* and maps the BPX ``Parameterisation.Cell`` parameters
+        that have direct BattINFO spec equivalents (capacity, voltage limits,
+        mass, dimensions) to a BattINFO CellType.  Physics parameters are
+        silently skipped.
+
+        Parameters
+        ----------
+        path:
+            Path to a BPX JSON file.
+        manufacturer:
+            Manufacturer name (required — BPX does not carry manufacturer info).
+        model:
+            Model identifier.  Falls back to ``Header.Title`` from the BPX file.
+        format:
+            Cell format (``"cylindrical"``, ``"pouch"``, etc.).
+        chemistry:
+            Chemistry string (e.g. ``"Li-ion"``).
+        source_type:
+            Provenance source type (default ``"simulation"``).
+        source_file:
+            Provenance source filename.  Defaults to the BPX file name.
+        comment:
+            Free-text comments.  BPX import warnings are appended automatically.
+        """
+        from battinfo.interop.bpx import from_bpx as _from_bpx  # noqa: PLC0415
+
+        result = _from_bpx(path)
+        resolved_model = model or result.title or Path(path).stem
+        resolved_source_file = source_file or Path(path).name
+        bpx_comments = list(comment or [])
+        if result.warnings:
+            bpx_comments.extend(result.warnings)
+        if result.bpx_version is not None:
+            bpx_comments.append(f"BPX version: {result.bpx_version}")
+        if result.model_type is not None:
+            bpx_comments.append(f"Physics model: {result.model_type}")
+
+        cell_type = self.cell_type(
+            manufacturer=manufacturer,
+            model=resolved_model,
+            format=format,
+            chemistry=chemistry or "unknown",
+            source_type=source_type,
+            source_file=resolved_source_file,
+            comment=bpx_comments if bpx_comments else None,
+            specs=result.specs,
+        )
+        return cell_type
+
     def publish(
         self,
         dataset: Dataset,
