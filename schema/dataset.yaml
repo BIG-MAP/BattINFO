@@ -1,0 +1,307 @@
+id: https://w3id.org/battinfo/schema/dataset
+name: battinfo-dataset
+description: >-
+  Schema for Dataset (battery test data collection) records.
+  Aligned with schema.org/Dataset and DCAT-AP 3.0 to support FAIR data
+  publication via Zenodo, Figshare, and institutional repositories.
+
+prefixes:
+  linkml:   https://w3id.org/linkml/
+  battinfo: https://w3id.org/battinfo/
+  spdx:     http://spdx.org/rdf/terms#
+
+default_prefix: battinfo
+default_range: string
+
+imports:
+  - types
+
+classes:
+
+  Dataset:
+    class_uri: dcat:Dataset
+    description: >-
+      A battery test dataset: a collection of time-series data files and
+      metadata describing their content, provenance, and access conditions.
+    slots:
+      - ds_id
+      - ds_name
+      - ds_description
+      - ds_access_url
+      - ds_same_as
+      - ds_about
+      - ds_license
+      - ds_version
+      - ds_keywords
+      - ds_creators
+      - ds_publisher
+      - ds_funders
+      - ds_created_at
+      - ds_modified_at
+      - ds_published_at
+      - ds_distributions
+      - ds_is_accessible_for_free
+      - ds_conditions_of_access
+      - ds_in_language
+
+  DataDistribution:
+    class_uri: dcat:Distribution
+    description: A specific downloadable file distribution of the dataset.
+    slots:
+      - dd_content_url
+      - dd_encoding_format
+      - dd_byte_size
+      - dd_checksum
+      - dd_name
+      - dd_description
+
+  Checksum:
+    class_uri: spdx:Checksum
+    description: File integrity checksum.
+    slots:
+      - cs_algorithm
+      - cs_value
+
+  PersonOrOrganization:
+    description: A person or organisation acting as creator, publisher, or funder.
+    slots:
+      - poo_name
+      - poo_orcid
+      - poo_ror
+      - poo_type
+
+slots:
+
+  ds_id:
+    slot_uri: schema:url
+    identifier: true
+    required: true
+    range: uri
+    description: Canonical IRI for this dataset (typically a DOI URL or registry IRI).
+    aliases:
+      - id
+
+  ds_name:
+    slot_uri: dcterms:title
+    required: true
+    range: string
+    description: Human-readable dataset title.
+    aliases:
+      - name
+
+  ds_description:
+    slot_uri: dcterms:description
+    range: string
+    description: Free-text description of the dataset contents.
+    aliases:
+      - description
+
+  ds_access_url:
+    slot_uri: dcat:accessURL
+    required: true
+    range: uri
+    description: Landing page or direct download URL for the dataset.
+    aliases:
+      - access_url
+
+  ds_same_as:
+    slot_uri: schema:sameAs
+    range: uri
+    multivalued: true
+    description: Equivalent persistent identifiers (DOI URL, Zenodo record URL, etc.).
+    aliases:
+      - same_as
+
+  ds_about:
+    slot_uri: dcterms:subject
+    range: uri
+    multivalued: true
+    description: IRIs of the cell types, cells, or tests this dataset is about.
+    aliases:
+      - about
+
+  ds_license:
+    slot_uri: dcterms:license
+    range: uri
+    description: SPDX licence URI (e.g. https://spdx.org/licenses/CC-BY-4.0.html).
+    aliases:
+      - license
+
+  ds_version:
+    slot_uri: schema:version
+    range: string
+    description: Dataset version string.
+    aliases:
+      - version
+
+  ds_keywords:
+    slot_uri: schema:keywords
+    range: string
+    multivalued: true
+    description: Subject keywords.
+    aliases:
+      - keywords
+
+  ds_creators:
+    slot_uri: dcterms:creator
+    range: PersonOrOrganization
+    multivalued: true
+    required: true
+    description: People and organisations who created the dataset.
+    aliases:
+      - creators
+
+  ds_publisher:
+    slot_uri: dcterms:publisher
+    range: PersonOrOrganization
+    description: Organisation responsible for publishing the dataset.
+    aliases:
+      - publisher
+
+  ds_funders:
+    slot_uri: schema:funder
+    range: PersonOrOrganization
+    multivalued: true
+    description: Funding organisations.
+    aliases:
+      - funders
+
+  ds_created_at:
+    slot_uri: dcterms:created
+    range: UnixTimestamp
+    description: Dataset creation timestamp (UNIX epoch).
+    aliases:
+      - created_at
+
+  ds_modified_at:
+    slot_uri: dcterms:modified
+    range: UnixTimestamp
+    description: Last modification timestamp (UNIX epoch).
+    aliases:
+      - modified_at
+
+  ds_published_at:
+    slot_uri: schema:datePublished
+    range: UnixTimestamp
+    description: Publication date timestamp (UNIX epoch).
+    aliases:
+      - published_at
+
+  ds_distributions:
+    slot_uri: dcat:distribution
+    range: DataDistribution
+    multivalued: true
+    required: true
+    description: File distributions available for download.
+    aliases:
+      - distributions
+
+  ds_is_accessible_for_free:
+    slot_uri: schema:isAccessibleForFree
+    range: boolean
+    description: True if the dataset is publicly accessible at no cost.
+    aliases:
+      - is_accessible_for_free
+
+  ds_conditions_of_access:
+    slot_uri: dcterms:accessRights
+    range: string
+    description: Human-readable description of access conditions.
+    aliases:
+      - conditions_of_access
+
+  ds_in_language:
+    slot_uri: dcterms:language
+    range: string
+    description: BCP 47 language tag (e.g. "en").
+    aliases:
+      - in_language
+
+  # DataDistribution slots
+  dd_content_url:
+    slot_uri: dcat:downloadURL
+    range: uri
+    description: Direct download URL for this distribution file.
+    aliases:
+      - content_url
+
+  dd_encoding_format:
+    slot_uri: dcat:mediaType
+    range: string
+    description: IANA media type (e.g. "application/parquet", "text/csv").
+    aliases:
+      - encoding_format
+
+  dd_byte_size:
+    slot_uri: dcat:byteSize
+    range: integer
+    description: File size in bytes.
+    aliases:
+      - byte_size
+
+  dd_checksum:
+    slot_uri: spdx:checksum
+    range: Checksum
+    description: File integrity checksum.
+    aliases:
+      - checksum
+
+  dd_name:
+    slot_uri: schema:name
+    range: string
+    description: Filename within the distribution.
+    aliases:
+      - name
+
+  dd_description:
+    slot_uri: schema:description
+    range: string
+    description: Free-text description of this distribution.
+    aliases:
+      - description
+
+  # Checksum slots
+  cs_algorithm:
+    slot_uri: spdx:checksumAlgorithm
+    range: string
+    description: Hash algorithm identifier (e.g. "sha256", "md5").
+    aliases:
+      - algorithm
+
+  cs_value:
+    slot_uri: spdx:checksumValue
+    range: string
+    description: Hex-encoded hash value.
+    aliases:
+      - value
+
+  # PersonOrOrganization slots
+  poo_name:
+    slot_uri: schema:name
+    required: true
+    range: string
+    description: Full name.
+    aliases:
+      - name
+
+  poo_orcid:
+    slot_uri: schema:identifier
+    range: uri
+    description: ORCID URI (https://orcid.org/...).
+    aliases:
+      - orcid
+
+  poo_ror:
+    slot_uri: schema:identifier
+    range: uri
+    description: ROR URI (https://ror.org/...).
+    aliases:
+      - ror
+
+  poo_type:
+    slot_uri: schema:additionalType
+    range: string
+    description: >-
+      Type hint: "Person" or "Organization" (schema.org class name).
+    aliases:
+      - type

@@ -1,0 +1,201 @@
+id: https://w3id.org/battinfo/schema/test
+name: battinfo-test
+description: >-
+  Schema for Test (battery test execution) records.
+  A Test is a prov:Activity that was performed on a specific cell instance
+  following a test specification (TestSpec).
+
+prefixes:
+  linkml:   https://w3id.org/linkml/
+  battinfo: https://w3id.org/battinfo/
+  battery:  https://w3id.org/emmo/domain/battery#
+
+default_prefix: battinfo
+default_range: string
+
+imports:
+  - types
+
+classes:
+
+  Test:
+    class_uri: battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081
+    description: >-
+      A battery test execution (prov:Activity).  Links to the cell instance
+      tested (hasTestObject) and to the test specification used (prov:used).
+    slots:
+      - t_id
+      - t_name
+      - t_kind
+      - t_cell_id
+      - t_protocol_id
+      - t_description
+      - t_status
+      - t_protocol
+      - t_instrument
+      - t_started_at
+      - t_ended_at
+      - t_dataset_ids
+      - t_conformance
+
+  TestConformance:
+    class_uri: battinfo:TestConformance
+    description: >-
+      Records how closely this test execution conformed to its specification.
+    slots:
+      - tc_status
+      - tc_note
+      - tc_deviations
+
+  Deviation:
+    class_uri: battinfo:Deviation
+    description: A single deviation from the test specification.
+    slots:
+      - dev_step
+      - dev_description
+      - dev_impact
+
+slots:
+
+  t_id:
+    slot_uri: schema:productID
+    identifier: true
+    range: uri
+    description: Canonical IRI for this test execution.
+    aliases:
+      - id
+
+  t_name:
+    slot_uri: schema:name
+    required: true
+    range: string
+    description: Human-readable label for this test execution.
+    aliases:
+      - name
+
+  t_kind:
+    slot_uri: battinfo:testKind
+    required: true
+    range: BatteryTestType
+    description: Test type from the BatteryTestType controlled vocabulary.
+    aliases:
+      - kind
+      - test_type
+
+  t_cell_id:
+    slot_uri: battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b
+    required: true
+    range: CellIri
+    description: IRI of the cell instance that was tested (hasTestObject).
+    aliases:
+      - cell_id
+
+  t_protocol_id:
+    slot_uri: prov:used
+    range: SpecIri
+    description: IRI of the TestSpec (plan) used for this execution.
+    aliases:
+      - protocol_id
+
+  t_description:
+    slot_uri: schema:description
+    range: string
+    description: Free-text description of this specific test run.
+    aliases:
+      - description
+
+  t_status:
+    slot_uri: battinfo:testStatus
+    range: string
+    description: Execution status (planned, running, completed, aborted, other).
+    aliases:
+      - status
+
+  t_protocol:
+    slot_uri: battinfo:protocolReference
+    range: ProtocolInfo
+    description: Reference protocol used (may differ from the linked TestSpec).
+    aliases:
+      - protocol
+
+  t_instrument:
+    slot_uri: battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c
+    range: string
+    description: Name or model of the test instrument/cycler (hasTestEquipment).
+    aliases:
+      - instrument
+
+  t_started_at:
+    slot_uri: prov:startedAtTime
+    range: UnixTimestamp
+    description: Test start timestamp (UNIX epoch).
+    aliases:
+      - started_at
+
+  t_ended_at:
+    slot_uri: prov:endedAtTime
+    range: UnixTimestamp
+    description: Test end timestamp (UNIX epoch).
+    aliases:
+      - ended_at
+
+  t_dataset_ids:
+    slot_uri: battinfo:hasDataset
+    range: uri
+    multivalued: true
+    description: IRIs of dataset records produced by this test.
+    aliases:
+      - dataset_ids
+
+  t_conformance:
+    slot_uri: battinfo:testConformance
+    range: TestConformance
+    description: Conformance assessment for this test execution.
+    aliases:
+      - conformance
+
+  # TestConformance slots
+  tc_status:
+    slot_uri: battinfo:conformanceStatus
+    required: true
+    range: ConformanceStatus
+    description: Conformance status from the ConformanceStatus vocabulary.
+    aliases:
+      - status
+
+  tc_note:
+    slot_uri: schema:description
+    range: string
+    description: Free-text note explaining the conformance assessment.
+    aliases:
+      - note
+
+  tc_deviations:
+    slot_uri: battinfo:deviation
+    range: Deviation
+    multivalued: true
+    description: Individual deviations from the specification.
+    aliases:
+      - deviations
+
+  # Deviation slots
+  dev_step:
+    slot_uri: battinfo:deviationStep
+    range: string
+    description: The protocol step where the deviation occurred.
+    aliases:
+      - step
+
+  dev_description:
+    slot_uri: schema:description
+    range: string
+    description: Description of what deviated from the specification.
+    aliases:
+      - description
+
+  dev_impact:
+    slot_uri: battinfo:deviationImpact
+    range: string
+    description: Assessed impact of this deviation on data quality.
+    aliases:
+      - impact

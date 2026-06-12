@@ -1,0 +1,697 @@
+id: https://w3id.org/battinfo/schema/cell-type
+name: battinfo-cell-type
+description: >-
+  Schema for CellType (product specification) records.  Covers product identity
+  fields, regulatory metadata, and the full SpecSet of quantitative properties.
+  Property IRIs are taken from the domain-battery and domain-electrochemistry
+  EMMO modules (pinned to battery 0.19.0 / electrochemistry 0.34.0).
+
+prefixes:
+  linkml:           https://w3id.org/linkml/
+  battinfo:         https://w3id.org/battinfo/
+  battery:          https://w3id.org/emmo/domain/battery#
+  electrochemistry: https://w3id.org/emmo/domain/electrochemistry#
+  emmo:             https://w3id.org/emmo#
+
+default_prefix: battinfo
+default_range: string
+
+imports:
+  - types
+
+classes:
+
+  CellType:
+    class_uri: battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0
+    description: >-
+      A battery cell product specification: manufacturer, model, format,
+      chemistry, and quantitative performance properties.
+    slots:
+      - id
+      - ct_name
+      - ct_model
+      - ct_manufacturer
+      - ct_cell_format
+      - ct_chemistry
+      - ct_positive_electrode_basis
+      - ct_negative_electrode_basis
+      - ct_size_code
+      - ct_iec_code
+      - ct_product_type
+      - ct_rechargeable
+      - ct_year
+      - ct_country_of_origin
+      - ct_battery_category
+      - ct_specs
+
+  Organization:
+    description: A manufacturer, brand, or research organisation.
+    slots:
+      - org_id
+      - org_name
+
+  SpecSet:
+    description: >-
+      Harmonised set of quantitative battery cell properties.
+      Each field is a SpecValue (value + unit), identified by its EMMO IRI.
+
+    # ── Capacity ──────────────────────────────────────────────────────────────
+    slots:
+      - nominal_capacity
+      - minimum_capacity
+      - rated_capacity
+      - typical_capacity
+
+    # ── Voltage ───────────────────────────────────────────────────────────────
+      - nominal_voltage
+      - charging_voltage
+      - discharging_cutoff_voltage
+      - charging_cutoff_voltage
+      - upper_voltage_limit
+
+    # ── Current ───────────────────────────────────────────────────────────────
+      - maximum_continuous_charging_current
+      - nominal_continuous_charging_current
+      - maximum_pulse_charging_current
+      - maximum_continuous_discharging_current
+      - nominal_continuous_discharging_current
+      - maximum_pulse_discharging_current
+
+    # ── Energy ────────────────────────────────────────────────────────────────
+      - nominal_energy
+      - typical_energy
+      - rated_energy
+      - certified_usable_energy
+
+    # ── Power ─────────────────────────────────────────────────────────────────
+      - power_capability
+      - maximum_power
+
+    # ── Energy / power density ────────────────────────────────────────────────
+      - specific_energy
+      - energy_density
+      - specific_power
+      - power_density
+      - power_energy_ratio
+
+    # ── Resistance / Impedance ────────────────────────────────────────────────
+      - internal_resistance
+      - dc_internal_resistance
+      - ac_internal_resistance
+      - impedance
+
+    # ── Efficiency ────────────────────────────────────────────────────────────
+      - round_trip_energy_efficiency
+      - round_trip_energy_efficiency_50pct
+      - initial_coulombic_efficiency
+
+    # ── Dimensions ────────────────────────────────────────────────────────────
+      - mass
+      - diameter
+      - height
+      - width
+      - length
+      - thickness
+      - volume
+
+    # ── Temperature ───────────────────────────────────────────────────────────
+      - maximum_charging_temperature
+      - minimum_charging_temperature
+      - maximum_discharging_temperature
+      - minimum_discharging_temperature
+      - maximum_storage_temperature
+      - minimum_storage_temperature
+      - operating_temperature_min
+      - operating_temperature_max
+
+    # ── Lifetime / degradation ────────────────────────────────────────────────
+      - cycle_life
+      - cycle_life_c_rate
+      - calendar_life
+      - capacity_fade
+      - capacity_threshold_exhaustion
+
+    # ── Charging / self-discharge ─────────────────────────────────────────────
+      - charging_time
+      - self_discharge_rate
+
+    # ── Health ────────────────────────────────────────────────────────────────
+      - state_of_health
+
+slots:
+
+  # ── CellType identity slots ───────────────────────────────────────────────
+
+  id:
+    slot_uri: schema:productID
+    identifier: true
+    required: true
+    range: SpecIri
+    description: Canonical IRI for this cell-type record.
+
+  ct_name:
+    slot_uri: schema:name
+    range: string
+    description: Full display name of the product (manufacturer + model).
+    aliases:
+      - name
+
+  ct_model:
+    slot_uri: schema:model
+    required: true
+    range: string
+    description: Manufacturer's product model number or name.
+    aliases:
+      - model
+
+  ct_manufacturer:
+    slot_uri: schema:manufacturer
+    required: true
+    range: Organization
+    description: The company that manufactured this cell.
+    aliases:
+      - manufacturer
+
+  ct_cell_format:
+    slot_uri: battinfo:cellFormat
+    required: true
+    range: CellFormat
+    description: Physical format (geometry) of the cell housing.
+    aliases:
+      - cell_format
+      - format
+
+  ct_chemistry:
+    slot_uri: battinfo:chemistry
+    required: true
+    range: string
+    description: >-
+      Cell chemistry identifier (e.g. "li-ion", "li-primary", "na-ion",
+      "alkaline", "zinc-carbon", "li-mno2").
+    aliases:
+      - chemistry
+
+  ct_positive_electrode_basis:
+    slot_uri: battinfo:positiveElectrodeBasis
+    range: string
+    description: >-
+      Cathode active material basis (e.g. "nmc", "lfp", "nca", "lco", "mno2").
+    aliases:
+      - positive_electrode_basis
+
+  ct_negative_electrode_basis:
+    slot_uri: battinfo:negativeElectrodeBasis
+    range: string
+    description: >-
+      Anode active material basis (e.g. "graphite", "silicon-graphite",
+      "hard-carbon", "lithium").
+    aliases:
+      - negative_electrode_basis
+
+  ct_size_code:
+    slot_uri: battinfo:sizeCode
+    range: string
+    description: Standardised size code (e.g. "18650", "21700", "AA", "AAA").
+    aliases:
+      - size_code
+
+  ct_iec_code:
+    slot_uri: schema:productID
+    range: string
+    description: IEC 60086 or IEC 61960 code string (e.g. "LR6", "ICR18650").
+    aliases:
+      - iec_code
+
+  ct_product_type:
+    slot_uri: battinfo:productType
+    range: CellProductType
+    description: Product maturity level.
+    aliases:
+      - product_type
+
+  ct_rechargeable:
+    slot_uri: battinfo:rechargeable
+    range: boolean
+    description: True for secondary (rechargeable) cells; false for primary.
+    aliases:
+      - rechargeable
+
+  ct_year:
+    slot_uri: schema:datePublished
+    range: integer
+    description: Model release or market introduction year.
+    aliases:
+      - year
+
+  ct_country_of_origin:
+    slot_uri: battinfo:countryOfOrigin
+    range: string
+    description: ISO 3166-1 alpha-2 country code of manufacturing origin.
+    aliases:
+      - country_of_origin
+
+  ct_battery_category:
+    slot_uri: battinfo:batteryCategory
+    range: BatteryCategoryEU
+    description: >-
+      EU Battery Regulation 2023/1542 battery category
+      (LMT, EV, Industrial, Stationary, Portable, SLI).
+    aliases:
+      - battery_category
+
+  ct_specs:
+    slot_uri: battinfo:specs
+    range: SpecSet
+    description: Quantitative performance specification for this cell type.
+    aliases:
+      - specs
+
+  org_id:
+    slot_uri: schema:url
+    range: uri
+    description: IRI / URL identifying the organisation.
+    aliases:
+      - id
+
+  org_name:
+    slot_uri: schema:name
+    required: true
+    range: string
+    description: Display name of the organisation.
+    aliases:
+      - name
+
+  # ── SpecSet property slots ────────────────────────────────────────────────
+  # Each slot_uri maps to an EMMO IRI from domain-electrochemistry or domain-emmo.
+  # The alias list carries the BPX-style human-readable name with unit in brackets.
+
+  # Capacity
+  nominal_capacity:
+    slot_uri: electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+    range: SpecValue
+    description: Nominal (rated) discharge capacity at standard conditions.
+    aliases:
+      - "Nominal capacity [Ah]"
+      - "Rated capacity [Ah]"
+
+  minimum_capacity:
+    slot_uri: electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+    range: SpecValue
+    description: Minimum guaranteed capacity.
+    aliases:
+      - "Minimum capacity [Ah]"
+
+  rated_capacity:
+    slot_uri: electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+    range: SpecValue
+    description: Capacity rated by the manufacturer (may differ from typical).
+    aliases:
+      - "Rated capacity [Ah]"
+
+  typical_capacity:
+    slot_uri: electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+    range: SpecValue
+    description: Typical capacity as manufactured.
+    aliases:
+      - "Typical capacity [Ah]"
+
+  # Voltage
+  nominal_voltage:
+    slot_uri: electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6
+    range: SpecValue
+    description: Nominal operating voltage.
+    aliases:
+      - "Nominal voltage [V]"
+
+  charging_voltage:
+    slot_uri: electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87
+    range: SpecValue
+    description: Maximum (end-of-charge) voltage.
+    aliases:
+      - "Charging voltage [V]"
+      - "Upper voltage limit [V]"
+
+  discharging_cutoff_voltage:
+    slot_uri: electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9
+    range: SpecValue
+    description: Minimum (discharge cutoff) voltage.
+    aliases:
+      - "Discharging cutoff voltage [V]"
+      - "Lower voltage limit [V]"
+
+  charging_cutoff_voltage:
+    slot_uri: electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88
+    range: SpecValue
+    description: "Charge cutoff voltage (alias: upper voltage limit)."
+    aliases:
+      - "Charging cutoff voltage [V]"
+
+  upper_voltage_limit:
+    slot_uri: electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88
+    range: SpecValue
+    description: Upper voltage safety limit (synonym for charging cutoff voltage).
+    aliases:
+      - "Upper voltage limit [V]"
+
+  # Current
+  maximum_continuous_charging_current:
+    slot_uri: electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78
+    range: SpecValue
+    description: Maximum continuous charge current allowed.
+    aliases:
+      - "Maximum continuous charging current [A]"
+
+  nominal_continuous_charging_current:
+    slot_uri: electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78
+    range: SpecValue
+    description: Nominal continuous charge current (standard rate).
+    aliases:
+      - "Nominal continuous charging current [A]"
+
+  maximum_pulse_charging_current:
+    slot_uri: electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78
+    range: SpecValue
+    description: Peak pulse charge current.
+    aliases:
+      - "Maximum pulse charging current [A]"
+
+  maximum_continuous_discharging_current:
+    slot_uri: electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5
+    range: SpecValue
+    description: Maximum continuous discharge current allowed.
+    aliases:
+      - "Maximum continuous discharging current [A]"
+
+  nominal_continuous_discharging_current:
+    slot_uri: electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5
+    range: SpecValue
+    description: Nominal continuous discharge current.
+    aliases:
+      - "Nominal continuous discharging current [A]"
+
+  maximum_pulse_discharging_current:
+    slot_uri: electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5
+    range: SpecValue
+    description: Peak pulse discharge current.
+    aliases:
+      - "Maximum pulse discharging current [A]"
+
+  # Energy
+  nominal_energy:
+    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    range: SpecValue
+    description: Nominal stored energy.
+    aliases:
+      - "Nominal energy [Wh]"
+
+  typical_energy:
+    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    range: SpecValue
+    description: Typical stored energy as manufactured.
+    aliases:
+      - "Typical energy [Wh]"
+
+  rated_energy:
+    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    range: SpecValue
+    description: Manufacturer-rated energy content.
+    aliases:
+      - "Rated energy [Wh]"
+
+  certified_usable_energy:
+    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    range: SpecValue
+    description: Certified usable energy per EU Battery Regulation 2023/1542.
+    aliases:
+      - "Certified usable energy [Wh]"
+
+  # Power
+  power_capability:
+    slot_uri: battinfo:powerCapability
+    range: SpecValue
+    description: Continuous power output capability.
+    aliases:
+      - "Power capability [W]"
+
+  maximum_power:
+    slot_uri: battinfo:maximumPower
+    range: SpecValue
+    description: Peak (pulse) power output.
+    aliases:
+      - "Maximum power [W]"
+
+  # Energy/power density
+  specific_energy:
+    slot_uri: emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9
+    range: SpecValue
+    description: Gravimetric energy density (energy per unit mass).
+    aliases:
+      - "Specific energy [Wh/kg]"
+      - "Gravimetric energy density [Wh/kg]"
+
+  energy_density:
+    slot_uri: electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b
+    range: SpecValue
+    description: Volumetric energy density (energy per unit volume).
+    aliases:
+      - "Energy density [Wh/L]"
+      - "Volumetric energy density [Wh/L]"
+
+  specific_power:
+    slot_uri: battinfo:specificPower
+    range: SpecValue
+    description: Gravimetric power density.
+    aliases:
+      - "Specific power [W/kg]"
+
+  power_density:
+    slot_uri: battinfo:powerDensity
+    range: SpecValue
+    description: Volumetric power density.
+    aliases:
+      - "Power density [W/L]"
+
+  power_energy_ratio:
+    slot_uri: battinfo:powerEnergyRatio
+    range: SpecValue
+    description: Ratio of rated power to rated energy.
+    aliases:
+      - "Power-to-energy ratio [W/Wh]"
+
+  # Resistance / Impedance
+  internal_resistance:
+    slot_uri: electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+    range: SpecValue
+    description: General internal resistance.
+    aliases:
+      - "Internal resistance [mOhm]"
+
+  dc_internal_resistance:
+    slot_uri: electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+    range: SpecValue
+    description: DC internal resistance measured by current-interrupt method.
+    aliases:
+      - "DC internal resistance [mOhm]"
+
+  ac_internal_resistance:
+    slot_uri: electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+    range: SpecValue
+    description: AC impedance magnitude at 1 kHz.
+    aliases:
+      - "AC internal resistance [mOhm]"
+
+  impedance:
+    slot_uri: electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+    range: SpecValue
+    description: Complex impedance magnitude (general).
+    aliases:
+      - "Impedance [mOhm]"
+
+  # Efficiency
+  round_trip_energy_efficiency:
+    slot_uri: battinfo:roundTripEnergyEfficiency
+    range: SpecValue
+    description: Ratio of discharge energy to charge energy (full charge-discharge cycle).
+    aliases:
+      - "Round-trip energy efficiency [1]"
+
+  round_trip_energy_efficiency_50pct:
+    slot_uri: battinfo:roundTripEnergyEfficiency50Pct
+    range: SpecValue
+    description: Round-trip efficiency measured at 50% state of charge.
+    aliases:
+      - "Round-trip energy efficiency at 50% SOC [1]"
+
+  initial_coulombic_efficiency:
+    slot_uri: battinfo:initialCoulombicEfficiency
+    range: SpecValue
+    description: Coulombic efficiency on the first formation cycle.
+    aliases:
+      - "Initial coulombic efficiency [1]"
+
+  # Dimensions
+  mass:
+    slot_uri: emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+    range: SpecValue
+    description: Mass of the cell (including packaging).
+    aliases:
+      - "Mass [g]"
+
+  diameter:
+    slot_uri: emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
+    range: SpecValue
+    description: Outer diameter (cylindrical or coin cells).
+    aliases:
+      - "Diameter [mm]"
+
+  height:
+    slot_uri: emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
+    range: SpecValue
+    description: "Height of the cell (cylindrical: total length; prismatic: z-dimension)."
+    aliases:
+      - "Height [mm]"
+
+  width:
+    slot_uri: emmo:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0
+    range: SpecValue
+    description: Width of the cell (prismatic / pouch cells).
+    aliases:
+      - "Width [mm]"
+
+  length:
+    slot_uri: emmo:EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac
+    range: SpecValue
+    description: Length of the cell (prismatic / pouch cells).
+    aliases:
+      - "Length [mm]"
+
+  thickness:
+    slot_uri: emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656
+    range: SpecValue
+    description: Thickness (pouch / coin cells).
+    aliases:
+      - "Thickness [mm]"
+
+  volume:
+    slot_uri: battinfo:volume
+    range: SpecValue
+    description: External volume of the cell.
+    aliases:
+      - "Volume [mL]"
+
+  # Temperature
+  maximum_charging_temperature:
+    slot_uri: electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260
+    range: SpecValue
+    description: Maximum allowed cell temperature during charging.
+    aliases:
+      - "Maximum charging temperature [degC]"
+
+  minimum_charging_temperature:
+    slot_uri: electrochemistry:electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49
+    range: SpecValue
+    description: Minimum allowed cell temperature during charging.
+    aliases:
+      - "Minimum charging temperature [degC]"
+
+  maximum_discharging_temperature:
+    slot_uri: electrochemistry:electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d
+    range: SpecValue
+    description: Maximum allowed cell temperature during discharging.
+    aliases:
+      - "Maximum discharging temperature [degC]"
+
+  minimum_discharging_temperature:
+    slot_uri: electrochemistry:electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b
+    range: SpecValue
+    description: Minimum allowed cell temperature during discharging.
+    aliases:
+      - "Minimum discharging temperature [degC]"
+
+  maximum_storage_temperature:
+    slot_uri: electrochemistry:electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7
+    range: SpecValue
+    description: Maximum recommended storage temperature.
+    aliases:
+      - "Maximum storage temperature [degC]"
+
+  minimum_storage_temperature:
+    slot_uri: electrochemistry:electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302
+    range: SpecValue
+    description: Minimum recommended storage temperature.
+    aliases:
+      - "Minimum storage temperature [degC]"
+
+  operating_temperature_min:
+    slot_uri: battinfo:operatingTemperatureMin
+    range: SpecValue
+    description: Overall minimum operating temperature (discharge + charge).
+    aliases:
+      - "Minimum operating temperature [degC]"
+
+  operating_temperature_max:
+    slot_uri: battinfo:operatingTemperatureMax
+    range: SpecValue
+    description: Overall maximum operating temperature (discharge + charge).
+    aliases:
+      - "Maximum operating temperature [degC]"
+
+  # Lifetime
+  cycle_life:
+    slot_uri: electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937
+    range: SpecValue
+    description: Number of cycles to rated end-of-life criterion.
+    aliases:
+      - "Cycle life [1]"
+      - "Cycle count"
+
+  cycle_life_c_rate:
+    slot_uri: battinfo:cycleLifeCRate
+    range: SpecValue
+    description: C-rate used in the cycle life test.
+    aliases:
+      - "Cycle life C-rate [1/h]"
+
+  calendar_life:
+    slot_uri: electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df
+    range: SpecValue
+    description: Calendar storage lifetime to end-of-life criterion.
+    aliases:
+      - "Calendar life [years]"
+
+  capacity_fade:
+    slot_uri: battinfo:capacityFade
+    range: SpecValue
+    description: Capacity fade rate per cycle or per year.
+    aliases:
+      - "Capacity fade [1/cycle]"
+
+  capacity_threshold_exhaustion:
+    slot_uri: battinfo:capacityThresholdExhaustion
+    range: SpecValue
+    description: Capacity threshold defining battery exhaustion per EU Battery Regulation.
+    aliases:
+      - "Capacity threshold for exhaustion [1]"
+
+  # Charging / self-discharge
+  charging_time:
+    slot_uri: battinfo:chargingTime
+    range: SpecValue
+    description: Time to charge from 0% to 100% SOC at standard rate.
+    aliases:
+      - "Charging time [min]"
+
+  self_discharge_rate:
+    slot_uri: battinfo:selfDischargeRate
+    range: SpecValue
+    description: Self-discharge rate (capacity loss per unit time in storage).
+    aliases:
+      - "Self-discharge rate [%/month]"
+
+  # Health
+  state_of_health:
+    slot_uri: battinfo:stateOfHealth
+    range: SpecValue
+    description: State of health (ratio of current to original capacity).
+    aliases:
+      - "State of health [1]"

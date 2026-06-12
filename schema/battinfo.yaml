@@ -1,0 +1,46 @@
+id: https://w3id.org/battinfo/schema/battinfo
+name: battinfo
+title: BattINFO Battery Data Schema
+description: >-
+  LinkML schema for the BattINFO battery data ecosystem.  This file is the
+  single source of truth for record types, property-to-IRI mappings, and the
+  JSON-LD context published at https://w3id.org/battinfo/context/records/v1.json.
+  Generated artefacts (JSON Schema, JSON-LD context, Pydantic models) are
+  produced by running `make gen-all` from the repo root.
+
+license: https://creativecommons.org/licenses/by/4.0/
+version: "0.1.0"
+
+# ── Namespace prefixes ────────────────────────────────────────────────────────
+# These are written verbatim into the generated JSON-LD @context so that
+# compact IRIs like "electrochemistry:electrochemistry_8ab..." resolve correctly.
+
+prefixes:
+  linkml:         https://w3id.org/linkml/
+  battinfo:       https://w3id.org/battinfo/
+  battery:        https://w3id.org/emmo/domain/battery#
+  electrochemistry: https://w3id.org/emmo/domain/electrochemistry#
+  emmo:           https://w3id.org/emmo#
+  schema:         http://schema.org/
+  dcterms:        http://purl.org/dc/terms/
+  prov:           http://www.w3.org/ns/prov#
+  dcat:           http://www.w3.org/ns/dcat#
+  dqv:            http://www.w3.org/ns/dqv#
+  oa:             http://www.w3.org/ns/oa#
+  qudt:           http://qudt.org/schema/qudt/
+  qudt-unit:      http://qudt.org/vocab/unit/
+  spdx:           http://spdx.org/rdf/terms#
+  rdfs:           http://www.w3.org/2000/01/rdf-schema#
+  xsd:            http://www.w3.org/2001/XMLSchema#
+
+default_prefix: battinfo
+default_range: string
+
+imports:
+  - linkml:types
+  - types
+  - cell-type
+  - cell-instance
+  - test-spec
+  - test
+  - dataset

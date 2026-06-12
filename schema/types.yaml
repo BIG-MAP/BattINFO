@@ -1,0 +1,258 @@
+id: https://w3id.org/battinfo/schema/types
+name: battinfo-types
+description: Shared types and enumerations used across BattINFO record schemas.
+
+prefixes:
+  linkml:   https://w3id.org/linkml/
+  battinfo: https://w3id.org/battinfo/
+
+default_prefix: battinfo
+default_range: string
+
+imports:
+  - linkml:types
+
+# ── Scalar types ──────────────────────────────────────────────────────────────
+
+types:
+  UnixTimestamp:
+    uri: xsd:integer
+    base: int
+    description: >-
+      UNIX epoch timestamp (seconds since 1970-01-01T00:00:00Z).
+      Accepted values: integer or ISO 8601 date string (validated by schema).
+
+  SpecIri:
+    uri: xsd:anyURI
+    base: str
+    description: IRI identifying a cell-type or test-protocol specification record.
+
+  CellIri:
+    uri: xsd:anyURI
+    base: str
+    description: IRI identifying a cell instance record.
+
+# ── Enumerations ──────────────────────────────────────────────────────────────
+
+enums:
+
+  BatteryTestType:
+    description: Controlled vocabulary for battery test types.
+    permissible_values:
+      cycling:             { description: "Repeated charge/discharge cycling." }
+      capacity_check:      { description: "Capacity measurement at defined C-rate." }
+      rate_capability:     { description: "Discharge at multiple C-rates." }
+      hppc:                { description: "Hybrid pulse power characterisation." }
+      ici:                 { description: "Intermittent current interruption." }
+      gitt:                { description: "Galvanostatic intermittent titration technique." }
+      dcir:                { description: "DC internal resistance measurement." }
+      eis:                 { description: "Electrochemical impedance spectroscopy." }
+      impedance:           { description: "Generic impedance measurement." }
+      calendar_ageing:     { description: "Storage / calendar ageing test." }
+      formation:           { description: "Formation / conditioning cycling." }
+      rpt:                 { description: "Reference performance test." }
+      quasi_ocv:           { description: "Quasi-OCV / low-rate discharge." }
+      field:               { description: "Field / in-vehicle / application test." }
+      duty_cycle:          { description: "Application duty-cycle test." }
+      wltp:                { description: "Worldwide harmonised light-duty test procedure." }
+      nedc:                { description: "New European Driving Cycle." }
+      sem:                 { description: "Scanning electron microscopy." }
+      characterization:    { description: "General characterisation (unspecified type)." }
+      other:               { description: "Test type not covered by enumerated values." }
+
+  CellFormat:
+    description: Physical format (geometry) of the battery cell.
+    permissible_values:
+      cylindrical:  {}
+      prismatic:    {}
+      pouch:        {}
+      coin:         {}
+      other:        {}
+      unknown:      {}
+
+  CellProductType:
+    description: Product maturity level of the cell.
+    permissible_values:
+      commercial:  { description: "Mass-produced commercial product." }
+      research:    { description: "Research / experimental cell." }
+      prototype:   { description: "Pre-production prototype." }
+
+  CellGrade:
+    description: >-
+      Battery grade / reuse status per EU Battery Regulation 2023/1542.
+    permissible_values:
+      original:           {}
+      repurposed:         {}
+      re-used:            {}
+      remanufactured:     {}
+      waste:              {}
+
+  BatteryStatus:
+    description: >-
+      Battery status per EU Battery Regulation 2023/1542, Article 14.
+    permissible_values:
+      original:    {}
+      repurposed:  {}
+      reused:      {}
+      remanufactured: {}
+      waste:       {}
+
+  BatteryCategoryEU:
+    description: Battery category per EU Battery Regulation 2023/1542.
+    permissible_values:
+      LMT:         { description: "Light means of transport." }
+      EV:          { description: "Electric vehicle (traction)." }
+      Industrial:  { description: "Industrial battery." }
+      Stationary:  { description: "Stationary energy storage." }
+      Portable:    { description: "Portable (general purpose)." }
+      SLI:         { description: "Starting, lighting, ignition." }
+
+  ConformanceStatus:
+    description: How closely a test execution conformed to its specification.
+    permissible_values:
+      conformant:
+        meaning: battinfo:ConformanceStatus/Conformant
+        description: "Fully conformed to the test specification."
+      partial:
+        meaning: battinfo:ConformanceStatus/PartialConformance
+        description: "Deviated in minor steps but produced usable data."
+      non-conformant:
+        meaning: battinfo:ConformanceStatus/NonConformant
+        description: "Deviated to such degree that results are unreliable."
+      unknown:
+        meaning: battinfo:ConformanceStatus/ConformanceUnknown
+        description: "Conformance status not known."
+
+  ProvenanceSourceType:
+    description: Origin type for provenance tracking.
+    permissible_values:
+      measurement:   {}
+      lab:           {}
+      simulation:    {}
+      catalog:       {}
+      external:      {}
+      manual:        {}
+      inferred:      {}
+      other:         {}
+
+# ── Reusable classes ──────────────────────────────────────────────────────────
+
+classes:
+
+  SpecValue:
+    description: >-
+      A scalar quantity with an optional measurement unit.  Used for all
+      quantitative battery properties in SpecSet.
+    slots:
+      - sv_value
+      - sv_unit
+      - sv_min_value
+      - sv_max_value
+      - sv_typical_value
+      - sv_value_text
+
+  Provenance:
+    description: Tracks the origin and curation history of a record.
+    slots:
+      - source_type
+      - source_url
+      - source_file
+      - citation
+      - citation_doi
+      - retrieved_at
+      - workflow_version
+      - curated_by
+
+  ProtocolInfo:
+    description: Human-readable name and optional URL of a test protocol standard.
+    slots:
+      - protocol_name
+      - protocol_url
+
+# ── Shared slots ──────────────────────────────────────────────────────────────
+
+slots:
+
+  # SpecValue component slots
+  sv_value:
+    domain: SpecValue
+    slot_uri: qudt:value
+    range: float
+    description: Nominal/measured value of the quantity.
+    aliases:
+      - value
+  sv_unit:
+    domain: SpecValue
+    slot_uri: qudt:unit
+    range: string
+    description: Unit symbol (e.g. "Ah", "V", "g").
+    aliases:
+      - unit
+  sv_min_value:
+    domain: SpecValue
+    range: float
+    description: Minimum acceptable value.
+    aliases:
+      - min_value
+  sv_max_value:
+    domain: SpecValue
+    range: float
+    description: Maximum acceptable value.
+    aliases:
+      - max_value
+  sv_typical_value:
+    domain: SpecValue
+    range: float
+    description: Typical/representative value.
+    aliases:
+      - typical_value
+  sv_value_text:
+    domain: SpecValue
+    range: string
+    description: Free-text value representation when numeric is unavailable.
+    aliases:
+      - value_text
+
+  # Provenance slots
+  source_type:
+    slot_uri: battinfo:sourceType
+    range: ProvenanceSourceType
+    description: Origin category of the record.
+  source_url:
+    slot_uri: battinfo:sourceURL
+    range: uri
+    description: URL of the original source document.
+  source_file:
+    slot_uri: battinfo:sourceFile
+    range: string
+    description: Filename of the source document.
+  citation:
+    slot_uri: dcterms:bibliographicCitation
+    range: uri
+    description: Citable reference URL.
+  citation_doi:
+    slot_uri: battinfo:citationDOI
+    range: string
+    description: DOI of the citable reference.
+  retrieved_at:
+    slot_uri: battinfo:retrievedAt
+    range: UnixTimestamp
+    description: Epoch timestamp when the record was retrieved/ingested.
+  workflow_version:
+    slot_uri: battinfo:workflowVersion
+    range: string
+    description: Version of the ingestion workflow that created this record.
+  curated_by:
+    slot_uri: dcterms:contributor
+    range: string
+    description: ORCID or name of the person who curated this record.
+
+  # ProtocolInfo slots
+  protocol_name:
+    slot_uri: schema:name
+    range: string
+    description: Human-readable name of the protocol standard.
+  protocol_url:
+    slot_uri: schema:url
+    range: uri
+    description: URL pointing to the protocol specification document.

@@ -1,0 +1,119 @@
+id: https://w3id.org/battinfo/schema/cell-instance
+name: battinfo-cell-instance
+description: Schema for CellInstance (physical battery cell) records.
+
+prefixes:
+  linkml:   https://w3id.org/linkml/
+  battinfo: https://w3id.org/battinfo/
+
+default_prefix: battinfo
+default_range: string
+
+imports:
+  - types
+  - cell-type
+
+classes:
+
+  CellInstance:
+    class_uri: battinfo:CellInstance
+    description: >-
+      A specific physical battery cell — one individual unit that can be tested.
+      Links to a CellType specification and carries its own serial/batch identity.
+    slots:
+      - ci_id
+      - ci_type_id
+      - ci_serial_number
+      - ci_batch_id
+      - ci_grade
+      - ci_manufactured_at
+      - ci_expires_at
+      - ci_service_start_date
+      - ci_battery_status
+      - ci_dataset_ids
+      - ci_measured
+
+slots:
+
+  ci_id:
+    slot_uri: schema:productID
+    identifier: true
+    required: true
+    range: CellIri
+    description: Canonical IRI for this cell instance.
+    aliases:
+      - id
+
+  ci_type_id:
+    slot_uri: battinfo:cellSpecification
+    required: true
+    range: SpecIri
+    description: IRI of the CellType specification this instance conforms to.
+    aliases:
+      - type_id
+
+  ci_serial_number:
+    slot_uri: schema:serialNumber
+    range: string
+    description: Manufacturer serial number (unique within the product model).
+    aliases:
+      - serial_number
+
+  ci_batch_id:
+    slot_uri: battinfo:batchId
+    range: string
+    description: Batch or lot identifier assigned during manufacturing.
+    aliases:
+      - batch_id
+
+  ci_grade:
+    slot_uri: battinfo:cellGrade
+    range: CellGrade
+    description: Cell grade / reuse status per EU Battery Regulation 2023/1542.
+    aliases:
+      - grade
+
+  ci_manufactured_at:
+    slot_uri: schema:productionDate
+    range: UnixTimestamp
+    description: Manufacturing date (UNIX epoch or ISO 8601).
+    aliases:
+      - manufactured_at
+
+  ci_expires_at:
+    slot_uri: battinfo:expiresAt
+    range: UnixTimestamp
+    description: Shelf life expiry date (UNIX epoch or ISO 8601).
+    aliases:
+      - expires_at
+
+  ci_service_start_date:
+    slot_uri: battinfo:serviceStartDate
+    range: string
+    description: ISO 8601 date when the cell was first placed in service.
+    aliases:
+      - service_start_date
+
+  ci_battery_status:
+    slot_uri: battinfo:batteryStatus
+    range: BatteryStatus
+    description: Battery status per EU Battery Regulation 2023/1542.
+    aliases:
+      - battery_status
+
+  ci_dataset_ids:
+    slot_uri: battinfo:hasDataset
+    range: uri
+    multivalued: true
+    description: IRIs of dataset records linked to this cell instance.
+    aliases:
+      - dataset_ids
+
+  ci_measured:
+    slot_uri: battinfo:measuredSpecs
+    range: SpecSet
+    description: >-
+      Measured properties for this individual cell (overrides CellType spec values
+      where more precise measurements are available).
+    aliases:
+      - measured
