@@ -360,6 +360,34 @@ class _AttributeMappingProxy:
         return dict(target)
 
 
+def _coerce_spec_value(value: Any) -> Any:
+    """Coerce a SpecValue object to the canonical {"value": ..., "unit": ...} dict.
+
+    Accepts the existing dict format unchanged; converts SpecValue objects from
+    bundle_generated so that notebook code can pass either form.
+    """
+    if value is None or isinstance(value, Mapping):
+        return value
+    try:
+        from battinfo.bundle_generated import SpecValue  # noqa: PLC0415
+        if isinstance(value, SpecValue):
+            out: dict[str, Any] = {}
+            if value.sv_value is not None:
+                out["value"] = value.sv_value
+            if value.sv_unit is not None:
+                out["unit"] = value.sv_unit
+            if value.sv_min_value is not None:
+                out["min_value"] = value.sv_min_value
+            if value.sv_max_value is not None:
+                out["max_value"] = value.sv_max_value
+            if value.sv_typical_value is not None:
+                out["typical_value"] = value.sv_typical_value
+            return out
+    except ImportError:
+        pass
+    return value
+
+
 def _mapping_property(name: str) -> property:
     def getter(self: Any) -> Any:
         return self.nominal_properties.get(name)
@@ -368,7 +396,7 @@ def _mapping_property(name: str) -> property:
         if value is None:
             self.nominal_properties.pop(name, None)
         else:
-            self.nominal_properties[name] = value
+            self.nominal_properties[name] = _coerce_spec_value(value)
 
     return property(getter, setter)
 
@@ -1154,7 +1182,7 @@ class CellType(BundleJsonModel):
             if field_name in data:
                 value = data.pop(field_name)
                 if value is not None:
-                    explicit_properties[field_name] = value
+                    explicit_properties[field_name] = _coerce_spec_value(value)
 
         data["nominal_properties"] = explicit_properties
         super().__init__(**data)

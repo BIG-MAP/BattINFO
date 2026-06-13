@@ -147,6 +147,13 @@ from battinfo.validate import (
     validate_shacl_report,
 )
 from battinfo.zenodo import ZenodoClient, ZenodoError, patch_zenodo_urls, upload_zenodo_package
+from battinfo.bundle_generated import SpecValue, SpecSet
+from battinfo.bundle_adapter import (
+    bundle_to_schema,
+    cell_type_to_schema,
+    specs_to_specset,
+    specset_to_specs,
+)
 
 BatteryCellType = CellType
 BatteryCell = CellInstance
@@ -300,6 +307,12 @@ __all__ = [
     "validate_record_report",
     "validate_shacl",
     "validate_shacl_report",
+    "SpecValue",
+    "SpecSet",
+    "bundle_to_schema",
+    "cell_type_to_schema",
+    "specs_to_specset",
+    "specset_to_specs",
 ]
 
 __version__ = "0.1.0"
