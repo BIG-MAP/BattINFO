@@ -515,26 +515,25 @@ def test_validate_can_run_canonical_record_validation_with_source_root() -> None
     assert "Validation passed." in result.stdout
 
 
-def test_validate_json_output_includes_warnings_on_success() -> None:
+def test_validate_json_output_includes_warnings_on_success(tmp_path: Path) -> None:
     runner = CliRunner()
-    with runner.isolated_filesystem():
-        warn_path = Path("warn-test.json")
-        source = json.loads(
-            (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-        )
-        source["test"]["short_id"] = "xxxxxx"
-        warn_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
-        result = runner.invoke(
-            app,
-            [
-                "validate",
-                str(warn_path),
-                "--source-root",
-                str(ROOT / "examples"),
-                "--format",
-                "json",
-            ],
-        )
+    warn_path = tmp_path / "warn-test.json"
+    source = json.loads(
+        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+    )
+    source["test"]["short_id"] = "xxxxxx"
+    warn_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
+    result = runner.invoke(
+        app,
+        [
+            "validate",
+            str(warn_path),
+            "--source-root",
+            str(ROOT / "examples"),
+            "--format",
+            "json",
+        ],
+    )
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
@@ -543,53 +542,51 @@ def test_validate_json_output_includes_warnings_on_success() -> None:
     assert any(issue["code"] == "semantic.short_id_mismatch" for issue in payload["issues"])
 
 
-def test_validate_strict_policy_fails_on_semantic_issue() -> None:
+def test_validate_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> None:
     runner = CliRunner()
-    with runner.isolated_filesystem():
-        bad_path = Path("bad-test.json")
-        source = json.loads(
-            (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-        )
-        source["test"]["short_id"] = "xxxxxx"
-        bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
-        result = runner.invoke(
-            app,
-            [
-                "validate",
-                str(bad_path),
-                "--source-root",
-                str(ROOT / "examples"),
-                "--policy",
-                "strict",
-            ],
-        )
+    bad_path = tmp_path / "bad-test.json"
+    source = json.loads(
+        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+    )
+    source["test"]["short_id"] = "xxxxxx"
+    bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
+    result = runner.invoke(
+        app,
+        [
+            "validate",
+            str(bad_path),
+            "--source-root",
+            str(ROOT / "examples"),
+            "--policy",
+            "strict",
+        ],
+    )
     assert result.exit_code == 1, result.stdout
     assert "Validation failed." in result.stdout
     assert "short_id" in result.stdout
 
 
-def test_validate_json_output_failure_has_structured_issue_metadata() -> None:
+def test_validate_json_output_failure_has_structured_issue_metadata(tmp_path: Path) -> None:
     runner = CliRunner()
-    with runner.isolated_filesystem():
-        bad_path = Path("bad-test.json")
-        source = json.loads(
-            (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-        )
-        source["test"]["short_id"] = "xxxxxx"
-        bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
-        result = runner.invoke(
-            app,
-            [
-                "validate",
-                str(bad_path),
-                "--source-root",
-                str(ROOT / "examples"),
-                "--policy",
-                "strict",
-                "--format",
-                "json",
-            ],
-        )
+    bad_path = tmp_path / "bad-test.json"
+    source = json.loads(
+        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
+    )
+    source["test"]["short_id"] = "xxxxxx"
+    bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
+    result = runner.invoke(
+        app,
+        [
+            "validate",
+            str(bad_path),
+            "--source-root",
+            str(ROOT / "examples"),
+            "--policy",
+            "strict",
+            "--format",
+            "json",
+        ],
+    )
     assert result.exit_code == 1, result.stdout
     payload = json.loads(result.stdout)
     assert payload["ok"] is False

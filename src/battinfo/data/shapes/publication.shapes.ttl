@@ -1,0 +1,83 @@
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix schema:  <https://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix dqv:     <http://www.w3.org/ns/dqv#> .
+@prefix earl:    <http://www.w3.org/ns/earl#> .
+@prefix spdx:    <http://spdx.org/rdf/terms#> .
+@prefix battery: <https://w3id.org/emmo/domain/battery#> .
+@prefix bsh:     <https://w3id.org/battinfo/shapes/publication#> .
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SHACL shapes for the PUBLISHED battinfo JSON-LD graph (battinfo.json /
+# battinfo.publish.jsonld), as assembled by AuthoringWorkspace._assemble_zenodo_jsonld.
+#
+# These constrain the gold-standard STRUCTURE — the catalog/dataset/test/provenance/
+# conformance topology — not individual quantity values (that is cell-type.shapes.ttl).
+# Target classes use the expanded IRIs the document's @context produces.
+# Violations are hard (sh:Violation) for invariants a consumer relies on; advisory
+# (sh:Warning) for FAIR-discoverability recommendations.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Catalog: the deposit-level dcat:Catalog ──────────────────────────────────
+bsh:CatalogShape a sh:NodeShape ;
+    sh:targetClass dcat:Catalog ;
+    sh:property [
+        sh:path schema:name ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:message "Catalog must carry a schema:name (human title)." ] ;
+    sh:property [
+        sh:path dcat:dataset ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:message "Catalog must reference at least one member dataset." ] ;
+    sh:property [
+        sh:path dcterms:license ; sh:minCount 1 ; sh:severity sh:Warning ;
+        sh:message "Catalog should declare a licence (FAIR Reusable)." ] ;
+    sh:property [
+        sh:path schema:creator ; sh:minCount 1 ; sh:severity sh:Warning ;
+        sh:message "Catalog should attribute a creator (FAIR Reusable)." ] .
+
+# ── Member dataset: one dcat:Dataset per test result ─────────────────────────
+bsh:MemberDatasetShape a sh:NodeShape ;
+    sh:targetClass dcat:Dataset ;
+    sh:property [
+        sh:path dcat:distribution ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:message "Member dataset must carry at least one dcat:distribution." ] ;
+    sh:property [
+        sh:path schema:distribution ; sh:minCount 1 ; sh:severity sh:Warning ;
+        sh:message "Member dataset should mirror a schema:DataDownload for schema.org consumers." ] .
+
+# ── Distribution: a downloadable file ────────────────────────────────────────
+bsh:DistributionShape a sh:NodeShape ;
+    sh:targetClass dcat:Distribution ;
+    sh:property [
+        sh:path dcat:downloadURL ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:message "Distribution must have a dcat:downloadURL." ] ;
+    sh:property [
+        sh:path dcat:mediaType ; sh:minCount 1 ; sh:severity sh:Warning ;
+        sh:message "Distribution should declare a media type." ] ;
+    sh:property [
+        sh:path spdx:checksum ; sh:minCount 1 ; sh:severity sh:Warning ;
+        sh:message "Distribution should carry a checksum for integrity." ] .
+
+# ── BatteryTest: PROV-complete test activity ─────────────────────────────────
+bsh:BatteryTestShape a sh:NodeShape ;
+    sh:targetClass battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081 ;
+    sh:property [
+        sh:path prov:used ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:message "BatteryTest must record prov:used (the cell, and the spec when followed)." ] ;
+    sh:property [
+        sh:path battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:message "BatteryTest must reference its test object (hasTestObject → cell)." ] ;
+    sh:property [
+        sh:path prov:generated ; sh:minCount 1 ; sh:severity sh:Warning ;
+        sh:message "BatteryTest should record prov:generated (output dataset) for PROV self-completeness." ] .
+
+# ── Conformance: DQV annotation must carry a valid EARL outcome ───────────────
+bsh:QualityAnnotationShape a sh:NodeShape ;
+    sh:targetClass dqv:QualityAnnotation ;
+    sh:property [
+        sh:path earl:outcome ;
+        sh:minCount 1 ;
+        sh:in ( earl:passed earl:failed earl:cantTell ) ;
+        sh:severity sh:Violation ;
+        sh:message "Quality annotation must carry a valid W3C EARL outcome." ] .

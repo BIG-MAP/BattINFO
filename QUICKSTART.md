@@ -10,8 +10,7 @@ BattINFO turns battery metadata into machine-readable Linked Data. In five minut
 - A terminal at the repo root
 
 ```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -e .
+uv sync          # creates .venv and installs from uv.lock
 ```
 
 ---

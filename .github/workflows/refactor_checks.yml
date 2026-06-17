@@ -20,33 +20,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
-      - name: Install Package + Dev Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+      - name: Install Package + Dependencies (locked)
+        run: uv sync --all-extras --frozen --python ${{ matrix.python-version }}
 
       - name: Lint (ruff)
-        run: python -m ruff check src tests
+        run: uv run ruff check src tests
 
       - name: Type Check (mypy)
-        run: python -m mypy
+        run: uv run mypy
 
       - name: Run Unit Tests + Coverage Gate
-        run: python -m pytest -q tests --cov=battinfo --cov-report=term-missing
+        run: uv run pytest -q tests --cov=battinfo --cov-report=term-missing
 
       - name: Lint Identifier Policy Compliance
-        run: python .tools/quality/lint_identifier_policy.py
+        run: uv run python .tools/quality/lint_identifier_policy.py
 
       - name: Run Alpha Verification Gate
-        run: python .tools/quality/run_alpha_verification.py
+        run: uv run python .tools/quality/run_alpha_verification.py
 
       - name: Smoke Test Installed Wheel
         run: |
-          python -m pip uninstall -y battinfo
-          python -m pip install dist/*.whl
-          python tests/installed_smoke.py
+          uv build
+          uv pip install --reinstall dist/*.whl
+          uv run --no-sync python tests/installed_smoke.py
