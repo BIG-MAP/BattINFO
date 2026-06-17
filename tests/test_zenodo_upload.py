@@ -30,6 +30,7 @@ from battinfo import (
 )
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ProvenanceInfo
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME
+from battinfo.ws import _plan_zenodo_deposit
 from battinfo.zenodo import (
     ZenodoClient,
     _build_zenodo_metadata,
@@ -37,20 +38,22 @@ from battinfo.zenodo import (
     _zenodo_checksum_matches,
     upload_zenodo_package,
 )
-from battinfo.ws import _plan_zenodo_deposit
 
 
 class TestChecksumMatch:
     def test_matches_bare_md5(self, tmp_path: Path) -> None:
-        f = tmp_path / "a.bin"; f.write_bytes(b"hello world")
+        f = tmp_path / "a.bin"
+        f.write_bytes(b"hello world")
         assert _zenodo_checksum_matches(f, _file_md5(f)) is True
 
     def test_matches_prefixed_md5(self, tmp_path: Path) -> None:
-        f = tmp_path / "a.bin"; f.write_bytes(b"hello world")
+        f = tmp_path / "a.bin"
+        f.write_bytes(b"hello world")
         assert _zenodo_checksum_matches(f, f"md5:{_file_md5(f)}") is True
 
     def test_mismatch_and_missing_are_false(self, tmp_path: Path) -> None:
-        f = tmp_path / "a.bin"; f.write_bytes(b"hello world")
+        f = tmp_path / "a.bin"
+        f.write_bytes(b"hello world")
         assert _zenodo_checksum_matches(f, "deadbeef") is False
         assert _zenodo_checksum_matches(f, None) is False
         assert _zenodo_checksum_matches(f, "sha256:" + _file_md5(f)) is False  # non-md5 → re-upload
@@ -58,9 +61,12 @@ class TestChecksumMatch:
 
 class TestSyncFiles:
     def test_keeps_unchanged_uploads_changed_removes_gone(self, tmp_path: Path) -> None:
-        keep = tmp_path / "data.csv"; keep.write_bytes(b"UNCHANGED-DATA")
-        changed = tmp_path / "battinfo.json"; changed.write_bytes(b"NEW-CONTENT")
-        added = tmp_path / "ro-crate-metadata.json"; added.write_bytes(b"BRAND-NEW")
+        keep = tmp_path / "data.csv"
+        keep.write_bytes(b"UNCHANGED-DATA")
+        changed = tmp_path / "battinfo.json"
+        changed.write_bytes(b"NEW-CONTENT")
+        added = tmp_path / "ro-crate-metadata.json"
+        added.write_bytes(b"BRAND-NEW")
         files = {keep: "data.csv", changed: "battinfo.json", added: "ro-crate-metadata.json"}
 
         c = ZenodoClient(token="t", sandbox=True)

@@ -56,6 +56,7 @@ class ExperimentSyntaxError(ValueError):
 # ── Model ─────────────────────────────────────────────────────────────────────
 
 class Quantity(BaseModel):
+    """A scalar value with its unit (e.g. ``{value: 4.2, unit: "V"}``)."""
     model_config = ConfigDict(extra="forbid")
     value: float
     unit: str
@@ -72,6 +73,8 @@ class Termination(BaseModel):
 
 
 class Step(BaseModel):
+    """One segment of a test method — a charge/discharge/hold/rest/scan step with
+    setpoints, any-of stop conditions, and optional sub-steps (when ``mode`` is a group)."""
     model_config = ConfigDict(extra="forbid")
 
     mode: str                          # cc | cv | cccv | cp | cr | rest | eis | scan | group
@@ -80,7 +83,6 @@ class Step(BaseModel):
     termination: list[Termination] = Field(default_factory=list)
     duration: Optional[Quantity] = None
     temperature: Optional[Quantity] = None
-    period: Optional[dict[str, Any]] = None
     tags: list[str] = Field(default_factory=list)
     description: Optional[str] = None
     # group-only

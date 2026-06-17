@@ -1346,6 +1346,53 @@ def test_library_cli_template_save_query_build_rdf(tmp_path: Path) -> None:
     assert manifest_json.exists()
 
 
+def test_library_cli_save_cell_spec_inline_without_input(tmp_path: Path) -> None:
+    # The inline flat-dict path (no --input) assembles a library specification from CLI
+    # options and persists it; previously only the --input file path was covered.
+    runner = CliRunner()
+    library_root = tmp_path / "library" / "cell-spec"
+    packaged_root = tmp_path / "package" / "cell-spec"
+
+    save_result = runner.invoke(
+        app,
+        [
+            "library",
+            "save",
+            "cell-spec",
+            "--manufacturer",
+            "A123",
+            "--model",
+            "ANR26650M1-B",
+            "--chemistry",
+            "Li-ion",
+            "--cell-format",
+            "cylindrical",
+            "--positive-electrode-basis",
+            "LFP",
+            "--negative-electrode-basis",
+            "graphite",
+            "--size-code",
+            "R26650",
+            "--uid",
+            "9qfb4wrnynwcayjw",
+            "--library-dir",
+            str(library_root),
+            "--packaged-dir",
+            str(packaged_root),
+            "--format",
+            "json",
+        ],
+    )
+    assert save_result.exit_code == 0, save_result.stdout
+    save_payload = json.loads(save_result.stdout)
+    assert save_payload["status"] == "created"
+    stored = json.loads(Path(save_payload["path"]).read_text(encoding="utf-8"))
+    assert stored["specification"]["manufacturer"] == "A123"
+    assert stored["specification"]["model"] == "ANR26650M1-B"
+    assert stored["specification"]["size_code"] == "R26650"
+    assert stored["provenance"]["source_type"] == "datasheet"
+
+
 
 
 

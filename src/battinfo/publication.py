@@ -19,14 +19,13 @@ from battinfo.bundle import (
     BattinfoBundle,
     CellInstance,
     CellSpecification,
-    CellSpecification,
     Dataset,
     ProtocolInfo,
     ProvenanceInfo,
     Test,
     ZenodoCellRecord,
 )
-from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -1168,7 +1167,7 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
     dataset_ref = {"@id": dataset_id}
     node: dict[str, Any] = {
         "@id": test["id"],
-        "@type": ["BatteryTest", "schema:Action"],
+        "@type": ["BatteryTest", "schema:Action", "prov:Activity"],
         "schema:identifier": test.get("identifier"),
         "schema:name": test.get("name"),
         "schema:description": description_value,
@@ -1377,8 +1376,9 @@ def _publication_graph(
     node shapes (PROV-complete tests, EMMO quantities, typed dates, DCAT+schema.org
     dual distributions, structured conformance). The only differences here are the
     container's base URL — a local ``file://`` dataset directory with no DOI — and the
-    CSVW tabular schema, re-attached below. CellSpecification and CellSpecification are the same
-    entity (a BatteryCellSpecification), so a single spec node represents both.
+    CSVW tabular schema, re-attached below. The registry ``cell_spec`` and the library
+    ``cell_specification`` describe the same entity (a BatteryCellSpecification), so a
+    single spec node represents both.
     """
     import hashlib
     import mimetypes

@@ -60,7 +60,6 @@ def _parse_shacl_report(report_graph: Any, _data_graph: Any) -> list[ValidationI
     """Walk an rdflib SHACL report graph and extract ValidationIssue objects."""
     try:
         from rdflib.namespace import SH  # noqa: PLC0415
-        from rdflib import URIRef, Literal  # noqa: PLC0415
     except ImportError:
         return []
 
@@ -70,7 +69,6 @@ def _parse_shacl_report(report_graph: Any, _data_graph: Any) -> list[ValidationI
     SH_path = SH.resultPath
     SH_severity = SH.resultSeverity
     SH_Violation = SH.Violation
-    SH_Warning = SH.Warning
 
     for result in report_graph.objects(None, SH_result):
         messages = list(report_graph.objects(result, SH_message))

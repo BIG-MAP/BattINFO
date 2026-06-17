@@ -1,18 +1,18 @@
-# Editorial Cell-Type Workflow
+# Editorial Cell-Spec Workflow
 
-This document describes the BattINFO tooling contract for the shared cell-type editorial workflow centered on `battinfo-records`.
+This document describes the BattINFO tooling contract for the shared cell-spec editorial workflow centered on `battinfo-records`.
 
 Use it together with:
 
-- `battinfo-records/docs/editorial-cell-type-workflow.md` in the sibling `battinfo-records` repo
+- `battinfo-records/docs/editorial-cell-type-workflow.md` in the sibling `battinfo-records` repo (renames to `editorial-cell-spec-workflow.md` when that repo completes its cell-spec migration)
 - `battinfo-records/docs/record-lifecycle.md` in the sibling `battinfo-records` repo
 
 ## Scope
 
-BattINFO is not the shared editorial source for curated cell-type content.
+BattINFO is not the shared editorial source for curated cell-spec content.
 BattINFO is the implementation layer that must make that editorial source workable.
 
-For the shared reusable cell-type corpus:
+For the shared reusable cell-spec corpus:
 
 - `battinfo-records` is the editable source
 - BattINFO validates, promotes, and packages records
@@ -33,8 +33,8 @@ BattINFO must support these editorial operations reliably:
 
 BattINFO should assume:
 
-- staging source: `battinfo-records/records/_staging/cell-type/*.json`
-- curated source: `battinfo-records/records/cell-type/<record-id>/record.json`
+- staging source: `battinfo-records/records/_staging/cell-spec/*.json`
+- curated source: `battinfo-records/records/cell-spec/<record-id>/record.json`
 
 BattINFO should not require curators to edit:
 
@@ -50,7 +50,7 @@ Generated or packaged outputs remain derived state.
 ### Validate one staging draft
 
 ```powershell
-battinfo editorial validate-staging-cell-type --input <draft.json> --validation-policy strict --format json
+battinfo editorial validate-staging-cell-spec --input <draft.json> --validation-policy strict --format json
 ```
 
 Expected output contract:
@@ -66,9 +66,9 @@ Expected output contract:
 ### Promote one staging draft
 
 ```powershell
-battinfo editorial promote-staging-cell-type `
+battinfo editorial promote-staging-cell-spec `
   --input <draft.json> `
-  --curated-root <records/cell-type> `
+  --curated-root <records/cell-spec> `
   --record-id <record-id> `
   --validation-policy strict
 ```
@@ -76,15 +76,15 @@ battinfo editorial promote-staging-cell-type `
 Expected behavior:
 
 - validate before writing
-- write only to `records/cell-type/<record-id>/record.json`
-- preserve existing curated `product.id` and `short_id` if the target already exists
+- write only to `records/cell-spec/<record-id>/record.json`
+- preserve existing curated `cell_spec.id` and `short_id` if the target already exists
 
 ### Publish one curated record
 
 ```powershell
-battinfo editorial publish-curated-cell-type `
+battinfo editorial publish-curated-cell-spec `
   --input <record.json> `
-  --project-id <project-id> `
+  --workspace-id <workspace-id> `
   --publisher-id <publisher-id> `
   --source-version <source-version> `
   --registry-url <registry-url> `
@@ -130,9 +130,9 @@ BattINFO should surface:
 
 Re-promotion is part of normal editorial maintenance.
 
-If `records/cell-type/<record-id>/record.json` already exists and still represents the same curated entity, BattINFO must preserve:
+If `records/cell-spec/<record-id>/record.json` already exists and still represents the same curated entity, BattINFO must preserve:
 
-- `product.id`
+- `cell_spec.id`
 - derived `short_id`
 - canonical BattINFO identity continuity used downstream by the registry and Battery Genome
 
@@ -140,13 +140,13 @@ This is the key safeguard that keeps the editorial source editable after publica
 
 ## Publication Contract
 
-For curated cell-type publication, BattINFO should treat `record.json` as the publication source.
+For curated cell-spec publication, BattINFO should treat `record.json` as the publication source.
 
 The generated submission package should contain:
 
-- the canonical curated record in `semantic_payload.battinfo_records.cell_type`
+- the canonical curated record in `semantic_payload.battinfo_records.cell_spec`
 - editorial workspace metadata pointing back to the curated record path
-- project, publisher, and source-version metadata for the registry workflow
+- workspace, publisher, and source-version metadata for the registry workflow
 
 BattINFO should not treat registry output as a place to be edited later.
 
@@ -163,7 +163,7 @@ When changing BattINFO editorial workflows, confirm:
 
 ## Done Condition
 
-BattINFO is doing its job for editorial cell-type workflows when:
+BattINFO is doing its job for editorial cell-spec workflows when:
 
 - curators can review and edit records in `battinfo-records`
 - promotion is deterministic and reviewable

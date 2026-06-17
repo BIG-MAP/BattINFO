@@ -15,8 +15,8 @@ from urllib.request import urlopen
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
-from battinfo.bundle import BatteryTestType, CellProductType
-from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+from battinfo.bundle import BatteryTestType, CellProductType, CellSpecification
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.transform.json_to_jsonld import _descriptor_quantity_node as _jsonld_quantity_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
@@ -910,11 +910,9 @@ def _staging_cell_spec_input(
 
     specs = payload.get("properties")
     if specs is None:
-        specs = payload.get("properties")
-    if specs is None:
         specs = {}
     if not isinstance(specs, Mapping):
-        raise ValueError("staging cell-spec JSON field 'specs' must be an object when provided.")
+        raise ValueError("staging cell-spec JSON field 'properties' must be an object when provided.")
 
     provenance = payload.get("provenance")
     if provenance is None:
@@ -2042,10 +2040,7 @@ def create_cell_instance(
             cell_spec_doc = cell_spec
         product_obj = cell_spec_doc.get("cell_spec", {})
         if not isinstance(product_obj, Mapping):
-            legacy_obj = cell_spec_doc.get("cell_spec", {})
-            if not isinstance(legacy_obj, Mapping):
-                raise ValueError("cell_spec document must contain a 'product' object.")
-            product_obj = legacy_obj
+            raise ValueError("cell_spec document must contain a 'cell_spec' object.")
         embedded_id = product_obj.get("id")
         if not isinstance(embedded_id, str):
             raise ValueError("cell-spec id missing in provided cell_spec document.")
@@ -2547,8 +2542,8 @@ def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
         record["safety"] = copy.deepcopy(draft.safety)
     # Descriptive method: a pre-built structured `method` wins, else parse the
     # PyBaMM-style `experiment` strings (the default human authoring interface).
-    from battinfo.testmethod import Step, compute_facets, parse_experiment  # noqa: PLC0415
     from battinfo.bundle import _prune_empty  # noqa: PLC0415
+    from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment  # noqa: PLC0415
     method_objs: list[Step] = []
     if draft.method:
         method_objs = [Step.model_validate(s) for s in draft.method]
@@ -2556,7 +2551,14 @@ def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
         method_objs = parse_experiment(list(draft.experiment), draft.cycles)
     if method_objs:
         record["method"] = [_prune_empty(s.model_dump(mode="json")) for s in method_objs]
-        record["facets"] = compute_facets(method_objs, {})
+        # Carry authored conditions (e.g. temperature) into the facet rollup so the
+        # API save path matches TestSpec.facets() — otherwise facets.temperatures is dropped.
+        facet_conditions = {
+            key: Quantity(value=value["value"], unit=value["unit"])
+            for key, value in (draft.conditions or {}).items()
+            if isinstance(value, Mapping) and "value" in value and "unit" in value
+        }
+        record["facets"] = compute_facets(method_objs, facet_conditions)
     if draft.artifacts:
         record["artifacts"] = [copy.deepcopy(a) for a in draft.artifacts]
     if draft.source_url is not None:
@@ -3169,7 +3171,7 @@ def build_cell_spec_library_rdf(
 
 
 def save_library_cell_spec(
-    draft: "CellSpecificationBundle | dict[str, Any] | PathLike",
+    draft: "CellSpecification | dict[str, Any] | PathLike",
     *,
     library_root: PathLike = DEFAULT_LIBRARY_CELL_TYPES_DIR,
     package_root: PathLike = DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR,
@@ -3886,7 +3888,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         out = {
             "@context": context,
             "@id": entity_iri,
-            "@type": ["BatteryTest", "schema:Action"],
+            "@type": ["BatteryTest", "schema:Action", "prov:Activity"],
             "schema:identifier": uid,
             "schema:name": test.get("name"),
             # EMMO-native: the battery cell is an input to the test

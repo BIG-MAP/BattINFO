@@ -13,7 +13,6 @@ from battinfo import (
     BattinfoBundle,
     CellInstance,
     CellSpecification,
-    CellSpecification,
     Dataset,
     Test,
     ZenodoCellRecord,

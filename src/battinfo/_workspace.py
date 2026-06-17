@@ -37,15 +37,15 @@ from battinfo.authoring import cell_description as build_cell_description
 from battinfo.bundle import (
     CellInstance,
     CellSpecification,
-    CellSpecification,
     ChecksumInfo,
     Dataset,
     ProtocolInfo,
     ProvenanceInfo,
     Test,
+    TestConformance,
     TestSpec,
 )
-from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -303,9 +303,10 @@ class Workspace:
     def add(self, *objects: Any) -> "Workspace":
         """Add one or more authoring objects to the workspace by type."""
         def _add(obj: Any) -> None:
-            # CellSpecification and CellSpecification are the same entity (a BatteryCellSpecification);
-            # add() routes it to the canonical cell-spec collection. The datasheet-library
-            # workflow uses the dedicated add_description/save_descriptions methods.
+            # The authoring model and the datasheet model are now one CellSpecification
+            # (a BatteryCellSpecification); add() routes it to the canonical cell-spec
+            # collection. The datasheet-library workflow uses the dedicated
+            # add_description/save_descriptions methods.
             if isinstance(obj, CellSpecification):
                 _append_unique(self.cell_specs, obj)
             elif isinstance(obj, TestSpec):
@@ -470,10 +471,8 @@ class Workspace:
             )
 
         specs = payload.get("properties")
-        if specs is None:
-            specs = payload.get("properties")
         if specs is not None and not isinstance(specs, dict):
-            raise ValueError("cell-spec authoring JSON field 'specs' must be an object when provided.")
+            raise ValueError("cell-spec authoring JSON field 'properties' must be an object when provided.")
 
         comment = payload.get("comment")
         if comment is None:

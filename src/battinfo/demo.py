@@ -8,8 +8,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request as UrlRequest
 from urllib.request import urlopen
 
-from battinfo.api import submit_publication_package
 from battinfo._workspace import Workspace, quantity
+from battinfo.api import submit_publication_package
 
 DEFAULT_DEMO_ROOT = Path(".battinfo/demo-e2e")
 DEFAULT_DEMO_REGISTRY = "digibatt/hello-world"

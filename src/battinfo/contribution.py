@@ -1023,7 +1023,7 @@ def _load_cell_spec_for_batch(cell_spec_iri: str) -> tuple[Any, Any]:
     Falls back to a minimal CellSpecification carrying only the IRI.
     """
     from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
-    from battinfo.bundle import CellSpecification, CellSpecification
+    from battinfo.bundle import CellSpecification
     from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
 
     packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent

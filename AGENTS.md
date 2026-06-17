@@ -117,7 +117,7 @@ battinfo config show
 ### Publish a folder of data (single command)
 
 ```powershell
-battinfo push ./my_data/ --cell-type "Energizer CR2032" --sandbox
+battinfo push ./my_data/ --cell-spec "Energizer CR2032" --sandbox
 ```
 
 `push` auto-detects the folder layout:
@@ -126,7 +126,7 @@ battinfo push ./my_data/ --cell-type "Energizer CR2032" --sandbox
 - **Existing batch** (folder already contains `batch.yaml`) — skips init, processes all cell sub-folders
 
 Flags:
-- `--cell-type` — required for flat/subdir layouts; omit for existing batches
+- `--cell-spec` — required for flat/subdir layouts; omit for existing batches
 - `--cells N` — override detected cell count
 - `--sandbox` — upload to sandbox.zenodo.org (safe for testing)
 - `--yes` / `-y` — skip confirmation prompt (use in automation)
@@ -136,7 +136,7 @@ Flags:
 ### Step-by-step (if push is not appropriate)
 
 ```powershell
-battinfo batch init   ./cr2032/ --cell-type "Energizer CR2032" --count 6 --batch-id LOT-2025
+battinfo batch init   ./cr2032/ --cell-spec "Energizer CR2032" --count 6 --batch-id LOT-2025
 # Drop raw files into each cell folder (e.g. cr2032/energizer-CR2032-abc123/)
 battinfo dataset process ./cr2032/          # validates, converts to BDF, writes annotations
 # Edit battinfo-annotations.yaml in any cell with '?' entries, then re-run process
@@ -148,7 +148,7 @@ battinfo batch upload   ./cr2032/staging/   # uploads as draft, prints URL
 
 ```
 cr2032/
-  batch.yaml                          <- batch manifest (cell type, lab, operator)
+  batch.yaml                          <- batch manifest (cell spec, lab, operator)
   energizer-CR2032-abc123/
     battinfo.yaml                     <- cell manifest (edit: batch_id, lab, operator)
     2025-06-01__capacity_check__25degC.nda    <- raw data (drop here)
@@ -170,9 +170,9 @@ cr2032/
 
 | Concept | Description |
 |---------|-------------|
-| `cell_type_iri` | Stable IRI for a reusable cell specification (e.g. Energizer CR2032) |
+| `cell_spec_iri` | Stable IRI for a reusable cell specification (e.g. Energizer CR2032) |
 | `cell_iri` | Stable IRI for one physical cell instance; minted at `batch init` time |
-| `batch.yaml` | Batch-level manifest: cell type, count, lab, operator |
+| `batch.yaml` | Batch-level manifest: cell spec, count, lab, operator |
 | `battinfo.yaml` | Per-cell manifest: cell IRI, batch ID, provenance fields |
 | `battinfo-annotations.yaml` | Per-cell file metadata: test type, date, temperature for each raw file |
 | `battinfo.bundle.json` | Multi-dataset Zenodo record (harvest target for battery-genome registry) |
@@ -186,7 +186,7 @@ from battinfo.config import resolve_creators, resolve_zenodo_token
 
 result = push_batch(
     "./my_data/",
-    cell_type="Energizer CR2032",
+    cell_spec="Energizer CR2032",
     creators=resolve_creators(None),       # reads from ~/.battinfo/config.yaml
     zenodo_token=resolve_zenodo_token(),   # reads from config / env
     sandbox=True,
@@ -199,11 +199,11 @@ print(result["zenodo_url"])  # Zenodo draft URL
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `cell_type is required` | Flat folder with no `--cell-type` | Pass `--cell-type "Manufacturer Model"` |
+| `cell_spec is required` | Flat folder with no `--cell-spec` | Pass `--cell-spec "Manufacturer Model"` |
 | `No raw data files found` | Files not in expected extensions or wrong folder | Check `_RAW_EXTENSIONS` in `contribution.py` |
 | `No creator specified` | Config not set, no `--creator` flag | `battinfo config set creator "..."` |
 | `Zenodo token required` | Token not in config or env | `battinfo config set zenodo_token <token>` |
-| `invalid ingest manifest … type_record` | Cell type IRI not found in library | Check IRI is correct; run `battinfo library query cell-types --id <iri>` |
+| `invalid ingest manifest … type_record` | Cell spec IRI not found in library | Check IRI is correct; run `battinfo library query cell-spec --id <iri>` |
 | `? entries in battinfo-annotations.yaml` | Filename not recognised, BDF inference inconclusive | Edit the YAML: fill in `test_type`, `date`, `temperature_degC` |
 
 ### Key source files

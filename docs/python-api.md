@@ -4,7 +4,7 @@
 
 | Goal | Surface to use |
 |------|---------------|
-| Publish a cell type or build a linked cell→test→dataset chain from Python objects | [`Workspace`](#workspace-release-export) — the primary authoring surface |
+| Publish a cell spec or build a linked cell→test→dataset chain from Python objects | [`Workspace`](#workspace-release-export) — the primary authoring surface |
 | Turn an existing folder of photos and CSV files into a linked BattINFO submission | [Ingest helpers](#ingest-first-intake) — one-command folder intake |
 | Load, query, or save canonical records from disk | [`battinfo.api` helpers](#query-and-save) |
 | Author records as JSON files and drive the workflow from the CLI | `LocalWorkspace` — disk-first submission scaffold behind `battinfo workspace ...` |
@@ -14,7 +14,7 @@ walk through the full authoring flow end to end.
 
 Alpha scope:
 - core: `Workspace`, publication, canonical record save/query/publish/index helpers, and the guide notebooks
-- preview: reusable cell-type library workflows beyond the guide walkthrough fixtures
+- preview: reusable cell-spec library workflows beyond the guide walkthrough fixtures
 
 ## Install
 
@@ -33,7 +33,7 @@ from battinfo import build_ingest_workspace, publish_ingest_workspace, write_ing
 write_ingest_manifest(
     r"D:\cell_phone\novonix\google--g20m7--2025--15qnrp",
     resource_type="cell-instance",
-    type_record="battinfo-records/records/cell-type/google--g20m7--2025/record.json",
+    type_record="battinfo-records/records/cell-spec/google--g20m7--2025/record.json",
     resource_iri="https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
     publisher_id="demo-lab",
     license="CC-BY-4.0",
@@ -79,19 +79,19 @@ chain, call `build_publication_package(...)`, then reload with
 `load_publication_package(...)`.
 
 ```python
-from battinfo import CellInstance, CellType, Dataset, Test, build_publication_package, load_publication_package
+from battinfo import CellInstance, CellSpecification, Dataset, Test, build_publication_package, load_publication_package
 
-cell_type = CellType(
+cell_spec = CellSpecification(
     manufacturer="Energizer",
     model="CR2032",
     format="coin",
     chemistry="Li-primary",
     size_code="CR2032",
-    nominal_properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
+    nominal_voltage={"value": 3.0, "unit": "V"},
 )
 
 cell = CellInstance(
-    cell_type=cell_type,
+    cell_spec=cell_spec,
     serial_number="energizer-cr2032-202602-dtjrga",
 )
 
@@ -111,7 +111,7 @@ dataset = Dataset(
 )
 
 report = build_publication_package(
-    cell_type=cell_type,
+    cell_spec=cell_spec,
     cell_instance=cell,
     test=test,
     dataset=dataset,
@@ -143,9 +143,9 @@ from pathlib import Path
 from battinfo import Workspace
 
 workspace = Workspace(root=Path(".battinfo/demo"))
-cell_type = workspace.cell_type(...)
-cell = workspace.cell(cell_type, ...)
-protocol = workspace.test_protocol(name="1C Cycle Life at 25 C", kind="cycle_life", ...)
+cell_spec = workspace.cell_spec(...)
+cell = workspace.cell(cell_spec, ...)
+protocol = workspace.test_spec(name="1C Cycle Life at 25 C", kind="cycle_life", ...)
 test = workspace.test(cell, protocol_ref=protocol, ...)
 dataset = workspace.dataset(cell, title="Cycle life dataset", test=test, path="data/cycle-life.csv")
 
@@ -182,21 +182,21 @@ Terminology note:
 - The BattINFO authoring surface uses `workspace_id`.
 - `battinfo-registry` now uses `workspace_id` as well, so the publication boundary is vocabulary-aligned end to end.
 
-Cell-type publish shortcut:
+Cell-spec publish shortcut:
 
 ```python
-from battinfo import CellType, publish
+from battinfo import CellSpecification, publish
 
-cell_type = CellType(
+cell_spec = CellSpecification(
     manufacturer="Google",
     model="G20M7",
     format="pouch",
     chemistry="Li-ion",
 )
 
-local_result = publish(cell_type, destination="local")
+local_result = publish(cell_spec, destination="local")
 registry_result = publish(
-    cell_type,
+    cell_spec,
     destination="registry",
     registry_base_url="https://registry.example.org",
     api_key="...",
@@ -208,11 +208,11 @@ registry_result = publish(
 - `destination="local"` writes the canonical BattINFO record and returns its path in `debug_paths`.
 - `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
 - `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.
-- The existing package-oriented dataset publication helper remains available via `publish(cell_type=..., cell_instance=..., test=..., dataset=...)`.
+- The existing package-oriented dataset publication helper remains available via `publish(cell_spec=..., cell_instance=..., test=..., dataset=...)`.
 
-## Load Cell Types From JSON
+## Load Cell Specs From JSON
 
-If you want to manually define cell types as JSON first, load them directly into
+If you want to manually define cell specs as JSON first, load them directly into
 `Workspace`:
 
 ```python
@@ -220,18 +220,18 @@ from pathlib import Path
 
 from battinfo import Workspace
 
-workspace = Workspace(root=Path(".battinfo/manual-cell-types"))
+workspace = Workspace(root=Path(".battinfo/manual-cell-specs"))
 
-cell_type = workspace.load_cell_type("cell-type/A123__ANR26650M1-B.json")
-more_cell_types = workspace.load_cell_types(directory="cell-type")
+cell_spec = workspace.load_cell_spec("cell-spec/A123__ANR26650M1-B.json")
+more_cell_specs = workspace.load_cell_specs(directory="cell-spec")
 ```
 
 If you want a starter draft file to fill in first, generate one with the API:
 
 ```python
-from battinfo import template_cell_type_draft
+from battinfo import template_cell_spec_draft
 
-draft = template_cell_type_draft(
+draft = template_cell_spec_draft(
     manufacturer="A123",
     model_name="ANR26650M1-B",
     chemistry="Li-ion",
@@ -243,7 +243,7 @@ draft = template_cell_type_draft(
 These helpers accept either:
 
 - a simple authoring draft with fields like `manufacturer`, `model`, `format`, `chemistry`, and optional `specs`
-- a canonical BattINFO `cell-type` record with a top-level `product` object
+- a canonical BattINFO `cell-spec` record with a top-level `cell_spec` object
 
 Draft inputs should omit canonical fields like `id`, `short_id`, and `identifier`.
 `Workspace.save()` canonizes those fields and fills default provenance if you did
@@ -268,7 +268,7 @@ protocol = workspace.test_protocol(
     setpoints={"charge_rate": {"value": 1.0, "unit": "C"}},
 )
 
-cell = workspace.cell(workspace.cell_type(...), serial_number="LAB-001")
+cell = workspace.cell(workspace.cell_spec(...), serial_number="LAB-001")
 test = workspace.test(cell, protocol_ref=protocol, instrument="Biologic VSP-300")
 workspace.save()
 ```
@@ -282,11 +282,11 @@ You can also hand-author reusable protocol JSON first with
 The `battinfo.api` helpers remain useful for canonical record workflows:
 
 ```python
-from battinfo import query_cell_types, save_cell_instance, template_cell_instance
+from battinfo import query_cell_specs, save_cell_instance, template_cell_instance
 
-rows = query_cell_types(manufacturer="A123", chemistry="LFP", limit=5)
+rows = query_cell_specs(manufacturer="A123", chemistry="LFP", limit=5)
 
-draft = template_cell_instance(type_id="https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8")
+draft = template_cell_instance(cell_spec_id="https://w3id.org/battinfo/spec/3m6k-9t2p-7x4h-9nq8")
 draft["cell_instance"]["serial_number"] = "LAB-001"
 
 result = save_cell_instance(

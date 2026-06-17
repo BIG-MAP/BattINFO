@@ -23,7 +23,7 @@ Use it for:
 - file discovery and publication defaults
 
 Do not use it for:
-- curated `cell-type` authoring
+- curated `cell-spec` authoring
 - editing canonical registry output
 - replacing the source folder itself
 
@@ -77,7 +77,7 @@ Do not use it for:
 ```json
 {
   "resource_type": "cell-instance",
-  "type_record": "battinfo-records/records/cell-type/google--g20m7--2025/record.json"
+  "type_record": "battinfo-records/records/cell-spec/google--g20m7--2025/record.json"
 }
 ```
 
@@ -86,7 +86,7 @@ Do not use it for:
 ```json
 {
   "resource_type": "cell-instance",
-  "type_record": "battinfo-records/records/cell-type/google--g20m7--2025/record.json",
+  "type_record": "battinfo-records/records/cell-spec/google--g20m7--2025/record.json",
   "resource_iri": "https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
   "resource_name": "google--g20m7--2025--15qnrp",
   "workspace_id": "google-g20m7-instance-demo",

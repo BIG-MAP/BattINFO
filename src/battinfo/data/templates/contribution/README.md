@@ -11,7 +11,7 @@ Open `battinfo.yaml` and fill in:
 | Field | What to put |
 |---|---|
 | `cell_name` | A short label for this specific cell (serial number, lab code) |
-| `cell_type_iri` | The BattINFO IRI for the cell model — find it at [battery-genome.org/registry/cell-type](https://www.battery-genome.org/registry/cell-type) |
+| `cell_spec_iri` | The BattINFO IRI for the cell model — find it at [battery-genome.org/registry/cell-spec](https://www.battery-genome.org/registry/cell-spec) |
 | `lab` | Your institution or lab name |
 | `experimenter` | Optional — who ran the experiments |
 | `license` | Keep `CC-BY-4.0` unless you have a reason to change it |

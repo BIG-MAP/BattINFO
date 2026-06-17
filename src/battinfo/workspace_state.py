@@ -11,7 +11,8 @@ from urllib.parse import unquote, urlparse
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from battinfo.bundle import CellInstance, CellSpecification, CellSpecification, Dataset, Test
+from battinfo._workspace import Workspace
+from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
 from battinfo.local_workspace import (
     BattinfoSubmission,
     SubmissionDistribution,
@@ -21,7 +22,6 @@ from battinfo.local_workspace import (
     SubmissionResource,
 )
 from battinfo.validate.record import validate_record
-from battinfo._workspace import Workspace
 
 PathLike = str | Path
 WorkspaceTarget = CellSpecification | CellInstance | Test | Dataset

@@ -175,8 +175,9 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     class_node = next(node for node in graph if node.get("@id") == bundle.cell_spec.id)
     class_types = class_node["@type"] if isinstance(class_node["@type"], list) else [class_node["@type"]]
     assert "BatteryCellSpecification" in class_types
-    # Gold-standard types the spec node as a schema:Product (a described product model).
-    assert "schema:Product" in class_types
+    # The spec node is a Description (information artifact); the physical battery is linked
+    # via isDescriptionFor, so the schema.org co-type is CreativeWork (consistent across paths).
+    assert "schema:CreativeWork" in class_types
     test_node = next(node for node in graph if node.get("@id") == bundle.test.id)
     test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
     # Gold-standard: a test is a prov:Activity; the protocol is schema:measurementTechnique
@@ -222,8 +223,9 @@ def test_publish_dataset_metadata_with_cell_spec_only(tmp_path: Path) -> None:
     assert "cell_specification_path" not in report["datasets"][0]
 
     bundle = load_publication(dataset_dir / "battinfo.publish.jsonld")
-    # CellSpecification and CellSpecification are the same entity (a BatteryCellSpecification),
-    # so the round-trip always recovers a specification — there is no "cell-spec-only"
+    # The registry cell_spec and the library cell_specification are the same entity
+    # (a BatteryCellSpecification), so the round-trip always recovers a specification —
+    # there is no "cell-spec-only"
     # graph that lacks one. (The publish() *report* still omits cell_specification_id,
     # asserted above, since no separate specification object was passed in.)
     assert bundle.cell_specification is not None

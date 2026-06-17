@@ -25,7 +25,6 @@ import warnings
 
 import pytest
 
-
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _bundle_enum_values(name: str) -> set[str]:
@@ -264,8 +263,14 @@ def test_adapter_bundle_to_schema_dispatcher() -> None:
     from battinfo.bundle_adapter import bundle_to_schema
     from battinfo.bundle_generated import (
         CellInstance as GenCI,
+    )
+    from battinfo.bundle_generated import (
         CellSpecification as GenCT,
+    )
+    from battinfo.bundle_generated import (
         Test as GenT,
+    )
+    from battinfo.bundle_generated import (
         TestSpec as GenTS,
     )
 

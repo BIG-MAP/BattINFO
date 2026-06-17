@@ -4,7 +4,7 @@
 
 This specification defines the primary user interaction surface for BattINFO:
 
-- query canonical resources (`cell-type`, `cell-instance`, `test`, `dataset`)
+- query canonical resources (`cell-spec`, `cell-instance`, `test`, `dataset`)
 - create new resource instances
 - publish validated records into resolver-ready artifacts
 - build and inspect local resource indexes
@@ -71,15 +71,15 @@ JSON output contract:
 
 ## 4. Query Commands
 
-### 4.1 Query Cell Types
+### 4.1 Query Cell Specs
 
 ```text
-battinfo query cell-type [filters...]
+battinfo query cell-spec [filters...]
 ```
 
 Filters:
 
-- `--id <cell-type-iri>`
+- `--id <cell-spec-iri>`
 - `--manufacturer <name>`
 - `--chemistry <value>`
 - `--cell-format <cylindrical|prismatic|pouch|coin|other|unknown>`
@@ -94,8 +94,8 @@ Filters:
 Behavior:
 
 - Supports exact filters and numeric range filters.
-- Returns canonical `cell-type` IRIs and summary metadata.
-- Range filters apply to normalized canonical fields in `specs`.
+- Returns canonical `cell-spec` IRIs and summary metadata.
+- Range filters apply to normalized canonical fields in `properties`.
 
 ### 4.2 Query Cell Instances
 
@@ -106,7 +106,7 @@ battinfo query cell-instances [filters...]
 Filters:
 
 - `--id <cell-iri>`
-- `--type-id <cell-type-iri>`
+- `--cell-spec-id <cell-spec-iri>`
 - `--short-id <prefix>`
 - `--serial-number <string>` (metadata only, non-canonical)
 - `--has-dataset <true|false>`
@@ -168,13 +168,13 @@ JSON mode (`--format json`) for all query commands:
 
 ```json
 {
-  "resource": "cell-type",
+  "resource": "cell-spec",
   "count": 2,
   "limit": 50,
   "offset": 0,
   "items": [
     {
-      "id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
+      "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
       "short_id": "7d9k2m",
       "manufacturer": "A123",
       "model_name": "ANR26650M1-B"
@@ -189,7 +189,7 @@ JSON mode (`--format json`) for all query commands:
 
 ```text
 battinfo create cell-instance \
-  --type-id <cell-type-iri> \
+  --cell-spec-id <cell-spec-iri> \
   [--serial-number <value>] \
   [--dataset-id <dataset-iri>] \
   [--source-type <measurement|lab|bms|other>] \
@@ -208,7 +208,7 @@ Output contract:
 {
   "status": "created",
   "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
-  "type_id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
+  "cell_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
   "path": "examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json"
 }
 ```
@@ -219,7 +219,7 @@ Registration is the primary workflow for creating canonical BattINFO resources i
 
 ```text
 battinfo save record --input <json-path> [options]
-battinfo save cell-type [--input <json-path> | inline-fields...] [options]
+battinfo save cell-spec [--input <json-path> | inline-fields...] [options]
 battinfo save cell-instance [--input <json-path> | inline-fields...] [options]
 battinfo save dataset [--input <json-path> | inline-fields...] [options]
 battinfo save batch --source-dir <dir> [--source-dir <dir> ...] [options]
@@ -246,9 +246,9 @@ Typical result:
 ```json
 {
   "status": "created",
-  "entity_type": "cell-type",
-  "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
-  "path": "examples/cell-type/cell-type-3m6k-9t2p-7x4h-9nq8.json",
+  "entity_type": "cell-spec",
+  "id": "https://w3id.org/battinfo/spec/3m6k-9t2p-7x4h-9nq8",
+  "path": "examples/cell-spec/cell-spec-3m6k-9t2p-7x4h-9nq8.json",
   "mode": "create_only",
   "published": false
 }
@@ -272,7 +272,7 @@ Batch result:
 ### 5.3 Generate Starter Templates
 
 ```text
-battinfo template cell-type [options]
+battinfo template cell-spec [options]
 battinfo template cell-instance [options]
 battinfo template dataset [options]
 ```
@@ -351,7 +351,7 @@ battinfo index stats \
 
 Minimum stats output:
 
-- `cell_type_count`
+- `cell_spec_count`
 - `cell_instance_count`
 - `dataset_count`
 - `build_timestamp`
@@ -360,7 +360,7 @@ Minimum stats output:
 
 ### Query
 
-- `query cell-type`, `query cell-instances`, `query tests`, and `query dataset` implemented.
+- `query cell-spec`, `query cell-instances`, `query tests`, and `query dataset` implemented.
 - Each command supports meaningful resource-specific filters.
 - JSON output contract stable and documented.
 
@@ -379,7 +379,7 @@ Minimum stats output:
 ### Index
 
 - `index build` and `index stats` implemented.
-- Index output includes at least cell-type/cell-instance/dataset counts plus build timestamp.
+- Index output includes at least cell-spec/cell-instance/dataset counts plus build timestamp.
 
 ### Reliability
 

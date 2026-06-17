@@ -25,14 +25,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Mapping
 
 if TYPE_CHECKING:
-    from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
+    from battinfo.bundle import CellInstance, CellSpecification, Test, TestSpec
     from battinfo.bundle_generated import (
         CellInstance as GenCellInstance,
+    )
+    from battinfo.bundle_generated import (
         CellSpecification as GenCellSpecification,
-        Dataset as GenDataset,
+    )
+    from battinfo.bundle_generated import (
         SpecSet,
         SpecValue,
+    )
+    from battinfo.bundle_generated import (
         Test as GenTest,
+    )
+    from battinfo.bundle_generated import (
         TestSpec as GenTestSpec,
     )
 
@@ -129,6 +136,8 @@ def cell_spec_to_schema(ct: "CellSpecification") -> "GenCellSpecification":
     """Convert a bundle.py CellSpecification to a generated CellSpecification with EMMO IRI annotations."""
     from battinfo.bundle_generated import (  # noqa: PLC0415
         CellSpecification as GenCellSpecification,
+    )
+    from battinfo.bundle_generated import (
         Organization,
     )
     return GenCellSpecification(
@@ -171,6 +180,8 @@ def test_spec_to_schema(ts: "TestSpec") -> "GenTestSpec":
     """Convert a bundle.py TestSpec to a generated TestSpec."""
     from battinfo.bundle_generated import (  # noqa: PLC0415
         ProtocolInfo as GenProtocolInfo,
+    )
+    from battinfo.bundle_generated import (
         TestSpec as GenTestSpec,
     )
     return GenTestSpec(
@@ -192,6 +203,8 @@ def test_to_schema(t: "Test") -> "GenTest":
     """Convert a bundle.py Test to a generated Test."""
     from battinfo.bundle_generated import (  # noqa: PLC0415
         ProtocolInfo as GenProtocolInfo,
+    )
+    from battinfo.bundle_generated import (
         Test as GenTest,
     )
     return GenTest(

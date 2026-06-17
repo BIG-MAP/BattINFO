@@ -8,9 +8,9 @@ BattINFO is the implementation layer for the EMMO domain-battery ontology — pr
 
 | | |
 |---|---|
-| **[Quickstart](../QUICKSTART.md)** | Create and publish your first cell-type record in 5 minutes |
+| **[Quickstart](../QUICKSTART.md)** | Create and publish your first cell-spec record in 5 minutes |
 | **[01 — Concepts](guides/01-concepts.ipynb)** | Data model, record types, IRIs, and the semantic layer |
-| **[02 — First cell type](guides/02-first-cell-type.ipynb)** | Materials → components → cell type → publish |
+| **[02 — First cell spec](guides/02-first-cell-type.ipynb)** | Materials → components → cell spec → publish |
 | **[03 — Linked records](guides/03-linked-records.ipynb)** | Cell instance → test → dataset → registry submission |
 | **[04 — Semantic layer](guides/04-semantic-layer.ipynb)** | JSON-LD anatomy, EMMO type stacking, RDF validation, SPARQL |
 | **[05 — Descriptors](guides/05-descriptors.ipynb)** | Research-grade descriptors: electrode composition, electrolyte, separator |
@@ -46,7 +46,7 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 | | |
 |---|---|
 | **[Instance / test / dataset workflow](instance-test-dataset-workflow.md)** | Detailed workflow reference for linked records |
-| **[Editorial cell-type workflow](editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-type library |
+| **[Editorial cell-spec workflow](editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
 | **[Ingest manifest contract](ingest-manifest-contract.md)** | Batch intake from a folder of raw data files |
 | **[Dataset registry intake spec](dataset-registry-intake-spec.md)** | Submission package format for registry intake |
 | **[Resolver deployment](resolver.md)** | Building and deploying static resolver artifacts |

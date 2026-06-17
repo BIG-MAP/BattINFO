@@ -89,9 +89,6 @@ from battinfo.api import (
     template_cell_instance as api_template_cell_instance,
 )
 from battinfo.api import (
-    template_library_cell_spec as api_template_library_cell_spec,
-)
-from battinfo.api import (
     template_cell_spec as api_template_cell_spec,
 )
 from battinfo.api import (
@@ -99,6 +96,9 @@ from battinfo.api import (
 )
 from battinfo.api import (
     template_dataset as api_template_dataset,
+)
+from battinfo.api import (
+    template_library_cell_spec as api_template_library_cell_spec,
 )
 from battinfo.api import (
     template_test as api_template_test,
@@ -121,7 +121,7 @@ from battinfo.runtime import recover_notebook_runtime
 from battinfo.storage import build_uploader_from_env
 from battinfo.validate import get_validation_policy
 from battinfo.validate.pydantic import validate_json
-from battinfo.validate.record import validate_record, validate_record_report
+from battinfo.validate.record import validate_record_report
 from battinfo.workflows.map import run_mapping
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)

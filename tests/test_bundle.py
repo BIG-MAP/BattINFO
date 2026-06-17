@@ -13,7 +13,6 @@ from battinfo import (  # noqa: E402
     CellConstruction,
     CellInstance,
     CellSpecification,
-    CellSpecification,
     Coating,
     CurrentCollector,
     Dataset,

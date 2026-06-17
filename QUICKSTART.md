@@ -16,29 +16,27 @@ python -m venv .venv
 
 ---
 
-## 1. Create your first cell-type record
+## 1. Create your first cell-spec record
 
-A **cell type** is a product specification — the datasheet-level description of a battery model. Create one in three lines:
+A **cell spec** is a product specification — the datasheet-level description of a battery model. Create one in three lines:
 
 ```python
-from battinfo import CellType, publish
+from battinfo import CellSpecification, publish
 
-cell_type = CellType(
+cell_spec = CellSpecification(
     manufacturer="Panasonic",
     model="NCR18650B",
     format="cylindrical",
     chemistry="Li-ion",
     size_code="R18650",
-    nominal_properties={
-        "nominal_capacity": {"value": 3.4, "unit": "Ah"},
-        "nominal_voltage":  {"value": 3.6, "unit": "V"},
-        "mass":             {"value": 48.0, "unit": "g"},
-    },
+    nominal_capacity={"value": 3.4, "unit": "Ah"},
+    nominal_voltage={"value": 3.6, "unit": "V"},
+    mass={"value": 48.0, "unit": "g"},
 )
 
-result = publish(cell_type, destination="local", root=".battinfo/quickstart")
+result = publish(cell_spec, destination="local", root=".battinfo/quickstart")
 print(result.canonical_iri)
-# https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx
 ```
 
 BattINFO mints a stable, opaque IRI for the record and writes it to disk.
@@ -89,10 +87,10 @@ The resolver JSON-LD is the lightweight document served at the cell's IRI. The f
 
 ## 4. Validate a record
 
-Canonical cell-type records are validated with `--source-root`:
+Canonical cell-spec records are validated with `--source-root`:
 
 ```powershell
-.venv\Scripts\battinfo validate examples/cell-type/A123__ANR26650M1-B.json `
+.venv\Scripts\battinfo validate examples/cell-spec/A123__ANR26650M1-B.json `
     --source-root examples --format json
 ```
 
@@ -110,7 +108,7 @@ Canonical cell-type records are validated with `--source-root`:
 ## You're done
 
 In four steps you have:
-- Created a battery cell-type record with a permanent IRI
+- Created a battery cell-spec record with a permanent IRI
 - Produced valid, EMMO-aligned JSON-LD
 - Seen automatic semantic type stacking
 
@@ -123,7 +121,7 @@ The guide notebooks in `docs/guides/` continue the walkthrough interactively. Op
 | Notebook | What you'll learn |
 |---|---|
 | [01 — Concepts](docs/guides/01-concepts.ipynb) | The data model, record types, and how IRIs work |
-| [02 — First cell type](docs/guides/02-first-cell-type.ipynb) | Full cell-type authoring: specs, provenance, CLI and Python paths |
+| [02 — First cell spec](docs/guides/02-first-cell-type.ipynb) | Full cell-spec authoring: specs, provenance, CLI and Python paths |
 | [03 — Linked records](docs/guides/03-linked-records.ipynb) | Cell instance → test → dataset provenance chain |
 | [04 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD, EMMO alignment, validation, and RDF queries |
 | [05 — Descriptors](docs/guides/05-descriptors.ipynb) | Deep cell descriptors: electrodes, electrolyte, separator |

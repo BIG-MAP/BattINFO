@@ -12,7 +12,6 @@ import pytest
 from battinfo import (
     CellInstance,
     CellSpecification,
-    CellSpecification,
     Dataset,
     Test,
     ZenodoCellRecord,

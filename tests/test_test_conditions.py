@@ -13,10 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo.ws import AuthoringWorkspace
 from battinfo.validate.core import get_validation_policy
 from battinfo.validate.publication import _test_condition_issues
-
+from battinfo.ws import AuthoringWorkspace
 
 SPEC_ID = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 

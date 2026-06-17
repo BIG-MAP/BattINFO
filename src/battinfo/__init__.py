@@ -1,10 +1,11 @@
+from battinfo._workspace import Workspace, q, quantity
 from battinfo.api import (
     CellInstanceInput,
     CellSpecificationInput,
     DatasetInput,
     TestInput,
-    TestSpecInput,
     TestProtocolInput,  # backward compat alias
+    TestSpecInput,
     build_cell_spec_library_rdf,
     build_curated_cell_spec_submission,
     build_index,
@@ -33,17 +34,16 @@ from battinfo.api import (
     save_test_spec,
     submit_publication_package,
     template_cell_instance,
-    template_library_cell_spec,
     template_cell_spec,
     template_cell_spec_draft,
     template_dataset,
+    template_library_cell_spec,
     template_test,
     template_test_spec,
     template_test_spec_draft,
     validate_staging_cell_spec,
     validate_staging_cell_specs,
 )
-from battinfo.ws import workspace, validate_jsonld
 from battinfo.authoring import (
     bom,
     case,
@@ -62,12 +62,9 @@ from battinfo.authoring import (
     terminal,
 )
 from battinfo.bundle import (
+    DEVIATION_CATEGORIES,
     BatteryTestType,
     BattinfoBundle,
-    Deviation,
-    Conformance,
-    TestConformance,
-    DEVIATION_CATEGORIES,
     BillOfMaterials,
     Case,
     CellConstruction,
@@ -76,29 +73,39 @@ from battinfo.bundle import (
     CellSpecification,
     ChecksumInfo,
     Coating,
+    Conformance,
     CurrentCollector,
     CurrentCollectorTab,
     Dataset,
+    Deviation,
     Electrode,
     Electrolyte,
     HardwarePart,
     Housing,
     MaterialComponent,
-    Seal,
-    Terminal,
     PropertySet,
     ProtocolInfo,
     ProvenanceInfo,
     Salt,
+    Seal,
     Separator,
     SolventMixture,
+    Terminal,
     Test,
-    TestSpec,
+    TestConformance,
     TestProtocol,  # backward compat alias
+    TestSpec,
     ZenodoCellRecord,
     ZenodoDatasetEntry,
     load_cell_specification,
 )
+from battinfo.bundle_adapter import (
+    bundle_to_schema,
+    cell_spec_to_schema,
+    specs_to_specset,
+    specset_to_specs,
+)
+from battinfo.bundle_generated import SpecSet, SpecValue
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.interop import (
@@ -121,6 +128,7 @@ from battinfo.interop import (
     save_bpx,
     to_bpx,
 )
+from battinfo.jsonld import record_to_jsonld
 from battinfo.local_workspace import LocalWorkspace
 from battinfo.metadata import (
     TableColumn,
@@ -152,8 +160,6 @@ from battinfo.publication import (
 )
 from battinfo.publish import PublishResult, publish
 from battinfo.runtime import recover_notebook_runtime
-from battinfo._workspace import Workspace, q, quantity
-from battinfo.jsonld import record_to_jsonld
 from battinfo.validate import (
     ValidationIssue,
     ValidationPolicy,
@@ -164,14 +170,8 @@ from battinfo.validate import (
     validate_shacl,
     validate_shacl_report,
 )
+from battinfo.ws import validate_jsonld, workspace
 from battinfo.zenodo import ZenodoClient, ZenodoError, patch_zenodo_urls, upload_zenodo_package
-from battinfo.bundle_generated import SpecValue, SpecSet
-from battinfo.bundle_adapter import (
-    bundle_to_schema,
-    cell_spec_to_schema,
-    specs_to_specset,
-    specset_to_specs,
-)
 
 BatteryCellSpecification = CellSpecification
 BatteryCell = CellInstance

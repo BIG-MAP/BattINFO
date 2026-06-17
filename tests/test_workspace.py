@@ -281,10 +281,10 @@ def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
             )
         ],
     )
-    test = workspace.test(cell, protocol_ref=spec, status="completed", conformance=conformance)
+    workspace.test(cell, protocol_ref=spec, status="completed", conformance=conformance)
 
     # in-memory round-trip via to_record / from_record
-    result = workspace.save(validation_policy="strict")
+    workspace.save(validation_policy="strict")
     saved_test_records = workspace.query_tests()
     assert len(saved_test_records) == 1
     saved = saved_test_records[0]
@@ -299,8 +299,8 @@ def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
     assert dev["impact"] == "minor"
 
     # model round-trip
+
     from battinfo.bundle import Test
-    from pathlib import Path as _Path
     test_dir = tmp_path / "workspace" / "examples" / "test"
     test_files = list(test_dir.glob("*.json"))
     assert len(test_files) == 1

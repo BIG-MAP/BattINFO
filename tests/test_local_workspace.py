@@ -9,7 +9,16 @@ from typer.testing import CliRunner
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo import BatteryCell, BatteryCellSpecification, BatteryTestType, BattinfoBundle, Dataset, Test, publish, quantity
+from battinfo import (
+    BatteryCell,
+    BatteryCellSpecification,
+    BatteryTestType,
+    BattinfoBundle,
+    Dataset,
+    Test,
+    publish,
+    quantity,
+)
 from battinfo.cli import app
 from battinfo.local_workspace import WORKSPACE_FILENAME, LocalWorkspace
 

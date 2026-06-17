@@ -8,11 +8,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from battinfo._workspace import Workspace
 from battinfo.api import build_curated_cell_spec_submission, submit_publication_package
 from battinfo.bundle import CellSpecification
 from battinfo.config import resolve_destination_config
 from battinfo.publication import publish as _legacy_publish
-from battinfo._workspace import Workspace
 
 PathLike = str | Path
 

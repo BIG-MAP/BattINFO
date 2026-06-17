@@ -10,6 +10,7 @@ from typing import Any, Mapping
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from battinfo._workspace import Workspace
 from battinfo.bundle import (
     BattinfoBundle,
     CellInstance,
@@ -22,7 +23,6 @@ from battinfo.bundle import (
 )
 from battinfo.publication import load_publication
 from battinfo.validate.record import validate_record
-from battinfo._workspace import Workspace
 
 PathLike = str | Path
 

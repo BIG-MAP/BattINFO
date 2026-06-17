@@ -430,7 +430,7 @@ def to_bpx(
     ----------
     source:
         A BattINFO cell-spec record dict (``{"cell_spec": ..., "properties":
-        ...}``), a :class:`~battinfo.bundle.CellType` (anything exposing
+        ...}``), a :class:`~battinfo.bundle.CellSpecification` (anything exposing
         ``to_record()``), or a bare properties mapping.
     cell_instance:
         Optional cell-instance record or object; its serial number / id is
@@ -568,7 +568,7 @@ def _coerce_cell_spec(source: Any) -> tuple[dict[str, Any], dict[str, Any]]:
         # A bare properties mapping (key → {value, unit}).
         return {}, dict(source)
     raise TypeError(
-        "to_bpx expects a cell-spec record dict, a CellType-like object with "
+        "to_bpx expects a cell-spec record dict, a CellSpecification-like object with "
         f"to_record(), or a properties mapping; got {type(source).__name__}."
     )
 

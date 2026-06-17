@@ -8,7 +8,6 @@ Covers:
 
 from __future__ import annotations
 
-import copy
 import json
 import sys
 from pathlib import Path
@@ -19,9 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.validate.core import ValidationPolicy
+from battinfo.validate.record import validate_record_report
 from battinfo.validate.semantic import validate_semantic_report
 from battinfo.validate.shacl import validate_shacl_report
-from battinfo.validate.record import validate_record_report
 
 WARN_POLICY = ValidationPolicy(name="warn", semantic="warning")
 STRICT_POLICY = ValidationPolicy(name="strict", semantic="error")

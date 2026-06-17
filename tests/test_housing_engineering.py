@@ -25,7 +25,6 @@ from battinfo.authoring import (  # noqa: E402
     material,
     properties,
     seal,
-    separator_spec,
     tab,
     terminal,
 )

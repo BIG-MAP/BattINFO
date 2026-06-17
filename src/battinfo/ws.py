@@ -20,6 +20,7 @@ import difflib
 import json
 import os
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -144,7 +145,7 @@ def _serial_matches(token: str, serial: str | None) -> bool:
 # speak "cell-spec"/"test-spec"; storage/IRIs keep cell_spec/test_protocol.
 _RESOURCE_TYPE_CANON: dict[str, str] = {
     "cell-spec": "cell_spec", "cell_spec": "cell_spec", "cellspec": "cell_spec",
-    "cell-spec": "cell_spec", "cell_spec": "cell_spec", "spec": "cell_spec",
+    "spec": "cell_spec",
     "cell": "cell", "cell-instance": "cell", "cell_instance": "cell", "instance": "cell",
     "test-spec": "test_protocol", "test_spec": "test_protocol",
     "test-protocol": "test_protocol", "test_protocol": "test_protocol",
@@ -1571,7 +1572,6 @@ class AuthoringWorkspace:
         print(f"Workspace: {self._records_root}")
         print(f"  {total} record(s) across {len(summary)} type(s):\n")
         for rtype, items in summary.items():
-            marker = lambda i: " *" if i["session"] else ""  # noqa: E731
             print(f"  {rtype} ({len(items)})")
             if verbose:
                 for i in items:
@@ -1741,7 +1741,6 @@ class AuthoringWorkspace:
             ws.save()
             ws.submit()
         """
-        import urllib.request
 
         # ── 1. Resolve source → raw JSON-LD text ──────────────────────────────
         raw_text = _import_resolve_source(source, sandbox=sandbox, token=token)
@@ -2096,7 +2095,6 @@ class AuthoringWorkspace:
                 "publisher_id is required. Pass it or set BATTINFO_PUBLISHER_ID."
             )
 
-        from battinfo.api import submit_publication_package
 
         examples = self._records_root / "examples"
         if not examples.exists():
@@ -2105,8 +2103,6 @@ class AuthoringWorkspace:
 
         # Normalise the `only` filter to a set of canonical directory names
         _ALIASES: dict[str, str] = {
-            "cell-spec":      "cell-spec",
-            "cell_spec":      "cell-spec",
             "cell-spec":      "cell-spec",
             "cell_spec":      "cell-spec",
             "cell-instance":  "cell-instance",
@@ -2370,7 +2366,6 @@ class AuthoringWorkspace:
                 "Install with: pip install boto3"
             )
         import hashlib
-        import urllib.parse
 
         endpoint = os.environ.get("R2_ENDPOINT")
         access_key = os.environ.get("R2_ACCESS_KEY_ID")
@@ -2561,6 +2556,7 @@ class AuthoringWorkspace:
         """
         import shutil
         import tempfile
+
         from battinfo.zenodo import ZenodoClient
 
         # ── Resolve token ──────────────────────────────────────────────────────
@@ -3321,8 +3317,10 @@ class AuthoringWorkspace:
                         physical_types.append("PrimaryBattery")
 
                     node: dict = {
-                        # BatteryCellSpecification = a Description, not a physical battery
-                        "@type":       ["BatteryCellSpecification", "schema:Product"],
+                        # BatteryCellSpecification = a Description (information artifact),
+                        # not a physical battery — the physical individual is linked via
+                        # isDescriptionFor below, so the schema.org co-type is CreativeWork.
+                        "@type":       ["BatteryCellSpecification", "schema:CreativeWork"],
                         "@id":         iri,
                         "schema:name": prod.get("name", ""),
                         "schema:model":prod.get("model", ""),
@@ -3424,7 +3422,7 @@ class AuthoringWorkspace:
 
                     if test_iri and cell_id:
                         tnode: dict = {
-                            "@type":         ["BatteryTest", "prov:Activity"],
+                            "@type":         ["BatteryTest", "schema:Action", "prov:Activity"],
                             "@id":           test_iri,
                             "hasTestObject": {"@id": cell_id},   # domain-battery: physical object tested
                             # PROV mirror of hasTestObject so a PROV-only consumer
@@ -4252,8 +4250,9 @@ class AuthoringWorkspace:
             ws.export("ttl")         # Turtle
             ws.export("ttl", "rdf/") # Turtle in a separate folder
         """
-        from battinfo.jsonld import record_to_jsonld
         from rdflib import Graph
+
+        from battinfo.jsonld import record_to_jsonld
 
         _FMT_MAP: dict[str, tuple[str, str]] = {
             "json-ld":  ("json-ld", ".jsonld"),
@@ -5229,8 +5228,9 @@ def _simple_submission_payload(
 
 def _do_submit(payload: dict, url: str, key: str, title: str) -> list[dict]:
     """Submit one record, retrying once with a bumped source_version on 409."""
-    from battinfo.api import submit_publication_package
     import copy
+
+    from battinfo.api import submit_publication_package
 
     for attempt in range(2):
         try:
@@ -5261,10 +5261,6 @@ def _bump_version(ver: str) -> str:
     if m:
         return ver[: m.start()] + f"-v{int(m.group(1)) + 1}"
     return ver + "-v2"
-
-
-import dataclasses
-from dataclasses import dataclass
 
 
 def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | None = None) -> str:

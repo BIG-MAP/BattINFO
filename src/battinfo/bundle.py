@@ -9,7 +9,7 @@ from typing import Any, ClassVar, Mapping, Self
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
@@ -1150,14 +1150,12 @@ class BundleJsonModel(BaseModel):
 
 class CellSpecification(BundleJsonModel):
     # NOTE: This is the merged cell-specification model. It absorbs the former
-    # ``CellSpecification`` (authoring API: kwarg-absorbing __init__, _mapping_property
-    # descriptors, optional id/name) AND the former datasheet ``CellSpecification``
-    # (electrode/electrolyte/separator structure, library record format) — the two are
-    # the same entity, a BatteryCellSpecification. A transient ``CellSpecification`` alias is
-    # defined at module scope until the identifier rename completes. The on-disk filename
-    # and ``kind`` discriminator stay as the legacy ``cell-spec`` tokens for now — the
-    # on-disk/record-key rename is the separate Phase-4 coordinated migration (keeps the
-    # live registry and existing record files readable).
+    # ``CellType`` (authoring API: kwarg-absorbing __init__, _mapping_property
+    # descriptors, optional id/name) AND the former datasheet specification model
+    # (electrode/electrolyte/separator structure, library record format) — the two
+    # describe the same entity, a BatteryCellSpecification, so a single class now
+    # serves both the registry record (``cell_spec``/``properties``) and the library
+    # record (``specification``/``property``) formats.
     default_filename: ClassVar[str] = CELL_SPEC_FILENAME
 
     kind: str = "CellSpecification"
@@ -1287,7 +1285,7 @@ class CellSpecification(BundleJsonModel):
         record = record_to_snake_aliases(record)
         product = record.get("cell_spec")
         if not isinstance(product, Mapping):
-            raise ValueError("cell type record must contain a 'product' object.")
+            raise ValueError("cell-spec record must contain a 'cell_spec' object.")
         provenance = record.get("provenance", {})
         if not isinstance(provenance, Mapping):
             provenance = {}
@@ -2756,9 +2754,10 @@ class BattinfoBundle(BundleJsonModel):
             if isinstance(candidate, Mapping) and _node_has_type(candidate, "BatteryCellSpecification"):
                 cell_specification_node = candidate
         if cell_specification_node is None and _node_has_type(cell_spec_node, "BatteryCellSpecification"):
-            # CellSpecification and CellSpecification are the same entity — a BatteryCellSpecification.
-            # When the graph carries a single spec node (the gold-standard shape), it serves
-            # as both; there is no separate "cell-spec-only" node to distinguish.
+            # The cell_spec node and the cell_specification node are the same entity — a
+            # BatteryCellSpecification. When the graph carries a single spec node (the
+            # gold-standard shape), it serves as both; there is no separate
+            # "cell-spec-only" node to distinguish.
             cell_specification_node = cell_spec_node
 
         manufacturer_obj = cell_spec_node.get("schema:manufacturer")

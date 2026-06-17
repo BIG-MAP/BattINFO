@@ -13,9 +13,14 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd
 
-from battinfo.interop.battdat import BattdatImportResult, from_battdat, _infer_kind, _extract_timestamps, _to_variable_measured
-from battinfo.interop.bpx import BpxImportResult, from_bpx, _extract_specs
-
+from battinfo.interop.battdat import (
+    BattdatImportResult,
+    _extract_timestamps,
+    _infer_kind,
+    _to_variable_measured,
+    from_battdat,
+)
+from battinfo.interop.bpx import BpxImportResult, from_bpx
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -327,7 +332,6 @@ def test_from_bpx_accessible_from_battinfo() -> None:
 
 def test_workspace_from_battdat_returns_test(tmp_path: Path) -> None:
     from battinfo._workspace import Workspace
-    from battinfo.bundle import CellSpecification, CellInstance
 
     csv_file = tmp_path / "cycling.csv"
     _make_cycling_df().to_csv(csv_file, index=False)
@@ -366,7 +370,6 @@ def test_workspace_from_bpx_creates_cell_spec(tmp_path: Path) -> None:
     # model should fall back to BPX Header.Title
     assert "NMC532" in (cell_spec.model or "")
     # capacity spec should be present
-    from battinfo.bundle import CellSpecification
     assert cell_spec in ws.cell_specs
 
 

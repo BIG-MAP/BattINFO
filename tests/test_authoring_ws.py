@@ -708,7 +708,6 @@ def test_published_graph_passes_publication_validation(tmp_path: Path) -> None:
 
 def test_publication_shacl_catches_broken_provenance(tmp_path: Path) -> None:
     """A test missing prov:used must be rejected by the structural SHACL layer."""
-    import copy
 
     from battinfo.validate import validate_publication_report
 

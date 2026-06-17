@@ -40,10 +40,10 @@ from battinfo.api import (
     save_test,
     save_test_spec,
     template_cell_instance,
-    template_library_cell_spec,
     template_cell_spec,
     template_cell_spec_draft,
     template_dataset,
+    template_library_cell_spec,
     template_test,
     template_test_spec,
     template_test_spec_draft,
@@ -1340,6 +1340,70 @@ def test_save_library_cell_spec_persists_construction_metadata(tmp_path: Path) -
 
     rows = query_library_cell_specs(directory=library_root)
     assert rows[0]["construction"]["assembly_type"] == "stacked"
+
+
+def test_library_flat_dict_carries_full_physical_structure(tmp_path: Path) -> None:
+    # The retired CellDatasheetInput could only carry construction + property. The flat-dict
+    # path (_library_record_from_input) must carry the FULL physical structure — electrodes,
+    # electrolyte, separator, and housing — so a detailed spec authored as a plain dict is not lossy.
+    library_root = tmp_path / "library" / "cell-spec"
+    packaged_root = tmp_path / "package" / "cell-spec"
+    payload = save_library_cell_spec(
+        {
+            "uid": "5h8k2m9q4v6n3t7r",
+            "manufacturer": "AlphaLab",
+            "model": "COIN-LFP-2032",
+            "format": "coin",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "LFP",
+            "negative_electrode_basis": "graphite",
+            "size_code": "2032",
+            "positive_electrode": {
+                "coating": {
+                    "component": {
+                        "active_material": [
+                            {"name": "LFP", "property": {"mass_fraction": {"value": 0.92, "unit": "1"}}}
+                        ],
+                        "binder": [
+                            {"name": "PVDF", "property": {"mass_fraction": {"value": 0.08, "unit": "1"}}}
+                        ],
+                    },
+                    "property": {"thickness": {"value": 55.0, "unit": "um"}},
+                },
+                "current_collector": {"name": "Al foil"},
+            },
+            "negative_electrode": {
+                "coating": {
+                    "component": {
+                        "active_material": [
+                            {"name": "Graphite", "property": {"mass_fraction": {"value": 0.95, "unit": "1"}}}
+                        ],
+                        "binder": [
+                            {"name": "CMC/SBR", "property": {"mass_fraction": {"value": 0.05, "unit": "1"}}}
+                        ],
+                    },
+                },
+                "current_collector": {"name": "Cu foil"},
+            },
+            "electrolyte": {
+                "family": "organic",
+                "salt": {"name": "LiPF6", "property": {"concentration": {"value": 1.0, "unit": "mol/L"}}},
+            },
+            "separator": {"material": "PP membrane", "property": {"thickness": {"value": 20.0, "unit": "um"}}},
+            "housing": {"case": {"size_code": "2032", "material": "Stainless steel"}},
+            "source_file": "alpha-coin-detailed.json",
+        },
+        library_root=library_root,
+        package_root=packaged_root,
+    )
+    assert payload["status"] == "created"
+    spec = json.loads(Path(payload["path"]).read_text(encoding="utf-8"))["specification"]
+    # All five physical sub-structures survive the flat-dict path (not just construction/property).
+    assert spec["positive_electrode"]["current_collector"]["name"] == "Al foil"
+    assert spec["negative_electrode"]["current_collector"]["name"] == "Cu foil"
+    assert spec["electrolyte"]["salt"]["name"] == "LiPF6"
+    assert spec["separator"]["material"] == "PP membrane"
+    assert spec["housing"]["case"]["size_code"] == "2032"
 
 
 

@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
-from battinfo.bundle import CellInstance, CellSpecification, CellSpecification, ProvenanceInfo, Test, TestSpec
+from battinfo.bundle import CellInstance, CellSpecification, ProvenanceInfo, Test, TestSpec
 
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace

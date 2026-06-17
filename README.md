@@ -17,17 +17,17 @@ python -m venv .venv
 ```
 
 ```python
-from battinfo import CellType, publish
+from battinfo import CellSpecification, publish
 
 result = publish(
-    CellType(manufacturer="Panasonic", model="NCR18650B",
-             format="cylindrical", chemistry="Li-ion",
-             nominal_properties={"nominal_capacity": {"value": 3.4, "unit": "Ah"}}),
+    CellSpecification(manufacturer="Panasonic", model="NCR18650B",
+                      format="cylindrical", chemistry="Li-ion",
+                      nominal_capacity={"value": 3.4, "unit": "Ah"}),
     destination="local",
     root=".battinfo/my-library",
 )
 print(result.canonical_iri)
-# https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx
 ```
 
 **→ [Full quickstart](QUICKSTART.md)** · **[Documentation index](docs/index.md)**
@@ -41,7 +41,7 @@ Interactive Jupyter notebooks in `docs/guides/` — open from the repo root with
 | Notebook | What you'll learn |
 |---|---|
 | [01 — Concepts](docs/guides/01-concepts.ipynb) | Data model, record types, IRIs, and the semantic layer |
-| [02 — First cell type](docs/guides/02-first-cell-type.ipynb) | Materials → components → cell type → publish |
+| [02 — First cell spec](docs/guides/02-first-cell-type.ipynb) | Materials → components → cell spec → publish |
 | [03 — Linked records](docs/guides/03-linked-records.ipynb) | Cell instance → test → dataset → registry submission |
 | [04 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
 | [05 — Descriptors](docs/guides/05-descriptors.ipynb) | Research-grade descriptors: electrodes, electrolyte, separator |
@@ -54,8 +54,8 @@ Interactive Jupyter notebooks in `docs/guides/` — open from the repo root with
 - Maps JSON inputs into domain-battery-aligned JSON-LD using authoritative curated property and unit mappings.
 - Produces Battery Pass-compatible JSON-LD (pinned to v1.2.0).
 - Provides profiles, examples, and mapping rules for all common battery record types.
-- Supports a reusable cell-type library curated once as BattINFO descriptors and published as generated RDF/JSON-LD.
-- Publishes dataset metadata as JSON-LD with a core `CellType → CellInstance → Test → Dataset` provenance chain.
+- Supports a reusable cell-spec library curated once as BattINFO descriptors and published as generated RDF/JSON-LD.
+- Publishes dataset metadata as JSON-LD with a core `CellSpecification → CellInstance → Test → Dataset` provenance chain.
 
 ---
 
@@ -65,7 +65,7 @@ Interactive Jupyter notebooks in `docs/guides/` — open from the repo root with
 |-------|-----------------|
 | `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0 with pinned versioned IRIs |
 | `assets/mappings/domain-battery/` | 47 curated property→EMMO-IRI mappings and 27 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
-| `assets/schemas/` | 23 JSON Schema (draft 2020-12) files covering cell types, cell instances, electrodes, electrolytes, separators, tests, datasets, and organisations |
+| `assets/schemas/` | 23 JSON Schema (draft 2020-12) files covering cell specs, cell instances, electrodes, electrolytes, separators, tests, datasets, and organisations |
 | `src/battinfo/transform/json_to_jsonld.py` | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | `src/battinfo/validate/` | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
 
@@ -83,10 +83,10 @@ Ontology dependency versions are pinned and verified. See [`docs/alpha-scope.md`
 
 **In scope for alpha:**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
-- CLI and Python API covering `cell-type`, `cell-instance`, `test`, `dataset`, and `test-protocol` records.
+- CLI and Python API covering `cell-spec`, `cell-instance`, `test`, `dataset`, and `test-protocol` records.
 
 **Preview (may still change):**
-- Reusable cell-type library flows beyond the alpha walkthrough fixtures.
+- Reusable cell-spec library flows beyond the alpha walkthrough fixtures.
 
 **In development (no stability promise):**
 - Registry sync/query (`battinfo push`, `battinfo registry`).

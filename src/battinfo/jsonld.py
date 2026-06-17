@@ -403,8 +403,6 @@ def _provenance(prov: dict) -> dict:
 _TRANSFORMERS = {
     "cell-spec":      cell_spec_to_jsonld,
     "cell_spec":      cell_spec_to_jsonld,
-    "cell-spec":      cell_spec_to_jsonld,
-    "cell_spec":      cell_spec_to_jsonld,
     "cell-instance":  cell_instance_to_jsonld,
     "cell_instance":  cell_instance_to_jsonld,
     "test":           test_to_jsonld,

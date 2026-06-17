@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 import battinfo
-from battinfo import validate_record, validate_record_report, ValidationPolicy
+from battinfo import ValidationPolicy, validate_record, validate_record_report
 
 _A123 = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 
