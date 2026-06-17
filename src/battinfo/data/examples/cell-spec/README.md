@@ -1,3 +1,3 @@
-# Cell Types (Examples)
+# Cell Specs (Examples)
 
-Packaged copy of canonical cell type examples.
+Canonical cell spec examples derived from datasheet JSON.

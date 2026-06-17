@@ -1,3 +1,3 @@
 # Cell Instances (Examples)
 
-Packaged copy of example cell instances.
+Example physical cell instances derived from cell specs.

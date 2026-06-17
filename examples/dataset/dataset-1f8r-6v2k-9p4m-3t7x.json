@@ -6,6 +6,7 @@
     "identifier": "doi:10.5281/zenodo.1234567",
     "name": "Cell cycling run for BattINFO cell 3m6k9t",
     "description": "Raw cycling and metadata export for one physical cell.",
+    "access_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x",
     "same_as": [
       "https://doi.org/10.5281/zenodo.1234567"
     ],
@@ -52,6 +53,10 @@
       {
         "name": "current",
         "unit_text": "A"
+      },
+      {
+        "name": "capacity",
+        "unit_text": "Ah"
       }
     ],
     "is_accessible_for_free": true,
@@ -71,8 +76,7 @@
         },
         "access_level": "open"
       }
-    ],
-    "access_url": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+    ]
   },
   "provenance": {
     "source_type": "measurement",

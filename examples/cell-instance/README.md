@@ -1,3 +1,3 @@
 # Cell Instances (Examples)
 
-Example physical cell instances derived from cell types.
+Example physical cell instances derived from cell specs.

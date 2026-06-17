@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/5v3n-8x1m-4k7p-9r2t",
+    "short_id": "5v3n8x",
+    "identifier": "test-protocol:5v3n-8x1m-4k7p-9r2t",
+    "name": "Rate Capability: C/10 to 5C Discharge at 25\u00b0C",
+    "kind": "rate_capability",
+    "description": "Galvanostatic constant-current discharge at six C-rates (C/10, C/5, C/2, 1C, 2C, 5C) to measure deliverable capacity and energy as a function of rate. Each discharge is preceded by a full constant-current constant-voltage charge at C/5. Three cycles are recorded at each rate. A reference C/10 cycle is repeated at the end to confirm capacity recovery.",
+    "version": "1.0",
+    "protocol_url": "https://example.org/protocols/rate-capability-c10-to-5c"
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "provenance": {
+    "source_type": "manual",
+    "source_file": "rate-capability-c10-5c.protocol.json",
+    "retrieved_at": 1746230400
+  },
+  "notes": [
+    "CC-CV charge at C/5 with C/20 cut-off ensures full, reproducible starting SOC across all rates.",
+    "30-minute rest between steps allows thermal equilibration and open-circuit relaxation.",
+    "At high rates (2C, 5C) the delivered capacity will be significantly lower than the nominal value; this is the expected and intended outcome.",
+    "Specific energy (Wh/kg) and energy density (Wh/L) can be computed from the measured energy and the cell mass/volume recorded in the cell-type record.",
+    "Pre-method-model parameters preserved on migration: {\"setpoints\": {\"charge_rate\": {\"value\": 0.2, \"unit\": \"C\"}, \"charge_cutoff_voltage\": {\"value_text\": \"upper_voltage_limit per cell specification\"}, \"charge_termination_current\": {\"value\": 0.05, \"unit\": \"C\"}, \"discharge_rates\": {\"value_text\": \"C/10, C/5, C/2, 1C, 2C, 5C\"}, \"discharge_cutoff_voltage\": {\"value_text\": \"lower_voltage_limit per cell specification\"}, \"cycles_per_rate\": {\"value\": 3, \"unit\": \"count\"}, \"rest_between_steps\": {\"value\": 30.0, \"unit\": \"min\"}}, \"termination_criteria\": {\"discharge_cutoff_voltage\": {\"value_text\": \"lower_voltage_limit per cell specification\"}}, \"measurement_outputs\": [{\"name\": \"Voltage\", \"unit_text\": \"V\"}, {\"name\": \"Current\", \"unit_text\": \"A\"}, {\"name\": \"Capacity\", \"unit_text\": \"Ah\"}, {\"name\": \"Energy\", \"unit_text\": \"Wh\"}, {\"name\": \"Temperature\", \"unit_text\": \"degC\"}]}"
+  ]
+}

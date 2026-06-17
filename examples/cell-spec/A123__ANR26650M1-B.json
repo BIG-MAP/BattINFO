@@ -3,7 +3,7 @@
   "cell_spec": {
     "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
-    "identifier": "cell-type:7d9k-2m4p-8t3x-6nq5",
+    "identifier": "cell-spec:7d9k-2m4p-8t3x-6nq5",
     "name": "A123 ANR26650M1-B",
     "model": "ANR26650M1-B",
     "manufacturer": {
