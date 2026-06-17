@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m",
+    "name": "AlphaLab CYL-LFP-18650",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "AlphaLab"
+    },
+    "model": "CYL-LFP-18650",
+    "cell_format": "cylindrical",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite",
+    "size_code": "18650"
+  },
+  "properties": {
+    "nominal_capacity": {
+      "value": 1.5,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.2,
+      "unit": "V"
+    }
+  },
+  "construction": {
+    "assembly_type": "wound",
+    "layering": "multilayer",
+    "layer_count": 32,
+    "comment": "Jelly-roll cylindrical alpha fixture."
+  },
+  "positive_electrode": {
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "LFP",
+            "property": {
+              "mass_fraction": {
+                "value": 0.94,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "property": {
+              "mass_fraction": {
+                "value": 0.03,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "property": {
+              "mass_fraction": {
+                "value": 0.03,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "loading": {
+          "value": 17.5,
+          "unit": "mg/cm^2"
+        },
+        "thickness": {
+          "value": 64.0,
+          "unit": "um"
+        }
+      }
+    },
+    "current_collector": {
+      "name": "Al foil",
+      "property": {
+        "thickness": {
+          "value": 15.0,
+          "unit": "um"
+        }
+      }
+    }
+  },
+  "negative_electrode": {
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "Graphite",
+            "property": {
+              "mass_fraction": {
+                "value": 0.95,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "CMC/SBR",
+            "property": {
+              "mass_fraction": {
+                "value": 0.05,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "thickness": {
+          "value": 72.0,
+          "unit": "um"
+        }
+      }
+    },
+    "current_collector": {
+      "name": "Cu foil",
+      "property": {
+        "thickness": {
+          "value": 10.0,
+          "unit": "um"
+        }
+      }
+    }
+  },
+  "electrolyte": {
+    "family": "organic",
+    "solvent_mixture": {
+      "component": [
+        {
+          "name": "EC",
+          "property": {
+            "volume_fraction": {
+              "value": 0.3,
+              "unit": "1"
+            }
+          }
+        },
+        {
+          "name": "EMC",
+          "property": {
+            "volume_fraction": {
+              "value": 0.7,
+              "unit": "1"
+            }
+          }
+        }
+      ]
+    },
+    "salt": {
+      "name": "LiPF6",
+      "property": {
+        "concentration": {
+          "value": 1.0,
+          "unit": "mol/L"
+        }
+      }
+    },
+    "additive": [
+      {
+        "name": "VC",
+        "property": {
+          "volume_fraction": {
+            "value": 0.02,
+            "unit": "1"
+          }
+        }
+      }
+    ]
+  },
+  "separator": {
+    "material": "PE/PP trilayer",
+    "property": {
+      "thickness": {
+        "value": 18.0,
+        "unit": "um"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "BattINFO alpha fixtures",
+    "source_file": "examples/cell-descriptors/alpha-cylindrical-detailed.example.json",
+    "retrieved_at": 1773201600,
+    "workflow_version": "alpha-fixtures-0.1",
+    "comment": "Canonical detailed cylindrical fixture."
+  },
+  "notes": [
+    "Detailed cylindrical descriptor for alpha validation coverage.",
+    "Alpha fixture for detailed cylindrical-cell descriptions."
+  ]
+}

@@ -1,0 +1,94 @@
+// Shared editorial content for the marketing/reference pages.
+// Kept here (not inline in JSX) so copy can be reviewed and reused across pages,
+// the way schema.org / Gene Ontology keep a single coherent narrative.
+
+// The author → validate → convert → publish pipeline. The four-verb spine of
+// the whole project; shown on the home page and echoed by the two tools.
+export const pipeline = [
+  {
+    verb: "Author",
+    body: "Write plain, readable JSON — the same fields you already put on a datasheet or spec. No ontology expertise required.",
+  },
+  {
+    verb: "Validate",
+    body: "Check structure, references, and semantics against one contract-grade engine, with stable issue codes.",
+  },
+  {
+    verb: "Convert",
+    body: "A deterministic, mapping-driven transform emits canonical EMMO-aligned JSON-LD — and valid RDF.",
+  },
+  {
+    verb: "Publish",
+    body: "Get back a stable w3id.org/battinfo IRI. Your record is now Linked Data anyone can resolve and reuse.",
+  },
+] as const;
+
+// Why BattINFO is trustworthy infrastructure, not a one-off schema.
+export const features = [
+  {
+    title: "Ontology-aligned",
+    body: "Every record is typed against EMMO domain-battery. BattINFO is the non-normative implementation layer; the ontology stays the source of truth.",
+  },
+  {
+    title: "JSON-LD first",
+    body: "Author plain JSON; publish valid RDF. A deterministic, mapping-table-driven transform produces canonical EMMO-aligned JSON-LD.",
+  },
+  {
+    title: "Validated, multi-layer",
+    body: "JSON Schema 2020-12, Pydantic, JSON-LD URDNA2015 normalisation, semantic rules, and referential integrity — not just shape-checking.",
+  },
+  {
+    title: "Persistent identifiers",
+    body: "Published entities carry stable, opaque w3id.org/battinfo/{type}/{uid} IRIs, governed by a published identifier policy.",
+  },
+] as const;
+
+// Dual-audience framing, the Gene Ontology pattern: the same resource serves the
+// people who describe batteries and the people who build tools, and says so.
+export const audiences = [
+  {
+    who: "Engineers, designers & data owners",
+    body: "Describe cells, builds, and tests in JSON you can read. Keep units explicit and provenance linked — and move data cleanly across teams, suppliers, and tools without learning RDF.",
+    cta: { label: "Author your first record", href: "/docs#quickstart" },
+  },
+  {
+    who: "Software & data teams",
+    body: "A stable JSON Schema contract, a Python library and CLI, structured validation issue codes, and JSON-LD you can load into any database or triplestore.",
+    cta: { label: "Read the schemas & API", href: "/docs#schemas" },
+  },
+] as const;
+
+// The linked data model — record types and how they chain. Used on the home
+// page and docs to show this is one coherent model, not a bag of schemas.
+export const recordModel = [
+  { type: "CellType", blurb: "An as-designed cell specification (a product / SKU)." },
+  { type: "CellInstance", blurb: "A physical, individually-tracked cell of a CellType." },
+  { type: "Test", blurb: "A measurement performed on a CellInstance under a protocol." },
+  { type: "Dataset", blurb: "The data and files a Test produced, with distributions." },
+  { type: "TestProtocol", blurb: "The reusable procedure a Test was run under." },
+  { type: "Organization", blurb: "Manufacturers, labs, and publishers, as linked entities." },
+] as const;
+
+// The provenance chain, rendered as a single readable line.
+export const provenanceChain = "CellType → CellInstance → Test → Dataset";
+
+// Project principles — the OBO Foundry move: state the governance commitments
+// that make a standard dependable, not just functional.
+export const principles = [
+  {
+    title: "Open & non-proprietary",
+    body: "Schemas, mappings, and tooling are public and openly licensed. The normative semantics live in the community EMMO ontology, not in this project.",
+  },
+  {
+    title: "Stable, resolvable identifiers",
+    body: "Published entities get opaque, persistent IRIs under w3id.org/battinfo, governed by a written identifier policy — they don't break when the site changes.",
+  },
+  {
+    title: "Versioned & reproducible",
+    body: "Upstream ontologies are pinned; the transform is deterministic; validation policies are versioned so downstream systems can rely on them.",
+  },
+  {
+    title: "Layered, not monolithic",
+    body: "EMMO is the source of truth; BattINFO is the operational layer of schemas and tools. Each layer can evolve without rewriting the other.",
+  },
+] as const;

@@ -1,0 +1,12 @@
+{
+  "generated_from": "src/battinfo/data/profiles/cell-descriptor/profile.json",
+  "fragment": "quantitative-properties",
+  "type": "object",
+  "patternProperties": {
+    "^[a-z][a-z0-9_]*$": {
+      "$ref": "quantity.schema.json"
+    }
+  },
+  "additionalProperties": false
+}
+

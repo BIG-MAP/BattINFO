@@ -1,0 +1,26 @@
+{
+  "generated_from": "src/battinfo/data/profiles/cell-descriptor/profile.json",
+  "fragment": "instance-reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}
+
