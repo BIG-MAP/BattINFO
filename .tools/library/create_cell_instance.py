@@ -51,7 +51,7 @@ def mint_uid() -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cell-type", required=True, help="Path to cell-type JSON")
+    parser.add_argument("--cell-spec", required=True, help="Path to cell-spec JSON")
     parser.add_argument("--serial", required=True, help="Serial number for instance")
     parser.add_argument("--out", required=True, help="Output cell-instance JSON")
     parser.add_argument(
@@ -66,13 +66,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    cell_type = load_json(Path(args.cell_type))
-    cell_type_id = cell_type.get("cell_type", {}).get("id")
-    if not cell_type_id:
-        raise SystemExit("cell_type.id missing in cell-type JSON")
-    if not CELL_TYPE_IRI_RE.fullmatch(cell_type_id):
+    cell_spec = load_json(Path(args.cell_spec))
+    cell_spec_id = cell_spec.get("cell_spec", {}).get("id")
+    if not cell_spec_id:
+        raise SystemExit("cell_spec.id missing in cell-spec JSON")
+    if not CELL_TYPE_IRI_RE.fullmatch(cell_spec_id):
         raise SystemExit(
-            "cell_type.id must be a BattINFO cell-type IRI "
+            "cell_spec.id must be a BattINFO cell-spec IRI "
             "(https://w3id.org/battinfo/cell/{uid})."
         )
 
@@ -96,7 +96,7 @@ def main() -> None:
         "schema_version": "0.1.0",
         "cell_instance": {
             "id": instance_id,
-            "type_id": cell_type_id,
+            "cell_spec_id": cell_spec_id,
             "short_id": uid.replace("-", "")[:6],
             "serial_number": args.serial,
         },

@@ -1,0 +1,172 @@
+{
+  "generated_from": "src/battinfo/data/profiles/cell-descriptor/profile.json",
+  "fragment": "specification-core",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "manufacturer",
+    "model",
+    "format",
+    "chemistry",
+    "positive_electrode_basis",
+    "negative_electrode_basis"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "manufacturer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "cylindrical",
+        "prismatic",
+        "pouch",
+        "coin",
+        "other",
+        "unknown"
+      ]
+    },
+    "chemistry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "positive_electrode_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "negative_electrode_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product_type": {
+      "type": "string",
+      "enum": [
+        "commercial",
+        "research",
+        "prototype"
+      ]
+    },
+    "size_code": {
+      "type": "string"
+    },
+    "construction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "assembly_type": {
+          "type": "string",
+          "enum": [
+            "wound",
+            "stacked",
+            "other",
+            "unknown"
+          ]
+        },
+        "layering": {
+          "type": "string",
+          "enum": [
+            "single_layer",
+            "multilayer",
+            "not_applicable",
+            "unknown"
+          ]
+        },
+        "layer_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "assembly_sequence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "comment": {
+          "type": "string"
+        },
+        "cathode_sheet_count": {
+          "type": "integer"
+        },
+        "anode_sheet_count": {
+          "type": "integer"
+        },
+        "separator_sheet_count": {
+          "type": "integer"
+        },
+        "winding_turns": {
+          "type": "number"
+        },
+        "electrode_length": {
+          "type": "object",
+          "description": "Quantity (value/unit)."
+        },
+        "jellyroll_volume": {
+          "type": "object",
+          "description": "Quantity (value/unit)."
+        }
+      }
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json"
+    },
+    "positive_electrode": {
+      "$ref": "electrode.schema.json"
+    },
+    "negative_electrode": {
+      "$ref": "electrode.schema.json"
+    },
+    "electrolyte": {
+      "$ref": "electrolyte.schema.json"
+    },
+    "separator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "material"
+      ],
+      "properties": {
+        "material": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "supplier": {
+          "type": "string"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "housing": {
+      "type": "object",
+      "title": "Housing",
+      "description": "Cell mechanical housing (case, terminals, seals, parts)."
+    },
+    "comment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

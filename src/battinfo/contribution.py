@@ -59,7 +59,7 @@ def init_contribution(
     output_path: Path,
     *,
     cell_name: str | None = None,
-    cell_type_iri: str | None = None,
+    cell_spec_iri: str | None = None,
     lab: str | None = None,
     license: str = "CC-BY-4.0",
     overwrite: bool = False,
@@ -89,8 +89,8 @@ def init_contribution(
 
     if cell_name:
         text = _patch(text, "cell_name", cell_name)
-    if cell_type_iri:
-        text = _patch(text, "cell_type_iri", cell_type_iri)
+    if cell_spec_iri:
+        text = _patch(text, "cell_spec_iri", cell_spec_iri)
     if lab:
         text = _patch(text, "lab", lab)
     if license != "CC-BY-4.0":
@@ -122,10 +122,10 @@ def load_contribution_manifest(root: Path) -> dict[str, Any]:
 def validate_contribution_manifest(manifest: dict) -> list[str]:
     """Return a list of human-readable error strings (empty = valid)."""
     errors = []
-    if not manifest.get("cell_type_iri"):
+    if not manifest.get("cell_spec_iri"):
         errors.append(
-            "cell_type_iri is required. Find the IRI at "
-            "https://www.battery-genome.org/registry/cell-type"
+            "cell_spec_iri is required. Find the IRI at "
+            "https://www.battery-genome.org/registry/cell-spec"
         )
     if not manifest.get("cell_name"):
         errors.append("cell_name is required (e.g. a serial number or lab label).")
@@ -134,14 +134,14 @@ def validate_contribution_manifest(manifest: dict) -> list[str]:
     return errors
 
 
-def _resolve_type_record_path(cell_type_iri: str) -> str | None:
-    """Return the absolute path to the library record.json for a cell-type IRI."""
-    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_types
+def _resolve_type_record_path(cell_spec_iri: str) -> str | None:
+    """Return the absolute path to the library record.json for a cell-spec IRI."""
+    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
     from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
 
     packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
     for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
-        results = query_library_cell_types(id=cell_type_iri, directory=directory)
+        results = query_library_cell_specs(id=cell_spec_iri, directory=directory)
         if results:
             return results[0]["path"]
     return None
@@ -153,8 +153,8 @@ def _contribution_to_ingest_manifest(manifest: dict, root: Path) -> dict:
     lab = manifest.get("lab") or ""
     resource_name = f"{lab} {cell_name}".strip() if lab else cell_name
 
-    cell_type_iri = manifest.get("cell_type_iri") or ""
-    type_record = _resolve_type_record_path(cell_type_iri) if cell_type_iri else None
+    cell_spec_iri = manifest.get("cell_spec_iri") or ""
+    type_record = _resolve_type_record_path(cell_spec_iri) if cell_spec_iri else None
 
     return {
         "resource_type": "cell-instance",
@@ -358,7 +358,7 @@ def process_contribution(
     result: dict[str, Any] = {
         "root": str(root),
         "cell_name": manifest.get("cell_name"),
-        "cell_type_iri": manifest.get("cell_type_iri"),
+        "cell_spec_iri": manifest.get("cell_spec_iri"),
         "lab": manifest.get("lab"),
         "license": manifest.get("license", "CC-BY-4.0"),
         "files": file_descriptions,
@@ -412,7 +412,7 @@ def publish_to_zenodo(
     manifest = load_contribution_manifest(root)
     intake = json.loads(intake_path.read_text(encoding="utf-8"))
 
-    cell_type_iri = manifest.get("cell_type_iri")
+    cell_spec_iri = manifest.get("cell_spec_iri")
     cell_name = manifest.get("cell_name", root.name)
     lab = manifest.get("lab", "")
     license_id = manifest.get("license", "CC-BY-4.0")
@@ -434,7 +434,7 @@ def publish_to_zenodo(
         "license": license_id.lower(),
         "communities": [{"identifier": community}] if community else [],
         "keywords": _extract_keywords(manifest, intake),
-        "related_identifiers": _related_identifiers(cell_type_iri, intake),
+        "related_identifiers": _related_identifiers(cell_spec_iri, intake),
     }
     operator = manifest.get("operator") or manifest.get("experimenter")
     if operator:
@@ -480,10 +480,10 @@ def _extract_keywords(manifest: dict, intake: dict) -> list[str]:
     return list(dict.fromkeys(keywords))  # deduplicate, preserve order
 
 
-def _related_identifiers(cell_type_iri: str | None, intake: dict) -> list[dict]:
+def _related_identifiers(cell_spec_iri: str | None, intake: dict) -> list[dict]:
     ids = []
-    if cell_type_iri:
-        ids.append({"identifier": cell_type_iri, "relation": "isSupplementTo", "scheme": "url"})
+    if cell_spec_iri:
+        ids.append({"identifier": cell_spec_iri, "relation": "isSupplementTo", "scheme": "url"})
     for resource in intake.get("resources", []):
         iri = resource.get("canonical_iri")
         if iri and iri not in {d["identifier"] for d in ids}:
@@ -531,8 +531,8 @@ _CELL_TYPE_IRI_PATTERN = (
 )
 
 
-def _resolve_cell_type_for_batch(cell_type: str) -> tuple[str, str, str, str]:
-    """Return (iri, display_name, manufacturer, model) for a cell-type query.
+def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
+    """Return (iri, display_name, manufacturer, model) for a cell-spec query.
 
     Accepts either a full BattINFO IRI or a free-text query like
     ``"Energizer CR2032"`` / ``"Energizer/CR2032"``.  Searches the packaged
@@ -540,29 +540,29 @@ def _resolve_cell_type_for_batch(cell_type: str) -> tuple[str, str, str, str]:
     """
     import re
 
-    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_types
+    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
     from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
 
     packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
-    is_iri = bool(re.fullmatch(_CELL_TYPE_IRI_PATTERN, cell_type.strip()))
+    is_iri = bool(re.fullmatch(_CELL_TYPE_IRI_PATTERN, cell_spec.strip()))
 
     if is_iri:
-        iri = cell_type.strip()
+        iri = cell_spec.strip()
         for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
-            results = query_library_cell_types(id=iri, directory=directory)
+            results = query_library_cell_specs(id=iri, directory=directory)
             if results:
                 r = results[0]
                 return iri, f"{r['manufacturer']} {r['model']}", r["manufacturer"], r["model"]
         return iri, iri.rstrip("/").split("/")[-1], "", ""
 
-    query = cell_type.strip().replace("/", " ")
+    query = cell_spec.strip().replace("/", " ")
     parts = query.split(None, 1)
     manufacturer = parts[0] if parts else query
     model = parts[1] if len(parts) > 1 else None
 
     results = []
     for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
-        results = query_library_cell_types(
+        results = query_library_cell_specs(
             manufacturer=manufacturer,
             model_contains=model,
             directory=directory,
@@ -572,7 +572,7 @@ def _resolve_cell_type_for_batch(cell_type: str) -> tuple[str, str, str, str]:
 
     if not results:
         raise ValueError(
-            f"No cell type found matching {cell_type!r}. "
+            f"No cell type found matching {cell_spec!r}. "
             "Check the library or pass the IRI directly."
         )
     if len(results) > 1:
@@ -580,7 +580,7 @@ def _resolve_cell_type_for_batch(cell_type: str) -> tuple[str, str, str, str]:
             f"  {r['manufacturer']} {r['model']}  ({r['id']})" for r in results[:5]
         )
         raise ValueError(
-            f"Multiple cell types match {cell_type!r}. "
+            f"Multiple cell types match {cell_spec!r}. "
             f"Be more specific or pass the IRI directly.\n{options}"
         )
 
@@ -621,18 +621,18 @@ def _cell_folder_name(
 
 
 def _generate_cell_iri(
-    cell_type_iri: str,
+    cell_spec_iri: str,
     batch_id: str | None,
     index: int,
     serial_number: str | None = None,
 ) -> str:
     """Mint a deterministic cell instance IRI.
 
-    The seed is stable: same cell_type + batch + serial (or index) always
+    The seed is stable: same cell_spec + batch + serial (or index) always
     produces the same IRI, so re-running init on an existing batch is safe.
     """
     from battinfo.publication import _entity_iri
-    seed_parts = [cell_type_iri, batch_id or "batch"]
+    seed_parts = [cell_spec_iri, batch_id or "batch"]
     if serial_number:
         seed_parts.append(serial_number)
     else:
@@ -656,7 +656,7 @@ project: {project}
 license: {license!r}
 
 # ── Managed by battinfo — do not edit below ──────────────────────────────────
-cell_type_iri: {cell_type_iri!r}
+cell_spec_iri: {cell_spec_iri!r}
 cell_iri: {cell_iri}
 publisher_id: null
 source_version: null
@@ -665,7 +665,7 @@ source_version: null
 
 def init_batch(
     output_dir: Path,
-    cell_type: str,
+    cell_spec: str,
     count: int,
     *,
     batch_id: str | None = None,
@@ -686,7 +686,7 @@ def init_batch(
     Args:
         output_dir: Root directory to create (must not exist unless
                     *overwrite* is True).
-        cell_type: BattINFO cell-type IRI **or** a free-text query like
+        cell_spec: BattINFO cell-spec IRI **or** a free-text query like
                    ``"Energizer CR2032"`` — resolved via the library.
         count: Number of cell instances to scaffold.
         batch_id: Batch / lot identifier stamped on every manifest.
@@ -702,7 +702,7 @@ def init_batch(
         overwrite: Allow writing into an existing directory.
 
     Returns:
-        Dict with ``output_dir``, ``cell_type_iri``, ``cell_type_name``,
+        Dict with ``output_dir``, ``cell_spec_iri``, ``cell_spec_name``,
         ``count``, and ``cells`` (list of per-cell dicts).
     """
     output_dir = Path(output_dir).resolve()
@@ -716,7 +716,7 @@ def init_batch(
             f"serial_numbers length ({len(serial_numbers)}) must equal count ({count})."
         )
 
-    cell_type_iri, cell_type_name, manufacturer, model = _resolve_cell_type_for_batch(cell_type)
+    cell_spec_iri, cell_spec_name, manufacturer, model = _resolve_cell_spec_for_batch(cell_spec)
 
     if output_dir.exists() and not overwrite:
         raise FileExistsError(
@@ -726,8 +726,8 @@ def init_batch(
 
     # ── batch.yaml ─────────────────────────────────────────────────────────────
     shipment_meta: dict[str, Any] = {
-        "cell_type_iri": cell_type_iri,
-        "cell_type_name": cell_type_name,
+        "cell_spec_iri": cell_spec_iri,
+        "cell_spec_name": cell_spec_name,
         "manufacturer": manufacturer,
         "model": model,
         "count": count,
@@ -746,7 +746,7 @@ def init_batch(
         cell_iri = (
             cell_iris[i]
             if cell_iris
-            else _generate_cell_iri(cell_type_iri, batch_id, i, sn)
+            else _generate_cell_iri(cell_spec_iri, batch_id, i, sn)
         )
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         cell_name = sn or folder_name
@@ -758,7 +758,7 @@ def init_batch(
 
         manifest_text = _CELL_YAML_TEMPLATE.format(
             cell_name=cell_name,
-            cell_type_iri=cell_type_iri,
+            cell_spec_iri=cell_spec_iri,
             cell_iri=repr(cell_iri),
             batch_id=repr(batch_id) if batch_id else "null",
             lab=repr(lab) if lab else "null",
@@ -776,8 +776,8 @@ def init_batch(
 
     return {
         "output_dir": str(output_dir),
-        "cell_type_iri": cell_type_iri,
-        "cell_type_name": cell_type_name,
+        "cell_spec_iri": cell_spec_iri,
+        "cell_spec_name": cell_spec_name,
         "count": count,
         "cells": cells,
     }
@@ -845,8 +845,8 @@ def add_to_batch(
 
     manifest = load_batch_manifest(batch_dir)
 
-    cell_type_iri: str = manifest["cell_type_iri"]
-    cell_type_name: str = manifest.get("cell_type_name", "")
+    cell_spec_iri: str = manifest["cell_spec_iri"]
+    cell_spec_name: str = manifest.get("cell_spec_name", "")
     manufacturer: str = manifest.get("manufacturer", "")
     model: str = manifest.get("model", "")
     existing_count: int = int(manifest.get("count") or 0)
@@ -863,7 +863,7 @@ def add_to_batch(
         cell_iri = (
             cell_iris[i]
             if cell_iris
-            else _generate_cell_iri(cell_type_iri, effective_batch_id, existing_count + i, sn)
+            else _generate_cell_iri(cell_spec_iri, effective_batch_id, existing_count + i, sn)
         )
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         cell_name = sn or folder_name
@@ -880,7 +880,7 @@ def add_to_batch(
 
         manifest_text = _CELL_YAML_TEMPLATE.format(
             cell_name=cell_name,
-            cell_type_iri=cell_type_iri,
+            cell_spec_iri=cell_spec_iri,
             cell_iri=repr(cell_iri),
             batch_id=repr(effective_batch_id) if effective_batch_id else "null",
             lab=repr(effective_lab) if effective_lab else "null",
@@ -899,8 +899,8 @@ def add_to_batch(
         "added": count,
         "new_cells": new_cells,
         "total_count": existing_count + count,
-        "cell_type_iri": cell_type_iri,
-        "cell_type_name": cell_type_name,
+        "cell_spec_iri": cell_spec_iri,
+        "cell_spec_name": cell_spec_name,
     }
 
 
@@ -1016,24 +1016,24 @@ def _test_kind_from_path(path: Path, subdir_name: str = "") -> str:
     return "other"
 
 
-def _load_cell_type_for_batch(cell_type_iri: str) -> tuple[Any, Any]:
-    """Return (CellType, CellSpecification | None) for a cell-type IRI.
+def _load_cell_spec_for_batch(cell_spec_iri: str) -> tuple[Any, Any]:
+    """Return (CellSpecification, CellSpecification | None) for a cell-spec IRI.
 
     Searches the packaged library first, then the local workspace library.
-    Falls back to a minimal CellType carrying only the IRI.
+    Falls back to a minimal CellSpecification carrying only the IRI.
     """
-    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_types
-    from battinfo.bundle import CellSpecification, CellType
+    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
+    from battinfo.bundle import CellSpecification, CellSpecification
     from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
 
     packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
     for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
-        results = query_library_cell_types(id=cell_type_iri, directory=directory)
+        results = query_library_cell_specs(id=cell_spec_iri, directory=directory)
         if results:
             spec = CellSpecification.from_library_record(results[0]["record"])
-            ct = CellType.from_cell_specification(spec, id=cell_type_iri)
+            ct = CellSpecification.from_cell_specification(spec, id=cell_spec_iri)
             return ct, spec
-    return CellType(id=cell_type_iri), None
+    return CellSpecification(id=cell_spec_iri), None
 
 
 def package_batch(
@@ -1077,7 +1077,7 @@ def package_batch(
     )
     from battinfo.publication import (
         _finalize_cell_instance,
-        _finalize_cell_type,
+        _finalize_cell_spec,
         _finalize_dataset,
         _finalize_test,
         build_zenodo_package,
@@ -1088,10 +1088,10 @@ def package_batch(
 
     batch_dir = Path(batch_dir).resolve()
     manifest = load_batch_manifest(batch_dir)
-    cell_type_iri: str = manifest["cell_type_iri"]
+    cell_spec_iri: str = manifest["cell_spec_iri"]
 
-    raw_cell_type, cell_spec = _load_cell_type_for_batch(cell_type_iri)
-    cell_type = _finalize_cell_type(raw_cell_type, cell_specification=cell_spec)
+    raw_cell_spec, cell_spec = _load_cell_spec_for_batch(cell_spec_iri)
+    cell_spec = _finalize_cell_spec(raw_cell_spec, cell_specification=cell_spec)
 
     # Discover cell sub-folders: any directory with a battinfo.yaml
     cell_dirs = sorted(
@@ -1114,7 +1114,7 @@ def package_batch(
 
         raw_ci = CellInstance(
             id=cell_manifest.get("cell_iri") or None,
-            cell_type_id=cell_type.id,
+            cell_spec_id=cell_spec.id,
             name=cell_manifest.get("cell_name"),
             serial_number=cell_manifest.get("cell_name"),
             batch_id=cell_manifest.get("batch_id") or manifest.get("batch_id"),
@@ -1123,7 +1123,7 @@ def package_batch(
                 url=(cell_dir / "data").resolve().as_uri(),
             ),
         )
-        ci = _finalize_cell_instance(raw_ci, cell_type=cell_type, dataset_dir=cell_dir)
+        ci = _finalize_cell_instance(raw_ci, cell_spec=cell_spec, dataset_dir=cell_dir)
 
         pairs = _collect_data_files(cell_dir)
         if not pairs:
@@ -1147,7 +1147,7 @@ def package_batch(
             )
             test = _finalize_test(raw_test, cell_instance=ci, dataset_dir=cell_dir)
 
-            ds_name = f"{cell_type.name} {ci.name or cell_dir.name} {raw_path.stem}"
+            ds_name = f"{cell_spec.name} {ci.name or cell_dir.name} {raw_path.stem}"
             raw_ds = Dataset(
                 name=ds_name,
                 cell_instance_id=ci.id,
@@ -1170,7 +1170,7 @@ def package_batch(
         )
 
     record = ZenodoCellRecord(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_specification=cell_spec,
         datasets=entries,
     )
@@ -1193,7 +1193,7 @@ def package_batch(
 
 def push_batch(
     folder: Path,
-    cell_type: str | None = None,
+    cell_spec: str | None = None,
     staging_dir: Path | None = None,
     *,
     creators: list[dict[str, Any]],
@@ -1236,10 +1236,10 @@ def push_batch(
 
     if not is_batch and not has_cell_subdirs:
         # Flat or sub-folder layout — need to create batch structure
-        if cell_type is None:
+        if cell_spec is None:
             raise ValueError(
-                "cell_type is required when folder is not already a battinfo batch. "
-                "Pass cell_type='Manufacturer Model'."
+                "cell_spec is required when folder is not already a battinfo batch. "
+                "Pass cell_spec='Manufacturer Model'."
             )
 
         # Check if sub-directories contain raw files (sub-folder layout)
@@ -1266,7 +1266,7 @@ def push_batch(
             cell_count = n_cells or len(groups)
             result_init = init_batch(
                 folder,
-                cell_type,
+                cell_spec,
                 cell_count,
                 batch_id=batch_id,
                 lab=lab,
@@ -1286,7 +1286,7 @@ def push_batch(
             # Sub-folder layout: init batch over the existing sub-dirs
             result_init = init_batch(
                 folder,
-                cell_type,
+                cell_spec,
                 len(subdirs_with_files),
                 batch_id=batch_id,
                 lab=lab,

@@ -9,13 +9,13 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
     CellInstanceInput,
-    CellTypeInput,
+    CellSpecificationInput,
     DatasetInput,
     TestInput,
     build_index,
     publish_batch,
     save_cell_instance,
-    save_cell_type,
+    save_cell_spec,
     save_dataset,
     save_test,
 )
@@ -26,8 +26,8 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
     publish_root = tmp_path / "site"
     index_path = tmp_path / ".battinfo" / "index.json"
 
-    cell_type = save_cell_type(
-        CellTypeInput(
+    cell_spec = save_cell_spec(
+        CellSpecificationInput(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",
@@ -41,7 +41,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
     cell_instance = save_cell_instance(
         CellInstanceInput(
             uid="1f8r6v2k9p4m3t7x",
-            type_id=cell_type["id"],
+            cell_spec_id=cell_spec["id"],
             serial_number="ALPHA-001",
             source_type="lab",
         ),
@@ -77,7 +77,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
 
     publish_summary = publish_batch(
         source_dirs=[
-            source_root / "cell-type",
+            source_root / "cell-spec",
             source_root / "cell-instance",
             source_root / "test",
             source_root / "dataset",
@@ -97,7 +97,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
         validation_policy="strict",
     )
     assert index["failed"] == 0
-    assert index["cell_type_count"] == 1
+    assert index["cell_spec_count"] == 1
     assert index["cell_instance_count"] == 1
     assert index["test_count"] == 1
     assert index["dataset_count"] == 1

@@ -8,11 +8,11 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DIR = ROOT / ".battinfo" / "datasheets" / "generated-cell-types"
+DEFAULT_DIR = ROOT / ".battinfo" / "datasheets" / "generated-cell-specs"
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run quality gates for BattINFO cell-type datasheet batches.")
+    parser = argparse.ArgumentParser(description="Run quality gates for BattINFO cell-spec datasheet batches.")
     parser.add_argument(
         "--dir",
         type=Path,
@@ -137,8 +137,8 @@ def main() -> int:
 
     for path in files:
         doc = _load_json(path)
-        product = doc.get("product", {})
-        specs = doc.get("specs", {})
+        product = doc.get("cell_spec", {})
+        specs = doc.get("properties", {})
 
         if _is_unknown(product.get("manufacturer")):
             unknown_manufacturer += 1

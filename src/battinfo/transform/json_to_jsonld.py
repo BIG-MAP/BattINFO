@@ -70,9 +70,14 @@ CONVERTER_LABEL_TO_TYPE = {label: type_name for type_name, label in {
     "VinyleneCarbonate": "VC",
 }.items()}
 CONVERTER_UNIT_TEXT_TO_TOKEN = {
+    "1": "emmo:UnitOne",
     "C": "emmo:CelsiusTemperature",
+    "°C": "emmo:CelsiusTemperature",
     "%": "unit:PERCENT",
     "g/cm3": "emmo:GramPerCubicCentiMetre",
+    "mAh/cm2": "emmo:MilliAmpereHourPerSquareCentiMetre",
+    "mAh/g": "unit:MilliA-HR-PER-GM",
+    "mg/cm2": "unit:MilliGM-PER-CentiM2",
     "mPa.s": "unit:MilliPA-SEC",
     "mS/cm": "unit:MilliS-PER-CentiM",
     "mm": "unit:MilliM",
@@ -90,8 +95,11 @@ CONVERTER_PROPERTY_TYPES = {
     "loading": "MassLoading",
     "mass_fraction": "MassFraction",
     "porosity": "Porosity",
+    "rated_areal_discharge_capacity": "RatedCapacity",
+    "rated_specific_discharge_capacity": "RatedCapacity",
     "temperature": "CelsiusTemperature",
     "thickness": "Thickness",
+    "tortuosity": "Tortuosity",
     "viscosity": "DynamicViscosity",
     "volume_fraction": "VolumeFraction",
 }
@@ -200,7 +208,7 @@ def _load_mapping_file(*parts: str) -> dict[str, Any]:
 
 
 def _load_profile_file(*parts: str) -> dict[str, Any]:
-    packaged_path = resources.files("battinfo").joinpath("data", "profiles", "cell-type", *parts)
+    packaged_path = resources.files("battinfo").joinpath("data", "profiles", "cell-spec", *parts)
     if packaged_path.is_file():
         with packaged_path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
@@ -222,7 +230,14 @@ def _property_type_map() -> dict[str, dict[str, str]]:
             term = item.get("class_pref_label") or item.get("class_label")
             iri = item.get("class_iri")
             if isinstance(term, str) and term and isinstance(iri, str) and iri:
-                merged.setdefault(key, {"term": term, "iri": iri})
+                entry: dict[str, str] = {"term": term, "iri": iri}
+                co_type = item.get("co_type")
+                if isinstance(co_type, str) and co_type:
+                    entry["co_type"] = co_type
+                co_type_pending = item.get("co_type_pending")
+                if isinstance(co_type_pending, str) and co_type_pending:
+                    entry["co_type_pending"] = co_type_pending
+                merged.setdefault(key, entry)
 
     merged.update(MANUAL_PROPERTY_TYPES)
     return merged
@@ -310,6 +325,31 @@ def _property_type_term(name: str) -> str:
     return f"battinfo:{_snake_to_camel(name)}"
 
 
+# Property-nature co-types that are declared in the curated map but not yet
+# published in domain-battery + its context. The descriptor emits the entry's
+# fallback ``co_type`` until the term lands, then flip the value here to True and
+# the ``co_type_pending`` class is emitted instead. Keeps JSON-LD validation green.
+# See docs/coincell-canonical.md §4.1 (RatedProperty).
+PENDING_CO_TYPE_AVAILABLE: dict[str, bool] = {"RatedProperty": False}
+
+
+def _property_co_type(name: str) -> str:
+    """Resolve the measured/conventional co-type for a property key.
+
+    Defaults to ``ConventionalProperty``. A curated entry may declare an explicit
+    ``co_type`` and/or a ``co_type_pending`` upgrade that activates once the term is
+    marked available in :data:`PENDING_CO_TYPE_AVAILABLE`.
+    """
+    entry = _property_type_map().get(name) or {}
+    pending = entry.get("co_type_pending")
+    if isinstance(pending, str) and PENDING_CO_TYPE_AVAILABLE.get(pending, False):
+        return pending
+    co_type = entry.get("co_type")
+    if isinstance(co_type, str) and co_type:
+        return co_type
+    return "ConventionalProperty"
+
+
 def _unit_iri(unit: str | None) -> str | None:
     if not isinstance(unit, str) or not unit:
         return None
@@ -330,11 +370,14 @@ def _profile_binding_target(path: str, default: str) -> str:
     return target if isinstance(target, str) and target else default
 
 
-def _descriptor_quantity_node(name: str, quantity: dict[str, Any]) -> dict[str, Any] | None:
+def _descriptor_quantity_node(
+    name: str, quantity: dict[str, Any], *, term: str | None = None
+) -> dict[str, Any] | None:
     if not isinstance(quantity, dict):
         return None
 
-    node: dict[str, Any] = {"@type": [_property_type_term(name), "ConventionalProperty"]}
+    resolved_term = term or _property_type_term(name)
+    node: dict[str, Any] = {"@type": [resolved_term, _property_co_type(name)]}
 
     # Emit the primary (nominal/typical) value only.  EMMO's canonical pattern for a
     # ConventionalProperty is a single RealData node; a range (min/max) is correctly
@@ -343,7 +386,7 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any]) -> dict[str, 
     # in the canonical JSON record and are available to JSON consumers.
     primary = quantity.get("value") if quantity.get("value") is not None else quantity.get("typical_value")
     if primary is not None:
-        node["hasNumericalPart"] = {"@type": "RealData", "hasNumericalValue": primary}
+        node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
 
     if quantity.get("value_text"):
         node["schema:value"] = quantity["value_text"]
@@ -356,6 +399,66 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any]) -> dict[str, 
         node["schema:unitText"] = unit
 
     return node if len(node) > 1 else None
+
+
+# Dimensionless fraction keys (need the UnitOne %→[0,1] encoding) → EMMO class.
+_FRACTION_PROPERTY_TERMS = {
+    "mass_fraction": "MassFraction",
+    "volume_fraction": "VolumeFraction",
+    "porosity": "Porosity",
+}
+
+# Canonical descriptor EMMO terms for property keys not carried by the curated map,
+# plus holder-specific specializations. Resolution falls through to the curated map
+# (``_property_type_term``) for any key not listed here, so curated capacity terms
+# (AreicCapacity / DischargingSpecificCapacity / TheoreticalCapacity / Mass / Diameter /
+# Tortuosity / D50ParticleSize …) win. NOTE: distinct from the converter-compatible
+# CONVERTER_PROPERTY_TYPES, which (legacy) types normalized capacities as RatedCapacity.
+_DESCRIPTOR_PROPERTY_TERMS: dict[str, str] = {
+    "concentration": "AmountConcentration",
+    "conductivity": "ElectrolyticConductivity",
+    "viscosity": "DynamicViscosity",
+    "density": "Density",
+    "temperature": "CelsiusTemperature",
+    "fill_volume": "Volume",
+    "loading": "MassLoading",
+    "calendered_density": "CalenderedDensity",
+}
+# Coating loading is the active-mass loading; coating thickness is the calendered value.
+_DESCRIPTOR_COATING_PROPERTY_TERMS: dict[str, str] = {
+    **_DESCRIPTOR_PROPERTY_TERMS,
+    "loading": "ActiveMassLoading",
+    "thickness": "CalenderedCoatingThickness",
+}
+
+
+def _descriptor_property_nodes(
+    prop: Any, *, term_overrides: dict[str, str] | None = None
+) -> list[dict[str, Any]]:
+    """Emit ``hasProperty`` nodes for an arbitrary holder property dict.
+
+    Every numeric quantity becomes a ``[EMMOClass, co-type]`` node via the curated
+    property map (with optional holder-specific ``term_overrides``); fraction keys use
+    the UnitOne encoding. This is the generic, holder-agnostic emitter that lets any
+    curated property attach to any component, rather than a per-holder whitelist.
+    """
+    out: list[dict[str, Any]] = []
+    if not isinstance(prop, dict):
+        return out
+    overrides = term_overrides or {}
+    for name in sorted(prop):
+        quantity = prop[name]
+        if not isinstance(quantity, dict):
+            continue
+        if name in _FRACTION_PROPERTY_TERMS:
+            term = overrides.get(name) or _FRACTION_PROPERTY_TERMS[name]
+            node = _fraction_quantity_node(term, quantity)
+        else:
+            term = overrides.get(name) or _property_type_term(name)
+            node = _descriptor_quantity_node(name, quantity, term=term)
+        if node:
+            out.append(node)
+    return out
 
 
 def _quantity_to_jsonld(quantity: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -478,112 +581,189 @@ def _descriptor_construction_to_jsonld(construction: dict[str, Any] | None) -> l
     return nodes
 
 
-def _hardware_measured_properties(properties: dict[str, Any] | None) -> list[dict[str, Any]]:
-    if not isinstance(properties, dict):
-        return []
-    out: list[dict[str, Any]] = []
-    for name, quantity in sorted(properties.items()):
-        node = _descriptor_quantity_node(name, quantity if isinstance(quantity, dict) else {})
-        if node is not None:
-            out.append(node)
-    return out
+_ASSEMBLY_QUANTITY_TERMS = {"electrode_length": "Length", "jellyroll_volume": "Volume"}
+_ASSEMBLY_COUNT_FIELDS = (
+    ("cathode_sheet_count", "Cathode Sheet Count"),
+    ("anode_sheet_count", "Anode Sheet Count"),
+    ("separator_sheet_count", "Separator Sheet Count"),
+    ("winding_turns", "Winding Turns"),
+)
 
 
-def _descriptor_coin_hardware_to_jsonld(coin_hardware: dict[str, Any] | None) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
-    if not isinstance(coin_hardware, dict):
-        return None, []
+def _descriptor_electrode_assembly_to_jsonld(construction: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Emit an ElectrodeStack / JellyRoll node from construction geometry fields.
 
-    case_node = None
-    case = coin_hardware.get("case")
+    Returns ``None`` unless at least one assembly-geometry field is present. Sheet counts
+    and winding turns (dimensionless) emit as ``schema:additionalProperty``; the
+    ``electrode_length`` / ``jellyroll_volume`` quantities ride the generic property emitter.
+    """
+    if not isinstance(construction, dict):
+        return None
+    has_geometry = any(construction.get(key) is not None for key, _ in _ASSEMBLY_COUNT_FIELDS) or any(
+        construction.get(key) for key in _ASSEMBLY_QUANTITY_TERMS
+    )
+    if not has_geometry:
+        return None
+
+    assembly_type = str(construction.get("assembly_type") or "").lower()
+    layering = str(construction.get("layering") or "").lower()
+    is_wound = assembly_type == "wound" or "jelly" in layering or construction.get("winding_turns") is not None
+    node: dict[str, Any] = {"@type": "JellyRoll" if is_wound else "ElectrodeStack"}
+
+    quantities = {key: construction[key] for key in _ASSEMBLY_QUANTITY_TERMS if construction.get(key)}
+    prop_nodes = _descriptor_property_nodes(quantities, term_overrides=_ASSEMBLY_QUANTITY_TERMS)
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+
+    count_nodes: list[dict[str, Any]] = []
+    for key, label in _ASSEMBLY_COUNT_FIELDS:
+        count_node = _property_value_node(f"construction.{key}", label, construction.get(key))
+        if count_node is not None:
+            count_nodes.append(count_node)
+    if count_nodes:
+        node["schema:additionalProperty"] = count_nodes[0] if len(count_nodes) == 1 else count_nodes
+
+    return node if len(node) > 1 else None
+
+
+_FORMAT_CASE_TYPE = {
+    "coin": "CoinCase",
+    "cylindrical": "CylindricalCase",
+    "pouch": "PouchCase",
+    "prismatic": "PrismaticCase",
+}
+_HARDWARE_PART_TYPE = {
+    "lid": "CellLid",
+    "can": "CellCan",
+    "cap": "CellLid",
+    "spring": "Spring",
+    "spacer": "Spacer",
+}
+
+
+def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
+    """Emit the Housing model as JSON-LD relations (hasCase / hasTerminal / hasConstituent).
+
+    Returns a {relation: node-or-list} dict to merge into the battery node. Each part is a
+    holder; its ``property`` dict rides the generic property emitter.
+    """
+    if not isinstance(housing, dict):
+        return {}
+    relations: dict[str, Any] = {}
+
+    def _part_node(part: dict[str, Any]) -> dict[str, Any]:
+        type_name = _HARDWARE_PART_TYPE.get(str(part.get("type")), "schema:Thing")
+        node: dict[str, Any] = {"@type": type_name}
+        if part.get("material"):
+            node["schema:material"] = part["material"]
+        if part.get("coating"):
+            node["hasCoating"] = {"schema:material": part["coating"]}
+        _converter_component_metadata(node, part)
+        part_props = _descriptor_property_nodes(part.get("property"))
+        if part_props:
+            node["hasProperty"] = part_props[0] if len(part_props) == 1 else part_props
+        return node
+
+    # lid/can are constituents of the case; spring/spacer/cap sit at cell level.
+    parts = [p for p in (housing.get("parts") or []) if isinstance(p, dict)]
+    cap = housing.get("cap")
+    if isinstance(cap, dict):
+        parts.append({**cap, "type": cap.get("type") or "cap"})
+    case_parts = [p for p in parts if p.get("type") in ("lid", "can")]
+    cell_parts = [p for p in parts if p.get("type") not in ("lid", "can")]
+
+    case = housing.get("case")
     if isinstance(case, dict):
-        case_node = {}
+        case_type = _FORMAT_CASE_TYPE.get(str(fmt), "Case")
+        mat_class = _material_emmo_class(case["material"]) if case.get("material") else None
+        node = {"@type": [case_type, mat_class] if mat_class else case_type}
         if case.get("size_code"):
-            case_node["schema:size"] = case["size_code"]
-        if case.get("material"):
-            case_node["schema:material"] = case["material"]
-        manufacturer_node = _manufacturer_to_jsonld(case.get("manufacturer"))
-        if manufacturer_node is not None:
-            case_node["schema:manufacturer"] = manufacturer_node
-        supplier_node = _agent_text_node(case.get("supplier"))
-        if supplier_node is not None:
-            case_node["schema:supplier"] = supplier_node
-        if case.get("product_id"):
-            case_node["schema:productID"] = case["product_id"]
-        measured = _hardware_measured_properties(case.get("property"))
-        if measured:
-            case_node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
-        if case.get("comment"):
-            case_node["schema:description"] = case["comment"]
-        case_constituents: list[dict[str, Any]] = []
-        if case.get("lid_coating"):
-            case_constituents.append(
-                {
-                    "@type": "schema:Thing",
-                    "schema:additionalType": "CellLid",
-                    "hasCoating": {"schema:material": case["lid_coating"]},
-                }
-            )
-        if case.get("can_coating"):
-            case_constituents.append(
-                {
-                    "@type": "schema:Thing",
-                    "schema:additionalType": "CellCan",
-                    "hasCoating": {"schema:material": case["can_coating"]},
-                }
-            )
-        for type_name, component in (("CellLid", coin_hardware.get("lid")), ("CellCan", coin_hardware.get("can"))):
-            if not isinstance(component, dict):
-                continue
-            node: dict[str, Any] = {"@type": "schema:Thing", "schema:additionalType": type_name}
-            if component.get("material"):
-                node["schema:material"] = component["material"]
-            if component.get("coating"):
-                node["hasCoating"] = {"schema:material": component["coating"]}
-            manufacturer_node = _manufacturer_to_jsonld(component.get("manufacturer"))
-            if manufacturer_node is not None:
-                node["schema:manufacturer"] = manufacturer_node
-            supplier_node = _agent_text_node(component.get("supplier"))
-            if supplier_node is not None:
-                node["schema:supplier"] = supplier_node
-            if component.get("product_id"):
-                node["schema:productID"] = component["product_id"]
-            measured = _hardware_measured_properties(component.get("property"))
-            if measured:
-                node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
-            if component.get("comment"):
-                node["schema:description"] = component["comment"]
-            if len(node) > 1:
-                case_constituents.append(node)
+            node["schema:size"] = case["size_code"]
+        if not mat_class and case.get("material"):
+            node["schema:material"] = case["material"]
+        _converter_component_metadata(node, case)
+        props = _descriptor_property_nodes(case.get("property"))
+        if props:
+            node["hasProperty"] = props[0] if len(props) == 1 else props
+        case_constituents = [_part_node(p) for p in case_parts]
         if case_constituents:
-            case_node["hasConstituent"] = case_constituents[0] if len(case_constituents) == 1 else case_constituents
-        if not case_node:
-            case_node = None
+            node["hasConstituent"] = case_constituents[0] if len(case_constituents) == 1 else case_constituents
+        relations["hasCase"] = node
+    else:
+        # No case node: lid/can fall back to cell-level constituents.
+        cell_parts = case_parts + cell_parts
 
-    extra_nodes: list[dict[str, Any]] = []
-    for name, type_name in (("spring", "Spring"), ("spacer", "Spacer")):
-        component = coin_hardware.get(name)
-        if not isinstance(component, dict):
+    terminal_nodes: list[dict[str, Any]] = []
+    for terminal in housing.get("terminals") or []:
+        if not isinstance(terminal, dict):
             continue
-        node: dict[str, Any] = {"@type": "schema:Thing", "schema:additionalType": type_name}
-        if component.get("material"):
-            node["schema:material"] = component["material"]
-        manufacturer_node = _manufacturer_to_jsonld(component.get("manufacturer"))
-        if manufacturer_node is not None:
-            node["schema:manufacturer"] = manufacturer_node
-        supplier_node = _agent_text_node(component.get("supplier"))
-        if supplier_node is not None:
-            node["schema:supplier"] = supplier_node
-        if component.get("product_id"):
-            node["schema:productID"] = component["product_id"]
-        measured = _hardware_measured_properties(component.get("property"))
-        if measured:
-            node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
-        if component.get("comment"):
-            node["schema:description"] = component["comment"]
-        if len(node) > 1:
-            extra_nodes.append(node)
+        node = {"@type": "Terminal"}
+        if terminal.get("polarity"):
+            node["schema:additionalType"] = terminal["polarity"]
+        if terminal.get("material"):
+            node["schema:material"] = terminal["material"]
+        _converter_component_metadata(node, terminal)
+        props = _descriptor_property_nodes(terminal.get("property"))
+        if props:
+            node["hasProperty"] = props[0] if len(props) == 1 else props
+        terminal_nodes.append(node)
+    if terminal_nodes:
+        relations["hasTerminal"] = terminal_nodes[0] if len(terminal_nodes) == 1 else terminal_nodes
 
-    return case_node, extra_nodes
+    constituents: list[dict[str, Any]] = []
+    for seal in housing.get("seals") or []:
+        if not isinstance(seal, dict):
+            continue
+        node = {"@type": "Seal"}
+        if seal.get("material"):
+            node["schema:material"] = seal["material"]
+        _converter_component_metadata(node, seal)
+        props = _descriptor_property_nodes(seal.get("property"))
+        if props:
+            node["hasProperty"] = props[0] if len(props) == 1 else props
+        constituents.append(node)
+    constituents.extend(_part_node(p) for p in cell_parts)
+    if constituents:
+        relations["hasConstituent"] = constituents[0] if len(constituents) == 1 else constituents
+
+    return relations
+
+
+def _coin_dict_from_housing(housing: Any) -> dict[str, Any]:
+    """Project a Housing dict back to the legacy coin_hardware shape for the coin emitters.
+
+    Lets the existing, round-trip-tested coin emitters keep working byte-for-byte after the
+    ``coin_hardware`` field was retired in favour of ``housing``.
+    """
+    if not isinstance(housing, dict):
+        return {}
+    out: dict[str, Any] = {}
+    case = housing.get("case")
+    if isinstance(case, dict):
+        node = {
+            key: case[key]
+            for key in ("size_code", "material", "coating", "manufacturer", "supplier", "product_id")
+            if case.get(key) is not None
+        }
+        if case.get("property"):
+            node["property"] = case["property"]
+        if case.get("comment"):
+            node["comment"] = case["comment"]
+        out["case"] = node
+    for part in housing.get("parts") or []:
+        if not isinstance(part, dict) or part.get("type") not in ("lid", "can", "spring", "spacer"):
+            continue
+        node = {
+            key: part[key]
+            for key in ("material", "coating", "manufacturer", "supplier", "product_id")
+            if part.get(key) is not None
+        }
+        if part.get("property"):
+            node["property"] = part["property"]
+        if part.get("comment"):
+            node["comment"] = part["comment"]
+        out[part["type"]] = node
+    return out
 
 
 def _converter_quantity_node(
@@ -654,6 +834,11 @@ def _converter_named_node(
             node["schema:name"] = component["name"]
     _converter_component_metadata(node, component)
     measured = _converter_measured_properties(component.get("property"), property_types=property_types)
+    formula = component.get("molecular_formula")
+    if isinstance(formula, str) and formula:
+        # The converter models the chemical formula as a molecularFormula string node,
+        # conventionally the first measured-property entry on a material.
+        measured = [{"@type": "molecularFormula", "hasStringValue": formula}, *measured]
     if measured:
         node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
     return node
@@ -943,7 +1128,7 @@ def _emmo_quantity_node(
         return None
     node: dict[str, Any] = {
         "@type": [emmo_type, "ConventionalProperty"],
-        "hasNumericalPart": {"@type": "RealData", "hasNumericalValue": value},
+        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
     }
     unit = quantity.get("unit")
     iri = unit_iri_override or _unit_iri(unit)
@@ -970,7 +1155,7 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
     if unit == "%":
         return {
             "@type": [emmo_type, "ConventionalProperty"],
-            "hasNumericalPart": {"@type": "RealData", "hasNumericalValue": round(value / 100, 6)},
+            "hasNumericalPart": {"@type": "RealData", "hasNumberValue": round(value / 100, 6)},
             "hasMeasurementUnit": _UNIT_ONE_IRI,
         }
     return _emmo_quantity_node(emmo_type, quantity)
@@ -1022,17 +1207,16 @@ def _typed_constituent_node(
     node_type: str | list[str] = [mat_class, role_class] if mat_class else role_class
     node: dict[str, Any] = {"@type": node_type, "schema:name": name}
 
-    prop = mat.get("property", {})
-    if isinstance(prop, dict):
-        q: dict[str, Any] | None = None
-        if (mf := prop.get("mass_fraction")) is not None:
-            q = _fraction_quantity_node("MassFraction", mf)
-        elif (vf := prop.get("volume_fraction")) is not None:
-            q = _fraction_quantity_node("VolumeFraction", vf)
-        elif (conc := prop.get("concentration")) is not None:
-            q = _emmo_quantity_node("AmountConcentration", conc)
-        if q:
-            node["hasProperty"] = q
+    prop_nodes = _descriptor_property_nodes(mat.get("property"), term_overrides=_DESCRIPTOR_PROPERTY_TERMS)
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+
+    # The molecular formula is an identifier/annotation, not a measured property:
+    # emit it as a schema:molecularFormula literal (the converter-compatible view
+    # re-expresses it as the legacy molecularFormula node).
+    formula = mat.get("molecular_formula")
+    if isinstance(formula, str) and formula:
+        node["schema:molecularFormula"] = formula
 
     if comment := mat.get("comment"):
         node["schema:description"] = comment
@@ -1061,21 +1245,11 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
             if role_nodes:
                 node[role_cfg["relation"]] = role_nodes[0] if len(role_nodes) == 1 else role_nodes
 
-    prop = coating.get("property", {})
-    emmo_props: list[dict[str, Any]] = []
-    if isinstance(prop, dict):
-        loading = prop.get("loading")
-        if loading:
-            q = _emmo_quantity_node("ActiveMassLoading", loading)
-            if q:
-                emmo_props.append(q)
-        cal_density = prop.get("calendered_density")
-        if cal_density:
-            q = _emmo_quantity_node("CalenderedDensity", cal_density)
-            if q:
-                emmo_props.append(q)
-    if emmo_props:
-        node["hasProperty"] = emmo_props[0] if len(emmo_props) == 1 else emmo_props
+    prop_nodes = _descriptor_property_nodes(
+        coating.get("property"), term_overrides=_DESCRIPTOR_COATING_PROPERTY_TERMS
+    )
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
 
     comment = coating.get("comment")
     if comment:
@@ -1097,13 +1271,9 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
     node: dict[str, Any] = {"@type": cc_types if len(cc_types) > 1 else cc_types[0]}
     if name:
         node["schema:name"] = name
-    prop = cc.get("property", {})
-    if isinstance(prop, dict):
-        thickness = prop.get("thickness")
-        if thickness:
-            q = _emmo_quantity_node("Thickness", thickness)
-            if q:
-                node["hasProperty"] = q
+    prop_nodes = _descriptor_property_nodes(cc.get("property"))
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
     return node if len(node) > 1 else None
 
 
@@ -1140,6 +1310,12 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
     if additive_nodes:
         node["hasAdditive"] = additive_nodes[0] if len(additive_nodes) == 1 else additive_nodes
 
+    prop_nodes = _descriptor_property_nodes(
+        electrolyte.get("property"), term_overrides=_DESCRIPTOR_PROPERTY_TERMS
+    )
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+
     comment = electrolyte.get("comment")
     if comment:
         node["schema:description"] = comment
@@ -1156,21 +1332,9 @@ def _descriptor_separator_to_jsonld(separator: dict[str, Any] | None) -> dict[st
     node: dict[str, Any] = {"@type": sep_type}
     if mat_name:
         node["schema:name"] = mat_name
-    prop = separator.get("property", {})
-    sep_props: list[dict[str, Any]] = []
-    if isinstance(prop, dict):
-        thickness = prop.get("thickness")
-        if thickness:
-            q = _emmo_quantity_node("Thickness", thickness)
-            if q:
-                sep_props.append(q)
-        porosity = prop.get("porosity")
-        if porosity:
-            q = _fraction_quantity_node("Porosity", porosity)
-            if q:
-                sep_props.append(q)
-    if sep_props:
-        node["hasProperty"] = sep_props
+    prop_nodes = _descriptor_property_nodes(separator.get("property"))
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
     comment = separator.get("comment")
     if comment:
         node["schema:description"] = comment
@@ -1228,20 +1392,18 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     if specification.get("size_code"):
         battery[size_code_target] = specification["size_code"]
 
-    for electrode_mapping, data_key in (
-        (positive_electrode, "positive_electrode"),
-        (negative_electrode, "negative_electrode"),
+    for electrode_mapping, data_key, default_relation in (
+        (positive_electrode, "positive_electrode", "hasPositiveElectrode"),
+        (negative_electrode, "negative_electrode", "hasNegativeElectrode"),
     ):
-        if not electrode_mapping:
-            continue
-        relation = electrode_mapping.get("relation")
-        node_type = electrode_mapping.get("node_type")
-        if not isinstance(relation, str) or not relation:
-            continue
-        electrode_node: dict[str, Any] = {}
-        if isinstance(node_type, str) and node_type:
-            electrode_node["@type"] = node_type
         electrode_data = specification.get(data_key)
+        mapping = electrode_mapping or {}
+        # Relation is fixed by which side this is; the entity mapping only refines
+        # the @type. Never gate electrode emission on a mapped chemistry basis —
+        # an electrode that has composition data must never be dropped.
+        relation = mapping.get("relation") or default_relation
+        node_type = mapping.get("node_type")
+        electrode_node: dict[str, Any] = {}
         if isinstance(electrode_data, dict):
             coating = _descriptor_electrode_coating_to_jsonld(electrode_data.get("coating"))
             if coating:
@@ -1249,6 +1411,25 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
             cc = _descriptor_current_collector_to_jsonld(electrode_data.get("current_collector"))
             if cc:
                 electrode_node["hasCurrentCollector"] = cc
+            tab = electrode_data.get("tab")
+            if isinstance(tab, dict):
+                tab_node: dict[str, Any] = {"@type": "CurrentCollectorTab"}
+                if tab.get("material"):
+                    tab_node["schema:material"] = tab["material"]
+                _converter_component_metadata(tab_node, tab)
+                tab_props = _descriptor_property_nodes(tab.get("property"))
+                if tab_props:
+                    tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
+                if len(tab_node) > 1:
+                    electrode_node["hasCurrentCollectorTab"] = tab_node
+            prop_nodes = _descriptor_property_nodes(electrode_data.get("property"))
+            if prop_nodes:
+                electrode_node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+        if isinstance(node_type, str) and node_type:
+            electrode_node["@type"] = node_type
+        elif electrode_node:
+            # Composition present but the basis has no specific EMMO electrode class.
+            electrode_node["@type"] = "Electrode"
         if electrode_node:
             battery[relation] = electrode_node
 
@@ -1274,12 +1455,22 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     if construction_nodes:
         battery["schema:additionalProperty"] = construction_nodes[0] if len(construction_nodes) == 1 else construction_nodes
 
-    if specification.get("format") == "coin":
-        case_node, extra_hardware_nodes = _descriptor_coin_hardware_to_jsonld(specification.get("coin_hardware"))
-        if case_node is not None:
-            battery["hasCase"] = case_node
-        if extra_hardware_nodes:
-            battery["hasConstituent"] = extra_hardware_nodes[0] if len(extra_hardware_nodes) == 1 else extra_hardware_nodes
+    # Format-neutral housing for ALL formats: case (format-typed: CoinCase/PrismaticCase/…),
+    # terminals, seals, cap, and lid/can/spring/spacer parts (coin lid/can nest under the case).
+    cell_format = specification.get("format")
+    housing_relations = _descriptor_housing_to_jsonld(specification.get("housing"), cell_format)
+    for relation, value in housing_relations.items():
+        battery[relation] = value
+
+    # Electrode assembly (stack / jelly-roll geometry) → hasConstituent.
+    assembly_node = _descriptor_electrode_assembly_to_jsonld(specification.get("construction"))
+    if assembly_node is not None:
+        existing = battery.get("hasConstituent")
+        if existing is None:
+            battery["hasConstituent"] = assembly_node
+        else:
+            existing_list = existing if isinstance(existing, list) else [existing]
+            battery["hasConstituent"] = [*existing_list, assembly_node]
 
     comment = _comment_value(specification.get("comment"))
     if comment is not None:
@@ -1446,9 +1637,9 @@ def _to_domain_battery_jsonld_descriptor(data: dict[str, Any]) -> dict[str, Any]
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("specification"), dict) and data.get("schema_version") is not None:
         return _to_domain_battery_jsonld_descriptor(data)
-    if isinstance(data.get("product"), dict) and data.get("schema_version") is not None:
+    if isinstance(data.get("cell_spec"), dict) and data.get("schema_version") is not None:
         # Cell-type record: normalise to descriptor shape and reuse the descriptor path.
-        product = data["product"]
+        product = data["cell_spec"]
         specification: dict[str, Any] = {
             "id": product.get("id"),
             "manufacturer": (product.get("manufacturer") or {}).get("name") or product.get("manufacturer", ""),
@@ -1461,11 +1652,11 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
         if "size_code" in product:
             specification["size_code"] = product["size_code"]
         for field in ("construction", "positive_electrode", "negative_electrode",
-                      "electrolyte", "separator", "coin_hardware"):
+                      "electrolyte", "separator", "housing"):
             if field in data:
                 specification[field] = data[field]
-        if "specs" in data:
-            specification["property"] = data["specs"]
+        if "properties" in data:
+            specification["property"] = data["properties"]
         if "notes" in data:
             specification["comment"] = data["notes"]
         descriptor = {
@@ -1540,7 +1731,7 @@ def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     separator = _converter_separator_node(specification.get("separator"))
     if separator is not None:
         doc["hasSeparator"] = separator
-    case_node, extra_nodes = _converter_coin_hardware_nodes(specification.get("coin_hardware"))
+    case_node, extra_nodes = _converter_coin_hardware_nodes(_coin_dict_from_housing(specification.get("housing")))
     if case_node is not None:
         doc["hasCase"] = case_node
     if extra_nodes:

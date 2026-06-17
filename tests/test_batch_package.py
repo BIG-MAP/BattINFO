@@ -156,7 +156,7 @@ class TestPackageBatch:
         result = package_batch(batch, creators=CREATORS)
         staging = Path(result["staging_dir"])
         record = ZenodoCellRecord.from_path(staging / ZENODO_CELL_RECORD_FILENAME)
-        assert record.cell_type.id == ENERGIZER_IRI
+        assert record.cell_spec.id == ENERGIZER_IRI
         assert len(record.datasets) == result["entry_count"]
 
     def test_publish_jsonld_has_graph(self, tmp_path: Path) -> None:

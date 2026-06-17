@@ -39,7 +39,7 @@ class ConfiguredBaseModel(BaseModel):
         validate_by_name = True,
         validate_assignment = True,
         validate_default = True,
-        extra = "allow",
+        extra = "forbid",
         arbitrary_types_allowed = True,
         use_enum_values = True,
         strict = False,
@@ -78,7 +78,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'battinfo',
      'id': 'https://w3id.org/battinfo/schema/battinfo',
      'imports': ['linkml:types',
                  'types',
-                 'cell-type',
+                 'cell-spec',
                  'cell-instance',
                  'test-spec',
                  'test',
@@ -95,6 +95,8 @@ linkml_meta = LinkMLMeta({'default_prefix': 'battinfo',
                               'prefix_reference': 'http://purl.org/dc/terms/'},
                   'dqv': {'prefix_prefix': 'dqv',
                           'prefix_reference': 'http://www.w3.org/ns/dqv#'},
+                  'earl': {'prefix_prefix': 'earl',
+                           'prefix_reference': 'http://www.w3.org/ns/earl#'},
                   'electrochemistry': {'prefix_prefix': 'electrochemistry',
                                        'prefix_reference': 'https://w3id.org/emmo/domain/electrochemistry#'},
                   'emmo': {'prefix_prefix': 'emmo',
@@ -290,23 +292,19 @@ class BatteryCategoryEU(str, Enum):
 
 class ConformanceStatus(str, Enum):
     """
-    How closely a test execution conformed to its specification.
+    Whether a test execution conformed to its specification. The verdict is boolean (conformant / non-conformant); 'unknown' marks a run that has not been assessed. Mapped to W3C EARL outcome values.
     """
     conformant = "conformant"
     """
-    Fully conformed to the test specification.
-    """
-    partial = "partial"
-    """
-    Deviated in minor steps but produced usable data.
+    Conformed to the test specification.
     """
     non_conformant = "non-conformant"
     """
-    Deviated to such degree that results are unreliable.
+    Did not conform to the test specification.
     """
     unknown = "unknown"
     """
-    Conformance status not known.
+    Conformance not assessed.
     """
 
 
@@ -373,60 +371,60 @@ class ProtocolInfo(ConfiguredBaseModel):
     protocol_url: Optional[str] = Field(default=None, description="""URL pointing to the protocol specification document.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProtocolInfo'], 'slot_uri': 'schema:url'} })
 
 
-class CellType(ConfiguredBaseModel):
+class CellSpecification(ConfiguredBaseModel):
     """
     A battery cell product specification: manufacturer, model, format, chemistry, and quantitative performance properties.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0',
-         'from_schema': 'https://w3id.org/battinfo/schema/cell-type'})
+         'from_schema': 'https://w3id.org/battinfo/schema/cell-spec'})
 
-    id: str = Field(default=..., description="""Canonical IRI for this cell-type record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CellType'], 'slot_uri': 'schema:productID'} })
-    ct_name: Optional[str] = Field(default=None, description="""Full display name of the product (manufacturer + model).""", json_schema_extra = { "linkml_meta": {'aliases': ['name'], 'domain_of': ['CellType'], 'slot_uri': 'schema:name'} })
-    ct_model: str = Field(default=..., description="""Manufacturer's product model number or name.""", json_schema_extra = { "linkml_meta": {'aliases': ['model'], 'domain_of': ['CellType'], 'slot_uri': 'schema:model'} })
+    id: str = Field(default=..., description="""Canonical IRI for this cell-spec record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CellSpecification'], 'slot_uri': 'schema:productID'} })
+    ct_name: Optional[str] = Field(default=None, description="""Full display name of the product (manufacturer + model).""", json_schema_extra = { "linkml_meta": {'aliases': ['name'], 'domain_of': ['CellSpecification'], 'slot_uri': 'schema:name'} })
+    ct_model: str = Field(default=..., description="""Manufacturer's product model number or name.""", json_schema_extra = { "linkml_meta": {'aliases': ['model'], 'domain_of': ['CellSpecification'], 'slot_uri': 'schema:model'} })
     ct_manufacturer: Organization = Field(default=..., description="""The company that manufactured this cell.""", json_schema_extra = { "linkml_meta": {'aliases': ['manufacturer'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'schema:manufacturer'} })
     ct_cell_format: CellFormat = Field(default=..., description="""Physical format (geometry) of the cell housing.""", json_schema_extra = { "linkml_meta": {'aliases': ['cell_format', 'format'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:cellFormat'} })
     ct_chemistry: str = Field(default=..., description="""Cell chemistry identifier (e.g. \"li-ion\", \"li-primary\", \"na-ion\", \"alkaline\", \"zinc-carbon\", \"li-mno2\").""", json_schema_extra = { "linkml_meta": {'aliases': ['chemistry'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:chemistry'} })
     ct_positive_electrode_basis: Optional[str] = Field(default=None, description="""Cathode active material basis (e.g. \"nmc\", \"lfp\", \"nca\", \"lco\", \"mno2\").""", json_schema_extra = { "linkml_meta": {'aliases': ['positive_electrode_basis'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:positiveElectrodeBasis'} })
     ct_negative_electrode_basis: Optional[str] = Field(default=None, description="""Anode active material basis (e.g. \"graphite\", \"silicon-graphite\", \"hard-carbon\", \"lithium\").""", json_schema_extra = { "linkml_meta": {'aliases': ['negative_electrode_basis'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:negativeElectrodeBasis'} })
     ct_size_code: Optional[str] = Field(default=None, description="""Standardised size code (e.g. \"18650\", \"21700\", \"AA\", \"AAA\").""", json_schema_extra = { "linkml_meta": {'aliases': ['size_code'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:sizeCode'} })
     ct_iec_code: Optional[str] = Field(default=None, description="""IEC 60086 or IEC 61960 code string (e.g. \"LR6\", \"ICR18650\").""", json_schema_extra = { "linkml_meta": {'aliases': ['iec_code'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'schema:productID'} })
     ct_product_type: Optional[CellProductType] = Field(default=None, description="""Product maturity level.""", json_schema_extra = { "linkml_meta": {'aliases': ['product_type'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:productType'} })
     ct_rechargeable: Optional[bool] = Field(default=None, description="""True for secondary (rechargeable) cells; false for primary.""", json_schema_extra = { "linkml_meta": {'aliases': ['rechargeable'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:rechargeable'} })
     ct_year: Optional[int] = Field(default=None, description="""Model release or market introduction year.""", json_schema_extra = { "linkml_meta": {'aliases': ['year'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'schema:datePublished'} })
     ct_country_of_origin: Optional[str] = Field(default=None, description="""ISO 3166-1 alpha-2 country code of manufacturing origin.""", json_schema_extra = { "linkml_meta": {'aliases': ['country_of_origin'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:countryOfOrigin'} })
     ct_battery_category: Optional[BatteryCategoryEU] = Field(default=None, description="""EU Battery Regulation 2023/1542 battery category (LMT, EV, Industrial, Stationary, Portable, SLI).""", json_schema_extra = { "linkml_meta": {'aliases': ['battery_category'],
-         'domain_of': ['CellType'],
+         'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:batteryCategory'} })
-    ct_specs: Optional[SpecSet] = Field(default=None, description="""Quantitative performance specification for this cell type.""", json_schema_extra = { "linkml_meta": {'aliases': ['specs'], 'domain_of': ['CellType'], 'slot_uri': 'battinfo:specs'} })
+    ct_specs: Optional[SpecSet] = Field(default=None, description="""Quantitative performance specification for this cell type.""", json_schema_extra = { "linkml_meta": {'aliases': ['properties'], 'domain_of': ['CellSpecification'], 'slot_uri': 'battinfo:specs'} })
 
 
 class Organization(ConfiguredBaseModel):
     """
     A manufacturer, brand, or research organisation.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/battinfo/schema/cell-type'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/battinfo/schema/cell-spec'})
 
     org_id: Optional[str] = Field(default=None, description="""IRI / URL identifying the organisation.""", json_schema_extra = { "linkml_meta": {'aliases': ['id'], 'domain_of': ['Organization'], 'slot_uri': 'schema:url'} })
     org_name: str = Field(default=..., description="""Display name of the organisation.""", json_schema_extra = { "linkml_meta": {'aliases': ['name'], 'domain_of': ['Organization'], 'slot_uri': 'schema:name'} })
@@ -436,17 +434,17 @@ class SpecSet(ConfiguredBaseModel):
     """
     Harmonised set of quantitative battery cell properties. Each field is a SpecValue (value + unit), identified by its EMMO IRI.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/battinfo/schema/cell-type'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/battinfo/schema/cell-spec'})
 
     nominal_capacity: Optional[SpecValue] = Field(default=None, description="""Nominal (rated) discharge capacity at standard conditions.""", json_schema_extra = { "linkml_meta": {'aliases': ['Nominal capacity [Ah]', 'Rated capacity [Ah]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100'} })
     minimum_capacity: Optional[SpecValue] = Field(default=None, description="""Minimum guaranteed capacity.""", json_schema_extra = { "linkml_meta": {'aliases': ['Minimum capacity [Ah]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100'} })
+         'slot_uri': 'electrochemistry:electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5'} })
     rated_capacity: Optional[SpecValue] = Field(default=None, description="""Capacity rated by the manufacturer (may differ from typical).""", json_schema_extra = { "linkml_meta": {'aliases': ['Rated capacity [Ah]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100'} })
+         'slot_uri': 'electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26'} })
     typical_capacity: Optional[SpecValue] = Field(default=None, description="""Typical capacity as manufactured.""", json_schema_extra = { "linkml_meta": {'aliases': ['Typical capacity [Ah]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100'} })
@@ -473,7 +471,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78'} })
     maximum_pulse_charging_current: Optional[SpecValue] = Field(default=None, description="""Peak pulse charge current.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum pulse charging current [A]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78'} })
+         'slot_uri': 'electrochemistry:electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da'} })
     maximum_continuous_discharging_current: Optional[SpecValue] = Field(default=None, description="""Maximum continuous discharge current allowed.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum continuous discharging current [A]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5'} })
@@ -482,7 +480,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5'} })
     maximum_pulse_discharging_current: Optional[SpecValue] = Field(default=None, description="""Peak pulse discharge current.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum pulse discharging current [A]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5'} })
+         'slot_uri': 'electrochemistry:electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b'} })
     nominal_energy: Optional[SpecValue] = Field(default=None, description="""Nominal stored energy.""", json_schema_extra = { "linkml_meta": {'aliases': ['Nominal energy [Wh]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d'} })
@@ -521,13 +519,13 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d'} })
     dc_internal_resistance: Optional[SpecValue] = Field(default=None, description="""DC internal resistance measured by current-interrupt method.""", json_schema_extra = { "linkml_meta": {'aliases': ['DC internal resistance [mOhm]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d'} })
+         'slot_uri': 'electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3'} })
     ac_internal_resistance: Optional[SpecValue] = Field(default=None, description="""AC impedance magnitude at 1 kHz.""", json_schema_extra = { "linkml_meta": {'aliases': ['AC internal resistance [mOhm]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d'} })
+         'slot_uri': 'electrochemistry:electrochemistry_964cd426_f3cf_4a52_8c5d_0490cf48edb5'} })
     impedance: Optional[SpecValue] = Field(default=None, description="""Complex impedance magnitude (general).""", json_schema_extra = { "linkml_meta": {'aliases': ['Impedance [mOhm]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d'} })
+         'slot_uri': 'emmo:EMMO_79a02de5_b884_4eab_bc18_f67997d597a2'} })
     round_trip_energy_efficiency: Optional[SpecValue] = Field(default=None, description="""Ratio of discharge energy to charge energy (full charge-discharge cycle).""", json_schema_extra = { "linkml_meta": {'aliases': ['Round-trip energy efficiency [1]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'battinfo:roundTripEnergyEfficiency'} })
@@ -536,7 +534,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'battinfo:roundTripEnergyEfficiency50Pct'} })
     initial_coulombic_efficiency: Optional[SpecValue] = Field(default=None, description="""Coulombic efficiency on the first formation cycle.""", json_schema_extra = { "linkml_meta": {'aliases': ['Initial coulombic efficiency [1]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:initialCoulombicEfficiency'} })
+         'slot_uri': 'electrochemistry:electrochemistry_469b9516_a96d_4aa2_b8e5_05ae982e2084'} })
     mass: Optional[SpecValue] = Field(default=None, description="""Mass of the cell (including packaging).""", json_schema_extra = { "linkml_meta": {'aliases': ['Mass [g]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405'} })
@@ -557,7 +555,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656'} })
     volume: Optional[SpecValue] = Field(default=None, description="""External volume of the cell.""", json_schema_extra = { "linkml_meta": {'aliases': ['Volume [mL]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:volume'} })
+         'slot_uri': 'emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed'} })
     maximum_charging_temperature: Optional[SpecValue] = Field(default=None, description="""Maximum allowed cell temperature during charging.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum charging temperature [degC]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260'} })
@@ -602,15 +600,15 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'battinfo:chargingTime'} })
     self_discharge_rate: Optional[SpecValue] = Field(default=None, description="""Self-discharge rate (capacity loss per unit time in storage).""", json_schema_extra = { "linkml_meta": {'aliases': ['Self-discharge rate [%/month]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:selfDischargeRate'} })
+         'slot_uri': 'electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e'} })
     state_of_health: Optional[SpecValue] = Field(default=None, description="""State of health (ratio of current to original capacity).""", json_schema_extra = { "linkml_meta": {'aliases': ['State of health [1]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:stateOfHealth'} })
+         'slot_uri': 'electrochemistry:electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce'} })
 
 
 class CellInstance(ConfiguredBaseModel):
     """
-    A specific physical battery cell — one individual unit that can be tested. Links to a CellType specification and carries its own serial/batch identity.
+    A specific physical battery cell — one individual unit that can be tested. Links to a CellSpecification specification and carries its own serial/batch identity.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'battinfo:CellInstance',
          'from_schema': 'https://w3id.org/battinfo/schema/cell-instance'})
@@ -618,10 +616,11 @@ class CellInstance(ConfiguredBaseModel):
     ci_id: str = Field(default=..., description="""Canonical IRI for this cell instance.""", json_schema_extra = { "linkml_meta": {'aliases': ['id'],
          'domain_of': ['CellInstance'],
          'slot_uri': 'schema:productID'} })
-    ci_type_id: str = Field(default=..., description="""IRI of the CellType specification this instance conforms to.""", json_schema_extra = { "linkml_meta": {'aliases': ['type_id'],
+    ci_type_id: str = Field(default=..., description="""IRI of the CellSpecification specification this instance conforms to.""", json_schema_extra = { "linkml_meta": {'aliases': ['cell_spec_id'],
          'domain_of': ['CellInstance'],
          'slot_uri': 'battinfo:cellSpecification'} })
-    ci_serial_number: Optional[str] = Field(default=None, description="""Manufacturer serial number (unique within the product model).""", json_schema_extra = { "linkml_meta": {'aliases': ['serial_number'],
+    ci_name: Optional[str] = Field(default=None, description="""Human-readable name or label for this cell instance — e.g. a lab batch ID. The primary identifier researchers use; usually present even when no manufacturer serial number is available.""", json_schema_extra = { "linkml_meta": {'aliases': ['name'], 'domain_of': ['CellInstance'], 'slot_uri': 'schema:name'} })
+    ci_serial_number: Optional[str] = Field(default=None, description="""Manufacturer serial number (unique within the product model); optional.""", json_schema_extra = { "linkml_meta": {'aliases': ['serial_number'],
          'domain_of': ['CellInstance'],
          'slot_uri': 'schema:serialNumber'} })
     ci_batch_id: Optional[str] = Field(default=None, description="""Batch or lot identifier assigned during manufacturing.""", json_schema_extra = { "linkml_meta": {'aliases': ['batch_id'],
@@ -645,7 +644,7 @@ class CellInstance(ConfiguredBaseModel):
     ci_dataset_ids: Optional[list[str]] = Field(default=None, description="""IRIs of dataset records linked to this cell instance.""", json_schema_extra = { "linkml_meta": {'aliases': ['dataset_ids'],
          'domain_of': ['CellInstance'],
          'slot_uri': 'battinfo:hasDataset'} })
-    ci_measured: Optional[SpecSet] = Field(default=None, description="""Measured properties for this individual cell (overrides CellType spec values where more precise measurements are available).""", json_schema_extra = { "linkml_meta": {'aliases': ['measured'],
+    ci_measured: Optional[SpecSet] = Field(default=None, description="""Measured properties for this individual cell (overrides CellSpecification spec values where more precise measurements are available).""", json_schema_extra = { "linkml_meta": {'aliases': ['measured'],
          'domain_of': ['CellInstance'],
          'slot_uri': 'battinfo:measuredSpecs'} })
 
@@ -671,22 +670,27 @@ class TestSpec(ConfiguredBaseModel):
     ts_protocol: Optional[ProtocolInfo] = Field(default=None, description="""Reference to the formal protocol standard document.""", json_schema_extra = { "linkml_meta": {'aliases': ['protocol'],
          'domain_of': ['TestSpec'],
          'slot_uri': 'battinfo:protocolReference'} })
-    ts_steps: Optional[list[str]] = Field(default=None, description="""Ordered list of PyBaMM-compatible experiment step strings (e.g. \"Discharge at 1C until 2.5 V\").""", json_schema_extra = { "linkml_meta": {'aliases': ['steps'], 'domain_of': ['TestSpec'], 'slot_uri': 'battinfo:steps'} })
-    ts_cycles: Optional[int] = Field(default=None, description="""Number of times the step sequence is repeated.""", ge=1, json_schema_extra = { "linkml_meta": {'aliases': ['cycles'],
+    ts_steps: Optional[list[str]] = Field(default=None, description="""PyBaMM-compatible experiment step strings (the default human authoring interface, e.g. \"Discharge at 1C until 2.5 V\"). Parsed into ts_method on ingest; ts_method is the canonical stored form.""", json_schema_extra = { "linkml_meta": {'aliases': ['steps', 'experiment'],
+         'domain_of': ['TestSpec'],
+         'slot_uri': 'battinfo:steps'} })
+    ts_cycles: Optional[int] = Field(default=None, description="""Number of times the authored step sequence is repeated (becomes an IterativeWorkflow group in ts_method).""", ge=1, json_schema_extra = { "linkml_meta": {'aliases': ['cycles'],
          'domain_of': ['TestSpec'],
          'slot_uri': 'battinfo:cycles'} })
-    ts_conditions: Optional[str] = Field(default=None, description="""Free-form JSON object of environmental conditions (e.g. {\"temperature_degC\": 25}).""", json_schema_extra = { "linkml_meta": {'aliases': ['conditions'],
+    ts_method: Optional[str] = Field(default=None, description="""Canonical structured method: an ordered, typed list of steps as a JSON array. Each step carries mode/direction, setpoints, termination and optional nested groups; emitted to JSON-LD as an EMMO process graph.""", json_schema_extra = { "linkml_meta": {'aliases': ['method'],
+         'domain_of': ['TestSpec'],
+         'slot_uri': 'battinfo:method'} })
+    ts_record: Optional[str] = Field(default=None, description="""Protocol-level default data-recording cadence as a JSON object (e.g. {\"time_s\": 10}).""", json_schema_extra = { "linkml_meta": {'aliases': ['record'],
+         'domain_of': ['TestSpec'],
+         'slot_uri': 'battinfo:record'} })
+    ts_safety: Optional[str] = Field(default=None, description="""Global instrument safety limits as a JSON object, distinct from per-step termination (e.g. {\"max_voltage_V\": 4.3, \"min_voltage_V\": 2.4}).""", json_schema_extra = { "linkml_meta": {'aliases': ['safety'],
+         'domain_of': ['TestSpec'],
+         'slot_uri': 'battinfo:safety'} })
+    ts_conditions: Optional[str] = Field(default=None, description="""Protocol-level ambient conditions as a JSON object of typed quantities (e.g. {\"temperature\": {\"value\": 25, \"unit\": \"degC\"}}).""", json_schema_extra = { "linkml_meta": {'aliases': ['conditions'],
          'domain_of': ['TestSpec'],
          'slot_uri': 'battinfo:conditions'} })
-    ts_setpoints: Optional[str] = Field(default=None, description="""Free-form JSON object of instrument setpoints (e.g. {\"current_A\": 1.5}).""", json_schema_extra = { "linkml_meta": {'aliases': ['setpoints'],
+    ts_artifacts: Optional[list[str]] = Field(default=None, description="""Links to machine-actionable protocol files (the actionable layer). Each entry is a JSON object with role/format/locator and optional checksum.""", json_schema_extra = { "linkml_meta": {'aliases': ['artifacts'],
          'domain_of': ['TestSpec'],
-         'slot_uri': 'battinfo:setpoints'} })
-    ts_termination_criteria: Optional[str] = Field(default=None, description="""Free-form JSON object of termination criteria (e.g. {\"voltage_V\": 2.5, \"time_h\": 10}).""", json_schema_extra = { "linkml_meta": {'aliases': ['termination_criteria'],
-         'domain_of': ['TestSpec'],
-         'slot_uri': 'battinfo:terminationCriteria'} })
-    ts_measurement_outputs: Optional[list[str]] = Field(default=None, description="""List of measurement output descriptors specifying which quantities the cycler should record during this protocol.""", json_schema_extra = { "linkml_meta": {'aliases': ['measurement_outputs'],
-         'domain_of': ['TestSpec'],
-         'slot_uri': 'battinfo:measurementOutputs'} })
+         'slot_uri': 'battinfo:artifacts'} })
 
 
 class Test(ConfiguredBaseModel):
@@ -727,6 +731,9 @@ class Test(ConfiguredBaseModel):
     t_conformance: Optional[TestConformance] = Field(default=None, description="""Conformance assessment for this test execution.""", json_schema_extra = { "linkml_meta": {'aliases': ['conformance'],
          'domain_of': ['Test'],
          'slot_uri': 'battinfo:testConformance'} })
+    t_artifacts: Optional[list[str]] = Field(default=None, description="""Links to machine-actionable protocol/vendor files produced by or executed in this test (the actionable layer). Each entry is a JSON object with role/format/locator and optional checksum.""", json_schema_extra = { "linkml_meta": {'aliases': ['artifacts'],
+         'domain_of': ['Test'],
+         'slot_uri': 'battinfo:artifacts'} })
 
 
 class TestConformance(ConfiguredBaseModel):
@@ -886,7 +893,7 @@ class PersonOrOrganization(ConfiguredBaseModel):
 SpecValue.model_rebuild()
 Provenance.model_rebuild()
 ProtocolInfo.model_rebuild()
-CellType.model_rebuild()
+CellSpecification.model_rebuild()
 Organization.model_rebuild()
 SpecSet.model_rebuild()
 CellInstance.model_rebuild()

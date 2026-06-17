@@ -31,10 +31,11 @@ classes:
       - ts_protocol
       - ts_steps
       - ts_cycles
+      - ts_method
+      - ts_record
+      - ts_safety
       - ts_conditions
-      - ts_setpoints
-      - ts_termination_criteria
-      - ts_measurement_outputs
+      - ts_artifacts
 
 slots:
 
@@ -89,52 +90,66 @@ slots:
     range: string
     multivalued: true
     description: >-
-      Ordered list of PyBaMM-compatible experiment step strings
-      (e.g. "Discharge at 1C until 2.5 V").
+      PyBaMM-compatible experiment step strings (the default human authoring
+      interface, e.g. "Discharge at 1C until 2.5 V"). Parsed into ts_method on
+      ingest; ts_method is the canonical stored form.
     aliases:
       - steps
+      - experiment
 
   ts_cycles:
     slot_uri: battinfo:cycles
     range: integer
     minimum_value: 1
-    description: Number of times the step sequence is repeated.
+    description: >-
+      Number of times the authored step sequence is repeated (becomes an
+      IterativeWorkflow group in ts_method).
     aliases:
       - cycles
+
+  ts_method:
+    slot_uri: battinfo:method
+    range: string
+    description: >-
+      Canonical structured method: an ordered, typed list of steps as a JSON
+      array. Each step carries mode/direction, setpoints, termination and
+      optional nested groups; emitted to JSON-LD as an EMMO process graph.
+    aliases:
+      - method
+
+  ts_record:
+    slot_uri: battinfo:record
+    range: string
+    description: >-
+      Protocol-level default data-recording cadence as a JSON object
+      (e.g. {"time_s": 10}).
+    aliases:
+      - record
+
+  ts_safety:
+    slot_uri: battinfo:safety
+    range: string
+    description: >-
+      Global instrument safety limits as a JSON object, distinct from per-step
+      termination (e.g. {"max_voltage_V": 4.3, "min_voltage_V": 2.4}).
+    aliases:
+      - safety
 
   ts_conditions:
     slot_uri: battinfo:conditions
     range: string
     description: >-
-      Free-form JSON object of environmental conditions
-      (e.g. {"temperature_degC": 25}).
+      Protocol-level ambient conditions as a JSON object of typed quantities
+      (e.g. {"temperature": {"value": 25, "unit": "degC"}}).
     aliases:
       - conditions
 
-  ts_setpoints:
-    slot_uri: battinfo:setpoints
-    range: string
-    description: >-
-      Free-form JSON object of instrument setpoints
-      (e.g. {"current_A": 1.5}).
-    aliases:
-      - setpoints
-
-  ts_termination_criteria:
-    slot_uri: battinfo:terminationCriteria
-    range: string
-    description: >-
-      Free-form JSON object of termination criteria
-      (e.g. {"voltage_V": 2.5, "time_h": 10}).
-    aliases:
-      - termination_criteria
-
-  ts_measurement_outputs:
-    slot_uri: battinfo:measurementOutputs
+  ts_artifacts:
+    slot_uri: battinfo:artifacts
     range: string
     multivalued: true
     description: >-
-      List of measurement output descriptors specifying which quantities
-      the cycler should record during this protocol.
+      Links to machine-actionable protocol files (the actionable layer). Each
+      entry is a JSON object with role/format/locator and optional checksum.
     aliases:
-      - measurement_outputs
+      - artifacts

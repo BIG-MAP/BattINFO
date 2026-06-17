@@ -11,7 +11,7 @@ default_range: string
 
 imports:
   - types
-  - cell-type
+  - cell-spec
 
 classes:
 
@@ -19,10 +19,11 @@ classes:
     class_uri: battinfo:CellInstance
     description: >-
       A specific physical battery cell — one individual unit that can be tested.
-      Links to a CellType specification and carries its own serial/batch identity.
+      Links to a CellSpecification specification and carries its own serial/batch identity.
     slots:
       - ci_id
       - ci_type_id
+      - ci_name
       - ci_serial_number
       - ci_batch_id
       - ci_grade
@@ -48,14 +49,24 @@ slots:
     slot_uri: battinfo:cellSpecification
     required: true
     range: SpecIri
-    description: IRI of the CellType specification this instance conforms to.
+    description: IRI of the CellSpecification specification this instance conforms to.
     aliases:
       - type_id
+
+  ci_name:
+    slot_uri: schema:name
+    range: string
+    description: >-
+      Human-readable name or label for this cell instance — e.g. a lab batch ID.
+      The primary identifier researchers use; usually present even when no
+      manufacturer serial number is available.
+    aliases:
+      - name
 
   ci_serial_number:
     slot_uri: schema:serialNumber
     range: string
-    description: Manufacturer serial number (unique within the product model).
+    description: Manufacturer serial number (unique within the product model); optional.
     aliases:
       - serial_number
 
@@ -113,7 +124,7 @@ slots:
     slot_uri: battinfo:measuredSpecs
     range: SpecSet
     description: >-
-      Measured properties for this individual cell (overrides CellType spec values
+      Measured properties for this individual cell (overrides CellSpecification spec values
       where more precise measurements are available).
     aliases:
       - measured

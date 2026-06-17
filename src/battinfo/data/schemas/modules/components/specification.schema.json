@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/modules/components/specification.schema.json",
   "title": "Cell Type Specification",
-  "description": "Shared cell-type specification for BattINFO and BDF metadata with a required minimal core and optional deep extensions.",
+  "description": "Shared cell-spec specification for BattINFO and BDF metadata with a required minimal core and optional deep extensions.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -52,7 +52,11 @@
     },
     "product_type": {
       "type": "string",
-      "enum": ["commercial", "research", "prototype"]
+      "enum": [
+        "commercial",
+        "research",
+        "prototype"
+      ]
     },
     "size_code": {
       "type": "string"
@@ -92,6 +96,26 @@
         },
         "comment": {
           "type": "string"
+        },
+        "cathode_sheet_count": {
+          "type": "integer"
+        },
+        "anode_sheet_count": {
+          "type": "integer"
+        },
+        "separator_sheet_count": {
+          "type": "integer"
+        },
+        "winding_turns": {
+          "type": "number"
+        },
+        "electrode_length": {
+          "type": "object",
+          "description": "Quantity (value/unit)."
+        },
+        "jellyroll_volume": {
+          "type": "object",
+          "description": "Quantity (value/unit)."
         }
       }
     },
@@ -107,177 +131,38 @@
     "electrolyte": {
       "$ref": "electrolyte.schema.json"
     },
-        "separator": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "material"
-      ],
-      "properties": {
-            "material": {
-              "type": "string",
-              "minLength": 1
-            },
-            "manufacturer": {
-              "type": "string"
-            },
-            "supplier": {
-              "type": "string"
-            },
-            "product_id": {
-              "type": "string"
-            },
-            "property": {
-              "$ref": "../common/quantitative-properties.schema.json"
-            },
-            "comment": {
-              "type": "string"
-        }
-      }
-    },
-    "coin_hardware": {
+    "separator": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "material"
+      ],
       "properties": {
-        "case": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "size_code": {
-              "type": "string"
-            },
-            "material": {
-              "type": "string"
-            },
-            "manufacturer": {
-              "type": "string"
-            },
-            "supplier": {
-              "type": "string"
-            },
-            "product_id": {
-              "type": "string"
-            },
-            "lid_coating": {
-              "type": "string"
-            },
-            "can_coating": {
-              "type": "string"
-            },
-            "property": {
-              "$ref": "../common/quantitative-properties.schema.json"
-            },
-            "comment": {
-              "type": "string"
-            }
-          }
+        "material": {
+          "type": "string",
+          "minLength": 1
         },
-        "lid": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "material": {
-              "type": "string"
-            },
-            "coating": {
-              "type": "string"
-            },
-            "manufacturer": {
-              "type": "string"
-            },
-            "supplier": {
-              "type": "string"
-            },
-            "product_id": {
-              "type": "string"
-            },
-            "property": {
-              "$ref": "../common/quantitative-properties.schema.json"
-            },
-            "comment": {
-              "type": "string"
-            }
-          }
+        "manufacturer": {
+          "type": "string"
         },
-        "can": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "material": {
-              "type": "string"
-            },
-            "coating": {
-              "type": "string"
-            },
-            "manufacturer": {
-              "type": "string"
-            },
-            "supplier": {
-              "type": "string"
-            },
-            "product_id": {
-              "type": "string"
-            },
-            "property": {
-              "$ref": "../common/quantitative-properties.schema.json"
-            },
-            "comment": {
-              "type": "string"
-            }
-          }
+        "supplier": {
+          "type": "string"
         },
-        "spring": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "material": {
-              "type": "string"
-            },
-            "manufacturer": {
-              "type": "string"
-            },
-            "supplier": {
-              "type": "string"
-            },
-            "product_id": {
-              "type": "string"
-            },
-            "property": {
-              "$ref": "../common/quantitative-properties.schema.json"
-            },
-            "comment": {
-              "type": "string"
-            }
-          }
+        "product_id": {
+          "type": "string"
         },
-        "spacer": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "material": {
-              "type": "string"
-            },
-            "manufacturer": {
-              "type": "string"
-            },
-            "supplier": {
-              "type": "string"
-            },
-            "product_id": {
-              "type": "string"
-            },
-            "property": {
-              "$ref": "../common/quantitative-properties.schema.json"
-            },
-            "comment": {
-              "type": "string"
-            }
-          }
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json"
         },
         "comment": {
           "type": "string"
         }
       }
+    },
+    "housing": {
+      "type": "object",
+      "title": "Housing",
+      "description": "Cell mechanical housing (case, terminals, seals, parts)."
     },
     "comment": {
       "type": "array",

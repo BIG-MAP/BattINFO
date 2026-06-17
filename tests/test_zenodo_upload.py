@@ -19,7 +19,7 @@ import pytest
 
 from battinfo import (
     CellInstance,
-    CellType,
+    CellSpecification,
     Dataset,
     Test,
     ZenodoCellRecord,
@@ -30,7 +30,81 @@ from battinfo import (
 )
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ProvenanceInfo
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME
-from battinfo.zenodo import ZenodoClient, _build_zenodo_metadata, upload_zenodo_package
+from battinfo.zenodo import (
+    ZenodoClient,
+    _build_zenodo_metadata,
+    _file_md5,
+    _zenodo_checksum_matches,
+    upload_zenodo_package,
+)
+from battinfo.ws import _plan_zenodo_deposit
+
+
+class TestChecksumMatch:
+    def test_matches_bare_md5(self, tmp_path: Path) -> None:
+        f = tmp_path / "a.bin"; f.write_bytes(b"hello world")
+        assert _zenodo_checksum_matches(f, _file_md5(f)) is True
+
+    def test_matches_prefixed_md5(self, tmp_path: Path) -> None:
+        f = tmp_path / "a.bin"; f.write_bytes(b"hello world")
+        assert _zenodo_checksum_matches(f, f"md5:{_file_md5(f)}") is True
+
+    def test_mismatch_and_missing_are_false(self, tmp_path: Path) -> None:
+        f = tmp_path / "a.bin"; f.write_bytes(b"hello world")
+        assert _zenodo_checksum_matches(f, "deadbeef") is False
+        assert _zenodo_checksum_matches(f, None) is False
+        assert _zenodo_checksum_matches(f, "sha256:" + _file_md5(f)) is False  # non-md5 → re-upload
+
+
+class TestSyncFiles:
+    def test_keeps_unchanged_uploads_changed_removes_gone(self, tmp_path: Path) -> None:
+        keep = tmp_path / "data.csv"; keep.write_bytes(b"UNCHANGED-DATA")
+        changed = tmp_path / "battinfo.json"; changed.write_bytes(b"NEW-CONTENT")
+        added = tmp_path / "ro-crate-metadata.json"; added.write_bytes(b"BRAND-NEW")
+        files = {keep: "data.csv", changed: "battinfo.json", added: "ro-crate-metadata.json"}
+
+        c = ZenodoClient(token="t", sandbox=True)
+        existing = [
+            {"id": "f1", "filename": "data.csv", "checksum": _file_md5(keep)},   # unchanged
+            {"id": "f2", "filename": "battinfo.json", "checksum": "deadbeef"},    # changed
+            {"id": "f3", "filename": "old.txt", "checksum": "whatever"},          # removed
+        ]
+        deleted: list[str] = []
+        uploaded: dict = {}
+        c.list_files = lambda dep: existing                       # type: ignore[assignment]
+        c.delete_file = lambda dep, fid: deleted.append(fid)      # type: ignore[assignment]
+        c.upload_files = lambda dep, mp: (uploaded.update(mp), {})[1]  # type: ignore[assignment]
+
+        out = c.sync_files(1, files)
+
+        assert out["kept"] == ["data.csv"]                        # unchanged → not uploaded
+        assert set(out["uploaded"]) == {"battinfo.json", "ro-crate-metadata.json"}
+        assert out["removed"] == ["old.txt"]
+        assert "f1" not in deleted                                # kept file never deleted
+        assert "f2" in deleted and "f3" in deleted                # changed + removed deleted
+        assert set(uploaded.values()) == {"battinfo.json", "ro-crate-metadata.json"}
+
+
+class TestPlanZenodoDeposit:
+    """Re-running ws.zenodo() never errors on an existing record — it warns and
+    moves the workflow forward."""
+
+    def test_first_run_creates_new_record(self) -> None:
+        assert _plan_zenodo_deposit(None, False, None) == (None, None, None)
+
+    def test_explicit_record_id_passes_through_without_warning(self) -> None:
+        assert _plan_zenodo_deposit("123", True, "456") == ("456", None, None)
+
+    def test_existing_published_forks_new_version_with_warning(self) -> None:
+        record_id, reuse, warn = _plan_zenodo_deposit("123", True, None)
+        assert record_id == "123" and reuse is None
+        assert warn and "NEW VERSION" in warn
+
+    def test_existing_draft_is_updated_in_place_with_warning(self) -> None:
+        record_id, reuse, warn = _plan_zenodo_deposit("513896", False, None)
+        assert record_id is None and reuse == "513896"
+        assert warn and "draft" in warn.lower()
+
 
 # ── helpers ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +113,7 @@ CREATORS = [{"name": "Clark, Simon", "affiliation": "SINTEF"}]
 
 
 def _make_record(n: int = 2) -> ZenodoCellRecord:
-    ct = CellType(
+    ct = CellSpecification(
         id=CELL_TYPE_ID,
         name="Energizer CR2032",
         manufacturer="Energizer",
@@ -57,14 +131,14 @@ def _make_record(n: int = 2) -> ZenodoCellRecord:
         ci_id = f"https://w3id.org/battinfo/cell/ci-{idx}"
         test_id = f"https://w3id.org/battinfo/test/t-{idx}"
         ds_id = f"https://w3id.org/battinfo/dataset/d-{idx}"
-        ci = CellInstance(id=ci_id, name=f"sn-{idx}", cell_type_id=CELL_TYPE_ID,
+        ci = CellInstance(id=ci_id, name=f"sn-{idx}", cell_spec_id=CELL_TYPE_ID,
                           serial_number=f"sn-{idx}", source=ProvenanceInfo(type="measurement"))
         test = Test(id=test_id, name=f"test {idx}", test_kind="capacity_check",
                     cell_instance_id=ci_id, source=ProvenanceInfo(type="measurement"))
         ds = Dataset(id=ds_id, name=f"dataset {idx}", cell_instance_id=ci_id,
                      test_id=test_id, source=ProvenanceInfo(type="measurement"))
         datasets.append(ZenodoDatasetEntry(cell_instances=[ci], test=test, dataset=ds))
-    return ZenodoCellRecord(cell_type=ct, datasets=datasets)
+    return ZenodoCellRecord(cell_spec=ct, datasets=datasets)
 
 
 def _staged_package(tmp_path: Path, n: int = 2) -> Path:

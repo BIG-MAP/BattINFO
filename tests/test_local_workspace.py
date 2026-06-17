@@ -9,19 +9,19 @@ from typer.testing import CliRunner
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo import BatteryCell, BatteryCellType, BatteryTestType, BattinfoBundle, Dataset, Test, publish, quantity
+from battinfo import BatteryCell, BatteryCellSpecification, BatteryTestType, BattinfoBundle, Dataset, Test, publish, quantity
 from battinfo.cli import app
 from battinfo.local_workspace import WORKSPACE_FILENAME, LocalWorkspace
 
 
-def _build_sample_objects(tmp_path: Path) -> tuple[BatteryCellType, BatteryCell, Test, Dataset]:
+def _build_sample_objects(tmp_path: Path) -> tuple[BatteryCellSpecification, BatteryCell, Test, Dataset]:
     dataset_file = tmp_path / "inputs" / "a123-cycle-life.csv"
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text(
         "cycle_index,capacity_ah,voltage_v\n0,2.50,3.30\n1,2.48,3.28\n",
         encoding="utf-8",
     )
-    cell_design = BatteryCellType(
+    cell_design = BatteryCellSpecification(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -86,7 +86,7 @@ def test_workspace_cli_init_validate_bundle_happy_path(tmp_path: Path) -> None:
     assert submission_package_path.exists()
     assert registry_intake_path.exists()
     assert zenodo_metadata_path.exists()
-    assert (normalized_dir / "cell-type" / "cell-type.json").exists()
+    assert (normalized_dir / "cell-spec" / "cell-spec.json").exists()
     assert (normalized_dir / "cell-instance" / "cell.json").exists()
     assert (normalized_dir / "test" / "test.json").exists()
     assert (normalized_dir / "dataset" / "dataset.json").exists()
@@ -269,7 +269,7 @@ def test_local_workspace_rehydrates_from_publication_bundle(tmp_path: Path) -> N
     dataset.download_url = None
     dataset.data_format = "application/vnd.battinfo.dataset-directory"
 
-    publish(cell_type=cell_design, cell_instance=cell, test=test, dataset=dataset)
+    publish(cell_spec=cell_design, cell_instance=cell, test=test, dataset=dataset)
     publication_path = publish_root / "battinfo.publish.jsonld"
     assert publication_path.exists()
 
@@ -300,7 +300,7 @@ def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path)
         publisher_id="demo-lab",
         bundle=BattinfoBundle(
             bundle_name="hello-world",
-            cell_type=cell_design,
+            cell_spec=cell_design,
             cell_instance=cell,
             test=test,
             dataset=dataset,

@@ -47,7 +47,7 @@ def _stats(directory: Path) -> dict[str, int]:
     }
     for path in files:
         doc = _load_json(path)
-        product = doc.get("product", {})
+        product = doc.get("cell_spec", {})
         quality = doc.get("quality", {})
         if _is_unknown(product.get("negative_electrode_basis")):
             stats["unknown_negative"] += 1

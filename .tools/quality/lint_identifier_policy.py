@@ -32,19 +32,19 @@ def _check_filename_policy(path: Path, errors: list[str]) -> None:
         errors.append(f"{path}: filename must not include serial-like tokens")
 
 
-def _check_cell_types(dir_path: Path, errors: list[str]) -> None:
+def _check_cell_specs(dir_path: Path, errors: list[str]) -> None:
     for path in sorted(dir_path.glob("*.json")):
         _check_filename_policy(path, errors)
         doc = _load(path)
-        # Accept both new-style "product" key and legacy "cell_type" key
-        cell_type = doc.get("product") or doc.get("cell_type")
-        if not isinstance(cell_type, dict):
-            errors.append(f"{path}: missing product/cell_type object")
+        # Accept both new-style "cell_spec" key and legacy "cell_spec" key
+        cell_spec = doc.get("cell_spec") or doc.get("cell_spec")
+        if not isinstance(cell_spec, dict):
+            errors.append(f"{path}: missing product/cell_spec object")
             continue
-        cell_id = cell_type.get("id")
+        cell_id = cell_spec.get("id")
         if not isinstance(cell_id, str) or not CELL_TYPE_IRI_RE.fullmatch(cell_id):
-            errors.append(f"{path}: invalid cell_type.id '{cell_id}'")
-        _check_short_id(cell_type.get("short_id"), path, errors)
+            errors.append(f"{path}: invalid cell_spec.id '{cell_id}'")
+        _check_short_id(cell_spec.get("short_id"), path, errors)
 
 
 def _check_cell_instances(dir_path: Path, errors: list[str]) -> None:
@@ -56,7 +56,7 @@ def _check_cell_instances(dir_path: Path, errors: list[str]) -> None:
             errors.append(f"{path}: missing cell_instance object")
             continue
         cell_id = inst.get("id")
-        type_id = inst.get("type_id")
+        type_id = inst.get("cell_spec_id")
         if not isinstance(cell_id, str) or not CELL_IRI_RE.fullmatch(cell_id):
             errors.append(f"{path}: invalid cell_instance.id '{cell_id}'")
         if not isinstance(type_id, str) or not CELL_TYPE_IRI_RE.fullmatch(type_id):
@@ -108,10 +108,10 @@ def _check_datasets(dir_path: Path, errors: list[str]) -> None:
 
 
 def _dirs() -> Iterable[tuple[str, Path]]:
-    yield "examples cell-type", ROOT / "examples" / "cell-type"
+    yield "examples cell-spec", ROOT / "examples" / "cell-spec"
     yield "examples cell-instance", ROOT / "examples" / "cell-instance"
     yield "examples dataset", ROOT / "examples" / "dataset"
-    yield "pkg cell-type", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type"
+    yield "pkg cell-spec", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec"
     yield "pkg cell-instance", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance"
     yield "pkg dataset", ROOT / "src" / "battinfo" / "data" / "examples" / "dataset"
 
@@ -122,11 +122,11 @@ def main() -> None:
         if not path.exists():
             errors.append(f"missing directory: {path}")
 
-    _check_cell_types(ROOT / "examples" / "cell-type", errors)
+    _check_cell_specs(ROOT / "examples" / "cell-spec", errors)
     _check_cell_instances(ROOT / "examples" / "cell-instance", errors)
     _check_datasets(ROOT / "examples" / "dataset", errors)
 
-    _check_cell_types(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type", errors)
+    _check_cell_specs(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec", errors)
     _check_cell_instances(ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance", errors)
     _check_datasets(ROOT / "src" / "battinfo" / "data" / "examples" / "dataset", errors)
 

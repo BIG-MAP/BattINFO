@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
-from battinfo.bundle import CellInstance, CellSpecification, CellType, ProvenanceInfo, Test, TestSpec
+from battinfo.bundle import CellInstance, CellSpecification, CellSpecification, ProvenanceInfo, Test, TestSpec
 
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
@@ -148,7 +148,7 @@ class ConverterImportResult:
 @dataclass(slots=True)
 class ConverterImportPackage:
     specification: CellSpecification
-    cell_type: CellType
+    cell_spec: CellSpecification
     cell_instance: CellInstance | None
     test_specs: list[TestSpec] = field(default_factory=list)
     tests: list[Test] = field(default_factory=list)
@@ -156,7 +156,7 @@ class ConverterImportPackage:
     record: dict[str, Any] | None = None
 
     def objects(self) -> list[Any]:
-        objects: list[Any] = [self.specification, self.cell_type]
+        objects: list[Any] = [self.specification, self.cell_spec]
         if self.cell_instance is not None:
             objects.append(self.cell_instance)
         objects.extend(self.test_specs)
@@ -302,7 +302,7 @@ def import_converter_jsonld_record(
         construction["comment"] = assembly_comment
 
     spec_id = id or _entity_iri(
-        "cell-type",
+        "cell-spec",
         "::".join(
             [
                 imported_manufacturer,
@@ -343,7 +343,7 @@ def import_converter_jsonld_record(
     if hardware_comment is not None and not coin_hardware:
         top_level_comments.append(hardware_comment)
         warnings.append(
-            "Converter-specific coin-cell hardware metadata is still preserved only as comments because it could not be mapped into BattINFO coin_hardware."
+            "Converter-specific coin-cell hardware metadata is still preserved only as comments because it could not be mapped into the BattINFO housing model."
         )
 
     source_comment = "Imported from BattINFO Converter JSON-LD."
@@ -430,12 +430,12 @@ def import_converter_package(
         schema_version=schema_version,
     )
     specification = imported.specification
-    cell_type = CellType.from_cell_specification(specification)
-    if cell_type.source.type not in {"datasheet", "label", "catalog", "manual", "other"}:
-        cell_type.source.type = "other"
-        existing = list(cell_type.comment)
+    cell_spec = CellSpecification.from_cell_specification(specification)
+    if cell_spec.source.type not in {"datasheet", "label", "catalog", "manual", "other"}:
+        cell_spec.source.type = "other"
+        existing = list(cell_spec.comment)
         existing.append("Source type normalized from converter-jsonld during converter package import.")
-        cell_type.comment = existing
+        cell_spec.comment = existing
 
     cell_instance: CellInstance | None = None
     instances = imported.record.get("instances")
@@ -446,7 +446,7 @@ def import_converter_package(
                 schema_version=schema_version,
                 id=first.get("id"),
                 name=first.get("name"),
-                cell_type=cell_type,
+                cell_spec=cell_spec,
                 serial_number=first.get("serial_number"),
                 source=ProvenanceInfo(
                     type=specification.source.type if specification.source.type in {"manual", "lab", "simulation", "other"} else "other",
@@ -471,7 +471,7 @@ def import_converter_package(
 
     return ConverterImportPackage(
         specification=specification,
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_instance=cell_instance,
         test_specs=protocol_objects,
         tests=test_objects,
@@ -612,8 +612,8 @@ def _quantity_value(node: Mapping[str, Any]) -> Any:
     if isinstance(numerical, Mapping):
         if "hasNumberValue" in numerical:
             return numerical.get("hasNumberValue")
-        if "hasNumericalValue" in numerical:
-            return numerical.get("hasNumericalValue")
+        if "hasNumberValue" in numerical or "hasNumericalValue" in numerical:
+            return numerical.get("hasNumberValue", numerical.get("hasNumericalValue"))
     if "hasStringValue" in node:
         return node.get("hasStringValue")
     return None
@@ -654,21 +654,23 @@ def _mapped_properties(value: Any) -> dict[str, dict[str, Any]]:
 
 
 def _component_comment(node: Mapping[str, Any]) -> str | None:
-    fragments: list[str] = []
-    formula = None
+    # Reserved for future free-text component notes. The molecular formula, which
+    # used to be folded into this comment, is now modeled on
+    # MaterialComponent.molecular_formula (see _molecular_formula).
+    return None
+
+
+def _molecular_formula(node: Mapping[str, Any]) -> str | None:
+    """Extract the molecularFormula string value from a component's measured properties."""
     measured = node.get("hasMeasuredProperty")
-    if isinstance(measured, list):
-        for item in measured:
-            if isinstance(item, Mapping) and _preferred_type(item, exclude=set()) == "molecularFormula":
-                formula = _string_value(item)
-                break
-    elif isinstance(measured, Mapping) and _preferred_type(measured, exclude=set()) == "molecularFormula":
-        formula = _string_value(measured)
-    if formula is not None:
-        fragments.append(f"formula: {formula}")
-    if not fragments:
-        return None
-    return "; ".join(fragments)
+    items = measured if isinstance(measured, list) else [measured]
+    for item in items:
+        if isinstance(item, Mapping) and _preferred_type(item, exclude=set()) == "molecularFormula":
+            value = item.get("hasStringValue")
+            if isinstance(value, str) and value:
+                return value
+            return _string_value(item)
+    return None
 
 
 def _map_material_component(node: Any, *, wrapper_types: set[str] | None = None) -> dict[str, Any] | None:
@@ -685,6 +687,9 @@ def _map_material_component(node: Any, *, wrapper_types: set[str] | None = None)
         "name": _label_for_type(preferred) or preferred,
     }
     _apply_component_metadata(component, node)
+    formula = _molecular_formula(node)
+    if formula is not None:
+        component["molecular_formula"] = formula
     properties = _mapped_properties(node.get("hasMeasuredProperty"))
     if properties:
         component["property"] = properties
@@ -1084,29 +1089,76 @@ def _safe_retrieved_at(value: int | None) -> int:
     return value if isinstance(value, int) and value >= 0 else 0
 
 
-def _task_chain_steps(task: Any) -> list[dict[str, Any]]:
-    steps: list[dict[str, Any]] = []
+# Converter EMMO task chain → structured method vocabulary.
+_CONV_TASK_MODE: dict[str, tuple[str, str]] = {
+    "Charging": ("cc", "charge"),
+    "ConstantCurrentCharging": ("cc", "charge"),
+    "Discharging": ("cc", "discharge"),
+    "ConstantCurrentDischarging": ("cc", "discharge"),
+    "Hold": ("cv", "hold"),
+    "VoltageHold": ("cv", "hold"),
+    "ConstantVoltage": ("cv", "hold"),
+    "Rest": ("rest", "rest"),
+    "OpenCircuitHold": ("rest", "rest"),
+}
+_CONV_SETPOINT: dict[str, tuple[str, str]] = {  # input @type -> (setpoint key, default unit)
+    "ElectricCurrent": ("current", "A"),
+    "ChargingCurrent": ("current", "A"),
+    "DischargingCurrent": ("current", "A"),
+    "ElectricCurrentDensity": ("current_density", "mA/cm2"),
+    "CRate": ("c_rate", "A/Ah"),
+    "Voltage": ("voltage", "V"),
+    "ChargingVoltage": ("voltage", "V"),
+    "Power": ("power", "W"),
+}
+_CONV_TERMINATION: dict[str, tuple[str, str, str]] = {  # sibling-of-TerminationQuantity -> (quantity, direction, unit)
+    "UpperVoltageLimit": ("voltage", "above", "V"),
+    "LowerVoltageLimit": ("voltage", "below", "V"),
+    "UpperCurrentLimit": ("current", "above", "A"),
+    "LowerCurrentLimit": ("current", "below", "A"),
+    "UpperCurrentDensityLimit": ("current", "above", "mA/cm2"),
+    "LowerCurrentDensityLimit": ("current", "below", "mA/cm2"),
+}
+
+
+def _task_chain_to_method(task: Any) -> list[Any]:
+    """Parse the converter's EMMO hasTask/hasNext chain into structured method steps,
+    so a converter-imported procedure is as queryable as the other importers."""
+    from battinfo.testmethod import Quantity, Step, Termination  # noqa: PLC0415
+
+    method: list[Step] = []
     current = _mapping_or_none(task)
     while current is not None:
-        step: dict[str, Any] = {}
-        task_type = _preferred_type(current, exclude=set()) or _string_value(current.get("@type"))
-        if task_type is not None:
-            step["task"] = task_type
-        inputs: list[dict[str, Any]] = []
+        ttype = _preferred_type(current, exclude=set()) or _string_value(current.get("@type"))
+        mode, direction = _CONV_TASK_MODE.get(ttype or "", ("cc", "charge"))
+        step = Step(mode=mode, direction=direction)
         for item in _mapping_list(current.get("hasInput")):
-            quantity = _quantity_text(item)
-            input_types = _node_types(item)
-            input_entry: dict[str, Any] = {
-                "type": [value for value in input_types if value != "TerminationQuantity"] or input_types,
-            }
-            if quantity is not None:
-                input_entry["quantity"] = quantity
-            inputs.append(input_entry)
-        if inputs:
-            step["inputs"] = inputs
-        steps.append(step)
+            part = item.get("hasNumericalPart") if isinstance(item, Mapping) else None
+            value = None
+            if isinstance(part, Mapping):
+                raw = part.get("hasNumberValue", part.get("hasNumericalValue"))
+                try:
+                    value = float(raw)
+                except (TypeError, ValueError):
+                    value = None
+            if value is None:
+                continue
+            types = _node_types(item)
+            if "TerminationQuantity" in types:
+                sibling = next((t for t in types if t != "TerminationQuantity"), None)
+                info = _CONV_TERMINATION.get(sibling or "")
+                if info:
+                    quantity, tdir, unit = info
+                    step.termination.append(
+                        Termination(quantity=quantity, value=value, unit=unit, direction=tdir))
+            else:
+                setpoint = next((_CONV_SETPOINT[t] for t in types if t in _CONV_SETPOINT), None)
+                if setpoint:
+                    key, unit = setpoint
+                    step.setpoints[key] = Quantity(value=abs(value), unit=unit)
+        method.append(step)
         current = _mapping_or_none(current.get("hasNext"))
-    return steps
+    return method
 
 
 def _test_object_context(node: Any) -> dict[str, Any]:
@@ -1193,15 +1245,24 @@ def _extract_procedure_records(
             role_label = role.replace("_", " ")
             protocol_name = _string_value(measurement_parameter.get("rdfs:label")) or f"{role_label} rated capacity procedure"
             protocol_description = _string_value(measurement_parameter.get("rdfs:comment"))
-            steps = _task_chain_steps(measurement_parameter.get("hasTask"))
+            method = _task_chain_to_method(measurement_parameter.get("hasTask"))
             conditions = _test_object_context(battery_test.get("hasTestObject"))
             conditions["subject"] = role
-            if not steps:
+            if not method:
                 warnings.append(
                     f"Converter rated-capacity procedure for {role} was imported without parsed task steps."
                 )
 
             protocol_id = _entity_iri("test-protocol", f"{instance_id}::{role}::capacity-check::{procedure_index}")
+            # The EMMO task chain is parsed into the structured, queryable method.
+            # Free-form test-object context (reference electrode, subject role) and the
+            # measurement-output list are not part of the method, so they are preserved
+            # as notes without data loss.
+            import_notes = [f"Imported from BattINFO Converter JSON-LD for {role_label}."]
+            if conditions:
+                import_notes.append(f"Imported test context: {json.dumps(conditions)}")
+            if measurement_outputs:
+                import_notes.append(f"Imported measurement outputs: {json.dumps(measurement_outputs)}")
             protocol = TestSpec(
                 schema_version=schema_version,
                 id=protocol_id,
@@ -1209,16 +1270,14 @@ def _extract_procedure_records(
                 test_type="capacity_check",
                 description=protocol_description,
                 version=workflow_version,
-                conditions=conditions,
-                setpoints={"steps": steps} if steps else {},
-                measurement_outputs=measurement_outputs,
+                method=method,
                 source=ProvenanceInfo(
                     type="manual",
                     file=source_file,
                     retrieved_at=retrieved_timestamp,
                     workflow_version=workflow_version,
                 ),
-                comment=[f"Imported from BattINFO Converter JSON-LD for {role_label}."],
+                comment=import_notes,
             )
 
             test_id = _entity_iri("test", f"{instance_id}::{role}::capacity-check::{procedure_index}")
@@ -1259,7 +1318,7 @@ def _stable_uid(seed: str) -> str:
 
 
 _IRI_NAMESPACE: dict[str, str] = {
-    "cell-type": "spec",
+    "cell-spec": "spec",
     "cell": "cell",
     "test-protocol": "spec",
     "test": "test",

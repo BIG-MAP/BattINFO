@@ -1,5 +1,11 @@
 from battinfo.interop.battdat import BattdatImportResult, from_battdat
-from battinfo.interop.bpx import BpxImportResult, from_bpx
+from battinfo.interop.bpx import (
+    BpxExportResult,
+    BpxImportResult,
+    from_bpx,
+    save_bpx,
+    to_bpx,
+)
 from battinfo.interop.converter import (
     BatchImportResult,
     ConverterImportPackage,
@@ -10,9 +16,15 @@ from battinfo.interop.converter import (
     import_converter_package,
     import_dataset_record,
 )
+from battinfo.interop.protocols import (
+    import_aurora_unicycler,
+    import_bmgen_jsonld,
+    import_pybamm_experiment,
+)
 
 __all__ = [
     "BattdatImportResult",
+    "BpxExportResult",
     "BpxImportResult",
     "BatchImportResult",
     "ConverterImportPackage",
@@ -20,8 +32,13 @@ __all__ = [
     "batch_import_converter_directory",
     "from_battdat",
     "from_bpx",
+    "save_bpx",
+    "to_bpx",
+    "import_aurora_unicycler",
+    "import_bmgen_jsonld",
     "import_converter_package",
     "import_converter_jsonld",
     "import_converter_jsonld_record",
     "import_dataset_record",
+    "import_pybamm_experiment",
 ]

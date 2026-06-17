@@ -10,10 +10,10 @@
 # Short label for this specific cell (serial number, lab code, etc.)
 cell_name: "My Cell 001"
 
-# BattINFO cell-type IRI for the model that was tested.
-# Find the IRI at https://www.battery-genome.org/registry/cell-type
+# BattINFO cell-spec IRI for the model that was tested.
+# Find the IRI at https://www.battery-genome.org/registry/cell-spec
 # Example: https://w3id.org/battinfo/cell/e5rn-ep3s-hwxr-kwzc
-cell_type_iri: null
+cell_spec_iri: null
 
 # Leave null unless you are republishing a cell that already has a BattINFO IRI.
 cell_iri: null

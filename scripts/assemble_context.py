@@ -44,8 +44,11 @@ PREFIXES: dict[str, str] = {
     "dcat":             "http://www.w3.org/ns/dcat#",
     "dqv":              "http://www.w3.org/ns/dqv#",
     "oa":               "http://www.w3.org/ns/oa#",
-    "qudt":             "http://qudt.org/schema/qudt/",
-    "qudt-unit":        "http://qudt.org/vocab/unit/",
+    "earl":             "http://www.w3.org/ns/earl#",
+    # No QUDT prefixes: quantities use ONE EMMO serialization
+    # (hasNumericalPart/hasNumericalValue/hasMeasurementUnit) in both the published
+    # battinfo.json and the SHACL validation view. The few compound-unit IRIs sourced
+    # from QUDT are emitted as full URLs, not via a prefix.
     "spdx":             "http://spdx.org/rdf/terms#",
     "rdfs":             "http://www.w3.org/2000/01/rdf-schema#",
     "xsd":              "http://www.w3.org/2001/XMLSchema#",
@@ -81,6 +84,10 @@ EMMO_OBJECT_PROPERTIES: dict[str, object] = {
         "@id":   "emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0",
         "@type": "@id",
     },
+    # hasNumberValue is EMMO's canonical prefLabel (and what bmgen emits); we emit it.
+    # hasNumericalValue is the altLabel for the SAME IRI — kept so older published
+    # documents that used it still resolve on read.
+    "hasNumberValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
     "hasNumericalValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
     "hasMeasurementUnit": {
         "@id":   "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
@@ -108,16 +115,30 @@ EMMO_OBJECT_PROPERTIES: dict[str, object] = {
     },
 }
 
-# ── Schema.org / QUDT common property aliases ─────────────────────────────────
+# ── Schema.org common property aliases ────────────────────────────────────────
+# The bare `value`/`unit` aliases are intentionally NOT declared: neither
+# serialization uses them. The published battinfo.json uses EMMO hasNumericalValue
+# / hasMeasurementUnit; the validation view emits qudt:value / qudt:unit directly
+# (compact form, via the qudt prefix), never the bare aliases.
 COMMON_PROPERTY_ALIASES: dict[str, object] = {
     "name":         "schema:name",
     "model":        "schema:model",
     "manufacturer": "schema:manufacturer",
-    "value":        "qudt:value",
-    "unit":         {"@id": "qudt:unit", "@type": "@vocab"},
 }
 
 # ── Curated unit symbol → EMMO IRI table ──────────────────────────────────────
+# IMPORTANT: term keys here MUST NOT contain "/" (or ":"). JSON-LD 1.1 treats any
+# term whose key has the form of an IRI (i.e. contains "/") as one that MUST expand
+# to its own definition; a compound-unit symbol like "Wh/kg" does not, so a strict
+# 1.1 processor rejects the ENTIRE context with:
+#   "Invalid JSON-LD syntax; term in form of IRI must expand to definition."
+# Compound units (Wh/kg, Wh/L, W/kg, W/L, 1/h, …) are therefore intentionally NOT
+# defined as symbol terms. They remain fully representable because:
+#   1. quantity nodes always emit the unit as an explicit IRI reference
+#      (hasMeasurementUnit / qudt:unit -> {"@id": "emmo:WattHourPerKilogram"}),
+#      never as a bare @vocab symbol string; and
+#   2. ws.py adds slash-free EMMO prefLabel aliases (WattHourPerKilogram, …) to the
+#      embedded context from unit_map.curated.json.
 UNIT_SYMBOLS: dict[str, str] = {
     "V":      "emmo:Volt",
     "mV":     "emmo:MilliVolt",
@@ -145,14 +166,9 @@ UNIT_SYMBOLS: dict[str, str] = {
     "L":      "emmo:Litre",
     "mL":     "emmo:MilliLitre",
     "cm3":    "emmo:CubicCentiMetre",
-    "Wh/kg":  "emmo:WattHourPerKilogram",
-    "Wh/L":   "emmo:WattHourPerLitre",
-    "W/kg":   "emmo:WattPerKilogram",
-    "W/L":    "emmo:WattPerLitre",
     "h":      "emmo:Hour",
     "min":    "emmo:Minute",
     "s":      "emmo:Second",
-    "1/h":    "emmo:PerHour",
     "C":      "emmo:CoulombUnit",
     "1":      "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
     "%":      "emmo:Percent",
@@ -163,8 +179,8 @@ TYPED_TERMS: dict[str, object] = {
     "license":        {"@id": "dcterms:license",   "@type": "@id"},
     "created_at":     {"@id": "dcterms:created",   "@type": "xsd:integer"},
     "modified_at":    {"@id": "dcterms:modified",  "@type": "xsd:integer"},
-    "productionDate": "schema:productionDate",
-    "expiresAt":      "battinfo:expiresAt",
+    # Note: cell production/expiry are emitted directly as typed schema:productionDate
+    # / schema:expires values (xsd:gYearMonth), so no extra aliases are declared here.
 }
 
 
@@ -274,6 +290,23 @@ def build_context(schema_dir: Path) -> dict:
     ctx.update(keep)
     ctx.update(UNIT_SYMBOLS)
     ctx.update(TYPED_TERMS)
+
+    # Guard: a term key in the form of an IRI (contains "/" or ":") must expand to
+    # its own definition under JSON-LD 1.1, otherwise a strict processor rejects the
+    # whole context. None of our terms do, so forbid such keys outright. Namespace
+    # prefixes (whose value is the base IRI) are exempt — they are the definition.
+    offenders = [
+        k for k, v in ctx.items()
+        if not k.startswith("@")
+        and k not in PREFIXES
+        and ("/" in k or ":" in k)
+    ]
+    if offenders:
+        raise ValueError(
+            "JSON-LD 1.1 forbids term keys in the form of an IRI "
+            f"(containing '/' or ':'): {sorted(offenders)}. "
+            "Define such units/terms by a slash-free alias instead."
+        )
 
     return {"@context": ctx}
 

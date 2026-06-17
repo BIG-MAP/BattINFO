@@ -12,7 +12,7 @@ import pytest
 from battinfo import (
     CellInstance,
     CellSpecification,
-    CellType,
+    CellSpecification,
     Dataset,
     Test,
     ZenodoCellRecord,
@@ -35,7 +35,7 @@ DATASET_ID = "https://w3id.org/battinfo/dataset/gj1y-pn2n-t5pm-gs9c"
 
 
 def _make_record(n_datasets: int = 1, *, with_spec: bool = False) -> ZenodoCellRecord:
-    cell_type = CellType(
+    cell_spec = CellSpecification(
         id=CELL_TYPE_ID,
         name="Energizer CR2032",
         manufacturer="Energizer",
@@ -63,7 +63,7 @@ def _make_record(n_datasets: int = 1, *, with_spec: bool = False) -> ZenodoCellR
         ci = CellInstance(
             id=ci_id,
             name=f"sn-{idx}",
-            cell_type_id=CELL_TYPE_ID,
+            cell_spec_id=CELL_TYPE_ID,
             serial_number=f"sn-{idx}",
             source=ProvenanceInfo(type="measurement"),
         )
@@ -84,7 +84,7 @@ def _make_record(n_datasets: int = 1, *, with_spec: bool = False) -> ZenodoCellR
         )
         datasets.append(ZenodoDatasetEntry(cell_instances=[ci], test=test, dataset=dataset))
 
-    return ZenodoCellRecord(cell_type=cell_type, cell_specification=spec, datasets=datasets)
+    return ZenodoCellRecord(cell_spec=cell_spec, cell_specification=spec, datasets=datasets)
 
 
 def _make_file_sets(
@@ -172,7 +172,7 @@ def test_bundle_json_is_valid_cell_record(tmp_path: Path) -> None:
 
     # Round-trip
     loaded = ZenodoCellRecord.from_flat_json(raw)
-    assert loaded.cell_type.id == CELL_TYPE_ID
+    assert loaded.cell_spec.id == CELL_TYPE_ID
 
 
 # ── battinfo.publish.jsonld ────────────────────────────────────────────────────
@@ -222,11 +222,36 @@ def test_publish_jsonld_contains_dataset_distribution(tmp_path: Path) -> None:
 
     payload = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
     graph = payload["@graph"]
-    dataset_nodes = [n for n in graph if "BatteryTestResult" in (n.get("@type") or [])]
+    # Gold-standard shape: each test result is a dcat:Dataset member carrying both a
+    # dcat:distribution and a schema:distribution (DataDownload) mirror.
+    dataset_nodes = [n for n in graph
+                     if "dcat:Dataset" in (n.get("@type") or []) and "dcat:distribution" in n]
     assert len(dataset_nodes) == 1
     dist = dataset_nodes[0].get("schema:distribution", [])
     assert len(dist) >= 1
     assert all("ZENODO_RECORD_ID" in d.get("schema:contentUrl", "") for d in dist)
+
+
+def test_publish_jsonld_bdf_distribution_conforms_to_table_schema(tmp_path: Path) -> None:
+    """A BDF data file (.bdf.*) declares conformance to the versioned BDF table
+    schema so a consumer can resolve column/unit semantics from one link; the raw
+    instrument file is NOT BDF and carries no such claim."""
+    from battinfo.ws import BDF_TABLE_SCHEMA_IRI
+
+    record = _make_record(1)
+    staging = tmp_path / "staging"
+    build_zenodo_package(record, staging, _make_file_sets(tmp_path / "src", 1))
+
+    payload = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
+    dists = [d for n in payload["@graph"] for d in n.get("dcat:distribution", [])]
+    bdf = [d for d in dists if ".bdf." in d.get("schema:name", "")]
+    raw = [d for d in dists if ".bdf." not in d.get("schema:name", "")]
+    assert bdf, "expected at least one BDF distribution"
+    assert all(d.get("dcterms:conformsTo") == {"@id": BDF_TABLE_SCHEMA_IRI} for d in bdf)
+    assert all("dcterms:conformsTo" not in d for d in raw), \
+        "raw instrument files must not claim BDF table-schema conformance"
+    # The link must be the VERSIONED IRI (archival reproducibility), not floating.
+    assert "/1.2.0/schema" in BDF_TABLE_SCHEMA_IRI
 
 
 def test_publish_jsonld_multi_dataset_cell_instance_nodes(tmp_path: Path) -> None:
@@ -249,6 +274,37 @@ def test_publish_jsonld_with_cell_specification(tmp_path: Path) -> None:
     graph = payload["@graph"]
     spec_nodes = [n for n in graph if "BatteryCellSpecification" in (n.get("@type") or [])]
     assert len(spec_nodes) >= 1
+
+
+def test_publish_jsonld_passes_publication_validation(tmp_path: Path) -> None:
+    """The contribution path's publish.jsonld must pass the publication gate
+    (JSON-LD + dict-structural + structural SHACL) at the strict publisher policy."""
+    from battinfo.validate import validate_publication_report
+
+    record = _make_record(2)
+    staging = tmp_path / "staging"
+    build_zenodo_package(record, staging, _make_file_sets(tmp_path / "src", 2))
+
+    payload = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
+    report = validate_publication_report(payload, policy="publisher")
+    errors = [i for i in report.issues if i.severity == "error"]
+    assert not errors, f"publication validation errors: {[(i.code, i.message) for i in errors]}"
+
+
+def test_publish_jsonld_uses_shared_gold_standard_builder(tmp_path: Path) -> None:
+    """The contribution path must route through the single shared graph builder, so
+    publish.jsonld carries the gold-standard shape: an inlined @context dict (not a
+    bare URL) and a dcat:Catalog top node. Guards against re-forking a second builder."""
+    record = _make_record(2)
+    staging = tmp_path / "staging"
+    build_zenodo_package(record, staging, _make_file_sets(tmp_path / "src", 2))
+
+    payload = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
+    assert isinstance(payload["@context"], dict), "context must be inlined (self-contained)"
+    assert any("dcat:Catalog" in (n.get("@type") or []) for n in payload["@graph"])
+    # Every test result is a dcat:Dataset member with a schema.org DataDownload mirror.
+    members = [n for n in payload["@graph"] if "dcat:distribution" in n]
+    assert members and all("schema:distribution" in m for m in members)
 
 
 # ── ro-crate-metadata.json ─────────────────────────────────────────────────────

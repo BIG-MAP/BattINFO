@@ -1,0 +1,68 @@
+{
+  "$comment": "Controlled vocabulary mapping a descriptive method step (mode + direction) to the EMMO domain-electrochemistry process class used as the step's JSON-LD @type. prefLabels are resolved against the remote EMMO battery @context (https://w3id.org/emmo/domain/battery/context); no compact IRI is hand-maintained here. Entries marked best_effort have not yet been verified against the published ontology and should be confirmed before relied upon downstream.",
+  "version": "1.0.0",
+  "modes": {
+    "cc": {
+      "label": "constant current",
+      "directions": {
+        "charge":    {"emmo_class": "ConstantCurrentCharging"},
+        "discharge": {"emmo_class": "ConstantCurrentDischarging"}
+      }
+    },
+    "cv": {
+      "label": "constant voltage (hold)",
+      "directions": {
+        "hold":      {"emmo_class": "VoltageHold"}
+      }
+    },
+    "cccv": {
+      "label": "constant current, constant voltage",
+      "directions": {
+        "charge":    {"emmo_class": "ConstantCurrentConstantVoltageCharging"},
+        "discharge": {"emmo_class": "ConstantCurrentConstantVoltageDischarging"}
+      }
+    },
+    "cp": {
+      "label": "constant power",
+      "best_effort": true,
+      "directions": {
+        "charge":    {"emmo_class": "ConstantPowerCharging"},
+        "discharge": {"emmo_class": "ConstantPowerDischarging"}
+      }
+    },
+    "cr": {
+      "label": "constant resistance",
+      "best_effort": true,
+      "directions": {
+        "charge":    {"emmo_class": "ConstantResistanceCharging"},
+        "discharge": {"emmo_class": "ConstantResistanceDischarging"}
+      }
+    },
+    "rest": {
+      "label": "rest / open-circuit hold",
+      "directions": {
+        "rest":      {"emmo_class": "OpenCircuitHold"}
+      }
+    },
+    "eis": {
+      "label": "electrochemical impedance spectroscopy",
+      "directions": {
+        "hold":      {"emmo_class": "ElectrochemicalImpedanceSpectroscopy"}
+      }
+    },
+    "scan": {
+      "label": "voltage scan / linear sweep voltammetry",
+      "best_effort": true,
+      "directions": {
+        "charge":    {"emmo_class": "LinearScanVoltammetry"},
+        "discharge": {"emmo_class": "LinearScanVoltammetry"}
+      }
+    },
+    "group": {
+      "label": "repeated cycle group",
+      "directions": {
+        "none":      {"emmo_class": "IterativeWorkflow"}
+      }
+    }
+  }
+}

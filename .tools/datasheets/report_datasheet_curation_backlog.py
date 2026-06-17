@@ -7,7 +7,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DIR = ROOT / ".battinfo" / "datasheets" / "generated-cell-types"
+DEFAULT_DIR = ROOT / ".battinfo" / "datasheets" / "generated-cell-specs"
 DEFAULT_OUT = ROOT / ".battinfo" / "reports" / "datasheet-curation-backlog.md"
 
 
@@ -83,8 +83,8 @@ def main() -> int:
 
     for path in files:
         doc = _load_json(path)
-        product = doc.get("product", {})
-        specs = doc.get("specs", {})
+        product = doc.get("cell_spec", {})
+        specs = doc.get("properties", {})
         uid = path.stem.replace(".datasheet", "")
         model = str(product.get("model", ""))
         manufacturer = str(product.get("manufacturer", ""))

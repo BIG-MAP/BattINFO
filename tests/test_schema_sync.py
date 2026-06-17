@@ -15,8 +15,8 @@ SPEC COVERAGE (report only) — which SpecSet schema fields lack a direct
   failure, since schema can legitimately contain EU-regulation fields that
   aren't in the authoring API yet.
 
-ADAPTER ROUNDTRIP (fail) — CellType → generated CellType → record dict →
-  CellType must preserve identity for all non-None fields.
+ADAPTER ROUNDTRIP (fail) — CellSpecification → generated CellSpecification → record dict →
+  CellSpecification must preserve identity for all non-None fields.
 """
 
 from __future__ import annotations
@@ -163,11 +163,11 @@ def test_bundle_authoring_fields_report_schema_gaps() -> None:
 
 # ── ADAPTER ROUNDTRIP ─────────────────────────────────────────────────────────
 
-def test_adapter_cell_type_to_schema_basic() -> None:
-    from battinfo.bundle import CellType
-    from battinfo.bundle_adapter import cell_type_to_schema
+def test_adapter_cell_spec_to_schema_basic() -> None:
+    from battinfo.bundle import CellSpecification
+    from battinfo.bundle_adapter import cell_spec_to_schema
 
-    ct = CellType(
+    ct = CellSpecification(
         manufacturer="Panasonic",
         model="NCR18650B",
         format="cylindrical",
@@ -175,7 +175,7 @@ def test_adapter_cell_type_to_schema_basic() -> None:
         nominal_capacity={"value": 3.4, "unit": "Ah"},
         mass={"value": 48.0, "unit": "g"},
     )
-    gen = cell_type_to_schema(ct)
+    gen = cell_spec_to_schema(ct)
     assert gen.ct_model == "NCR18650B"
     assert gen.ct_manufacturer.org_name == "Panasonic"
     assert gen.ct_cell_format == "cylindrical"
@@ -185,11 +185,11 @@ def test_adapter_cell_type_to_schema_basic() -> None:
     assert gen.ct_specs.mass.sv_value == pytest.approx(48.0)
 
 
-def test_adapter_cell_type_roundtrip() -> None:
-    from battinfo.bundle import CellType
-    from battinfo.bundle_adapter import cell_type_to_schema, schema_cell_type_to_record_dict
+def test_adapter_cell_spec_roundtrip() -> None:
+    from battinfo.bundle import CellSpecification
+    from battinfo.bundle_adapter import cell_spec_to_schema, schema_cell_spec_to_record_dict
 
-    ct = CellType(
+    ct = CellSpecification(
         id="https://w3id.org/battinfo/spec/abc123",
         manufacturer="Samsung SDI",
         model="INR21700-50E",
@@ -199,32 +199,32 @@ def test_adapter_cell_type_roundtrip() -> None:
         nominal_voltage={"value": 3.6, "unit": "V"},
         mass={"value": 70.0, "unit": "g"},
     )
-    gen = cell_type_to_schema(ct)
-    record = schema_cell_type_to_record_dict(gen)
-    ct2 = CellType.from_record(record)
+    gen = cell_spec_to_schema(ct)
+    record = schema_cell_spec_to_record_dict(gen)
+    ct2 = CellSpecification.from_record(record)
 
     assert ct2.manufacturer == ct.manufacturer
     assert ct2.model == ct.model
     assert ct2.format == ct.format
-    assert ct2.nominal_properties.get("nominal_capacity", {}).get("value") == pytest.approx(5.0)
-    assert ct2.nominal_properties.get("nominal_voltage", {}).get("value") == pytest.approx(3.6)
-    assert ct2.nominal_properties.get("mass", {}).get("value") == pytest.approx(70.0)
+    assert ct2.properties.get("nominal_capacity", {}).get("value") == pytest.approx(5.0)
+    assert ct2.properties.get("nominal_voltage", {}).get("value") == pytest.approx(3.6)
+    assert ct2.properties.get("mass", {}).get("value") == pytest.approx(70.0)
 
 
-def test_adapter_spec_value_coercion_in_cell_type() -> None:
-    """SpecValue objects passed to CellType should be coerced to dicts."""
-    from battinfo.bundle import CellType
+def test_adapter_spec_value_coercion_in_cell_spec() -> None:
+    """SpecValue objects passed to CellSpecification should be coerced to dicts."""
+    from battinfo.bundle import CellSpecification
     from battinfo.bundle_generated import SpecValue
 
     sv = SpecValue(sv_value=2.5, sv_unit="Ah")
-    ct = CellType(
+    ct = CellSpecification(
         manufacturer="A123",
         model="ANR26650M1B",
         format="cylindrical",
         chemistry="li-ion",
         nominal_capacity=sv,
     )
-    stored = ct.nominal_properties.get("nominal_capacity")
+    stored = ct.properties.get("nominal_capacity")
     assert isinstance(stored, dict), "SpecValue should be coerced to dict"
     assert stored["value"] == pytest.approx(2.5)
     assert stored["unit"] == "Ah"
@@ -232,10 +232,10 @@ def test_adapter_spec_value_coercion_in_cell_type() -> None:
 
 def test_adapter_spec_value_via_mapping_property() -> None:
     """Setting a _mapping_property with a SpecValue should coerce to dict."""
-    from battinfo.bundle import CellType
+    from battinfo.bundle import CellSpecification
     from battinfo.bundle_generated import SpecValue
 
-    ct = CellType(manufacturer="A123", model="X", format="cylindrical", chemistry="li-ion")
+    ct = CellSpecification(manufacturer="A123", model="X", format="cylindrical", chemistry="li-ion")
     ct.nominal_capacity = SpecValue(sv_value=3.0, sv_unit="Ah")
     assert ct.nominal_capacity == {"value": 3.0, "unit": "Ah"}
 
@@ -260,20 +260,20 @@ def test_adapter_specset_roundtrip() -> None:
 
 
 def test_adapter_bundle_to_schema_dispatcher() -> None:
-    from battinfo.bundle import CellInstance, CellType, Test, TestSpec
+    from battinfo.bundle import CellInstance, CellSpecification, Test, TestSpec
     from battinfo.bundle_adapter import bundle_to_schema
     from battinfo.bundle_generated import (
         CellInstance as GenCI,
-        CellType as GenCT,
+        CellSpecification as GenCT,
         Test as GenT,
         TestSpec as GenTS,
     )
 
-    ct = CellType(manufacturer="X", model="Y", format="pouch", chemistry="nmc")
+    ct = CellSpecification(manufacturer="X", model="Y", format="pouch", chemistry="nmc")
     assert isinstance(bundle_to_schema(ct), GenCT)
 
     ci = CellInstance(
-        cell_type_id="https://w3id.org/battinfo/spec/abc",
+        cell_spec_id="https://w3id.org/battinfo/spec/abc",
         serial_number="SN-001",
     )
     assert isinstance(bundle_to_schema(ci), GenCI)

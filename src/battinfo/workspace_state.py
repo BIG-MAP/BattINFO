@@ -11,7 +11,7 @@ from urllib.parse import unquote, urlparse
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from battinfo.bundle import CellInstance, CellSpecification, CellType, Dataset, Test
+from battinfo.bundle import CellInstance, CellSpecification, CellSpecification, Dataset, Test
 from battinfo.local_workspace import (
     BattinfoSubmission,
     SubmissionDistribution,
@@ -24,7 +24,7 @@ from battinfo.validate.record import validate_record
 from battinfo._workspace import Workspace
 
 PathLike = str | Path
-WorkspaceTarget = CellType | CellInstance | Test | Dataset
+WorkspaceTarget = CellSpecification | CellInstance | Test | Dataset
 WORKSPACE_STATE_SCHEMA_VERSION = "0.1.0"
 WORKSPACE_STATE_FILENAME = "battinfo-authoring-workspace.json"
 
@@ -95,7 +95,7 @@ def _dir_size(path: Path) -> int:
 class WorkspacePaths(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    cell_types: str = "records/cell-type"
+    cell_specs: str = "records/cell-spec"
     cells: str = "records/cell-instance"
     tests: str = "records/tests"
     datasets: str = "records/dataset"
@@ -167,8 +167,8 @@ class WorkspaceStateStore:
         return self.workspace.root
 
     @property
-    def cell_types(self) -> list[CellType]:
-        return self.workspace.cell_types
+    def cell_specs(self) -> list[CellSpecification]:
+        return self.workspace.cell_specs
 
     @property
     def cells(self) -> list[CellInstance]:
@@ -193,8 +193,8 @@ class WorkspaceStateStore:
     def describe_cell(self, **kwargs: Any) -> CellSpecification:
         return self.workspace.describe_cell(**kwargs)
 
-    def cell_type(self, **kwargs: Any) -> CellType:
-        return self.workspace.cell_type(**kwargs)
+    def cell_spec(self, **kwargs: Any) -> CellSpecification:
+        return self.workspace.cell_spec(**kwargs)
 
     def cell(self, *args: Any, **kwargs: Any) -> CellInstance:
         return self.workspace.cell(*args, **kwargs)
@@ -220,7 +220,7 @@ class WorkspaceStateStore:
             "status": "ok",
             "workspace_root": str(self.root),
             "manifest_path": str(self.manifest_path),
-            "cell_type_count": len(records["cell_types"]),
+            "cell_spec_count": len(records["cell_specs"]),
             "cell_count": len(records["cell_instances"]),
             "test_count": len(records["tests"]),
             "dataset_count": len(records["datasets"]),
@@ -236,7 +236,7 @@ class WorkspaceStateStore:
             source_root = Path(tmpdir) / "normalized"
             self._write_record_groups(records, target_root=source_root)
             validation_groups = {
-                "cell_types": [self._validation_payload(validate_record(record, source_root=source_root, policy=policy)) for record in records["cell_types"]],
+                "cell_specs": [self._validation_payload(validate_record(record, source_root=source_root, policy=policy)) for record in records["cell_specs"]],
                 "cells": [self._validation_payload(validate_record(record, source_root=source_root, policy=policy)) for record in records["cell_instances"]],
                 "tests": [self._validation_payload(validate_record(record, source_root=source_root, policy=policy)) for record in records["tests"]],
                 "datasets": [self._validation_payload(validate_record(record, source_root=source_root, policy=policy)) for record in records["datasets"]],
@@ -256,7 +256,7 @@ class WorkspaceStateStore:
             "error_count": error_count,
             "warning_count": warning_count,
             "counts": {
-                "cell_types": len(records["cell_types"]),
+                "cell_specs": len(records["cell_specs"]),
                 "cells": len(records["cell_instances"]),
                 "tests": len(records["tests"]),
                 "datasets": len(records["datasets"]),
@@ -332,17 +332,17 @@ class WorkspaceStateStore:
         normalized_dir = self.root / manifest.dist_dir / "normalized"
         self._write_record_groups(records, target_root=normalized_dir)
 
-        cell_type_by_id = {
-            str(record["product"]["id"]): record
-            for record in records["cell_types"]
-            if isinstance(record.get("product"), dict) and isinstance(record["product"].get("id"), str)
+        cell_spec_by_id = {
+            str(record["cell_spec"]["id"]): record
+            for record in records["cell_specs"]
+            if isinstance(record.get("cell_spec"), dict) and isinstance(record["cell_spec"].get("id"), str)
         }
         cell_records = list(records["cell_instances"])
         test_records = list(records["tests"])
         dataset_records = list(records["datasets"])
 
         cell_titles = {
-            self._source_local_id("cell", record): self._cell_title(record, cell_type_by_id)
+            self._source_local_id("cell", record): self._cell_title(record, cell_spec_by_id)
             for record in cell_records
         }
         cell_local_ids = {
@@ -363,7 +363,7 @@ class WorkspaceStateStore:
         if target is None:
             resources: list[SubmissionResource] = []
             for record in cell_records:
-                resources.append(self._cell_resource(record, cell_type_by_id))
+                resources.append(self._cell_resource(record, cell_spec_by_id))
             for record in test_records:
                 resources.append(self._test_resource(record, cell_titles, cell_local_ids))
             for record in dataset_records:
@@ -374,7 +374,7 @@ class WorkspaceStateStore:
         else:
             resource = self._resource_submission(
                 target,
-                cell_type_by_id=cell_type_by_id,
+                cell_spec_by_id=cell_spec_by_id,
                 cell_records=cell_records,
                 test_records=test_records,
                 dataset_records=dataset_records,
@@ -455,27 +455,27 @@ class WorkspaceStateStore:
             comment=list(manifest.comment),
         )
         store.workspace.descriptions.clear()
-        store.workspace.cell_types.clear()
+        store.workspace.cell_specs.clear()
         store.workspace.cells.clear()
         store.workspace.tests.clear()
         store.workspace.datasets.clear()
 
         paths = manifest.paths
-        cell_type_records = cls._load_records(root_path / paths.cell_types)
+        cell_spec_records = cls._load_records(root_path / paths.cell_specs)
         cell_records = cls._load_records(root_path / paths.cells)
         test_records = cls._load_records(root_path / paths.tests)
         dataset_records = cls._load_records(root_path / paths.datasets)
         artifact_map = {entry.dataset_id: root_path / entry.path for entry in manifest.dataset_artifacts}
 
-        cell_types = [CellType.from_record(record) for record in cell_type_records]
-        cell_type_by_id = {item.id: item for item in cell_types if item.id is not None}
+        cell_specs = [CellSpecification.from_record(record) for record in cell_spec_records]
+        cell_spec_by_id = {item.id: item for item in cell_specs if item.id is not None}
 
         cells: list[CellInstance] = []
         cell_by_id: dict[str, CellInstance] = {}
         for record in cell_records:
             cell = CellInstance.from_record(record)
-            if cell.cell_type_id is not None:
-                cell.cell_type = cell_type_by_id.get(cell.cell_type_id)
+            if cell.cell_spec_id is not None:
+                cell.cell_spec = cell_spec_by_id.get(cell.cell_spec_id)
             cells.append(cell)
             if cell.id is not None:
                 cell_by_id[cell.id] = cell
@@ -501,7 +501,7 @@ class WorkspaceStateStore:
                 dataset.test = test_by_id.get(dataset.test_id)
             datasets.append(dataset)
 
-        store.workspace.cell_types.extend(cell_types)
+        store.workspace.cell_specs.extend(cell_specs)
         store.workspace.cells.extend(cells)
         store.workspace.tests.extend(tests)
         store.workspace.datasets.extend(datasets)
@@ -531,13 +531,13 @@ class WorkspaceStateStore:
 
     def _write_workspace(self, manifest: WorkspaceManifest, records: dict[str, list[dict[str, Any]]]) -> dict[str, str | None]:
         record_groups = {
-            "cell_types": records["cell_types"],
+            "cell_specs": records["cell_specs"],
             "cells": records["cell_instances"],
             "tests": records["tests"],
             "datasets": records["datasets"],
         }
         roots = {
-            "cell_types": self.root / manifest.paths.cell_types,
+            "cell_specs": self.root / manifest.paths.cell_specs,
             "cells": self.root / manifest.paths.cells,
             "tests": self.root / manifest.paths.tests,
             "datasets": self.root / manifest.paths.datasets,
@@ -654,7 +654,7 @@ class WorkspaceStateStore:
 
     def _write_record_groups(self, records: dict[str, list[dict[str, Any]]], *, target_root: Path) -> None:
         groups = {
-            "cell_types": target_root / "cell-type",
+            "cell_specs": target_root / "cell-spec",
             "cell_instances": target_root / "cell-instance",
             "tests": target_root / "test",
             "datasets": target_root / "dataset",
@@ -674,8 +674,8 @@ class WorkspaceStateStore:
         return [_read_json(path) for path in sorted(directory.glob("*.json")) if path.is_file()]
 
     def _record_short_id(self, kind: str, record: dict[str, Any]) -> str:
-        if kind == "cell_types":
-            payload = record.get("product", {})
+        if kind == "cell_specs":
+            payload = record.get("cell_spec", {})
         elif kind in {"cells", "cell_instances"}:
             payload = record.get("cell_instance", {})
         elif kind == "tests":
@@ -692,38 +692,38 @@ class WorkspaceStateStore:
 
     def _source_local_id(self, resource_type: str, record: dict[str, Any]) -> str:
         kind_map = {
-            "cell_type": "cell_types",
+            "cell_spec": "cell_specs",
             "cell": "cells",
             "test": "tests",
             "dataset": "datasets",
         }
         return f"{resource_type}:{self._record_short_id(kind_map[resource_type], record)}"
 
-    def _cell_type_title(self, record: dict[str, Any]) -> str:
-        product = record["product"]
+    def _cell_spec_title(self, record: dict[str, Any]) -> str:
+        product = record["cell_spec"]
         manufacturer_obj = product.get("manufacturer")
         manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, dict) else manufacturer_obj
         return str(product.get("name") or f"{manufacturer or 'Battery'} {product.get('model') or 'Cell'}").strip()
 
-    def _cell_type_resource(self, record: dict[str, Any]) -> SubmissionResource:
+    def _cell_spec_resource(self, record: dict[str, Any]) -> SubmissionResource:
         return SubmissionResource(
-            resource_type="cell_type",
-            source_local_id=self._source_local_id("cell_type", record),
-            title=self._cell_type_title(record),
+            resource_type="cell_spec",
+            source_local_id=self._source_local_id("cell_spec", record),
+            title=self._cell_spec_title(record),
             semantic_payload={
-                "@type": "CellType",
-                "battinfo_records": {"cell_type": record},
+                "@type": "CellSpecification",
+                "battinfo_records": {"cell_spec": record},
             },
         )
 
-    def _cell_title(self, record: dict[str, Any], cell_type_by_id: dict[str, dict[str, Any]]) -> str:
+    def _cell_title(self, record: dict[str, Any], cell_spec_by_id: dict[str, dict[str, Any]]) -> str:
         cell_payload = record["cell_instance"]
-        cell_type_id = cell_payload.get("type_id")
-        cell_type = cell_type_by_id.get(cell_type_id) if isinstance(cell_type_id, str) else None
+        cell_spec_id = cell_payload.get("cell_spec_id")
+        cell_spec = cell_spec_by_id.get(cell_spec_id) if isinstance(cell_spec_id, str) else None
         manufacturer = None
         model = None
-        if isinstance(cell_type, dict) and isinstance(cell_type.get("product"), dict):
-            product = cell_type["product"]
+        if isinstance(cell_spec, dict) and isinstance(cell_spec.get("cell_spec"), dict):
+            product = cell_spec["cell_spec"]
             manufacturer_obj = product.get("manufacturer")
             manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, dict) else manufacturer_obj
             model = product.get("model")
@@ -732,17 +732,17 @@ class WorkspaceStateStore:
     def _test_title(self, record: dict[str, Any]) -> str:
         return str(record["test"].get("name") or record["test"].get("kind") or "test")
 
-    def _cell_resource(self, record: dict[str, Any], cell_type_by_id: dict[str, dict[str, Any]]) -> SubmissionResource:
+    def _cell_resource(self, record: dict[str, Any], cell_spec_by_id: dict[str, dict[str, Any]]) -> SubmissionResource:
         cell_payload = record["cell_instance"]
-        cell_type_id = cell_payload.get("type_id")
-        cell_type_record = cell_type_by_id.get(cell_type_id) if isinstance(cell_type_id, str) else None
+        cell_spec_id = cell_payload.get("cell_spec_id")
+        cell_spec_record = cell_spec_by_id.get(cell_spec_id) if isinstance(cell_spec_id, str) else None
         battinfo_records = {"cell": record}
-        if cell_type_record is not None:
-            battinfo_records["cell_type"] = cell_type_record
+        if cell_spec_record is not None:
+            battinfo_records["cell_spec"] = cell_spec_record
         return SubmissionResource(
             resource_type="cell",
             source_local_id=self._source_local_id("cell", record),
-            title=self._cell_title(record, cell_type_by_id),
+            title=self._cell_title(record, cell_spec_by_id),
             semantic_payload={
                 "@type": "Cell",
                 "battinfo_records": battinfo_records,
@@ -883,7 +883,7 @@ class WorkspaceStateStore:
         self,
         target: WorkspaceTarget,
         *,
-        cell_type_by_id: dict[str, dict[str, Any]],
+        cell_spec_by_id: dict[str, dict[str, Any]],
         cell_records: list[dict[str, Any]],
         test_records: list[dict[str, Any]],
         dataset_records: list[dict[str, Any]],
@@ -893,19 +893,19 @@ class WorkspaceStateStore:
         cell_local_ids: dict[str, str],
         test_local_ids: dict[str, str],
     ) -> SubmissionResource:
-        if isinstance(target, CellType):
-            record = self._find_record("cell_types", target.id, cell_type_by_id.values())
-            return self._cell_type_resource(record)
+        if isinstance(target, CellSpecification):
+            record = self._find_record("cell_specs", target.id, cell_spec_by_id.values())
+            return self._cell_spec_resource(record)
         if isinstance(target, CellInstance):
             record = self._find_record("cells", target.id, cell_records)
-            return self._cell_resource(record, cell_type_by_id)
+            return self._cell_resource(record, cell_spec_by_id)
         if isinstance(target, Test):
             record = self._find_record("tests", target.id, test_records)
             return self._test_resource(record, cell_titles, cell_local_ids)
         if isinstance(target, Dataset):
             record = self._find_record("dataset", target.id, dataset_records)
             return self._dataset_resource(record, artifact_map, cell_titles, test_titles, cell_local_ids, test_local_ids)
-        raise TypeError("Workspace.bundle_workspace() target must be a CellType, CellInstance, Test, or Dataset.")
+        raise TypeError("Workspace.bundle_workspace() target must be a CellSpecification, CellInstance, Test, or Dataset.")
 
     def _resource_artifacts(
         self,
@@ -959,8 +959,8 @@ class WorkspaceStateStore:
         raise ValueError(f"Workspace.bundle_workspace() target {entity_id!r} is not present in this workspace.")
 
     def _record_payload(self, kind: str, record: dict[str, Any]) -> dict[str, Any]:
-        if kind == "cell_types":
-            payload = record.get("product", {})
+        if kind == "cell_specs":
+            payload = record.get("cell_spec", {})
         elif kind == "cells":
             payload = record.get("cell_instance", {})
         elif kind == "tests":
@@ -989,7 +989,7 @@ def _store_for_workspace(workspace: Workspace) -> WorkspaceStateStore:
         version=workspace.version,
         comment=list(workspace.comment),
     )
-    store.add(*workspace.cell_types, *workspace.cells, *workspace.tests, *workspace.datasets)
+    store.add(*workspace.cell_specs, *workspace.cells, *workspace.tests, *workspace.datasets)
     return store
 
 

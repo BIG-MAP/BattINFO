@@ -387,6 +387,26 @@
       "notes": "typical_energy is a legacy field name; maps to NominalEnergy per IEC 60050-151 IEV 151-16-11."
     },
     {
+      "key": "rated_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+      "class_qname": "emmo:NominalEnergy",
+      "class_pref_label": "NominalEnergy",
+      "class_label": "NominalEnergy",
+      "confidence": 1.0,
+      "notes": "rated_energy maps to NominalEnergy (no distinct RatedEnergy class in domain-electrochemistry); matches the schema slot_uri."
+    },
+    {
+      "key": "certified_usable_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+      "class_qname": "emmo:NominalEnergy",
+      "class_pref_label": "NominalEnergy",
+      "class_label": "NominalEnergy",
+      "confidence": 1.0,
+      "notes": "certified_usable_energy (EU Battery Regulation) maps to NominalEnergy; matches the schema slot_uri."
+    },
+    {
       "key": "calendar_life",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df",
@@ -438,6 +458,138 @@
       "class_qname": "emmo:StateOfHealth",
       "class_pref_label": "StateOfHealth",
       "class_label": "StateOfHealth",
+      "confidence": 1.0
+    },
+    {
+      "key": "theoretical_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23",
+      "class_qname": "emmo:TheoreticalCapacity",
+      "class_pref_label": "TheoreticalCapacity",
+      "class_label": "TheoreticalCapacity",
+      "confidence": 1.0
+    },
+    {
+      "key": "n_p_ratio",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723",
+      "class_qname": "emmo:NPRatio",
+      "class_pref_label": "NPRatio",
+      "class_label": "NPRatio",
+      "confidence": 1.0
+    },
+    {
+      "key": "tortuosity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8",
+      "class_qname": "emmo:Tortuosity",
+      "class_pref_label": "Tortuosity",
+      "class_label": "Tortuosity",
+      "confidence": 1.0
+    },
+    {
+      "key": "d50_particle_size",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c",
+      "class_qname": "emmo:D50ParticleSize",
+      "class_pref_label": "D50ParticleSize",
+      "class_label": "D50ParticleSize",
+      "confidence": 1.0
+    },
+    {
+      "key": "rated_areal_discharge_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a",
+      "class_qname": "emmo:AreicCapacity",
+      "class_pref_label": "AreicCapacity",
+      "class_label": "AreicCapacity",
+      "confidence": 1.0,
+      "co_type": "ConventionalProperty",
+      "co_type_pending": "RatedProperty",
+      "co_type_pending_note": "Upgrade co_type to RatedProperty once published in domain-battery."
+    },
+    {
+      "key": "rated_specific_discharge_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee",
+      "class_qname": "emmo:DischargingSpecificCapacity",
+      "class_pref_label": "DischargingSpecificCapacity",
+      "class_label": "DischargingSpecificCapacity",
+      "confidence": 1.0,
+      "co_type": "ConventionalProperty",
+      "co_type_pending": "RatedProperty",
+      "co_type_pending_note": "Upgrade co_type to RatedProperty once published in domain-battery."
+    },
+    {
+      "key": "weight",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405",
+      "class_qname": "emmo:Mass",
+      "class_pref_label": "Mass",
+      "class_label": "Mass",
+      "confidence": 1.0
+    },
+    {
+      "key": "cap_assembly_weight",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405",
+      "class_qname": "emmo:Mass",
+      "class_pref_label": "Mass",
+      "class_label": "Mass",
+      "confidence": 1.0
+    },
+    {
+      "key": "press_density",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379",
+      "class_qname": "emmo:CalenderedDensity",
+      "class_pref_label": "CalenderedDensity",
+      "class_label": "CalenderedDensity",
+      "confidence": 1.0
+    },
+    {
+      "key": "foil_thickness",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656",
+      "class_qname": "emmo:Thickness",
+      "class_pref_label": "Thickness",
+      "class_label": "Thickness",
+      "confidence": 1.0
+    },
+    {
+      "key": "wall_thickness",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656",
+      "class_qname": "emmo:Thickness",
+      "class_pref_label": "Thickness",
+      "class_label": "Thickness",
+      "confidence": 1.0
+    },
+    {
+      "key": "available_volume",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed",
+      "class_qname": "emmo:Volume",
+      "class_pref_label": "Volume",
+      "class_label": "Volume",
+      "confidence": 1.0
+    },
+    {
+      "key": "single_side_loading",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
+      "class_qname": "emmo:MassLoading",
+      "class_pref_label": "MassLoading",
+      "class_label": "MassLoading",
+      "confidence": 1.0
+    },
+    {
+      "key": "double_side_loading",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
+      "class_qname": "emmo:MassLoading",
+      "class_pref_label": "MassLoading",
+      "class_label": "MassLoading",
       "confidence": 1.0
     }
   ]

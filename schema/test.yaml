@@ -37,6 +37,7 @@ classes:
       - t_ended_at
       - t_dataset_ids
       - t_conformance
+      - t_artifacts
 
   TestConformance:
     class_uri: battinfo:TestConformance
@@ -153,6 +154,17 @@ slots:
     description: Conformance assessment for this test execution.
     aliases:
       - conformance
+
+  t_artifacts:
+    slot_uri: battinfo:artifacts
+    range: string
+    multivalued: true
+    description: >-
+      Links to machine-actionable protocol/vendor files produced by or executed
+      in this test (the actionable layer). Each entry is a JSON object with
+      role/format/locator and optional checksum.
+    aliases:
+      - artifacts
 
   # TestConformance slots
   tc_status:

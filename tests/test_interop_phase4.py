@@ -309,11 +309,11 @@ def test_from_bpx_missing_parameterisation_returns_empty() -> None:
     assert any("Parameterisation" in w for w in result.warnings)
 
 
-def test_from_bpx_to_cell_type_kwargs() -> None:
+def test_from_bpx_to_cell_spec_kwargs() -> None:
     result = from_bpx(_make_bpx_dict())
-    kwargs = result.to_cell_type_kwargs()
-    assert "specs" in kwargs
-    assert kwargs["specs"]["nominal_capacity"]["value"] == 3.0
+    kwargs = result.to_cell_spec_kwargs()
+    assert "properties" in kwargs
+    assert kwargs["properties"]["nominal_capacity"]["value"] == 3.0
     assert kwargs.get("name") == "Test Cell NMC532"
 
 
@@ -327,20 +327,20 @@ def test_from_bpx_accessible_from_battinfo() -> None:
 
 def test_workspace_from_battdat_returns_test(tmp_path: Path) -> None:
     from battinfo._workspace import Workspace
-    from battinfo.bundle import CellType, CellInstance
+    from battinfo.bundle import CellSpecification, CellInstance
 
     csv_file = tmp_path / "cycling.csv"
     _make_cycling_df().to_csv(csv_file, index=False)
 
     ws = Workspace()
-    cell_type = ws.cell_type(
+    cell_spec = ws.cell_spec(
         manufacturer="TestMfg",
         model="XR-1234",
         format="cylindrical",
         chemistry="Li-ion",
         specs={"nominal_capacity": {"value": 2.5, "unit": "Ah"}},
     )
-    cell = ws.cell(cell_type, serial_number="SN-TEST-001")
+    cell = ws.cell(cell_spec, serial_number="SN-TEST-001")
 
     test = ws.from_battdat(cell, csv_file)
     assert test is not None
@@ -349,25 +349,25 @@ def test_workspace_from_battdat_returns_test(tmp_path: Path) -> None:
     assert test in ws.tests
 
 
-def test_workspace_from_bpx_creates_cell_type(tmp_path: Path) -> None:
+def test_workspace_from_bpx_creates_cell_spec(tmp_path: Path) -> None:
     from battinfo._workspace import Workspace
 
     bpx_path = tmp_path / "params.json"
     bpx_path.write_text(json.dumps(_make_bpx_dict()), encoding="utf-8")
 
     ws = Workspace()
-    cell_type = ws.from_bpx(
+    cell_spec = ws.from_bpx(
         bpx_path,
         manufacturer="TestMfg",
         format="pouch",
         chemistry="NMC",
     )
-    assert cell_type is not None
+    assert cell_spec is not None
     # model should fall back to BPX Header.Title
-    assert "NMC532" in (cell_type.model or "")
+    assert "NMC532" in (cell_spec.model or "")
     # capacity spec should be present
-    from battinfo.bundle import CellType
-    assert cell_type in ws.cell_types
+    from battinfo.bundle import CellSpecification
+    assert cell_spec in ws.cell_specs
 
 
 def test_workspace_from_bpx_specs_accessible(tmp_path: Path) -> None:
@@ -377,8 +377,8 @@ def test_workspace_from_bpx_specs_accessible(tmp_path: Path) -> None:
     bpx_path.write_text(json.dumps(_make_bpx_dict()), encoding="utf-8")
 
     ws = Workspace()
-    cell_type = ws.from_bpx(bpx_path, manufacturer="TestMfg", format="pouch")
-    # nominal_properties dict should contain nominal_capacity
-    props = cell_type.nominal_properties or {}
+    cell_spec = ws.from_bpx(bpx_path, manufacturer="TestMfg", format="pouch")
+    # properties dict should contain nominal_capacity
+    props = cell_spec.properties or {}
     assert "nominal_capacity" in props
     assert props["nominal_capacity"]["value"] == pytest.approx(3.0)

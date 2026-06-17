@@ -13,7 +13,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 from battinfo.bundle import (
     BattinfoBundle,
     CellInstance,
-    CellType,
+    CellSpecification,
     ChecksumInfo,
     Dataset,
     ProtocolInfo,
@@ -260,7 +260,7 @@ class BattinfoSubmission(BaseModel):
         return self
 
 
-class CellTypeAuthoring(BaseModel):
+class CellSpecificationAuthoring(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     id: str | None = None
@@ -296,7 +296,7 @@ class WorkspaceCellDocument(BaseModel):
     schema_version: str = WORKSPACE_SCHEMA_VERSION
     kind: str = "BattinfoWorkspaceCell"
     resource_id: str = "cell"
-    cell_type: CellTypeAuthoring
+    cell_spec: CellSpecificationAuthoring
     cell: CellAuthoring
 
 
@@ -442,7 +442,7 @@ class LocalWorkspace:
             ],
         )
         cell_doc = WorkspaceCellDocument(
-            cell_type=CellTypeAuthoring(
+            cell_spec=CellSpecificationAuthoring(
                 manufacturer="Energizer",
                 model="CR2032",
                 format="coin",
@@ -567,7 +567,7 @@ class LocalWorkspace:
 
     def capture(
         self,
-        cell_design: CellType,
+        cell_design: CellSpecification,
         cell: CellInstance,
         test: Test,
         dataset: Dataset,
@@ -648,7 +648,7 @@ class LocalWorkspace:
         title: str,
         registry: RegistryTarget | Mapping[str, Any],
         publisher_id: str | None = None,
-        cell_design: CellType,
+        cell_design: CellSpecification,
         cell: CellInstance,
         test: Test,
         dataset: Dataset,
@@ -677,7 +677,7 @@ class LocalWorkspace:
             comment=resolved_comment,
         )
         cell_doc = WorkspaceCellDocument(
-            cell_type=CellTypeAuthoring(
+            cell_spec=CellSpecificationAuthoring(
                 id=cell_design.id,
                 manufacturer=cell_design.manufacturer,
                 model=cell_design.model,
@@ -687,7 +687,7 @@ class LocalWorkspace:
                 positive_electrode_basis=cell_design.positive_electrode_basis,
                 negative_electrode_basis=cell_design.negative_electrode_basis,
                 datasheet_revision=cell_design.datasheet_revision,
-                specs=dict(cell_design.nominal_properties),
+                specs=dict(cell_design.properties),
                 provenance=cell_design.source.model_copy(deep=True),
                 comment=list(cell_design.comment),
             ),
@@ -841,24 +841,24 @@ class LocalWorkspace:
         dataset_path = None
         if distribution.path is not None:
             dataset_path = str((self.root / distribution.path).resolve())
-        cell_design = CellType(
-            id=cell_doc.cell_type.id,
-            manufacturer=cell_doc.cell_type.manufacturer,
-            model=cell_doc.cell_type.model,
-            format=cell_doc.cell_type.format,
-            chemistry=cell_doc.cell_type.chemistry,
-            size_code=cell_doc.cell_type.size_code,
-            positive_electrode_basis=cell_doc.cell_type.positive_electrode_basis,
-            negative_electrode_basis=cell_doc.cell_type.negative_electrode_basis,
-            datasheet_revision=cell_doc.cell_type.datasheet_revision,
-            nominal_properties=dict(cell_doc.cell_type.specs),
-            source=cell_doc.cell_type.provenance.model_copy(deep=True),
-            comment=list(cell_doc.cell_type.comment),
+        cell_design = CellSpecification(
+            id=cell_doc.cell_spec.id,
+            manufacturer=cell_doc.cell_spec.manufacturer,
+            model=cell_doc.cell_spec.model,
+            format=cell_doc.cell_spec.format,
+            chemistry=cell_doc.cell_spec.chemistry,
+            size_code=cell_doc.cell_spec.size_code,
+            positive_electrode_basis=cell_doc.cell_spec.positive_electrode_basis,
+            negative_electrode_basis=cell_doc.cell_spec.negative_electrode_basis,
+            datasheet_revision=cell_doc.cell_spec.datasheet_revision,
+            properties=dict(cell_doc.cell_spec.specs),
+            source=cell_doc.cell_spec.provenance.model_copy(deep=True),
+            comment=list(cell_doc.cell_spec.comment),
         )
         cell = CellInstance(
             id=cell_doc.cell.id,
             name=cell_doc.cell.name,
-            cell_type=cell_design,
+            cell_spec=cell_design,
             serial_number=cell_doc.cell.serial_number,
             batch_id=cell_doc.cell.batch_id,
             manufactured_at=cell_doc.cell.manufactured_at,
@@ -916,7 +916,7 @@ class LocalWorkspace:
         objects = self.load_objects()
         return BattinfoBundle(
             bundle_name=objects["dataset"].name,
-            cell_type=objects["cell_design"],
+            cell_spec=objects["cell_design"],
             cell_instance=objects["cell"],
             test=objects["test"],
             dataset=objects["dataset"],
@@ -945,7 +945,7 @@ class LocalWorkspace:
             title=title,
             registry=registry,
             publisher_id=publisher_id,
-            cell_design=bundle.cell_type,
+            cell_design=bundle.cell_spec,
             cell=bundle.cell_instance,
             test=bundle.test,
             dataset=bundle.dataset,
@@ -977,14 +977,14 @@ class LocalWorkspace:
         cell_payload = cls._resource_semantic_payload(resource_payloads["cell"]).get("battinfo_records", {})
         test_payload = cls._resource_semantic_payload(resource_payloads["test"]).get("battinfo_records", {})
         dataset_payload = cls._resource_semantic_payload(resource_payloads["dataset"]).get("battinfo_records", {})
-        cell_type_resource = resource_payloads.get("cell_type")
-        cell_type_payload = cls._resource_semantic_payload(cell_type_resource).get("battinfo_records", {})
-        cell_type_record = cell_type_payload.get("cell_type") or cell_payload.get("cell_type")
-        if not isinstance(cell_type_record, Mapping):
-            raise ValueError("Submission bundle must include a cell_type record, either as a resource or nested in the cell resource.")
+        cell_spec_resource = resource_payloads.get("cell_spec")
+        cell_spec_payload = cls._resource_semantic_payload(cell_spec_resource).get("battinfo_records", {})
+        cell_spec_record = cell_spec_payload.get("cell_spec") or cell_payload.get("cell_spec")
+        if not isinstance(cell_spec_record, Mapping):
+            raise ValueError("Submission bundle must include a cell_spec record, either as a resource or nested in the cell resource.")
         return BattinfoBundle(
             bundle_name=bundle_name,
-            cell_type=CellType.from_record(dict(cell_type_record)),
+            cell_spec=CellSpecification.from_record(dict(cell_spec_record)),
             cell_instance=CellInstance.from_record(cell_payload["cell"]),
             test=Test.from_record(test_payload["test"]),
             dataset=Dataset.from_record(dataset_payload["dataset"]),
@@ -1256,24 +1256,24 @@ class LocalWorkspace:
             if checksum_algorithm == "sha256":
                 checksum_value = _sha256(distribution_path)
 
-        cell_type = CellType(
-            id=cell_doc.cell_type.id,
-            manufacturer=cell_doc.cell_type.manufacturer,
-            model=cell_doc.cell_type.model,
-            format=cell_doc.cell_type.format,
-            chemistry=cell_doc.cell_type.chemistry,
-            size_code=cell_doc.cell_type.size_code,
-            positive_electrode_basis=cell_doc.cell_type.positive_electrode_basis,
-            negative_electrode_basis=cell_doc.cell_type.negative_electrode_basis,
-            datasheet_revision=cell_doc.cell_type.datasheet_revision,
-            nominal_properties=dict(cell_doc.cell_type.specs),
-            source=cell_doc.cell_type.provenance.model_copy(deep=True),
-            comment=list(cell_doc.cell_type.comment),
+        cell_spec = CellSpecification(
+            id=cell_doc.cell_spec.id,
+            manufacturer=cell_doc.cell_spec.manufacturer,
+            model=cell_doc.cell_spec.model,
+            format=cell_doc.cell_spec.format,
+            chemistry=cell_doc.cell_spec.chemistry,
+            size_code=cell_doc.cell_spec.size_code,
+            positive_electrode_basis=cell_doc.cell_spec.positive_electrode_basis,
+            negative_electrode_basis=cell_doc.cell_spec.negative_electrode_basis,
+            datasheet_revision=cell_doc.cell_spec.datasheet_revision,
+            properties=dict(cell_doc.cell_spec.specs),
+            source=cell_doc.cell_spec.provenance.model_copy(deep=True),
+            comment=list(cell_doc.cell_spec.comment),
         )
         cell = CellInstance(
             id=cell_doc.cell.id,
             name=cell_doc.cell.name,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             serial_number=cell_doc.cell.serial_number,
             batch_id=cell_doc.cell.batch_id,
             manufactured_at=cell_doc.cell.manufactured_at,
@@ -1316,7 +1316,7 @@ class LocalWorkspace:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             scratch = Workspace(root=Path(tmpdir))
-            scratch.cell_types.append(cell_type)
+            scratch.cell_specs.append(cell_spec)
             scratch.cells.append(cell)
             scratch.tests.append(test)
             scratch.datasets.append(dataset)
@@ -1328,7 +1328,7 @@ class LocalWorkspace:
             "test_doc": test_doc,
             "dataset_doc": dataset_doc,
             "records": {
-                "cell_type": records["cell_types"][0],
+                "cell_spec": records["cell_specs"][0],
                 "cell": records["cell_instances"][0],
                 "test": records["tests"][0],
                 "dataset": records["datasets"][0],
@@ -1410,7 +1410,7 @@ class LocalWorkspace:
             "warning_count": warning_count,
             "records": validation_records,
             "resource_ids": {
-                "cell_type_id": records["cell_type"]["product"]["id"],
+                "cell_spec_id": records["cell_spec"]["cell_spec"]["id"],
                 "cell_id": records["cell"]["cell_instance"]["id"],
                 "test_id": records["test"]["test"]["id"],
                 "dataset_id": records["dataset"]["dataset"]["id"],
@@ -1428,7 +1428,7 @@ class LocalWorkspace:
 
     def _write_normalized_records(self, records: dict[str, dict[str, Any]], *, target_root: Path) -> None:
         mapping = {
-            "cell_type": target_root / "cell-type" / "cell-type.json",
+            "cell_spec": target_root / "cell-spec" / "cell-spec.json",
             "cell": target_root / "cell-instance" / "cell.json",
             "test": target_root / "test" / "test.json",
             "dataset": target_root / "dataset" / "dataset.json",
@@ -1467,15 +1467,15 @@ class LocalWorkspace:
 
     def _cell_submission_payload(self, manifest: WorkspaceManifest, records: dict[str, dict[str, Any]]) -> SubmissionResource:
         cell_record = records["cell"]["cell_instance"]
-        cell_type_record = records["cell_type"]["product"]
+        cell_spec_record = records["cell_spec"]["cell_spec"]
         return SubmissionResource(
             resource_type="cell",
             source_local_id=self._submission_source_local_id(manifest, "cell"),
-            title=cell_record.get("name") or f"{cell_type_record.get('manufacturer', 'Battery')} {cell_type_record.get('model', 'Cell')}",
+            title=cell_record.get("name") or f"{cell_spec_record.get('manufacturer', 'Battery')} {cell_spec_record.get('model', 'Cell')}",
             semantic_payload={
                 "@type": "Cell",
                 "battinfo_records": {
-                    "cell_type": records["cell_type"],
+                    "cell_spec": records["cell_spec"],
                     "cell": records["cell"],
                 },
             },
@@ -1665,7 +1665,7 @@ class LocalWorkspace:
             "zenodo_metadata_path": str(zenodo_metadata_path) if zenodo_metadata_path is not None else None,
             "resource_count": len(submission_package.get("resources", [])),
             "artifact_count": len(submission_package.get("artifacts", [])),
-            "cell_type_id": records["cell_type"]["product"]["id"],
+            "cell_spec_id": records["cell_spec"]["cell_spec"]["id"],
             "cell_id": records["cell"]["cell_instance"]["id"],
             "test_id": records["test"]["test"]["id"],
             "dataset_id": records["dataset"]["dataset"]["id"],

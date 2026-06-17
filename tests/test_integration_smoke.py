@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import battinfo
 from battinfo import validate_record, validate_record_report, ValidationPolicy
 
-_A123 = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
+_A123 = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 
 WARN_POLICY = ValidationPolicy(name="warn", semantic="warning")
 
@@ -50,7 +50,7 @@ def test_validate_record_report_clean_on_a123() -> None:
 def test_validate_record_report_runs_shacl_layer() -> None:
     """Pipeline includes SHACL layer: injecting 33V produces both semantic AND SHACL warnings."""
     doc = _load()
-    doc["specs"]["nominal_voltage"] = {"value": 33.0, "unit": "V"}
+    doc["properties"]["nominal_voltage"] = {"value": 33.0, "unit": "V"}
     report = validate_record_report(doc, policy=WARN_POLICY)
 
     sem_codes = {i.code for i in report.issues}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 from urllib.parse import urlparse
@@ -16,6 +17,105 @@ from battinfo.validate.core import (
 from battinfo.validate.jsonld import validate_jsonld_report
 
 SHA256_RE = re.compile(r"^[A-Fa-f0-9]{64}$")
+
+# SHACL shapes constraining the assembled gold-standard publication graph.
+_PUBLICATION_SHAPES_FILENAME = "publication.shapes.ttl"
+
+
+def _shacl_publication_report(data: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
+    """Validate the published @graph against publication.shapes.ttl with pyshacl.
+
+    This is the RDF/tooling layer: pyshacl parses the document (resolving its inlined
+    @context to real triples — a JSON-LD round-trip in itself) and checks the
+    gold-standard topology (catalog/dataset/distribution/test/provenance/conformance).
+    Only runs on full @graph publication packages; single-node resolver documents are
+    skipped (their shapes do not apply). SHACL severities are honoured directly.
+    """
+    # These shapes describe the gold-standard catalog topology produced by the shared
+    # builder (AuthoringWorkspace._assemble_zenodo_jsonld). Run only when the document
+    # is that shape — i.e. a @graph containing a dcat:Catalog node. Single-node resolver
+    # documents and the legacy _publication_graph output (not yet consolidated onto the
+    # shared builder) carry a different topology and are out of scope here.
+    graph = data.get("@graph")
+    if not isinstance(graph, list):
+        return ValidationReport(policy=policy)
+    is_gold_standard = any(
+        isinstance(n, dict) and "dcat:Catalog" in (
+            n.get("@type") if isinstance(n.get("@type"), list) else [n.get("@type")]
+        )
+        for n in graph
+    )
+    if not is_gold_standard:
+        return ValidationReport(policy=policy)
+
+    try:
+        import pyshacl  # noqa: PLC0415
+    except ImportError:
+        return ValidationReport(policy=policy)  # pyshacl optional; dict-layer still ran
+
+    from battinfo.validate.shacl import _parse_shacl_report, _shapes_path  # noqa: PLC0415
+
+    shapes_path = _shapes_path(_PUBLICATION_SHAPES_FILENAME)
+    if shapes_path is None:
+        return ValidationReport(
+            issues=(
+                ValidationIssue(
+                    code="publication.shapes_not_found",
+                    severity="warning",
+                    path="",
+                    message=f"SHACL shapes '{_PUBLICATION_SHAPES_FILENAME}' not found; structural SHACL skipped.",
+                    validator="publication",
+                    resource_type="jsonld-publication",
+                ),
+            ),
+            policy=policy,
+        )
+
+    import warnings as _warnings  # noqa: PLC0415
+
+    try:
+        with _warnings.catch_warnings():
+            _warnings.filterwarnings("ignore", category=DeprecationWarning)
+            conforms, report_graph, _text = pyshacl.validate(
+                json.dumps(data),
+                shacl_graph=str(shapes_path),
+                data_graph_format="json-ld",
+                shacl_graph_format="turtle",
+                inference="none",
+                abort_on_first=False,
+            )
+    except Exception as exc:  # noqa: BLE001
+        return ValidationReport(
+            issues=(
+                ValidationIssue(
+                    code="publication.shacl_runtime_error",
+                    severity="warning",
+                    path="",
+                    message=f"Structural SHACL validation failed to run: {exc}",
+                    validator="publication",
+                    resource_type="jsonld-publication",
+                ),
+            ),
+            policy=policy,
+        )
+
+    if conforms:
+        return ValidationReport(policy=policy)
+
+    issues = []
+    for issue in _parse_shacl_report(report_graph, None):
+        # Re-tag SHACL issues as publication issues but keep the shape's own severity.
+        issues.append(
+            ValidationIssue(
+                code="publication.shacl_constraint",
+                severity=issue.severity,
+                path=issue.path,
+                message=issue.message,
+                validator="publication",
+                resource_type="jsonld-publication",
+            )
+        )
+    return ValidationReport(issues=tuple(issues), policy=policy)
 
 
 def _issue_severity(policy: ValidationPolicy) -> str:
@@ -40,6 +140,40 @@ def _append_issue(
             resource_type="jsonld-publication",
         )
     )
+
+
+def _test_condition_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
+    """Warn (never block) when a protocol carries a test condition that fell back to
+    schema:PropertyValue because its name is outside the controlled vocabulary — a
+    nudge to use an EMMO-mapped term so the condition is machine-queryable. The
+    builder marks fallbacks with schema:propertyID = the authoring group; a gold-
+    standard condition is emitted as an EMMO quantity and never reaches this path."""
+    from battinfo.jsonld import TEST_CONDITION_GROUPS  # noqa: PLC0415
+
+    issues: list[ValidationIssue] = []
+    for path, node in _graph_nodes(data):
+        types = _type_values(node)
+        if "schema:HowTo" not in types and "prov:Plan" not in types:
+            continue
+        extra = node.get("schema:additionalProperty")
+        if not isinstance(extra, list):
+            continue
+        for prop in extra:
+            if not isinstance(prop, dict):
+                continue
+            if prop.get("schema:propertyID") in TEST_CONDITION_GROUPS:
+                _append_issue(
+                    issues,
+                    code="publication.test_condition_unmapped",
+                    severity="warning",  # explicit: a nudge, not a publish blocker
+                    path=f"{path}.schema:additionalProperty",
+                    message=(
+                        f"Test condition {prop.get('schema:name')!r} is not in the "
+                        "controlled vocabulary; emitted as a schema:PropertyValue "
+                        "(not a machine-queryable EMMO quantity). Use a mapped term."
+                    ),
+                )
+    return ValidationReport(issues=tuple(issues), policy=policy)
 
 
 def _is_absolute_uri(value: Any) -> bool:
@@ -187,7 +321,10 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                     message="Distribution entries must be JSON objects.",
                 )
                 continue
-            for key in ("schema:contentUrl", "schema:encodingFormat", "schema:sha256", "schema:isPartOf"):
+            # Required: a resolvable content URL, its format, and the parent link.
+            # A checksum (schema:sha256) is recommended, not required — directory and
+            # remote distributions legitimately lack one; the SHACL layer warns on it.
+            for key in ("schema:contentUrl", "schema:encodingFormat", "schema:isPartOf"):
                 if key not in entry:
                     _append_issue(
                         issues,
@@ -240,6 +377,8 @@ def validate_publication_report(
     return combine_reports(
         jsonld_report,
         _shape_issues(data, resolved_policy),
+        _shacl_publication_report(data, resolved_policy),
+        _test_condition_issues(data, resolved_policy),
         policy=resolved_policy,
     )
 

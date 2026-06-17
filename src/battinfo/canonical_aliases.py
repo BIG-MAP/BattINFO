@@ -67,8 +67,8 @@ _TABLE_GROUP_TO_LEGACY = {value: key for key, value in _TABLE_GROUP_TO_SNAKE.ite
 
 def record_to_snake_aliases(record: Mapping[str, Any]) -> dict[str, Any]:
     normalized = copy.deepcopy(dict(record))
-    if isinstance(normalized.get("product"), Mapping):
-        normalized["product"] = _map_keys(dict(normalized["product"]), _CELL_TYPE_PRODUCT_TO_SNAKE)
+    if isinstance(normalized.get("cell_spec"), Mapping):
+        normalized["cell_spec"] = _map_keys(dict(normalized["cell_spec"]), _CELL_TYPE_PRODUCT_TO_SNAKE)
     if isinstance(normalized.get("dataset"), Mapping):
         normalized["dataset"] = _dataset_to_snake(dict(normalized["dataset"]))
     return normalized
@@ -76,8 +76,8 @@ def record_to_snake_aliases(record: Mapping[str, Any]) -> dict[str, Any]:
 
 def record_to_legacy_aliases(record: Mapping[str, Any]) -> dict[str, Any]:
     normalized = copy.deepcopy(dict(record))
-    if isinstance(normalized.get("product"), Mapping):
-        normalized["product"] = _map_keys(dict(normalized["product"]), _CELL_TYPE_PRODUCT_TO_LEGACY)
+    if isinstance(normalized.get("cell_spec"), Mapping):
+        normalized["cell_spec"] = _map_keys(dict(normalized["cell_spec"]), _CELL_TYPE_PRODUCT_TO_LEGACY)
     if isinstance(normalized.get("dataset"), Mapping):
         normalized["dataset"] = _dataset_to_legacy(dict(normalized["dataset"]))
     return normalized

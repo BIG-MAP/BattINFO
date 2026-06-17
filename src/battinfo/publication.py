@@ -19,7 +19,7 @@ from battinfo.bundle import (
     BattinfoBundle,
     CellInstance,
     CellSpecification,
-    CellType,
+    CellSpecification,
     Dataset,
     ProtocolInfo,
     ProvenanceInfo,
@@ -33,9 +33,116 @@ from battinfo.validate.pydantic import validate_json
 
 PathLike = str | Path
 
+
+def _is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
+def plan_artifact_inclusion(
+    records: list[Mapping[str, Any]],
+    workspace_root: Path,
+) -> tuple[list[Path], list[str]]:
+    """Decide which actionable-artifact files travel with a publication.
+
+    Only files the user has explicitly placed inside the workspace are included.
+    A remote (http/https) locator needs no upload. A local locator that does not
+    resolve to a file inside *workspace_root* is NOT copied automatically — it
+    yields a non-blocking warning telling the user to place the file in the
+    workspace if they want it published. Returns ``(files_to_include, warnings)``.
+    """
+    root = Path(workspace_root)
+    included: list[Path] = []
+    warnings_out: list[str] = []
+    seen: set[str] = set()
+    for record in records:
+        for art in record.get("artifacts") or []:
+            if not isinstance(art, Mapping):
+                continue
+            loc = art.get("locator")
+            if not loc:
+                continue
+            text = str(loc)
+            if text.startswith(("http://", "https://")):
+                continue  # already hosted elsewhere — nothing to upload
+            raw = text[len("file://"):] if text.startswith("file://") else text
+            raw = unquote(raw)
+            candidate = Path(raw)
+            resolved = candidate if candidate.is_absolute() else (root / candidate)
+            if resolved.is_file() and _is_within(resolved, root):
+                key = resolved.resolve().as_posix()
+                if key not in seen:
+                    seen.add(key)
+                    included.append(resolved)
+            else:
+                warnings_out.append(
+                    f"Artifact {text!r} (format {art.get('format', 'unknown')!r}) is not in the "
+                    f"workspace and will NOT be included in the publication. Place the file under "
+                    f"{root} to publish it."
+                )
+    return included, warnings_out
+
+
+# format -> (importer attribute on battinfo.interop.protocols)
+_ARTIFACT_IMPORTERS: dict[str, str] = {
+    "aurora-unicycler-json": "import_aurora_unicycler",
+    "pybamm-experiment": "import_pybamm_experiment",
+    "bmgen-jsonld": "import_bmgen_jsonld",
+}
+# Facet keys compared when checking the descriptive method against its artifact.
+_CONFORMANCE_FACETS = ("modes", "directions", "c_rates", "voltage_window_V",
+                       "has_cv_hold", "has_rest", "has_eis")
+
+
+def check_artifact_conformance(
+    spec_record: Mapping[str, Any],
+    workspace_root: Path,
+) -> list[str]:
+    """Re-derive facets from each parseable linked artifact and warn (never block)
+    when the descriptive method diverges from the executable source of truth.
+
+    Only artifacts whose format has an importer and whose file resolves inside the
+    workspace are checked; everything else is silently skipped. Returns warnings."""
+    from battinfo.interop import protocols as _protocols  # noqa: PLC0415
+
+    root = Path(workspace_root)
+    spec_facets = spec_record.get("facets") if isinstance(spec_record.get("facets"), Mapping) else {}
+    out: list[str] = []
+    for art in spec_record.get("artifacts") or []:
+        if not isinstance(art, Mapping):
+            continue
+        importer_name = _ARTIFACT_IMPORTERS.get(art.get("format"))
+        loc = art.get("locator")
+        if not importer_name or not loc or str(loc).startswith(("http://", "https://")):
+            continue
+        raw = str(loc)[len("file://"):] if str(loc).startswith("file://") else str(loc)
+        resolved = Path(unquote(raw))
+        if not resolved.is_absolute():
+            resolved = root / resolved
+        if not (resolved.is_file() and _is_within(resolved, root)):
+            continue
+        try:
+            imported = getattr(_protocols, importer_name)(resolved)
+            artifact_facets = imported.facets()
+        except Exception as exc:  # importer failure must not block publication
+            out.append(f"Artifact {loc!r} could not be parsed for conformance check: {exc}.")
+            continue
+        diverged = [k for k in _CONFORMANCE_FACETS
+                    if spec_facets.get(k) not in (None, [], {}) and spec_facets.get(k) != artifact_facets.get(k)]
+        if diverged:
+            out.append(
+                f"Descriptive method diverges from linked artifact {loc!r} on "
+                f"{', '.join(diverged)} — the artifact is the executable source of truth; "
+                f"regenerate the method from it or reconcile the difference."
+            )
+    return out
+
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CR2032_DATASHEET = Path("ENERGIZER__CR2032.pdf")
-DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "src" / "battinfo" / "data" / "library" / "cell-type" / "ENERGIZER__CR2032.json"
+DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "ENERGIZER__CR2032.json"
 DEFAULT_CR2032_DATASET_DIRS: tuple[Path, ...] = ()
 DEFAULT_PUBLISH_FILENAME = "battinfo.publish.jsonld"
 DEFAULT_RO_CRATE_METADATA_FILENAME = "ro-crate-metadata.json"
@@ -166,7 +273,7 @@ def _stable_uid(seed: str) -> str:
 
 
 _PUB_IRI_NAMESPACE: dict[str, str] = {
-    "cell-type": "spec",
+    "cell-spec": "spec",
     "cell": "cell",
     "test-protocol": "spec",
     "test": "test",
@@ -190,10 +297,10 @@ def _cell_specification_iri(entity_id: str) -> str:
     return _entity_iri("cell-specification", entity_id)
 
 
-def _cell_type_iri(entity_id: str) -> str:
+def _cell_spec_iri(entity_id: str) -> str:
     if entity_id.startswith(_BATTINFO_BASE):
         return entity_id
-    return _entity_iri("cell-type", entity_id)
+    return _entity_iri("cell-spec", entity_id)
 
 
 def _with_default(value: str | None, fallback: str) -> str:
@@ -263,7 +370,7 @@ def _quantity_to_spec_item(quantity: Any) -> dict[str, Any] | None:
     return out
 
 
-def _specification_properties_to_cell_type_specs(properties: Any) -> dict[str, Any]:
+def _specification_properties_to_cell_spec_specs(properties: Any) -> dict[str, Any]:
     if not isinstance(properties, Mapping):
         return {}
     out: dict[str, Any] = {}
@@ -1084,10 +1191,10 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
     return _without_none(node)
 
 
-def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_type: CellType) -> dict[str, Any]:
+def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_spec: CellSpecification) -> dict[str, Any]:
     inst = cell_instance_record["cell_instance"]
     type_list = ["BatteryCell", "schema:IndividualProduct"]
-    subclass_term = CELL_SUBCLASS_MAP.get(cell_type.format)
+    subclass_term = CELL_SUBCLASS_MAP.get(cell_spec.format)
     if subclass_term is not None:
         type_list.append(subclass_term)
     node: dict[str, Any] = {
@@ -1096,8 +1203,8 @@ def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: 
         "schema:identifier": inst.get("short_id"),
         "schema:name": label,
         "schema:description": "Dataset-local cell instance included in the publication graph.",
-        "hasDescription": {"@id": inst["type_id"]},
-        "schema:isVariantOf": {"@id": inst["type_id"]},
+        "hasDescription": {"@id": inst["cell_spec_id"]},
+        "schema:isVariantOf": {"@id": inst["cell_spec_id"]},
     }
     if inst.get("serial_number"):
         node["schema:serialNumber"] = inst["serial_number"]
@@ -1135,7 +1242,7 @@ def _schema_citation_node(source: ProvenanceInfo) -> dict[str, Any] | None:
     return node
 
 
-def _cell_type_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
+def _cell_spec_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
     if not isinstance(quantity, Mapping):
         return None
     type_name = PROPERTY_TYPE_MAP.get(name)
@@ -1155,7 +1262,7 @@ def _cell_type_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
         return None
     node: dict[str, Any] = {
         "@type": type_name,
-        "hasNumericalPart": {"@type": "RealData", "hasNumericalValue": value},
+        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
     }
     unit_iri = UNIT_IRI_MAP.get(unit, unit)
     if unit_iri:
@@ -1163,70 +1270,70 @@ def _cell_type_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
     return node
 
 
-def _cell_type_jsonld_node(cell_type: CellType, *, cell_specification: CellSpecification | None = None) -> dict[str, Any]:
+def _cell_spec_jsonld_node(cell_spec: CellSpecification, *, cell_specification: CellSpecification | None = None) -> dict[str, Any]:
     physical_types: list[str] = ["BatteryCell"]
-    subclass_term = CELL_SUBCLASS_MAP.get(cell_type.format)
+    subclass_term = CELL_SUBCLASS_MAP.get(cell_spec.format)
     if subclass_term is not None:
         physical_types.append(subclass_term)
     node: dict[str, Any] = {
-        "@id": cell_type.id,
+        "@id": cell_spec.id,
         "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
         "isDescriptionFor": {"@type": physical_types if len(physical_types) > 1 else physical_types[0]},
-        "schema:identifier": _tail_id(cell_type.id),
-        "schema:name": cell_type.name,
-        "schema:model": cell_type.model,
+        "schema:identifier": _tail_id(cell_spec.id),
+        "schema:name": cell_spec.name,
+        "schema:model": cell_spec.model,
         "schema:manufacturer": {
             "@type": "schema:Organization",
-            "schema:name": cell_type.manufacturer,
+            "schema:name": cell_spec.manufacturer,
         },
-        "schema:schemaVersion": cell_type.schema_version,
+        "schema:schemaVersion": cell_spec.schema_version,
     }
-    if cell_type.product_type is not None:
-        node["schema:additionalType"] = str(cell_type.product_type)
-    if cell_type.size_code is not None:
-        node["schema:size"] = cell_type.size_code
-    country_node = _schema_country_node(cell_type.country_of_origin)
+    if cell_spec.product_type is not None:
+        node["schema:additionalType"] = str(cell_spec.product_type)
+    if cell_spec.size_code is not None:
+        node["schema:size"] = cell_spec.size_code
+    country_node = _schema_country_node(cell_spec.country_of_origin)
     if country_node is not None:
         node["schema:countryOfOrigin"] = country_node
-    release_date = _schema_release_date_from_year(cell_type.year)
+    release_date = _schema_release_date_from_year(cell_spec.year)
     if release_date is not None:
         node["schema:releaseDate"] = release_date
-    if cell_type.comment:
-        node["schema:description"] = list(cell_type.comment)
+    if cell_spec.comment:
+        node["schema:description"] = list(cell_spec.comment)
     if cell_specification is not None:
         node["schema:isBasedOn"] = {"@id": cell_specification.id}
     else:
-        source_node = _schema_source_node(cell_type.source)
+        source_node = _schema_source_node(cell_spec.source)
         if source_node is not None:
             node["schema:isBasedOn"] = source_node
         properties = [
             property_node
-            for key, value in cell_type.nominal_properties.items()
-            if (property_node := _cell_type_property_node(key, value)) is not None
+            for key, value in cell_spec.properties.items()
+            if (property_node := _cell_spec_property_node(key, value)) is not None
         ]
         if properties:
             node["hasProperty"] = properties
-    citation_node = _schema_citation_node(cell_type.source)
+    citation_node = _schema_citation_node(cell_spec.source)
     if citation_node is not None:
         node["schema:citation"] = citation_node
     return _without_none(node)
 
 
-def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, cell_type: CellType) -> dict[str, Any]:
+def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, cell_spec: CellSpecification) -> dict[str, Any]:
     descriptions = list(cell_specification.specification_comment) + [
         comment for comment in cell_specification.comment if comment not in cell_specification.specification_comment
     ]
     properties = [
         property_node
         for key, value in cell_specification.properties.items()
-        if (property_node := _cell_type_property_node(str(key), value)) is not None
+        if (property_node := _cell_spec_property_node(str(key), value)) is not None
     ]
     node: dict[str, Any] = {
         "@id": cell_specification.id,
         "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
         "schema:identifier": _tail_id(cell_specification.id),
         "schema:name": f"{cell_specification.manufacturer} {cell_specification.model} specification",
-        "schema:about": {"@id": cell_type.id},
+        "schema:about": {"@id": cell_spec.id},
         "schema:model": cell_specification.model,
         "schema:manufacturer": {
             "@type": "schema:Organization",
@@ -1253,7 +1360,7 @@ def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, ce
 
 def _publication_graph(
     *,
-    cell_type: CellType,
+    cell_spec: CellSpecification,
     cell_specification: CellSpecification | None,
     cell_instance_record: dict[str, Any],
     test_record: dict[str, Any],
@@ -1263,59 +1370,136 @@ def _publication_graph(
     dataset_files: list[Path],
     instance_label: str,
 ) -> dict[str, Any]:
-    include_bibo = any(
-        _citation_doi_value(source) is not None
-        for source in (
-            cell_specification.source if cell_specification is not None else None,
-            cell_type.source,
-        )
-        if source is not None
-    )
-    include_csvw = bool(dataset.main_entity)
-    graph = [_cell_type_jsonld_node(cell_type, cell_specification=cell_specification)]
-    if cell_specification is not None:
-        # Use upsert so that if cell-type and cell-specification share the same IRI
-        # (both now use the cell/ namespace) their nodes are merged rather than duplicated.
-        _upsert_graph_node(graph, _cell_specification_jsonld_node(cell_specification, cell_type=cell_type))
+    """Build the local single-dataset publication graph via the shared gold-standard
+    builder (``AuthoringWorkspace._assemble_zenodo_jsonld``).
 
-    _upsert_graph_node(graph, _cell_instance_summary_node(cell_instance_record, label=instance_label, cell_type=cell_type))
-    _upsert_graph_node(graph, _test_jsonld_node(test_record, dataset_id=dataset_record["dataset"]["id"]))
-    _upsert_graph_node(
-        graph,
-        _dataset_jsonld_node(
+    All publication paths now share ONE graph builder and emit the same gold-standard
+    node shapes (PROV-complete tests, EMMO quantities, typed dates, DCAT+schema.org
+    dual distributions, structured conformance). The only differences here are the
+    container's base URL — a local ``file://`` dataset directory with no DOI — and the
+    CSVW tabular schema, re-attached below. CellSpecification and CellSpecification are the same
+    entity (a BatteryCellSpecification), so a single spec node represents both.
+    """
+    import hashlib
+    import mimetypes
+
+    from battinfo.ws import AuthoringWorkspace  # local import avoids an import cycle
+
+    # cell-spec record, with the specification's detailed properties folded into specs
+    # so the shared builder emits one fully-described BatteryCellSpecification node.
+    ct_record = cell_spec.to_record()
+    if cell_specification is not None:
+        specs = dict(ct_record.get("properties") or {})
+        for key, value in cell_specification.properties.items():
+            v = getattr(value, "value", None)
+            if str(key) not in specs and v is not None:
+                specs[str(key)] = {"value": v, "unit": getattr(value, "unit", "") or ""}
+        ct_record["properties"] = specs
+
+    # Distributions: the dataset's already-declared distributions (which may reference
+    # remote/hosted URLs) PLUS the files actually present in the dataset directory.
+    ds_inner = dataset_record.setdefault("dataset", {})
+    declared = list(ds_inner.get("distributions") or [])
+    declared_names = {Path(str(d.get("content_url") or "")).name for d in declared}
+    discovered: list[dict] = []
+    for f in dataset_files:
+        if f.name in declared_names:
+            continue  # already declared explicitly
+        fmt = mimetypes.guess_type(f.name)[0] or (
+            "application/x-parquet" if f.suffix == ".parquet" else "application/octet-stream"
+        )
+        try:
+            checksum = hashlib.sha256(f.read_bytes()).hexdigest()
+        except OSError:
+            checksum = ""
+        discovered.append({
+            "content_url":     f.name,
+            "encoding_format": fmt,
+            "role":            "processed" if ".bdf." in f.name else "raw",
+            "checksum":        {"algorithm": "sha256", "value": checksum} if checksum else {},
+        })
+    all_dists = declared + discovered
+    ds_inner["distributions"] = all_dists
+    # The dataset's access URL for a local directory publication is the directory itself.
+    ds_inner.setdefault("access_url", dataset_dir.resolve().as_uri())
+
+    # Files uploaded under the dataset directory (everything except already-remote URLs)
+    # so the shared builder rewrites their download URLs to files_base_url; remote URLs
+    # are used verbatim.
+    data_filenames = [
+        Path(str(d.get("content_url") or "")).name
+        for d in all_dists
+        if not str(d.get("content_url") or "").startswith(("http://", "https://"))
+    ]
+
+    # Forward test→dataset link the shared builder expects for provenance.
+    test_record.setdefault("test", {})["dataset_ids"] = [ds_inner.get("id")]
+
+    record_sets = {
+        "cell-spec":     [ct_record],
+        "cell-instance": [cell_instance_record],
+        "test":          [test_record],
+        "test-protocol": [],
+        "dataset":       [dataset_record],
+    }
+
+    base_uri = dataset_dir.resolve().as_uri()
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        record_sets,
+        zenodo_record_id=0,
+        prereserved_doi="",          # local directory publication carries no DOI
+        record_url=base_uri,
+        files_base_url=base_uri,     # files live directly in the dataset directory
+        data_filenames=data_filenames,
+        title=dataset.name or instance_label,
+        description=dataset.description or "",
+    )
+
+    # Locate the member dataset node to attach the local path's richer Dataset
+    # discoverability metadata (creators, publisher, funders, citations,
+    # variableMeasured, CSVW mainEntity, …). These are shaped by the existing
+    # _dataset_jsonld_node helper and merged in (without overwriting what the shared
+    # builder already set), so no shaping logic is duplicated.
+    member_node = next(
+        (n for n in doc["@graph"] if n.get("@id") == ds_inner.get("id")), None
+    )
+    if member_node is not None:
+        # Local directory publication: the member's access URL is the directory itself
+        # (a file:// URL is appropriate here, unlike the hosted Zenodo paths).
+        member_node.setdefault("schema:url", base_uri)
+        rich = _dataset_jsonld_node(
             dataset,
-            files=dataset_files,
+            files=[],
             dataset_dir=dataset_dir,
             test_id=test_record["test"]["id"],
             cell_id=cell_instance_record["cell_instance"]["id"],
+            distribution_entries=[],   # distributions already emitted by the shared builder
         )
-    )
-    _upsert_graph_node(
-        graph,
-        {
-            "@id": dataset_dir.resolve().as_uri(),
-            "@type": "schema:Dataset",
-            "schema:name": dataset_dir.name,
-            "schema:url": dataset_dir.resolve().as_uri(),
-            "schema:hasPart": [{"@id": dataset_record["dataset"]["id"]}],
-        }
-    )
-    context: Any
-    if include_bibo or include_csvw:
-        context_entries: list[Any] = [DOMAIN_BATTERY_CONTEXT_URL]
-        local_context: dict[str, str] = {}
-        if include_bibo:
-            local_context["bibo"] = "http://purl.org/ontology/bibo/"
-        if include_csvw:
-            local_context["csvw"] = "http://www.w3.org/ns/csvw#"
-        context_entries.append(local_context)
-        context = context_entries
-    else:
-        context = DOMAIN_BATTERY_CONTEXT_URL
-    return {
-        "@context": context,
-        "@graph": graph,
-    }
+        for key in (
+            "schema:license", "schema:keywords", "schema:version", "schema:sameAs",
+            "schema:additionalType", "schema:creator", "schema:publisher",
+            "schema:funder", "schema:citation", "schema:measurementTechnique",
+            "schema:measurementMethod", "schema:variableMeasured",
+            "schema:isAccessibleForFree", "schema:conditionsOfAccess", "schema:inLanguage",
+            "schema:dateCreated", "schema:dateModified", "schema:datePublished",
+            "schema:temporalCoverage", "schema:spatialCoverage", "schema:isBasedOn",
+            "schema:includedInDataCatalog",
+        ):
+            if key in rich and key not in member_node:
+                member_node[key] = rich[key]
+
+        # CSVW tabular schema (a local-publication feature), declaring the csvw prefix.
+        if dataset.main_entity:
+            main_entity = [
+                node for item in dataset.main_entity
+                if (node := _schema_main_entity_node(item)) is not None
+            ]
+            if main_entity:
+                ctx = doc.get("@context")
+                if isinstance(ctx, dict):
+                    ctx.setdefault("csvw", "http://www.w3.org/ns/csvw#")
+                member_node["schema:mainEntity"] = main_entity
+    return doc
 
 
 def _normalize_cell_specification(
@@ -1327,13 +1511,13 @@ def _normalize_cell_specification(
         spec = source.model_copy(deep=True)
     else:
         payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
-        if isinstance(payload.get("product"), Mapping):
-            result = validate_json(payload, profile="cell-type")
+        if isinstance(payload.get("cell_spec"), Mapping):
+            result = validate_json(payload, profile="cell-spec")
             if not result.ok:
                 raise ValueError(f"cell specification validation failed: {'; '.join(result.errors)}")
             spec = CellSpecification.from_library_record(payload)
         elif isinstance(payload.get("specification"), Mapping):
-            # Internal specification-format record — bypass cell-type schema validation.
+            # Internal specification-format record — bypass cell-spec schema validation.
             spec = CellSpecification.from_library_record(payload)
         else:
             spec = CellSpecification.from_json(payload)
@@ -1351,18 +1535,18 @@ def _normalize_cell_specification(
     return spec
 
 
-def _normalize_cell_type(source: CellType | Mapping[str, Any] | PathLike) -> CellType:
-    if isinstance(source, CellType):
+def _normalize_cell_spec(source: CellSpecification | Mapping[str, Any] | PathLike) -> CellSpecification:
+    if isinstance(source, CellSpecification):
         return source.model_copy(deep=True)
     payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
-    if isinstance(payload.get("product"), Mapping):
-        return CellType.from_record(payload)
-    return CellType.from_json(payload)
+    if isinstance(payload.get("cell_spec"), Mapping):
+        return CellSpecification.from_record(payload)
+    return CellSpecification.from_json(payload)
 
 
-def _build_cell_type_from_specification(cell_specification: CellSpecification) -> CellType:
-    return CellType(
-        id=_cell_type_iri(cell_specification.id),
+def _build_cell_spec_from_specification(cell_specification: CellSpecification) -> CellSpecification:
+    return CellSpecification(
+        id=_cell_spec_iri(cell_specification.id),
         name=f"{cell_specification.manufacturer} {cell_specification.model}",
         manufacturer=cell_specification.manufacturer,
         model=cell_specification.model,
@@ -1373,7 +1557,7 @@ def _build_cell_type_from_specification(cell_specification: CellSpecification) -
         negative_electrode_basis=cell_specification.negative_electrode_basis,
         size_code=cell_specification.size_code,
         cell_specification_id=cell_specification.id,
-        nominal_properties=_specification_properties_to_cell_type_specs(cell_specification.properties),
+        properties=_specification_properties_to_cell_spec_specs(cell_specification.properties),
         source=ProvenanceInfo(
             type=cell_specification.source.type,
             name=cell_specification.source.name,
@@ -1387,31 +1571,31 @@ def _build_cell_type_from_specification(cell_specification: CellSpecification) -
     )
 
 
-def derive_cell_type(
+def derive_cell_spec(
     source: CellSpecification | Mapping[str, Any] | PathLike,
     *,
     datasheet_path: PathLike | None = None,
-) -> CellType:
+) -> CellSpecification:
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
     normalized = _normalize_cell_specification(source, datasheet_path=datasheet)
-    return _finalize_cell_type(
-        _build_cell_type_from_specification(normalized),
+    return _finalize_cell_spec(
+        _build_cell_spec_from_specification(normalized),
         cell_specification=normalized,
     )
 
 
-def _finalize_cell_type(
-    cell_type: CellType,
+def _finalize_cell_spec(
+    cell_spec: CellSpecification,
     *,
     cell_specification: CellSpecification | None = None,
-) -> CellType:
-    finalized = cell_type.model_copy(deep=True)
+) -> CellSpecification:
+    finalized = cell_spec.model_copy(deep=True)
     if finalized.id is None:
         finalized.id = (
-            _cell_type_iri(cell_specification.id)
+            _cell_spec_iri(cell_specification.id)
             if cell_specification is not None
             else _entity_iri(
-                "cell-type",
+                "cell-spec",
                 "::".join(
                     [
                         _with_default(finalized.manufacturer, "unknown-manufacturer"),
@@ -1435,13 +1619,13 @@ def _finalize_cell_type(
 def _finalize_cell_instance(
     cell_instance: CellInstance,
     *,
-    cell_type: CellType,
+    cell_spec: CellSpecification,
     dataset_dir: Path,
     dataset_id: str | None = None,
 ) -> CellInstance:
-    finalized = cell_instance.model_copy(deep=True, update={"cell_type": None})
-    if finalized.cell_type_id is None:
-        finalized.cell_type_id = cell_type.id
+    finalized = cell_instance.model_copy(deep=True, update={"cell_spec": None})
+    if finalized.cell_spec_id is None:
+        finalized.cell_spec_id = cell_spec.id
     if finalized.name is None:
         finalized.name = finalized.serial_number or finalized.batch_id or dataset_dir.name
     if finalized.id is None:
@@ -1449,7 +1633,7 @@ def _finalize_cell_instance(
             "cell",
             "::".join(
                 [
-                    _with_default(finalized.cell_type_id, "unknown-cell-type"),
+                    _with_default(finalized.cell_spec_id, "unknown-cell-spec"),
                     finalized.serial_number or "",
                     finalized.batch_id or "",
                     _with_default(finalized.name, dataset_dir.name),
@@ -1549,17 +1733,17 @@ def _finalize_dataset(
 
 def _finalize_publication_bundle(
     *,
-    cell_type: CellType,
+    cell_spec: CellSpecification,
     cell_instance: CellInstance,
     test: Test,
     dataset: Dataset,
     cell_specification: CellSpecification | None = None,
 ) -> tuple[BattinfoBundle, Path]:
     dataset_dir = _resolve_dataset_dir(dataset)
-    finalized_cell_type = _finalize_cell_type(cell_type, cell_specification=cell_specification)
+    finalized_cell_spec = _finalize_cell_spec(cell_spec, cell_specification=cell_specification)
     finalized_cell_instance = _finalize_cell_instance(
         cell_instance,
-        cell_type=finalized_cell_type,
+        cell_spec=finalized_cell_spec,
         dataset_dir=dataset_dir,
     )
     finalized_test = _finalize_test(
@@ -1580,7 +1764,7 @@ def _finalize_publication_bundle(
     return (
         BattinfoBundle(
             bundle_name=bundle_name,
-            cell_type=finalized_cell_type,
+            cell_spec=finalized_cell_spec,
             cell_instance=finalized_cell_instance,
             test=finalized_test,
             dataset=finalized_dataset,
@@ -1592,7 +1776,7 @@ def _finalize_publication_bundle(
 
 def publish(
     *,
-    cell_type: CellType,
+    cell_spec: CellSpecification,
     cell_instance: CellInstance,
     test: Test,
     dataset: Dataset,
@@ -1622,13 +1806,13 @@ def publish(
     )
     if (
         normalized_cell_specification is not None
-        and cell_type.id is not None
-        and cell_type.id != _cell_type_iri(normalized_cell_specification.id)
+        and cell_spec.id is not None
+        and cell_spec.id != _cell_spec_iri(normalized_cell_specification.id)
     ):
-        raise ValueError("cell_type.id must match the class IRI derived from cell_specification.id when both are provided.")
+        raise ValueError("cell_spec.id must match the class IRI derived from cell_specification.id when both are provided.")
 
     bundle, dataset_dir = _finalize_publication_bundle(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_instance=cell_instance,
         test=test,
         dataset=dataset,
@@ -1639,7 +1823,7 @@ def publish(
 
     dataset_files = _discover_dataset_files(dataset_dir, dataset_glob, publish_filename)
     publish_payload = _publication_graph(
-        cell_type=bundle.cell_type,
+        cell_spec=bundle.cell_spec,
         cell_specification=normalized_cell_specification,
         cell_instance_record=bundle.cell_instance.to_record(),
         test_record=bundle.test.to_record(),
@@ -1687,7 +1871,7 @@ def publish(
         "dataset_files": [str(path) for path in dataset_files],
         "publish_path": str(publish_path),
         "triple_count": _triple_count(publish_payload),
-        "cell_type_id": bundle.cell_type.id,
+        "cell_spec_id": bundle.cell_spec.id,
         "cell_instance_id": bundle.cell_instance.id,
         "test_id": bundle.test.id,
         "dataset_id": bundle.dataset.id,
@@ -1718,7 +1902,7 @@ def publish(
 
 def build_publication_package(
     *,
-    cell_type: CellType,
+    cell_spec: CellSpecification,
     cell_instance: CellInstance,
     test: Test,
     dataset: Dataset,
@@ -1740,7 +1924,7 @@ def build_publication_package(
     """Preferred name for locally building a publication package on disk."""
 
     return publish(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_instance=cell_instance,
         test=test,
         dataset=dataset,
@@ -1765,7 +1949,7 @@ def publish_dataset_metadata(
     *,
     dataset_dirs: list[PathLike],
     staging_root: PathLike,
-    cell_type: CellType | Mapping[str, Any] | PathLike | None = None,
+    cell_spec: CellSpecification | Mapping[str, Any] | PathLike | None = None,
     cell_specification: CellSpecification | Mapping[str, Any] | PathLike | None = None,
     datasheet_path: PathLike | None = None,
     test_kind: str = "other",
@@ -1800,40 +1984,40 @@ def publish_dataset_metadata(
         if not dataset_dir.exists():
             raise FileNotFoundError(f"dataset_dir does not exist: {dataset_dir}")
 
-    if cell_specification is None and cell_type is None:
-        raise ValueError("Provide either cell_specification or cell_type.")
+    if cell_specification is None and cell_spec is None:
+        raise ValueError("Provide either cell_specification or cell_spec.")
 
     normalized_cell_specification = (
         _normalize_cell_specification(cell_specification, datasheet_path=datasheet)
         if cell_specification is not None
         else None
     )
-    normalized_cell_type = (
-        _normalize_cell_type(cell_type)
-        if cell_type is not None
-        else _build_cell_type_from_specification(normalized_cell_specification)
+    normalized_cell_spec = (
+        _normalize_cell_spec(cell_spec)
+        if cell_spec is not None
+        else _build_cell_spec_from_specification(normalized_cell_specification)
     )
-    normalized_cell_type = _finalize_cell_type(
-        normalized_cell_type,
+    normalized_cell_spec = _finalize_cell_spec(
+        normalized_cell_spec,
         cell_specification=normalized_cell_specification,
     )
-    if normalized_cell_specification is not None and normalized_cell_type.id != _cell_type_iri(normalized_cell_specification.id):
-        raise ValueError("cell_type.id must match the class IRI derived from cell_specification.id when both are provided.")
+    if normalized_cell_specification is not None and normalized_cell_spec.id != _cell_spec_iri(normalized_cell_specification.id):
+        raise ValueError("cell_spec.id must match the class IRI derived from cell_specification.id when both are provided.")
 
     report_path = staging_root / report_filename
     shared_root = staging_root / "shared"
-    cell_type_path = normalized_cell_type.to_path(shared_root / "cell-type.json")
-    type_id = normalized_cell_type.id
+    cell_spec_path = normalized_cell_spec.to_path(shared_root / "cell-spec.json")
+    cell_spec_id = normalized_cell_spec.id
 
     dataset_results: list[dict[str, Any]] = []
     for dataset_dir in dataset_dir_paths:
         dataset_key = dataset_dir.name
         context = {
             "dataset_key": dataset_key,
-            "cell_type_id": normalized_cell_type.id,
-            "cell_type_name": normalized_cell_type.name,
-            "manufacturer": normalized_cell_type.manufacturer,
-            "model": normalized_cell_type.model,
+            "cell_spec_id": normalized_cell_spec.id,
+            "cell_spec_name": normalized_cell_spec.name,
+            "manufacturer": normalized_cell_spec.manufacturer,
+            "model": normalized_cell_spec.model,
             "protocol_name": protocol_name or "test",
             "instrument_name": instrument_name or "",
             "test_kind": test_kind,
@@ -1843,18 +2027,18 @@ def publish_dataset_metadata(
         batch_id = _format_template(batch_id_template, context)
         resolved_test_name = _format_template(test_name_template, context) or f"{dataset_key} {protocol_name or 'test'}"
         resolved_dataset_name = (
-            _format_template(dataset_name_template, context) or f"{normalized_cell_type.name} dataset {dataset_key}"
+            _format_template(dataset_name_template, context) or f"{normalized_cell_spec.name} dataset {dataset_key}"
         )
         resolved_dataset_description = (
             _format_template(dataset_description_template, context)
-            or f"Dataset directory packaged with self-contained BattINFO publication metadata for {normalized_cell_type.name}."
+            or f"Dataset directory packaged with self-contained BattINFO publication metadata for {normalized_cell_spec.name}."
         )
 
         retrieved_at = _now_unix()
         source = ProvenanceInfo(type="measurement", url=dataset_dir.resolve().as_uri(), retrieved_at=retrieved_at)
         cell_instance = CellInstance(
             name=instance_name,
-            cell_type=normalized_cell_type,
+            cell_spec=normalized_cell_spec,
             serial_number=serial_number,
             batch_id=batch_id,
             source=source,
@@ -1883,7 +2067,7 @@ def publish_dataset_metadata(
             comment=["Generated from the BattINFO publication helper."],
         )
         publish_result = publish(
-            cell_type=normalized_cell_type,
+            cell_spec=normalized_cell_spec,
             cell_specification=normalized_cell_specification,
             cell_instance=cell_instance,
             test=test,
@@ -1911,7 +2095,7 @@ def publish_dataset_metadata(
                 {
                     "bundle_dir": publish_result["bundle_dir"],
                     "bundle_manifest_path": publish_result["bundle_manifest_path"],
-                    "cell_type_path": str(Path(publish_result["bundle_dir"]) / "cell-type.json"),
+                    "cell_spec_path": str(Path(publish_result["bundle_dir"]) / "cell-spec.json"),
                     "cell_instance_path": str(Path(publish_result["bundle_dir"]) / "cell-instance.json"),
                     "test_path": str(Path(publish_result["bundle_dir"]) / "test.json"),
                     "dataset_path": str(Path(publish_result["bundle_dir"]) / "dataset.json"),
@@ -1925,8 +2109,8 @@ def publish_dataset_metadata(
         "status": "ok",
         "generated_at": _now_iso(),
         "staging_root": str(staging_root),
-        "cell_type_id": type_id,
-        "cell_type_path": str(cell_type_path),
+        "cell_spec_id": cell_spec_id,
+        "cell_spec_path": str(cell_spec_path),
         "dataset_count": len(dataset_results),
         "datasets": dataset_results,
     }
@@ -1969,10 +2153,10 @@ def publish_cr2032_dataset_metadata(
         serial_number_template="{dataset_key}",
         batch_id_template="{dataset_key}",
         test_name_template="{dataset_key} constant current discharging",
-        dataset_name_template="{cell_type_name} dataset {dataset_key}",
+        dataset_name_template="{cell_spec_name} dataset {dataset_key}",
         dataset_description_template=(
             "Dataset directory packaged with self-contained BattINFO publication metadata for one "
-            "{cell_type_name} constant-current discharge run."
+            "{cell_spec_name} constant-current discharge run."
         ),
         publish_filename=publish_filename,
         html_filename=html_filename,
@@ -2008,67 +2192,88 @@ def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any
     }
 
 
+def _record_sets_from_zenodo_record(
+    record: ZenodoCellRecord,
+    entry_files: list[list[Path]],
+) -> tuple[dict[str, list[dict]], list[str]]:
+    """Map a ``ZenodoCellRecord`` to the canonical ``record_sets`` the shared builder
+    consumes, plus the list of staged data filenames.
+
+    Bridges two model differences vs the workspace's on-disk records:
+      * the test→dataset link is stored here as ``dataset.test_id`` (inverse), so we
+        inject ``test.dataset_ids`` for the builder's provenance linkage; and
+      * distributions are rebuilt from the actually-staged files (canonical
+        ``dataset-NNN`` names) so download URLs and checksums reflect the upload.
+    The cell specification's detailed properties are folded into the cell-spec
+    record's ``specs`` so the builder emits one BatteryCellSpecification node.
+    """
+    import hashlib
+    import mimetypes
+
+    ct_record = record.cell_spec.to_record()
+    if record.cell_specification is not None:
+        specs = dict(ct_record.get("properties") or {})
+        for key, value in record.cell_specification.properties.items():
+            v = getattr(value, "value", None)
+            if str(key) not in specs and v is not None:
+                specs[str(key)] = {"value": v, "unit": getattr(value, "unit", "") or ""}
+        ct_record["properties"] = specs
+
+    record_sets: dict[str, list[dict]] = {
+        "cell-spec": [ct_record], "cell-instance": [], "test": [],
+        "test-protocol": [], "dataset": [],
+    }
+    data_filenames: list[str] = []
+
+    for i, entry in enumerate(record.datasets):
+        for ci in entry.cell_instances:
+            record_sets["cell-instance"].append(ci.to_record())
+
+        test_record = entry.test.to_record()
+        # Inject the forward test→dataset link the builder expects.
+        test_record["test"]["dataset_ids"] = [entry.dataset.id]
+        record_sets["test"].append(test_record)
+
+        dataset_record = entry.dataset.to_record()
+        dists: list[dict] = []
+        for f in entry_files[i]:
+            fmt = mimetypes.guess_type(f.name)[0] or (
+                "application/x-parquet" if f.suffix == ".parquet" else "application/octet-stream"
+            )
+            dists.append({
+                "content_url":     f.name,
+                "encoding_format": fmt,
+                "role":            "processed" if ".bdf." in f.name else "raw",
+                "checksum":        {"algorithm": "sha256",
+                                    "value": hashlib.sha256(f.read_bytes()).hexdigest()},
+            })
+            data_filenames.append(f.name)
+        dataset_record.setdefault("dataset", {})["distributions"] = dists
+        record_sets["dataset"].append(dataset_record)
+
+    return record_sets, data_filenames
+
+
 def _zenodo_publication_graph(
     record: ZenodoCellRecord,
     entry_files: list[list[Path]],
     zenodo_record_url: str,
 ) -> dict[str, Any]:
-    files_base_url = f"{zenodo_record_url}/files"
-    graph: list[dict[str, Any]] = [
-        _cell_type_jsonld_node(record.cell_type, cell_specification=record.cell_specification)
-    ]
-    if record.cell_specification is not None:
-        _upsert_graph_node(graph, _cell_specification_jsonld_node(record.cell_specification, cell_type=record.cell_type))
+    """Build the deposit JSON-LD via the single shared, gold-standard graph builder
+    (``AuthoringWorkspace._assemble_zenodo_jsonld``), so the programmatic contribution
+    path and the interactive authoring path emit identical graph structures."""
+    from battinfo.ws import AuthoringWorkspace  # local import avoids an import cycle
 
-    all_dataset_refs: list[dict[str, str]] = []
-    for i, entry in enumerate(record.datasets):
-        files = entry_files[i]
-
-        for ci in entry.cell_instances:
-            label = ci.name or ci.serial_number or ci.id or f"cell-{i + 1}"
-            _upsert_graph_node(graph, _cell_instance_summary_node(
-                ci.to_record(), label=label, cell_type=record.cell_type,
-            ))
-
-        test_record = entry.test.to_record()
-        dataset_record = entry.dataset.to_record()
-        dataset_id = dataset_record["dataset"]["id"]
-
-        _upsert_graph_node(graph, _test_jsonld_node(test_record, dataset_id=dataset_id))
-
-        dist_entries = [_zenodo_distribution_entry(f, files_base_url) for f in files]
-        _upsert_graph_node(graph, _dataset_jsonld_node(
-            entry.dataset,
-            files=[],
-            dataset_dir=Path("."),
-            test_id=test_record["test"]["id"],
-            cell_id=test_record["test"]["cell_id"],
-            distribution_entries=dist_entries,
-            url_override=zenodo_record_url,
-        ))
-
-        all_dataset_refs.append({"@id": dataset_id})
-
-    _upsert_graph_node(graph, _without_none({
-        "@id": zenodo_record_url,
-        "@type": "schema:Dataset",
-        "schema:name": record.cell_type.name,
-        "schema:url": zenodo_record_url,
-        "schema:hasPart": all_dataset_refs,
-    }))
-
-    include_bibo = any(
-        _citation_doi_value(source) is not None
-        for source in (
-            record.cell_specification.source if record.cell_specification is not None else None,
-            record.cell_type.source,
-        )
-        if source is not None
+    record_sets, data_filenames = _record_sets_from_zenodo_record(record, entry_files)
+    record_id = zenodo_record_url.rstrip("/").split("/")[-1]
+    return AuthoringWorkspace._assemble_zenodo_jsonld(
+        record_sets,
+        zenodo_record_id=0,
+        prereserved_doi=f"10.5281/zenodo.{record_id}",
+        record_url=zenodo_record_url,
+        data_filenames=data_filenames,
+        title=record.cell_spec.name or "",
     )
-    context: Any = DOMAIN_BATTERY_CONTEXT_URL
-    if include_bibo:
-        context = [DOMAIN_BATTERY_CONTEXT_URL, {"bibo": "http://purl.org/ontology/bibo/"}]
-    return {"@context": context, "@graph": graph}
 
 
 def _zenodo_ro_crate(
@@ -2092,12 +2297,12 @@ def _zenodo_ro_crate(
     root_dataset: dict[str, Any] = _without_none({
         "@id": "./",
         "@type": "Dataset",
-        "name": record.cell_type.name,
+        "name": record.cell_spec.name,
         "url": zenodo_record_url,
         "hasPart": has_part,
     })
-    if record.cell_type.manufacturer:
-        root_dataset["publisher"] = {"@type": "Organization", "name": record.cell_type.manufacturer}
+    if record.cell_spec.manufacturer:
+        root_dataset["publisher"] = {"@type": "Organization", "name": record.cell_spec.manufacturer}
 
     graph: list[dict[str, Any]] = [
         {
@@ -2229,7 +2434,7 @@ def build_zenodo_package(
         "file_url_map": file_url_map,
         "zenodo_record_id_placeholder": zenodo_record_id_placeholder,
         "zenodo_record_url": zenodo_record_url,
-        "cell_type_id": record.cell_type.id,
+        "cell_spec_id": record.cell_spec.id,
         "dataset_count": len(record.datasets),
     }
 
@@ -2247,7 +2452,7 @@ __all__ = [
     "DEFAULT_RO_CRATE_METADATA_FILENAME",
     "build_publication_package",
     "build_zenodo_package",
-    "derive_cell_type",
+    "derive_cell_spec",
     "load_publication",
     "load_publication_package",
     "publish",

@@ -11,12 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 publish_module = importlib.import_module("battinfo.publish")
-from battinfo import CellType, PublishResult, publish
+from battinfo import CellSpecification, PublishResult, publish
 from battinfo.api import publish_record, save_record
 
 
-def _sample_cell_type() -> CellType:
-    return CellType(
+def _sample_cell_spec() -> CellSpecification:
+    return CellSpecification(
         manufacturer="Google",
         model="G20M7",
         format="pouch",
@@ -25,24 +25,24 @@ def _sample_cell_type() -> CellType:
     )
 
 
-def test_publish_cell_type_local_writes_canonical_record(tmp_path: Path) -> None:
-    result = publish(_sample_cell_type(), destination="local", root=tmp_path / "publish-local", force=True)
+def test_publish_cell_spec_local_writes_canonical_record(tmp_path: Path) -> None:
+    result = publish(_sample_cell_spec(), destination="local", root=tmp_path / "publish-local", force=True)
 
     assert isinstance(result, PublishResult)
     assert result.status == "ok"
     assert result.destination == "local"
-    assert result.resource_type == "cell_type"
+    assert result.resource_type == "cell_spec"
     assert result.canonical_id is not None
     assert result.canonical_iri == f"https://w3id.org/battinfo/spec/{result.canonical_id}"
 
     canonical_record_path = Path(result.debug_paths["canonical_record_path"])
     assert canonical_record_path.exists()
     payload = json.loads(canonical_record_path.read_text(encoding="utf-8"))
-    assert payload["product"]["manufacturer"]["name"] == "Google"
-    assert payload["product"]["model"] == "G20M7"
+    assert payload["cell_spec"]["manufacturer"]["name"] == "Google"
+    assert payload["cell_spec"]["model"] == "G20M7"
 
 
-def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(tmp_path: Path, monkeypatch) -> None:
+def test_publish_cell_spec_registry_builds_submission_and_returns_registry_url(tmp_path: Path, monkeypatch) -> None:
     captured: dict[str, object] = {}
 
     def _fake_submit(payload, *, registry_base_url, api_key, api_key_header="X-Battinfo-API-Key", timeout_sec=30.0):
@@ -55,9 +55,9 @@ def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(t
         return {
             "status": "ok",
             "response": {
-                "canonical_id_map": {source_local_id: "registry-cell-type-001"},
+                "canonical_id_map": {source_local_id: "registry-cell-spec-001"},
                 "canonical_iri_map": {
-                    source_local_id: "https://w3id.org/battinfo/cell/registry-cell-type-001",
+                    source_local_id: "https://w3id.org/battinfo/cell/registry-cell-spec-001",
                 },
             },
         }
@@ -65,7 +65,7 @@ def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(t
     monkeypatch.setattr(publish_module, "submit_publication_package", _fake_submit)
 
     result = publish(
-        _sample_cell_type(),
+        _sample_cell_spec(),
         destination="registry",
         root=tmp_path / "publish-registry",
         force=True,
@@ -79,9 +79,9 @@ def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(t
     assert isinstance(result, PublishResult)
     assert result.status == "ok"
     assert result.destination == "registry"
-    assert result.canonical_id == "registry-cell-type-001"
-    assert result.canonical_iri == "https://w3id.org/battinfo/cell/registry-cell-type-001"
-    assert result.registry_resource_url == "https://registry.example.org/resources/cell-type/registry-cell-type-001"
+    assert result.canonical_id == "registry-cell-spec-001"
+    assert result.canonical_iri == "https://w3id.org/battinfo/cell/registry-cell-spec-001"
+    assert result.registry_resource_url == "https://registry.example.org/resources/cell-spec/registry-cell-spec-001"
     assert result.page_url is None
     assert result.workspace_id == "hello-world"
     assert result.publisher_id == "demo-lab"
@@ -102,15 +102,15 @@ def test_publish_cell_type_registry_builds_submission_and_returns_registry_url(t
     assert captured_payload["resource"]["source_local_id"] == result.source_local_id
 
 
-def test_publish_cell_type_battery_genome_returns_page_url(tmp_path: Path, monkeypatch) -> None:
+def test_publish_cell_spec_battery_genome_returns_page_url(tmp_path: Path, monkeypatch) -> None:
     def _fake_submit(payload, *, registry_base_url, api_key, api_key_header="X-Battinfo-API-Key", timeout_sec=30.0):
         source_local_id = payload["resource"]["source_local_id"]
         return {
             "status": "ok",
             "response": {
-                "canonical_id_map": {source_local_id: "registry-cell-type-002"},
+                "canonical_id_map": {source_local_id: "registry-cell-spec-002"},
                 "canonical_iri_map": {
-                    source_local_id: "https://w3id.org/battinfo/cell/registry-cell-type-002",
+                    source_local_id: "https://w3id.org/battinfo/cell/registry-cell-spec-002",
                 },
             },
         }
@@ -118,7 +118,7 @@ def test_publish_cell_type_battery_genome_returns_page_url(tmp_path: Path, monke
     monkeypatch.setattr(publish_module, "submit_publication_package", _fake_submit)
 
     result = publish(
-        _sample_cell_type(),
+        _sample_cell_spec(),
         destination="battery-genome",
         root=tmp_path / "publish-battery-genome",
         force=True,
@@ -131,9 +131,9 @@ def test_publish_cell_type_battery_genome_returns_page_url(tmp_path: Path, monke
     )
 
     assert result.destination == "battery-genome"
-    assert result.canonical_id == "registry-cell-type-002"
-    assert result.registry_resource_url == "https://registry.example.org/resources/cell-type/registry-cell-type-002"
-    assert result.page_url == "https://battery-genome.org/registry/cell-type/registry-cell-type-002"
+    assert result.canonical_id == "registry-cell-spec-002"
+    assert result.registry_resource_url == "https://registry.example.org/resources/cell-spec/registry-cell-spec-002"
+    assert result.page_url == "https://battery-genome.org/registry/cell-spec/registry-cell-spec-002"
 
 
 def test_publish_preserves_legacy_publication_package_call_shape(monkeypatch) -> None:
@@ -146,7 +146,7 @@ def test_publish_preserves_legacy_publication_package_call_shape(monkeypatch) ->
     monkeypatch.setattr(publish_module, "_legacy_publish", _fake_legacy_publish)
 
     result = publish(
-        cell_type="cell-type",
+        cell_spec="cell-spec",
         cell_instance="cell-instance",
         test="test",
         dataset="dataset",
@@ -155,7 +155,7 @@ def test_publish_preserves_legacy_publication_package_call_shape(monkeypatch) ->
     assert result == {"status": "ok", "kind": "legacy-publication-package"}
     assert calls == [
         {
-            "cell_type": "cell-type",
+            "cell_spec": "cell-spec",
             "cell_instance": "cell-instance",
             "test": "test",
             "dataset": "dataset",
@@ -172,17 +172,17 @@ def test_publish_requires_object_or_legacy_keywords() -> None:
 # publish_record() — low-level API
 # ---------------------------------------------------------------------------
 
-_EXAMPLE_CELL_TYPE = ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
+_EXAMPLE_CELL_TYPE = ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 _EXAMPLE_CELL_INSTANCE = ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json"
 _EXAMPLE_DATASET = ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json"
 _EXAMPLE_TEST_PROTOCOL = ROOT / "examples" / "test-protocol" / "test-protocol-8r2m-4v6k-9p3t-7n5x.json"
 
 
-def test_publish_record_cell_type_writes_three_files(tmp_path: Path) -> None:
+def test_publish_record_cell_spec_writes_three_files(tmp_path: Path) -> None:
     result = publish_record(_EXAMPLE_CELL_TYPE, target_root=tmp_path)
 
     assert result["status"] == "published"
-    assert result["entity_type"] == "cell-type"
+    assert result["entity_type"] == "cell-spec"
     files = result["files"]
     assert any(f.endswith("index.json") for f in files)
     assert any(f.endswith("index.jsonld") for f in files)
@@ -201,7 +201,7 @@ def test_publish_record_jsonld_is_valid_json_ld(tmp_path: Path) -> None:
     assert "@context" in doc
 
 
-def test_publish_record_cell_type_is_battery_cell_specification(tmp_path: Path) -> None:
+def test_publish_record_cell_spec_is_battery_cell_specification(tmp_path: Path) -> None:
     publish_record(_EXAMPLE_CELL_TYPE, target_root=tmp_path)
     jsonld_files = list(tmp_path.rglob("index.jsonld"))
     doc = json.loads(jsonld_files[0].read_text(encoding="utf-8"))
@@ -249,7 +249,7 @@ def test_publish_record_skip_html(tmp_path: Path) -> None:
 def test_publish_record_returns_correct_uid(tmp_path: Path) -> None:
     doc = json.loads(_EXAMPLE_CELL_TYPE.read_text(encoding="utf-8"))
     result = publish_record(doc, target_root=tmp_path)
-    assert result["uid"] == doc["product"]["id"].split("/")[-1]
+    assert result["uid"] == doc["cell_spec"]["id"].split("/")[-1]
 
 
 def test_publish_record_dataset(tmp_path: Path) -> None:

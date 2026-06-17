@@ -14,7 +14,7 @@ from battinfo.cli import app
 from battinfo.contribution import (
     BATCH_MANIFEST,
     CONTRIBUTION_MANIFEST,
-    _resolve_cell_type_for_batch,
+    _resolve_cell_spec_for_batch,
     add_to_batch,
     init_batch,
     load_batch_manifest,
@@ -25,17 +25,17 @@ runner = CliRunner()
 ENERGIZER_IRI = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 
 
-# ── _resolve_cell_type_for_batch ───────────────────────────────────────────────
+# ── _resolve_cell_spec_for_batch ───────────────────────────────────────────────
 
-class TestResolveCellType:
+class TestResolveCellSpecification:
     def test_direct_iri_passthrough(self) -> None:
-        iri, name, mfr, model = _resolve_cell_type_for_batch(ENERGIZER_IRI)
+        iri, name, mfr, model = _resolve_cell_spec_for_batch(ENERGIZER_IRI)
         assert iri == ENERGIZER_IRI
         assert mfr == "Energizer"
         assert model == "CR2032"
 
     def test_name_resolves_to_iri(self) -> None:
-        iri, name, mfr, model = _resolve_cell_type_for_batch("Energizer CR2032")
+        iri, name, mfr, model = _resolve_cell_spec_for_batch("Energizer CR2032")
         assert iri == ENERGIZER_IRI
         assert "Energizer" in name
         assert "CR2032" in name
@@ -43,16 +43,16 @@ class TestResolveCellType:
         assert model == "CR2032"
 
     def test_slash_separator_accepted(self) -> None:
-        iri, _, _, _ = _resolve_cell_type_for_batch("Energizer/CR2032")
+        iri, _, _, _ = _resolve_cell_spec_for_batch("Energizer/CR2032")
         assert iri == ENERGIZER_IRI
 
     def test_fuzzy_manufacturer(self) -> None:
-        iri, _, _, _ = _resolve_cell_type_for_batch("Enegizer CR2032")
+        iri, _, _, _ = _resolve_cell_spec_for_batch("Enegizer CR2032")
         assert iri == ENERGIZER_IRI
 
     def test_unknown_raises(self) -> None:
         with pytest.raises(ValueError, match="No cell type found"):
-            _resolve_cell_type_for_batch("NoSuchManufacturer XYZ999")
+            _resolve_cell_spec_for_batch("NoSuchManufacturer XYZ999")
 
 
 # ── init_batch ─────────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ class TestInitBatch:
         result = init_batch(tmp_path / "batch", "Energizer CR2032", 3)
         root = Path(result["output_dir"])
         assert root.exists()
-        assert result["cell_type_iri"] == ENERGIZER_IRI
+        assert result["cell_spec_iri"] == ENERGIZER_IRI
         assert result["count"] == 3
         assert len(result["cells"]) == 3
 
@@ -211,7 +211,7 @@ class TestInitBatch:
 
     def test_direct_iri_uses_library_for_folder_names(self, tmp_path: Path) -> None:
         result = init_batch(tmp_path / "batch", ENERGIZER_IRI, 1)
-        assert result["cell_type_iri"] == ENERGIZER_IRI
+        assert result["cell_spec_iri"] == ENERGIZER_IRI
         folder = result["cells"][0]["folder"]
         assert "energizer" in folder
         assert "CR2032" in folder  # model case preserved
@@ -230,7 +230,7 @@ class TestBatchInitCli:
         result = runner.invoke(app, [
             "batch", "init",
             str(tmp_path / "batch"),
-            "--cell-type", "Energizer CR2032",
+            "--cell-spec", "Energizer CR2032",
             "--count", "2",
         ])
         assert result.exit_code == 0, result.output
@@ -243,7 +243,7 @@ class TestBatchInitCli:
         result = runner.invoke(app, [
             "batch", "init",
             str(tmp_path / "batch"),
-            "--cell-type", "Energizer CR2032",
+            "--cell-spec", "Energizer CR2032",
             "--count", "3",
             "--batch-id", "B2025-06",
             "--lab", "SINTEF",
@@ -261,7 +261,7 @@ class TestBatchInitCli:
     def test_cell_folder_via_cli(self, tmp_path: Path) -> None:
         runner.invoke(app, [
             "batch", "init", str(tmp_path / "batch"),
-            "--cell-type", "Energizer CR2032", "--count", "1",
+            "--cell-spec", "Energizer CR2032", "--count", "1",
         ])
         cell = _first_cell_dir(tmp_path)
         assert cell.is_dir()
@@ -271,7 +271,7 @@ class TestBatchInitCli:
         result = runner.invoke(app, [
             "batch", "init",
             str(tmp_path / "batch"),
-            "--cell-type", "Energizer CR2032",
+            "--cell-spec", "Energizer CR2032",
             "--count", "2",
             "--serials", "SN-01,SN-02",
         ])
@@ -285,7 +285,7 @@ class TestBatchInitCli:
         result = runner.invoke(app, [
             "batch", "init",
             str(tmp_path / "batch"),
-            "--cell-type", "Energizer CR2032",
+            "--cell-spec", "Energizer CR2032",
             "--count", "2",
             "--iris", f"{ci1},{ci2}",
         ])
@@ -295,11 +295,11 @@ class TestBatchInitCli:
         ci1_dir = next(d for d in _cell_dirs(tmp_path / "batch") if ci1_short in d.name)
         assert ci1 in (ci1_dir / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
 
-    def test_unknown_cell_type_exits_with_error(self, tmp_path: Path) -> None:
+    def test_unknown_cell_spec_exits_with_error(self, tmp_path: Path) -> None:
         result = runner.invoke(app, [
             "batch", "init",
             str(tmp_path / "batch"),
-            "--cell-type", "NoSuchBrand XYZ999",
+            "--cell-spec", "NoSuchBrand XYZ999",
             "--count", "1",
         ])
         assert result.exit_code != 0
@@ -309,7 +309,7 @@ class TestBatchInitCli:
         dest.mkdir()
         result = runner.invoke(app, [
             "batch", "init", str(dest),
-            "--cell-type", "Energizer CR2032", "--count", "1",
+            "--cell-spec", "Energizer CR2032", "--count", "1",
         ])
         assert result.exit_code != 0
 
@@ -318,7 +318,7 @@ class TestBatchInitCli:
         dest.mkdir()
         result = runner.invoke(app, [
             "batch", "init", str(dest),
-            "--cell-type", "Energizer CR2032", "--count", "1",
+            "--cell-spec", "Energizer CR2032", "--count", "1",
             "--force",
         ])
         assert result.exit_code == 0, result.output
@@ -367,10 +367,10 @@ class TestAddToBatch:
         assert cell.is_dir()
         assert (cell / "battinfo.yaml").is_file()
 
-    def test_inherits_cell_type_from_batch_yaml(self, tmp_path: Path) -> None:
+    def test_inherits_cell_spec_from_batch_yaml(self, tmp_path: Path) -> None:
         d = self._init(tmp_path, 1)
         result = add_to_batch(d, 1)
-        assert result["cell_type_iri"] == ENERGIZER_IRI
+        assert result["cell_spec_iri"] == ENERGIZER_IRI
         cell = d / result["new_cells"][0]["folder"]
         assert ENERGIZER_IRI in (cell / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
 
@@ -453,7 +453,7 @@ class TestBatchAddCli:
         batch_dir = tmp_path / "batch"
         runner.invoke(app, [
             "batch", "init", str(batch_dir),
-            "--cell-type", "Energizer CR2032",
+            "--cell-spec", "Energizer CR2032",
             "--count", str(count),
             "--lab", "SINTEF",
         ])

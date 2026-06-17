@@ -37,7 +37,7 @@ def setup_demo_environment(
         encoding="utf-8",
     )
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -51,7 +51,7 @@ def setup_demo_environment(
         },
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_type, serial_number="demo-hello-world-001", batch_id="A123-DEMO-01", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="demo-hello-world-001", batch_id="A123-DEMO-01", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -179,7 +179,7 @@ def _verification_target(submission_payload: dict[str, Any], response_payload: d
         resource = submission_payload.get("resource")
         resources = [resource] if isinstance(resource, dict) else []
 
-    preferred_order = {"dataset": 0, "cell_type": 1, "cell": 2, "test": 3}
+    preferred_order = {"dataset": 0, "cell_spec": 1, "cell": 2, "test": 3}
     ordered_resources = sorted(
         [item for item in resources if isinstance(item, dict)],
         key=lambda item: preferred_order.get(str(item.get("resource_type")), len(preferred_order)),

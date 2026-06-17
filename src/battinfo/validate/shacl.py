@@ -43,11 +43,11 @@ def _shapes_path(filename: str) -> Path | None:
 
 def _record_to_jsonld(record: dict[str, Any]) -> dict[str, Any]:
     """Convert a raw BattINFO record dict to its JSON-LD representation."""
-    product = record.get("product") or record.get("specification") or {}
-    specs = record.get("specs") or {}
+    product = record.get("cell_spec") or record.get("specification") or {}
+    specs = record.get("properties") or {}
 
     if not product and not specs:
-        # Non-cell-type record: test, dataset, etc. — return minimal JSON-LD
+        # Non-cell-spec record: test, dataset, etc. — return minimal JSON-LD
         return record
 
     # Lazy import to avoid circular dependency
@@ -91,7 +91,7 @@ def _parse_shacl_report(report_graph: Any, _data_graph: Any) -> list[ValidationI
                 path=path_text,
                 message=msg_text,
                 validator="shacl",
-                resource_type="cell-type",
+                resource_type="cell-spec",
             )
         )
     return issues
@@ -100,18 +100,18 @@ def _parse_shacl_report(report_graph: Any, _data_graph: Any) -> list[ValidationI
 def validate_shacl_report(
     doc: dict[str, Any],
     *,
-    shapes_filename: str = "cell-type.shapes.ttl",
+    shapes_filename: str = "cell-spec.shapes.ttl",
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
     """Validate *doc* against the SHACL shapes and return a ValidationReport.
 
-    Only cell-type records are validated; other record types return an empty
+    Only cell-spec records are validated; other record types return an empty
     report.  ``pyshacl`` must be installed (it is a dev dependency).
     """
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
 
-    # Only run on cell-type records
-    product = doc.get("product") or doc.get("specification")
+    # Only run on cell-spec records
+    product = doc.get("cell_spec") or doc.get("specification")
     if not product:
         return ValidationReport(policy=resolved_policy)
 

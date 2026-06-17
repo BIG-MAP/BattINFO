@@ -606,6 +606,17 @@
             "unknown"
           ]
         },
+        "role": {
+          "type": "string",
+          "description": "Role of this file within the dataset: a normalised 'processed' file or the original 'raw' instrument file kept for provenance.",
+          "enum": [
+            "processed",
+            "raw",
+            "report",
+            "metadata",
+            "other"
+          ]
+        },
         "conditions": {
           "type": "object",
           "description": "Per-file measurement conditions (e.g. {\"soc\": 0.5} for EIS files split by SOC).",

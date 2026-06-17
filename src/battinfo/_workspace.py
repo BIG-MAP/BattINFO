@@ -13,17 +13,17 @@ if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
 
 from battinfo.api import (
-    build_cell_type_library_rdf,
+    build_cell_spec_library_rdf,
     query_cell_instances,
-    query_cell_types,
+    query_cell_specs,
     query_datasets,
-    query_library_cell_types,
+    query_library_cell_specs,
     query_test_specs,
     query_tests,
     save_cell_instance,
-    save_cell_type,
+    save_cell_spec,
     save_dataset,
-    save_library_cell_type,
+    save_library_cell_spec,
     save_test,
     save_test_spec,
 )
@@ -37,7 +37,7 @@ from battinfo.authoring import cell_description as build_cell_description
 from battinfo.bundle import (
     CellInstance,
     CellSpecification,
-    CellType,
+    CellSpecification,
     ChecksumInfo,
     Dataset,
     ProtocolInfo,
@@ -124,7 +124,7 @@ def _stable_uid(seed: str) -> str:
 
 
 _IRI_NAMESPACE: dict[str, str] = {
-    "cell-type": "spec",
+    "cell-spec": "spec",
     "cell": "cell",
     "test-protocol": "spec",
     "test": "test",
@@ -197,8 +197,15 @@ def _mapping_value(value: Any) -> dict[str, Any]:
 
 
 def _append_unique(items: list[Any], candidate: Any) -> None:
-    if not any(existing is candidate for existing in items):
-        items.append(candidate)
+    cand_id = getattr(candidate, "id", None)
+    for existing in items:
+        if existing is candidate:
+            return
+        # Two distinct objects with the same canonical id are the same entity
+        # (e.g. a cell-spec and its specification, now merged) — keep only one.
+        if cand_id is not None and getattr(existing, "id", None) == cand_id:
+            return
+    items.append(candidate)
 
 
 class Workspace:
@@ -230,11 +237,11 @@ class Workspace:
             shutil.rmtree(self.root)
         self.source_root = self.root / source_dir_name
         self.index_path = self.root / index_name
-        self.library_root = self.root / "library" / "cell-type"
-        self.package_root = self.root / "package" / "cell-type"
-        self.library_rdf_root = self.root / "library-rdf" / "cell-type"
-        self.library_aggregate_jsonld = self.root / "ontology" / "library" / "cell-type.jsonld"
-        self.library_manifest_json = self.root / "library-rdf" / "cell-type.index.json"
+        self.library_root = self.root / "library" / "cell-spec"
+        self.package_root = self.root / "package" / "cell-spec"
+        self.library_rdf_root = self.root / "library-rdf" / "cell-spec"
+        self.library_aggregate_jsonld = self.root / "ontology" / "library" / "cell-spec.jsonld"
+        self.library_manifest_json = self.root / "library-rdf" / "cell-spec.index.json"
         self.root.mkdir(parents=True, exist_ok=True)
         self.name = name
         self.title = title
@@ -245,7 +252,7 @@ class Workspace:
         self.comment = list(comment or [])
 
         self.descriptions: list[CellSpecification] = []
-        self.cell_types: list[CellType] = []
+        self.cell_specs: list[CellSpecification] = []
         self.cells: list[CellInstance] = []
         self.test_specs: list[TestSpec] = []
         self.tests: list[Test] = []
@@ -269,7 +276,7 @@ class Workspace:
 
     def bundle_workspace(
         self,
-        target: CellType | CellInstance | Test | Dataset | None = None,
+        target: CellSpecification | CellInstance | Test | Dataset | None = None,
         *,
         name: str | None = None,
         title: str | None = None,
@@ -296,15 +303,16 @@ class Workspace:
     def add(self, *objects: Any) -> "Workspace":
         """Add one or more authoring objects to the workspace by type."""
         def _add(obj: Any) -> None:
+            # CellSpecification and CellSpecification are the same entity (a BatteryCellSpecification);
+            # add() routes it to the canonical cell-spec collection. The datasheet-library
+            # workflow uses the dedicated add_description/save_descriptions methods.
             if isinstance(obj, CellSpecification):
-                _append_unique(self.descriptions, obj)
-            elif isinstance(obj, CellType):
-                _append_unique(self.cell_types, obj)
+                _append_unique(self.cell_specs, obj)
             elif isinstance(obj, TestSpec):
                 _append_unique(self.test_specs, obj)
             elif isinstance(obj, CellInstance):
-                if obj.cell_type is not None:
-                    _add(obj.cell_type)
+                if obj.cell_spec is not None:
+                    _add(obj.cell_spec)
                 _append_unique(self.cells, obj)
             elif isinstance(obj, Test):
                 if obj.protocol_entity is not None:
@@ -320,69 +328,69 @@ class Workspace:
                 _append_unique(self.datasets, obj)
             else:
                 raise TypeError(
-                    "Workspace.add() supports CellSpecification, CellType, TestSpec, Cell/CellInstance, Test, and Dataset objects."
+                    "Workspace.add() supports CellSpecification, CellSpecification, TestSpec, Cell/CellInstance, Test, and Dataset objects."
                 )
         for obj in objects:
             _add(obj)
         return self
 
-    def load_cell_type(
+    def load_cell_spec(
         self,
-        source: CellType | dict[str, Any] | PathLike,
+        source: CellSpecification | dict[str, Any] | PathLike,
         *,
         validate: bool = True,
         validation_policy: str = "strict",
-    ) -> CellType:
-        """Load one cell-type JSON source into the workspace.
+    ) -> CellSpecification:
+        """Load one cell-spec JSON source into the workspace.
 
-        The source can be either a canonical BattINFO `cell-type` record with a
+        The source can be either a canonical BattINFO `cell-spec` record with a
         top-level `product` object or a simpler authoring draft with fields like
         `manufacturer`, `model`, `format`, `chemistry`, and optional `specs`.
         Draft inputs are canonized later when the workspace renders or saves.
         """
 
-        if isinstance(source, CellType):
-            cell_type = source.model_copy(deep=True)
+        if isinstance(source, CellSpecification):
+            cell_spec = source.model_copy(deep=True)
         else:
             payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
-            if isinstance(payload.get("cell_type"), dict) and "product" not in payload:
+            if isinstance(payload.get("cell_spec"), dict) and "cell_spec" not in payload:
                 payload = dict(payload)
-                payload["product"] = dict(payload["cell_type"])
-            if isinstance(payload.get("specification"), dict) and "product" not in payload:
-                # Library cell-type format: promote specification fields for authoring path
+                payload["cell_spec"] = dict(payload["cell_spec"])
+            if isinstance(payload.get("specification"), dict) and "cell_spec" not in payload:
+                # Library cell-spec format: promote specification fields for authoring path
                 payload = dict(payload["specification"])
-            if isinstance(payload.get("product"), dict):
+            if isinstance(payload.get("cell_spec"), dict):
                 if validate:
                     report = validate_record_report(payload, policy=validation_policy)
                     if not report.ok:
-                        raise ValueError(f"cell-type validation failed: {'; '.join(report.render_errors())}")
-                cell_type = CellType.from_record(payload)
+                        raise ValueError(f"cell-spec validation failed: {'; '.join(report.render_errors())}")
+                cell_spec = CellSpecification.from_record(payload)
             else:
-                cell_type = self._cell_type_from_authoring_payload(payload)
+                cell_spec = self._cell_spec_from_authoring_payload(payload)
 
-        _append_unique(self.cell_types, cell_type)
-        return cell_type
+        _append_unique(self.cell_specs, cell_spec)
+        return cell_spec
 
-    def load_cell_types(
+    def load_cell_specs(
         self,
-        *sources: CellType | dict[str, Any] | PathLike,
+        *sources: CellSpecification | dict[str, Any] | PathLike,
         directory: PathLike | None = None,
         glob: str = "*.json",
         validate: bool = True,
         validation_policy: str = "strict",
-    ) -> list[CellType]:
-        """Load multiple cell-type JSON sources into the workspace."""
+    ) -> list[CellSpecification]:
+        """Load multiple cell-spec JSON sources into the workspace."""
 
-        inputs: list[CellType | dict[str, Any] | PathLike] = list(sources)
+        inputs: list[CellSpecification | dict[str, Any] | PathLike] = list(sources)
         if directory is not None:
             directory_path = _as_path(directory)
             if not directory_path.exists() or not directory_path.is_dir():
                 raise ValueError(f"cell type directory does not exist: {directory_path}")
             inputs.extend(sorted(directory_path.glob(glob)))
         if not inputs:
-            raise ValueError("load_cell_types requires one or more sources or a directory.")
+            raise ValueError("load_cell_specs requires one or more sources or a directory.")
         return [
-            self.load_cell_type(
+            self.load_cell_spec(
                 item,
                 validate=validate,
                 validation_policy=validation_policy,
@@ -449,7 +457,7 @@ class Workspace:
             for item in inputs
         ]
 
-    def _cell_type_from_authoring_payload(self, payload: dict[str, Any]) -> CellType:
+    def _cell_spec_from_authoring_payload(self, payload: dict[str, Any]) -> CellSpecification:
         model = payload.get("model")
         if model is None:
             model = payload.get("model_name")
@@ -458,14 +466,14 @@ class Workspace:
         chemistry = payload.get("chemistry")
         if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model, format_value, chemistry)):
             raise ValueError(
-                "cell-type authoring JSON requires non-empty string fields: manufacturer, model, format, chemistry."
+                "cell-spec authoring JSON requires non-empty string fields: manufacturer, model, format, chemistry."
             )
 
-        specs = payload.get("specs")
+        specs = payload.get("properties")
         if specs is None:
-            specs = payload.get("nominal_properties")
+            specs = payload.get("properties")
         if specs is not None and not isinstance(specs, dict):
-            raise ValueError("cell-type authoring JSON field 'specs' must be an object when provided.")
+            raise ValueError("cell-spec authoring JSON field 'specs' must be an object when provided.")
 
         comment = payload.get("comment")
         if comment is None:
@@ -477,13 +485,13 @@ class Workspace:
         elif isinstance(comment, list) and all(isinstance(item, str) for item in comment):
             comment_list = list(comment)
         else:
-            raise ValueError("cell-type authoring JSON field 'comment' must be a string or list of strings.")
+            raise ValueError("cell-spec authoring JSON field 'comment' must be a string or list of strings.")
 
         provenance = payload.get("provenance")
         if provenance is None:
             provenance = {}
         elif not isinstance(provenance, dict):
-            raise ValueError("cell-type authoring JSON field 'provenance' must be an object when provided.")
+            raise ValueError("cell-spec authoring JSON field 'provenance' must be an object when provided.")
 
         source_type = payload.get("source_type", provenance.get("source_type"))
         source_file = payload.get("source_file", provenance.get("source_file"))
@@ -498,7 +506,7 @@ class Workspace:
         year = payload.get("year")
         name = payload.get("name")
 
-        return CellType(
+        return CellSpecification(
             name=name if isinstance(name, str) and name.strip() else None,
             manufacturer=manufacturer,
             model=model,
@@ -511,7 +519,7 @@ class Workspace:
             positive_electrode_basis=payload.get("positive_electrode_basis"),
             negative_electrode_basis=payload.get("negative_electrode_basis"),
             datasheet_revision=datasheet_revision,
-            nominal_properties=dict(specs or {}),
+            properties=dict(specs or {}),
             source=ProvenanceInfo(
                 type=source_type if isinstance(source_type, str) else None,
                 file=source_file if isinstance(source_file, str) else None,
@@ -552,26 +560,23 @@ class Workspace:
         elif not isinstance(conditions, dict):
             raise ValueError("test-protocol authoring JSON field 'conditions' must be an object when provided.")
 
-        setpoints = payload.get("setpoints")
-        if setpoints is None:
-            setpoints = {}
-        elif not isinstance(setpoints, dict):
-            raise ValueError("test-protocol authoring JSON field 'setpoints' must be an object when provided.")
+        record_settings = payload.get("record")
+        if record_settings is None:
+            record_settings = {}
+        elif not isinstance(record_settings, dict):
+            raise ValueError("test-protocol authoring JSON field 'record' must be an object when provided.")
 
-        termination_criteria = payload.get("termination_criteria")
-        if termination_criteria is None:
-            termination_criteria = {}
-        elif not isinstance(termination_criteria, dict):
-            raise ValueError("test-protocol authoring JSON field 'termination_criteria' must be an object when provided.")
+        safety = payload.get("safety")
+        if safety is None:
+            safety = {}
+        elif not isinstance(safety, dict):
+            raise ValueError("test-protocol authoring JSON field 'safety' must be an object when provided.")
 
-        measurement_outputs = payload.get("measurement_outputs")
-        if measurement_outputs is None:
-            measurement_outputs = []
-        elif not (
-            isinstance(measurement_outputs, list)
-            and all(isinstance(item, dict) for item in measurement_outputs)
-        ):
-            raise ValueError("test-protocol authoring JSON field 'measurement_outputs' must be a list of objects.")
+        artifacts = payload.get("artifacts")
+        if artifacts is None:
+            artifacts = []
+        elif not (isinstance(artifacts, list) and all(isinstance(item, dict) for item in artifacts)):
+            raise ValueError("test-protocol authoring JSON field 'artifacts' must be a list of objects.")
 
         source_type = payload.get("source_type", provenance.get("source_type"))
         source_file = payload.get("source_file", provenance.get("source_file"))
@@ -580,16 +585,36 @@ class Workspace:
         retrieved_at = payload.get("retrieved_at", provenance.get("retrieved_at"))
         workflow_version = payload.get("workflow_version", provenance.get("workflow_version"))
 
+        # Descriptive method: a pre-built structured `method` wins; otherwise parse
+        # the PyBaMM-style `experiment`/`steps` strings (the default human interface).
+        method_fields: dict[str, Any] = {}
+        method = payload.get("method")
+        if isinstance(method, list) and method:
+            method_fields["method"] = method
+        else:
+            authored = payload.get("experiment")
+            if authored is None:
+                authored = payload.get("steps")
+            if authored is not None:
+                if not (isinstance(authored, list) and all(isinstance(s, str) for s in authored)):
+                    raise ValueError(
+                        "test-protocol authoring JSON 'experiment'/'steps' must be a list of PyBaMM-style strings."
+                    )
+                method_fields["experiment"] = list(authored)
+                cycles = payload.get("cycles")
+                if isinstance(cycles, int):
+                    method_fields["cycles"] = cycles
+
         return TestSpec(
             name=name,
             test_kind=kind,
             description=payload.get("description"),
             version=payload.get("version"),
             protocol=ProtocolInfo(url=payload.get("protocol_url")),
+            record=dict(record_settings),
+            safety=dict(safety),
             conditions=dict(conditions),
-            setpoints=dict(setpoints),
-            termination_criteria=dict(termination_criteria),
-            measurement_outputs=[dict(item) for item in measurement_outputs],
+            artifacts=[dict(item) for item in artifacts],
             source=ProvenanceInfo(
                 type=source_type if isinstance(source_type, str) else None,
                 file=source_file if isinstance(source_file, str) else None,
@@ -599,6 +624,7 @@ class Workspace:
                 workflow_version=workflow_version if isinstance(workflow_version, str) else None,
             ),
             comment=comment_list,
+            **method_fields,
         )
 
     def describe_cell(
@@ -617,14 +643,15 @@ class Workspace:
         negative_electrode: Any = None,
         electrolyte: Any = None,
         separator: Any = None,
-        coin_hardware: Any = None,
+        coin_hardware: Any = None,  # DEPRECATED: pass ``housing`` instead (auto-migrated).
+        housing: Any = None,
         source: ProvenanceInfo | None = None,
         specification_comment: str | list[str] | None = None,
         comment: str | list[str] | None = None,
     ) -> CellSpecification:
         specification = build_cell_description(
             id=_entity_iri(
-                "cell-type",
+                "cell-spec",
                 "::".join(
                     [
                         _with_default(manufacturer, "unknown-manufacturer"),
@@ -649,6 +676,7 @@ class Workspace:
             electrolyte=electrolyte,
             separator=separator,
             coin_hardware=coin_hardware,
+            housing=housing,
             source=source,
             specification_comment=specification_comment,
             comment=comment,
@@ -660,7 +688,7 @@ class Workspace:
         self.descriptions.append(specification)
         return specification
 
-    def cell_type(
+    def cell_spec(
         self,
         *,
         manufacturer: str,
@@ -683,10 +711,10 @@ class Workspace:
         citation: str | None = None,
         retrieved_at: int | str | None = None,
         comment: list[str] | None = None,
-    ) -> CellType:
+    ) -> CellSpecification:
         from battinfo.bundle import CellProductType
         resolved_pt = CellProductType(product_type) if product_type is not None else None
-        cell_type = CellType(
+        cell_spec = CellSpecification(
             manufacturer=manufacturer,
             model=model,
             format=format,
@@ -700,7 +728,7 @@ class Workspace:
             positive_electrode_basis=positive_electrode_basis,
             negative_electrode_basis=negative_electrode_basis,
             datasheet_revision=datasheet_revision,
-            nominal_properties=_mapping_value(specs),
+            properties=_mapping_value(specs),
             source=ProvenanceInfo(
                 type=source_type,
                 file=source_file,
@@ -710,29 +738,36 @@ class Workspace:
             ),
             comment=list(comment or []),
         )
-        self.cell_types.append(cell_type)
-        return cell_type
+        self.cell_specs.append(cell_spec)
+        return cell_spec
 
     def cell(
         self,
-        cell_type: CellType,
+        cell_spec: CellSpecification,
         *,
+        name: str | None = None,
         serial_number: str | None = None,
         batch_id: str | None = None,
         grade: str | None = None,
         manufactured_at: int | str | None = None,
         expires_at: int | str | None = None,
         measured: Any = None,
+        conformance: Any = None,
         source_type: str = "measurement",
         source_url: str | None = None,
         citation: str | None = None,
         retrieved_at: int | str | None = None,
         comment: list[str] | None = None,
     ) -> CellInstance:
+        from battinfo.bundle import Conformance as _Conformance
+        if isinstance(conformance, dict):
+            conformance = _Conformance.from_record(conformance)
         cell = CellInstance(
-            cell_type=cell_type,
+            cell_spec=cell_spec,
+            name=name,
             serial_number=serial_number,
             batch_id=batch_id,
+            conformance=conformance,
             grade=grade,
             manufactured_at=manufactured_at,
             expires_at=expires_at,
@@ -752,16 +787,19 @@ class Workspace:
         self,
         *,
         name: str,
-        kind: str,
+        type: str | None = None,
+        kind: str | None = None,   # backward-compat alias for type
         description: str | None = None,
-        steps: list[str] | None = None,
+        experiment: list[str] | None = None,
+        steps: list[str] | None = None,   # alias for experiment (PyBaMM strings)
         cycles: int | None = None,
+        method: list[Any] | None = None,
         version: str | None = None,
         protocol_url: str | None = None,
+        record: dict[str, Any] | None = None,
+        safety: dict[str, Any] | None = None,
         conditions: Any = None,
-        setpoints: Any = None,
-        termination_criteria: Any = None,
-        measurement_outputs: list[dict[str, Any]] | None = None,
+        artifacts: list[Any] | None = None,
         source_type: str = "manual",
         source_url: str | None = None,
         source_file: str | None = None,
@@ -770,19 +808,20 @@ class Workspace:
         workflow_version: str | None = None,
         comment: list[str] | None = None,
     ) -> TestSpec:
-        protocol = TestSpec(
-            name=name,
-            test_kind=kind,
-            description=description,
-            steps=list(steps) if steps else [],
-            cycles=cycles,
-            version=version,
-            protocol=ProtocolInfo(url=protocol_url),
-            conditions=_mapping_value(conditions),
-            setpoints=_mapping_value(setpoints),
-            termination_criteria=_mapping_value(termination_criteria),
-            measurement_outputs=[dict(item) for item in (measurement_outputs or [])],
-            source=ProvenanceInfo(
+        kind = type or kind
+        if not kind:
+            raise ValueError("Workspace.test_spec() requires type=... (the test type).")
+        fields: dict[str, Any] = {
+            "name": name,
+            "test_kind": kind,
+            "description": description,
+            "version": version,
+            "protocol": ProtocolInfo(url=protocol_url),
+            "record": dict(record or {}),
+            "safety": dict(safety or {}),
+            "conditions": _mapping_value(conditions),
+            "artifacts": list(artifacts or []),
+            "source": ProvenanceInfo(
                 type=source_type,
                 file=source_file,
                 url=source_url,
@@ -790,8 +829,19 @@ class Workspace:
                 retrieved_at=retrieved_at,
                 workflow_version=workflow_version,
             ),
-            comment=list(comment or []),
-        )
+            "comment": list(comment or []),
+        }
+        # PyBaMM-string authoring (default human interface) -> parsed into method;
+        # a pre-built structured method takes precedence when supplied.
+        if method:
+            fields["method"] = list(method)
+        else:
+            authored = experiment if experiment is not None else steps
+            if authored:
+                fields["experiment"] = list(authored)
+                if cycles is not None:
+                    fields["cycles"] = cycles
+        protocol = TestSpec(**fields)
         self.test_specs.append(protocol)
         return protocol
 
@@ -799,7 +849,8 @@ class Workspace:
         self,
         cell: CellInstance,
         *,
-        kind: str | None = None,
+        type: str | None = None,
+        kind: str | None = None,   # backward-compat alias for type
         protocol_ref: TestSpec | None = None,
         name: str | None = None,
         description: str | None = None,
@@ -823,9 +874,9 @@ class Workspace:
             conformance = _TestConformance.from_record(conformance)
         protocol_name = protocol or (protocol_ref.name if protocol_ref is not None else None)
         protocol_link = protocol_url or (protocol_ref.protocol_url if protocol_ref is not None else None)
-        resolved_kind = kind or (str(protocol_ref.test_kind) if protocol_ref is not None else None)
+        resolved_kind = (type or kind) or (str(protocol_ref.test_kind) if protocol_ref is not None else None)
         if resolved_kind is None:
-            raise ValueError("Workspace.test() requires kind or protocol_ref.")
+            raise ValueError("Workspace.test() requires type or protocol_ref.")
         test = Test(
             name=name,
             test_kind=resolved_kind,
@@ -856,7 +907,8 @@ class Workspace:
         self,
         cell: CellInstance,
         *,
-        kind: str,
+        type: str | None = None,
+        kind: str | None = None,   # backward-compat alias for type
         path: PathLike | None = None,
         name: str | None = None,
         title: str | None = None,
@@ -876,12 +928,17 @@ class Workspace:
         source_type: str = "measurement",
         source_url: str | None = None,
         source_file: str | None = None,
+        source_path: PathLike | None = None,
+        source_format: str | None = None,
         citation: str | None = None,
         retrieved_at: int | str | None = None,
         workflow_version: str | None = None,
         curated_by: str | None = None,
         comment: list[str] | None = None,
     ) -> Test:
+        kind = type or kind
+        if not kind:
+            raise ValueError("Workspace.record_test() requires type=... (the test type).")
         protocol_name = protocol or kind.replace("_", " ")
         test_name = name or f"{cell.name or cell.serial_number or 'cell'} {protocol_name}"
         test = self.test(
@@ -918,6 +975,8 @@ class Workspace:
                 created_at=created_at,
                 source_type=source_type,
                 source_url=source_url,
+                source_path=source_path,
+                source_format=source_format,
                 citation=citation,
                 retrieved_at=retrieved_at,
                 curated_by=curated_by,
@@ -940,8 +999,11 @@ class Workspace:
         checksum_algorithm: str | None = None,
         checksum_value: str | None = None,
         created_at: int | str | None = None,
+        temporal_coverage: str | None = None,
         source_type: str = "measurement",
         source_url: str | None = None,
+        source_path: PathLike | None = None,
+        source_format: str | None = None,
         citation: str | None = None,
         retrieved_at: int | str | None = None,
         curated_by: str | None = None,
@@ -960,6 +1022,45 @@ class Workspace:
             if resolved_checksum_algorithm == "sha256":
                 resolved_checksum_value = _sha256(dataset_path_obj)
 
+        # When an original pre-conversion source file is supplied, the dataset holds
+        # two distributions of the same measurement: the normalised file (role
+        # "processed") and the original instrument file (role "raw"), kept for
+        # provenance. Both are uploaded and listed as dcat:distribution at publish.
+        explicit_distributions: list[dict] = []
+        source_path_obj = _as_path(source_path) if source_path is not None else None
+        if source_path_obj is not None:
+            processed_dist: dict = {"role": "processed"}
+            content_url = download_url or resolved_access_url
+            if content_url is not None:
+                processed_dist["content_url"] = content_url
+            # encoding_format is required by the schema — fall back to a generic type.
+            processed_dist["encoding_format"] = resolved_format or "application/octet-stream"
+            if dataset_path_obj is not None:
+                processed_dist["name"] = dataset_path_obj.name
+            if dataset_path_obj is not None and dataset_path_obj.exists() and dataset_path_obj.is_file():
+                processed_dist["content_size"] = str(dataset_path_obj.stat().st_size)
+            if resolved_checksum_value is not None:
+                processed_dist["checksum"] = {
+                    "algorithm": resolved_checksum_algorithm or "sha256",
+                    "value": resolved_checksum_value,
+                }
+            # The raw file is the source the PROCESSED file was converted FROM — name the
+            # processed file here, not the raw file itself.
+            _processed_name = dataset_path_obj.name if dataset_path_obj is not None else "the processed dataset"
+            raw_dist: dict = {
+                "role": "raw",
+                "content_url": source_path_obj.resolve().as_uri(),
+                "name": source_path_obj.name,
+                "description": f"Original instrument data file (pre-conversion source for {_processed_name}).",
+            }
+            raw_dist["encoding_format"] = (
+                source_format or _guess_media_type(str(source_path_obj)) or "application/octet-stream"
+            )
+            if source_path_obj.exists() and source_path_obj.is_file():
+                raw_dist["checksum"] = {"algorithm": "sha256", "value": _sha256(source_path_obj)}
+                raw_dist["content_size"] = str(source_path_obj.stat().st_size)
+            explicit_distributions = [processed_dist, raw_dist]
+
         dataset = Dataset(
             name=title,
             description=description,
@@ -969,9 +1070,11 @@ class Workspace:
             access_url=resolved_access_url,
             download_url=download_url,
             created_at=created_at,
+            temporal_coverage=temporal_coverage,
             checksum=ChecksumInfo(algorithm=resolved_checksum_algorithm, value=resolved_checksum_value),
             cell=cell,
             test=test,
+            distributions=explicit_distributions,
             source=ProvenanceInfo(
                 type=source_type,
                 url=source_url or resolved_access_url,
@@ -1089,12 +1192,12 @@ class Workspace:
         source_type: str = "simulation",
         source_file: str | None = None,
         comment: list[str] | None = None,
-    ) -> CellType:
-        """Create a CellType from a BPX battery parameter file.
+    ) -> CellSpecification:
+        """Create a CellSpecification from a BPX battery parameter file.
 
         Reads *path* and maps the BPX ``Parameterisation.Cell`` parameters
         that have direct BattINFO spec equivalents (capacity, voltage limits,
-        mass, dimensions) to a BattINFO CellType.  Physics parameters are
+        mass, dimensions) to a BattINFO CellSpecification.  Physics parameters are
         silently skipped.
 
         Parameters
@@ -1129,7 +1232,7 @@ class Workspace:
         if result.model_type is not None:
             bpx_comments.append(f"Physics model: {result.model_type}")
 
-        cell_type = self.cell_type(
+        cell_spec = self.cell_spec(
             manufacturer=manufacturer,
             model=resolved_model,
             format=format,
@@ -1139,7 +1242,7 @@ class Workspace:
             comment=bpx_comments if bpx_comments else None,
             specs=result.specs,
         )
-        return cell_type
+        return cell_spec
 
     def publish(
         self,
@@ -1147,7 +1250,7 @@ class Workspace:
         *,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         cell_specification: CellSpecification | dict[str, Any] | PathLike | None = None,
         datasheet_path: PathLike | None = None,
         publication_root: PathLike | None = None,
@@ -1162,7 +1265,7 @@ class Workspace:
             dataset,
             test=test,
             cell=cell,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             cell_specification=cell_specification,
             datasheet_path=datasheet_path,
             publication_root=publication_root,
@@ -1180,7 +1283,7 @@ class Workspace:
         *,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         cell_specification: CellSpecification | dict[str, Any] | PathLike | None = None,
         datasheet_path: PathLike | None = None,
         publication_root: PathLike | None = None,
@@ -1196,11 +1299,11 @@ class Workspace:
     ) -> dict[str, Any]:
         """Preferred name for locally building a publication package from `Workspace`."""
 
-        resolved_test, resolved_cell, resolved_cell_type = self._resolve_dataset_chain(
+        resolved_test, resolved_cell, resolved_cell_spec = self._resolve_dataset_chain(
             dataset,
             test=test,
             cell=cell,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             action="build_publication_package",
         )
         staged_dataset = self._stage_publication_dataset(
@@ -1208,7 +1311,7 @@ class Workspace:
             publication_root=_as_path(publication_root) if publication_root is not None else self.root / "publication",
         )
         return publish_bundle(
-            cell_type=resolved_cell_type,
+            cell_spec=resolved_cell_spec,
             cell_instance=resolved_cell,
             test=resolved_test,
             dataset=staged_dataset,
@@ -1233,7 +1336,7 @@ class Workspace:
         root: PathLike | None = None,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1253,7 +1356,7 @@ class Workspace:
             root=root,
             test=test,
             cell=cell,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             workspace_id=workspace_id,
             publisher_id=publisher_id,
             version=version,
@@ -1274,7 +1377,7 @@ class Workspace:
         root: PathLike | None = None,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1290,11 +1393,11 @@ class Workspace:
 
         from battinfo.local_workspace import LocalWorkspace
 
-        resolved_test, resolved_cell, resolved_cell_type = self._resolve_dataset_chain(
+        resolved_test, resolved_cell, resolved_cell_spec = self._resolve_dataset_chain(
             dataset,
             test=test,
             cell=cell,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             action="export_submission_workspace",
         )
         release_root = _as_path(root) if root is not None else self.root / "release"
@@ -1307,7 +1410,7 @@ class Workspace:
                 shutil.rmtree(release_root)
         release_workspace = LocalWorkspace(release_root)
         release_workspace.capture(
-            resolved_cell_type,
+            resolved_cell_spec,
             resolved_cell,
             resolved_test,
             dataset,
@@ -1332,7 +1435,7 @@ class Workspace:
         root: PathLike | None = None,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1353,7 +1456,7 @@ class Workspace:
             root=root,
             test=test,
             cell=cell,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             workspace_id=workspace_id,
             publisher_id=publisher_id,
             version=version,
@@ -1375,7 +1478,7 @@ class Workspace:
         root: PathLike | None = None,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1396,7 +1499,7 @@ class Workspace:
             root=root,
             test=test,
             cell=cell,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             workspace_id=workspace_id,
             publisher_id=publisher_id,
             version=version,
@@ -1413,7 +1516,7 @@ class Workspace:
     def render(self) -> dict[str, list[dict[str, Any]]]:
         finalized = self._finalize()
         return {
-            "cell_types": [item.to_record() for item in finalized["cell_types"]],
+            "cell_specs": [item.to_record() for item in finalized["cell_specs"]],
             "cell_instances": [item.to_record() for item in finalized["cells"]],
             "test_specs": [item.to_record() for item in finalized["test_specs"]],
             "tests": [item.to_record() for item in finalized["tests"]],
@@ -1433,15 +1536,15 @@ class Workspace:
         finalized = self._finalize()
 
         results = {
-            "cell_types": [
-                save_cell_type(
+            "cell_specs": [
+                save_cell_spec(
                     item,
                     source_root=target_root,
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                 )
-                for item in finalized["cell_types"]
+                for item in finalized["cell_specs"]
             ],
             "cell_instances": [
                 save_cell_instance(
@@ -1522,7 +1625,7 @@ class Workspace:
 
         results: dict[str, Any] = {
             "descriptions": [
-                save_library_cell_type(
+                save_library_cell_spec(
                     item,
                     library_root=target_library_root,
                     package_root=target_package_root,
@@ -1535,7 +1638,7 @@ class Workspace:
             ]
         }
         if build_rdf:
-            results["rdf"] = build_cell_type_library_rdf(
+            results["rdf"] = build_cell_spec_library_rdf(
                 input_dir=target_library_root,
                 output_jsonld_dir=target_output_jsonld_dir,
                 aggregate_jsonld=target_aggregate_jsonld,
@@ -1561,31 +1664,31 @@ class Workspace:
             validation_policy=validation_policy,
         )
 
-    def query_cell_types(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("cell_types_dir", self.source_root / "cell-type")
-        return query_cell_types(**filters)
+    def query_cell_specs(self, **filters: Any) -> list[dict[str, Any]]:
+        filters.setdefault("cell_specs_dir", self.source_root / "cell-spec")
+        return query_cell_specs(**filters)
 
-    def query(self, kind: str, /, **filters: Any) -> list[dict[str, Any]]:
-        normalized = kind.strip().lower().replace("-", "_")
-        if normalized in {"cell_type", "cell_types"}:
-            filters.setdefault("cell_types_dir", self.source_root / "cell-type")
-            return query_api(kind, **filters)
+    def query(self, type: str, /, **filters: Any) -> list[dict[str, Any]]:
+        normalized = type.strip().lower().replace("-", "_")
+        if normalized in {"cell_spec", "cell_specs", "cell_spec", "cell_specs"}:
+            filters.setdefault("cell_specs_dir", self.source_root / "cell-spec")
+            return query_api(type, **filters)
         if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
             filters.setdefault("directory", self.source_root / "cell-instance")
-            return query_api(kind, **filters)
-        if normalized in {"test_spec", "test_specs"}:
+            return query_api(type, **filters)
+        if normalized in {"test_spec", "test_specs", "test_protocol", "test_protocols"}:
             filters.setdefault("directory", self.source_root / "test-protocol")
-            return query_api(kind, **filters)
+            return query_api(type, **filters)
         if normalized in {"test", "tests"}:
             filters.setdefault("directory", self.source_root / "test")
-            return query_api(kind, **filters)
+            return query_api(type, **filters)
         if normalized in {"dataset", "datasets"}:
             filters.setdefault("directory", self.source_root / "dataset")
-            return query_api(kind, **filters)
-        if normalized in {"description", "descriptions", "library_cell_type", "library_cell_types"}:
+            return query_api(type, **filters)
+        if normalized in {"description", "descriptions", "library_cell_spec", "library_cell_specs"}:
             filters.setdefault("directory", self.library_root)
-            return query_api(kind, **filters)
-        return query_api(kind, **filters)
+            return query_api(type, **filters)
+        return query_api(type, **filters)
 
     def query_cells(self, **filters: Any) -> list[dict[str, Any]]:
         filters.setdefault("directory", self.source_root / "cell-instance")
@@ -1605,7 +1708,7 @@ class Workspace:
 
     def query_descriptions(self, **filters: Any) -> list[dict[str, Any]]:
         filters.setdefault("directory", self.library_root)
-        return query_library_cell_types(**filters)
+        return query_library_cell_specs(**filters)
 
     # backward compat aliases
     test_protocol = test_spec
@@ -1614,10 +1717,10 @@ class Workspace:
     query_test_protocols = query_test_specs
 
     def _finalize(self) -> dict[str, list[Any]]:
-        finalized_cell_types = [self._finalize_cell_type(item) for item in self.cell_types]
-        cell_type_map = {id(original): finalized for original, finalized in zip(self.cell_types, finalized_cell_types, strict=True)}
+        finalized_cell_specs = [self._finalize_cell_spec(item) for item in self.cell_specs]
+        cell_spec_map = {id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)}
 
-        finalized_cells = [self._finalize_cell(item, cell_type_map) for item in self.cells]
+        finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
 
         finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
@@ -1650,7 +1753,7 @@ class Workspace:
             if test.id is not None:
                 test.dataset_ids = list(dict.fromkeys(dataset_ids_by_test.get(test.id, [])))
 
-        for original, finalized in zip(self.cell_types, finalized_cell_types, strict=True):
+        for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True):
             _sync_model_state(original, finalized)
         for original, finalized in zip(self.cells, finalized_cells, strict=True):
             _sync_model_state(original, finalized)
@@ -1662,7 +1765,7 @@ class Workspace:
             _sync_model_state(original, finalized)
 
         return {
-            "cell_types": self.cell_types,
+            "cell_specs": self.cell_specs,
             "cells": self.cells,
             "test_specs": self.test_specs,
             "tests": self.tests,
@@ -1732,15 +1835,15 @@ class Workspace:
             return self.cells[0]
         return None
 
-    def _resolve_dataset_cell_type(self, dataset: Dataset, cell: CellInstance) -> CellType | None:
-        if cell.cell_type is not None:
-            return cell.cell_type
+    def _resolve_dataset_cell_spec(self, dataset: Dataset, cell: CellInstance) -> CellSpecification | None:
+        if cell.cell_spec is not None:
+            return cell.cell_spec
         if dataset.cell_instance_id is not None:
             for candidate in self.cells:
-                if candidate.id == dataset.cell_instance_id and candidate.cell_type is not None:
-                    return candidate.cell_type
-        if len(self.cell_types) == 1:
-            return self.cell_types[0]
+                if candidate.id == dataset.cell_instance_id and candidate.cell_spec is not None:
+                    return candidate.cell_spec
+        if len(self.cell_specs) == 1:
+            return self.cell_specs[0]
         return None
 
     def _resolve_dataset_chain(
@@ -1749,9 +1852,9 @@ class Workspace:
         *,
         test: Test | None = None,
         cell: CellInstance | None = None,
-        cell_type: CellType | None = None,
+        cell_spec: CellSpecification | None = None,
         action: str,
-    ) -> tuple[Test, CellInstance, CellType]:
+    ) -> tuple[Test, CellInstance, CellSpecification]:
         resolved_test = test or dataset.test or self._resolve_dataset_test(dataset)
         if resolved_test is None:
             raise ValueError(f"Workspace.{action}() requires a Test or a Dataset linked to a Test.")
@@ -1760,11 +1863,11 @@ class Workspace:
         if resolved_cell is None:
             raise ValueError(f"Workspace.{action}() requires a Cell or a Dataset/Test linked to a Cell.")
 
-        resolved_cell_type = cell_type or resolved_cell.cell_type or self._resolve_dataset_cell_type(dataset, resolved_cell)
-        if resolved_cell_type is None:
-            raise ValueError(f"Workspace.{action}() requires a CellType or a linked Cell with cell_type set.")
+        resolved_cell_spec = cell_spec or resolved_cell.cell_spec or self._resolve_dataset_cell_spec(dataset, resolved_cell)
+        if resolved_cell_spec is None:
+            raise ValueError(f"Workspace.{action}() requires a CellSpecification or a linked Cell with cell_spec set.")
 
-        return resolved_test, resolved_cell, resolved_cell_type
+        return resolved_test, resolved_cell, resolved_cell_spec
 
     def _finalize_description(self, specification: CellSpecification) -> CellSpecification:
         finalized = specification.model_copy(deep=True)
@@ -1774,11 +1877,11 @@ class Workspace:
             finalized.source.retrieved_at = _now_unix()
         return finalized
 
-    def _finalize_cell_type(self, cell_type: CellType) -> CellType:
-        finalized = cell_type.model_copy(deep=True)
+    def _finalize_cell_spec(self, cell_spec: CellSpecification) -> CellSpecification:
+        finalized = cell_spec.model_copy(deep=True)
         if finalized.id is None:
             finalized.id = _entity_iri(
-                "cell-type",
+                "cell-spec",
                 "::".join(
                     [
                         _with_default(finalized.manufacturer, "unknown-manufacturer"),
@@ -1799,11 +1902,15 @@ class Workspace:
             finalized.source.retrieved_at = _now_unix()
         return finalized
 
-    def _finalize_cell(self, cell: CellInstance, cell_type_map: dict[int, CellType]) -> CellInstance:
-        finalized = cell.model_copy(deep=True, update={"cell_type": None})
-        linked_type = cell_type_map.get(id(cell.cell_type)) if cell.cell_type is not None else None
-        if finalized.cell_type_id is None and linked_type is not None:
-            finalized.cell_type_id = linked_type.id
+    def _finalize_cell(self, cell: CellInstance, cell_spec_map: dict[int, CellSpecification]) -> CellInstance:
+        finalized = cell.model_copy(deep=True, update={"cell_spec": None})
+        linked_type = cell_spec_map.get(id(cell.cell_spec)) if cell.cell_spec is not None else None
+        if finalized.cell_spec_id is None and linked_type is not None:
+            finalized.cell_spec_id = linked_type.id
+        # Fall back to a referenced spec's IRI (e.g. one loaded from the registry and
+        # not part of this session's authored specs).
+        if finalized.cell_spec_id is None and cell.cell_spec is not None and getattr(cell.cell_spec, "id", None):
+            finalized.cell_spec_id = cell.cell_spec.id
         if finalized.name is None:
             finalized.name = finalized.serial_number or finalized.batch_id or "cell"
         if finalized.id is None:
@@ -1811,7 +1918,7 @@ class Workspace:
                 "cell",
                 "::".join(
                     [
-                        _with_default(finalized.cell_type_id, "unknown-cell-type"),
+                        _with_default(finalized.cell_spec_id, "unknown-cell-spec"),
                         finalized.serial_number or "",
                         finalized.batch_id or "",
                         _with_default(finalized.name, "cell"),
@@ -1856,6 +1963,11 @@ class Workspace:
         linked_protocol = test_spec_map.get(id(test.protocol_entity)) if test.protocol_entity is not None else None
         if finalized.cell_instance_id is None and linked_cell is not None:
             finalized.cell_instance_id = linked_cell.id
+        # Fall back to an externally-linked cell's IRI — e.g. an instance registered
+        # earlier (at manufacture) and linked via ws.link_cells(), which is not part
+        # of this session's saved cells.
+        if finalized.cell_instance_id is None and test.cell is not None and getattr(test.cell, "id", None):
+            finalized.cell_instance_id = test.cell.id
         if finalized.protocol_id is None and linked_protocol is not None:
             finalized.protocol_id = linked_protocol.id
         protocol_name = finalized.protocol.name or "test"
@@ -1890,6 +2002,9 @@ class Workspace:
         linked_test = test_map.get(id(dataset.test)) if dataset.test is not None else None
         if finalized.cell_instance_id is None and linked_cell is not None:
             finalized.cell_instance_id = linked_cell.id
+        # Fall back to an externally-linked cell's IRI (see _finalize_test).
+        if finalized.cell_instance_id is None and dataset.cell is not None and getattr(dataset.cell, "id", None):
+            finalized.cell_instance_id = dataset.cell.id
         if finalized.cell_instance_id is None and linked_test is not None:
             finalized.cell_instance_id = linked_test.cell_instance_id
         if finalized.test_id is None and linked_test is not None:

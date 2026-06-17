@@ -19,10 +19,10 @@ from battinfo.validate.shacl import validate_shacl_report
 
 
 def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("product"), Mapping):
-        return "cell-type.schema.json"
-    if isinstance(doc.get("cell_type"), Mapping):
-        return "cell-type.schema.json"
+    if isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec.schema.json"
+    if isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec.schema.json"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell-instance.schema.json"
     if isinstance(doc.get("test_spec"), Mapping):
@@ -31,12 +31,12 @@ def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
         return "test.schema.json"
     if isinstance(doc.get("dataset"), Mapping):
         return "dataset.schema.json"
-    raise ValueError("Unsupported record type: expected product/cell_type, cell_instance, test_protocol, test, or dataset.")
+    raise ValueError("Unsupported record type: expected product/cell_spec, cell_instance, test_protocol, test, or dataset.")
 
 
 def _resource_type(doc: dict[str, Any]) -> str | None:
-    if isinstance(doc.get("product"), Mapping) or isinstance(doc.get("cell_type"), Mapping):
-        return "cell-type"
+    if isinstance(doc.get("cell_spec"), Mapping) or isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
     if isinstance(doc.get("test_spec"), Mapping):

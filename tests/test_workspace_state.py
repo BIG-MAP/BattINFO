@@ -30,7 +30,7 @@ def test_workspace_save_open_and_extend_same_cell(tmp_path: Path) -> None:
         publisher="demo-lab",
         version="0.1.0",
     )
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -42,7 +42,7 @@ def test_workspace_save_open_and_extend_same_cell(tmp_path: Path) -> None:
         source_file="a123-anr26650m1-b.manual.json",
     )
     cell = workspace.cell(
-        cell_type,
+        cell_spec,
         serial_number="hello-world-001",
         batch_id="A123-HELLO-01",
         source_type="lab",
@@ -71,7 +71,7 @@ def test_workspace_save_open_and_extend_same_cell(tmp_path: Path) -> None:
     reopened = Workspace.open(workspace_root)
     assert reopened.name == "hello-world"
     assert reopened.publisher == "demo-lab"
-    assert len(reopened.cell_types) == 1
+    assert len(reopened.cell_specs) == 1
     assert len(reopened.cells) == 1
     assert len(reopened.tests) == 1
     assert len(reopened.datasets) == 1
@@ -100,7 +100,7 @@ def test_workspace_save_open_and_extend_same_cell(tmp_path: Path) -> None:
     assert save_b["artifact_count"] == 2
 
     reopened_again = Workspace.open(workspace_root)
-    assert len(reopened_again.cell_types) == 1
+    assert len(reopened_again.cell_specs) == 1
     assert len(reopened_again.cells) == 1
     assert len(reopened_again.tests) == 2
     assert len(reopened_again.datasets) == 2
@@ -127,7 +127,7 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
         publisher="demo-lab",
         version="1.0.0",
     )
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
@@ -139,7 +139,7 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
         source_file="energizer-cr2032.manual.json",
     )
     cell = workspace.cell(
-        cell_type,
+        cell_spec,
         serial_number="cr2032-001",
         batch_id="CR2032-ALPHA",
         source_type="lab",
@@ -183,7 +183,7 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
     assert submission_package_path.exists()
     assert registry_intake_path.exists()
     assert validation_report_path.exists()
-    assert (normalized_dir / "cell-type").is_dir()
+    assert (normalized_dir / "cell-spec").is_dir()
     assert (normalized_dir / "cell-instance").is_dir()
     assert (normalized_dir / "test").is_dir()
     assert (normalized_dir / "dataset").is_dir()
@@ -207,7 +207,7 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
     assert "metadata" not in cell_resources[0]["semantic_payload"]
     assert "metadata" not in test_resources[0]["semantic_payload"]
     assert "metadata" not in dataset_resources[0]["semantic_payload"]
-    assert "cell_type" in cell_resources[0]["semantic_payload"]["battinfo_records"]
+    assert "cell_spec" in cell_resources[0]["semantic_payload"]["battinfo_records"]
     cell_local_id = cell_resources[0]["source_local_id"]
     test_related = {item["source_local_id"] for resource in test_resources for item in resource["related_resources"]}
     dataset_related = {item["source_local_id"] for resource in dataset_resources for item in resource["related_resources"] if item["resource_type"] == "cell"}
@@ -237,7 +237,7 @@ def test_workspace_bundle_can_emit_single_dataset_submission(tmp_path: Path) -> 
         publisher="demo-lab",
         version="0.1.0",
     )
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -248,7 +248,7 @@ def test_workspace_bundle_can_emit_single_dataset_submission(tmp_path: Path) -> 
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_type, serial_number="hello-world-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="hello-world-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -279,7 +279,7 @@ def test_workspace_bundle_can_emit_single_dataset_submission(tmp_path: Path) -> 
     assert payload["artifacts"][0]["path"].startswith("artifacts/dataset/")
 
 
-def test_workspace_bundle_can_emit_single_cell_type_submission(tmp_path: Path) -> None:
+def test_workspace_bundle_can_emit_single_cell_spec_submission(tmp_path: Path) -> None:
     workspace = Workspace(
         tmp_path / "workspace",
         name="cell-library",
@@ -288,7 +288,7 @@ def test_workspace_bundle_can_emit_single_cell_type_submission(tmp_path: Path) -
         publisher="demo-lab",
         version="0.1.0",
     )
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
@@ -300,16 +300,16 @@ def test_workspace_bundle_can_emit_single_cell_type_submission(tmp_path: Path) -
         source_file="energizer-cr2032.manual.json",
     )
 
-    submission = workspace.bundle_workspace(cell_type)
+    submission = workspace.bundle_workspace(cell_spec)
 
     assert Path(submission["submission_package_path"]).exists()
     payload = json.loads(Path(submission["submission_package_path"]).read_text(encoding="utf-8"))
     assert submission["submission_mode"] == "resource"
-    assert submission["resource_type"] == "cell_type"
+    assert submission["resource_type"] == "cell_spec"
     assert submission["artifact_count"] == 0
     assert payload["submission_mode"] == "resource"
-    assert payload["resource"]["resource_type"] == "cell_type"
-    assert payload["resource"]["semantic_payload"]["battinfo_records"]["cell_type"]["product"]["model"] == "CR2032"
+    assert payload["resource"]["resource_type"] == "cell_spec"
+    assert payload["resource"]["semantic_payload"]["battinfo_records"]["cell_spec"]["cell_spec"]["model"] == "CR2032"
 
 
 

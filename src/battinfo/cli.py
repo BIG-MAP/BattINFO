@@ -9,16 +9,15 @@ import typer
 from battinfo.api import (
     CellInstanceInput,
     CellSpecificationInput,
-    CellTypeInput,
     DatasetInput,
     TestInput,
     TestSpecInput,
 )
 from battinfo.api import (
-    build_cell_type_library_rdf as api_build_cell_type_library_rdf,
+    build_cell_spec_library_rdf as api_build_cell_spec_library_rdf,
 )
 from battinfo.api import (
-    build_curated_cell_type_submission as api_build_curated_cell_type_submission,
+    build_curated_cell_spec_submission as api_build_curated_cell_spec_submission,
 )
 from battinfo.api import (
     build_index as api_build_index,
@@ -30,16 +29,16 @@ from battinfo.api import (
     index_stats as api_index_stats,
 )
 from battinfo.api import (
-    promote_staging_cell_type as api_promote_staging_cell_type,
+    promote_staging_cell_spec as api_promote_staging_cell_spec,
 )
 from battinfo.api import (
-    promote_staging_cell_types as api_promote_staging_cell_types,
+    promote_staging_cell_specs as api_promote_staging_cell_specs,
 )
 from battinfo.api import (
     publish_batch as api_publish_batch,
 )
 from battinfo.api import (
-    publish_curated_cell_type as api_publish_curated_cell_type,
+    publish_curated_cell_spec as api_publish_curated_cell_spec,
 )
 from battinfo.api import (
     publish_record as api_publish_record,
@@ -48,13 +47,13 @@ from battinfo.api import (
     query_cell_instances as api_query_cell_instances,
 )
 from battinfo.api import (
-    query_cell_types as api_query_cell_types,
+    query_cell_specs as api_query_cell_specs,
 )
 from battinfo.api import (
     query_datasets as api_query_datasets,
 )
 from battinfo.api import (
-    query_library_cell_types as api_query_library_cell_types,
+    query_library_cell_specs as api_query_library_cell_specs,
 )
 from battinfo.api import (
     query_test_specs as api_query_test_specs,
@@ -69,13 +68,13 @@ from battinfo.api import (
     save_cell_instance as api_save_cell_instance,
 )
 from battinfo.api import (
-    save_cell_type as api_save_cell_type,
+    save_cell_spec as api_save_cell_spec,
 )
 from battinfo.api import (
     save_dataset as api_save_dataset,
 )
 from battinfo.api import (
-    save_library_cell_type as api_save_library_cell_type,
+    save_library_cell_spec as api_save_library_cell_spec,
 )
 from battinfo.api import (
     save_record as api_save_record,
@@ -90,13 +89,13 @@ from battinfo.api import (
     template_cell_instance as api_template_cell_instance,
 )
 from battinfo.api import (
-    template_cell_specification as api_template_cell_specification,
+    template_library_cell_spec as api_template_library_cell_spec,
 )
 from battinfo.api import (
-    template_cell_type as api_template_cell_type,
+    template_cell_spec as api_template_cell_spec,
 )
 from battinfo.api import (
-    template_cell_type_draft as api_template_cell_type_draft,
+    template_cell_spec_draft as api_template_cell_spec_draft,
 )
 from battinfo.api import (
     template_dataset as api_template_dataset,
@@ -108,12 +107,12 @@ from battinfo.api import (
     template_test_spec as api_template_test_spec,
 )
 from battinfo.api import (
-    validate_staging_cell_type as api_validate_staging_cell_type,
+    validate_staging_cell_spec as api_validate_staging_cell_spec,
 )
 from battinfo.api import (
-    validate_staging_cell_types as api_validate_staging_cell_types,
+    validate_staging_cell_specs as api_validate_staging_cell_specs,
 )
-from battinfo.bundle import CellType
+from battinfo.bundle import CellSpecification
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.local_workspace import LocalWorkspace
@@ -163,7 +162,7 @@ app.add_typer(registry_app, name="registry")
 app.add_typer(dataset_app, name="dataset")
 app.add_typer(batch_app, name="batch")
 app.add_typer(config_app, name="config")
-app.add_typer(specs_app, name="specs")
+app.add_typer(specs_app, name="properties")
 library_app.add_typer(library_query_app, name="query")
 library_app.add_typer(library_save_app, name="save")
 library_app.add_typer(library_template_app, name="template")
@@ -264,18 +263,18 @@ def _render_notebook_recovery(payload: dict[str, Any]) -> None:
             typer.echo(f"- {path}")
 
 
-def _load_cell_type_input(path: Path) -> CellType:
+def _load_cell_spec_input(path: Path) -> CellSpecification:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if isinstance(payload.get("product"), dict):
-        return CellType.from_record(payload)
-    return CellType(**payload)
+    if isinstance(payload.get("cell_spec"), dict):
+        return CellSpecification.from_record(payload)
+    return CellSpecification(**payload)
 
 
 def _init_example_document(profile: str) -> dict[str, Any]:
-    if profile == "cell-type":
+    if profile == "cell-spec":
         return {
             "schema_version": "1.0.0",
-            "product": {
+            "cell_spec": {
                 "id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
                 "name": "ExampleManufacturer MODEL-001",
                 "manufacturer": {"type": "Organization", "name": "ExampleManufacturer"},
@@ -358,7 +357,7 @@ def _safe_echo(text: str) -> None:
 
 
 _RECORD_TYPE_KEYS = frozenset(
-    {"product", "cell_type", "cell_instance", "test_spec", "test", "dataset"}
+    {"cell_spec", "cell_spec", "cell_instance", "test_spec", "test", "dataset"}
 )
 
 
@@ -370,7 +369,7 @@ def _is_full_record(data: dict) -> bool:
 @app.command()
 def validate(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    profile: str = typer.Option("cell-type", help="JSON Schema profile (used only for raw JSON, not full records)."),
+    profile: str = typer.Option("cell-spec", help="JSON Schema profile (used only for raw JSON, not full records)."),
     policy: str = typer.Option("default", help="Validation policy: default|strict|publisher|ingest."),
     output_format: str = typer.Option("text", "--format", help="Output format: text|json."),
     source_root: Path | None = typer.Option(
@@ -382,7 +381,7 @@ def validate(
         readable=True,
         help="Canonical source root for cross-reference validation.",
     ),
-    shacl: bool = typer.Option(True, "--shacl/--no-shacl", help="Run SHACL shapes validation (cell-type records only)."),
+    shacl: bool = typer.Option(True, "--shacl/--no-shacl", help="Run SHACL shapes validation (cell-spec records only)."),
 ) -> None:
     """Validate a BattINFO record (JSON Schema + semantic + SHACL) or a raw JSON profile document."""
     data = json.loads(input_path.read_text(encoding="utf-8"))
@@ -429,7 +428,7 @@ def validate(
 @app.command()
 def init(
     workspace_dir: Path = typer.Argument(...),
-    profile: str = typer.Option("cell-type", help="Profile to scaffold."),
+    profile: str = typer.Option("cell-spec", help="Profile to scaffold."),
 ) -> None:
     """Create a minimal workspace scaffold with an example JSON file."""
     workspace_dir.mkdir(parents=True, exist_ok=True)
@@ -898,8 +897,8 @@ def map(
     typer.echo(f"Wrote JSON-LD mapping to {out}")
 
 
-@template_app.command("cell-type")
-def template_cell_type(
+@template_app.command("cell-spec")
+def template_cell_spec(
     manufacturer: str = typer.Option("ExampleManufacturer", help="Manufacturer name."),
     model_name: str = typer.Option("MODEL-001", "--model-name", help="Model name."),
     chemistry: str = typer.Option("unknown", help="Chemistry label."),
@@ -910,10 +909,10 @@ def template_cell_type(
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Generate a starter template for a cell-type record."""
+    """Generate a starter template for a cell-spec record."""
     fmt = _check_output_format(output_format)
     try:
-        record = api_template_cell_type(
+        record = api_template_cell_spec(
             manufacturer=manufacturer,
             model_name=model_name,
             chemistry=chemistry,
@@ -930,8 +929,8 @@ def template_cell_type(
         _write_json_file(out, record)
         payload = {
             "status": "template",
-            "resource": "cell-type",
-            "id": record["product"]["id"],
+            "resource": "cell-spec",
+            "id": record["cell_spec"]["id"],
             "path": str(out),
         }
         if fmt == "json":
@@ -945,15 +944,15 @@ def template_cell_type(
         return
     payload = {
         "status": "template",
-        "resource": "cell-type",
-        "id": record["product"]["id"],
+        "resource": "cell-spec",
+        "id": record["cell_spec"]["id"],
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
 
 
-@template_app.command("cell-type-draft")
-def template_cell_type_draft(
+@template_app.command("cell-spec-draft")
+def template_cell_spec_draft(
     manufacturer: str = typer.Option("ExampleManufacturer", help="Manufacturer name placeholder."),
     model_name: str = typer.Option("MODEL-001", "--model-name", help="Model name placeholder."),
     chemistry: str = typer.Option("unknown", help="Chemistry label placeholder."),
@@ -968,9 +967,9 @@ def template_cell_type_draft(
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Generate a starter authoring draft for a hand-edited cell-type JSON file."""
+    """Generate a starter authoring draft for a hand-edited cell-spec JSON file."""
     fmt = _check_output_format(output_format)
-    record = api_template_cell_type_draft(
+    record = api_template_cell_spec_draft(
         manufacturer=manufacturer,
         model_name=model_name,
         chemistry=chemistry,
@@ -988,7 +987,7 @@ def template_cell_type_draft(
         _write_json_file(out, record)
         payload = {
             "status": "template",
-            "resource": "cell-type-draft",
+            "resource": "cell-spec-draft",
             "path": str(out),
         }
         if fmt == "json":
@@ -1002,7 +1001,7 @@ def template_cell_type_draft(
         return
     payload = {
         "status": "template",
-        "resource": "cell-type-draft",
+        "resource": "cell-spec-draft",
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "path"])
@@ -1010,7 +1009,7 @@ def template_cell_type_draft(
 
 @template_app.command("cell-instance")
 def template_cell_instance(
-    type_id: str = typer.Option(
+    cell_spec_id: str = typer.Option(
         "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
         help="Canonical cell-spec IRI.",
     ),
@@ -1023,7 +1022,7 @@ def template_cell_instance(
     fmt = _check_output_format(output_format)
     try:
         record = api_template_cell_instance(
-            type_id=type_id,
+            cell_spec_id=cell_spec_id,
             source_type=source_type,  # type: ignore[arg-type]
             uid=uid,
         )
@@ -1214,8 +1213,8 @@ def template_test(
     _emit_table([payload], ["status", "resource", "id", "path"])
 
 
-@library_template_app.command("cell-type")
-def library_template_cell_type(
+@library_template_app.command("cell-spec")
+def library_template_cell_spec(
     manufacturer: str = typer.Option("ExampleManufacturer", help="Manufacturer name."),
     model: str = typer.Option("MODEL-001", help="Model name."),
     chemistry: str = typer.Option("unknown", help="Chemistry label."),
@@ -1226,10 +1225,10 @@ def library_template_cell_type(
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Generate a starter reusable library cell-type specification."""
+    """Generate a starter reusable library cell-spec specification."""
     fmt = _check_output_format(output_format)
     try:
-        record = api_template_cell_specification(
+        record = api_template_library_cell_spec(
             manufacturer=manufacturer,
             model=model,
             chemistry=chemistry,
@@ -1246,7 +1245,7 @@ def library_template_cell_type(
         _write_json_file(out, record)
         payload = {
             "status": "template",
-            "resource": "library-cell-type",
+            "resource": "library-cell-spec",
             "id": record["specification"]["id"],
             "path": str(out),
         }
@@ -1261,16 +1260,16 @@ def library_template_cell_type(
         return
     payload = {
         "status": "template",
-        "resource": "library-cell-type",
+        "resource": "library-cell-spec",
         "id": record["specification"]["id"],
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
 
 
-@library_query_app.command("cell-type")
-def library_query_cell_types(
-    id: str | None = typer.Option(None, help="Filter by reusable cell-type IRI."),
+@library_query_app.command("cell-spec")
+def library_query_cell_specs(
+    id: str | None = typer.Option(None, help="Filter by reusable cell-spec IRI."),
     manufacturer: str | None = typer.Option(None, help="Filter by manufacturer."),
     model_contains: str | None = typer.Option(None, help="Filter by model substring."),
     chemistry: str | None = typer.Option(None, help="Filter by chemistry."),
@@ -1282,14 +1281,14 @@ def library_query_cell_types(
     nominal_capacity_max: float | None = typer.Option(None, help="Filter maximum nominal capacity."),
     nominal_voltage_min: float | None = typer.Option(None, help="Filter minimum nominal voltage."),
     nominal_voltage_max: float | None = typer.Option(None, help="Filter maximum nominal voltage."),
-    library_dir: Path = typer.Option(Path(".battinfo/library/cell-type"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(Path(".battinfo/library/cell-spec"), help="Reusable library cell-specification directory."),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
 ) -> None:
-    """Query reusable library cell-type specifications."""
+    """Query reusable library cell-spec specifications."""
     fmt = _check_output_format(output_format)
-    rows = api_query_library_cell_types(
+    rows = api_query_library_cell_specs(
         id=id,
         manufacturer=manufacturer,
         model_contains=model_contains,
@@ -1307,7 +1306,7 @@ def library_query_cell_types(
         offset=offset,
     )
     payload = {
-        "resource": "library-cell-type",
+        "resource": "library-cell-spec",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -1322,8 +1321,8 @@ def library_query_cell_types(
     )
 
 
-@library_save_app.command("cell-type")
-def library_save_cell_type(
+@library_save_app.command("cell-spec")
+def library_save_cell_spec(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical cell-specification JSON."
     ),
@@ -1352,9 +1351,9 @@ def library_save_cell_type(
         readable=True,
         help="Optional JSON object for cell-specification specification.property.",
     ),
-    library_dir: Path = typer.Option(Path(".battinfo/library/cell-type"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(Path(".battinfo/library/cell-spec"), help="Reusable library cell-specification directory."),
     packaged_dir: Path = typer.Option(
-        Path("src/battinfo/data/library/cell-type"),
+        Path("src/battinfo/data/library/cell-spec"),
         help="Packaged reusable library cell-specification directory.",
     ),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
@@ -1365,15 +1364,15 @@ def library_save_cell_type(
     ),
     build_rdf: bool = typer.Option(False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after saving."),
     output_jsonld_dir: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-type"),
+        Path(".battinfo/library-rdf/cell-spec"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path(".battinfo/library/cell-type.jsonld"),
+        Path(".battinfo/library/cell-spec.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-type.index.json"),
+        Path(".battinfo/library-rdf/cell-spec.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
     clean_output: bool = typer.Option(False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."),
@@ -1386,7 +1385,7 @@ def library_save_cell_type(
     dup_policy = _check_duplicate_policy(duplicate_policy)
     try:
         if input_path is not None:
-            draft_obj: CellSpecificationInput | dict[str, Any] | Path = input_path
+            draft_obj: dict[str, Any] | Path = input_path
         else:
             if not manufacturer or not model or not positive_electrode_basis or not negative_electrode_basis:
                 raise ValueError(
@@ -1399,22 +1398,23 @@ def library_save_cell_type(
                 if not isinstance(loaded_property, dict):
                     raise ValueError("--property must point to a JSON object.")
                 properties = loaded_property
-            draft_obj = CellSpecificationInput(
-                uid=uid,
-                manufacturer=manufacturer,
-                model=model,
-                chemistry=chemistry,
-                format=cell_format,  # type: ignore[arg-type]
-                positive_electrode_basis=positive_electrode_basis,
-                negative_electrode_basis=negative_electrode_basis,
-                size_code=size_code,
-                property=properties,
-                source_type=source_type,
-                source_name=source_name,
-                source_file=source_file,
-                source_url=source_url,
-            )
-        payload = api_save_library_cell_type(
+            # Flat library-specification dict; save_library_cell_spec normalises it into a record.
+            draft_obj = {
+                "uid": uid,
+                "manufacturer": manufacturer,
+                "model": model,
+                "chemistry": chemistry,
+                "format": cell_format,
+                "positive_electrode_basis": positive_electrode_basis,
+                "negative_electrode_basis": negative_electrode_basis,
+                "size_code": size_code,
+                "property": properties,
+                "source_type": source_type,
+                "source_name": source_name,
+                "source_file": source_file,
+                "source_url": source_url,
+            }
+        payload = api_save_library_cell_spec(
             draft_obj,
             library_root=library_dir,
             package_root=packaged_dir,
@@ -1442,7 +1442,7 @@ def library_save_cell_type(
 @library_app.command("build-rdf")
 def library_build_rdf(
     input_dir: Path = typer.Option(
-        Path(".battinfo/library/cell-type"),
+        Path(".battinfo/library/cell-spec"),
         "--input-dir",
         exists=True,
         file_okay=False,
@@ -1451,25 +1451,25 @@ def library_build_rdf(
         help="Directory containing reusable library cell-specification JSON files.",
     ),
     output_jsonld_dir: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-type"),
+        Path(".battinfo/library-rdf/cell-spec"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
     ),
     aggregate_jsonld: Path = typer.Option(
-        Path(".battinfo/library/cell-type.jsonld"),
+        Path(".battinfo/library/cell-spec.jsonld"),
         help="Path for the aggregated library JSON-LD file.",
     ),
     manifest_json: Path = typer.Option(
-        Path(".battinfo/library-rdf/cell-type.index.json"),
+        Path(".battinfo/library-rdf/cell-spec.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
     glob: str = typer.Option("*.json", help="File glob used to select library cell specifications."),
     clean_output: bool = typer.Option(False, "--clean-output", help="Remove existing JSON-LD outputs before writing."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Build domain-battery JSON-LD artifacts for the reusable cell-type library."""
+    """Build domain-battery JSON-LD artifacts for the reusable cell-spec library."""
     fmt = _check_output_format(output_format)
     try:
-        payload = api_build_cell_type_library_rdf(
+        payload = api_build_cell_spec_library_rdf(
             input_dir=input_dir,
             output_jsonld_dir=output_jsonld_dir,
             aggregate_jsonld=aggregate_jsonld,
@@ -1486,9 +1486,9 @@ def library_build_rdf(
     _emit_table([payload], ["status", "entry_count", "output_jsonld_dir", "aggregate_jsonld", "manifest_json"])
 
 
-@query_app.command("cell-type")
-def query_cell_types(
-    id: str | None = typer.Option(None, help="Filter by canonical cell-type IRI."),
+@query_app.command("cell-spec")
+def query_cell_specs(
+    id: str | None = typer.Option(None, help="Filter by canonical cell-spec IRI."),
     manufacturer: str | None = typer.Option(None, help="Filter by manufacturer."),
     chemistry: str | None = typer.Option(None, help="Filter by chemistry."),
     cell_format: str | None = typer.Option(None, "--cell-format", help="Filter by cell form factor."),
@@ -1503,7 +1503,7 @@ def query_cell_types(
 ) -> None:
     """Query canonical cell types."""
     fmt = _check_output_format(output_format)
-    rows = api_query_cell_types(
+    rows = api_query_cell_specs(
         id=id,
         manufacturer=manufacturer,
         chemistry=chemistry,
@@ -1517,7 +1517,7 @@ def query_cell_types(
         offset=offset,
     )
     payload = {
-        "resource": "cell-type",
+        "resource": "cell-spec",
         "count": len(rows),
         "limit": limit,
         "offset": offset,
@@ -1535,7 +1535,7 @@ def query_cell_types(
 @query_app.command("cell-instance")
 def query_cell_instances(
     id: str | None = typer.Option(None, help="Filter by canonical cell IRI."),
-    type_id: str | None = typer.Option(None, help="Filter by canonical cell-type IRI."),
+    cell_spec_id: str | None = typer.Option(None, help="Filter by canonical cell-spec IRI."),
     short_id: str | None = typer.Option(None, help="Filter by short-id prefix."),
     serial_number: str | None = typer.Option(None, help="Filter by serial metadata."),
     has_dataset: str | None = typer.Option(None, help="Filter by dataset presence: true|false."),
@@ -1550,7 +1550,7 @@ def query_cell_instances(
     dataset_bool = _parse_optional_bool(has_dataset, "--has-dataset")
     rows = api_query_cell_instances(
         id=id,
-        type_id=type_id,
+        cell_spec_id=cell_spec_id,
         short_id_prefix=short_id,
         serial_number=serial_number,
         has_dataset=dataset_bool,
@@ -1569,7 +1569,7 @@ def query_cell_instances(
     if fmt == "json":
         _emit_json(payload)
         return
-    _emit_table(rows, ["id", "type_id", "short_id", "serial_number", "dataset_id", "source_type"])
+    _emit_table(rows, ["id", "cell_spec_id", "short_id", "serial_number", "dataset_id", "source_type"])
 
 
 @query_app.command("dataset")
@@ -1681,9 +1681,9 @@ def query_tests(
 
 @create_app.command("cell-instance")
 def create_cell_instance(
-    type_id: str | None = typer.Option(None, help="Canonical cell-type IRI."),
-    cell_type: Path | None = typer.Option(
-        None, help="Path to cell-type JSON (alternative to --type-id).", exists=True, file_okay=True, dir_okay=False
+    cell_spec_id: str | None = typer.Option(None, help="Canonical cell-spec IRI."),
+    cell_spec: Path | None = typer.Option(
+        None, help="Path to cell-spec JSON (alternative to --cell-spec-id).", exists=True, file_okay=True, dir_okay=False
     ),
     model_name: str | None = typer.Option(None, help="Resolve type by model name."),
     manufacturer: str | None = typer.Option(None, help="Resolve type by manufacturer."),
@@ -1701,8 +1701,8 @@ def create_cell_instance(
     fmt = _check_output_format(output_format)
     try:
         doc = api_create_cell_instance(
-            type_id=type_id,
-            cell_type=cell_type,
+            cell_spec_id=cell_spec_id,
+            cell_spec=cell_spec,
             model_name=model_name,
             manufacturer=manufacturer,
             chemistry=chemistry,
@@ -1721,13 +1721,13 @@ def create_cell_instance(
         "status": "created",
         "resource": "cell-instance",
         "id": doc["cell_instance"]["id"],
-        "type_id": doc["cell_instance"]["type_id"],
+        "cell_spec_id": doc["cell_instance"]["cell_spec_id"],
         "path": str(out) if out else None,
     }
     if fmt == "json":
         _emit_json(payload)
         return
-    _emit_table([payload], ["status", "resource", "id", "type_id", "path"])
+    _emit_table([payload], ["status", "resource", "id", "cell_spec_id", "path"])
 
 
 @save_app.command("record")
@@ -1735,7 +1735,7 @@ def save_record(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True),
     source_root: Path = typer.Option(
         Path("examples"),
-        help="Root directory containing cell-type, cell-instances, and dataset.",
+        help="Root directory containing cell-spec, cell-instances, and dataset.",
     ),
     mode: str = typer.Option("create_only", help="Save mode: create_only|upsert."),
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
@@ -1842,8 +1842,8 @@ def save_batch(
     _emit_table([payload], ["status", "processed", "created", "updated", "exists", "dry_run", "failed"])
 
 
-@save_app.command("cell-type")
-def save_cell_type(
+@save_app.command("cell-spec")
+def save_cell_spec(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
@@ -1870,14 +1870,14 @@ def save_cell_type(
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Save a cell-type using either --input JSON or inline draft fields."""
+    """Save a cell-spec using either --input JSON or inline draft fields."""
     fmt = _check_output_format(output_format)
     reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: CellTypeInput | dict[str, Any] | Path = input_path
+            draft_obj: CellSpecificationInput | dict[str, Any] | Path = input_path
         else:
             if not manufacturer or not model_name:
                 raise ValueError("--manufacturer and --model-name are required when --input is not provided.")
@@ -1887,7 +1887,7 @@ def save_cell_type(
                 if not isinstance(loaded_specs, dict):
                     raise ValueError("--specs must point to a JSON object.")
                 specs = loaded_specs
-            draft_obj = CellTypeInput(
+            draft_obj = CellSpecificationInput(
                 uid=uid,
                 model_name=model_name,
                 manufacturer=manufacturer,
@@ -1900,7 +1900,7 @@ def save_cell_type(
                 source_file=source_file,
                 source_url=source_url,
             )
-        payload = api_save_cell_type(
+        payload = api_save_cell_spec(
             draft_obj,
             source_root=source_root,
             mode=reg_mode,
@@ -1926,7 +1926,7 @@ def save_cell_instance(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
     ),
-    type_id: str | None = typer.Option(None, help="Canonical cell-type IRI (required when --input omitted)."),
+    cell_spec_id: str | None = typer.Option(None, help="Canonical cell-spec IRI (required when --input omitted)."),
     serial_number: str | None = typer.Option(None, help="Optional serial metadata."),
     dataset_id: list[str] = typer.Option([], "--dataset-id", help="Optional linked dataset IRI. Repeat for multiple."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
@@ -1953,11 +1953,11 @@ def save_cell_instance(
         if input_path is not None:
             draft_obj: CellInstanceInput | dict[str, Any] | Path = input_path
         else:
-            if not type_id:
-                raise ValueError("--type-id is required when --input is not provided.")
+            if not cell_spec_id:
+                raise ValueError("--cell-spec-id is required when --input is not provided.")
             draft_obj = CellInstanceInput(
                 uid=uid,
-                type_id=type_id,
+                cell_spec_id=cell_spec_id,
                 serial_number=serial_number,
                 source_type=source_type,  # type: ignore[arg-type]
                 dataset_id=(dataset_id[0] if dataset_id else None),
@@ -2200,17 +2200,17 @@ def save_test(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
-@editorial_app.command("validate-staging-cell-type")
-def validate_staging_cell_type(
+@editorial_app.command("validate-staging-cell-spec")
+def validate_staging_cell_spec(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Validate one single-file staging cell-type draft and preview its canonical record."""
+    """Validate one single-file staging cell-spec draft and preview its canonical record."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
-        payload = api_validate_staging_cell_type(input_path, validation_policy=policy_name)
+        payload = api_validate_staging_cell_spec(input_path, validation_policy=policy_name)
     except ValueError as exc:
         typer.echo(str(exc))
         raise typer.Exit(code=1) from exc
@@ -2220,18 +2220,18 @@ def validate_staging_cell_type(
     _emit_table([payload], ["ok", "record_id", "record_id_basis", "requires_record_id", "source_path"])
 
 
-@editorial_app.command("validate-staging-cell-type")
-def validate_staging_cell_types(
+@editorial_app.command("validate-staging-cell-spec")
+def validate_staging_cell_specs(
     input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Validate all staging cell-type drafts in a directory."""
+    """Validate all staging cell-spec drafts in a directory."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
-        payload = api_validate_staging_cell_types(
+        payload = api_validate_staging_cell_specs(
             input_dir=input_dir,
             glob=glob,
             validation_policy=policy_name,
@@ -2252,20 +2252,20 @@ def validate_staging_cell_types(
     _emit_table([summary], ["status", "input_dir", "processed", "ok", "failed"])
 
 
-@editorial_app.command("promote-staging-cell-type")
-def promote_staging_cell_type(
+@editorial_app.command("promote-staging-cell-spec")
+def promote_staging_cell_spec(
     input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
-    curated_root: Path = typer.Option(Path("records/cell-type"), help="Curated cell-type root."),
+    curated_root: Path = typer.Option(Path("records/cell-spec"), help="Curated cell-spec root."),
     record_id: str | None = typer.Option(None, "--record-id", help="Override the curated record id."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Promote one staging cell-type draft into records/cell-type/<record-id>/record.json."""
+    """Promote one staging cell-spec draft into records/cell-spec/<record-id>/record.json."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
-        payload = api_promote_staging_cell_type(
+        payload = api_promote_staging_cell_spec(
             input_path,
             curated_root=curated_root,
             record_id=record_id,
@@ -2281,20 +2281,20 @@ def promote_staging_cell_type(
     _emit_table([payload], ["status", "record_id", "record_id_basis", "source_path", "target_path", "dry_run"])
 
 
-@editorial_app.command("promote-staging-cell-type-batch")
-def promote_staging_cell_types(
+@editorial_app.command("promote-staging-cell-spec-batch")
+def promote_staging_cell_specs(
     input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
-    curated_root: Path = typer.Option(Path("records/cell-type"), help="Curated cell-type root."),
+    curated_root: Path = typer.Option(Path("records/cell-spec"), help="Curated cell-spec root."),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Promote all staging cell-type drafts into curated record.json directories."""
+    """Promote all staging cell-spec drafts into curated record.json directories."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
-        payload = api_promote_staging_cell_types(
+        payload = api_promote_staging_cell_specs(
             input_dir=input_dir,
             curated_root=curated_root,
             glob=glob,
@@ -2317,9 +2317,9 @@ def promote_staging_cell_types(
     _emit_table([summary], ["status", "input_dir", "curated_root", "processed", "dry_run"])
 
 
-@editorial_app.command("build-curated-cell-type-submission")
-def build_curated_cell_type_submission(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-type record.json or equivalent canonical JSON."),
+@editorial_app.command("build-curated-cell-spec-submission")
+def build_curated_cell_spec_submission(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-spec record.json or equivalent canonical JSON."),
     workspace_id: str = typer.Option(..., "--workspace-id", help="Registry workspace id."),
     publisher_id: str = typer.Option(..., help="Registry publisher id."),
     source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
@@ -2327,16 +2327,16 @@ def build_curated_cell_type_submission(
     title: str | None = typer.Option(None, help="Override submission title."),
     publication_mode: str = typer.Option("canonical-publication", help="Publication intent mode."),
     source_system: str = typer.Option("battinfo-records", help="Submission provenance source_system."),
-    workflow_name: str = typer.Option("curated-cell-type-publication", help="Submission provenance workflow_name."),
+    workflow_name: str = typer.Option("curated-cell-spec-publication", help="Submission provenance workflow_name."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     out_path: Path | None = typer.Option(None, "--out", help="Optional path to write the generated submission package JSON."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Build a registry publication package for one curated cell-type record."""
+    """Build a registry publication package for one curated cell-spec record."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
-        payload = api_build_curated_cell_type_submission(
+        payload = api_build_curated_cell_spec_submission(
             input_path,
             workspace_id=workspace_id,
             publisher_id=publisher_id,
@@ -2368,9 +2368,9 @@ def build_curated_cell_type_submission(
     _emit_table([summary], ["workspace_id", "publisher_id", "source_version", "resource_type", "source_local_id", "out_path"])
 
 
-@editorial_app.command("publish-curated-cell-type")
-def publish_curated_cell_type(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-type record.json or equivalent canonical JSON."),
+@editorial_app.command("publish-curated-cell-spec")
+def publish_curated_cell_spec(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-spec record.json or equivalent canonical JSON."),
     workspace_id: str = typer.Option(..., "--workspace-id", help="Registry workspace id."),
     publisher_id: str = typer.Option(..., help="Registry publisher id."),
     source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
@@ -2381,18 +2381,18 @@ def publish_curated_cell_type(
     title: str | None = typer.Option(None, help="Override submission title."),
     publication_mode: str = typer.Option("canonical-publication", help="Publication intent mode."),
     source_system: str = typer.Option("battinfo-records", help="Submission provenance source_system."),
-    workflow_name: str = typer.Option("curated-cell-type-publication", help="Submission provenance workflow_name."),
+    workflow_name: str = typer.Option("curated-cell-spec-publication", help="Submission provenance workflow_name."),
     validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="HTTP timeout in seconds."),
     out_path: Path | None = typer.Option(None, "--out", help="Optional path to write the generated submission package JSON before posting."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Publish one curated cell-type record to battinfo-registry."""
+    """Publish one curated cell-spec record to battinfo-registry."""
     fmt = _check_output_format(output_format)
     policy_name = _check_validation_policy(validation_policy)
     try:
         if out_path is not None:
-            request_payload = api_build_curated_cell_type_submission(
+            request_payload = api_build_curated_cell_spec_submission(
                 input_path,
                 workspace_id=workspace_id,
                 publisher_id=publisher_id,
@@ -2405,7 +2405,7 @@ def publish_curated_cell_type(
                 validation_policy=policy_name,
             )
             _write_json_file(out_path, request_payload)
-        payload = api_publish_curated_cell_type(
+        payload = api_publish_curated_cell_spec(
             input_path,
             workspace_id=workspace_id,
             publisher_id=publisher_id,
@@ -2438,15 +2438,15 @@ def publish_curated_cell_type(
     _emit_table([summary], ["status", "status_code", "submission_mode", "resource_count", "created_count"])
 
 
-@publish_app.command("cell-type")
-def publish_cell_type(
+@publish_app.command("cell-spec")
+def publish_cell_spec(
     input_path: Path | None = typer.Option(
         None,
         "--input",
         exists=True,
         dir_okay=False,
         readable=True,
-        help="Optional JSON draft or canonical cell-type record to load.",
+        help="Optional JSON draft or canonical cell-spec record to load.",
     ),
     manufacturer: str | None = typer.Option(None, help="Cell manufacturer."),
     model: str | None = typer.Option(None, help="Cell model."),
@@ -2476,13 +2476,13 @@ def publish_cell_type(
     fmt = _check_workspace_output_format(output_format)
     try:
         if input_path is not None:
-            cell_type = _load_cell_type_input(input_path)
+            cell_spec = _load_cell_spec_input(input_path)
         else:
             if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model, cell_format, chemistry)):
                 raise typer.BadParameter(
                     "Provide --input or all of --manufacturer, --model, --cell-format, and --chemistry."
                 )
-            cell_type = CellType(
+            cell_spec = CellSpecification(
                 manufacturer=manufacturer.strip(),
                 model=model.strip(),
                 format=cell_format.strip(),
@@ -2496,7 +2496,7 @@ def publish_cell_type(
             )
 
         result = publish_object(
-            cell_type,
+            cell_spec,
             destination=destination,
             root=root,
             force=force,
@@ -2608,7 +2608,7 @@ def index_build(
         file_okay=False,
         dir_okay=True,
         readable=True,
-        help="Root directory containing cell-type, cell-instances, and dataset subdirectories.",
+        help="Root directory containing cell-spec, cell-instances, and dataset subdirectories.",
     ),
     out: Path = typer.Option(Path(".battinfo/index.json"), help="Output index JSON path."),
     glob: str = typer.Option("*.json", help="File glob to include in index build."),
@@ -2634,7 +2634,7 @@ def index_build(
         "status": "ok" if payload.get("failed", 0) == 0 else "partial",
         "index_path": str(out),
         "build_timestamp": payload.get("build_timestamp"),
-        "cell_type_count": payload.get("cell_type_count", 0),
+        "cell_spec_count": payload.get("cell_spec_count", 0),
         "cell_instance_count": payload.get("cell_instance_count", 0),
         "test_count": payload.get("test_count", 0),
         "dataset_count": payload.get("dataset_count", 0),
@@ -2648,7 +2648,7 @@ def index_build(
         [payload],
         [
             "status",
-            "cell_type_count",
+            "cell_spec_count",
             "cell_instance_count",
             "test_count",
             "dataset_count",
@@ -2680,7 +2680,7 @@ def index_stats(
         return
     _emit_table(
         [payload],
-        ["cell_type_count", "cell_instance_count", "test_count", "dataset_count", "total_count", "failed", "build_timestamp"],
+        ["cell_spec_count", "cell_instance_count", "test_count", "dataset_count", "total_count", "failed", "build_timestamp"],
     )
 
 
@@ -2802,7 +2802,7 @@ def registry_bootstrap(
 def dataset_init(
     output: Path = typer.Argument(..., help="Path for the new contribution folder."),
     cell_name: str | None = typer.Option(None, "--cell-name", "-n", help="Short label for this cell (e.g. serial number)."),
-    cell_type_iri: str | None = typer.Option(None, "--cell-type-iri", help="BattINFO cell-type IRI."),
+    cell_spec_iri: str | None = typer.Option(None, "--cell-spec-iri", help="BattINFO cell-spec IRI."),
     lab: str | None = typer.Option(None, "--lab", help="Your institution or lab name."),
     license: str = typer.Option("CC-BY-4.0", "--license", help="Data licence identifier."),
     overwrite: bool = typer.Option(False, "--force", help="Overwrite an existing folder."),
@@ -2823,7 +2823,7 @@ def dataset_init(
         path = init_contribution(
             output,
             cell_name=cell_name,
-            cell_type_iri=cell_type_iri,
+            cell_spec_iri=cell_spec_iri,
             lab=lab,
             license=license,
             overwrite=overwrite,
@@ -3124,7 +3124,7 @@ def dataset_publish(
 @batch_app.command("init")
 def batch_init(
     output_dir: Path = typer.Argument(..., help="Directory to create for this batch."),
-    cell_type: str = typer.Option(..., "--cell-type", "-t", help='Cell type IRI or name, e.g. "Energizer CR2032".'),
+    cell_spec: str = typer.Option(..., "--cell-spec", "-t", help='Cell type IRI or name, e.g. "Energizer CR2032".'),
     count: int = typer.Option(..., "--count", "-n", help="Number of cells received."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
     lab: str | None = typer.Option(None, "--lab", help="Institution or lab name."),
@@ -3167,7 +3167,7 @@ def batch_init(
     try:
         result = init_batch(
             output_dir,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             count=count,
             batch_id=batch_id,
             lab=lab,
@@ -3183,7 +3183,7 @@ def batch_init(
         raise typer.Exit(code=1) from exc
 
     typer.echo(f"Initialised batch: {result['output_dir']}")
-    typer.echo(f"  Cell type : {result['cell_type_name']}  ({result['cell_type_iri']})")
+    typer.echo(f"  Cell type : {result['cell_spec_name']}  ({result['cell_spec_iri']})")
     typer.echo(f"  Cells     : {result['count']}")
     typer.echo()
     for cell in result["cells"]:
@@ -3245,7 +3245,7 @@ def batch_add(
         raise typer.Exit(code=1) from exc
 
     typer.echo(f"Added {result['added']} cell(s) to {result['batch_dir']}")
-    typer.echo(f"  Cell type  : {result['cell_type_name']}  ({result['cell_type_iri']})")
+    typer.echo(f"  Cell type  : {result['cell_spec_name']}  ({result['cell_spec_iri']})")
     typer.echo(f"  New total  : {result['total_count']}")
     typer.echo()
     for cell in result["new_cells"]:
@@ -3324,7 +3324,7 @@ def batch_status(
     if json_output:
         typer.echo(json.dumps({
             "batch_dir": str(batch_dir),
-            "cell_type": manifest.get("cell_type_name", manifest.get("cell_type_iri")),
+            "cell_spec": manifest.get("cell_spec_name", manifest.get("cell_spec_iri")),
             "total_cells": total,
             "cells_with_data": has_data,
             "needs_annotation": needs_annotation,
@@ -3341,7 +3341,7 @@ def batch_status(
 
     console.print()
     console.print(f"[bold]Batch:[/bold] {batch_dir.name}")
-    console.print(f"  Cell type  : {manifest.get('cell_type_name', manifest.get('cell_type_iri', '?'))}")
+    console.print(f"  Cell type  : {manifest.get('cell_spec_name', manifest.get('cell_spec_iri', '?'))}")
     console.print(f"  Cells      : {total}")
     console.print()
     console.print(f"  Cells with data      : {has_data}/{total}  {_status(has_data == total)}")
@@ -3546,7 +3546,7 @@ def batch_upload(
 def push(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True,
                                   help="Folder containing raw data files or an existing batch."),
-    cell_type: str | None = typer.Option(None, "--cell-type", "-t",
+    cell_spec: str | None = typer.Option(None, "--cell-spec", "-t",
                                          help="Cell type, e.g. 'Energizer CR2032'. Required for unstructured folders."),
     cells: int | None = typer.Option(None, "--cells", "-n",
                                      help="Number of cells (auto-detected from filenames if omitted)."),
@@ -3568,8 +3568,8 @@ def push(
 
     \b
     Accepts three layouts:
-      battinfo push ./flat_files/    --cell-type "Energizer CR2032"   # groups by filename
-      battinfo push ./cell_folders/  --cell-type "Energizer CR2032"   # one subdir per cell
+      battinfo push ./flat_files/    --cell-spec "Energizer CR2032"   # groups by filename
+      battinfo push ./cell_folders/  --cell-spec "Energizer CR2032"   # one subdir per cell
       battinfo push ./my_batch/                                        # existing batch.yaml
 
     \b
@@ -3604,8 +3604,8 @@ def push(
 
     # ── Preview (human mode only) ──────────────────────────────────────────────
     is_batch = (folder / BATCH_MANIFEST).exists()
-    if not is_batch and not cell_type:
-        msg = "--cell-type is required for unstructured folders."
+    if not is_batch and not cell_spec:
+        msg = "--cell-spec is required for unstructured folders."
         if json_output:
             typer.echo(json.dumps({"ok": False, "error": msg}))
         else:
@@ -3615,8 +3615,8 @@ def push(
     if not json_output:
         console.print()
         console.print(f"[bold]Push:[/bold] {folder}")
-        if cell_type:
-            console.print(f"  Cell type : {cell_type}")
+        if cell_spec:
+            console.print(f"  Cell type : {cell_spec}")
         if not is_batch:
             groups = _group_files_by_cell(folder)
             if groups:
@@ -3646,7 +3646,7 @@ def push(
     try:
         result = push_batch(
             folder,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             staging_dir=staging,
             creators=creators,
             zenodo_token=resolved_token,

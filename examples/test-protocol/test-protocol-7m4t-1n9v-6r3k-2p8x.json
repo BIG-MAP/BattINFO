@@ -1,10 +1,10 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "1.0.0",
   "test_spec": {
     "id": "https://w3id.org/battinfo/spec/7m4t-1n9v-6r3k-2p8x",
     "short_id": "7m4t1n",
     "identifier": "test-protocol:7m4t-1n9v-6r3k-2p8x",
-    "name": "HPPC — Pulse Power Characterisation at 25°C",
+    "name": "HPPC \u2014 Pulse Power Characterisation at 25\u00b0C",
     "kind": "hppc",
     "description": "Hybrid Pulse Power Characterisation (HPPC) per IEC 62660-1 / USABC methodology. Discharge and charge pulses are applied at nine SOC setpoints (90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%) to determine DC internal resistance and the cell's power capability envelope as a function of state of charge. A 10s 2C discharge pulse followed by a 40s rest and a 10s 1.75C charge pulse is applied at each SOC level.",
     "version": "1.0",
@@ -16,73 +16,6 @@
       "unit": "degC"
     }
   },
-  "setpoints": {
-    "pre_test_charge_rate": {
-      "value": 0.2,
-      "unit": "C"
-    },
-    "soc_setpoints": {
-      "value_text": "90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%"
-    },
-    "soc_step_discharge_rate": {
-      "value": 0.2,
-      "unit": "C"
-    },
-    "discharge_pulse_current": {
-      "value": 2.0,
-      "unit": "C"
-    },
-    "discharge_pulse_duration": {
-      "value": 10.0,
-      "unit": "s"
-    },
-    "rest_after_discharge_pulse": {
-      "value": 40.0,
-      "unit": "s"
-    },
-    "charge_pulse_current": {
-      "value": 1.75,
-      "unit": "C"
-    },
-    "charge_pulse_duration": {
-      "value": 10.0,
-      "unit": "s"
-    },
-    "rest_after_charge_pulse": {
-      "value": 1.0,
-      "unit": "h"
-    }
-  },
-  "termination_criteria": {
-    "voltage_lower_limit": {
-      "value_text": "lower_voltage_limit per cell specification — terminate pulse if reached before duration"
-    },
-    "voltage_upper_limit": {
-      "value_text": "upper_voltage_limit per cell specification — terminate charge pulse if reached before duration"
-    }
-  },
-  "measurement_outputs": [
-    {
-      "name": "Voltage",
-      "unit_text": "V"
-    },
-    {
-      "name": "Current",
-      "unit_text": "A"
-    },
-    {
-      "name": "Temperature",
-      "unit_text": "degC"
-    },
-    {
-      "name": "DCInternalResistance",
-      "unit_text": "Ohm"
-    },
-    {
-      "name": "Capacity",
-      "unit_text": "Ah"
-    }
-  ],
   "provenance": {
     "source_type": "manual",
     "source_file": "hppc-iec62660.protocol.json",
@@ -92,6 +25,7 @@
     "DC internal resistance is calculated from the instantaneous voltage drop at the start of each pulse: DCIR = delta_V / delta_I.",
     "The 1-hour rest period after each charge pulse allows open-circuit relaxation before the next SOC step.",
     "Pulse voltage limits must be respected; at low SOC, discharge pulses may be truncated before 10s if the lower voltage limit is reached.",
-    "Temperature must remain within the cell's operating temperature range throughout; protocol should be paused if the cell surface exceeds 35 degC."
+    "Temperature must remain within the cell's operating temperature range throughout; protocol should be paused if the cell surface exceeds 35 degC.",
+    "Pre-method-model parameters preserved on migration: {\"setpoints\": {\"pre_test_charge_rate\": {\"value\": 0.2, \"unit\": \"C\"}, \"soc_setpoints\": {\"value_text\": \"90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%\"}, \"soc_step_discharge_rate\": {\"value\": 0.2, \"unit\": \"C\"}, \"discharge_pulse_current\": {\"value\": 2.0, \"unit\": \"C\"}, \"discharge_pulse_duration\": {\"value\": 10.0, \"unit\": \"s\"}, \"rest_after_discharge_pulse\": {\"value\": 40.0, \"unit\": \"s\"}, \"charge_pulse_current\": {\"value\": 1.75, \"unit\": \"C\"}, \"charge_pulse_duration\": {\"value\": 10.0, \"unit\": \"s\"}, \"rest_after_charge_pulse\": {\"value\": 1.0, \"unit\": \"h\"}}, \"termination_criteria\": {\"voltage_lower_limit\": {\"value_text\": \"lower_voltage_limit per cell specification \\u2014 terminate pulse if reached before duration\"}, \"voltage_upper_limit\": {\"value_text\": \"upper_voltage_limit per cell specification \\u2014 terminate charge pulse if reached before duration\"}}, \"measurement_outputs\": [{\"name\": \"Voltage\", \"unit_text\": \"V\"}, {\"name\": \"Current\", \"unit_text\": \"A\"}, {\"name\": \"Temperature\", \"unit_text\": \"degC\"}, {\"name\": \"DCInternalResistance\", \"unit_text\": \"Ohm\"}, {\"name\": \"Capacity\", \"unit_text\": \"Ah\"}]}"
   ]
 }

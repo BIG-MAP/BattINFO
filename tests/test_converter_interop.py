@@ -201,11 +201,13 @@ def test_import_converter_jsonld_record_builds_valid_descriptor_record() -> None
     assert specification["electrolyte"]["salt"]["name"] == "LiPF6"
     assert specification["electrolyte"]["property"]["fill_volume"]["value"] == 100
     assert specification["separator"]["material"] == "PP"
-    assert specification["coin_hardware"]["case"]["product_id"] == "2032, SUS316L"
-    assert specification["coin_hardware"]["case"]["size_code"] == "R2032"
-    assert specification["coin_hardware"]["case"]["material"] == "Stainless steel"
-    assert specification["coin_hardware"]["spring"]["property"]["diameter"]["value"] == 15
-    assert specification["coin_hardware"]["spacer"]["property"]["thickness"]["value"] == 1.0
+    housing = specification["housing"]
+    assert housing["case"]["product_id"] == "2032, SUS316L"
+    assert housing["case"]["size_code"] == "R2032"
+    assert housing["case"]["material"] == "Stainless steel"
+    parts = {part["type"]: part for part in housing["parts"]}
+    assert parts["spring"]["property"]["diameter"]["value"] == 15
+    assert parts["spacer"]["property"]["thickness"]["value"] == 1.0
 
 
 def test_import_converter_jsonld_supports_canonical_overrides() -> None:
@@ -238,24 +240,28 @@ def test_imported_converter_record_renders_to_coin_cell_jsonld() -> None:
         physical_types = [physical_types]
     assert "CoinCell" in physical_types
     assert battery_node["schema:model"] == "Empa-bco-000007"
+    assert battery_node["hasCase"]["@type"] == "CoinCase"
     assert battery_node["hasCase"]["schema:size"] == "R2032"
-    assert battery_node["hasConstituent"][0]["schema:additionalType"] == "Spring"
+    # Coin hardware now uses real EMMO @types (was schema:Thing + additionalType).
+    assert battery_node["hasConstituent"][0]["@type"] == "Spring"
     assert mapped["@graph"][1]["schema:serialNumber"] == "Empa-bco-000007"
 
 
 def test_imported_converter_record_renders_to_converter_compatible_jsonld() -> None:
     result = import_converter_jsonld_record(_load_fixture())
     specification = result.record["specification"]
-    specification["coin_hardware"]["lid"] = {
+    specification["housing"]["parts"].append({
+        "type": "lid",
         "material": "Stainless steel",
         "coating": "Au",
         "manufacturer": "Empa",
-    }
-    specification["coin_hardware"]["can"] = {
+    })
+    specification["housing"]["parts"].append({
+        "type": "can",
         "material": "Stainless steel",
         "coating": "Ni",
         "supplier": "CaseParts AG",
-    }
+    })
 
     mapped = to_jsonld(result.record, target="converter-compatible")
 
@@ -285,9 +291,16 @@ def test_import_converter_jsonld_record_extracts_linked_test_protocols_and_tests
     negative_protocol = result.test_specs[1]["test_spec"]
     assert positive_protocol["kind"] == "capacity_check"
     assert negative_protocol["kind"] == "capacity_check"
-    assert result.test_specs[0]["setpoints"]["steps"][0]["task"] == "Charging"
-    assert result.test_specs[1]["setpoints"]["steps"][0]["task"] == "Discharging"
-    assert result.test_specs[1]["conditions"]["reference_electrode"] == "Li-metal"
+    # The EMMO task chain is parsed into the structured, queryable method: the
+    # positive-electrode procedure charges first, the negative discharges first.
+    pos_method = result.test_specs[0]["method"]
+    neg_method = result.test_specs[1]["method"]
+    assert pos_method[0]["mode"] == "cc" and pos_method[0]["direction"] == "charge"
+    assert neg_method[0]["direction"] == "discharge"
+    # A CC charge step carries its cutoff voltage as a structured termination.
+    assert pos_method[0]["termination"][0]["quantity"] == "voltage"
+    # Free-form test context (reference electrode) is preserved in notes.
+    assert any("Li-metal" in note for note in result.test_specs[1]["notes"])
     assert result.tests[0]["test"]["protocol_id"] == result.test_specs[0]["test_spec"]["id"]
     assert result.tests[0]["test"]["cell_id"] == result.record["instances"][0]["id"]
 
@@ -295,9 +308,9 @@ def test_import_converter_jsonld_record_extracts_linked_test_protocols_and_tests
 def test_import_converter_package_builds_linked_objects_and_adds_to_workspace(tmp_path: Path) -> None:
     package = import_converter_package(_fixture_with_procedures())
 
-    assert package.specification.id == package.cell_type.id
+    assert package.specification.id == package.cell_spec.id
     assert package.cell_instance is not None
-    assert package.cell_instance.cell_type_id == package.cell_type.id
+    assert package.cell_instance.cell_spec_id == package.cell_spec.id
     assert len(package.test_specs) == 2
     assert len(package.tests) == 2
     assert package.tests[0].cell is package.cell_instance
@@ -307,7 +320,7 @@ def test_import_converter_package_builds_linked_objects_and_adds_to_workspace(tm
     package.add_to_workspace(workspace)
     results = workspace.save(source_root=tmp_path / "records", build_index=False)
 
-    assert len(results["cell_types"]) == 1
+    assert len(results["cell_specs"]) == 1
     assert len(results["cell_instances"]) == 1
     assert len(results["test_specs"]) == 2
     assert len(results["tests"]) == 2

@@ -10,11 +10,11 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-PROFILE_PATH = ROOT / "src" / "battinfo" / "data" / "profiles" / "cell-type" / "profile.json"
+PROFILE_PATH = ROOT / "src" / "battinfo" / "data" / "profiles" / "cell-spec" / "profile.json"
 
 
 def test_profile_asset_exists() -> None:
-    assert PROFILE_PATH.exists(), "Missing packaged cell-type profile asset"
+    assert PROFILE_PATH.exists(), "Missing packaged cell-spec profile asset"
 
 
 def test_profile_has_required_top_level_keys() -> None:

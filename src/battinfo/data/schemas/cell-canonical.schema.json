@@ -21,7 +21,7 @@
     "cell": {
       "$ref": "#/$defs/Cell"
     },
-    "specs": {
+    "properties": {
       "$ref": "#/$defs/SpecSet"
     },
     "measurements": {

@@ -10,7 +10,7 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-GENERATED_DIR = ROOT / "src" / "battinfo" / "data" / "profiles" / "cell-type" / "generated"
+GENERATED_DIR = ROOT / "src" / "battinfo" / "data" / "profiles" / "cell-spec" / "generated"
 
 
 def test_generated_profile_fragments_exist() -> None:

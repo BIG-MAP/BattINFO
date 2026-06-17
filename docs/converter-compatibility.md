@@ -60,7 +60,8 @@ tooling without requiring the converter to rewrite its user-facing workflow yet.
   - negative electrode
   - electrolyte
   - separator
-  - coin-cell case / lid / can / spring / spacer into `specification.coin_hardware`
+  - coin-cell case / lid / can / spring / spacer into `specification.housing`
+    (the legacy `coin_hardware` dict is retired and auto-migrated into `housing`)
   - coin-cell size code when it can be inferred from the case block
   - assembly sequence into `specification.construction.assembly_sequence`
   - component provenance where the converter exposes manufacturer / supplier / product identifiers
@@ -88,10 +89,47 @@ This keeps the canonical BattINFO authoring surface clean:
 - compatibility work happens in a controlled adapter layer
 - schema growth is driven by real imported concepts that prove useful
 
+## Round-Trip Status (canonical coin-cell model, 2026-06)
+
+The coin-cell canonical model work (see [coincell-canonical.md](coincell-canonical.md))
+brought the integration seam to a verified checkpoint:
+
+- **Lossless converter round-trip.** `import_converter_package(reference) ->
+  to_jsonld(..., target="converter-compatible")` reproduces the converter's own
+  reference output (`coincell_jsonld_result.json`, Release 3.2.0) with **zero
+  property-node loss**. Guarded by `tests/test_coincell_canonical_roundtrip.py`.
+- **Two views over one model.** The same imported/authored record exports either as
+  the canonical `domain-battery` JSON-LD (dimensionally-correct `AreicCapacity` /
+  `DischargingSpecificCapacity`, electrode-level `hasProperty`, `hasProperty` +
+  measured/conventional co-type) or as `converter-compatible` JSON-LD (legacy
+  `RatedCapacity` overload, `hasMeasuredProperty`) for byte-level converter parity.
+- **"Converter imports battinfo" direction proven.** A coin cell authored with the
+  BattINFO authoring helpers (`material()` / `electrode()` / `separator_spec()` /
+  `electrolyte_recipe()` / `cell_description()`) exports straight to converter-shaped
+  JSON-LD — the path a future BattINFO Converter would call instead of its own
+  path-walking engine.
+
+### Recommended integration path for BattINFO Converter
+
+```python
+import battinfo as bi
+from battinfo.transform import to_jsonld
+
+spec = bi.cell_description(...)          # build from the converter's Excel inputs
+record = {"schema_version": "1.0.0", "specification": spec.to_json()}
+jsonld = to_jsonld(record, target="converter-compatible")
+```
+
+The only converter-side work remaining is the Excel-schema → `cell_description(...)`
+mapping; the export engine and ontology mappings now live in BattINFO.
+
 ## Next Steps
 
-- add more golden fixtures from BattINFO Converter
+- add the Excel-schema → BattINFO authoring adapter so the converter can delegate
+  conversion end to end
 - expand converter procedure import beyond the current rated-capacity graph shape
-- expand canonical BattINFO authoring helpers for richer component provenance
+- publish `RatedProperty` in domain-battery, then flip
+  `PENDING_CO_TYPE_AVAILABLE["RatedProperty"]` so normalized rated capacities emit
+  `[AreicCapacity, RatedProperty]`
 - keep the canonical `domain-battery` export stable and grow the
   `converter-compatible` export only as an explicit migration surface

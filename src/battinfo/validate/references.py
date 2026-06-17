@@ -19,7 +19,7 @@ SPEC_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
 # Aliases kept for clarity — cell specs and test protocols both use spec/ namespace
-CELL_TYPE_IRI_RE = SPEC_IRI_RE
+CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_SPEC_IRI_RE = SPEC_IRI_RE
 CELL_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
@@ -44,10 +44,10 @@ def _iri_tail(iri: str) -> tuple[str, str]:
 
 
 def _entity_id(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("product"), Mapping) and isinstance(doc["product"].get("id"), str):
-        return doc["product"]["id"]
-    if isinstance(doc.get("cell_type"), Mapping) and isinstance(doc["cell_type"].get("id"), str):
-        return doc["cell_type"]["id"]
+    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
+        return doc["cell_spec"]["id"]
+    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
+        return doc["cell_spec"]["id"]
     if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
         return doc["cell_instance"]["id"]
     if isinstance(doc.get("test_spec"), Mapping) and isinstance(doc["test_spec"].get("id"), str):
@@ -60,8 +60,8 @@ def _entity_id(doc: dict[str, Any]) -> str:
 
 
 def _entity_type_from_doc(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("product"), Mapping) or isinstance(doc.get("cell_type"), Mapping):
-        return "cell-type"
+    if isinstance(doc.get("cell_spec"), Mapping) or isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
     if isinstance(doc.get("test_spec"), Mapping):
@@ -70,12 +70,12 @@ def _entity_type_from_doc(doc: dict[str, Any]) -> str:
         return "test"
     if isinstance(doc.get("dataset"), Mapping):
         return "dataset"
-    raise ValueError("Unsupported record type: expected product/cell_type, cell_instance, test, or dataset.")
+    raise ValueError("Unsupported record type: expected product/cell_spec, cell_instance, test, or dataset.")
 
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
-    if entity_type == "cell-type":
-        directory = source_root / "cell-type"
+    if entity_type == "cell-spec":
+        directory = source_root / "cell-spec"
     elif entity_type == "cell":
         directory = source_root / "cell-instance"
     elif entity_type == "test-protocol":
@@ -92,9 +92,9 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
 
 
 def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
-    filename = f"{entity_type}-{uid}.json" if entity_type != "cell-type" else f"cell-type-{uid}.json"
-    if entity_type == "cell-type":
-        return source_root / "cell-type" / filename
+    filename = f"{entity_type}-{uid}.json" if entity_type != "cell-spec" else f"cell-spec-{uid}.json"
+    if entity_type == "cell-spec":
+        return source_root / "cell-spec" / filename
     if entity_type == "cell":
         return source_root / "cell-instance" / filename
     if entity_type == "test-protocol":
@@ -107,10 +107,10 @@ def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
 
 
 def _candidate_types(namespace: str) -> list[str]:
-    # cell/ covers both cell-type specs and cell instances (shared IRI namespace).
+    # cell/ covers both cell-spec specs and cell instances (shared IRI namespace).
     # test/ covers both test-protocol specs and test executions.
     if namespace == "spec":
-        return ["cell-type", "test-protocol"]
+        return ["cell-spec", "test-protocol"]
     return [namespace]
 
 
@@ -198,22 +198,22 @@ def validate_references_report(
         resource_type = None
 
     if isinstance(doc.get("cell_instance"), Mapping):
-        type_id = doc["cell_instance"].get("type_id")
-        if isinstance(type_id, str):
+        cell_spec_id = doc["cell_instance"].get("cell_spec_id")
+        if isinstance(cell_spec_id, str):
             _check_reference(
                 issues=issues,
-                ref_id=type_id,
-                expected_type="cell-type",
-                path="cell_instance.type_id",
+                ref_id=cell_spec_id,
+                expected_type="cell-spec",
+                path="cell_instance.cell_spec_id",
                 source_root=root,
                 resource_type=resource_type,
                 missing_message=(
-                    "Referenced cell_type not found in source_root. Register the type first "
-                    f"or disable resolve_references. Missing: {type_id}"
+                    "Referenced cell_spec not found in source_root. Register the type first "
+                    f"or disable resolve_references. Missing: {cell_spec_id}"
                 ),
                 mismatch_message=(
-                    "Referenced cell_type must resolve to a cell-type record in source_root. "
-                    f"Found a different record type for: {type_id}"
+                    "Referenced cell_spec must resolve to a cell-spec record in source_root. "
+                    f"Found a different record type for: {cell_spec_id}"
                 ),
                 allow_missing=allow_missing,
             )

@@ -131,7 +131,7 @@ CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
 CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/spec/"  # cell specs use the spec/ namespace
 
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
-    "cell-type": ("product", "cell_type"),
+    "cell-spec": ("cell_spec", "cell_spec"),
     "cell": ("cell_instance",),
     "test": ("test",),
     "dataset": ("dataset",),
@@ -272,7 +272,7 @@ def _validate_controlled_values(
     issues: list[ValidationIssue],
     resource_type: str | None,
 ) -> None:
-    product = doc.get("product")
+    product = doc.get("cell_spec")
     if not isinstance(product, Mapping):
         return
     value_map = _controlled_value_map()
@@ -306,7 +306,7 @@ def _validate_size_code(
     resource_type: str | None,
     issue_severity: str,
 ) -> None:
-    product = doc.get("product")
+    product = doc.get("cell_spec")
     if not isinstance(product, Mapping):
         return
     size_code = product.get("size_code")
@@ -488,7 +488,7 @@ def _validate_dataset_semantics(
             code="semantic.dataset_missing_cell_link",
             severity=issue_severity,
             path="dataset.about",
-            message="dataset must reference at least one BattINFO cell or cell_type IRI.",
+            message="dataset must reference at least one BattINFO cell or cell_spec IRI.",
             resource_type=resource_type,
         )
 
@@ -579,7 +579,7 @@ def validate_semantic_report(
     _validate_controlled_values(doc, issues, resource_type)
     _validate_size_code(doc, issues, resource_type, hard_issue_severity)
 
-    specs = doc.get("specs")
+    specs = doc.get("properties")
     if isinstance(specs, Mapping):
         _validate_specs(specs, issues, resource_type, hard_issue_severity)
 

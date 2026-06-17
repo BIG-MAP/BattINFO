@@ -1,15 +1,42 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "1.0.0",
   "test_spec": {
     "id": "https://w3id.org/battinfo/spec/2k9p-7t4r-3m6x-5n1v",
     "short_id": "2k9p7t",
     "identifier": "test-protocol:2k9p-7t4r-3m6x-5n1v",
-    "name": "EIS at 50% SOC, 25°C",
+    "name": "EIS at 50% SOC, 25\u00b0C",
     "kind": "eis",
     "description": "Electrochemical impedance spectroscopy sweep from 100 kHz to 10 mHz with a 10 mV AC perturbation amplitude. Cell is brought to 50% state of charge before measurement and held at open-circuit potential for 2 hours to reach equilibrium. Galvanostatic EIS mode.",
     "version": "1.0",
     "protocol_url": "https://example.org/protocols/eis-50soc-25c"
   },
+  "method": [
+    {
+      "mode": "eis",
+      "direction": "hold",
+      "setpoints": {
+        "frequency_upper_limit": {
+          "value": 100000.0,
+          "unit": "Hz"
+        },
+        "frequency_lower_limit": {
+          "value": 0.01,
+          "unit": "Hz"
+        },
+        "ac_perturbation_amplitude": {
+          "value": 10.0,
+          "unit": "mV"
+        },
+        "points_per_decade": {
+          "value": 10.0,
+          "unit": "count"
+        }
+      },
+      "termination": [],
+      "tags": [],
+      "steps": []
+    }
+  ],
   "conditions": {
     "ambient_temperature": {
       "value": 25.0,
@@ -24,47 +51,16 @@
       "unit": "h"
     }
   },
-  "setpoints": {
-    "frequency_upper_limit": {
-      "value": 100000.0,
-      "unit": "Hz"
-    },
-    "frequency_lower_limit": {
-      "value": 0.01,
-      "unit": "Hz"
-    },
-    "ac_perturbation_amplitude": {
-      "value": 10.0,
-      "unit": "mV"
-    },
-    "points_per_decade": {
-      "value": 10,
-      "unit": "count"
-    }
+  "facets": {
+    "modes": [
+      "eis"
+    ],
+    "directions": [],
+    "control_modes": [],
+    "has_cv_hold": false,
+    "has_rest": false,
+    "has_eis": true
   },
-  "termination_criteria": {},
-  "measurement_outputs": [
-    {
-      "name": "Frequency",
-      "unit_text": "Hz"
-    },
-    {
-      "name": "ImpedanceMagnitude",
-      "unit_text": "Ohm"
-    },
-    {
-      "name": "PhaseAngle",
-      "unit_text": "deg"
-    },
-    {
-      "name": "RealImpedance",
-      "unit_text": "Ohm"
-    },
-    {
-      "name": "ImaginaryImpedance",
-      "unit_text": "Ohm"
-    }
-  ],
   "provenance": {
     "source_type": "manual",
     "source_file": "eis-50soc-25c.protocol.json",
@@ -73,6 +69,7 @@
   "notes": [
     "EIS spectrum is typically collected after a C/10 capacity check to set SOC accurately.",
     "Ten mV perturbation amplitude is appropriate for most lithium-ion cells; reduce to 5 mV for cells with low internal resistance.",
-    "Lower frequency limit of 10 mHz captures the diffusion tail (Warburg region) for solid-state diffusion characterisation."
+    "Lower frequency limit of 10 mHz captures the diffusion tail (Warburg region) for solid-state diffusion characterisation.",
+    "Pre-method-model parameters preserved on migration: {\"measurement_outputs\": [{\"name\": \"Frequency\", \"unit_text\": \"Hz\"}, {\"name\": \"ImpedanceMagnitude\", \"unit_text\": \"Ohm\"}, {\"name\": \"PhaseAngle\", \"unit_text\": \"deg\"}, {\"name\": \"RealImpedance\", \"unit_text\": \"Ohm\"}, {\"name\": \"ImaginaryImpedance\", \"unit_text\": \"Ohm\"}]}"
   ]
 }

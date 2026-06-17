@@ -12,7 +12,7 @@ Usage::
     from battinfo.jsonld import record_to_jsonld
     import json
 
-    raw = json.loads(Path("cell-type-xyz.json").read_text())
+    raw = json.loads(Path("cell-spec-xyz.json").read_text())
     ld  = record_to_jsonld(raw, "cell-spec")
 """
 from __future__ import annotations
@@ -48,9 +48,141 @@ def _load_entity_type_map() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))["mappings"]
 
 
+def _load_test_method_vocab() -> dict:
+    base = _DATA / "vocab" / "test-method"
+    return {
+        "step_modes":  json.loads((base / "step-modes.json").read_text(encoding="utf-8"))["modes"],
+        "quantities":  json.loads((base / "quantities.json").read_text(encoding="utf-8")),
+        "termination": json.loads((base / "termination.json").read_text(encoding="utf-8"))["terminations"],
+    }
+
+
 _PROP_MAP   = _load_property_map()
 _UNIT_MAP   = _load_unit_map()
 _ENTITY_MAP = _load_entity_type_map()
+_METHOD_VOCAB = _load_test_method_vocab()
+
+
+def _load_test_method_context_terms() -> dict:
+    """Pull the EMMO terms a method graph emits (process classes, relations,
+    quantity classes) from the curated domain-battery context, so the assembled
+    JSON-LD resolves offline without hand-maintaining their IRIs here."""
+    db = json.loads((_DATA / "context" / "domain-battery.context.json").read_text(encoding="utf-8"))["@context"]
+    wanted = (
+        "hasTask", "NumberOfIterations", "hasControlParameter", "hasTerminationParameter", "hasProperty",
+        "ConstantCurrentCharging", "ConstantCurrentDischarging",
+        "ConstantCurrentConstantVoltageCharging", "ConstantCurrentConstantVoltageDischarging",
+        "ConstantPowerCharging", "ConstantPowerDischarging",
+        "VoltageHold", "OpenCircuitHold", "IterativeWorkflow",
+        "ElectrochemicalImpedanceSpectroscopy", "LinearScanVoltammetry",
+        "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
+        "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
+        "Duration", "ConventionalProperty",
+    )
+    return {t: db[t] for t in wanted if t in db}
+
+
+TEST_METHOD_CONTEXT_TERMS = _load_test_method_context_terms()
+
+
+def step_emmo_class(mode: str, direction: str | None) -> str | None:
+    """(mode, direction) → EMMO process class prefLabel for a method step @type."""
+    entry = _METHOD_VOCAB["step_modes"].get(mode)
+    if not entry:
+        return None
+    dirs = entry.get("directions", {})
+    if direction and direction in dirs:
+        return dirs[direction]["emmo_class"]
+    if len(dirs) == 1:
+        return next(iter(dirs.values()))["emmo_class"]
+    return None
+
+
+def setpoint_emmo_class(quantity: str) -> str | None:
+    """Setpoint quantity key → EMMO quantity class prefLabel."""
+    entry = _METHOD_VOCAB["quantities"]["setpoints"].get(quantity)
+    return entry["emmo_class"] if entry else None
+
+
+def termination_emmo_class(quantity: str, direction: str | None) -> str | None:
+    """(termination quantity, direction) → EMMO termination class prefLabel."""
+    terms = _METHOD_VOCAB["termination"].get(quantity)
+    if not terms:
+        return None
+    if quantity == "duration":
+        return terms.get("elapsed", {}).get("emmo_class")
+    if direction and direction in terms:
+        return terms[direction]["emmo_class"]
+    if "below" in terms:
+        return terms["below"]["emmo_class"]
+    return None
+
+# ── Test-protocol condition vocabulary (EMMO domain-battery) ──────────────────
+# A test protocol's structured conditions are modelled the way the EMMO
+# electrochemistry ontology models a test process: controlled inputs via
+# `hasControlParameter`, stop conditions via `hasTerminationParameter`, and
+# ambient conditions via `hasProperty` — each a typed quantity with the standard
+# `hasNumericalPart`/`hasMeasurementUnit` sub-pattern (see the ontology's
+# formation_cycling.jsonld example). These maps let the publication builder turn
+# a `{value, unit}` authoring entry into that graph, with a `schema:PropertyValue`
+# fallback (and a warning) for any name not in the controlled vocabulary.
+#
+# Authoring group → EMMO relation predicate.
+TEST_CONDITION_GROUP_RELATION: dict[str, str] = {
+    "setpoints":            "hasControlParameter",
+    "termination_criteria": "hasTerminationParameter",
+    "conditions":           "hasProperty",
+}
+TEST_CONDITION_GROUPS = tuple(TEST_CONDITION_GROUP_RELATION)
+# Authoring condition key → EMMO quantity-class prefLabel (resolved by the context).
+# Temperature has no dedicated quantity class, so it is a generic ConventionalProperty
+# (an assigned-by-convention value, e.g. "room temperature" = 20 degC) carrying a label.
+TEST_CONDITION_CLASS: dict[str, str] = {
+    "c_rate":                     "CRate",
+    "crate":                      "CRate",
+    "current":                    "ElectricCurrent",
+    "discharging_current":        "ElectricCurrent",
+    "charging_current":           "ElectricCurrent",
+    "voltage":                    "Voltage",
+    "discharging_cutoff_voltage": "LowerVoltageLimit",
+    "lower_voltage_limit":        "LowerVoltageLimit",
+    "charging_cutoff_voltage":    "UpperVoltageLimit",
+    "upper_voltage_limit":        "UpperVoltageLimit",
+    "duration":                   "Duration",
+    "number_of_iterations":       "NumberOfIterations",
+    "cycles":                     "NumberOfIterations",
+    "temperature":                "ConventionalProperty",
+    "ambient_temperature":        "ConventionalProperty",
+    "room_temperature":           "ConventionalProperty",
+}
+# Quantity classes whose @type is generic and so should carry a human rdfs:label.
+TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
+# Extra unit symbols not in the records context (CRate is current-per-capacity).
+TEST_CONDITION_UNIT_IRI: dict[str, str] = {
+    "A/Ah":  "electrochemistry:AmperePerAmpereHour",
+    "Ah/Ah": "electrochemistry:AmperePerAmpereHour",
+    "C":     "electrochemistry:AmperePerAmpereHour",
+}
+# Context terms the test-protocol model needs that the records context lacks.
+# Relations are @id-typed; classes/units map a prefLabel to a compact IRI.
+TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
+    "hasControlParameter": {
+        "@id": "electrochemistry:electrochemistry_e55f2798_55c8_4fc5_9abb_2f8ac101f3b8",
+        "@type": "@id",
+    },
+    "hasTerminationParameter": {
+        "@id": "electrochemistry:electrochemistry_e6a7d617_a581_4782_8374_37d3305e0258",
+        "@type": "@id",
+    },
+    "ControlProperty":      "electrochemistry:electrochemistry_33e6986c_b35a_4cae_9a94_acb23248065c",
+    "ConventionalProperty": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456",
+    "CRate":                "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
+    "Voltage":              "emmo:EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee",
+    "ElectricCurrent":      "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
+    "Duration":             "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
+    "NumberOfIterations":   "electrochemistry:electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
+    "AmperePerAmpereHour":  "electrochemistry:AmperePerAmpereHour",
+}
 
 # EMMO battery-type IRIs (from domain-battery.context.json)
 _BATTERY_TYPE_IRIS: dict[str, str] = {
@@ -80,13 +212,15 @@ def _compact_iri(iri: str) -> str:
 
 
 def _quantity(value: Any, unit: str) -> dict:
-    """Convert {value, unit} to a QUDT-style quantity node."""
-    node: dict = {"qudt:value": value}
+    """Convert {value, unit} to an EMMO quantity node.
+
+    Uses the same EMMO ``hasNumericalPart``/``hasNumberValue``/``hasMeasurementUnit``
+    encoding as the published builder (ws.py) — a single, shared quantity serialization
+    across publication and validation (no parallel QUDT form).
+    """
+    node: dict = {"hasNumericalPart": {"hasNumberValue": value}}
     unit_iri = _UNIT_MAP.get(unit)
-    if unit_iri:
-        node["qudt:unit"] = {"@id": unit_iri}
-    else:
-        node["qudt:unit"] = unit
+    node["hasMeasurementUnit"] = {"@id": unit_iri} if unit_iri else unit
     return node
 
 
@@ -114,8 +248,8 @@ def _rdf_types_for(cell_format: str, chemistry: str) -> list[str]:
 
 def cell_spec_to_jsonld(record: dict) -> dict:
     """Transform a cell-spec record dict to JSON-LD."""
-    product = record.get("product") or record.get("specification") or {}
-    specs   = record.get("specs") or {}
+    product = record.get("cell_spec") or record.get("specification") or {}
+    specs   = record.get("properties") or {}
     prov    = record.get("provenance") or {}
 
     node: dict = {
@@ -163,8 +297,8 @@ def cell_instance_to_jsonld(record: dict) -> dict:
         "@id":      ci.get("id", ""),
         "schema:serialNumber": ci.get("serial_number"),
     }
-    if ci.get("type_id"):
-        node["battinfo:cellSpecification"] = {"@id": ci["type_id"]}
+    if ci.get("cell_spec_id"):
+        node["battinfo:cellSpecification"] = {"@id": ci["cell_spec_id"]}
     if ci.get("batch_id"):
         node["battinfo:batchId"] = ci["batch_id"]
     if ci.get("manufactured_at"):
@@ -269,8 +403,8 @@ def _provenance(prov: dict) -> dict:
 _TRANSFORMERS = {
     "cell-spec":      cell_spec_to_jsonld,
     "cell_spec":      cell_spec_to_jsonld,
-    "cell-type":      cell_spec_to_jsonld,
-    "cell_type":      cell_spec_to_jsonld,
+    "cell-spec":      cell_spec_to_jsonld,
+    "cell_spec":      cell_spec_to_jsonld,
     "cell-instance":  cell_instance_to_jsonld,
     "cell_instance":  cell_instance_to_jsonld,
     "test":           test_to_jsonld,
@@ -299,7 +433,7 @@ def record_to_jsonld(record: dict, record_type: str) -> dict:
         import json
         from battinfo.jsonld import record_to_jsonld
 
-        raw = json.loads(Path("cell-type-xyz.json").read_text())
+        raw = json.loads(Path("cell-spec-xyz.json").read_text())
         ld  = record_to_jsonld(raw, "cell-spec")
         print(json.dumps(ld, indent=2))
     """

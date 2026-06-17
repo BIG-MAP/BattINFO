@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo.cli import app
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 
-EXAMPLE_CELL_TYPE = ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
+EXAMPLE_CELL_TYPE = ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 
 
 def _make_ingest_root(tmp_path: Path) -> Path:

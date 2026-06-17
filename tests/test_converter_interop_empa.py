@@ -564,9 +564,10 @@ class TestGenerationA:
 
     def test_hardware_extracted_from_hasConstituent_dict(self) -> None:
         result = import_converter_jsonld_record(_gen_a_fixture())
-        hardware = result.record["specification"].get("coin_hardware", {})
-        assert "spring" in hardware
-        assert hardware["spring"]["property"]["diameter"]["value"] == 15
+        housing = result.record["specification"].get("housing", {})
+        parts = {part["type"]: part for part in housing.get("parts", [])}
+        assert "spring" in parts
+        assert parts["spring"]["property"]["diameter"]["value"] == 15
 
     def test_dataset_record_built(self) -> None:
         ds = import_dataset_record(_gen_a_fixture())
@@ -623,10 +624,11 @@ class TestGenerationB:
 
     def test_hardware_extracted_from_hasComponent_list(self) -> None:
         result = import_converter_jsonld_record(_gen_b_fixture())
-        hardware = result.record["specification"].get("coin_hardware", {})
-        assert "spring" in hardware
-        assert hardware["spring"]["property"]["diameter"]["value"] == 15
-        assert "spacer" in hardware
+        housing = result.record["specification"].get("housing", {})
+        parts = {part["type"]: part for part in housing.get("parts", [])}
+        assert "spring" in parts
+        assert parts["spring"]["property"]["diameter"]["value"] == 15
+        assert "spacer" in parts
 
     def test_dataset_record_built(self) -> None:
         ds = import_dataset_record(_gen_b_fixture())

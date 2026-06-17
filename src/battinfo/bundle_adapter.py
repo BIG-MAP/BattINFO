@@ -11,13 +11,13 @@ Public API
 ----------
 specs_to_specset(props)         dict[str, Any] → SpecSet
 specset_to_specs(ss)            SpecSet        → dict[str, Any]
-cell_type_to_schema(ct)         CellType       → generated CellType
+cell_spec_to_schema(ct)         CellSpecification       → generated CellSpecification
 cell_instance_to_schema(ci)     CellInstance   → generated CellInstance
 test_to_schema(t)               Test           → generated Test
 test_spec_to_schema(ts)         TestSpec       → generated TestSpec
 bundle_to_schema(obj)           any bundle obj → corresponding generated obj
 
-schema_cell_type_to_record_dict(ct_gen) → record dict accepted by CellType.from_record()
+schema_cell_spec_to_record_dict(ct_gen) → record dict accepted by CellSpecification.from_record()
 """
 
 from __future__ import annotations
@@ -25,10 +25,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Mapping
 
 if TYPE_CHECKING:
-    from battinfo.bundle import CellInstance, CellType, Dataset, Test, TestSpec
+    from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
     from battinfo.bundle_generated import (
         CellInstance as GenCellInstance,
-        CellType as GenCellType,
+        CellSpecification as GenCellSpecification,
         Dataset as GenDataset,
         SpecSet,
         SpecValue,
@@ -67,7 +67,7 @@ def _spec_value_to_dict(sv: "SpecValue") -> dict[str, Any]:
 
 
 def specs_to_specset(props: dict[str, Any]) -> "SpecSet | None":
-    """Convert a nominal_properties dict to a SpecSet.
+    """Convert a properties dict to a SpecSet.
 
     Keys matching SpecSet field names become typed SpecValue objects.
     Unknown keys are stored as extras (ConfiguredBaseModel uses extra='allow').
@@ -85,7 +85,7 @@ def specs_to_specset(props: dict[str, Any]) -> "SpecSet | None":
 
 
 def specset_to_specs(specset: "SpecSet | None") -> dict[str, Any]:
-    """Convert a SpecSet to a nominal_properties dict.
+    """Convert a SpecSet to a properties dict.
 
     Only non-None fields are included.  SpecValue fields are converted to
     {"value": ..., "unit": ...} dicts.
@@ -125,13 +125,13 @@ def specset_to_specs(specset: "SpecSet | None") -> dict[str, Any]:
 # ── bundle.py → generated ─────────────────────────────────────────────────────
 
 
-def cell_type_to_schema(ct: "CellType") -> "GenCellType":
-    """Convert a bundle.py CellType to a generated CellType with EMMO IRI annotations."""
+def cell_spec_to_schema(ct: "CellSpecification") -> "GenCellSpecification":
+    """Convert a bundle.py CellSpecification to a generated CellSpecification with EMMO IRI annotations."""
     from battinfo.bundle_generated import (  # noqa: PLC0415
-        CellType as GenCellType,
+        CellSpecification as GenCellSpecification,
         Organization,
     )
-    return GenCellType(
+    return GenCellSpecification(
         id=ct.id or "urn:staging:unknown",
         ct_name=ct.name,
         ct_model=ct.model,
@@ -146,7 +146,7 @@ def cell_type_to_schema(ct: "CellType") -> "GenCellType":
         ct_negative_electrode_basis=ct.negative_electrode_basis,
         ct_size_code=ct.size_code,
         ct_iec_code=ct.iec_code,
-        ct_specs=specs_to_specset(ct.nominal_properties),
+        ct_specs=specs_to_specset(ct.properties),
     )
 
 
@@ -155,7 +155,8 @@ def cell_instance_to_schema(ci: "CellInstance") -> "GenCellInstance":
     from battinfo.bundle_generated import CellInstance as GenCellInstance  # noqa: PLC0415
     return GenCellInstance(
         ci_id=ci.id or "urn:staging:unknown",
-        ci_type_id=ci.cell_type_id or "",
+        ci_type_id=ci.cell_spec_id or "",
+        ci_name=ci.name,
         ci_serial_number=ci.serial_number,
         ci_batch_id=ci.batch_id,
         ci_grade=ci.grade,
@@ -182,8 +183,8 @@ def test_spec_to_schema(ts: "TestSpec") -> "GenTestSpec":
             protocol_name=ts.protocol.name,
             protocol_url=ts.protocol.url,
         ) if (ts.protocol.name or ts.protocol.url) else None,
-        ts_steps=list(ts.steps) if ts.steps else None,
-        ts_cycles=ts.cycles,
+        ts_steps=ts.experiment or None,
+        ts_cycles=None,
     )
 
 
@@ -219,12 +220,12 @@ def bundle_to_schema(obj: Any) -> Any:
     """
     from battinfo.bundle import (  # noqa: PLC0415
         CellInstance,
-        CellType,
+        CellSpecification,
         Test,
         TestSpec,
     )
-    if isinstance(obj, CellType):
-        return cell_type_to_schema(obj)
+    if isinstance(obj, CellSpecification):
+        return cell_spec_to_schema(obj)
     if isinstance(obj, CellInstance):
         return cell_instance_to_schema(obj)
     if isinstance(obj, Test):
@@ -237,8 +238,8 @@ def bundle_to_schema(obj: Any) -> Any:
 # ── generated → record dict ───────────────────────────────────────────────────
 
 
-def schema_cell_type_to_record_dict(ct_gen: "GenCellType") -> dict[str, Any]:
-    """Convert a generated CellType to the record dict accepted by CellType.from_record().
+def schema_cell_spec_to_record_dict(ct_gen: "GenCellSpecification") -> dict[str, Any]:
+    """Convert a generated CellSpecification to the record dict accepted by CellSpecification.from_record().
 
     Useful when reading JSON-LD output back into the application layer.
     """
@@ -273,7 +274,7 @@ def schema_cell_type_to_record_dict(ct_gen: "GenCellType") -> dict[str, Any]:
         product["iec_code"] = ct_gen.ct_iec_code
     return {
         "schema_version": "1.0.0",
-        "product": product,
-        "specs": specset_to_specs(ct_gen.ct_specs),
+        "cell_spec": product,
+        "properties": specset_to_specs(ct_gen.ct_specs),
         "provenance": {},
     }

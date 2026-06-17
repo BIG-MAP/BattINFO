@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo import (
     BattinfoBundle,
     CellInstance,
-    CellType,
+    CellSpecification,
     Dataset,
     Test,
     load_publication,
@@ -67,14 +67,14 @@ def test_generate_cr2032_dataset_publication(tmp_path: Path) -> None:
 
     report_file = _load_json(staging_root / "cr2032-publication-report.json")
     assert report_file["dataset_count"] == 2
-    assert Path(report_file["cell_type_path"]).exists()
+    assert Path(report_file["cell_spec_path"]).exists()
 
     assert not (dataset_dir_a / "battinfo").exists()
     assert not (dataset_dir_b / "battinfo").exists()
 
     bundle_a = BattinfoBundle.from_jsonld(dataset_dir_a / "battinfo.publish.jsonld")
     bundle_b = BattinfoBundle.from_jsonld(dataset_dir_b / "battinfo.publish.jsonld")
-    assert bundle_a.cell_type.model == "CR2032"
+    assert bundle_a.cell_spec.model == "CR2032"
     assert bundle_b.cell_specification is not None
     assert bundle_a.dataset.access_url == dataset_dir_a.resolve().as_uri()
     assert bundle_b.test.protocol.name == "constant current discharging"
@@ -89,13 +89,18 @@ def test_generate_cr2032_dataset_publication(tmp_path: Path) -> None:
     ids_a = {node["@id"] for node in graph_a if isinstance(node, dict) and isinstance(node.get("@id"), str)}
     ids_b = {node["@id"] for node in graph_b if isinstance(node, dict) and isinstance(node.get("@id"), str)}
 
-    assert report_file["cell_type_id"] in ids_a
-    assert report_file["cell_type_id"] in ids_b
-    assert any(node.get("@type") == "schema:Dataset" for node in graph_a if isinstance(node, dict))
-    assert any(node.get("@type") == "schema:Dataset" for node in graph_b if isinstance(node, dict))
+    assert report_file["cell_spec_id"] in ids_a
+    assert report_file["cell_spec_id"] in ids_b
+    def _is_schema_dataset(node: dict) -> bool:
+        types = node.get("@type")
+        types = types if isinstance(types, list) else [types]
+        return "schema:Dataset" in types
 
-    dataset_nodes_a = [node for node in graph_a if isinstance(node, dict) and node.get("@type") == "schema:Dataset"]
-    dataset_nodes_b = [node for node in graph_b if isinstance(node, dict) and node.get("@type") == "schema:Dataset"]
+    assert any(_is_schema_dataset(node) for node in graph_a if isinstance(node, dict))
+    assert any(_is_schema_dataset(node) for node in graph_b if isinstance(node, dict))
+
+    dataset_nodes_a = [node for node in graph_a if isinstance(node, dict) and _is_schema_dataset(node)]
+    dataset_nodes_b = [node for node in graph_b if isinstance(node, dict) and _is_schema_dataset(node)]
     assert any(node.get("schema:url") == dataset_dir_a.resolve().as_uri() for node in dataset_nodes_a)
     assert any(node.get("schema:url") == dataset_dir_b.resolve().as_uri() for node in dataset_nodes_b)
     assert not any("battinfo" in str(path) for path in report_file["datasets"][0]["dataset_files"])
@@ -121,7 +126,7 @@ def test_publish_cr2032_dataset_metadata_api(tmp_path: Path) -> None:
     assert Path(report["datasets"][0]["publish_path"]).exists()
 
     bundle = load_publication(dataset_dir / "battinfo.publish.jsonld")
-    assert bundle.cell_type.model == "CR2032"
+    assert bundle.cell_spec.model == "CR2032"
     assert bundle.cell_specification is not None
     assert bundle.cell_instance.name == dataset_dir.name
     assert bundle.dataset.test_id == report["datasets"][0]["test_id"]
@@ -138,7 +143,7 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     raw.write_text("dummy-a", encoding="utf-8")
 
     report = publish_dataset_metadata(
-        cell_specification=ROOT / "src" / "battinfo" / "data" / "library" / "cell-type" / "ENERGIZER__CR2032.json",
+        cell_specification=ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "ENERGIZER__CR2032.json",
         datasheet_path=datasheet,
         dataset_dirs=[dataset_dir],
         staging_root=tmp_path / "staging",
@@ -154,8 +159,8 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
 
     bundle = load_publication(dataset_dir / "battinfo.publish.jsonld")
     assert bundle.cell_specification is not None
-    assert bundle.cell_type.model == "CR2032"
-    assert bundle.cell_type.cell_specification_id == bundle.cell_specification.id
+    assert bundle.cell_spec.model == "CR2032"
+    assert bundle.cell_spec.cell_specification_id == bundle.cell_specification.id
     assert bundle.test.test_kind == "capacity_check"
     assert bundle.dataset.access_url == dataset_dir.resolve().as_uri()
     assert bundle.test.instrument == "short Landt cycler"
@@ -165,27 +170,30 @@ def test_publish_dataset_metadata_with_cell_specification(tmp_path: Path) -> Non
     instance_node = next(node for node in graph if node.get("@id") == bundle.cell_instance.id)
     type_values = instance_node.get("@type")
     assert isinstance(type_values, list)
-    assert bundle.cell_type.id not in type_values
-    assert instance_node["hasDescription"]["@id"] == bundle.cell_type.id
-    class_node = next(node for node in graph if node.get("@id") == bundle.cell_type.id)
+    assert bundle.cell_spec.id not in type_values
+    assert instance_node["hasDescription"]["@id"] == bundle.cell_spec.id
+    class_node = next(node for node in graph if node.get("@id") == bundle.cell_spec.id)
     class_types = class_node["@type"] if isinstance(class_node["@type"], list) else [class_node["@type"]]
     assert "BatteryCellSpecification" in class_types
-    assert "schema:CreativeWork" in class_types
+    # Gold-standard types the spec node as a schema:Product (a described product model).
+    assert "schema:Product" in class_types
     test_node = next(node for node in graph if node.get("@id") == bundle.test.id)
     test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
-    assert "schema:Action" in test_types
+    # Gold-standard: a test is a prov:Activity; the protocol is schema:measurementTechnique
+    # and the instrument is carried via hasTestEquipment (not schema:instrument).
+    assert "prov:Activity" in test_types
     assert "BatteryTest" in test_types
-    assert test_node["schema:description"] == "Protocol: constant current discharging"
-    assert test_node["schema:instrument"]["schema:name"] == "short Landt cycler"
+    assert test_node["schema:measurementTechnique"] == "constant current discharging"
+    assert test_node["hasTestEquipment"]["schema:name"] == "short Landt cycler"
 
 
-def test_publish_dataset_metadata_with_cell_type_only(tmp_path: Path) -> None:
+def test_publish_dataset_metadata_with_cell_spec_only(tmp_path: Path) -> None:
     dataset_dir = tmp_path / "example-cell-001"
     raw = dataset_dir / "data" / "run.csv"
     raw.parent.mkdir(parents=True)
     raw.write_text("time,voltage\n0,3.7\n", encoding="utf-8")
 
-    cell_type = CellType(
+    cell_spec = CellSpecification(
         id="https://w3id.org/battinfo/spec/1234-5678-9abc-def0",
         name="ExampleCell 21700-A",
         manufacturer="ExampleCell",
@@ -193,17 +201,17 @@ def test_publish_dataset_metadata_with_cell_type_only(tmp_path: Path) -> None:
         format="cylindrical",
         chemistry="NMC/Graphite",
         size_code="R21700",
-        nominal_properties={"nominal_voltage": {"value": 3.7, "unit": "V"}},
+        properties={"nominal_voltage": {"value": 3.7, "unit": "V"}},
         source=ProvenanceInfo(type="manual", url="https://example.org/cells/21700-a", retrieved_at=1771804800),
     )
 
     report = publish_dataset_metadata(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         dataset_dirs=[dataset_dir],
         staging_root=tmp_path / "staging",
         test_kind="cycling",
         protocol_name="cycling",
-        dataset_name_template="{cell_type_name} measurements for {dataset_key}",
+        dataset_name_template="{cell_spec_name} measurements for {dataset_key}",
         emit_bundle_dir=True,
     )
 
@@ -214,8 +222,13 @@ def test_publish_dataset_metadata_with_cell_type_only(tmp_path: Path) -> None:
     assert "cell_specification_path" not in report["datasets"][0]
 
     bundle = load_publication(dataset_dir / "battinfo.publish.jsonld")
-    assert bundle.cell_specification is None
-    assert bundle.cell_type.name == "ExampleCell 21700-A"
+    # CellSpecification and CellSpecification are the same entity (a BatteryCellSpecification),
+    # so the round-trip always recovers a specification — there is no "cell-spec-only"
+    # graph that lacks one. (The publish() *report* still omits cell_specification_id,
+    # asserted above, since no separate specification object was passed in.)
+    assert bundle.cell_specification is not None
+    assert bundle.cell_specification.id == bundle.cell_spec.id
+    assert bundle.cell_spec.name == "ExampleCell 21700-A"
     assert bundle.test.protocol.name == "cycling"
     assert bundle.dataset.name == "ExampleCell 21700-A measurements for example-cell-001"
 
@@ -226,16 +239,16 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     raw.parent.mkdir(parents=True)
     raw.write_text("time,voltage\n0,3.0\n", encoding="utf-8")
 
-    cell_type = CellType(
+    cell_spec = CellSpecification(
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
         chemistry="Li-primary",
         size_code="R2032",
-        nominal_properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
+        properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
     )
     cell = CellInstance(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         serial_number="energizer-cr2032-202602-dtjrga",
     )
     test = Test(
@@ -285,7 +298,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     )
 
     result = publish(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_instance=cell,
         test=test,
         dataset=dataset,
@@ -297,11 +310,11 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert Path(result["publish_path"]).exists()
     assert Path(result["bundle_dir"]).exists()
     assert Path(result["html_path"]).exists()
-    assert result["cell_type_id"].startswith("https://w3id.org/battinfo/spec/")
+    assert result["cell_spec_id"].startswith("https://w3id.org/battinfo/spec/")
 
     loaded = load_publication(dataset_dir / "battinfo.publish.jsonld")
-    assert loaded.cell_type.id == result["cell_type_id"]
-    assert loaded.cell_instance.cell_type_id == loaded.cell_type.id
+    assert loaded.cell_spec.id == result["cell_spec_id"]
+    assert loaded.cell_instance.cell_spec_id == loaded.cell_spec.id
     assert loaded.test.cell_instance_id == loaded.cell_instance.id
     assert loaded.dataset.test_id == loaded.test.id
     assert loaded.dataset.access_url == dataset_dir.resolve().as_uri()
@@ -311,7 +324,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert loaded.dataset.main_entity[0]["type"] == "Table"
     assert loaded.dataset.main_entity[0]["table_schema"]["id"] == "https://example.org/datasets/cr2032/table-schema"
     assert any(dist["content_url"] == "https://example.org/downloads/cr2032.csv" for dist in loaded.dataset.distributions)
-    assert loaded.cell_type.model == "CR2032"
+    assert loaded.cell_spec.model == "CR2032"
     assert loaded.cell_instance.serial_number == "energizer-cr2032-202602-dtjrga"
     assert loaded.test.protocol.name == "constant current discharging"
     assert loaded.test.instrument == "short Landt cycler"

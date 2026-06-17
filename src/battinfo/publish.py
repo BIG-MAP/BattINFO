@@ -8,8 +8,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from battinfo.api import build_curated_cell_type_submission, submit_publication_package
-from battinfo.bundle import CellType
+from battinfo.api import build_curated_cell_spec_submission, submit_publication_package
+from battinfo.bundle import CellSpecification
 from battinfo.config import resolve_destination_config
 from battinfo.publication import publish as _legacy_publish
 from battinfo._workspace import Workspace
@@ -48,17 +48,17 @@ def publish(obj: Any = None, destination: str | None = None, **kwargs: Any) -> P
         raise TypeError("publish() requires a BattINFO object or the legacy publication-package keyword arguments.")
 
     resolved_destination = destination or "local"
-    if isinstance(obj, CellType):
-        return _publish_cell_type(obj, destination=resolved_destination, **kwargs)
+    if isinstance(obj, CellSpecification):
+        return _publish_cell_spec(obj, destination=resolved_destination, **kwargs)
 
     raise TypeError(
-        "publish(obj, destination=...) currently supports CellType objects. "
+        "publish(obj, destination=...) currently supports CellSpecification objects. "
         "Use the legacy keyword form for dataset publication packages."
     )
 
 
-def _publish_cell_type(
-    cell_type: CellType,
+def _publish_cell_spec(
+    cell_spec: CellSpecification,
     *,
     destination: str,
     root: PathLike | None = None,
@@ -83,16 +83,16 @@ def _publish_cell_type(
         source_version=source_version,
     )
 
-    workspace_root = Path(root) if root is not None else Path(".battinfo/publish") / _cell_type_slug(cell_type)
+    workspace_root = Path(root) if root is not None else Path(".battinfo/publish") / _cell_spec_slug(cell_spec)
     workspace = Workspace(root=workspace_root, clean=force)
-    workspace.add(cell_type)
+    workspace.add(cell_spec)
     workspace.save(validation_policy=validation_policy)
 
-    if not isinstance(cell_type.id, str) or not cell_type.id:
-        raise RuntimeError("CellType did not receive a canonical id during save().")
+    if not isinstance(cell_spec.id, str) or not cell_spec.id:
+        raise RuntimeError("CellSpecification did not receive a canonical id during save().")
 
-    canonical_id = cell_type.id.rsplit("/", 1)[-1]
-    record_path = workspace.source_root / "cell-type" / f"cell-type-{canonical_id}.json"
+    canonical_id = cell_spec.id.rsplit("/", 1)[-1]
+    record_path = workspace.source_root / "cell-spec" / f"cell-spec-{canonical_id}.json"
     if not record_path.exists():
         raise FileNotFoundError(f"Expected canonical record to exist at {record_path}")
 
@@ -106,9 +106,9 @@ def _publish_cell_type(
         return PublishResult(
             status="ok",
             destination=config.name,
-            resource_type="cell_type",
+            resource_type="cell_spec",
             canonical_id=canonical_id,
-            canonical_iri=cell_type.id,
+            canonical_iri=cell_spec.id,
             source_local_id=source_local_id,
             debug_paths=debug_paths,
         )
@@ -119,7 +119,7 @@ def _publish_cell_type(
     resolved_registry_base_url = _require_value(config.registry_base_url, "registry_base_url", destination=config.name)
     resolved_api_key = _require_value(config.api_key, "api_key", destination=config.name)
 
-    submission_payload = build_curated_cell_type_submission(
+    submission_payload = build_curated_cell_spec_submission(
         record_path,
         workspace_id=resolved_workspace_id,
         publisher_id=resolved_publisher_id,
@@ -129,7 +129,7 @@ def _publish_cell_type(
     )
     dist_dir = workspace.root / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
-    submission_path = dist_dir / f"submission-package.cell_type.{source_local_id}.json"
+    submission_path = dist_dir / f"submission-package.cell_spec.{source_local_id}.json"
     submission_path.write_text(json.dumps(submission_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     debug_paths["submission_package_path"] = str(submission_path)
 
@@ -152,7 +152,7 @@ def _publish_cell_type(
         if isinstance(canonical_iri_map, dict) and isinstance(canonical_iri_map.get(source_local_id), str)
         else response_payload.get("canonical_iri")
     )
-    route_resource_type = "cell-type"
+    route_resource_type = "cell-spec"
     registry_resource_url = (
         resolved_registry_base_url.rstrip("/") + f"/resources/{route_resource_type}/{published_canonical_id}"
         if isinstance(published_canonical_id, str)
@@ -167,9 +167,9 @@ def _publish_cell_type(
     return PublishResult(
         status=submission_result["status"],
         destination=config.name,
-        resource_type="cell_type",
+        resource_type="cell_spec",
         canonical_id=published_canonical_id,
-        canonical_iri=published_canonical_iri or cell_type.id,
+        canonical_iri=published_canonical_iri or cell_spec.id,
         page_url=page_url,
         registry_resource_url=registry_resource_url,
         source_local_id=source_local_id,
@@ -184,15 +184,15 @@ def _publish_cell_type(
 def _looks_like_legacy_publication_call(obj: Any, destination: str | None, kwargs: dict[str, Any]) -> bool:
     if obj is not None or destination is not None:
         return False
-    legacy_keys = {"cell_type", "cell_instance", "test", "dataset"}
+    legacy_keys = {"cell_spec", "cell_instance", "test", "dataset"}
     return any(key in kwargs for key in legacy_keys)
 
 
-def _cell_type_slug(cell_type: CellType) -> str:
-    parts = [cell_type.manufacturer or "cell", cell_type.model or "type"]
+def _cell_spec_slug(cell_spec: CellSpecification) -> str:
+    parts = [cell_spec.manufacturer or "cell", cell_spec.model or "type"]
     value = "-".join(parts).strip().lower()
     slug = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
-    return slug or "cell-type"
+    return slug or "cell-spec"
 
 
 def _require_value(value: str | None, name: str, *, destination: str) -> str:

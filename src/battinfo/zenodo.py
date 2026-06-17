@@ -23,6 +23,30 @@ _DEFAULT_PUBLISH_FILENAME = "battinfo.publish.jsonld"
 _DEFAULT_RO_CRATE_FILENAME = "ro-crate-metadata.json"
 
 
+def _file_md5(path: Path) -> str:
+    """MD5 hex digest of a file (Zenodo identifies file content by MD5)."""
+    import hashlib
+    h = hashlib.md5()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _zenodo_checksum_matches(path: Path, checksum: str | None) -> bool:
+    """True only if *path*'s content matches Zenodo's recorded MD5 checksum.
+
+    Zenodo reports file checksums as MD5 (sometimes prefixed ``"md5:"``). Any
+    missing/non-MD5/mismatching value returns False, so the caller safely re-uploads
+    (correctness over optimisation)."""
+    if not checksum:
+        return False
+    algo, _, digest = checksum.partition(":") if ":" in checksum else ("md5", "", checksum)
+    if algo.lower() not in ("md5", ""):
+        return False
+    return _file_md5(path) == digest.strip().lower()
+
+
 class ZenodoError(RuntimeError):
     """Raised when the Zenodo API returns an error response."""
 
@@ -195,6 +219,46 @@ class ZenodoClient:
     def list_files(self, deposit_id: int | str) -> list[dict]:
         return self._json("GET", f"/deposit/depositions/{deposit_id}/files")
 
+    def delete_file(self, deposit_id: int | str, file_id: str) -> None:
+        self._request("DELETE", f"/deposit/depositions/{deposit_id}/files/{file_id}", data=b"")
+
+    def sync_files(
+        self,
+        deposit_id: int | str,
+        files: dict[Path, str],
+    ) -> dict[str, list[str]]:
+        """Make the deposit's files match *files* while re-uploading as little as possible.
+
+        Files already on the deposit whose content is unchanged (MD5 match) are kept;
+        changed files are replaced; files no longer present are removed; new files are
+        uploaded. This is what makes a new version cheap — Zenodo copies the prior
+        version's files into the new draft, so unchanged data (often gigabytes) need not
+        be re-uploaded; typically only ``battinfo.json``/``ro-crate-metadata.json`` change.
+
+        ``files`` maps ``{local_path: zenodo_filename}`` (same shape as :meth:`upload_files`).
+        Returns ``{"uploaded": [...], "kept": [...], "removed": [...]}``.
+        """
+        existing = {(f.get("filename") or f.get("key")): f for f in self.list_files(deposit_id)}
+        desired = {name: Path(path) for path, name in files.items()}
+
+        to_upload: dict[Path, str] = {}
+        kept: list[str] = []
+        for name, path in desired.items():
+            ex = existing.get(name)
+            if ex is not None and _zenodo_checksum_matches(path, ex.get("checksum")):
+                kept.append(name)
+            else:
+                to_upload[path] = name
+
+        removed = [name for name in existing if name not in desired]
+        # A changed file must be deleted before its replacement is uploaded.
+        changed = [name for name in to_upload.values() if name in existing]
+        for name in removed + changed:
+            self.delete_file(deposit_id, existing[name]["id"])
+
+        self.upload_files(deposit_id, to_upload)
+        return {"uploaded": sorted(to_upload.values()), "kept": sorted(kept), "removed": sorted(removed)}
+
     # ── Convenience ────────────────────────────────────────────────────────────
 
     @property
@@ -230,7 +294,7 @@ def _build_zenodo_metadata(
     community: str | None,
     extra_keywords: list[str] | None,
 ) -> dict[str, Any]:
-    ct = record.cell_type
+    ct = record.cell_spec
 
     resolved_title = title or f"{ct.name} — BattINFO Reference Datasets"
 
@@ -317,9 +381,13 @@ def patch_zenodo_urls(
         if not fpath.exists():
             continue
         text = fpath.read_text(encoding="utf-8")
-        count = text.count(old_url)
+        # Replace the full record URL first, then any remaining bare placeholder
+        # tokens (e.g. inside the DOI "10.5281/zenodo.<placeholder>"), so the token
+        # is gone everywhere it appears — as the docstring promises.
+        url_patched = text.replace(old_url, new_url)
+        count = text.count(old_url) + url_patched.count(placeholder)
         if count > 0:
-            fpath.write_text(text.replace(old_url, new_url), encoding="utf-8")
+            fpath.write_text(url_patched.replace(placeholder, str(record_id)), encoding="utf-8")
         results[fname] = count
 
     return results

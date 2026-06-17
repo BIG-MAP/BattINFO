@@ -20,20 +20,25 @@
       "additionalProperties": false,
       "required": [
         "id",
-        "type_id"
+        "cell_spec_id"
       ],
       "properties": {
         "id": {
           "$ref": "#/$defs/CellIri"
         },
-        "type_id": {
+        "cell_spec_id": {
           "$ref": "#/$defs/SpecIri"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number."
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
         },
         "serial_number": {
-          "type": "string"
+          "type": "string",
+          "description": "Manufacturer serial number (unique within the product model); optional."
         },
         "batch_id": {
           "type": "string"
@@ -79,6 +84,88 @@
         "supersedes": {
           "$ref": "#/$defs/CellIri",
           "description": "IRI of the previous cell record this passport replaces, e.g. after repurposing."
+        },
+        "conformance": {
+          "type": "object",
+          "description": "Assessment of how well this record followed the spec that governs it.",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "conformant",
+                "non-conformant",
+                "unknown"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "description": "Free-text summary of the assessment."
+            },
+            "deviations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "category"
+                ],
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "power_outage",
+                      "equipment_failure",
+                      "temperature_excursion",
+                      "software_error",
+                      "operator_intervention",
+                      "premature_termination",
+                      "communication_loss",
+                      "parameter_drift",
+                      "setpoint_deviation",
+                      "calibration_issue",
+                      "out_of_tolerance",
+                      "dimensional",
+                      "other"
+                    ],
+                    "description": "Broad classification of the deviation."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Specific deviation label within the category (free text)."
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "occurred_at": {
+                    "type": [
+                      "integer",
+                      "string"
+                    ]
+                  },
+                  "duration_s": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "step_index": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "impact": {
+                    "type": "string",
+                    "enum": [
+                      "minor",
+                      "moderate",
+                      "major"
+                    ]
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -147,8 +234,13 @@
     },
     "FlexDate": {
       "oneOf": [
-        {"$ref": "#/$defs/UnixTime"},
-        {"type": "string", "description": "ISO 8601 date string (YYYY-MM-DD or YYYY-MM)."}
+        {
+          "$ref": "#/$defs/UnixTime"
+        },
+        {
+          "type": "string",
+          "description": "ISO 8601 date string (YYYY-MM-DD or YYYY-MM)."
+        }
       ]
     },
     "ShortId": {

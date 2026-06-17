@@ -19,7 +19,7 @@ def main() -> None:
         app,
         [
             "validate",
-            str(ROOT / "examples" / "cell-type" / "research" / "minimal.example.json"),
+            str(ROOT / "examples" / "cell-spec" / "research" / "minimal.example.json"),
             "--format",
             "json",
         ],
@@ -38,14 +38,14 @@ def main() -> None:
         raw_file.parent.mkdir(parents=True, exist_ok=True)
         raw_file.write_text("time,voltage\n0,3.0\n", encoding="utf-8")
 
-        cell_type = battinfo.CellType(
+        cell_spec = battinfo.CellSpecification(
             manufacturer="Energizer",
             model="CR2032",
             format="coin",
             chemistry="Li-primary",
             size_code="R2032",
         )
-        cell = battinfo.CellInstance(cell_type=cell_type, serial_number="energizer-cr2032-alpha")
+        cell = battinfo.CellInstance(cell_spec=cell_spec, serial_number="energizer-cr2032-alpha")
         test = battinfo.Test(
             cell=cell,
             kind="capacity_check",
@@ -60,18 +60,18 @@ def main() -> None:
             name="Installed smoke dataset",
         )
 
-        publish_result = battinfo.publish(cell_type=cell_type, cell_instance=cell, test=test, dataset=dataset)
+        publish_result = battinfo.publish(cell_spec=cell_spec, cell_instance=cell, test=test, dataset=dataset)
         publication_payload = json.loads(Path(publish_result["publish_path"]).read_text(encoding="utf-8"))
         graph = publication_payload["@graph"]
-        cell_type_node = next(node for node in graph if node.get("@id") == publish_result["cell_type_id"])
+        cell_spec_node = next(node for node in graph if node.get("@id") == publish_result["cell_spec_id"])
         cell_instance_node = next(node for node in graph if node.get("@id") == publish_result["cell_instance_id"])
-        cell_type_types = cell_type_node["@type"] if isinstance(cell_type_node["@type"], list) else [cell_type_node["@type"]]
-        assert "BatteryCellSpecification" in cell_type_types
-        assert "schema:CreativeWork" in cell_type_types
-        assert publish_result["cell_type_id"] not in (
+        cell_spec_types = cell_spec_node["@type"] if isinstance(cell_spec_node["@type"], list) else [cell_spec_node["@type"]]
+        assert "BatteryCellSpecification" in cell_spec_types
+        assert "schema:CreativeWork" in cell_spec_types
+        assert publish_result["cell_spec_id"] not in (
             cell_instance_node["@type"] if isinstance(cell_instance_node["@type"], list) else [cell_instance_node["@type"]]
         )
-        assert cell_instance_node["hasDescription"]["@id"] == publish_result["cell_type_id"]
+        assert cell_instance_node["hasDescription"]["@id"] == publish_result["cell_spec_id"]
         test_node = next(node for node in graph if node.get("@id") == publish_result["test_id"])
         test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
         assert "schema:Action" in test_types

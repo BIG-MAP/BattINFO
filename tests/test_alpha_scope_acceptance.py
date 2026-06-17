@@ -10,11 +10,11 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo.api import (
     build_index,
     query_cell_instances,
-    query_cell_types,
+    query_cell_specs,
     query_datasets,
     query_tests,
     save_cell_instance,
-    save_cell_type,
+    save_cell_spec,
     save_dataset,
     save_test,
 )
@@ -28,14 +28,14 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     source_root = tmp_path / "examples"
     index_path = tmp_path / ".battinfo" / "index.json"
 
-    cell_type_doc = _load_json(ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json")
-    cell_type_payload = save_cell_type(
-        cell_type_doc,
+    cell_spec_doc = _load_json(ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json")
+    cell_spec_payload = save_cell_spec(
+        cell_spec_doc,
         source_root=source_root,
         resolve_references=False,
         validation_policy="strict",
     )
-    assert cell_type_payload["status"] == "created"
+    assert cell_spec_payload["status"] == "created"
 
     cell_instance_doc = _load_json(ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json")
     cell_instance_payload = save_cell_instance(
@@ -74,16 +74,16 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
         validation_policy="strict",
     )
     assert build_stats["failed"] == 0
-    assert build_stats["cell_type_count"] == 1
+    assert build_stats["cell_spec_count"] == 1
     assert build_stats["cell_instance_count"] == 1
     assert build_stats["test_count"] == 8
     assert build_stats["dataset_count"] == 1
     assert index_path.exists()
 
-    cell_rows = query_cell_types(
+    cell_rows = query_cell_specs(
         manufacturer="A123",
         format="cylindrical",
-        cell_types_dir=source_root / "cell-type",
+        cell_specs_dir=source_root / "cell-spec",
     )
     assert len(cell_rows) == 1
     assert cell_rows[0]["model_name"] == "ANR26650M1-B"
@@ -91,7 +91,7 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
 
     instance_rows = query_cell_instances(
         directory=source_root / "cell-instance",
-        type_id=cell_type_doc["product"]["id"],
+        cell_spec_id=cell_spec_doc["cell_spec"]["id"],
         has_dataset=True,
         dataset_id=dataset_doc["dataset"]["id"],
     )

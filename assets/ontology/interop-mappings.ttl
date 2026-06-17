@@ -1,0 +1,54 @@
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix schema: <https://schema.org/> .
+@prefix dcat:   <http://www.w3.org/ns/dcat#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+@prefix prov:   <http://www.w3.org/ns/prov#> .
+@prefix emmo:   <https://w3id.org/emmo#> .
+@prefix battery:<https://w3id.org/emmo/domain/battery#> .
+@prefix battinfo:<https://w3id.org/battinfo/> .
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BattINFO interoperability mappings
+#
+# The published battinfo.json expresses each fact ONCE in the most precise
+# vocabulary for its concern (EMMO/battinfo for domain, PROV for provenance,
+# DCAT for packaging, DQV/EARL for quality), and the builder additionally emits
+# GENERATED mirror triples in interop vocabularies (chiefly schema.org) so that a
+# single-vocabulary consumer is never stranded. Those mirrors are deterministic
+# projections of one source produced in a single pass, so they cannot drift.
+#
+# This file is the machine-readable justification for those mirrors: it declares
+# the equivalences a reasoner can use, so the redundancy in the data is documented
+# rather than incidental. It is published at the battinfo namespace; consuming it
+# is optional (non-reasoning agents rely on the materialised mirrors directly).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Packaging: DCAT ⇄ schema.org ────────────────────────────────────────────
+dcat:downloadURL    owl:equivalentProperty schema:contentUrl .
+dcat:mediaType      owl:equivalentProperty schema:encodingFormat .
+dcat:Distribution   owl:equivalentClass    schema:DataDownload .
+dcat:Dataset        owl:equivalentClass    schema:Dataset .
+dcat:Catalog        owl:equivalentClass    schema:DataCatalog .
+dcat:distribution   rdfs:subPropertyOf     schema:distribution .
+
+# ── Provenance: EMMO ⇄ PROV (the builder emits both directions) ──────────────
+# A test's EMMO output relation is mirrored as prov:generated; the EMMO test-object
+# relation is mirrored as the test's prov:used (alongside the used spec/plan).
+emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840   # hasOutput
+    rdfs:subPropertyOf prov:generated .
+battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b  # hasTestObject
+    rdfs:subPropertyOf prov:used .
+
+# ── Instance ⇄ spec link (EMMO description mirrored as dcterms:conformsTo) ────
+# A cell is described by its specification (EMMO hasDescription); for broad reach
+# the same link is mirrored as dcterms:conformsTo (and asserted only-when-conformant
+# for test executions).
+emmo:EMMO_c58c799e_cc6c_4310_a3f1_78da70705b2a   # hasDescription
+    skos:relatedMatch dcterms:conformsTo .
+
+# ── Note on instrument ───────────────────────────────────────────────────────
+# The test instrument is expressed only via EMMO hasTestEquipment. schema.org's
+# `instrument` is a property of schema:Action (not of an Activity/Dataset), so no
+# schema.org mirror is emitted for it — there is no faithful equivalent to declare.

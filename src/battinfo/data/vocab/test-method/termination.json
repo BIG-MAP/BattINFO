@@ -1,0 +1,30 @@
+{
+  "$comment": "Controlled vocabulary mapping a termination condition (the measured quantity + the direction the limit is approached from) to the EMMO termination quantity class, attached under hasTerminationParameter. This replaces the old name-encoded scheme (e.g. 'discharging_cutoff_voltage' -> LowerVoltageLimit) with an explicit (quantity, direction) pair, mirroring bmgen's LOWER_LIMITS/UPPER_LIMITS remap. 'below'/'above' = the value is a lower/upper bound the channel crosses to end the step. 'duration' is time-based and direction-free.",
+  "version": "1.0.0",
+  "terminations": {
+    "voltage": {
+      "below": {"emmo_class": "LowerVoltageLimit"},
+      "above": {"emmo_class": "UpperVoltageLimit"}
+    },
+    "current": {
+      "below": {"emmo_class": "TerminationQuantity"},
+      "above": {"emmo_class": "TerminationQuantity"}
+    },
+    "c_rate": {
+      "below": {"emmo_class": "TerminationQuantity"},
+      "above": {"emmo_class": "TerminationQuantity"}
+    },
+    "duration": {
+      "elapsed": {"emmo_class": "Duration", "iri": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3"}
+    },
+    "capacity": {
+      "below": {"emmo_class": "TerminationQuantity"},
+      "above": {"emmo_class": "TerminationQuantity"}
+    }
+  },
+  "relations": {
+    "hasControlParameter":     {"iri": "electrochemistry:electrochemistry_e55f2798_55c8_4fc5_9abb_2f8ac101f3b8"},
+    "hasTerminationParameter": {"iri": "electrochemistry:electrochemistry_e6a7d617_a581_4782_8374_37d3305e0258"},
+    "hasProperty":             {"iri": "emmo:hasProperty"}
+  }
+}

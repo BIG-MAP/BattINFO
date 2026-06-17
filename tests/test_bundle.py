@@ -13,7 +13,7 @@ from battinfo import (  # noqa: E402
     CellConstruction,
     CellInstance,
     CellSpecification,
-    CellType,
+    CellSpecification,
     Coating,
     CurrentCollector,
     Dataset,
@@ -25,12 +25,12 @@ from battinfo import (  # noqa: E402
     Separator,
     SolventMixture,
     Test,
-    derive_cell_type,
+    derive_cell_spec,
     load_cell_specification,
     save_cell_instance,
-    save_cell_type,
+    save_cell_spec,
     save_dataset,
-    save_library_cell_type,
+    save_library_cell_spec,
     save_test,
 )
 from battinfo.bundle import ProtocolInfo, ProvenanceInfo  # noqa: E402
@@ -56,7 +56,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
         ),
         comment=["Example bundle specification."],
     )
-    cell_type = CellType(
+    cell_spec = CellSpecification(
         id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
         name="Energizer CR2032",
         manufacturer="Energizer",
@@ -66,7 +66,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
         positive_electrode_basis="MnO2",
         negative_electrode_basis="Li-metal",
         cell_specification_id=specification.id,
-        nominal_properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
+        properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
         bibliography={
             "subject_of": [
                 {
@@ -89,7 +89,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
     cell_instance = CellInstance(
         id="https://w3id.org/battinfo/cell/69ca-scxq-6w58-e9tc",
         name="energizer-cr2032-202602-dtjrga",
-        cell_type_id=cell_type.id,
+        cell_spec_id=cell_spec.id,
         serial_number="energizer-cr2032-202602-dtjrga",
         dataset_ids=["https://w3id.org/battinfo/dataset/gj1y-pn2n-t5pm-gs9c"],
         source=ProvenanceInfo(type="measurement", retrieved_at=1771804801),
@@ -117,7 +117,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
     )
     bundle = BattinfoBundle(
         bundle_name="energizer-cr2032-202602-dtjrga",
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_instance=cell_instance,
         test=test,
         dataset=dataset,
@@ -130,29 +130,29 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
     assert loaded.cell_specification.model == "CR2032"
     assert loaded.cell_specification.construction["assembly_type"] == "stacked"
     assert loaded.cell_specification.source.citation == "https://doi.org/10.1016/j.jpowsour.2024.123456"
-    assert loaded.cell_type.nominal_properties["nominal_voltage"]["value"] == 3.0
-    assert loaded.cell_type.bibliography["subject_of"][0]["id"] == "https://doi.org/10.1000/example-publication"
-    assert loaded.cell_type.source.citation == "https://doi.org/10.1016/j.jpowsour.2024.123456"
+    assert loaded.cell_spec.properties["nominal_voltage"]["value"] == 3.0
+    assert loaded.cell_spec.bibliography["subject_of"][0]["id"] == "https://doi.org/10.1000/example-publication"
+    assert loaded.cell_spec.source.citation == "https://doi.org/10.1016/j.jpowsour.2024.123456"
     assert loaded.cell_instance.serial_number == "energizer-cr2032-202602-dtjrga"
     assert loaded.test.protocol.name == "constant current discharging"
     assert loaded.test.instrument == "short Landt cycler"
     assert loaded.dataset.dataset_path == ".."
 
-    library_payload = save_library_cell_type(
+    library_payload = save_library_cell_spec(
         specification,
-        library_root=tmp_path / "library" / "cell-type",
-        package_root=tmp_path / "package" / "cell-type",
+        library_root=tmp_path / "library" / "cell-spec",
+        package_root=tmp_path / "package" / "cell-spec",
     )
     assert library_payload["status"] == "created"
 
-    type_payload = save_cell_type(
-        loaded.cell_type,
+    type_payload = save_cell_spec(
+        loaded.cell_spec,
         source_root=tmp_path / "registry",
         resolve_references=False,
     )
     assert type_payload["status"] == "created"
-    saved_cell_type_record = json.loads(Path(type_payload["path"]).read_text(encoding="utf-8"))
-    assert saved_cell_type_record["bibliography"]["subject_of"][0]["headline"] == "Example publication"
+    saved_cell_spec_record = json.loads(Path(type_payload["path"]).read_text(encoding="utf-8"))
+    assert saved_cell_spec_record["bibliography"]["subject_of"][0]["headline"] == "Example publication"
 
     instance_payload = save_cell_instance(
         loaded.cell_instance,
@@ -296,7 +296,7 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
 
 
 def test_load_cell_specification_from_library_record() -> None:
-    spec = load_cell_specification(ROOT / "src" / "battinfo" / "data" / "library" / "cell-type" / "A123__ANR26650M1-B.json")
+    spec = load_cell_specification(ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json")
 
     assert spec.model == "ANR26650M1-B"
     assert spec.positive_electrode is not None
@@ -310,16 +310,16 @@ def test_load_cell_specification_from_library_record() -> None:
     assert spec.separator.material == "PE/PP trilayer"
 
 
-def test_derive_cell_type_from_library_record_mapping() -> None:
-    spec_record = json.loads((ROOT / "src" / "battinfo" / "data" / "library" / "cell-type" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
+def test_derive_cell_spec_from_library_record_mapping() -> None:
+    spec_record = json.loads((ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
 
-    cell_type = derive_cell_type(spec_record)
+    cell_spec = derive_cell_spec(spec_record)
 
-    assert cell_type.id == "https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw"
-    assert cell_type.model == "ANR26650M1-B"
-    assert cell_type.positive_electrode_basis == "LFP"
-    assert cell_type.negative_electrode_basis == "graphite"
-    assert cell_type.nominal_properties["nominal_voltage"]["value"] == 3.3
+    assert cell_spec.id == "https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw"
+    assert cell_spec.model == "ANR26650M1-B"
+    assert cell_spec.positive_electrode_basis == "LFP"
+    assert cell_spec.negative_electrode_basis == "graphite"
+    assert cell_spec.properties["nominal_voltage"]["value"] == 3.3
 
 
 def test_cell_specification_accepts_nested_objects() -> None:

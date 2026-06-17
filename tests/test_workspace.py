@@ -9,10 +9,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import (
     BatteryCell,
-    BatteryCellType,
+    BatteryCellSpecification,
     BatteryTestType,
     Cell,
-    CellType,
+    CellSpecification,
     Dataset,
     Test,
     Workspace,
@@ -34,7 +34,7 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("time_s,voltage_v\n0,3.0\n60,2.95\n", encoding="utf-8")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
@@ -50,7 +50,7 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
         source_file="energizer-cr2032.manual.json",
     )
     cell = workspace.cell(
-        cell_type,
+        cell_spec,
         serial_number="energizer-cr2032-lot-a-001",
         batch_id="CR2032-2026-02",
         source_type="lab",
@@ -72,7 +72,7 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
     )
 
     records = workspace.render()
-    assert records["cell_types"][0]["product"]["size_code"] == "R2032"
+    assert records["cell_specs"][0]["cell_spec"]["size_code"] == "R2032"
     assert records["cell_instances"][0]["datasets"] == [{"id": records["datasets"][0]["dataset"]["id"], "role": "raw"}]
     assert records["tests"][0]["test"]["dataset_ids"] == [records["datasets"][0]["dataset"]["id"]]
     assert records["datasets"][0]["dataset"]["about"] == [
@@ -86,38 +86,38 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
 
     result = workspace.save(validation_policy="strict")
     assert result["index"]["failed"] == 0
-    assert result["index"]["cell_type_count"] == 1
+    assert result["index"]["cell_spec_count"] == 1
     assert result["index"]["cell_instance_count"] == 1
     assert result["index"]["test_count"] == 1
     assert result["index"]["dataset_count"] == 1
 
-    assert workspace.query_cell_types(manufacturer="Energizer", format="coin")[0]["id"] == cell_type.id
-    assert workspace.query_cells(type_id=cell_type.id, dataset_id=dataset.id)[0]["id"] == cell.id
+    assert workspace.query_cell_specs(manufacturer="Energizer", format="coin")[0]["id"] == cell_spec.id
+    assert workspace.query_cells(cell_spec_id=cell_spec.id, dataset_id=dataset.id)[0]["id"] == cell.id
     assert workspace.query_tests(kind="capacity_check", cell_id=cell.id)[0]["id"] == test.id
     assert workspace.query_datasets(related_cell_id=cell.id, related_test_id=test.id)[0]["id"] == dataset.id
     assert workspace.query("datasets", related_cell_id=cell.id, related_test_id=test.id)[0]["id"] == dataset.id
-    assert workspace.query("cells", type_id=cell_type.id, dataset_id=dataset.id)[0]["id"] == cell.id
+    assert workspace.query("cells", cell_spec_id=cell_spec.id, dataset_id=dataset.id)[0]["id"] == cell.id
 
 
-def test_workspace_loads_cell_type_from_validated_json_record(tmp_path: Path) -> None:
+def test_workspace_loads_cell_spec_from_validated_json_record(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
 
-    cell_type = workspace.load_cell_type(
-        ROOT / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
+    cell_spec = workspace.load_cell_spec(
+        ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
     )
 
-    assert len(workspace.cell_types) == 1
-    assert cell_type.manufacturer == "A123"
-    assert cell_type.model == "ANR26650M1-B"
-    assert cell_type.id == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
-    assert cell_type.iec_code == "IFpR26650"
-    assert cell_type.country_of_origin == "United States"
-    assert cell_type.year == 2012
+    assert len(workspace.cell_specs) == 1
+    assert cell_spec.manufacturer == "A123"
+    assert cell_spec.model == "ANR26650M1-B"
+    assert cell_spec.id == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+    assert cell_spec.iec_code == "IFpR26650"
+    assert cell_spec.country_of_origin == "United States"
+    assert cell_spec.year == 2012
 
 
-def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp_path: Path) -> None:
+def test_workspace_loads_cell_spec_from_authoring_json_and_canonizes_on_save(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
-    draft_path = tmp_path / "cell-type" / "A123__ANR26650M1-B.json"
+    draft_path = tmp_path / "cell-spec" / "A123__ANR26650M1-B.json"
     draft_path.parent.mkdir(parents=True, exist_ok=True)
     draft_path.write_text(
         json.dumps(
@@ -132,7 +132,7 @@ def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp
                 "year": 2012,
                 "positive_electrode_basis": "LFP",
                 "negative_electrode_basis": "graphite",
-                "specs": {
+                "properties": {
                     "nominal_capacity": {"value": 2.5, "unit": "Ah"},
                     "typical_energy": {"value": 8.25, "unit": "Wh"},
                     "rated_energy": {"value": 8.0, "unit": "Wh"},
@@ -149,47 +149,47 @@ def test_workspace_loads_cell_type_from_authoring_json_and_canonizes_on_save(tmp
         encoding="utf-8",
     )
 
-    cell_type = workspace.load_cell_type(draft_path)
+    cell_spec = workspace.load_cell_spec(draft_path)
 
-    assert cell_type.manufacturer == "A123"
-    assert cell_type.model == "ANR26650M1-B"
-    assert cell_type.id is None
-    assert cell_type.source.type is None
-    assert cell_type.source.file is None
+    assert cell_spec.manufacturer == "A123"
+    assert cell_spec.model == "ANR26650M1-B"
+    assert cell_spec.id is None
+    assert cell_spec.source.type is None
+    assert cell_spec.source.file is None
 
     save_result = workspace.save()
 
-    assert save_result["index"]["cell_type_count"] == 1
-    assert isinstance(cell_type.id, str)
-    assert cell_type.id.startswith("https://w3id.org/battinfo/spec/")
-    record_path = tmp_path / "workspace" / "examples" / "cell-type" / f"cell-type-{cell_type.id.rsplit('/', 1)[-1]}.json"
+    assert save_result["index"]["cell_spec_count"] == 1
+    assert isinstance(cell_spec.id, str)
+    assert cell_spec.id.startswith("https://w3id.org/battinfo/spec/")
+    record_path = tmp_path / "workspace" / "examples" / "cell-spec" / f"cell-spec-{cell_spec.id.rsplit('/', 1)[-1]}.json"
     record = json.loads(record_path.read_text(encoding="utf-8"))
-    assert isinstance(record["product"]["short_id"], str)
-    assert len(record["product"]["short_id"]) == 6
-    assert record["product"]["identifier"] == f"cell-type:{cell_type.id.rsplit('/', 1)[-1]}"
-    assert record["product"]["iec_code"] == "IFpR26650"
-    assert record["product"]["country_of_origin"] == "United States"
-    assert record["product"]["year"] == 2012
-    assert record["specs"]["typical_energy"] == {"value": 8.25, "unit": "Wh"}
-    assert record["specs"]["rated_energy"] == {"value": 8.0, "unit": "Wh"}
-    assert record["specs"]["specific_energy"] == {"value": 130.0, "unit": "Wh/kg"}
-    assert record["specs"]["energy_density"] == {"value": 250.0, "unit": "Wh/L"}
-    assert record["specs"]["specific_power"] == {"value": 900.0, "unit": "W/kg"}
-    assert record["specs"]["power_density"] == {"value": 1700.0, "unit": "W/L"}
+    assert isinstance(record["cell_spec"]["short_id"], str)
+    assert len(record["cell_spec"]["short_id"]) == 6
+    assert record["cell_spec"]["identifier"] == f"cell-spec:{cell_spec.id.rsplit('/', 1)[-1]}"
+    assert record["cell_spec"]["iec_code"] == "IFpR26650"
+    assert record["cell_spec"]["country_of_origin"] == "United States"
+    assert record["cell_spec"]["year"] == 2012
+    assert record["properties"]["typical_energy"] == {"value": 8.25, "unit": "Wh"}
+    assert record["properties"]["rated_energy"] == {"value": 8.0, "unit": "Wh"}
+    assert record["properties"]["specific_energy"] == {"value": 130.0, "unit": "Wh/kg"}
+    assert record["properties"]["energy_density"] == {"value": 250.0, "unit": "Wh/L"}
+    assert record["properties"]["specific_power"] == {"value": 900.0, "unit": "W/kg"}
+    assert record["properties"]["power_density"] == {"value": 1700.0, "unit": "W/L"}
     assert record["provenance"]["source_type"] == "datasheet"
     assert record["provenance"]["source_file"] == "manual.json"
     assert isinstance(record["provenance"]["retrieved_at"], int)
 
 
-def test_workspace_loads_multiple_cell_types_from_directory(tmp_path: Path) -> None:
-    records_dir = tmp_path / "cell-type"
+def test_workspace_loads_multiple_cell_specs_from_directory(tmp_path: Path) -> None:
+    records_dir = tmp_path / "cell-spec"
     records_dir.mkdir(parents=True, exist_ok=True)
     first = {
         "manufacturer": "A123",
         "model": "ANR26650M1-B",
         "chemistry": "LFP",
         "format": "cylindrical",
-        "specs": {"nominal_voltage": {"value": 3.3, "unit": "V"}},
+        "properties": {"nominal_voltage": {"value": 3.3, "unit": "V"}},
     }
     second = {
         "manufacturer": "Energizer",
@@ -199,14 +199,14 @@ def test_workspace_loads_multiple_cell_types_from_directory(tmp_path: Path) -> N
         "iec_code": "CR2032",
         "country_of_origin": "United States",
         "year": 2023,
-        "specs": {"nominal_voltage": {"value": 3.0, "unit": "V"}},
+        "properties": {"nominal_voltage": {"value": 3.0, "unit": "V"}},
         "provenance": {"source_file": "ENERGIZER__CR2032.pdf"},
     }
     (records_dir / "A123__ANR26650M1-B.json").write_text(json.dumps(first, indent=2), encoding="utf-8")
     (records_dir / "ENERGIZER__CR2032.json").write_text(json.dumps(second, indent=2), encoding="utf-8")
 
     workspace = Workspace(root=tmp_path / "workspace")
-    loaded = workspace.load_cell_types(directory=records_dir)
+    loaded = workspace.load_cell_specs(directory=records_dir)
 
     assert len(loaded) == 2
     assert {item.manufacturer for item in loaded} == {"A123", "Energizer"}
@@ -220,22 +220,27 @@ def test_workspace_loads_multiple_cell_types_from_directory(tmp_path: Path) -> N
 def test_workspace_saves_and_queries_test_protocols(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
         chemistry="Li-ion",
         source_file="A123__ANR26650M1-B.pdf",
     )
-    cell = workspace.cell(cell_type, serial_number="LAB-001")
+    cell = workspace.cell(cell_spec, serial_number="LAB-001")
     protocol = workspace.test_spec(
         name="1C Cycle Life at 25 C",
         kind="cycling",
         version="1.0",
         protocol_url="https://example.org/protocols/cycle-life-1c",
-        conditions={"ambient_temperature": quantity(25.0, "degC")},
-        setpoints={"charge_rate": quantity(1.0, "C")},
+        experiment=["Charge at 1 C until 4.2 V", "Discharge at 1 C until 2.5 V"],
+        cycles=500,
+        conditions={"temperature": quantity(25.0, "degC")},
     )
+    # PyBaMM-string authoring parsed into the canonical structured method.
+    assert protocol.method[0].mode == "group"
+    assert protocol.method[0].count == 500
+    assert protocol.facets()["c_rates"] == [1.0]
     test = workspace.test(
         cell,
         protocol_ref=protocol,
@@ -258,12 +263,12 @@ def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
     from battinfo.bundle import Deviation, TestConformance
 
     workspace = Workspace(root=tmp_path / "workspace")
-    cell_type = workspace.cell_type(manufacturer="ACME", model="X1", format="cylindrical", chemistry="Li-ion")
-    cell = workspace.cell(cell_type, serial_number="SN-001")
+    cell_spec = workspace.cell_spec(manufacturer="ACME", model="X1", format="cylindrical", chemistry="Li-ion")
+    cell = workspace.cell(cell_spec, serial_number="SN-001")
     spec = workspace.test_spec(name="C/5 capacity check", kind="capacity_check")
 
     conformance = TestConformance(
-        status="partial",
+        status="non-conformant",
         note="Power outage at step 3; 4 min gap before restart.",
         deviations=[
             Deviation(
@@ -284,7 +289,7 @@ def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
     assert len(saved_test_records) == 1
     saved = saved_test_records[0]
 
-    assert saved["conformance"]["status"] == "partial"
+    assert saved["conformance"]["status"] == "non-conformant"
     assert saved["conformance"]["note"] == "Power outage at step 3; 4 min gap before restart."
     assert len(saved["conformance"]["deviations"]) == 1
     dev = saved["conformance"]["deviations"][0]
@@ -302,7 +307,7 @@ def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
     import json
     reloaded = Test.from_record(json.loads(test_files[0].read_text()))
     assert reloaded.conformance is not None
-    assert reloaded.conformance.status == "partial"
+    assert reloaded.conformance.status == "non-conformant"
     assert len(reloaded.conformance.deviations) == 1
     assert reloaded.conformance.deviations[0].type == "power_outage"
     assert reloaded.conformance.deviations[0].duration_s == 240
@@ -401,7 +406,7 @@ def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> 
     assert len(records) == 1
     assert records[0]["id"] == specification.id
     assert records[0]["construction"]["layer_count"] == 18
-    assert records[0]["coin_hardware"]["case"]["material"] == "Al laminate"
+    assert records[0]["housing"]["case"]["material"] == "Al laminate"
 
 
 def test_workspace_record_test_creates_linked_dataset(tmp_path: Path) -> None:
@@ -410,7 +415,7 @@ def test_workspace_record_test_creates_linked_dataset(tmp_path: Path) -> None:
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("step,value\n1,0.0\n2,1.0\n", encoding="utf-8")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -422,7 +427,7 @@ def test_workspace_record_test_creates_linked_dataset(tmp_path: Path) -> None:
         source_file="a123-anr26650m1-b.manual.json",
     )
     cell = workspace.cell(
-        cell_type,
+        cell_spec,
         serial_number="a123-anr26650m1-b-alpha-001",
         batch_id="A123-ALPHA-01",
         source_type="lab",
@@ -452,18 +457,18 @@ def test_workspace_add_supports_object_style_authoring_and_dataset_infers_cell_f
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
 
-    cell_type = CellType()
-    cell_type.manufacturer = "A123"
-    cell_type.model = "ANR26650M1-B"
-    cell_type.format = "cylindrical"
-    cell_type.chemistry = "Li-ion"
-    cell_type.size_code = "R26650"
-    cell_type.positive_electrode_basis = "LFP"
-    cell_type.negative_electrode_basis = "unknown"
-    cell_type.nominal_capacity = quantity(2.5, "Ah")
-    cell_type.nominal_voltage = quantity(3.3, "V")
+    cell_spec = CellSpecification()
+    cell_spec.manufacturer = "A123"
+    cell_spec.model = "ANR26650M1-B"
+    cell_spec.format = "cylindrical"
+    cell_spec.chemistry = "Li-ion"
+    cell_spec.size_code = "R26650"
+    cell_spec.positive_electrode_basis = "LFP"
+    cell_spec.negative_electrode_basis = "unknown"
+    cell_spec.nominal_capacity = quantity(2.5, "Ah")
+    cell_spec.nominal_voltage = quantity(3.3, "V")
 
-    cell = Cell(cell_type)
+    cell = Cell(cell_spec)
     cell.serial_number = "hello-world-001"
     cell.batch_id = "A123-HELLO-01"
     cell.source.type = "lab"
@@ -477,10 +482,10 @@ def test_workspace_add_supports_object_style_authoring_and_dataset_infers_cell_f
     dataset = Dataset(dataset_file, test=test, license="CC-BY-4.0")
     dataset.name = "A123 hello world cycling dataset"
 
-    workspace.add(cell_type, cell, test, dataset)
+    workspace.add(cell_spec, cell, test, dataset)
 
     records = workspace.render()
-    assert records["cell_types"][0]["specs"]["nominal_capacity"] == {"value": 2.5, "unit": "Ah"}
+    assert records["cell_specs"][0]["properties"]["nominal_capacity"] == {"value": 2.5, "unit": "Ah"}
     assert records["tests"][0]["test"]["cell_id"] == records["cell_instances"][0]["cell_instance"]["id"]
     assert records["tests"][0]["test"]["dataset_ids"] == [records["datasets"][0]["dataset"]["id"]]
     assert records["datasets"][0]["dataset"]["about"] == [
@@ -498,7 +503,7 @@ def test_workspace_add_dataset_pulls_in_linked_dependencies(tmp_path: Path) -> N
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
 
-    cell_type = BatteryCellType(
+    cell_spec = BatteryCellSpecification(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -507,7 +512,7 @@ def test_workspace_add_dataset_pulls_in_linked_dependencies(tmp_path: Path) -> N
         nominal_voltage=quantity(3.3, "V"),
     )
     cell = BatteryCell(
-        cell_type,
+        cell_spec,
         serial_number="dataset-only-001",
         batch_id="A123-DATASET-ONLY",
         source={"type": "lab"},
@@ -529,7 +534,7 @@ def test_workspace_add_dataset_pulls_in_linked_dependencies(tmp_path: Path) -> N
 
     result = workspace.save(validation_policy="strict")
     assert result["index"]["failed"] == 0
-    assert result["index"]["cell_type_count"] == 1
+    assert result["index"]["cell_spec_count"] == 1
     assert result["index"]["cell_instance_count"] == 1
     assert result["index"]["test_count"] == 1
     assert result["index"]["dataset_count"] == 1
@@ -542,7 +547,7 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("time_s,voltage_v\n0,3.0\n60,2.95\n", encoding="utf-8")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
@@ -558,7 +563,7 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
         },
         source_file="energizer-cr2032.manual.json",
     )
-    cell = workspace.cell(cell_type, serial_number="energizer-cr2032-lot-a-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="energizer-cr2032-lot-a-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="capacity_check",
@@ -599,15 +604,16 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     assert dataset.data_format == "text/csv"
     assert dataset_node["schema:url"] == Path(publish_result["dataset_dir"]).resolve().as_uri()
     assert dataset_file.name in distribution_names
-    cell_type_node = next(node for node in payload["@graph"] if node.get("@id") == publish_result["cell_type_id"])
-    assert cell_type_node["schema:countryOfOrigin"]["schema:name"] == "Japan"
-    assert cell_type_node["schema:releaseDate"] == "2022-01-01"
+    cell_spec_node = next(node for node in payload["@graph"] if node.get("@id") == publish_result["cell_spec_id"])
+    assert cell_spec_node["schema:countryOfOrigin"]["schema:name"] == "Japan"
+    assert cell_spec_node["schema:releaseDate"] == "2022-01-01"
     property_types = {
         entry.get("@type")
-        for entry in cell_type_node.get("hasProperty", [])
+        for entry in cell_spec_node.get("hasProperty", [])
         if isinstance(entry, dict)
     }
-    assert "RatedEnergy" in property_types
+    # rated_energy maps to NominalEnergy (no distinct RatedEnergy class in EMMO).
+    assert "NominalEnergy" in property_types
     assert ro_crate_payload["@graph"][0]["@id"] == "ro-crate-metadata.json"
     assert datacite_payload["types"]["resourceTypeGeneral"] == "Dataset"
     assert datacite_payload["titles"][0]["title"] == "Energizer CR2032 capacity dataset"
@@ -619,7 +625,7 @@ def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_pa
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -630,7 +636,7 @@ def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_pa
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="alpha-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -653,7 +659,7 @@ def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_pa
     assert Path(publish_result["publish_path"]).exists()
     assert publish_result["test_id"] is not None
     assert publish_result["cell_instance_id"] is not None
-    assert publish_result["cell_type_id"] is not None
+    assert publish_result["cell_spec_id"] is not None
 
 
 def test_workspace_build_publication_package_can_emit_dcat_export(tmp_path: Path) -> None:
@@ -662,7 +668,7 @@ def test_workspace_build_publication_package_can_emit_dcat_export(tmp_path: Path
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -673,7 +679,7 @@ def test_workspace_build_publication_package_can_emit_dcat_export(tmp_path: Path
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="alpha-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -705,7 +711,7 @@ def test_workspace_build_release_exports_registry_ready_local_workspace(tmp_path
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
 
-    cell_type = workspace.cell_type(
+    cell_spec = workspace.cell_spec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -716,7 +722,7 @@ def test_workspace_build_release_exports_registry_ready_local_workspace(tmp_path
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_type, serial_number="alpha-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="alpha-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -768,7 +774,7 @@ def test_battery_cell_design_and_battery_cell_aliases_work_for_object_authoring(
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n", encoding="utf-8")
 
-    cell_design = BatteryCellType()
+    cell_design = BatteryCellSpecification()
     cell_design.manufacturer = "A123"
     cell_design.model = "ANR26650M1-B"
     cell_design.format = "cylindrical"
@@ -786,7 +792,7 @@ def test_battery_cell_design_and_battery_cell_aliases_work_for_object_authoring(
 
     workspace.add(cell_design, cell, test, dataset)
     records = workspace.render()
-    assert records["cell_types"][0]["product"]["model"] == "ANR26650M1-B"
+    assert records["cell_specs"][0]["cell_spec"]["model"] == "ANR26650M1-B"
     assert records["datasets"][0]["dataset"]["about"] == [
         records["cell_instances"][0]["cell_instance"]["id"],
         records["tests"][0]["test"]["id"],
@@ -794,7 +800,7 @@ def test_battery_cell_design_and_battery_cell_aliases_work_for_object_authoring(
 
 
 def test_battery_cell_design_accepts_flattened_quantities_in_constructor() -> None:
-    cell_design = BatteryCellType(
+    cell_design = BatteryCellSpecification(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
@@ -807,7 +813,7 @@ def test_battery_cell_design_accepts_flattened_quantities_in_constructor() -> No
     assert cell_design.nominal_capacity == {"value": 2.5, "unit": "Ah"}
     assert cell_design.nominal_voltage == {"value": 3.3, "unit": "V"}
     assert cell_design.diameter == {"value": 26.0, "unit": "mm"}
-    assert cell_design.nominal_properties["nominal_capacity"] == {"value": 2.5, "unit": "Ah"}
+    assert cell_design.properties["nominal_capacity"] == {"value": 2.5, "unit": "Ah"}
 
 
 def test_test_uses_enum_backed_test_type_and_rejects_unknown_values() -> None:

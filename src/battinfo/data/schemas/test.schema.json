@@ -116,26 +116,34 @@
         },
         "conformance": {
           "type": "object",
-          "description": "Assessment of how well the test followed its referenced test specification.",
+          "description": "Assessment of how well this record followed the spec that governs it.",
           "additionalProperties": false,
-          "required": ["status"],
+          "required": [
+            "status"
+          ],
           "properties": {
             "status": {
               "type": "string",
-              "enum": ["conformant", "partial", "non-conformant", "unknown"]
+              "enum": [
+                "conformant",
+                "non-conformant",
+                "unknown"
+              ]
             },
             "note": {
               "type": "string",
-              "description": "Free-text summary of any deviations or assessment rationale."
+              "description": "Free-text summary of the assessment."
             },
             "deviations": {
               "type": "array",
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["type"],
+                "required": [
+                  "category"
+                ],
                 "properties": {
-                  "type": {
+                  "category": {
                     "type": "string",
                     "enum": [
                       "power_outage",
@@ -146,17 +154,42 @@
                       "premature_termination",
                       "communication_loss",
                       "parameter_drift",
+                      "setpoint_deviation",
                       "calibration_issue",
+                      "out_of_tolerance",
+                      "dimensional",
                       "other"
+                    ],
+                    "description": "Broad classification of the deviation."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Specific deviation label within the category (free text)."
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "occurred_at": {
+                    "type": [
+                      "integer",
+                      "string"
                     ]
                   },
-                  "description": { "type": "string" },
-                  "occurred_at": { "$ref": "#/$defs/UnixTime" },
-                  "duration_s": { "type": "integer", "minimum": 0 },
-                  "step_index": { "type": "integer", "minimum": 0 },
+                  "duration_s": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "step_index": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
                   "impact": {
                     "type": "string",
-                    "enum": ["minor", "moderate", "major"]
+                    "enum": [
+                      "minor",
+                      "moderate",
+                      "major"
+                    ]
                   }
                 }
               }
@@ -213,6 +246,11 @@
         }
       }
     },
+    "artifacts": {
+      "type": "array",
+      "description": "Actionable-layer links to runnable protocol/vendor files produced by or executed in this test.",
+      "items": { "$ref": "#/$defs/Artifact" }
+    },
     "notes": {
       "type": "array",
       "items": {
@@ -221,6 +259,25 @@
     }
   },
   "$defs": {
+    "Artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "role", "format", "locator" ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [ "source_protocol", "executed_protocol", "vendor_export", "simulation_input", "other" ]
+        },
+        "format": { "type": "string", "minLength": 1 },
+        "locator": { "type": "string", "minLength": 1 },
+        "media_type": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "byte_size": { "type": "integer", "minimum": 0 },
+        "conforms_to": { "type": "string" },
+        "generated": { "type": "array", "items": { "type": "string" } },
+        "generated_from": { "type": "string" }
+      }
+    },
     "UnixTime": {
       "type": "integer",
       "minimum": 0,

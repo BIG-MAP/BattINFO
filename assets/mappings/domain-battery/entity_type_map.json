@@ -47,41 +47,97 @@
     },
     "chemistry": {
       "li-ion": {
-        "battery_types": ["LithiumIonBattery"]
+        "battery_types": [
+          "LithiumIonBattery"
+        ]
       },
       "li-primary": {
-        "battery_types": ["LithiumMetalBattery"]
+        "battery_types": [
+          "LithiumMetalBattery"
+        ]
       },
       "na-ion": {
-        "battery_types": ["SodiumIonBattery"]
+        "battery_types": [
+          "SodiumIonBattery"
+        ]
       },
       "zn-mno2": {
-        "battery_types": ["AlkalineZincManganeseDioxideBattery"]
+        "battery_types": [
+          "AlkalineZincManganeseDioxideBattery"
+        ]
       },
       "alkaline": {
-        "battery_types": ["AlkalineZincManganeseDioxideBattery"]
+        "battery_types": [
+          "AlkalineZincManganeseDioxideBattery"
+        ]
       },
       "znmno2": {
-        "battery_types": ["AlkalineZincManganeseDioxideBattery"]
+        "battery_types": [
+          "AlkalineZincManganeseDioxideBattery"
+        ]
       },
       "zinc-carbon": {
-        "battery_types": ["AlkalineCell"]
+        "battery_types": [
+          "AlkalineCell"
+        ]
       },
       "li-mno2": {
-        "battery_types": ["LithiumManganeseDioxideBattery"]
+        "battery_types": [
+          "LithiumManganeseDioxideBattery"
+        ]
       }
     },
     "iec_code": {
-      "lr03":   {"battery_types": ["LR03"]},
-      "lr6":    {"battery_types": ["LR6"]},
-      "lr14":   {"battery_types": ["LR14"]},
-      "lr20":   {"battery_types": ["LR20"]},
-      "lr1":    {"battery_types": ["LR1"]},
-      "lr44":   {"battery_types": ["LR44"]},
-      "cr2032": {"battery_types": ["CR2032"]},
-      "cr2025": {"battery_types": ["CR2025"]},
-      "hr6":    {"battery_types": ["HR6"]},
-      "kr6":    {"battery_types": ["KR6"]}
+      "lr03": {
+        "battery_types": [
+          "LR03"
+        ]
+      },
+      "lr6": {
+        "battery_types": [
+          "LR6"
+        ]
+      },
+      "lr14": {
+        "battery_types": [
+          "LR14"
+        ]
+      },
+      "lr20": {
+        "battery_types": [
+          "LR20"
+        ]
+      },
+      "lr1": {
+        "battery_types": [
+          "LR1"
+        ]
+      },
+      "lr44": {
+        "battery_types": [
+          "LR44"
+        ]
+      },
+      "cr2032": {
+        "battery_types": [
+          "CR2032"
+        ]
+      },
+      "cr2025": {
+        "battery_types": [
+          "CR2025"
+        ]
+      },
+      "hr6": {
+        "battery_types": [
+          "HR6"
+        ]
+      },
+      "kr6": {
+        "battery_types": [
+          "KR6"
+        ]
+      }
     },
     "positive_electrode_basis": {
       "lfp": {
@@ -117,6 +173,20 @@
         "battery_types": [
           "LithiumManganeseDioxideBattery"
         ]
+      },
+      "lmfp": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumManganeseIronPhosphateElectrode",
+        "battery_types": [
+          "LithiumIonManganeseIronPhosphateBattery"
+        ]
+      },
+      "lmo": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumManganeseOxideElectrode",
+        "battery_types": [
+          "LithiumIonManganeseOxideBattery"
+        ]
       }
     },
     "negative_electrode_basis": {
@@ -142,6 +212,13 @@
         "node_type": "LithiumElectrode",
         "battery_types": [
           "LithiumMetalBattery"
+        ]
+      },
+      "lto": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "LithiumTitanateElectrode",
+        "battery_types": [
+          "LithiumIonTitanateBattery"
         ]
       }
     }

@@ -27,6 +27,7 @@ prefixes:
   dcat:           http://www.w3.org/ns/dcat#
   dqv:            http://www.w3.org/ns/dqv#
   oa:             http://www.w3.org/ns/oa#
+  earl:           http://www.w3.org/ns/earl#
   qudt:           http://qudt.org/schema/qudt/
   qudt-unit:      http://qudt.org/vocab/unit/
   spdx:           http://spdx.org/rdf/terms#
@@ -39,7 +40,7 @@ default_range: string
 imports:
   - linkml:types
   - types
-  - cell-type
+  - cell-spec
   - cell-instance
   - test-spec
   - test

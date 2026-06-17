@@ -9,7 +9,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo import (  # noqa: E402
     BatteryTestType,
     Cell,
-    CellType,
+    CellSpecification,
     Dataset,
     TableColumn,
     TableSchema,
@@ -84,13 +84,13 @@ def test_infer_variable_measured_from_columns_and_metadata() -> None:
 
 
 def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
-    cell_type = CellType(
+    cell_spec = CellSpecification(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",
         chemistry="Li-ion",
     )
-    cell = Cell(cell_type, serial_number="alpha-001")
+    cell = Cell(cell_spec, serial_number="alpha-001")
     test = Test(cell, test_type=BatteryTestType.CYCLING)
     dataset = Dataset(
         id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",

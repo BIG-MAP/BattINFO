@@ -27,7 +27,7 @@ from battinfo.validate import (
 def test_validate_json_report_exposes_structured_schema_issue() -> None:
     doc = {
         "schema_version": "1.0.0",
-        "product": {
+        "cell_spec": {
             "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
             "name": "A123 ANR26650M1-B",
             "manufacturer": {"type": "Organization", "name": "A123"},
@@ -43,21 +43,21 @@ def test_validate_json_report_exposes_structured_schema_issue() -> None:
             "retrieved_at": "not-an-integer",
         },
     }
-    report = validate_json_report(doc, profile="cell-type")
+    report = validate_json_report(doc, profile="cell-spec")
     assert not report.ok
     assert report.policy.name == "default"
     assert report.errors
     issue = report.errors[0]
     assert issue.code == "schema.type"
     assert issue.path == "provenance.retrieved_at"
-    assert issue.profile == "cell-type"
+    assert issue.profile == "cell-spec"
     assert issue.validator == "type"
 
 
 def test_validate_json_result_preserves_structured_issues() -> None:
     doc = {
         "schema_version": "1.0.0",
-        "product": {
+        "cell_spec": {
             "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
             "name": "A123 ANR26650M1-B",
             "manufacturer": {"type": "Organization", "name": "A123"},
@@ -73,7 +73,7 @@ def test_validate_json_result_preserves_structured_issues() -> None:
             "retrieved_at": "not-an-integer",
         },
     }
-    result = validate_json(doc, profile="cell-type")
+    result = validate_json(doc, profile="cell-spec")
     assert not result.ok
     assert result.policy == "default"
     assert result.issues
@@ -259,7 +259,7 @@ def test_validate_references_report_detects_missing_reference(tmp_path: Path) ->
             "cell_instance": {
                 "id": "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x",
                 "identifier": "cell:1f8r-6v2k-9p4m-3t7x",
-                "type_id": "https://w3id.org/battinfo/cell/eysh-4h5s-k4bx-zkgg",
+                "cell_spec_id": "https://w3id.org/battinfo/cell/eysh-4h5s-k4bx-zkgg",
             },
             "provenance": {
                 "source_type": "measurement",
@@ -270,7 +270,7 @@ def test_validate_references_report_detects_missing_reference(tmp_path: Path) ->
     )
     assert not report.ok
     assert report.errors[0].code == "reference.missing"
-    assert report.errors[0].path == "cell_instance.type_id"
+    assert report.errors[0].path == "cell_instance.cell_spec_id"
 
 
 def test_validate_references_report_detects_wrong_reference_type(tmp_path: Path) -> None:
@@ -301,7 +301,7 @@ def test_validate_references_report_detects_wrong_reference_type(tmp_path: Path)
             "cell_instance": {
                 "id": "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x",
                 "identifier": "cell:1f8r-6v2k-9p4m-3t7x",
-                "type_id": "https://w3id.org/battinfo/dataset/87fr-c4vr-wfyh-21td",
+                "cell_spec_id": "https://w3id.org/battinfo/dataset/87fr-c4vr-wfyh-21td",
             },
             "provenance": {
                 "source_type": "measurement",
@@ -312,5 +312,5 @@ def test_validate_references_report_detects_wrong_reference_type(tmp_path: Path)
     )
     assert not report.ok
     assert report.errors[0].code == "reference.type_mismatch"
-    assert report.errors[0].path == "cell_instance.type_id"
+    assert report.errors[0].path == "cell_instance.cell_spec_id"
 

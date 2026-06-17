@@ -36,7 +36,7 @@ UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 SPEC_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
-CELL_TYPE_IRI_RE = SPEC_IRI_RE
+CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
 CELL_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
@@ -52,16 +52,16 @@ PACKAGE_ROOT = Path(__file__).resolve().parent
 EXAMPLES_ROOT = PACKAGE_ROOT / "data" / "examples"
 SCHEMAS_ROOT = PACKAGE_ROOT / "data" / "schemas"
 
-DEFAULT_CELL_TYPES_DIR = EXAMPLES_ROOT / "cell-type"
+DEFAULT_CELL_TYPES_DIR = EXAMPLES_ROOT / "cell-spec"
 DEFAULT_CELL_INSTANCES_DIR = EXAMPLES_ROOT / "cell-instance"
 DEFAULT_TEST_PROTOCOLS_DIR = EXAMPLES_ROOT / "test-protocol"
 DEFAULT_TESTS_DIR = EXAMPLES_ROOT / "test"
 DEFAULT_DATASETS_DIR = EXAMPLES_ROOT / "dataset"
-DEFAULT_LIBRARY_CELL_TYPES_DIR = Path(".battinfo") / "library" / "cell-type"
-DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR = Path(".battinfo") / "library-rdf" / "cell-type"
-DEFAULT_LIBRARY_AGGREGATE_JSONLD = Path(".battinfo") / "library" / "cell-type.jsonld"
-DEFAULT_LIBRARY_MANIFEST_JSON = Path(".battinfo") / "library-rdf" / "cell-type.index.json"
-DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR = Path("src") / "battinfo" / "data" / "library" / "cell-type"
+DEFAULT_LIBRARY_CELL_TYPES_DIR = Path(".battinfo") / "library" / "cell-spec"
+DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR = Path(".battinfo") / "library-rdf" / "cell-spec"
+DEFAULT_LIBRARY_AGGREGATE_JSONLD = Path(".battinfo") / "library" / "cell-spec.jsonld"
+DEFAULT_LIBRARY_MANIFEST_JSON = Path(".battinfo") / "library-rdf" / "cell-spec.index.json"
+DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR = Path("src") / "battinfo" / "data" / "library" / "cell-spec"
 DEFAULT_PUBLISH_SOURCES = (
     DEFAULT_CELL_TYPES_DIR,
     DEFAULT_CELL_INSTANCES_DIR,
@@ -72,7 +72,7 @@ DEFAULT_PUBLISH_SOURCES = (
 DEFAULT_INDEX_SOURCE_ROOT = EXAMPLES_ROOT
 DEFAULT_REGISTRATION_SOURCE_ROOT = Path("examples")
 TEMPLATE_UID = "0000000000000000"
-TEMPLATE_CELL_TYPE_ID = "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
+TEMPLATE_CELL_SPEC_ID = "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
 TEMPLATE_CELL_ID = "https://w3id.org/battinfo/cell/0000-0000-0000-0000"
 
 REGISTER_MODE_CREATE_ONLY = "create_only"
@@ -118,8 +118,8 @@ def _citation_url_value(citation: object = None, citation_doi: object = None) ->
     return None
 
 
-class CellTypeInput(BaseModel):
-    """Typed input for saving a new canonical cell-type resource."""
+class CellSpecificationInput(BaseModel):
+    """Typed input for saving a new canonical cell-spec resource."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -148,34 +148,10 @@ class CellTypeInput(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
-class CellSpecificationInput(BaseModel):
-    """Typed input for saving a reusable cell specification for a cell type."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    schema_version: str = "1.0.0"
-    id: str | None = None
-    uid: str | None = None
-    manufacturer: str
-    model: str
-    format: Literal["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"]
-    chemistry: str
-    product_type: CellProductType | None = None
-    positive_electrode_basis: str
-    negative_electrode_basis: str
-    size_code: str | None = None
-    construction: dict[str, Any] = Field(default_factory=dict)
-    property: dict[str, Any] = Field(default_factory=dict)
-    specification_comment: list[str] = Field(default_factory=list)
-    source_type: str = "datasheet"
-    source_name: str | None = None
-    source_file: str = "manual.json"
-    source_url: str | None = None
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
-    retrieved_at: int | str | None = None
-    workflow_version: str | None = None
-    provenance_comment: str | None = None
-    comment: list[str] = Field(default_factory=list)
+# NOTE: the former ``CellDatasheetInput`` (a thin, lossy library-input model that could only
+# carry construction/property dicts) has been retired. Detailed specs are authored via
+# ``cell_description()`` → ``CellSpecification`` bundle, or supplied as a library-format dict;
+# both flow through ``save_library_cell_spec`` / ``_library_record_from_input``.
 
 
 class CellInstanceInput(BaseModel):
@@ -186,7 +162,7 @@ class CellInstanceInput(BaseModel):
     schema_version: str = "0.1.0"
     id: str | None = None
     uid: str | None = None
-    type_id: str
+    cell_spec_id: str
     serial_number: str | None = None
     batch_id: str | None = None
     manufactured_at: int | str | None = None
@@ -295,10 +271,13 @@ class TestSpecInput(BaseModel):
     version: str | None = None
     protocol_url: str | None = None
     conditions: dict[str, Any] = Field(default_factory=dict)
-    setpoints: dict[str, Any] = Field(default_factory=dict)
-    termination_criteria: dict[str, Any] = Field(default_factory=dict)
-    measurement_outputs: list[dict[str, Any]] = Field(default_factory=list)
-    source_type: Literal["manual", "lab", "simulation", "other"] = "manual"
+    experiment: list[str] = Field(default_factory=list)   # PyBaMM-style strings (authoring)
+    cycles: int | None = None
+    method: list[dict[str, Any]] = Field(default_factory=list)  # pre-built structured method
+    record: dict[str, Any] = Field(default_factory=dict)
+    safety: dict[str, Any] = Field(default_factory=dict)
+    artifacts: list[dict[str, Any]] = Field(default_factory=list)
+    source_type: Literal["manual", "lab", "simulation", "import", "other"] = "manual"
     source_url: str | None = None
     citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     source_file: str | None = None
@@ -307,7 +286,7 @@ class TestSpecInput(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
-def template_cell_type(
+def template_cell_spec(
     *,
     manufacturer: str = "ExampleManufacturer",
     model_name: str = "MODEL-001",
@@ -317,10 +296,10 @@ def template_cell_type(
     country_of_origin: str | None = None,
     year: int | None = None,
     uid: str | None = TEMPLATE_UID,
-    source_file: str = "template-cell-type.json",
+    source_file: str = "template-cell-spec.json",
 ) -> dict[str, Any]:
-    """Build a starter canonical cell-type document for save workflows."""
-    draft = CellTypeInput(
+    """Build a starter canonical cell-spec document for save workflows."""
+    draft = CellSpecificationInput(
         uid=uid,
         model_name=model_name,
         manufacturer=manufacturer,
@@ -333,10 +312,10 @@ def template_cell_type(
         specs={},
         notes=["Template-generated record. Fill in specs/provenance before saving."],
     )
-    return _record_from_cell_type(draft)
+    return _record_from_cell_spec(draft)
 
 
-def template_cell_type_draft(
+def template_cell_spec_draft(
     *,
     manufacturer: str = "ExampleManufacturer",
     model_name: str = "MODEL-001",
@@ -350,16 +329,16 @@ def template_cell_type_draft(
     negative_electrode_basis: str | None = None,
     datasheet_revision: str | None = None,
 ) -> dict[str, Any]:
-    """Build a starter authoring draft for a hand-edited cell-type JSON file."""
+    """Build a starter authoring draft for a hand-edited cell-spec JSON file."""
     specs = _draft_specs_for_format(format)
     draft: dict[str, Any] = {
         "manufacturer": manufacturer,
         "model": model_name,
         "format": format,
         "chemistry": chemistry,
-        "specs": specs,
+        "properties": specs,
         "comment": (
-            "Template-generated cell-type authoring draft. "
+            "Template-generated cell-spec authoring draft. "
             "Edit values and remove entries that don't apply. "
             "Run 'battinfo specs list' to see all available properties and their valid units."
         ),
@@ -413,16 +392,16 @@ def _draft_specs_for_format(
 
 def template_cell_instance(
     *,
-    type_id: str = TEMPLATE_CELL_TYPE_ID,
+    cell_spec_id: str = TEMPLATE_CELL_SPEC_ID,
     source_type: Literal["measurement", "lab", "bms", "other"] = "measurement",
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
     """Build a starter canonical cell-instance document for save workflows."""
     draft = CellInstanceInput(
         uid=uid,
-        type_id=type_id,
+        cell_spec_id=cell_spec_id,
         source_type=source_type,
-        notes=["Template-generated record. Set type_id/serial_number/datasets before saving."],
+        notes=["Template-generated record. Set cell_spec_id/serial_number/datasets before saving."],
     )
     return _record_from_cell_instance(draft)
 
@@ -482,7 +461,8 @@ def template_test_spec(
         name=name,
         kind=kind,
         source_type=source_type,
-        notes=["Template-generated record. Fill in conditions/setpoints before saving."],
+        experiment=["Discharge at C/10 until 2.5 V"],
+        notes=["Template-generated record. Replace the example experiment / conditions before saving."],
     )
     return _record_from_test_protocol(draft)
 
@@ -498,11 +478,13 @@ def template_test_spec_draft(
     draft: dict[str, Any] = {
         "name": name,
         "kind": str(kind),
-        "conditions": {},
-        "setpoints": {},
-        "termination_criteria": {},
-        "measurement_outputs": [],
-        "comment": "Template-generated test-protocol authoring draft. Fill in trusted procedure details before loading into Workspace.",
+        "experiment": ["Charge at 1 C until 4.2 V", "Hold at 4.2 V until C/50", "Discharge at 1 C until 2.5 V"],
+        "cycles": 1,
+        "conditions": {"temperature": {"value": 25, "unit": "degC"}},
+        "record": {},
+        "safety": {},
+        "artifacts": [],
+        "comment": "Template-generated test-protocol authoring draft. Replace the example experiment with the real PyBaMM-style steps before loading into Workspace.",
     }
     if version is not None:
         draft["version"] = version
@@ -511,7 +493,7 @@ def template_test_spec_draft(
     return draft
 
 
-def template_cell_specification(
+def template_library_cell_spec(
     *,
     manufacturer: str = "ExampleManufacturer",
     model: str = "MODEL-001",
@@ -520,24 +502,29 @@ def template_cell_specification(
     positive_electrode_basis: str = "unknown",
     negative_electrode_basis: str = "unknown",
     uid: str | None = TEMPLATE_UID,
-    source_file: str = "template-cell-specification.json",
+    source_file: str = "template-library-cell-spec.json",
     source_type: str = "datasheet",
 ) -> dict[str, Any]:
-    """Build a starter reusable cell specification for the cell-type library."""
-    draft = CellSpecificationInput(
-        uid=uid,
-        manufacturer=manufacturer,
-        model=model,
-        chemistry=chemistry,
-        format=format,
-        positive_electrode_basis=positive_electrode_basis,
-        negative_electrode_basis=negative_electrode_basis,
-        source_file=source_file,
-        source_type=source_type,
-        specification_comment=["Template-generated specification. Fill in trusted specification values."],
-        comment=["Template-generated reusable library cell type."],
+    """Build a starter detailed cell specification (library record).
+
+    Detailed specs are normally authored via ``cell_description()``; this is the flat
+    template for the library record (fill in the electrode/electrolyte/separator structure).
+    """
+    return _library_record_from_input(
+        {
+            "uid": uid,
+            "manufacturer": manufacturer,
+            "model": model,
+            "chemistry": chemistry,
+            "format": format,
+            "positive_electrode_basis": positive_electrode_basis,
+            "negative_electrode_basis": negative_electrode_basis,
+            "source_file": source_file,
+            "source_type": source_type,
+            "specification_comment": ["Template-generated specification. Fill in trusted specification values."],
+            "comment": ["Template-generated reusable library cell spec."],
+        }
     )
-    return _record_from_cell_specification(draft)
 
 
 def _now_iso() -> str:
@@ -691,20 +678,20 @@ def _find_library_descriptor_path_by_id(entity_id: str, library_root: Path) -> P
 
 def _validate_cell_specification(doc: dict[str, Any]) -> None:
     # Specification-format docs (internal library format) are not validated against the
-    # cell-type schema — their structure is enforced by CellSpecificationInput upstream.
+    # cell-spec schema — their structure is enforced by CellSpecificationInput upstream.
     if isinstance(doc.get("specification"), Mapping):
         return
-    result = validate_json(doc, profile="cell-type")
+    result = validate_json(doc, profile="cell-spec")
     if result.ok:
         return
     raise ValueError(f"cell-specification validation failed: {'; '.join(result.errors)}")
 
 
-def _cell_type_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
-    """Convert a cell-type format record (product key) to the internal specification format."""
-    if "specification" in doc or "product" not in doc:
+def _cell_spec_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
+    """Convert a cell-spec format record (product key) to the internal specification format."""
+    if "specification" in doc or "cell_spec" not in doc:
         return doc
-    product = doc.get("product", {})
+    product = doc.get("cell_spec", {})
     mfr = product.get("manufacturer", {})
     mfr_name = mfr.get("name") if isinstance(mfr, Mapping) else str(mfr) if mfr else ""
     specification: dict[str, Any] = {
@@ -722,10 +709,10 @@ def _cell_type_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
     ]:
         if product.get(src) is not None:
             specification[dst] = product[src]
-    if "specs" in doc:
-        specification["property"] = doc["specs"]
+    if "properties" in doc:
+        specification["property"] = doc["properties"]
     for field in ("construction", "positive_electrode", "negative_electrode",
-                  "electrolyte", "separator", "coin_hardware"):
+                  "electrolyte", "separator", "housing"):
         if field in doc:
             specification[field] = doc[field]
     if "notes" in doc:
@@ -751,7 +738,7 @@ def _library_token(value: str) -> str:
     return token or "UNKNOWN"
 
 
-def _library_cell_type_filename(manufacturer: str, model: str) -> str:
+def _library_cell_spec_filename(manufacturer: str, model: str) -> str:
     return f"{_library_token(manufacturer)}__{_library_token(model)}.json"
 
 
@@ -787,9 +774,9 @@ def _editorial_date_token(value: object) -> str | None:
     return datetime.fromtimestamp(unix_time, tz=timezone.utc).strftime("%Y%m%d")
 
 
-def _staging_cell_type_identity(
+def _staging_cell_spec_identity(
     source: dict[str, Any] | PathLike,
-    draft: CellTypeInput,
+    draft: CellSpecificationInput,
 ) -> dict[str, Any]:
     if isinstance(source, (str, Path)):
         payload = _load_json(_as_path(source))
@@ -852,11 +839,11 @@ def _staging_cell_type_identity(
     }
 
 
-def _staging_cell_type_input(
+def _staging_cell_spec_input(
     source: dict[str, Any] | PathLike,
     *,
     uid: str | None = None,
-) -> tuple[CellTypeInput, Path | None]:
+) -> tuple[CellSpecificationInput, Path | None]:
     source_path: Path | None = None
     if isinstance(source, (str, Path)):
         source_path = _as_path(source)
@@ -864,18 +851,18 @@ def _staging_cell_type_input(
     else:
         payload = dict(source)
 
-    if isinstance(payload.get("product"), Mapping) or isinstance(payload.get("cell_type"), Mapping):
+    if isinstance(payload.get("cell_spec"), Mapping) or isinstance(payload.get("cell_spec"), Mapping):
         record_payload = dict(payload)
-        if isinstance(record_payload.get("cell_type"), Mapping) and "product" not in record_payload:
-            record_payload["product"] = dict(record_payload["cell_type"])
-        product = record_payload.get("product")
+        if isinstance(record_payload.get("cell_spec"), Mapping) and "cell_spec" not in record_payload:
+            record_payload["cell_spec"] = dict(record_payload["cell_spec"])
+        product = record_payload.get("cell_spec")
         provenance = record_payload.get("provenance")
         if not isinstance(product, Mapping):
-            raise ValueError("canonical cell-type record is missing product.")
+            raise ValueError("canonical cell-spec record is missing product.")
         manufacturer_obj = product.get("manufacturer")
         manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
         return (
-            CellTypeInput(
+            CellSpecificationInput(
                 schema_version=str(record_payload.get("schema_version") or "0.1.0"),
                 id=product.get("id") if isinstance(product.get("id"), str) else None,
                 uid=uid,
@@ -896,7 +883,7 @@ def _staging_cell_type_input(
                 datasheet_revision=(product.get("datasheet_revision") or product.get("datasheet_revision"))
                 if isinstance(product.get("datasheet_revision") or product.get("datasheet_revision"), str)
                 else None,
-                specs=dict(record_payload.get("specs") or {}),
+                specs=dict(record_payload.get("properties") or {}),
                 source_type=str(provenance.get("source_type") or "datasheet") if isinstance(provenance, Mapping) else "datasheet",
                 source_file=(
                     str(provenance.get("source_file"))
@@ -919,28 +906,28 @@ def _staging_cell_type_input(
     format_value = payload.get("format")
     chemistry = payload.get("chemistry")
     if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model_name, format_value, chemistry)):
-        raise ValueError("staging cell-type JSON requires non-empty string fields: manufacturer, model/model_name, format, chemistry.")
+        raise ValueError("staging cell-spec JSON requires non-empty string fields: manufacturer, model/model_name, format, chemistry.")
 
-    specs = payload.get("specs")
+    specs = payload.get("properties")
     if specs is None:
-        specs = payload.get("nominal_properties")
+        specs = payload.get("properties")
     if specs is None:
         specs = {}
     if not isinstance(specs, Mapping):
-        raise ValueError("staging cell-type JSON field 'specs' must be an object when provided.")
+        raise ValueError("staging cell-spec JSON field 'specs' must be an object when provided.")
 
     provenance = payload.get("provenance")
     if provenance is None:
         provenance = {}
     if not isinstance(provenance, Mapping):
-        raise ValueError("staging cell-type JSON field 'provenance' must be an object when provided.")
+        raise ValueError("staging cell-spec JSON field 'provenance' must be an object when provided.")
 
     year = payload.get("year")
     parsed_year = year if isinstance(year, int) else int(year) if isinstance(year, str) and year.strip().isdigit() else None
     retrieved_at = payload.get("retrieved_at", provenance.get("retrieved_at"))
 
     return (
-        CellTypeInput(
+        CellSpecificationInput(
             uid=uid,
             manufacturer=manufacturer.strip(),
             model_name=str(model_name).strip(),
@@ -980,20 +967,20 @@ def _staging_cell_type_input(
     )
 
 
-def validate_staging_cell_type(
+def validate_staging_cell_spec(
     source: dict[str, Any] | PathLike,
     *,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> dict[str, Any]:
-    """Validate a staging cell-type draft without writing anything to disk.
+    """Validate a staging cell-spec draft without writing anything to disk.
 
     Returns a dict with keys ``ok`` (bool), ``source_path``, ``record_id``,
     ``record_id_basis``, ``issues`` (list of validation issue dicts), and
     ``errors`` (list of error-severity issues only).
     """
-    draft, source_path = _staging_cell_type_input(source)
-    identity = _staging_cell_type_identity(source, draft)
-    record = _record_from_cell_type(draft)
+    draft, source_path = _staging_cell_spec_input(source)
+    identity = _staging_cell_spec_identity(source, draft)
+    record = _record_from_cell_spec(draft)
     report = validate_record_report(record, policy=validation_policy)
     return {
         "ok": report.ok,
@@ -1016,7 +1003,7 @@ def validate_staging_cell_type(
     }
 
 
-def validate_staging_cell_types(
+def validate_staging_cell_specs(
     *,
     input_dir: PathLike,
     glob: str = "*.json",
@@ -1029,7 +1016,7 @@ def validate_staging_cell_types(
     for path in sorted(input_root.glob(glob)):
         if path.name.startswith("_"):
             continue
-        results.append(validate_staging_cell_type(path, validation_policy=validation_policy))
+        results.append(validate_staging_cell_spec(path, validation_policy=validation_policy))
     return {
         "status": "ok",
         "input_dir": str(input_root),
@@ -1040,20 +1027,20 @@ def validate_staging_cell_types(
     }
 
 
-def _existing_curated_cell_type_id(target_path: Path) -> str | None:
+def _existing_curated_cell_spec_id(target_path: Path) -> str | None:
     if not target_path.exists():
         return None
     try:
         payload = _load_json(target_path)
     except Exception:  # noqa: BLE001
         return None
-    product = payload.get("product")
+    product = payload.get("cell_spec")
     if isinstance(product, Mapping) and isinstance(product.get("id"), str):
         return product["id"]
     return None
 
 
-def promote_staging_cell_type(
+def promote_staging_cell_spec(
     source: dict[str, Any] | PathLike,
     *,
     curated_root: PathLike,
@@ -1061,7 +1048,7 @@ def promote_staging_cell_type(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Promote a validated staging cell-type draft to the curated record store.
+    """Promote a validated staging cell-spec draft to the curated record store.
 
     Validates the draft, assigns or resolves the canonical record IRI, writes
     the canonical JSON file to ``curated_root``, and returns a result dict with
@@ -1069,28 +1056,28 @@ def promote_staging_cell_type(
 
     Pass ``dry_run=True`` to validate and resolve the IRI without writing files.
     """
-    draft, source_path = _staging_cell_type_input(source)
-    identity = _staging_cell_type_identity(source, draft)
+    draft, source_path = _staging_cell_spec_input(source)
+    identity = _staging_cell_spec_identity(source, draft)
     if record_id is not None:
         resolved_record_id = _editorial_record_id(record_id)
     else:
         resolved_record_id = identity["record_id"]
         if not isinstance(resolved_record_id, str) or not resolved_record_id:
             raise ValueError(
-                "staging cell-type does not have a safe automatic record id. "
+                "staging cell-spec does not have a safe automatic record id. "
                 f"Provide --record-id explicitly; suggested pattern: {identity['record_id_hint']}."
             )
 
     curated_root_path = _as_path(curated_root)
     target_path = curated_root_path / resolved_record_id / "record.json"
-    existing_id = _existing_curated_cell_type_id(target_path)
+    existing_id = _existing_curated_cell_spec_id(target_path)
     if existing_id is not None:
         draft = draft.model_copy(update={"id": existing_id, "uid": None})
 
-    record = _record_from_cell_type(draft)
+    record = _record_from_cell_spec(draft)
     report = validate_record_report(record, policy=validation_policy)
     if not report.ok:
-        raise ValueError(f"staging cell-type validation failed: {'; '.join(report.render_errors())}")
+        raise ValueError(f"staging cell-spec validation failed: {'; '.join(report.render_errors())}")
 
     if not dry_run:
         _write_json(target_path, record)
@@ -1105,7 +1092,7 @@ def promote_staging_cell_type(
     }
 
 
-def promote_staging_cell_types(
+def promote_staging_cell_specs(
     *,
     input_dir: PathLike,
     curated_root: PathLike,
@@ -1121,7 +1108,7 @@ def promote_staging_cell_types(
         if path.name.startswith("_"):
             continue
         promoted.append(
-            promote_staging_cell_type(
+            promote_staging_cell_spec(
                 path,
                 curated_root=curated_root,
                 validation_policy=validation_policy,
@@ -1138,7 +1125,7 @@ def promote_staging_cell_types(
     }
 
 
-def _curated_cell_type_source(
+def _curated_cell_spec_source(
     source: dict[str, Any] | PathLike,
 ) -> tuple[dict[str, Any], Path | None, str | None]:
     source_path: Path | None = None
@@ -1148,9 +1135,9 @@ def _curated_cell_type_source(
     else:
         payload = dict(source)
 
-    product = payload.get("product")
+    product = payload.get("cell_spec")
     if not isinstance(product, Mapping):
-        raise ValueError("curated cell-type source must be a canonical record with a top-level product object.")
+        raise ValueError("curated cell-spec source must be a canonical record with a top-level product object.")
 
     inferred_local_id: str | None = None
     if source_path is not None:
@@ -1161,35 +1148,35 @@ def _curated_cell_type_source(
     return payload, source_path, inferred_local_id
 
 
-def _curated_cell_type_title(record: Mapping[str, Any]) -> str:
-    product = record.get("product")
+def _curated_cell_spec_title(record: Mapping[str, Any]) -> str:
+    product = record.get("cell_spec")
     if not isinstance(product, Mapping):
-        raise ValueError("cell-type record is missing product.")
+        raise ValueError("cell-spec record is missing product.")
     manufacturer_obj = product.get("manufacturer")
     manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
     return str(product.get("name") or f"{manufacturer or 'Battery'} {product.get('model') or 'Cell'}").strip()
 
 
-def _curated_cell_type_submission_resource(
+def _curated_cell_spec_submission_resource(
     *,
     record: Mapping[str, Any],
     source_local_id: str,
     title: str,
 ) -> dict[str, Any]:
     return {
-        "resource_type": "cell_type",
+        "resource_type": "cell_spec",
         "source_local_id": source_local_id,
         "title": title,
         "semantic_payload": {
-            "@type": "CellType",
-            "battinfo_records": {"cell_type": dict(record)},
+            "@type": "CellSpecification",
+            "battinfo_records": {"cell_spec": dict(record)},
         },
         "related_resources": [],
         "distributions": [],
     }
 
 
-def build_curated_cell_type_submission(
+def build_curated_cell_spec_submission(
     source: dict[str, Any] | PathLike,
     *,
     workspace_id: str,
@@ -1199,19 +1186,19 @@ def build_curated_cell_type_submission(
     title: str | None = None,
     publication_mode: str = "canonical-publication",
     source_system: str = "battinfo-records",
-    workflow_name: str = "curated-cell-type-publication",
+    workflow_name: str = "curated-cell-spec-publication",
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> dict[str, Any]:
-    record, source_path, inferred_local_id = _curated_cell_type_source(source)
+    record, source_path, inferred_local_id = _curated_cell_spec_source(source)
     resolved_source_local_id = source_local_id or inferred_local_id
     if not isinstance(resolved_source_local_id, str) or not resolved_source_local_id.strip():
-        raise ValueError("Could not infer source_local_id for curated cell-type source; provide source_local_id explicitly.")
+        raise ValueError("Could not infer source_local_id for curated cell-spec source; provide source_local_id explicitly.")
 
     validation = validate_record(record, policy=validation_policy)
     if not validation.ok:
-        raise ValueError(f"curated cell-type validation failed: {'; '.join(validation.errors)}")
+        raise ValueError(f"curated cell-spec validation failed: {'; '.join(validation.errors)}")
 
-    resolved_title = title or _curated_cell_type_title(record)
+    resolved_title = title or _curated_cell_spec_title(record)
     generated_at = _now_iso()
     workspace: dict[str, Any] | None = None
     if source_path is not None:
@@ -1239,7 +1226,7 @@ def build_curated_cell_type_submission(
         },
         "release": {"version": source_version},
         "workspace": workspace,
-        "resource": _curated_cell_type_submission_resource(
+        "resource": _curated_cell_spec_submission_resource(
             record=record,
             source_local_id=resolved_source_local_id,
             title=resolved_title,
@@ -1294,7 +1281,7 @@ def submit_publication_package(
         raise RuntimeError(f"Registry submission failed: {exc.reason}") from exc
 
 
-def publish_curated_cell_type(
+def publish_curated_cell_spec(
     source: dict[str, Any] | PathLike,
     *,
     workspace_id: str,
@@ -1307,11 +1294,11 @@ def publish_curated_cell_type(
     title: str | None = None,
     publication_mode: str = "canonical-publication",
     source_system: str = "battinfo-records",
-    workflow_name: str = "curated-cell-type-publication",
+    workflow_name: str = "curated-cell-spec-publication",
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     timeout_sec: float = 30.0,
 ) -> dict[str, Any]:
-    payload = build_curated_cell_type_submission(
+    payload = build_curated_cell_spec_submission(
         source,
         workspace_id=workspace_id,
         publisher_id=publisher_id,
@@ -1339,65 +1326,78 @@ def publish_curated_cell_type(
     }
 
 
-def _record_from_cell_specification(draft: CellSpecificationInput) -> dict[str, Any]:
-    if draft.id is not None:
-        if not CELL_TYPE_IRI_RE.fullmatch(draft.id):
+# Specification fields carried through from a flat library-input dict. Unlike the retired
+# CellDatasheetInput, this accepts the FULL physical structure, not just construction/property.
+_LIBRARY_SPEC_OPTIONAL_FIELDS = (
+    "size_code", "construction", "property", "positive_electrode", "negative_electrode",
+    "electrolyte", "separator", "housing",
+)
+
+
+def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
+    """Build a library cell-spec record from a flat dict of specification fields.
+
+    Accepts the full specification surface (manufacturer/model/identity + construction,
+    property, and the electrode/electrolyte/separator/housing structure). Detailed specs
+    are normally authored via ``cell_description()`` and saved as a ``CellSpecification``
+    bundle; this is the dict/CLI entry point for the same library record.
+    """
+    draft_id = draft.get("id")
+    uid = draft.get("uid")
+    if draft_id is not None:
+        if not CELL_SPEC_IRI_RE.fullmatch(draft_id):
             raise ValueError("cell specification id must match https://w3id.org/battinfo/spec/{uid}.")
-        if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
-        entity_id = draft.id
+        if uid is not None:
+            _assert_id_matches_uid(draft_id, _normalized_dashed_uid(uid))
+        entity_id = draft_id
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(uid)}"
 
     specification: dict[str, Any] = {
         "id": entity_id,
-        "manufacturer": draft.manufacturer,
-        "model": draft.model,
-        "format": draft.format,
-        "chemistry": draft.chemistry,
-        "positive_electrode_basis": draft.positive_electrode_basis,
-        "negative_electrode_basis": draft.negative_electrode_basis,
+        "manufacturer": draft.get("manufacturer"),
+        "model": draft.get("model"),
+        "format": draft.get("format"),
+        "chemistry": draft.get("chemistry"),
+        "positive_electrode_basis": draft.get("positive_electrode_basis"),
+        "negative_electrode_basis": draft.get("negative_electrode_basis"),
     }
-    if draft.size_code is not None:
-        specification["size_code"] = draft.size_code
-    if draft.construction:
-        specification["construction"] = draft.construction
-    if draft.property:
-        specification["property"] = draft.property
-    if draft.specification_comment:
-        specification["comment"] = list(draft.specification_comment)
+    for key in _LIBRARY_SPEC_OPTIONAL_FIELDS:
+        value = draft.get(key)
+        if value:
+            specification[key] = value
+    if draft.get("specification_comment"):
+        specification["comment"] = list(draft["specification_comment"])
 
     provenance: dict[str, Any] = {
-        "source_file": draft.source_file,
-        "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+        "source_file": draft.get("source_file", "manual.json"),
+        "retrieved_at": _to_unix_time(draft.get("retrieved_at")) or _now_unix(),
     }
-    if draft.source_type:
-        provenance["source_type"] = draft.source_type
-    if draft.source_name is not None:
-        provenance["source_name"] = draft.source_name
-    if draft.source_url is not None:
-        provenance["source_url"] = draft.source_url
-    citation = _citation_url_value(draft.citation)
+    if draft.get("source_type"):
+        provenance["source_type"] = draft["source_type"]
+    if draft.get("source_name") is not None:
+        provenance["source_name"] = draft["source_name"]
+    if draft.get("source_url") is not None:
+        provenance["source_url"] = draft["source_url"]
+    citation = _citation_url_value(draft.get("citation"))
     if citation is not None:
         provenance["citation"] = citation
-    if draft.workflow_version is not None:
-        provenance["workflow_version"] = draft.workflow_version
-    if draft.provenance_comment is not None:
-        provenance["comment"] = draft.provenance_comment
+    if draft.get("workflow_version") is not None:
+        provenance["workflow_version"] = draft["workflow_version"]
+    if draft.get("provenance_comment") is not None:
+        provenance["comment"] = draft["provenance_comment"]
 
     record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
+        "schema_version": draft.get("schema_version", "1.0.0"),
         "specification": specification,
         "provenance": provenance,
     }
-    if draft.comment:
-        record["comment"] = list(draft.comment)
+    if draft.get("comment"):
+        record["comment"] = list(draft["comment"])
     return record
 
 
-def query_library_cell_types(
+def query_library_cell_specs(
     *,
     id: str | None = None,
     manufacturer: str | None = None,
@@ -1416,7 +1416,7 @@ def query_library_cell_types(
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query reusable library cell-type specifications."""
+    """Query reusable library cell-spec specifications."""
     records: list[dict[str, Any]] = []
 
     for path in _iter_json_files(_as_path(directory)):
@@ -1438,7 +1438,7 @@ def query_library_cell_types(
             "format": specification.get("format"),
             "size_code": specification.get("size_code"),
             "construction": specification.get("construction"),
-            "coin_hardware": specification.get("coin_hardware"),
+            "housing": specification.get("housing"),
             "positive_electrode_basis": specification.get("positive_electrode_basis"),
             "negative_electrode_basis": specification.get("negative_electrode_basis"),
             "nominal_capacity": _quantity_numeric_value(properties, "nominal_capacity")
@@ -1494,7 +1494,7 @@ def query_library_cell_types(
     return _paginate(filtered, limit=limit, offset=offset)
 
 
-def query_cell_types(
+def query_cell_specs(
     *,
     id: str | None = None,
     manufacturer: str | None = None,
@@ -1506,7 +1506,7 @@ def query_cell_types(
     nominal_voltage_min: float | None = None,
     nominal_voltage_max: float | None = None,
     spec_filters: Mapping[str, tuple[float | None, float | None]] | None = None,
-    cell_types_dir: PathLike = DEFAULT_CELL_TYPES_DIR,
+    cell_specs_dir: PathLike = DEFAULT_CELL_TYPES_DIR,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
@@ -1514,10 +1514,10 @@ def query_cell_types(
     records: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
 
-    for path in _iter_json_files(_as_path(cell_types_dir)):
+    for path in _iter_json_files(_as_path(cell_specs_dir)):
         doc = _load_json(path)
-        product = doc.get("product", {})
-        specs = doc.get("specs", {})
+        product = doc.get("cell_spec", {})
+        specs = doc.get("properties", {})
         if isinstance(product, Mapping):
             cell_id = product.get("id")
             manufacturer_obj = product.get("manufacturer")
@@ -1535,7 +1535,7 @@ def query_cell_types(
             chemistry_name = product.get("chemistry")
             short_id = product.get("short_id")
         else:
-            legacy = doc.get("cell_type", {})
+            legacy = doc.get("cell_spec", {})
             if not isinstance(legacy, Mapping):
                 continue
             cell_id = legacy.get("id")
@@ -1565,8 +1565,8 @@ def query_cell_types(
                 "year": year,
                 "nominal_capacity": _spec_numeric_value(specs, "nominal_capacity"),
                 "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
-                "specs": specs,
-                "source": "cell-type",
+                "properties": specs,
+                "source": "cell-spec",
                 "path": str(path),
             }
         )
@@ -1589,7 +1589,7 @@ def query_cell_types(
             continue
 
         if spec_filters:
-            specs = rec.get("specs", {})
+            specs = rec.get("properties", {})
             if not isinstance(specs, Mapping):
                 continue
             matches = True
@@ -1609,7 +1609,7 @@ def query_cell_types(
 def query_cell_instances(
     *,
     id: str | None = None,
-    type_id: str | None = None,
+    cell_spec_id: str | None = None,
     short_id_prefix: str | None = None,
     serial_number: str | None = None,
     has_dataset: bool | None = None,
@@ -1643,7 +1643,7 @@ def query_cell_instances(
                 linked_dataset_ids = [prov["dataset_id"]]
         rec = {
             "id": inst.get("id"),
-            "type_id": inst.get("type_id"),
+            "cell_spec_id": inst.get("cell_spec_id"),
             "short_id": inst.get("short_id"),
             "serial_number": inst.get("serial_number"),
             "dataset_id": linked_dataset_ids[0] if linked_dataset_ids else None,
@@ -1658,7 +1658,7 @@ def query_cell_instances(
     for rec in records:
         if id is not None and rec.get("id") != id:
             continue
-        if type_id is not None and rec.get("type_id") != type_id:
+        if cell_spec_id is not None and rec.get("cell_spec_id") != cell_spec_id:
             continue
         if short_id_prefix and not str(rec.get("short_id", "")).lower().startswith(short_id_prefix.lower()):
             continue
@@ -1823,11 +1823,23 @@ def query_test_specs(
     kind: str | None = None,
     name_contains: str | None = None,
     source_type: str | None = None,
+    mode: str | None = None,
+    direction: str | None = None,
+    tag: str | None = None,
+    c_rate: float | None = None,
+    has_cv_hold: bool | None = None,
+    has_rest: bool | None = None,
+    has_eis: bool | None = None,
     directory: PathLike = DEFAULT_TEST_PROTOCOLS_DIR,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query canonical reusable test-protocol metadata records."""
+    """Query canonical reusable test-protocol metadata records.
+
+    Beyond identity filters, the ``mode`` / ``direction`` / ``tag`` / ``c_rate`` /
+    ``has_cv_hold`` / ``has_rest`` / ``has_eis`` filters match against the derived
+    ``facets`` rollup, so an agent can find protocols by what their method *does*
+    (e.g. all specs with a CV hold, or any using C/2)."""
     records: list[dict[str, Any]] = []
     for path in _iter_json_files(_as_path(directory)):
         doc = _load_json(path)
@@ -1844,6 +1856,7 @@ def query_test_specs(
                 "version": protocol.get("version"),
                 "protocol_url": protocol.get("protocol_url"),
                 "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                "facets": doc.get("facets") if isinstance(doc.get("facets"), Mapping) else {},
                 "path": str(path),
                 "record": doc,
             }
@@ -1859,17 +1872,41 @@ def query_test_specs(
             continue
         if not _str_eq(rec.get("source_type"), source_type):
             continue
+        if not _matches_facets(rec.get("facets") or {}, mode=mode, direction=direction,
+                               tag=tag, c_rate=c_rate, has_cv_hold=has_cv_hold,
+                               has_rest=has_rest, has_eis=has_eis):
+            continue
         filtered.append(rec)
 
     return _paginate(filtered, limit=limit, offset=offset)
+
+
+def _matches_facets(facets: Mapping[str, Any], *, mode: str | None, direction: str | None,
+                    tag: str | None, c_rate: float | None, has_cv_hold: bool | None,
+                    has_rest: bool | None, has_eis: bool | None) -> bool:
+    """True if the derived facets satisfy every supplied method-shape filter."""
+    if mode is not None and mode not in (facets.get("modes") or []):
+        return False
+    if direction is not None and direction not in (facets.get("directions") or []):
+        return False
+    if tag is not None and tag not in (facets.get("tags") or []):
+        return False
+    if c_rate is not None and not any(
+        abs(float(c) - float(c_rate)) < 1e-9 for c in (facets.get("c_rates") or [])
+    ):
+        return False
+    for flag, key in ((has_cv_hold, "has_cv_hold"), (has_rest, "has_rest"), (has_eis, "has_eis")):
+        if flag is not None and bool(facets.get(key)) != bool(flag):
+            return False
+    return True
 
 
 def query(kind: str, /, **filters: Any) -> list[dict[str, Any]]:
     """Query BattINFO resources by explicit kind."""
     normalized = kind.strip().lower().replace("-", "_")
 
-    if normalized in {"cell_type", "cell_types"}:
-        return query_cell_types(**filters)
+    if normalized in {"cell_spec", "cell_specs"}:
+        return query_cell_specs(**filters)
     if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
         return query_cell_instances(**filters)
     if normalized in {"test_spec", "test_specs"}:
@@ -1878,17 +1915,17 @@ def query(kind: str, /, **filters: Any) -> list[dict[str, Any]]:
         return query_tests(**filters)
     if normalized in {"dataset", "datasets"}:
         return query_datasets(**filters)
-    if normalized in {"description", "descriptions", "library_cell_type", "library_cell_types"}:
-        return query_library_cell_types(**filters)
+    if normalized in {"description", "descriptions", "library_cell_spec", "library_cell_specs"}:
+        return query_library_cell_specs(**filters)
 
     raise ValueError(
-        "kind must be one of: cell_types, cells, test_specs, tests, datasets, descriptions."
+        "kind must be one of: cell_specs, cells, test_specs, tests, datasets, descriptions."
     )
 
 
-def resolve_cell_type_id(
+def resolve_cell_spec_id(
     *,
-    type_id: str | None = None,
+    cell_spec_id: str | None = None,
     model_name: str | None = None,
     manufacturer: str | None = None,
     chemistry: str | None = None,
@@ -1896,13 +1933,13 @@ def resolve_cell_type_id(
     exact_model: bool = True,
     limit: int = 50,
 ) -> str:
-    """Resolve a unique `cell-type` IRI from metadata filters."""
-    if type_id is not None:
-        if not CELL_TYPE_IRI_RE.fullmatch(type_id):
-            raise ValueError("type_id must match https://w3id.org/battinfo/spec/{uid}.")
-        return type_id
+    """Resolve a unique `cell-spec` IRI from metadata filters."""
+    if cell_spec_id is not None:
+        if not CELL_SPEC_IRI_RE.fullmatch(cell_spec_id):
+            raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        return cell_spec_id
 
-    matches = query_cell_types(
+    matches = query_cell_specs(
         manufacturer=manufacturer,
         chemistry=chemistry,
         format=format,
@@ -1914,12 +1951,12 @@ def resolve_cell_type_id(
         matches = [m for m in matches if _str_eq(m.get("model_name"), model_name)]
 
     if not matches:
-        raise ValueError("No cell-type match found. Refine metadata filters or pass type_id explicitly.")
+        raise ValueError("No cell-spec match found. Refine metadata filters or pass cell_spec_id explicitly.")
 
     if len(matches) > 1:
         ids = [str(m.get("id")) for m in matches[:5]]
         raise ValueError(
-            "Multiple cell-type matches found. Add more filters or pass type_id. "
+            "Multiple cell-spec matches found. Add more filters or pass cell_spec_id. "
             f"Examples: {ids}"
         )
     only = matches[0].get("id")
@@ -1977,8 +2014,8 @@ def _validate_publication_artifact(
 
 def create_cell_instance(
     *,
-    type_id: str | None = None,
-    cell_type: dict[str, Any] | PathLike | None = None,
+    cell_spec_id: str | None = None,
+    cell_spec: dict[str, Any] | PathLike | None = None,
     model_name: str | None = None,
     manufacturer: str | None = None,
     chemistry: str | None = None,
@@ -1992,32 +2029,32 @@ def create_cell_instance(
 ) -> dict[str, Any]:
     """Create a physical cell-instance document.
 
-    You can pass a canonical `type_id`, a `cell_type` document/path, or metadata filters
+    You can pass a canonical `cell_spec_id`, a `cell_spec` document/path, or metadata filters
     (`model_name`, `manufacturer`, ...) to resolve the type.
     """
-    resolved_type_id = type_id
+    resolved_cell_spec_id = cell_spec_id
 
-    if cell_type is not None:
-        cell_type_doc: dict[str, Any]
-        if isinstance(cell_type, (str, Path)):
-            cell_type_doc = _load_json(_as_path(cell_type))
+    if cell_spec is not None:
+        cell_spec_doc: dict[str, Any]
+        if isinstance(cell_spec, (str, Path)):
+            cell_spec_doc = _load_json(_as_path(cell_spec))
         else:
-            cell_type_doc = cell_type
-        product_obj = cell_type_doc.get("product", {})
+            cell_spec_doc = cell_spec
+        product_obj = cell_spec_doc.get("cell_spec", {})
         if not isinstance(product_obj, Mapping):
-            legacy_obj = cell_type_doc.get("cell_type", {})
+            legacy_obj = cell_spec_doc.get("cell_spec", {})
             if not isinstance(legacy_obj, Mapping):
-                raise ValueError("cell_type document must contain a 'product' object.")
+                raise ValueError("cell_spec document must contain a 'product' object.")
             product_obj = legacy_obj
         embedded_id = product_obj.get("id")
         if not isinstance(embedded_id, str):
-            raise ValueError("cell-type id missing in provided cell_type document.")
-        if resolved_type_id is not None and embedded_id != resolved_type_id:
-            raise ValueError("Provided type_id does not match cell-type id.")
-        resolved_type_id = embedded_id
+            raise ValueError("cell-spec id missing in provided cell_spec document.")
+        if resolved_cell_spec_id is not None and embedded_id != resolved_cell_spec_id:
+            raise ValueError("Provided cell_spec_id does not match cell-spec id.")
+        resolved_cell_spec_id = embedded_id
 
-    resolved_type_id = resolve_cell_type_id(
-        type_id=resolved_type_id,
+    resolved_cell_spec_id = resolve_cell_spec_id(
+        cell_spec_id=resolved_cell_spec_id,
         model_name=model_name,
         manufacturer=manufacturer,
         chemistry=chemistry,
@@ -2037,7 +2074,7 @@ def create_cell_instance(
         "schema_version": "0.1.0",
         "cell_instance": {
             "id": instance_id,
-            "type_id": resolved_type_id,
+            "cell_spec_id": resolved_cell_spec_id,
             "short_id": dashed_uid.replace("-", "")[:6],
         },
         "provenance": {
@@ -2059,8 +2096,8 @@ def create_cell_instance(
 
 
 def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
-    if entity_type == "cell-type":
-        return source_root / "cell-type" / f"cell-type-{uid}.json"
+    if entity_type == "cell-spec":
+        return source_root / "cell-spec" / f"cell-spec-{uid}.json"
     if entity_type == "cell":
         return source_root / "cell-instance" / f"cell-{uid}.json"
     if entity_type == "test-protocol":
@@ -2073,8 +2110,8 @@ def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
 
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
-    if entity_type == "cell-type":
-        directory = source_root / "cell-type"
+    if entity_type == "cell-spec":
+        directory = source_root / "cell-spec"
     elif entity_type == "cell":
         directory = source_root / "cell-instance"
     elif entity_type == "test-protocol":
@@ -2092,8 +2129,8 @@ def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
 
 def _logical_entity_type_from_doc(doc: Mapping[str, Any]) -> str:
     """Return the logical entity type from document structure, independent of IRI namespace."""
-    if isinstance(doc.get("product"), Mapping) or isinstance(doc.get("cell_type"), Mapping):
-        return "cell-type"
+    if isinstance(doc.get("cell_spec"), Mapping) or isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell"
     if isinstance(doc.get("test_spec"), Mapping):
@@ -2102,13 +2139,13 @@ def _logical_entity_type_from_doc(doc: Mapping[str, Any]) -> str:
         return "test"
     if isinstance(doc.get("dataset"), Mapping):
         return "dataset"
-    raise ValueError("Cannot determine entity type: expected product/cell_type, cell_instance, test_protocol, test, or dataset key.")
+    raise ValueError("Cannot determine entity type: expected product/cell_spec, cell_instance, test_protocol, test, or dataset key.")
 
 
 def _candidate_types_for_namespace(namespace: str) -> list[str]:
     """Map an IRI namespace to the candidate internal entity types to search."""
     if namespace == "spec":
-        return ["cell-type", "test-protocol"]
+        return ["cell-spec", "test-protocol"]
     if namespace == "cell":
         return ["cell"]
     if namespace == "test":
@@ -2157,9 +2194,9 @@ def _assert_id_matches_uid(entity_id: str, uid: str) -> None:
         raise ValueError("Provided id and uid do not match.")
 
 
-def _record_from_cell_type(draft: CellTypeInput) -> dict[str, Any]:
+def _record_from_cell_spec(draft: CellSpecificationInput) -> dict[str, Any]:
     if draft.id is not None:
-        if not CELL_TYPE_IRI_RE.fullmatch(draft.id):
+        if not CELL_SPEC_IRI_RE.fullmatch(draft.id):
             raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
         if draft.uid is not None:
             dashed = _normalized_dashed_uid(draft.uid)
@@ -2172,17 +2209,17 @@ def _record_from_cell_type(draft: CellTypeInput) -> dict[str, Any]:
 
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
-        "product": {
+        "cell_spec": {
             "id": entity_id,
             "short_id": dashed_uid.replace("-", "")[:6],
-            "identifier": f"cell-type:{dashed_uid}",
+            "identifier": f"cell-spec:{dashed_uid}",
             "name": f"{draft.manufacturer} {draft.model_name}",
             "model": draft.model_name,
             "manufacturer": {"type": "Organization", "name": draft.manufacturer},
             "cell_format": draft.format,
             "chemistry": draft.chemistry,
         },
-        "specs": draft.specs,
+        "properties": draft.specs,
         "provenance": {
             "source_type": draft.source_type,
             "source_file": draft.source_file,
@@ -2194,19 +2231,19 @@ def _record_from_cell_type(draft: CellTypeInput) -> dict[str, Any]:
     if citation is not None:
         record["provenance"]["citation"] = citation
     if draft.positive_electrode_basis is not None:
-        record["product"]["positive_electrode_basis"] = draft.positive_electrode_basis
+        record["cell_spec"]["positive_electrode_basis"] = draft.positive_electrode_basis
     if draft.negative_electrode_basis is not None:
-        record["product"]["negative_electrode_basis"] = draft.negative_electrode_basis
+        record["cell_spec"]["negative_electrode_basis"] = draft.negative_electrode_basis
     if draft.size_code is not None:
-        record["product"]["size_code"] = draft.size_code
+        record["cell_spec"]["size_code"] = draft.size_code
     if draft.iec_code is not None:
-        record["product"]["iec_code"] = draft.iec_code
+        record["cell_spec"]["iec_code"] = draft.iec_code
     if draft.country_of_origin is not None:
-        record["product"]["country_of_origin"] = draft.country_of_origin
+        record["cell_spec"]["country_of_origin"] = draft.country_of_origin
     if draft.year is not None:
-        record["product"]["year"] = draft.year
+        record["cell_spec"]["year"] = draft.year
     if draft.datasheet_revision is not None:
-        record["product"]["datasheet_revision"] = draft.datasheet_revision
+        record["cell_spec"]["datasheet_revision"] = draft.datasheet_revision
     if draft.file_hash is not None:
         record["provenance"]["file_hash"] = draft.file_hash
     if draft.notes:
@@ -2215,8 +2252,8 @@ def _record_from_cell_type(draft: CellTypeInput) -> dict[str, Any]:
 
 
 def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
-    if not CELL_TYPE_IRI_RE.fullmatch(draft.type_id):
-        raise ValueError("type_id must match https://w3id.org/battinfo/spec/{uid}.")
+    if not CELL_SPEC_IRI_RE.fullmatch(draft.cell_spec_id):
+        raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if draft.dataset_id is not None and not DATASET_IRI_RE.fullmatch(draft.dataset_id):
         raise ValueError("dataset_id must match https://w3id.org/battinfo/dataset/{uid}.")
     for dataset_id in draft.dataset_ids:
@@ -2240,7 +2277,7 @@ def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
         "schema_version": draft.schema_version,
         "cell_instance": {
             "id": entity_id,
-            "type_id": draft.type_id,
+            "cell_spec_id": draft.cell_spec_id,
             "short_id": dashed_uid.replace("-", "")[:6],
         },
         "provenance": {
@@ -2504,12 +2541,24 @@ def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
         record["test_spec"]["protocol_url"] = draft.protocol_url
     if draft.conditions:
         record["conditions"] = copy.deepcopy(draft.conditions)
-    if draft.setpoints:
-        record["setpoints"] = copy.deepcopy(draft.setpoints)
-    if draft.termination_criteria:
-        record["termination_criteria"] = copy.deepcopy(draft.termination_criteria)
-    if draft.measurement_outputs:
-        record["measurement_outputs"] = copy.deepcopy(draft.measurement_outputs)
+    if draft.record:
+        record["record"] = copy.deepcopy(draft.record)
+    if draft.safety:
+        record["safety"] = copy.deepcopy(draft.safety)
+    # Descriptive method: a pre-built structured `method` wins, else parse the
+    # PyBaMM-style `experiment` strings (the default human authoring interface).
+    from battinfo.testmethod import Step, compute_facets, parse_experiment  # noqa: PLC0415
+    from battinfo.bundle import _prune_empty  # noqa: PLC0415
+    method_objs: list[Step] = []
+    if draft.method:
+        method_objs = [Step.model_validate(s) for s in draft.method]
+    elif draft.experiment:
+        method_objs = parse_experiment(list(draft.experiment), draft.cycles)
+    if method_objs:
+        record["method"] = [_prune_empty(s.model_dump(mode="json")) for s in method_objs]
+        record["facets"] = compute_facets(method_objs, {})
+    if draft.artifacts:
+        record["artifacts"] = [copy.deepcopy(a) for a in draft.artifacts]
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
     citation = _citation_url_value(draft.citation)
@@ -2609,8 +2658,8 @@ def save_record(
     return payload
 
 
-def save_cell_type(
-    draft: CellTypeInput | dict[str, Any] | PathLike,
+def save_cell_spec(
+    draft: CellSpecificationInput | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2624,12 +2673,12 @@ def save_cell_type(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Save a cell-type from either draft payload or canonical record."""
-    from battinfo.bundle import CellType as CellTypeBundle
+    """Save a cell-spec from either draft payload or canonical record."""
+    from battinfo.bundle import CellSpecification as CellSpecificationBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return save_cell_type(
+        return save_cell_spec(
             loaded,
             source_root=source_root,
             mode=mode,
@@ -2643,7 +2692,7 @@ def save_cell_type(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, CellTypeBundle):
+    if isinstance(draft, CellSpecificationBundle):
         return save_record(
             draft.to_record(),
             source_root=source_root,
@@ -2659,7 +2708,7 @@ def save_cell_type(
             dry_run=dry_run,
         )
     if isinstance(draft, Mapping) and (
-        isinstance(draft.get("product"), Mapping) or isinstance(draft.get("cell_type"), Mapping)
+        isinstance(draft.get("cell_spec"), Mapping) or isinstance(draft.get("cell_spec"), Mapping)
     ):
         return save_record(
             dict(draft),
@@ -2675,8 +2724,8 @@ def save_cell_type(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, CellTypeInput) else CellTypeInput.model_validate(draft)
-    record = _record_from_cell_type(draft_model)
+    draft_model = draft if isinstance(draft, CellSpecificationInput) else CellSpecificationInput.model_validate(draft)
+    record = _record_from_cell_spec(draft_model)
     return save_record(
         record,
         source_root=source_root,
@@ -3021,7 +3070,7 @@ def save_test_spec(
     )
 
 
-def build_cell_type_library_rdf(
+def build_cell_spec_library_rdf(
     *,
     input_dir: PathLike = DEFAULT_LIBRARY_CELL_TYPES_DIR,
     output_jsonld_dir: PathLike = DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR,
@@ -3030,7 +3079,7 @@ def build_cell_type_library_rdf(
     glob: str = "*.json",
     clean_output: bool = False,
 ) -> dict[str, Any]:
-    """Validate reusable cell-type specifications and build domain-battery JSON-LD artifacts."""
+    """Validate reusable cell-spec specifications and build domain-battery JSON-LD artifacts."""
     input_dir_path = _as_path(input_dir)
     output_jsonld_dir_path = _as_path(output_jsonld_dir)
     aggregate_jsonld_path = _as_path(aggregate_jsonld)
@@ -3077,7 +3126,7 @@ def build_cell_type_library_rdf(
         if isinstance(graph_nodes, list):
             aggregate_graph.extend([node for node in graph_nodes if isinstance(node, Mapping)])
 
-        normalised = _cell_type_record_to_library_format(descriptor)
+        normalised = _cell_spec_record_to_library_format(descriptor)
         specification = normalised.get("specification", {})
         if not isinstance(specification, Mapping):
             specification = {}
@@ -3099,7 +3148,7 @@ def build_cell_type_library_rdf(
         "@graph": aggregate_graph,
     }
     manifest_payload = {
-        "library_type": "battinfo-cell-type-library",
+        "library_type": "battinfo-cell-spec-library",
         "entry_count": len(manifest_entries),
         "source_dir": str(input_dir_path),
         "output_jsonld_dir": str(output_jsonld_dir_path),
@@ -3119,8 +3168,8 @@ def build_cell_type_library_rdf(
     }
 
 
-def save_library_cell_type(
-    draft: CellSpecificationInput | dict[str, Any] | PathLike,
+def save_library_cell_spec(
+    draft: "CellSpecificationBundle | dict[str, Any] | PathLike",
     *,
     library_root: PathLike = DEFAULT_LIBRARY_CELL_TYPES_DIR,
     package_root: PathLike = DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR,
@@ -3141,7 +3190,7 @@ def save_library_cell_type(
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
-        return save_library_cell_type(
+        return save_library_cell_spec(
             loaded,
             library_root=library_root,
             package_root=package_root,
@@ -3160,16 +3209,16 @@ def save_library_cell_type(
 
     if isinstance(draft, CellSpecificationBundle):
         doc = draft.to_library_record()
-    elif isinstance(draft, Mapping) and isinstance(draft.get("product"), Mapping):
+    elif isinstance(draft, Mapping) and isinstance(draft.get("cell_spec"), Mapping):
         # Cell-type format: validate first, then normalise to the internal specification format.
         if validate:
             _validate_cell_specification(dict(draft))
-        doc = _cell_type_record_to_library_format(dict(draft))
+        doc = _cell_spec_record_to_library_format(dict(draft))
     elif isinstance(draft, Mapping) and isinstance(draft.get("specification"), Mapping):
         doc = dict(draft)
     else:
-        draft_model = draft if isinstance(draft, CellSpecificationInput) else CellSpecificationInput.model_validate(draft)
-        doc = _record_from_cell_specification(draft_model)
+        # Flat dict of specification fields (CLI inline options / hand-authored JSON).
+        doc = _library_record_from_input(dict(draft))
 
     if validate and not isinstance(doc.get("specification"), Mapping):
         _validate_cell_specification(doc)
@@ -3186,14 +3235,14 @@ def save_library_cell_type(
     entity_id = specification.get("id")
     manufacturer = specification.get("manufacturer")
     model = specification.get("model")
-    if not isinstance(entity_id, str) or not CELL_TYPE_IRI_RE.fullmatch(entity_id):
+    if not isinstance(entity_id, str) or not CELL_SPEC_IRI_RE.fullmatch(entity_id):
         raise ValueError("cell specification field 'specification.id' must match https://w3id.org/battinfo/spec/{uid}.")
     if not isinstance(manufacturer, str) or not manufacturer.strip():
         raise ValueError("cell specification field 'specification.manufacturer' must be a non-empty string.")
     if not isinstance(model, str) or not model.strip():
         raise ValueError("cell specification field 'specification.model' must be a non-empty string.")
 
-    expected_path = library_root_path / _library_cell_type_filename(manufacturer, model)
+    expected_path = library_root_path / _library_cell_spec_filename(manufacturer, model)
     existing_path = _find_library_descriptor_path_by_id(entity_id, library_root_path)
 
     if expected_path.exists() and expected_path != existing_path:
@@ -3221,7 +3270,7 @@ def save_library_cell_type(
             return {
                 "status": "exists",
                 "id": entity_id,
-                "entity_type": "cell-type",
+                "entity_type": "cell-spec",
                 "path": str(existing_path),
                 "package_path": str(package_path) if sync_packaged_copy else None,
                 "mode": mode_normalized,
@@ -3237,7 +3286,7 @@ def save_library_cell_type(
     payload: dict[str, Any] = {
         "status": "dry-run" if dry_run else operation,
         "id": entity_id,
-        "entity_type": "cell-type",
+        "entity_type": "cell-spec",
         "path": str(target_path),
         "package_path": str(package_path) if sync_packaged_copy else None,
         "mode": mode_normalized,
@@ -3256,7 +3305,7 @@ def save_library_cell_type(
         payload["synced_package"] = True
 
     if build_rdf:
-        rdf_result = build_cell_type_library_rdf(
+        rdf_result = build_cell_spec_library_rdf(
             input_dir=library_root_path,
             output_jsonld_dir=output_jsonld_dir,
             aggregate_jsonld=aggregate_jsonld,
@@ -3357,10 +3406,10 @@ def save_batch(
 
 
 def _entity_id(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("product"), Mapping) and isinstance(doc["product"].get("id"), str):
-        return doc["product"]["id"]
-    if isinstance(doc.get("cell_type"), Mapping) and isinstance(doc["cell_type"].get("id"), str):
-        return doc["cell_type"]["id"]
+    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
+        return doc["cell_spec"]["id"]
+    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
+        return doc["cell_spec"]["id"]
     if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
         return doc["cell_instance"]["id"]
     if isinstance(doc.get("test_spec"), Mapping) and isinstance(doc["test_spec"].get("id"), str):
@@ -3373,10 +3422,10 @@ def _entity_id(doc: dict[str, Any]) -> str:
 
 
 def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("product"), Mapping):
-        return "cell-type.schema.json"
-    if isinstance(doc.get("cell_type"), Mapping):
-        return "cell-type.schema.json"
+    if isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec.schema.json"
+    if isinstance(doc.get("cell_spec"), Mapping):
+        return "cell-spec.schema.json"
     if isinstance(doc.get("cell_instance"), Mapping):
         return "cell-instance.schema.json"
     if isinstance(doc.get("test_spec"), Mapping):
@@ -3385,7 +3434,7 @@ def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
         return "test.schema.json"
     if isinstance(doc.get("dataset"), Mapping):
         return "dataset.schema.json"
-    raise ValueError("Unsupported record type: expected product/cell_type, cell_instance, test_protocol, test, or dataset.")
+    raise ValueError("Unsupported record type: expected product/cell_spec, cell_instance, test_protocol, test, or dataset.")
 
 
 def _iri_tail(iri: str) -> tuple[str, str]:
@@ -3747,10 +3796,10 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         },
     ]
 
-    if entity_type == "cell-type":
-        cell = doc.get("product")
+    if entity_type == "cell-spec":
+        cell = doc.get("cell_spec")
         if not isinstance(cell, Mapping):
-            cell = doc["cell_type"]
+            cell = doc["cell_spec"]
         manufacturer = cell.get("manufacturer")
         if isinstance(manufacturer, Mapping):
             manufacturer_name = manufacturer.get("name")
@@ -3772,7 +3821,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             out["schema:size"] = size_code
         # Quantitative specifications as EMMO ConventionalProperty nodes.
         # Chemistry and format are already expressed through @type stacking.
-        specs = doc.get("specs") or {}
+        specs = doc.get("properties") or {}
         if isinstance(specs, Mapping):
             prop_nodes = [
                 node
@@ -3791,8 +3840,8 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             "@id": entity_iri,
             "@type": ["BatteryCell", "schema:IndividualProduct"],
             "schema:identifier": uid,
-            "hasDescription": {"@id": inst.get("type_id")},
-            "schema:isVariantOf": {"@id": inst.get("type_id")},
+            "hasDescription": {"@id": inst.get("cell_spec_id")},
+            "schema:isVariantOf": {"@id": inst.get("cell_spec_id")},
         }
         if inst.get("serial_number"):
             out["schema:serialNumber"] = inst.get("serial_number")
@@ -4139,29 +4188,29 @@ def build_index(
     if not src_root.exists():
         raise ValueError(f"source_root does not exist: {src_root}")
 
-    cell_types: list[dict[str, Any]] = []
+    cell_specs: list[dict[str, Any]] = []
     cell_instances: list[dict[str, Any]] = []
     test_specs: list[dict[str, Any]] = []
     tests: list[dict[str, Any]] = []
     datasets: list[dict[str, Any]] = []
     failures: list[dict[str, str]] = []
 
-    cell_types_dir = src_root / "cell-type"
+    cell_specs_dir = src_root / "cell-spec"
     cell_instances_dir = src_root / "cell-instance"
     test_protocols_dir = src_root / "test-protocol"
     tests_dir = src_root / "test"
     datasets_dir = src_root / "dataset"
 
-    for path in sorted(cell_types_dir.glob(glob)) if cell_types_dir.exists() else []:
+    for path in sorted(cell_specs_dir.glob(glob)) if cell_specs_dir.exists() else []:
         try:
             doc = _load_json(path)
             if validate:
                 _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
-            product = doc.get("product")
+            product = doc.get("cell_spec")
             if isinstance(product, Mapping):
                 entity = product
             else:
-                legacy = doc.get("cell_type")
+                legacy = doc.get("cell_spec")
                 if not isinstance(legacy, Mapping):
                     raise ValueError("missing product.id")
                 entity = legacy
@@ -4173,7 +4222,7 @@ def build_index(
                 if isinstance(manufacturer_obj, Mapping)
                 else manufacturer_obj
             )
-            cell_types.append(
+            cell_specs.append(
                 {
                     "id": entity["id"],
                     "short_id": entity.get("short_id") or _short_id_from_iri(entity["id"]),
@@ -4212,7 +4261,7 @@ def build_index(
             cell_instances.append(
                 {
                     "id": inst["id"],
-                    "type_id": inst.get("type_id"),
+                    "cell_spec_id": inst.get("cell_spec_id"),
                     "short_id": inst.get("short_id") or _short_id_from_iri(inst["id"]),
                     "dataset_id": linked_dataset_ids[0] if linked_dataset_ids else None,
                     "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
@@ -4315,15 +4364,15 @@ def build_index(
     out: dict[str, Any] = {
         "build_timestamp": _now_iso(),
         "source_root": str(src_root),
-        "cell_type_count": len(cell_types),
+        "cell_spec_count": len(cell_specs),
         "cell_instance_count": len(cell_instances),
         "test_spec_count": len(test_specs),
         "test_count": len(tests),
         "dataset_count": len(datasets),
-        "total_count": len(cell_types) + len(cell_instances) + len(test_specs) + len(tests) + len(datasets),
+        "total_count": len(cell_specs) + len(cell_instances) + len(test_specs) + len(tests) + len(datasets),
         "failed": len(failures),
         "failures": failures,
-        "cell_types": cell_types,
+        "cell_specs": cell_specs,
         "cell_instances": cell_instances,
         "test_specs": test_specs,
         "tests": tests,
@@ -4346,10 +4395,10 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
     else:
         doc = index
 
-    cell_type_count = (
-        int(doc["cell_type_count"])
-        if isinstance(doc.get("cell_type_count"), int)
-        else len(doc.get("cell_types", [])) if isinstance(doc.get("cell_types"), list) else 0
+    cell_spec_count = (
+        int(doc["cell_spec_count"])
+        if isinstance(doc.get("cell_spec_count"), int)
+        else len(doc.get("cell_specs", [])) if isinstance(doc.get("cell_specs"), list) else 0
     )
     cell_instance_count = (
         int(doc["cell_instance_count"])
@@ -4374,13 +4423,13 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
     total_count = (
         int(doc["total_count"])
         if isinstance(doc.get("total_count"), int)
-        else cell_type_count + cell_instance_count + test_spec_count + test_count + dataset_count
+        else cell_spec_count + cell_instance_count + test_spec_count + test_count + dataset_count
     )
     failed = int(doc["failed"]) if isinstance(doc.get("failed"), int) else 0
 
     out = {
         "build_timestamp": doc.get("build_timestamp"),
-        "cell_type_count": cell_type_count,
+        "cell_spec_count": cell_spec_count,
         "cell_instance_count": cell_instance_count,
         "test_spec_count": test_spec_count,
         "test_count": test_count,
@@ -4396,47 +4445,46 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
 __all__ = [
     "CellSpecificationInput",
     "CellInstanceInput",
-    "CellTypeInput",
     "DatasetInput",
     "TestSpecInput",
     "TestInput",
-    "build_cell_type_library_rdf",
+    "build_cell_spec_library_rdf",
     "build_index",
-    "build_curated_cell_type_submission",
+    "build_curated_cell_spec_submission",
     "create_cell_instance",
     "index_stats",
-    "publish_curated_cell_type",
+    "publish_curated_cell_spec",
     "publish_batch",
     "publish_record",
-    "promote_staging_cell_type",
-    "promote_staging_cell_types",
+    "promote_staging_cell_spec",
+    "promote_staging_cell_specs",
     "query",
     "query_cell_instances",
-    "query_library_cell_types",
-    "query_cell_types",
+    "query_library_cell_specs",
+    "query_cell_specs",
     "query_datasets",
     "query_test_specs",
     "query_tests",
     "save_batch",
     "save_cell_instance",
-    "save_cell_type",
+    "save_cell_spec",
     "save_dataset",
-    "save_library_cell_type",
+    "save_library_cell_spec",
     "save_test_spec",
-    "resolve_cell_type_id",
+    "resolve_cell_spec_id",
     "save_record",
     "save_test",
-    "template_cell_specification",
+    "template_library_cell_spec",
     "template_cell_instance",
-    "template_cell_type_draft",
-    "template_cell_type",
+    "template_cell_spec_draft",
+    "template_cell_spec",
     "template_dataset",
     "template_test_spec_draft",
     "template_test_spec",
     "template_test",
     "submit_publication_package",
-    "validate_staging_cell_type",
-    "validate_staging_cell_types",
+    "validate_staging_cell_spec",
+    "validate_staging_cell_specs",
     "TestProtocolInput",
     "save_test_protocol",
     "template_test_protocol",

@@ -1,0 +1,200 @@
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix battery:         <https://w3id.org/emmo/domain/battery#> .
+@prefix electrochemistry:<https://w3id.org/emmo/domain/electrochemistry#> .
+@prefix emmo:            <https://w3id.org/emmo#> .
+@prefix battinfo:        <https://w3id.org/battinfo/> .
+@prefix shapes:          <https://w3id.org/battinfo/shapes/> .
+
+# ── Plausibility shapes for cell-type spec quantities ─────────────────────────
+#
+# These shapes apply to the *quantity nodes* that are values of cell-spec
+# properties in the BattINFO JSON-LD output (produced by
+# battinfo.jsonld.cell_spec_to_jsonld).  Each quantity node has:
+#
+#   <spec-IRI>  <property-IRI>  [ hasNumericalPart [ hasNumericalValue <num> ] ; hasMeasurementUnit <unit-IRI> ] .
+#
+# SHACL sh:targetObjectsOf selects the blank node objects; sh:property then
+# constrains the EMMO numerical value (hasNumericalPart/hasNumericalValue) on those nodes.
+#
+# Bounds are intentionally loose (order-of-magnitude sanity only) so that
+# legitimate edge-case cells (ultra-high-capacity, miniature coin cells, etc.)
+# are not incorrectly flagged.  Unit-conditional bounds are noted in comments
+# but not enforced at this level (the Python semantic layer handles those).
+
+# ── Voltages ──────────────────────────────────────────────────────────────────
+
+shapes:NominalVoltageValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 0.3 ;
+        sh:maxInclusive 5.5 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Nominal voltage (V) should be in [0.3, 5.5]. Check for decimal-shift errors."
+    ] .
+
+shapes:ChargingVoltageValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 0.3 ;
+        sh:maxInclusive 6.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Charging voltage (V) should be in [0.3, 6.0]. Check for decimal-shift errors."
+    ] .
+
+shapes:DischargingCutoffVoltageValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 5.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Discharging cutoff voltage (V) should be in [0.0, 5.0]."
+    ] .
+
+shapes:ChargingCutoffVoltageValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 1.0 ;
+        sh:maxInclusive 6.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Charging cutoff voltage (V) should be in [1.0, 6.0]."
+    ] .
+
+# ── Capacity ──────────────────────────────────────────────────────────────────
+# (nominal, minimum, rated, typical all use the same IRI)
+
+shapes:CapacityValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Capacity value must be positive."
+    ] .
+
+# ── Energy ────────────────────────────────────────────────────────────────────
+# (nominal, typical, rated, certified-usable all use same IRI)
+
+shapes:EnergyValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Energy value must be positive."
+    ] .
+
+# ── Specific energy / energy density ─────────────────────────────────────────
+
+shapes:SpecificEnergyValueShape a sh:NodeShape ;
+    sh:targetObjectsOf emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 1.0 ;
+        sh:maxInclusive 1000.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Specific energy (Wh/kg) should be in [1, 1000] for single cells."
+    ] .
+
+shapes:EnergyDensityValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 1.0 ;
+        sh:maxInclusive 2500.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Energy density (Wh/L) should be in [1, 2500] for single cells."
+    ] .
+
+# ── Mass ──────────────────────────────────────────────────────────────────────
+
+shapes:MassValueShape a sh:NodeShape ;
+    sh:targetObjectsOf emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Mass value must be positive."
+    ] .
+
+# ── Dimensions ────────────────────────────────────────────────────────────────
+
+shapes:DiameterValueShape a sh:NodeShape ;
+    sh:targetObjectsOf emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:maxInclusive 500.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Diameter (mm) should be in (0, 500]."
+    ] .
+
+shapes:HeightValueShape a sh:NodeShape ;
+    sh:targetObjectsOf emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:maxInclusive 2000.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Height (mm) should be in (0, 2000]."
+    ] .
+
+shapes:WidthValueShape a sh:NodeShape ;
+    sh:targetObjectsOf emmo:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:maxInclusive 2000.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Width (mm) should be in (0, 2000]."
+    ] .
+
+shapes:ThicknessValueShape a sh:NodeShape ;
+    sh:targetObjectsOf emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minExclusive 0.0 ;
+        sh:maxInclusive 200.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Thickness (mm) should be in (0, 200]."
+    ] .
+
+# ── Cycle life ────────────────────────────────────────────────────────────────
+
+shapes:CycleLifeValueShape a sh:NodeShape ;
+    sh:targetObjectsOf electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937 ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 1.0 ;
+        sh:maxInclusive 100000.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Cycle life should be in [1, 100000]."
+    ] .
+
+# ── Efficiency / fade percentages ─────────────────────────────────────────────
+
+shapes:RoundTripEfficiencyValueShape a sh:NodeShape ;
+    sh:targetObjectsOf battinfo:roundTripEnergyEfficiency ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 100.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Round-trip energy efficiency (%) must be in [0, 100]."
+    ] .
+
+shapes:CapacityFadeValueShape a sh:NodeShape ;
+    sh:targetObjectsOf battinfo:capacityFade ;
+    sh:property [
+        sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 100.0 ;
+        sh:severity  sh:Warning ;
+        sh:message   "Capacity fade (%) must be in [0, 100]."
+    ] .

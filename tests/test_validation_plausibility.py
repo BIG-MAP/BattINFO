@@ -2,8 +2,8 @@
 
 Covers:
 - SPEC_PLAUSIBILITY_BOUNDS checks in validate/semantic.py
-- SHACL shapes in assets/shapes/cell-type.shapes.ttl via validate/shacl.py
-- Integration: validate_record_report includes SHACL for cell-type records
+- SHACL shapes in assets/shapes/cell-spec.shapes.ttl via validate/shacl.py
+- Integration: validate_record_report includes SHACL for cell-spec records
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from battinfo.validate.record import validate_record_report
 WARN_POLICY = ValidationPolicy(name="warn", semantic="warning")
 STRICT_POLICY = ValidationPolicy(name="strict", semantic="error")
 
-_A123 = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-type" / "A123__ANR26650M1-B.json"
+_A123 = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 
 
 def _load() -> dict:
@@ -79,10 +79,10 @@ def test_plausibility_accepts_valid_record() -> None:
 )
 def test_plausibility_rejects_bad_spec_value(spec_key: str, bad_value: float, unit: str) -> None:
     doc = _load()
-    if spec_key not in doc.get("specs", {}):
-        doc.setdefault("specs", {})[spec_key] = {"value": bad_value, "unit": unit}
+    if spec_key not in doc.get("properties", {}):
+        doc.setdefault("properties", {})[spec_key] = {"value": bad_value, "unit": unit}
     else:
-        doc["specs"][spec_key] = {"value": bad_value, "unit": unit}
+        doc["properties"][spec_key] = {"value": bad_value, "unit": unit}
 
     report = validate_semantic_report(doc, policy=WARN_POLICY)
     plausibility_issues = [i for i in report.issues if i.code == "semantic.value_out_of_plausible_range"]
@@ -116,7 +116,7 @@ def test_shacl_warns_on_bad_spec_value(
     spec_key: str, bad_value: float, unit: str, expected_shacl_msg_fragment: str
 ) -> None:
     doc = _load()
-    doc.setdefault("specs", {})[spec_key] = {"value": bad_value, "unit": unit}
+    doc.setdefault("properties", {})[spec_key] = {"value": bad_value, "unit": unit}
 
     report = validate_shacl_report(doc, policy=WARN_POLICY)
     shacl_issues = [i for i in report.issues if i.code == "shacl.constraint_violation"]
@@ -130,7 +130,7 @@ def test_shacl_warns_on_bad_spec_value(
     )
 
 
-def test_shacl_ignores_non_cell_type_records() -> None:
+def test_shacl_ignores_non_cell_spec_records() -> None:
     """SHACL validation should silently skip dataset/test records."""
     doc = {
         "dataset": {
@@ -139,7 +139,7 @@ def test_shacl_ignores_non_cell_type_records() -> None:
         }
     }
     report = validate_shacl_report(doc, policy=WARN_POLICY)
-    # No SHACL issues — just returns empty report for non-cell-type records
+    # No SHACL issues — just returns empty report for non-cell-spec records
     shacl_errors = [i for i in report.issues if i.code == "shacl.constraint_violation"]
     assert not shacl_errors
 
@@ -156,7 +156,7 @@ def test_validate_record_includes_shacl_for_valid_record() -> None:
 
 def test_validate_record_includes_shacl_for_bad_voltage() -> None:
     doc = _load()
-    doc["specs"]["nominal_voltage"] = {"value": 33.0, "unit": "V"}
+    doc["properties"]["nominal_voltage"] = {"value": 33.0, "unit": "V"}
     report = validate_record_report(doc, policy=WARN_POLICY)
     # Should have both semantic plausibility AND SHACL warnings for 33V
     sem_issues = [i for i in report.issues if i.code == "semantic.value_out_of_plausible_range"]

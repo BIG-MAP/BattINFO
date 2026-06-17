@@ -25,7 +25,7 @@ types:
   SpecIri:
     uri: xsd:anyURI
     base: str
-    description: IRI identifying a cell-type or test-protocol specification record.
+    description: IRI identifying a cell-spec or test-protocol specification record.
 
   CellIri:
     uri: xsd:anyURI
@@ -108,20 +108,20 @@ enums:
       SLI:         { description: "Starting, lighting, ignition." }
 
   ConformanceStatus:
-    description: How closely a test execution conformed to its specification.
+    description: >-
+      Whether a test execution conformed to its specification. The verdict is
+      boolean (conformant / non-conformant); 'unknown' marks a run that has not
+      been assessed. Mapped to W3C EARL outcome values.
     permissible_values:
       conformant:
-        meaning: battinfo:ConformanceStatus/Conformant
-        description: "Fully conformed to the test specification."
-      partial:
-        meaning: battinfo:ConformanceStatus/PartialConformance
-        description: "Deviated in minor steps but produced usable data."
+        meaning: earl:passed
+        description: "Conformed to the test specification."
       non-conformant:
-        meaning: battinfo:ConformanceStatus/NonConformant
-        description: "Deviated to such degree that results are unreliable."
+        meaning: earl:failed
+        description: "Did not conform to the test specification."
       unknown:
-        meaning: battinfo:ConformanceStatus/ConformanceUnknown
-        description: "Conformance status not known."
+        meaning: earl:cantTell
+        description: "Conformance not assessed."
 
   ProvenanceSourceType:
     description: Origin type for provenance tracking.

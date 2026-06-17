@@ -29,7 +29,7 @@ DEFAULT_TEST_LABELS = {
     "capacity_check": "Capacity check",
     "other": "Other",
 }
-# Short labels used in dataset record titles (cell-type + label + temp + date format)
+# Short labels used in dataset record titles (cell-spec + label + temp + date format)
 DATASET_TITLE_LABELS = {
     "rate_capability": "Rate",
     "ici": "ICI",
@@ -529,9 +529,9 @@ def build_ingest_workspace(
             f"resource_type '{resolved_resource_type}' is not implemented yet. Supported today: cell-instance."
         )
 
-    cell_type_obj = workspace.load_cell_type(str(inspection["type_record"]))
+    cell_spec_obj = workspace.load_cell_spec(str(inspection["type_record"]))
     cell = workspace.cell(
-        cell_type_obj,
+        cell_spec_obj,
         serial_number=str(inspection["resource_name"]),
         source_type="lab",
         source_url=ingest_path.resolve().as_uri(),
@@ -622,7 +622,7 @@ def build_ingest_workspace(
         "save_report": save_report,
         "validation": check_report,
         "counts": {
-            "cell_types": len(workspace.cell_types),
+            "cell_specs": len(workspace.cell_specs),
             "cells": len(workspace.cells),
             "tests": len(workspace.tests),
             "datasets": len(workspace.datasets),

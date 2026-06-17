@@ -1,0 +1,61 @@
+{
+  "$comment": "Controlled vocabulary of actionable test-protocol artifact formats (Layer B). Each format is a machine-actionable file that a cycler or simulator can execute. battinfo links and carries these but does not interpret them as authority; conforms_to points at the format's schema/spec for downstream tooling. media_type is used for DCAT distribution nodes in JSON-LD.",
+  "version": "1.0.0",
+  "roles": ["source_protocol", "executed_protocol", "vendor_export", "simulation_input", "other"],
+  "formats": {
+    "aurora-unicycler-json": {
+      "label": "Aurora Unicycler protocol JSON",
+      "media_type": "application/json",
+      "conforms_to": "https://github.com/EmpaEconversion/aurora-unicycler",
+      "importable": true
+    },
+    "bmgen-program": {
+      "label": "bmgen Python test program",
+      "media_type": "text/x-python",
+      "conforms_to": "https://github.com/digibatt/bmgen",
+      "importable": false
+    },
+    "bmgen-jsonld": {
+      "label": "bmgen EMMO/BattINFO JSON-LD",
+      "media_type": "application/ld+json",
+      "conforms_to": "https://github.com/digibatt/bmgen",
+      "importable": true
+    },
+    "pybamm-experiment": {
+      "label": "PyBaMM Experiment config (to_config JSON or script)",
+      "media_type": "application/json",
+      "conforms_to": "https://docs.pybamm.org/en/stable/source/api/experiment/index.html",
+      "importable": true
+    },
+    "biologic-mps": {
+      "label": "BioLogic settings file",
+      "media_type": "application/octet-stream",
+      "importable": false
+    },
+    "neware-xml": {
+      "label": "Neware step XML",
+      "media_type": "application/xml",
+      "importable": false
+    },
+    "basytec": {
+      "label": "Basytec test plan",
+      "media_type": "text/plain",
+      "importable": false
+    },
+    "digatron": {
+      "label": "Digatron test program",
+      "media_type": "application/octet-stream",
+      "importable": false
+    },
+    "maccor": {
+      "label": "Maccor procedure",
+      "media_type": "application/octet-stream",
+      "importable": false
+    },
+    "generic": {
+      "label": "Generic / unspecified protocol file",
+      "media_type": "application/octet-stream",
+      "importable": false
+    }
+  }
+}

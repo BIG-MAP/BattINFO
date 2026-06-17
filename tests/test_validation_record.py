@@ -16,24 +16,24 @@ def _load_json(path: str) -> dict:
     return json.loads((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_validate_record_report_accepts_canonical_cell_type_example() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
-    doc["specs"]["specific_energy"] = {"value": 130.0, "unit": "Wh/kg"}
-    doc["specs"]["energy_density"] = {"value": 250.0, "unit": "Wh/L"}
-    doc["specs"]["specific_power"] = {"value": 900.0, "unit": "W/kg"}
-    doc["specs"]["power_density"] = {"value": 1700.0, "unit": "W/L"}
-    doc["specs"]["typical_energy"] = {"value": 8.25, "unit": "Wh"}
-    doc["specs"]["rated_energy"] = {"value": 8.0, "unit": "Wh"}
+def test_validate_record_report_accepts_canonical_cell_spec_example() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["properties"]["specific_energy"] = {"value": 130.0, "unit": "Wh/kg"}
+    doc["properties"]["energy_density"] = {"value": 250.0, "unit": "Wh/L"}
+    doc["properties"]["specific_power"] = {"value": 900.0, "unit": "W/kg"}
+    doc["properties"]["power_density"] = {"value": 1700.0, "unit": "W/L"}
+    doc["properties"]["typical_energy"] = {"value": 8.25, "unit": "Wh"}
+    doc["properties"]["rated_energy"] = {"value": 8.0, "unit": "Wh"}
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
     assert not report.issues
-    assert doc["product"]["iec_code"] == "IFpR26650"
-    assert doc["product"]["country_of_origin"] == "United States"
-    assert doc["product"]["year"] == 2012
+    assert doc["cell_spec"]["iec_code"] == "IFpR26650"
+    assert doc["cell_spec"]["country_of_origin"] == "United States"
+    assert doc["cell_spec"]["year"] == 2012
 
 
-def test_validate_record_report_accepts_cell_type_with_bibliography() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
+def test_validate_record_report_accepts_cell_spec_with_bibliography() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
     doc["bibliography"] = {
         "subject_of": [
             {
@@ -100,7 +100,7 @@ def test_validate_record_report_rejects_dataset_without_cell_link() -> None:
     assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.errors)
 
 
-def test_validate_record_report_accepts_dataset_with_cell_type_link_only() -> None:
+def test_validate_record_report_accepts_dataset_with_cell_spec_link_only() -> None:
     doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
     doc["dataset"]["about"] = ["https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"]
     report = validate_record_report(doc, policy=STRICT)
@@ -125,8 +125,8 @@ def test_validate_record_accepts_named_policy_string() -> None:
 
 
 def test_validate_record_report_rejects_invalid_size_code_shape() -> None:
-    doc = _load_json("src/battinfo/data/examples/cell-type/A123__ANR26650M1-B.json")
-    doc["product"]["size_code"] = "26650"
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["cell_spec"]["size_code"] = "26650"
     report = validate_record_report(doc, policy=STRICT)
     assert not report.ok
     codes = {issue.code for issue in report.errors}

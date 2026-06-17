@@ -1,0 +1,1667 @@
+{
+    "$defs": {
+        "BatteryCategoryEU": {
+            "description": "Battery category per EU Battery Regulation 2023/1542.",
+            "enum": [
+                "LMT",
+                "EV",
+                "Industrial",
+                "Stationary",
+                "Portable",
+                "SLI"
+            ],
+            "title": "BatteryCategoryEU",
+            "type": "string"
+        },
+        "BatteryStatus": {
+            "description": "Battery status per EU Battery Regulation 2023/1542, Article 14.",
+            "enum": [
+                "original",
+                "repurposed",
+                "reused",
+                "remanufactured",
+                "waste"
+            ],
+            "title": "BatteryStatus",
+            "type": "string"
+        },
+        "BatteryTestType": {
+            "description": "Controlled vocabulary for battery test types.",
+            "enum": [
+                "cycling",
+                "capacity_check",
+                "rate_capability",
+                "hppc",
+                "ici",
+                "gitt",
+                "dcir",
+                "eis",
+                "impedance",
+                "calendar_ageing",
+                "formation",
+                "rpt",
+                "quasi_ocv",
+                "field",
+                "duty_cycle",
+                "wltp",
+                "nedc",
+                "sem",
+                "characterization",
+                "other"
+            ],
+            "title": "BatteryTestType",
+            "type": "string"
+        },
+        "CellFormat": {
+            "description": "Physical format (geometry) of the battery cell.",
+            "enum": [
+                "cylindrical",
+                "prismatic",
+                "pouch",
+                "coin",
+                "other",
+                "unknown"
+            ],
+            "title": "CellFormat",
+            "type": "string"
+        },
+        "CellGrade": {
+            "description": "Battery grade / reuse status per EU Battery Regulation 2023/1542.",
+            "enum": [
+                "original",
+                "repurposed",
+                "re-used",
+                "remanufactured",
+                "waste"
+            ],
+            "title": "CellGrade",
+            "type": "string"
+        },
+        "CellInstance": {
+            "additionalProperties": false,
+            "description": "A specific physical battery cell \u2014 one individual unit that can be tested. Links to a CellType specification and carries its own serial/batch identity.",
+            "properties": {
+                "ci_batch_id": {
+                    "description": "Batch or lot identifier assigned during manufacturing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ci_battery_status": {
+                    "$ref": "#/$defs/BatteryStatus",
+                    "description": "Battery status per EU Battery Regulation 2023/1542."
+                },
+                "ci_dataset_ids": {
+                    "description": "IRIs of dataset records linked to this cell instance.",
+                    "items": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ci_expires_at": {
+                    "description": "Shelf life expiry date (UNIX epoch or ISO 8601).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "ci_grade": {
+                    "$ref": "#/$defs/CellGrade",
+                    "description": "Cell grade / reuse status per EU Battery Regulation 2023/1542."
+                },
+                "ci_id": {
+                    "description": "Canonical IRI for this cell instance.",
+                    "type": "string"
+                },
+                "ci_manufactured_at": {
+                    "description": "Manufacturing date (UNIX epoch or ISO 8601).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "ci_measured": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecSet"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Measured properties for this individual cell (overrides CellType spec values where more precise measurements are available)."
+                },
+                "ci_name": {
+                    "description": "Human-readable name or label for this cell instance \u2014 e.g. a lab batch ID. The primary identifier researchers use; usually present even when no manufacturer serial number is available.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ci_serial_number": {
+                    "description": "Manufacturer serial number (unique within the product model); optional.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ci_service_start_date": {
+                    "description": "ISO 8601 date when the cell was first placed in service.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ci_type_id": {
+                    "description": "IRI of the CellType specification this instance conforms to.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "ci_id",
+                "ci_type_id"
+            ],
+            "title": "CellInstance",
+            "type": "object"
+        },
+        "CellProductType": {
+            "description": "Product maturity level of the cell.",
+            "enum": [
+                "commercial",
+                "research",
+                "prototype"
+            ],
+            "title": "CellProductType",
+            "type": "string"
+        },
+        "CellType": {
+            "additionalProperties": false,
+            "description": "A battery cell product specification: manufacturer, model, format, chemistry, and quantitative performance properties.",
+            "properties": {
+                "ct_battery_category": {
+                    "$ref": "#/$defs/BatteryCategoryEU",
+                    "description": "EU Battery Regulation 2023/1542 battery category (LMT, EV, Industrial, Stationary, Portable, SLI)."
+                },
+                "ct_cell_format": {
+                    "$ref": "#/$defs/CellFormat",
+                    "description": "Physical format (geometry) of the cell housing."
+                },
+                "ct_chemistry": {
+                    "description": "Cell chemistry identifier (e.g. \"li-ion\", \"li-primary\", \"na-ion\", \"alkaline\", \"zinc-carbon\", \"li-mno2\").",
+                    "type": "string"
+                },
+                "ct_country_of_origin": {
+                    "description": "ISO 3166-1 alpha-2 country code of manufacturing origin.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ct_iec_code": {
+                    "description": "IEC 60086 or IEC 61960 code string (e.g. \"LR6\", \"ICR18650\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ct_manufacturer": {
+                    "$ref": "#/$defs/Organization",
+                    "description": "The company that manufactured this cell."
+                },
+                "ct_model": {
+                    "description": "Manufacturer's product model number or name.",
+                    "type": "string"
+                },
+                "ct_name": {
+                    "description": "Full display name of the product (manufacturer + model).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ct_negative_electrode_basis": {
+                    "description": "Anode active material basis (e.g. \"graphite\", \"silicon-graphite\", \"hard-carbon\", \"lithium\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ct_positive_electrode_basis": {
+                    "description": "Cathode active material basis (e.g. \"nmc\", \"lfp\", \"nca\", \"lco\", \"mno2\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ct_product_type": {
+                    "$ref": "#/$defs/CellProductType",
+                    "description": "Product maturity level."
+                },
+                "ct_rechargeable": {
+                    "description": "True for secondary (rechargeable) cells; false for primary.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "ct_size_code": {
+                    "description": "Standardised size code (e.g. \"18650\", \"21700\", \"AA\", \"AAA\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ct_specs": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecSet"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Quantitative performance specification for this cell type."
+                },
+                "ct_year": {
+                    "description": "Model release or market introduction year.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Canonical IRI for this cell-spec record.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "ct_model",
+                "ct_manufacturer",
+                "ct_cell_format",
+                "ct_chemistry"
+            ],
+            "title": "CellType",
+            "type": "object"
+        },
+        "Checksum": {
+            "additionalProperties": false,
+            "description": "File integrity checksum.",
+            "properties": {
+                "cs_algorithm": {
+                    "description": "Hash algorithm identifier (e.g. \"sha256\", \"md5\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "cs_value": {
+                    "description": "Hex-encoded hash value.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "Checksum",
+            "type": "object"
+        },
+        "ConformanceStatus": {
+            "description": "Whether a test execution conformed to its specification. The verdict is boolean (conformant / non-conformant); 'unknown' marks a run that has not been assessed. Mapped to W3C EARL outcome values.",
+            "enum": [
+                "conformant",
+                "non-conformant",
+                "unknown"
+            ],
+            "title": "ConformanceStatus",
+            "type": "string"
+        },
+        "DataDistribution": {
+            "additionalProperties": false,
+            "description": "A specific downloadable file distribution of the dataset.",
+            "properties": {
+                "dd_byte_size": {
+                    "description": "File size in bytes.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "dd_checksum": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Checksum"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "File integrity checksum."
+                },
+                "dd_content_url": {
+                    "description": "Direct download URL for this distribution file.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dd_description": {
+                    "description": "Free-text description of this distribution.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dd_encoding_format": {
+                    "description": "IANA media type (e.g. \"application/parquet\", \"text/csv\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dd_name": {
+                    "description": "Filename within the distribution.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "DataDistribution",
+            "type": "object"
+        },
+        "Dataset": {
+            "additionalProperties": false,
+            "description": "A battery test dataset: a collection of time-series data files and metadata describing their content, provenance, and access conditions.",
+            "properties": {
+                "ds_about": {
+                    "description": "IRIs of the cell types, cells, or tests this dataset is about.",
+                    "items": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ds_access_url": {
+                    "description": "Landing page or direct download URL for the dataset.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "ds_conditions_of_access": {
+                    "description": "Human-readable description of access conditions.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ds_created_at": {
+                    "description": "Dataset creation timestamp (UNIX epoch).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "ds_creators": {
+                    "description": "People and organisations who created the dataset.",
+                    "items": {
+                        "$ref": "#/$defs/PersonOrOrganization"
+                    },
+                    "type": "array"
+                },
+                "ds_description": {
+                    "description": "Free-text description of the dataset contents.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ds_distributions": {
+                    "description": "File distributions available for download.",
+                    "items": {
+                        "$ref": "#/$defs/DataDistribution"
+                    },
+                    "type": "array"
+                },
+                "ds_funders": {
+                    "description": "Funding organisations.",
+                    "items": {
+                        "$ref": "#/$defs/PersonOrOrganization"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ds_id": {
+                    "description": "Canonical IRI for this dataset (typically a DOI URL or registry IRI).",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "ds_in_language": {
+                    "description": "BCP 47 language tag (e.g. \"en\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ds_is_accessible_for_free": {
+                    "description": "True if the dataset is publicly accessible at no cost.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "ds_keywords": {
+                    "description": "Subject keywords.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ds_license": {
+                    "description": "SPDX licence URI (e.g. https://spdx.org/licenses/CC-BY-4.0.html).",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ds_modified_at": {
+                    "description": "Last modification timestamp (UNIX epoch).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "ds_name": {
+                    "description": "Human-readable dataset title.",
+                    "type": "string"
+                },
+                "ds_published_at": {
+                    "description": "Publication date timestamp (UNIX epoch).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "ds_publisher": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/PersonOrOrganization"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Organisation responsible for publishing the dataset."
+                },
+                "ds_same_as": {
+                    "description": "Equivalent persistent identifiers (DOI URL, Zenodo record URL, etc.).",
+                    "items": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ds_version": {
+                    "description": "Dataset version string.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "ds_id",
+                "ds_name",
+                "ds_access_url",
+                "ds_creators",
+                "ds_distributions"
+            ],
+            "title": "Dataset",
+            "type": "object"
+        },
+        "Deviation": {
+            "additionalProperties": false,
+            "description": "A single deviation from the test specification.",
+            "properties": {
+                "dev_description": {
+                    "description": "Description of what deviated from the specification.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dev_impact": {
+                    "description": "Assessed impact of this deviation on data quality.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dev_step": {
+                    "description": "The protocol step where the deviation occurred.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "Deviation",
+            "type": "object"
+        },
+        "Organization": {
+            "additionalProperties": false,
+            "description": "A manufacturer, brand, or research organisation.",
+            "properties": {
+                "org_id": {
+                    "description": "IRI / URL identifying the organisation.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "org_name": {
+                    "description": "Display name of the organisation.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "org_name"
+            ],
+            "title": "Organization",
+            "type": "object"
+        },
+        "PersonOrOrganization": {
+            "additionalProperties": false,
+            "description": "A person or organisation acting as creator, publisher, or funder.",
+            "properties": {
+                "poo_name": {
+                    "description": "Full name.",
+                    "type": "string"
+                },
+                "poo_orcid": {
+                    "description": "ORCID URI (https://orcid.org/...).",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "poo_ror": {
+                    "description": "ROR URI (https://ror.org/...).",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "poo_type": {
+                    "description": "Type hint: \"Person\" or \"Organization\" (schema.org class name).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "poo_name"
+            ],
+            "title": "PersonOrOrganization",
+            "type": "object"
+        },
+        "ProtocolInfo": {
+            "additionalProperties": false,
+            "description": "Human-readable name and optional URL of a test protocol standard.",
+            "properties": {
+                "protocol_name": {
+                    "description": "Human-readable name of the protocol standard.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "protocol_url": {
+                    "description": "URL pointing to the protocol specification document.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "ProtocolInfo",
+            "type": "object"
+        },
+        "Provenance": {
+            "additionalProperties": false,
+            "description": "Tracks the origin and curation history of a record.",
+            "properties": {
+                "citation": {
+                    "description": "Citable reference URL.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "citation_doi": {
+                    "description": "DOI of the citable reference.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "curated_by": {
+                    "description": "ORCID or name of the person who curated this record.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "retrieved_at": {
+                    "description": "Epoch timestamp when the record was retrieved/ingested.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "source_file": {
+                    "description": "Filename of the source document.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_type": {
+                    "$ref": "#/$defs/ProvenanceSourceType",
+                    "description": "Origin category of the record."
+                },
+                "source_url": {
+                    "description": "URL of the original source document.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "workflow_version": {
+                    "description": "Version of the ingestion workflow that created this record.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "Provenance",
+            "type": "object"
+        },
+        "ProvenanceSourceType": {
+            "description": "Origin type for provenance tracking.",
+            "enum": [
+                "measurement",
+                "lab",
+                "simulation",
+                "catalog",
+                "external",
+                "manual",
+                "inferred",
+                "other"
+            ],
+            "title": "ProvenanceSourceType",
+            "type": "string"
+        },
+        "SpecSet": {
+            "additionalProperties": false,
+            "description": "Harmonised set of quantitative battery cell properties. Each field is a SpecValue (value + unit), identified by its EMMO IRI.",
+            "properties": {
+                "ac_internal_resistance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "AC impedance magnitude at 1 kHz."
+                },
+                "calendar_life": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Calendar storage lifetime to end-of-life criterion."
+                },
+                "capacity_fade": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Capacity fade rate per cycle or per year."
+                },
+                "capacity_threshold_exhaustion": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Capacity threshold defining battery exhaustion per EU Battery Regulation."
+                },
+                "certified_usable_energy": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Certified usable energy per EU Battery Regulation 2023/1542."
+                },
+                "charging_cutoff_voltage": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Charge cutoff voltage (alias: upper voltage limit)."
+                },
+                "charging_time": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Time to charge from 0% to 100% SOC at standard rate."
+                },
+                "charging_voltage": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Maximum (end-of-charge) voltage."
+                },
+                "cycle_life": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Number of cycles to rated end-of-life criterion."
+                },
+                "cycle_life_c_rate": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "C-rate used in the cycle life test."
+                },
+                "dc_internal_resistance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "DC internal resistance measured by current-interrupt method."
+                },
+                "diameter": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Outer diameter (cylindrical or coin cells)."
+                },
+                "discharging_cutoff_voltage": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Minimum (discharge cutoff) voltage."
+                },
+                "energy_density": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Volumetric energy density (energy per unit volume)."
+                },
+                "height": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Height of the cell (cylindrical: total length; prismatic: z-dimension)."
+                },
+                "impedance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Complex impedance magnitude (general)."
+                },
+                "initial_coulombic_efficiency": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Coulombic efficiency on the first formation cycle."
+                },
+                "internal_resistance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "General internal resistance."
+                },
+                "length": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Length of the cell (prismatic / pouch cells)."
+                },
+                "mass": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Mass of the cell (including packaging)."
+                },
+                "maximum_charging_temperature": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Maximum allowed cell temperature during charging."
+                },
+                "maximum_continuous_charging_current": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Maximum continuous charge current allowed."
+                },
+                "maximum_continuous_discharging_current": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Maximum continuous discharge current allowed."
+                },
+                "maximum_discharging_temperature": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Maximum allowed cell temperature during discharging."
+                },
+                "maximum_power": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Peak (pulse) power output."
+                },
+                "maximum_pulse_charging_current": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Peak pulse charge current."
+                },
+                "maximum_pulse_discharging_current": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Peak pulse discharge current."
+                },
+                "maximum_storage_temperature": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Maximum recommended storage temperature."
+                },
+                "minimum_capacity": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Minimum guaranteed capacity."
+                },
+                "minimum_charging_temperature": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Minimum allowed cell temperature during charging."
+                },
+                "minimum_discharging_temperature": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Minimum allowed cell temperature during discharging."
+                },
+                "minimum_storage_temperature": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Minimum recommended storage temperature."
+                },
+                "nominal_capacity": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Nominal (rated) discharge capacity at standard conditions."
+                },
+                "nominal_continuous_charging_current": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Nominal continuous charge current (standard rate)."
+                },
+                "nominal_continuous_discharging_current": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Nominal continuous discharge current."
+                },
+                "nominal_energy": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Nominal stored energy."
+                },
+                "nominal_voltage": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Nominal operating voltage."
+                },
+                "operating_temperature_max": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Overall maximum operating temperature (discharge + charge)."
+                },
+                "operating_temperature_min": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Overall minimum operating temperature (discharge + charge)."
+                },
+                "power_capability": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Continuous power output capability."
+                },
+                "power_density": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Volumetric power density."
+                },
+                "power_energy_ratio": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Ratio of rated power to rated energy."
+                },
+                "rated_capacity": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Capacity rated by the manufacturer (may differ from typical)."
+                },
+                "rated_energy": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Manufacturer-rated energy content."
+                },
+                "round_trip_energy_efficiency": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Ratio of discharge energy to charge energy (full charge-discharge cycle)."
+                },
+                "round_trip_energy_efficiency_50pct": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Round-trip efficiency measured at 50% state of charge."
+                },
+                "self_discharge_rate": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Self-discharge rate (capacity loss per unit time in storage)."
+                },
+                "specific_energy": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Gravimetric energy density (energy per unit mass)."
+                },
+                "specific_power": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Gravimetric power density."
+                },
+                "state_of_health": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "State of health (ratio of current to original capacity)."
+                },
+                "thickness": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Thickness (pouch / coin cells)."
+                },
+                "typical_capacity": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Typical capacity as manufactured."
+                },
+                "typical_energy": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Typical stored energy as manufactured."
+                },
+                "upper_voltage_limit": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Upper voltage safety limit (synonym for charging cutoff voltage)."
+                },
+                "volume": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "External volume of the cell."
+                },
+                "width": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/SpecValue"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Width of the cell (prismatic / pouch cells)."
+                }
+            },
+            "title": "SpecSet",
+            "type": "object"
+        },
+        "SpecValue": {
+            "additionalProperties": false,
+            "description": "A scalar quantity with an optional measurement unit.  Used for all quantitative battery properties in SpecSet.",
+            "properties": {
+                "sv_max_value": {
+                    "description": "Maximum acceptable value.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "sv_min_value": {
+                    "description": "Minimum acceptable value.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "sv_typical_value": {
+                    "description": "Typical/representative value.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "sv_unit": {
+                    "description": "Unit symbol (e.g. \"Ah\", \"V\", \"g\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "sv_value": {
+                    "description": "Nominal/measured value of the quantity.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "sv_value_text": {
+                    "description": "Free-text value representation when numeric is unavailable.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "SpecValue",
+            "type": "object"
+        },
+        "Test": {
+            "additionalProperties": false,
+            "description": "A battery test execution (prov:Activity).  Links to the cell instance tested (hasTestObject) and to the test specification used (prov:used).",
+            "properties": {
+                "t_artifacts": {
+                    "description": "Links to machine-actionable protocol/vendor files produced by or executed in this test (the actionable layer). Each entry is a JSON object with role/format/locator and optional checksum.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "t_cell_id": {
+                    "description": "IRI of the cell instance that was tested (hasTestObject).",
+                    "type": "string"
+                },
+                "t_conformance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/TestConformance"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Conformance assessment for this test execution."
+                },
+                "t_dataset_ids": {
+                    "description": "IRIs of dataset records produced by this test.",
+                    "items": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "t_description": {
+                    "description": "Free-text description of this specific test run.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "t_ended_at": {
+                    "description": "Test end timestamp (UNIX epoch).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "t_id": {
+                    "description": "Canonical IRI for this test execution.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "t_instrument": {
+                    "description": "Name or model of the test instrument/cycler (hasTestEquipment).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "t_kind": {
+                    "$ref": "#/$defs/BatteryTestType",
+                    "description": "Test type from the BatteryTestType controlled vocabulary."
+                },
+                "t_name": {
+                    "description": "Human-readable label for this test execution.",
+                    "type": "string"
+                },
+                "t_protocol": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ProtocolInfo"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Reference protocol used (may differ from the linked TestSpec)."
+                },
+                "t_protocol_id": {
+                    "description": "IRI of the TestSpec (plan) used for this execution.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "t_started_at": {
+                    "description": "Test start timestamp (UNIX epoch).",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "t_status": {
+                    "description": "Execution status (planned, running, completed, aborted, other).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "t_id",
+                "t_name",
+                "t_kind",
+                "t_cell_id"
+            ],
+            "title": "Test",
+            "type": "object"
+        },
+        "TestConformance": {
+            "additionalProperties": false,
+            "description": "Records how closely this test execution conformed to its specification.",
+            "properties": {
+                "tc_deviations": {
+                    "description": "Individual deviations from the specification.",
+                    "items": {
+                        "$ref": "#/$defs/Deviation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "tc_note": {
+                    "description": "Free-text note explaining the conformance assessment.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "tc_status": {
+                    "$ref": "#/$defs/ConformanceStatus",
+                    "description": "Conformance status from the ConformanceStatus vocabulary."
+                }
+            },
+            "required": [
+                "tc_status"
+            ],
+            "title": "TestConformance",
+            "type": "object"
+        },
+        "TestSpec": {
+            "additionalProperties": false,
+            "description": "A test protocol specification (plan) that defines the procedure for a battery test.  Referenced by Test instances via prov:used.",
+            "properties": {
+                "ts_artifacts": {
+                    "description": "Links to machine-actionable protocol files (the actionable layer). Each entry is a JSON object with role/format/locator and optional checksum.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ts_conditions": {
+                    "description": "Protocol-level ambient conditions as a JSON object of typed quantities (e.g. {\"temperature\": {\"value\": 25, \"unit\": \"degC\"}}).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ts_cycles": {
+                    "description": "Number of times the authored step sequence is repeated (becomes an IterativeWorkflow group in ts_method).",
+                    "minimum": 1,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "ts_description": {
+                    "description": "Free-text description of the protocol.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ts_id": {
+                    "description": "Canonical IRI for this test specification.",
+                    "type": "string"
+                },
+                "ts_kind": {
+                    "$ref": "#/$defs/BatteryTestType",
+                    "description": "Test type from the BatteryTestType controlled vocabulary."
+                },
+                "ts_method": {
+                    "description": "Canonical structured method: an ordered, typed list of steps as a JSON array. Each step carries mode/direction, setpoints, termination and optional nested groups; emitted to JSON-LD as an EMMO process graph.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ts_name": {
+                    "description": "Human-readable name of the test protocol.",
+                    "type": "string"
+                },
+                "ts_protocol": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ProtocolInfo"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Reference to the formal protocol standard document."
+                },
+                "ts_record": {
+                    "description": "Protocol-level default data-recording cadence as a JSON object (e.g. {\"time_s\": 10}).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ts_safety": {
+                    "description": "Global instrument safety limits as a JSON object, distinct from per-step termination (e.g. {\"max_voltage_V\": 4.3, \"min_voltage_V\": 2.4}).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "ts_steps": {
+                    "description": "PyBaMM-compatible experiment step strings (the default human authoring interface, e.g. \"Discharge at 1C until 2.5 V\"). Parsed into ts_method on ingest; ts_method is the canonical stored form.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "ts_version": {
+                    "description": "Version string of this protocol specification.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "ts_id",
+                "ts_name",
+                "ts_kind"
+            ],
+            "title": "TestSpec",
+            "type": "object"
+        }
+    },
+    "$id": "https://w3id.org/battinfo/schema/battinfo",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "additionalProperties": false,
+    "metamodel_version": "1.11.0",
+    "title": "battinfo",
+    "type": "object",
+    "version": "0.1.0"
+}
+

@@ -46,10 +46,10 @@ def main() -> int:
         instrument_name="short Landt cycler",
         test_status="completed",
         test_name_template="{dataset_key} constant current discharging",
-        dataset_name_template="{cell_type_name} dataset {dataset_key}",
+        dataset_name_template="{cell_spec_name} dataset {dataset_key}",
         dataset_description_template=(
             "Dataset directory packaged with self-contained BattINFO publication metadata for one "
-            "{cell_type_name} constant-current discharge run."
+            "{cell_spec_name} constant-current discharge run."
         ),
         publish_filename=args.publish_filename,
         report_filename=args.report_filename,

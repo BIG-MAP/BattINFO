@@ -13,7 +13,7 @@ from battinfo import (
     BattinfoBundle,
     CellInstance,
     CellSpecification,
-    CellType,
+    CellSpecification,
     Dataset,
     Test,
     ZenodoCellRecord,
@@ -51,15 +51,15 @@ def _make_cell_spec() -> CellSpecification:
     )
 
 
-def _make_cell_type() -> CellType:
-    return CellType(
+def _make_cell_spec() -> CellSpecification:
+    return CellSpecification(
         id=CELL_TYPE_ID,
         name="Energizer CR2032",
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
         chemistry="Li-primary",
-        nominal_properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
+        properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
         source=ProvenanceInfo(type="datasheet"),
     )
 
@@ -71,7 +71,7 @@ def _make_cell_instance(
     return CellInstance(
         id=instance_id,
         name=serial,
-        cell_type_id=CELL_TYPE_ID,
+        cell_spec_id=CELL_TYPE_ID,
         serial_number=serial,
         source=ProvenanceInfo(type="measurement"),
     )
@@ -109,7 +109,7 @@ def _make_dataset_entry(
 def test_round_trip_no_cell_instances() -> None:
     """Aggregate record: no individual cell tracking."""
     record = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry()],
     )
 
@@ -118,7 +118,7 @@ def test_round_trip_no_cell_instances() -> None:
     assert flat["datasets"][0]["cell_instances"] == []
 
     loaded = ZenodoCellRecord.from_flat_json(flat)
-    assert loaded.cell_type.id == CELL_TYPE_ID
+    assert loaded.cell_spec.id == CELL_TYPE_ID
     assert loaded.datasets[0].cell_instances == []
     assert loaded.datasets[0].test.id == TEST_ID
 
@@ -127,7 +127,7 @@ def test_round_trip_one_cell_instance() -> None:
     """Entry with a single tracked cell."""
     ci = _make_cell_instance()
     record = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry(cell_instances=[ci])],
     )
 
@@ -144,7 +144,7 @@ def test_round_trip_multiple_cell_instances_per_entry() -> None:
     ci1 = _make_cell_instance(CELL_INSTANCE_ID, "sn-001")
     ci2 = _make_cell_instance(CELL_INSTANCE_ID_2, "sn-002")
     record = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry(cell_instances=[ci1, ci2])],
     )
 
@@ -158,7 +158,7 @@ def test_round_trip_multiple_cell_instances_per_entry() -> None:
 
 def test_round_trip_with_cell_specification() -> None:
     record = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         cell_specification=_make_cell_spec(),
         datasets=[_make_dataset_entry()],
     )
@@ -169,7 +169,7 @@ def test_round_trip_with_cell_specification() -> None:
     loaded = ZenodoCellRecord.from_flat_json(flat)
     assert loaded.cell_specification is not None
     assert loaded.cell_specification.model == "CR2032"
-    assert loaded.cell_type.cell_specification_id == CELL_SPEC_ID
+    assert loaded.cell_spec.cell_specification_id == CELL_SPEC_ID
 
 
 def test_round_trip_multi_dataset_mixed_instances() -> None:
@@ -178,7 +178,7 @@ def test_round_trip_multi_dataset_mixed_instances() -> None:
     entry_without = _make_dataset_entry(test_id=TEST_ID_2, dataset_id=DATASET_ID_2)
 
     record = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[entry_with, entry_without],
     )
 
@@ -196,7 +196,7 @@ def test_round_trip_multi_dataset_mixed_instances() -> None:
 
 def test_to_path_and_from_path(tmp_path: Path) -> None:
     record = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry(cell_instances=[_make_cell_instance()])],
     )
     out = tmp_path / ZENODO_CELL_RECORD_FILENAME
@@ -208,31 +208,31 @@ def test_to_path_and_from_path(tmp_path: Path) -> None:
     assert len(raw["datasets"][0]["cell_instances"]) == 1
 
     loaded = ZenodoCellRecord.from_path(out)
-    assert loaded.cell_type.id == CELL_TYPE_ID
+    assert loaded.cell_spec.id == CELL_TYPE_ID
     assert loaded.datasets[0].cell_instances[0].serial_number == "sn-001"
 
 
 # ── from_battinfo_bundles ──────────────────────────────────────────────────────
 
 def test_from_battinfo_bundles_single() -> None:
-    cell_type = _make_cell_type()
+    cell_spec = _make_cell_spec()
     entry = _make_dataset_entry(cell_instances=[_make_cell_instance()])
     bundle = BattinfoBundle(
-        cell_type=cell_type,
+        cell_spec=cell_spec,
         cell_instance=entry.cell_instances[0],
         test=entry.test,
         dataset=entry.dataset,
     )
 
     record = ZenodoCellRecord.from_battinfo_bundles([bundle])
-    assert record.cell_type.id == CELL_TYPE_ID
+    assert record.cell_spec.id == CELL_TYPE_ID
     assert len(record.datasets) == 1
     assert len(record.datasets[0].cell_instances) == 1
     assert record.datasets[0].cell_instances[0].serial_number == "sn-001"
 
 
 def test_from_battinfo_bundles_multi() -> None:
-    cell_type = _make_cell_type()
+    cell_spec = _make_cell_spec()
     spec = _make_cell_spec()
     ci1 = _make_cell_instance(CELL_INSTANCE_ID, "sn-001")
     ci2 = _make_cell_instance(CELL_INSTANCE_ID_2, "sn-002")
@@ -240,8 +240,8 @@ def test_from_battinfo_bundles_multi() -> None:
     e2 = _make_dataset_entry(test_id=TEST_ID_2, dataset_id=DATASET_ID_2, cell_instances=[ci2])
 
     bundles = [
-        BattinfoBundle(cell_type=cell_type, cell_instance=ci1, test=e1.test, dataset=e1.dataset),
-        BattinfoBundle(cell_type=cell_type, cell_instance=ci2, test=e2.test, dataset=e2.dataset),
+        BattinfoBundle(cell_spec=cell_spec, cell_instance=ci1, test=e1.test, dataset=e1.dataset),
+        BattinfoBundle(cell_spec=cell_spec, cell_instance=ci2, test=e2.test, dataset=e2.dataset),
     ]
 
     record = ZenodoCellRecord.from_battinfo_bundles(bundles, cell_specification=spec)
@@ -251,36 +251,36 @@ def test_from_battinfo_bundles_multi() -> None:
     assert record.cell_specification is not None
 
 
-def test_from_battinfo_bundles_rejects_mixed_cell_types() -> None:
-    cell_type_a = _make_cell_type()
-    cell_type_b = _make_cell_type()
-    cell_type_b = cell_type_b.model_copy(update={"id": "https://w3id.org/battinfo/cell/different"})
+def test_from_battinfo_bundles_rejects_mixed_cell_specs() -> None:
+    cell_spec_a = _make_cell_spec()
+    cell_spec_b = _make_cell_spec()
+    cell_spec_b = cell_spec_b.model_copy(update={"id": "https://w3id.org/battinfo/cell/different"})
     ci = _make_cell_instance()
     entry = _make_dataset_entry(cell_instances=[ci])
     bundles = [
-        BattinfoBundle(cell_type=cell_type_a, cell_instance=ci, test=entry.test, dataset=entry.dataset),
-        BattinfoBundle(cell_type=cell_type_b, cell_instance=ci, test=entry.test, dataset=entry.dataset),
+        BattinfoBundle(cell_spec=cell_spec_a, cell_instance=ci, test=entry.test, dataset=entry.dataset),
+        BattinfoBundle(cell_spec=cell_spec_b, cell_instance=ci, test=entry.test, dataset=entry.dataset),
     ]
-    with pytest.raises(ValueError, match="same cell_type.id"):
+    with pytest.raises(ValueError, match="same cell_spec.id"):
         ZenodoCellRecord.from_battinfo_bundles(bundles)
 
 
 # ── JSON structure ─────────────────────────────────────────────────────────────
 
-def test_flat_json_cell_type_structure() -> None:
+def test_flat_json_cell_spec_structure() -> None:
     flat = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry()],
     ).to_flat_json()
-    ct = flat["cell_type"]
-    assert "product" in ct
-    assert ct["product"]["id"] == CELL_TYPE_ID
-    assert ct["product"]["manufacturer"]["name"] == "Energizer"
+    ct = flat["cell_spec"]
+    assert "cell_spec" in ct
+    assert ct["cell_spec"]["id"] == CELL_TYPE_ID
+    assert ct["cell_spec"]["manufacturer"]["name"] == "Energizer"
 
 
 def test_flat_json_dataset_entry_keys() -> None:
     flat = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry(cell_instances=[_make_cell_instance()])],
     ).to_flat_json()
     entry = flat["datasets"][0]
@@ -292,14 +292,14 @@ def test_flat_json_dataset_entry_keys() -> None:
 
 # ── error cases ────────────────────────────────────────────────────────────────
 
-def test_from_flat_json_missing_cell_type_raises() -> None:
-    with pytest.raises(ValueError, match="cell_type"):
+def test_from_flat_json_missing_cell_spec_raises() -> None:
+    with pytest.raises(ValueError, match="cell_spec"):
         ZenodoCellRecord.from_flat_json({"kind": "BattinfoCellRecord", "datasets": []})
 
 
 def test_from_flat_json_missing_datasets_raises() -> None:
     flat = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry()],
     ).to_flat_json()
     del flat["datasets"]
@@ -309,7 +309,7 @@ def test_from_flat_json_missing_datasets_raises() -> None:
 
 def test_from_flat_json_malformed_cell_instances_raises() -> None:
     flat = ZenodoCellRecord(
-        cell_type=_make_cell_type(),
+        cell_spec=_make_cell_spec(),
         datasets=[_make_dataset_entry()],
     ).to_flat_json()
     flat["datasets"][0]["cell_instances"] = "not-a-list"

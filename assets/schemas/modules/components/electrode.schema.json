@@ -26,6 +26,11 @@
     },
     "comment": {
       "type": "string"
+    },
+    "tab": {
+      "type": "object",
+      "title": "CurrentCollectorTab",
+      "description": "Electrode current-collector tab (width, thickness, length, weld_width, tape_width)."
     }
   },
   "anyOf": [
@@ -46,4 +51,3 @@
     }
   ]
 }
-

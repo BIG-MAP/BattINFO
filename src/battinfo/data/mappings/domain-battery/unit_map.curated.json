@@ -263,6 +263,16 @@
       "notes": "Not defined in EMMO core; QUDT IRI used as authoritative fallback."
     },
     {
+      "symbol": "W/L",
+      "status": "curated",
+      "unit_iri": "http://qudt.org/vocab/unit/W-PER-L",
+      "unit_qname": "qudt:W-PER-L",
+      "unit_pref_label": "WattPerLitre",
+      "unit_label": "W/L",
+      "confidence": 0.9,
+      "notes": "Power density; not in EMMO core, QUDT fallback (mirrors W/kg). QUDT code W-PER-L pending dereference verification."
+    },
+    {
       "symbol": "%",
       "status": "curated",
       "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505",

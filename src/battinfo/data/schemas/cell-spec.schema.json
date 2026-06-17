@@ -1,0 +1,522 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/cell-spec.schema.json",
+  "title": "BattINFO Cell Type (Schema.org-Aligned Product)",
+  "description": "Canonical cell-spec metadata using schema.org Product terms with minimal battery-specific extensions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "cell_spec",
+    "provenance"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "cell_spec": {
+            "properties": {
+              "cell_format": {
+                "enum": [
+                  "cylindrical",
+                  "coin"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "length"
+                  ]
+                },
+                {
+                  "required": [
+                    "width"
+                  ]
+                },
+                {
+                  "required": [
+                    "thickness"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cell_spec": {
+            "properties": {
+              "cell_format": {
+                "enum": [
+                  "prismatic",
+                  "pouch"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "not": {
+              "required": [
+                "diameter"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "cell_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "model",
+        "manufacturer",
+        "cell_format",
+        "chemistry"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/SpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "identifier": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/Organization"
+        },
+        "brand": {
+          "$ref": "#/$defs/BrandOrOrganization"
+        },
+        "category": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "additional_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          ]
+        },
+        "product_type": {
+          "type": "string",
+          "enum": [
+            "commercial",
+            "research",
+            "prototype"
+          ],
+          "description": "Whether this cell type is a commercial product, a research cell, or a prototype."
+        },
+        "cell_format": {
+          "type": "string",
+          "enum": [
+            "cylindrical",
+            "prismatic",
+            "pouch",
+            "coin",
+            "other",
+            "unknown"
+          ]
+        },
+        "size_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "iec_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country_of_origin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rechargeable": {
+          "type": "boolean",
+          "description": "Whether this cell is rechargeable (true) or primary/single-use (false)."
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1800,
+          "maximum": 3000
+        },
+        "chemistry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "positive_electrode_basis": {
+          "type": "string"
+        },
+        "negative_electrode_basis": {
+          "type": "string"
+        },
+        "datasheet_revision": {
+          "type": "string"
+        },
+        "manufacturing_place": {
+          "type": "string",
+          "description": "Geographic location of the battery manufacturing plant (EU Battery Regulation Annex VI Part A)."
+        },
+        "battery_category": {
+          "type": "string",
+          "enum": [
+            "EV",
+            "LMT",
+            "industrial",
+            "stationary",
+            "portable",
+            "SLI",
+            "other"
+          ],
+          "description": "Battery category per EU Battery Regulation Article 3."
+        },
+        "reference_electrode": {
+          "type": "string",
+          "description": "Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE')."
+        }
+      }
+    },
+    "properties": {
+      "$ref": "cell-canonical.schema.json#/$defs/SpecSet"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "workflow_version": {
+          "type": "string"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "bibliography": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_of": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BibliographyEntry"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "construction": {
+      "$ref": "modules/components/specification.schema.json#/properties/construction"
+    },
+    "positive_electrode": {
+      "$ref": "modules/components/electrode.schema.json"
+    },
+    "negative_electrode": {
+      "$ref": "modules/components/electrode.schema.json"
+    },
+    "electrolyte": {
+      "$ref": "modules/components/electrolyte.schema.json"
+    },
+    "separator": {
+      "$ref": "modules/components/specification.schema.json#/properties/separator"
+    },
+    "housing": {
+      "$ref": "modules/components/specification.schema.json#/properties/housing"
+    },
+    "hazardous_substances": {
+      "type": "array",
+      "description": "Hazardous substances present in the battery (EU Battery Regulation Annex XIII §7.1).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "cas_number": {
+            "type": "string",
+            "pattern": "^\\d{1,7}-\\d{2}-\\d$"
+          },
+          "concentration_ppm": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "critical_raw_materials": {
+      "type": "array",
+      "description": "Critical raw materials present in the battery at more than 0.1% weight by weight (EU Battery Regulation Annex XIII §7.1).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "weight_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "extinguishing_agent": {
+      "type": "string",
+      "description": "Usable extinguishing agent for the battery (EU Battery Regulation Annex VI Part A)."
+    }
+  },
+  "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "BibliographyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "date_published": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1800,
+              "maximum": 3000
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        }
+      }
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "Identifier": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/PropertyValue"
+        },
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/$defs/PropertyValue"
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "PropertyValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "property_id",
+        "value"
+      ],
+      "properties": {
+        "property_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "Brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Brand"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "BrandOrOrganization": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Brand"
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ]
+    },
+    "SpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    }
+  }
+}

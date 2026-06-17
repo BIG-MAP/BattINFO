@@ -10,12 +10,13 @@ from typing import Any, ClassVar, Mapping, Self
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from battinfo.canonical_aliases import record_to_legacy_aliases, record_to_snake_aliases
+from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
 
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
-CELL_TYPE_FILENAME = "cell-type.json"
+CELL_SPEC_FILENAME = "cell-spec.json"
 CELL_INSTANCE_FILENAME = "cell-instance.json"
 TEST_SPEC_FILENAME = "test-spec.json"
 TEST_PROTOCOL_FILENAME = TEST_SPEC_FILENAME  # backward compat alias
@@ -226,7 +227,7 @@ def _extract_property_item(node: Mapping[str, Any]) -> tuple[str, dict[str, Any]
     numerical = node.get("hasNumericalPart")
     if not isinstance(numerical, Mapping):
         return None
-    value = numerical.get("hasNumericalValue")
+    value = numerical.get("hasNumberValue", numerical.get("hasNumericalValue"))
     unit = _unit_from_iri(node.get("hasMeasurementUnit"))
     if value is None or unit is None:
         return None
@@ -390,13 +391,13 @@ def _coerce_spec_value(value: Any) -> Any:
 
 def _mapping_property(name: str) -> property:
     def getter(self: Any) -> Any:
-        return self.nominal_properties.get(name)
+        return self.properties.get(name)
 
     def setter(self: Any, value: Any) -> None:
         if value is None:
-            self.nominal_properties.pop(name, None)
+            self.properties.pop(name, None)
         else:
-            self.nominal_properties[name] = _coerce_spec_value(value)
+            self.properties[name] = _coerce_spec_value(value)
 
     return property(getter, setter)
 
@@ -453,6 +454,14 @@ class CellConstruction(BaseModel):
     assembly_type: str | None = None
     layering: str | None = None
     layer_count: int | None = None
+    # Electrode-assembly geometry (stack / jelly-roll).
+    cathode_sheet_count: int | None = None
+    anode_sheet_count: int | None = None
+    separator_sheet_count: int | None = None
+    winding_turns: float | None = None
+    electrode_length: dict[str, Any] | None = None
+    jellyroll_volume: dict[str, Any] | None = None
+    assembly_sequence: list[str] | None = None
     comment: str | None = None
 
     def to_mapping(self) -> dict[str, Any]:
@@ -655,6 +664,9 @@ def _canonical_distribution(value: Any) -> dict[str, Any] | None:
         ("encoding_format", ("encoding_format", "encodingFormat", "schema:encodingFormat")),
         ("content_size", ("content_size", "contentSize", "schema:contentSize")),
         ("access_level", ("access_level", "accessLevel", "schema:accessLevel")),
+        # Role of this file within the dataset: "processed" (normalised, e.g. BDF
+        # CSV) or "raw" (the original instrument file kept for provenance).
+        ("role", ("role",)),
     ):
         for source_key in source_keys:
             candidate = value.get(source_key)
@@ -811,6 +823,7 @@ class MaterialComponent(BaseModel):
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
+    molecular_formula: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -864,11 +877,30 @@ class CurrentCollector(BaseModel):
         return _mapping_from_object(value)
 
 
+class CurrentCollectorTab(BaseModel):
+    """An electrode current-collector tab (prismatic/cylindrical/pouch)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    material: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
+    property: dict[str, Any] = Field(default_factory=dict)  # width, thickness, length, weld_width, tape_width
+    comment: str | None = None
+
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
+
 class Electrode(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     coating: Coating | None = None
     current_collector: CurrentCollector | None = None
+    tab: CurrentCollectorTab | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
@@ -950,6 +982,149 @@ class Electrolyte(BaseModel):
         return _mapping_from_object(value)
 
 
+# ---------------------------------------------------------------------------
+# Housing — format-neutral mechanical enclosure & hardware (E1).
+# Each part is a holder with a ``property`` dict, so its quantities ride the
+# generic descriptor property emitter. ``Housing`` is the canonical model for
+# cell hardware; the legacy coin-specific ``coin_hardware`` dict normalizes into
+# it on load (its on-disk retirement is a later coordinated schema migration).
+# ---------------------------------------------------------------------------
+
+
+class Terminal(BaseModel):
+    """A cell terminal (prismatic/cylindrical/pouch)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    polarity: str | None = None  # "positive" | "negative"
+    material: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
+    property: dict[str, Any] = Field(default_factory=dict)  # width, thickness, weld_width, tape_width, length
+    comment: str | None = None
+
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
+
+class Seal(BaseModel):
+    """A pouch/prismatic seal."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    material: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
+    property: dict[str, Any] = Field(default_factory=dict)  # single_channel_thickness, top_corner_thickness
+    comment: str | None = None
+
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
+
+class Case(BaseModel):
+    """The cell case/can. JSON-LD @type is chosen from the cell format."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    size_code: str | None = None
+    material: str | None = None
+    coating: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
+    property: dict[str, Any] = Field(default_factory=dict)  # wall_thickness, weight, available_volume, filling_ratio
+    comment: str | None = None
+
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
+
+class HardwarePart(BaseModel):
+    """A generic discrete hardware part (cap/lid/can/spring/spacer)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: str | None = None  # e.g. "cap", "lid", "can", "spring", "spacer"
+    material: str | None = None
+    coating: str | None = None
+    manufacturer: str | None = None
+    supplier: str | None = None
+    product_id: str | None = None
+    property: dict[str, Any] = Field(default_factory=dict)
+    comment: str | None = None
+
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
+
+class Housing(BaseModel):
+    """Format-neutral mechanical enclosure: case, terminals, seals, discrete parts."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: Case | None = None
+    cap: HardwarePart | None = None
+    terminals: list[Terminal] = Field(default_factory=list)
+    seals: list[Seal] = Field(default_factory=list)
+    parts: list[HardwarePart] = Field(default_factory=list)  # spring/spacer/other
+    comment: str | None = None
+
+    def to_mapping(self) -> dict[str, Any]:
+        return self.model_dump(mode="json", exclude_none=True)
+
+
+_COIN_HARDWARE_PART_KEYS = ("lid", "can", "spring", "spacer")
+
+
+def _housing_from_coin_hardware(coin_hardware: Any) -> "Housing | None":
+    """Migrate a legacy ``coin_hardware`` dict to a :class:`Housing` (case + parts)."""
+    if not isinstance(coin_hardware, Mapping) or not coin_hardware:
+        return None
+    case: Case | None = None
+    raw_case = coin_hardware.get("case")
+    if isinstance(raw_case, Mapping):
+        case = Case(
+            size_code=raw_case.get("size_code"),
+            material=raw_case.get("material"),
+            coating=raw_case.get("coating"),
+            manufacturer=raw_case.get("manufacturer"),
+            supplier=raw_case.get("supplier"),
+            product_id=raw_case.get("product_id"),
+            property=dict(raw_case.get("property") or {}),
+            comment=raw_case.get("comment"),
+        )
+    parts: list[HardwarePart] = []
+    for key in _COIN_HARDWARE_PART_KEYS:
+        raw = coin_hardware.get(key)
+        if isinstance(raw, Mapping):
+            parts.append(
+                HardwarePart(
+                    type=key,
+                    material=raw.get("material"),
+                    coating=raw.get("coating"),
+                    manufacturer=raw.get("manufacturer"),
+                    supplier=raw.get("supplier"),
+                    product_id=raw.get("product_id"),
+                    property=dict(raw.get("property") or {}),
+                    comment=raw.get("comment"),
+                )
+            )
+    if case is None and not parts:
+        return None
+    return Housing(case=case, parts=parts)
+
+
 class BundleJsonModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -974,180 +1149,18 @@ class BundleJsonModel(BaseModel):
 
 
 class CellSpecification(BundleJsonModel):
-    default_filename: ClassVar[str] = CELL_SPECIFICATION_FILENAME
+    # NOTE: This is the merged cell-specification model. It absorbs the former
+    # ``CellSpecification`` (authoring API: kwarg-absorbing __init__, _mapping_property
+    # descriptors, optional id/name) AND the former datasheet ``CellSpecification``
+    # (electrode/electrolyte/separator structure, library record format) — the two are
+    # the same entity, a BatteryCellSpecification. A transient ``CellSpecification`` alias is
+    # defined at module scope until the identifier rename completes. The on-disk filename
+    # and ``kind`` discriminator stay as the legacy ``cell-spec`` tokens for now — the
+    # on-disk/record-key rename is the separate Phase-4 coordinated migration (keeps the
+    # live registry and existing record files readable).
+    default_filename: ClassVar[str] = CELL_SPEC_FILENAME
 
     kind: str = "CellSpecification"
-    id: str
-    manufacturer: str
-    model: str
-    format: str
-    chemistry: str
-    product_type: CellProductType | None = None
-    positive_electrode_basis: str | None = None
-    negative_electrode_basis: str | None = None
-    size_code: str | None = None
-    construction: dict[str, Any] = Field(default_factory=dict)
-    properties: dict[str, Any] = Field(default_factory=dict)
-    positive_electrode: Electrode | None = None
-    negative_electrode: Electrode | None = None
-    electrolyte: Electrolyte | None = None
-    separator: Separator | None = None
-    coin_hardware: dict[str, Any] = Field(default_factory=dict)
-    specification_comment: list[str] = Field(default_factory=list)
-    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
-    comment: list[str] = Field(default_factory=list)
-
-    @field_validator("construction", "properties", "coin_hardware", mode="before")
-    @classmethod
-    def _coerce_mapping_fields(cls, value: Any) -> Any:
-        return _mapping_from_object(value)
-
-    @field_validator("positive_electrode", "negative_electrode", mode="before")
-    @classmethod
-    def _coerce_electrode(cls, value: Any) -> Any:
-        if isinstance(value, Mapping):
-            return dict(value)
-        return value
-
-    @field_validator("electrolyte", mode="before")
-    @classmethod
-    def _coerce_electrolyte(cls, value: Any) -> Any:
-        if isinstance(value, Mapping):
-            return dict(value)
-        return value
-
-    @field_validator("separator", mode="before")
-    @classmethod
-    def _coerce_separator(cls, value: Any) -> Any:
-        if isinstance(value, Mapping):
-            return dict(value)
-        return value
-
-    @classmethod
-    def from_path(cls, path: PathLike) -> Self:
-        payload = _read_json(_as_path(path))
-        if isinstance(payload.get("specification"), Mapping):
-            return cls.from_library_record(payload)
-        return cls.from_json(payload)
-
-    @classmethod
-    def from_library_record(cls, record: Mapping[str, Any]) -> Self:
-        specification = record.get("specification", {})
-        provenance = record.get("provenance", {})
-        if not isinstance(specification, Mapping):
-            raise ValueError("cell specification record must contain a 'specification' object.")
-        if not isinstance(provenance, Mapping):
-            provenance = {}
-        specification_comment = specification.get("comment")
-        if not isinstance(specification_comment, list):
-            specification_comment = []
-        comment = record.get("comment")
-        if not isinstance(comment, list):
-            comment = []
-        raw_pt = specification.get("product_type")
-        product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
-        return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
-            id=str(specification["id"]),
-            manufacturer=str(specification["manufacturer"]),
-            model=str(specification["model"]),
-            format=str(specification["format"]),
-            chemistry=str(specification["chemistry"]),
-            product_type=product_type,
-            positive_electrode_basis=specification.get("positive_electrode_basis"),
-            negative_electrode_basis=specification.get("negative_electrode_basis"),
-            size_code=specification.get("size_code"),
-            construction=copy.deepcopy(specification.get("construction", {}))
-            if isinstance(specification.get("construction"), Mapping)
-            else {},
-            properties=dict(specification.get("property", {})) if isinstance(specification.get("property"), Mapping) else {},
-            positive_electrode=copy.deepcopy(specification.get("positive_electrode")),
-            negative_electrode=copy.deepcopy(specification.get("negative_electrode")),
-            electrolyte=copy.deepcopy(specification.get("electrolyte")),
-            separator=copy.deepcopy(specification.get("separator")),
-            coin_hardware=dict(specification.get("coin_hardware", {}))
-            if isinstance(specification.get("coin_hardware"), Mapping)
-            else {},
-            specification_comment=[str(item) for item in specification_comment],
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                name=provenance.get("source_name"),
-                file=provenance.get("source_file"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-                workflow_version=provenance.get("workflow_version"),
-                comment=provenance.get("comment"),
-            ),
-            comment=[str(item) for item in comment],
-        )
-
-    def to_library_record(self) -> dict[str, Any]:
-        specification: dict[str, Any] = {
-            "id": self.id,
-            "manufacturer": self.manufacturer,
-            "model": self.model,
-            "format": self.format,
-            "chemistry": self.chemistry,
-        }
-        if self.product_type is not None:
-            specification["product_type"] = str(self.product_type)
-        if self.positive_electrode_basis is not None:
-            specification["positive_electrode_basis"] = self.positive_electrode_basis
-        if self.negative_electrode_basis is not None:
-            specification["negative_electrode_basis"] = self.negative_electrode_basis
-        if self.size_code is not None:
-            specification["size_code"] = self.size_code
-        if self.construction:
-            specification["construction"] = copy.deepcopy(self.construction)
-        if self.properties:
-            specification["property"] = self.properties
-        if self.positive_electrode is not None:
-            specification["positive_electrode"] = self.positive_electrode.model_dump(mode="json", exclude_none=True)
-        if self.negative_electrode is not None:
-            specification["negative_electrode"] = self.negative_electrode.model_dump(mode="json", exclude_none=True)
-        if self.electrolyte is not None:
-            specification["electrolyte"] = self.electrolyte.model_dump(mode="json", exclude_none=True)
-        if self.separator is not None:
-            specification["separator"] = self.separator.model_dump(mode="json", exclude_none=True)
-        if self.coin_hardware:
-            specification["coin_hardware"] = copy.deepcopy(self.coin_hardware)
-        if self.specification_comment:
-            specification["comment"] = list(self.specification_comment)
-
-        provenance: dict[str, Any] = {}
-        if self.source.type is not None:
-            provenance["source_type"] = self.source.type
-        if self.source.name is not None:
-            provenance["source_name"] = self.source.name
-        if self.source.file is not None:
-            provenance["source_file"] = self.source.file
-        if self.source.url is not None:
-            provenance["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            provenance["citation"] = citation
-        if self.source.retrieved_at is not None:
-            provenance["retrieved_at"] = self.source.retrieved_at
-        if self.source.workflow_version is not None:
-            provenance["workflow_version"] = self.source.workflow_version
-        if self.source.comment is not None:
-            provenance["comment"] = self.source.comment
-
-        out = {
-            "schema_version": self.schema_version,
-            "specification": specification,
-            "provenance": provenance,
-        }
-        if self.comment:
-            out["comment"] = list(self.comment)
-        return out
-
-
-class CellType(BundleJsonModel):
-    default_filename: ClassVar[str] = CELL_TYPE_FILENAME
-
-    kind: str = "CellType"
     id: str | None = None
     name: str | None = None
     manufacturer: str = ""
@@ -1164,13 +1177,33 @@ class CellType(BundleJsonModel):
     year: int | None = None
     datasheet_revision: str | None = None
     cell_specification_id: str | None = None
-    nominal_properties: dict[str, Any] = Field(default_factory=dict)
+    properties: dict[str, Any] = Field(default_factory=dict)
+    # Datasheet structure (merged from the former CellSpecification).
+    construction: dict[str, Any] = Field(default_factory=dict)
+    positive_electrode: Electrode | None = None
+    negative_electrode: Electrode | None = None
+    electrolyte: Electrolyte | None = None
+    separator: Separator | None = None
+    housing: Housing | None = None
+    specification_comment: list[str] = Field(default_factory=list)
     bibliography: dict[str, Any] = Field(default_factory=dict)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
 
+    @field_validator("construction", "properties", mode="before")
+    @classmethod
+    def _coerce_mapping_fields(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
+    @field_validator("positive_electrode", "negative_electrode", "electrolyte", "separator", mode="before")
+    @classmethod
+    def _coerce_component(cls, value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return dict(value)
+        return value
+
     def __init__(self, **data: Any) -> None:
-        explicit_properties = data.get("nominal_properties")
+        explicit_properties = data.get("properties")
         if explicit_properties is None:
             explicit_properties = {}
         elif isinstance(explicit_properties, Mapping):
@@ -1184,7 +1217,15 @@ class CellType(BundleJsonModel):
                 if value is not None:
                     explicit_properties[field_name] = _coerce_spec_value(value)
 
-        data["nominal_properties"] = explicit_properties
+        # Back-compat: the legacy ``coin_hardware`` dict is retired in favour of the
+        # format-neutral ``housing`` model. Absorb it on input.
+        legacy_coin_hardware = data.pop("coin_hardware", None)
+        if legacy_coin_hardware and data.get("housing") is None:
+            migrated = _housing_from_coin_hardware(legacy_coin_hardware)
+            if migrated is not None:
+                data["housing"] = migrated
+
+        data["properties"] = explicit_properties
         super().__init__(**data)
 
     @model_validator(mode="after")
@@ -1196,7 +1237,7 @@ class CellType(BundleJsonModel):
 
     @property
     def specs(self) -> _AttributeMappingProxy:
-        return _AttributeMappingProxy(self.nominal_properties)
+        return _AttributeMappingProxy(self.properties)
 
     nominal_capacity = _mapping_property("nominal_capacity")
     minimum_capacity = _mapping_property("minimum_capacity")
@@ -1244,7 +1285,7 @@ class CellType(BundleJsonModel):
     @classmethod
     def from_record(cls, record: Mapping[str, Any], *, cell_specification_id: str | None = None) -> Self:
         record = record_to_snake_aliases(record)
-        product = record.get("product")
+        product = record.get("cell_spec")
         if not isinstance(product, Mapping):
             raise ValueError("cell type record must contain a 'product' object.")
         provenance = record.get("provenance", {})
@@ -1275,7 +1316,7 @@ class CellType(BundleJsonModel):
             year=_year_value(product.get("year")),
             datasheet_revision=product.get("datasheet_revision"),
             cell_specification_id=cell_specification_id,
-            nominal_properties=dict(record.get("specs", {})) if isinstance(record.get("specs"), Mapping) else {},
+            properties=dict(record.get("properties", {})) if isinstance(record.get("properties"), Mapping) else {},
             bibliography=dict(record.get("bibliography", {}))
             if isinstance(record.get("bibliography"), Mapping)
             else {},
@@ -1310,7 +1351,7 @@ class CellType(BundleJsonModel):
             negative_electrode_basis=specification.negative_electrode_basis,
             size_code=specification.size_code,
             cell_specification_id=specification.id,
-            nominal_properties=dict(specification.properties),
+            properties=dict(specification.properties),
             source=ProvenanceInfo(
                 type=specification.source.type,
                 file=specification.source.file,
@@ -1323,42 +1364,42 @@ class CellType(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("CellType.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
+            raise ValueError("CellSpecification.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
         if self.name is None:
-            raise ValueError("CellType.name is required before serialization.")
+            raise ValueError("CellSpecification.name is required before serialization.")
         record: dict[str, Any] = {
             "schema_version": self.schema_version,
-            "product": {
+            "cell_spec": {
                 "id": self.id,
                 "short_id": _short_id(self.id),
-                "identifier": _identifier("cell-type", self.id),
+                "identifier": _identifier("cell-spec", self.id),
                 "name": self.name,
                 "model": self.model,
                 "manufacturer": {"type": "Organization", "name": self.manufacturer},
                 "cell_format": self.format,
                 "chemistry": self.chemistry,
             },
-            "specs": self.nominal_properties,
+            "properties": self.properties,
             "provenance": {},
         }
         if self.product_type is not None:
-            record["product"]["product_type"] = str(self.product_type)
+            record["cell_spec"]["product_type"] = str(self.product_type)
         if self.positive_electrode_basis is not None:
-            record["product"]["positive_electrode_basis"] = self.positive_electrode_basis
+            record["cell_spec"]["positive_electrode_basis"] = self.positive_electrode_basis
         if self.negative_electrode_basis is not None:
-            record["product"]["negative_electrode_basis"] = self.negative_electrode_basis
+            record["cell_spec"]["negative_electrode_basis"] = self.negative_electrode_basis
         if self.size_code is not None:
-            record["product"]["size_code"] = self.size_code
+            record["cell_spec"]["size_code"] = self.size_code
         if self.iec_code is not None:
-            record["product"]["iec_code"] = self.iec_code
+            record["cell_spec"]["iec_code"] = self.iec_code
         if self.country_of_origin is not None:
-            record["product"]["country_of_origin"] = self.country_of_origin
+            record["cell_spec"]["country_of_origin"] = self.country_of_origin
         if self.rechargeable is not None:
-            record["product"]["rechargeable"] = self.rechargeable
+            record["cell_spec"]["rechargeable"] = self.rechargeable
         if self.year is not None:
-            record["product"]["year"] = self.year
+            record["cell_spec"]["year"] = self.year
         if self.datasheet_revision is not None:
-            record["product"]["datasheet_revision"] = self.datasheet_revision
+            record["cell_spec"]["datasheet_revision"] = self.datasheet_revision
         if self.source.type is not None:
             record["provenance"]["source_type"] = self.source.type
         if self.source.file is not None:
@@ -1378,6 +1419,130 @@ class CellType(BundleJsonModel):
             record["notes"] = list(self.comment)
         return record_to_snake_aliases(record)
 
+    # ── Datasheet "library" record format (merged from the former CellSpecification) ──
+    @classmethod
+    def from_path(cls, path: PathLike) -> Self:
+        payload = _read_json(_as_path(path))
+        if isinstance(payload.get("specification"), Mapping):
+            return cls.from_library_record(payload)
+        if isinstance(payload.get("cell_spec"), Mapping):
+            return cls.from_record(payload)
+        return cls.from_json(payload)
+
+    @classmethod
+    def from_library_record(cls, record: Mapping[str, Any]) -> Self:
+        specification = record.get("specification", {})
+        provenance = record.get("provenance", {})
+        if not isinstance(specification, Mapping):
+            raise ValueError("cell specification record must contain a 'specification' object.")
+        if not isinstance(provenance, Mapping):
+            provenance = {}
+        specification_comment = specification.get("comment")
+        if not isinstance(specification_comment, list):
+            specification_comment = []
+        comment = record.get("comment")
+        if not isinstance(comment, list):
+            comment = []
+        raw_pt = specification.get("product_type")
+        product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
+        return cls(
+            schema_version=str(record.get("schema_version", "1.0.0")),
+            id=str(specification["id"]),
+            manufacturer=str(specification["manufacturer"]),
+            model=str(specification["model"]),
+            format=str(specification["format"]),
+            chemistry=str(specification["chemistry"]),
+            product_type=product_type,
+            positive_electrode_basis=specification.get("positive_electrode_basis"),
+            negative_electrode_basis=specification.get("negative_electrode_basis"),
+            size_code=specification.get("size_code"),
+            construction=copy.deepcopy(specification.get("construction", {}))
+            if isinstance(specification.get("construction"), Mapping)
+            else {},
+            properties=dict(specification.get("property", {})) if isinstance(specification.get("property"), Mapping) else {},
+            positive_electrode=copy.deepcopy(specification.get("positive_electrode")),
+            negative_electrode=copy.deepcopy(specification.get("negative_electrode")),
+            electrolyte=copy.deepcopy(specification.get("electrolyte")),
+            separator=copy.deepcopy(specification.get("separator")),
+            housing=copy.deepcopy(specification.get("housing"))
+            if specification.get("housing") is not None
+            else _housing_from_coin_hardware(specification.get("coin_hardware")),
+            specification_comment=[str(item) for item in specification_comment],
+            source=ProvenanceInfo(
+                type=provenance.get("source_type"),
+                name=provenance.get("source_name"),
+                file=provenance.get("source_file"),
+                url=provenance.get("source_url"),
+                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
+                retrieved_at=provenance.get("retrieved_at"),
+                workflow_version=provenance.get("workflow_version"),
+                comment=provenance.get("comment"),
+            ),
+            comment=[str(item) for item in comment],
+        )
+
+    def to_library_record(self) -> dict[str, Any]:
+        specification: dict[str, Any] = {
+            "id": self.id,
+            "manufacturer": self.manufacturer,
+            "model": self.model,
+            "format": self.format,
+            "chemistry": self.chemistry,
+        }
+        if self.product_type is not None:
+            specification["product_type"] = str(self.product_type)
+        if self.positive_electrode_basis is not None:
+            specification["positive_electrode_basis"] = self.positive_electrode_basis
+        if self.negative_electrode_basis is not None:
+            specification["negative_electrode_basis"] = self.negative_electrode_basis
+        if self.size_code is not None:
+            specification["size_code"] = self.size_code
+        if self.construction:
+            specification["construction"] = copy.deepcopy(self.construction)
+        if self.properties:
+            specification["property"] = self.properties
+        if self.positive_electrode is not None:
+            specification["positive_electrode"] = self.positive_electrode.model_dump(mode="json", exclude_none=True)
+        if self.negative_electrode is not None:
+            specification["negative_electrode"] = self.negative_electrode.model_dump(mode="json", exclude_none=True)
+        if self.electrolyte is not None:
+            specification["electrolyte"] = self.electrolyte.model_dump(mode="json", exclude_none=True)
+        if self.separator is not None:
+            specification["separator"] = self.separator.model_dump(mode="json", exclude_none=True)
+        if self.housing is not None:
+            specification["housing"] = self.housing.model_dump(mode="json", exclude_none=True)
+        if self.specification_comment:
+            specification["comment"] = list(self.specification_comment)
+
+        provenance: dict[str, Any] = {}
+        if self.source.type is not None:
+            provenance["source_type"] = self.source.type
+        if self.source.name is not None:
+            provenance["source_name"] = self.source.name
+        if self.source.file is not None:
+            provenance["source_file"] = self.source.file
+        if self.source.url is not None:
+            provenance["source_url"] = self.source.url
+        citation = _citation_url_value(self.source.citation)
+        if citation is not None:
+            provenance["citation"] = citation
+        if self.source.retrieved_at is not None:
+            provenance["retrieved_at"] = self.source.retrieved_at
+        if self.source.workflow_version is not None:
+            provenance["workflow_version"] = self.source.workflow_version
+        if self.source.comment is not None:
+            provenance["comment"] = self.source.comment
+
+        out = {
+            "schema_version": self.schema_version,
+            "specification": specification,
+            "provenance": provenance,
+        }
+        if self.comment:
+            out["comment"] = list(self.comment)
+        return out
+
+
 
 class CellInstance(BundleJsonModel):
     default_filename: ClassVar[str] = CELL_INSTANCE_FILENAME
@@ -1385,27 +1550,28 @@ class CellInstance(BundleJsonModel):
     kind: str = "CellInstance"
     id: str | None = None
     name: str | None = None
-    cell_type_id: str | None = None
-    cell_type: CellType | None = Field(default=None, exclude=True, repr=False)
+    cell_spec_id: str | None = None
+    cell_spec: CellSpecification | None = Field(default=None, exclude=True, repr=False)
     serial_number: str | None = None
     batch_id: str | None = None
     grade: str | None = None
     manufactured_at: int | str | None = None
     expires_at: int | str | None = None
     measured: dict[str, Any] = Field(default_factory=dict)
+    conformance: Conformance | None = None
     dataset_ids: list[str] = Field(default_factory=list)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
 
-    def __init__(self, cell_type: CellType | None = None, /, **data: Any) -> None:
-        if cell_type is not None and "cell_type" not in data and "cell_type_id" not in data:
-            data["cell_type"] = cell_type
+    def __init__(self, cell_spec: CellSpecification | None = None, /, **data: Any) -> None:
+        if cell_spec is not None and "cell_spec" not in data and "cell_spec_id" not in data:
+            data["cell_spec"] = cell_spec
         super().__init__(**data)
 
     @model_validator(mode="after")
     def _populate_links(self) -> Self:
-        if self.cell_type_id is None and self.cell_type is not None and self.cell_type.id is not None:
-            self.cell_type_id = self.cell_type.id
+        if self.cell_spec_id is None and self.cell_spec is not None and self.cell_spec.id is not None:
+            self.cell_spec_id = self.cell_spec.id
         if self.name is None:
             self.name = self.serial_number or self.batch_id or _id_tail(self.id)
         return self
@@ -1440,14 +1606,23 @@ class CellInstance(BundleJsonModel):
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(cell_instance["id"]),
-            name=str(cell_instance.get("serial_number") or cell_instance["id"].rstrip("/").split("/")[-1]),
-            cell_type_id=str(cell_instance["type_id"]),
+            name=str(
+                cell_instance.get("name")
+                or cell_instance.get("serial_number")
+                or cell_instance["id"].rstrip("/").split("/")[-1]
+            ),
+            cell_spec_id=str(cell_instance["cell_spec_id"]),
             serial_number=cell_instance.get("serial_number"),
             batch_id=cell_instance.get("batch_id"),
             grade=cell_instance.get("grade"),
             manufactured_at=cell_instance.get("manufactured_at"),
             expires_at=cell_instance.get("expires_at"),
             measured=dict(record.get("measured", {})) if isinstance(record.get("measured"), Mapping) else {},
+            conformance=(
+                Conformance.from_record(cell_instance["conformance"])
+                if isinstance(cell_instance.get("conformance"), Mapping)
+                else None
+            ),
             dataset_ids=[str(item) for item in dataset_ids],
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
@@ -1461,14 +1636,15 @@ class CellInstance(BundleJsonModel):
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
             raise ValueError("CellInstance.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
-        if self.cell_type_id is None:
-            raise ValueError("CellInstance.cell_type_id is required before serialization.")
+        if self.cell_spec_id is None:
+            raise ValueError("CellInstance.cell_spec_id is required before serialization.")
         record: dict[str, Any] = {
             "schema_version": self.schema_version,
             "cell_instance": {
                 "id": self.id,
                 "short_id": _short_id(self.id),
-                "type_id": self.cell_type_id,
+                "cell_spec_id": self.cell_spec_id,
+                "name": self.name,
                 "serial_number": self.serial_number,
                 "batch_id": self.batch_id,
                 "grade": self.grade,
@@ -1491,25 +1667,53 @@ class CellInstance(BundleJsonModel):
         if self.source.retrieved_at is not None:
             record["provenance"]["retrieved_at"] = self.source.retrieved_at
         record["cell_instance"] = {key: value for key, value in record["cell_instance"].items() if value is not None}
+        if self.conformance is not None:
+            record["cell_instance"]["conformance"] = self.conformance.to_record()
         if self.comment:
             record["notes"] = list(self.comment)
         return record_to_snake_aliases(record)
 
 
-CONFORMANCE_STATUS_VALUES = ("conformant", "partial", "non-conformant", "unknown")
+CONFORMANCE_STATUS_VALUES = ("conformant", "non-conformant", "unknown")
 
+# Conformance is a boolean verdict mapped to W3C EARL outcome values. "unknown"
+# is the not-yet-assessed default (EARL's cantTell), not a third verdict. Compact
+# CURIEs — the 'earl' prefix is declared in records.context.json.
 CONFORMANCE_STATUS_IRI: dict[str, str] = {
-    "conformant":     "https://w3id.org/battinfo/ConformanceStatus/Conformant",
-    "partial":        "https://w3id.org/battinfo/ConformanceStatus/PartialConformance",
-    "non-conformant": "https://w3id.org/battinfo/ConformanceStatus/NonConformant",
-    "unknown":        "https://w3id.org/battinfo/ConformanceStatus/ConformanceUnknown",
+    "conformant":     "earl:passed",
+    "non-conformant": "earl:failed",
+    "unknown":        "earl:cantTell",
 }
+
+# Controlled vocabulary for a deviation's broad category. Covers both test executions
+# (vs a test spec) and physical cells (vs a cell spec). A free-text `type` carries the
+# specific label within a category.
+DEVIATION_CATEGORIES = (
+    "power_outage",
+    "equipment_failure",
+    "temperature_excursion",
+    "software_error",
+    "operator_intervention",
+    "premature_termination",
+    "communication_loss",
+    "parameter_drift",
+    "setpoint_deviation",
+    "calibration_issue",
+    "out_of_tolerance",
+    "dimensional",
+    "other",
+)
 
 
 class Deviation(BaseModel):
-    """A single unplanned event that caused a test to depart from its specification."""
+    """A single way a thing departed from the spec that governs it.
 
-    type: str
+    ``category`` is a controlled classification (see DEVIATION_CATEGORIES); ``type`` is
+    an optional free-text label naming the specific deviation within that category.
+    """
+
+    category: str = "other"
+    type: str | None = None
     description: str | None = None
     occurred_at: int | None = None
     duration_s: int | None = None
@@ -1518,8 +1722,14 @@ class Deviation(BaseModel):
 
     @classmethod
     def from_record(cls, data: Mapping[str, Any]) -> "Deviation":
+        category = data.get("category")
+        type_ = data.get("type")
+        # Back-compat: a legacy `type` that names a known category becomes the category.
+        if category is None and type_ in DEVIATION_CATEGORIES:
+            category, type_ = type_, None
         return cls(
-            type=str(data["type"]),
+            category=str(category or "other"),
+            type=type_,
             description=data.get("description"),
             occurred_at=data.get("occurred_at"),
             duration_s=data.get("duration_s"),
@@ -1528,7 +1738,9 @@ class Deviation(BaseModel):
         )
 
     def to_record(self) -> dict[str, Any]:
-        out: dict[str, Any] = {"type": self.type}
+        out: dict[str, Any] = {"category": self.category}
+        if self.type is not None:
+            out["type"] = self.type
         if self.description is not None:
             out["description"] = self.description
         if self.occurred_at is not None:
@@ -1542,15 +1754,18 @@ class Deviation(BaseModel):
         return out
 
 
-class TestConformance(BaseModel):
-    """Assessment of how well a test activity followed its referenced test specification."""
+class Conformance(BaseModel):
+    """Assessment of how well a thing followed the spec that governs it.
+
+    Used for a test execution (vs its test spec) and a cell instance (vs its cell spec).
+    """
 
     status: str = "unknown"
     note: str | None = None
     deviations: list[Deviation] = Field(default_factory=list)
 
     @classmethod
-    def from_record(cls, data: Mapping[str, Any]) -> "TestConformance":
+    def from_record(cls, data: Mapping[str, Any]) -> "Conformance":
         deviations = [
             Deviation.from_record(d)
             for d in (data.get("deviations") or [])
@@ -1571,6 +1786,50 @@ class TestConformance(BaseModel):
         return out
 
 
+# Backward-compatible alias — conformance is general, not test-specific.
+TestConformance = Conformance
+
+
+def _prune_empty(obj: Any) -> Any:
+    """Recursively drop None and empty list/dict/str values (keeps 0 and False)."""
+    if isinstance(obj, dict):
+        out: dict[str, Any] = {}
+        for key, value in obj.items():
+            pruned = _prune_empty(value)
+            if pruned is None or pruned == [] or pruned == {} or pruned == "":
+                continue
+            out[key] = pruned
+        return out
+    if isinstance(obj, list):
+        return [_prune_empty(item) for item in obj]
+    return obj
+
+
+class Artifact(BaseModel):
+    """A link to a machine-actionable protocol file (Layer B).
+
+    BattINFO carries and references the file but does not interpret it as
+    authority; ``conforms_to`` points downstream tooling at the format spec."""
+    model_config = ConfigDict(extra="forbid")
+
+    role: str                              # source_protocol | executed_protocol | vendor_export | simulation_input | other
+    format: str                            # key in data/vocab/test-method/artifact-formats.json
+    locator: str                           # dataset-relative path | URI | DOI
+    media_type: str | None = None
+    sha256: str | None = None
+    byte_size: int | None = None
+    conforms_to: str | None = None
+    generated: list[str] = Field(default_factory=list)
+    generated_from: str | None = None
+
+    @classmethod
+    def from_record(cls, data: Mapping[str, Any]) -> "Artifact":
+        return cls.model_validate(dict(data))
+
+    def to_record(self) -> dict[str, Any]:
+        return _prune_empty(self.model_dump(mode="json"))
+
+
 class TestSpec(BundleJsonModel):
     default_filename: ClassVar[str] = TEST_SPEC_FILENAME
 
@@ -1585,14 +1844,37 @@ class TestSpec(BundleJsonModel):
     description: str | None = None
     version: str | None = None
     protocol: ProtocolInfo = Field(default_factory=ProtocolInfo)
-    steps: list[str] = Field(default_factory=list)
-    cycles: int | None = None
-    conditions: dict[str, Any] = Field(default_factory=dict)
-    setpoints: dict[str, Any] = Field(default_factory=dict)
-    termination_criteria: dict[str, Any] = Field(default_factory=dict)
-    measurement_outputs: list[dict[str, Any]] = Field(default_factory=list)
+    # Descriptive layer (canonical structured form of the procedure).
+    method: list[Step] = Field(default_factory=list)
+    record: dict[str, Any] = Field(default_factory=dict)
+    safety: dict[str, Any] = Field(default_factory=dict)
+    conditions: dict[str, Quantity] = Field(default_factory=dict)
+    # Actionable layer.
+    artifacts: list[Artifact] = Field(default_factory=list)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_authoring(cls, data: Any) -> Any:
+        """Accept PyBaMM-style ``experiment``/``steps`` strings (+ ``cycles``) as the
+        human authoring interface, parsing them into the canonical ``method``."""
+        if not isinstance(data, Mapping):
+            return data
+        out = dict(data)
+        if not out.get("method"):
+            source = out.get("experiment")
+            if source is None:
+                source = out.get("steps")
+            if source and all(isinstance(s, str) for s in source):
+                cycles = out.get("cycles")
+                out["method"] = parse_experiment(
+                    list(source), cycles if isinstance(cycles, int) else None
+                )
+        # Authoring-only keys are not model fields (extra="forbid").
+        for key in ("experiment", "steps", "cycles"):
+            out.pop(key, None)
+        return out
 
     @field_validator("protocol", mode="before")
     @classmethod
@@ -1625,43 +1907,52 @@ class TestSpec(BundleJsonModel):
     def protocol_url(self, value: str | None) -> None:
         self.protocol.url = value
 
+    @property
+    def experiment(self) -> list[str]:
+        """The method rendered back to PyBaMM-style strings (display / round-trip)."""
+        from battinfo.testmethod import render_method
+        strings, _cycles = render_method(self.method)
+        return strings
+
+    def facets(self) -> dict[str, Any]:
+        """Derived rollup index of the method for cheap filtering."""
+        return compute_facets(self.method, self.conditions)
+
     @classmethod
     def from_record(cls, record: Mapping[str, Any]) -> Self:
         protocol = record.get("test_spec")
         if not isinstance(protocol, Mapping):
-            raise ValueError("test-protocol record must contain a 'test_protocol' object.")
+            raise ValueError("test-protocol record must contain a 'test_spec' object.")
         provenance = record.get("provenance", {})
         if not isinstance(provenance, Mapping):
             provenance = {}
         notes = record.get("notes")
         if not isinstance(notes, list):
             notes = []
-        measurement_outputs = record.get("measurement_outputs")
-        if not isinstance(measurement_outputs, list):
-            measurement_outputs = []
+        method = record.get("method")
+        if not isinstance(method, list):
+            method = []
         conditions = record.get("conditions")
         if not isinstance(conditions, Mapping):
             conditions = {}
-        setpoints = record.get("setpoints")
-        if not isinstance(setpoints, Mapping):
-            setpoints = {}
-        termination_criteria = record.get("termination_criteria")
-        if not isinstance(termination_criteria, Mapping):
-            termination_criteria = {}
+        record_settings = record.get("record")
+        safety = record.get("safety")
+        artifacts = record.get("artifacts")
+        if not isinstance(artifacts, list):
+            artifacts = []
         return cls(
-            schema_version=str(record.get("schema_version", "0.1.0")),
+            schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(protocol["id"]),
             name=str(protocol["name"]),
             test_type=protocol["kind"],
             description=protocol.get("description"),
             version=protocol.get("version"),
             protocol=ProtocolInfo(url=protocol.get("protocol_url")),
-            steps=[str(s) for s in protocol.get("steps", []) if isinstance(s, str)],
-            cycles=int(protocol["cycles"]) if isinstance(protocol.get("cycles"), int) else None,
+            method=[Step.model_validate(s) for s in method if isinstance(s, Mapping)],
+            record=dict(record_settings) if isinstance(record_settings, Mapping) else {},
+            safety=dict(safety) if isinstance(safety, Mapping) else {},
             conditions=dict(conditions),
-            setpoints=dict(setpoints),
-            termination_criteria=dict(termination_criteria),
-            measurement_outputs=[dict(item) for item in measurement_outputs if isinstance(item, Mapping)],
+            artifacts=[Artifact.from_record(a) for a in artifacts if isinstance(a, Mapping)],
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
                 file=provenance.get("source_file"),
@@ -1695,18 +1986,19 @@ class TestSpec(BundleJsonModel):
             record["test_spec"]["version"] = self.version
         if self.protocol.url is not None:
             record["test_spec"]["protocol_url"] = self.protocol.url
-        if self.steps:
-            record["test_spec"]["steps"] = list(self.steps)
-        if self.cycles is not None:
-            record["test_spec"]["cycles"] = self.cycles
+        if self.method:
+            record["method"] = [_prune_empty(s.model_dump(mode="json")) for s in self.method]
+            record["facets"] = self.facets()
+        if self.record:
+            record["record"] = copy.deepcopy(self.record)
+        if self.safety:
+            record["safety"] = copy.deepcopy(self.safety)
         if self.conditions:
-            record["conditions"] = copy.deepcopy(self.conditions)
-        if self.setpoints:
-            record["setpoints"] = copy.deepcopy(self.setpoints)
-        if self.termination_criteria:
-            record["termination_criteria"] = copy.deepcopy(self.termination_criteria)
-        if self.measurement_outputs:
-            record["measurement_outputs"] = copy.deepcopy(self.measurement_outputs)
+            record["conditions"] = {
+                name: qty.model_dump(mode="json") for name, qty in self.conditions.items()
+            }
+        if self.artifacts:
+            record["artifacts"] = [a.to_record() for a in self.artifacts]
         if self.source.type is not None:
             record["provenance"]["source_type"] = self.source.type
         if self.source.file is not None:
@@ -1748,6 +2040,7 @@ class Test(BundleJsonModel):
     ended_at: int | str | None = None
     dataset_ids: list[str] = Field(default_factory=list)
     conformance: TestConformance | None = None
+    artifacts: list[Artifact] = Field(default_factory=list)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
 
@@ -1825,6 +2118,9 @@ class Test(BundleJsonModel):
             if isinstance(raw_conformance, Mapping)
             else None
         )
+        artifacts = record.get("artifacts")
+        if not isinstance(artifacts, list):
+            artifacts = []
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(test["id"]),
@@ -1843,6 +2139,7 @@ class Test(BundleJsonModel):
             ended_at=test.get("ended_at"),
             dataset_ids=[str(item) for item in dataset_ids],
             conformance=conformance,
+            artifacts=[Artifact.from_record(a) for a in artifacts if isinstance(a, Mapping)],
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
                 file=provenance.get("source_file"),
@@ -1893,6 +2190,8 @@ class Test(BundleJsonModel):
             record["test"]["dataset_ids"] = list(self.dataset_ids)
         if self.conformance is not None:
             record["test"]["conformance"] = self.conformance.to_record()
+        if self.artifacts:
+            record["artifacts"] = [a.to_record() for a in self.artifacts]
         if self.source.type is not None:
             record["provenance"]["source_type"] = self.source.type
         if self.source.file is not None:
@@ -2303,7 +2602,7 @@ class BattinfoBundle(BundleJsonModel):
     kind: str = "BattinfoBundle"
     bundle_name: str | None = None
     cell_specification: CellSpecification | None = None
-    cell_type: CellType
+    cell_spec: CellSpecification
     cell_instance: CellInstance
     test: Test
     dataset: Dataset
@@ -2313,7 +2612,7 @@ class BattinfoBundle(BundleJsonModel):
         payload: dict[str, Any] = {
             "schema_version": self.schema_version,
             "kind": self.kind,
-            "cell_type_file": CELL_TYPE_FILENAME,
+            "cell_spec_file": CELL_SPEC_FILENAME,
             "cell_instance_file": CELL_INSTANCE_FILENAME,
             "test_file": TEST_FILENAME,
             "dataset_file": DATASET_FILENAME,
@@ -2331,7 +2630,7 @@ class BattinfoBundle(BundleJsonModel):
         root.mkdir(parents=True, exist_ok=True)
         if self.cell_specification is not None:
             self.cell_specification.to_path(root / CELL_SPECIFICATION_FILENAME)
-        self.cell_type.to_path(root / CELL_TYPE_FILENAME)
+        self.cell_spec.to_path(root / CELL_SPEC_FILENAME)
         self.cell_instance.to_path(root / CELL_INSTANCE_FILENAME)
         self.test.to_path(root / TEST_FILENAME)
         self.dataset.to_path(root / DATASET_FILENAME)
@@ -2352,7 +2651,7 @@ class BattinfoBundle(BundleJsonModel):
             schema_version=str(manifest.get("schema_version", "1.0.0")),
             bundle_name=manifest.get("bundle_name"),
             cell_specification=cell_specification,
-            cell_type=CellType.from_path(root / str(manifest.get("cell_type_file", CELL_TYPE_FILENAME))),
+            cell_spec=CellSpecification.from_path(root / str(manifest.get("cell_spec_file", CELL_SPEC_FILENAME))),
             cell_instance=CellInstance.from_path(root / str(manifest.get("cell_instance_file", CELL_INSTANCE_FILENAME))),
             test=Test.from_path(root / str(manifest.get("test_file", TEST_FILENAME))),
             dataset=Dataset.from_path(root / str(manifest.get("dataset_file", DATASET_FILENAME))),
@@ -2369,19 +2668,31 @@ class BattinfoBundle(BundleJsonModel):
             if isinstance(node.get("@id"), str)
         }
 
+        def _is_cell_instance(node: Mapping[str, Any]) -> bool:
+            # Legacy shapes; or the gold-standard instance node, whose @type is the
+            # physical subclass (e.g. CoinCell) but which always links to its spec via
+            # hasDescription/conformsTo and lives under the /cell/ namespace.
+            if _node_has_type(node, "BatteryCell") or _node_has_type(node, "schema:IndividualProduct"):
+                return True
+            nid = node.get("@id")
+            return (
+                isinstance(nid, str) and "/cell/" in nid
+                and bool(node.get("hasDescription") or node.get("dcterms:conformsTo"))
+            )
+
         cell_instance_node = next(
-            (node for node in graph if _node_has_type(node, "BatteryCell") or _node_has_type(node, "schema:IndividualProduct")),
+            (node for node in graph if _is_cell_instance(node)),
             None,
         )
-        cell_type_id = None
+        cell_spec_id = None
         if cell_instance_node is not None:
-            cell_type_id = next((value for value in _type_values(cell_instance_node) if "/cell-type/" in value), None)
-            if cell_type_id is None:
+            cell_spec_id = next((value for value in _type_values(cell_instance_node) if "/cell-spec/" in value), None)
+            if cell_spec_id is None:
                 # hasDescription is the current term; schema:isVariantOf is kept for backward compatibility
-                cell_type_id = _ref_id(cell_instance_node.get("hasDescription") or cell_instance_node.get("schema:isVariantOf"))
-        cell_type_node = graph_by_id.get(cell_type_id) if cell_type_id is not None else None
-        if cell_type_node is None:
-            cell_type_node = next(
+                cell_spec_id = _ref_id(cell_instance_node.get("hasDescription") or cell_instance_node.get("schema:isVariantOf"))
+        cell_spec_node = graph_by_id.get(cell_spec_id) if cell_spec_id is not None else None
+        if cell_spec_node is None:
+            cell_spec_node = next(
                 (
                     node
                     for node in graph
@@ -2406,11 +2717,19 @@ class BattinfoBundle(BundleJsonModel):
             (
                 node
                 for node in graph
-                if _node_has_type(node, "BatteryTestResult")
-                or (
-                    _node_has_type(node, "schema:Dataset")
-                    and (
-                        any("/cell/" in ref_id for ref_id in _ref_ids(node.get("schema:about")))
+                # Never the catalog/container; match the member test-result dataset.
+                if not _node_has_type(node, "dcat:Catalog")
+                and (
+                    _node_has_type(node, "BatteryTestResult")
+                    # Gold-standard member: a dcat:Dataset carrying distributions.
+                    or (
+                        (_node_has_type(node, "dcat:Dataset") or _node_has_type(node, "schema:Dataset"))
+                        and bool(node.get("dcat:distribution") or node.get("schema:distribution"))
+                    )
+                    # Legacy: a schema:Dataset whose about references both a cell and a test.
+                    or (
+                        _node_has_type(node, "schema:Dataset")
+                        and any("/cell/" in ref_id for ref_id in _ref_ids(node.get("schema:about")))
                         and any("/test/" in ref_id for ref_id in _ref_ids(node.get("schema:about")))
                     )
                 )
@@ -2418,26 +2737,31 @@ class BattinfoBundle(BundleJsonModel):
             None,
         )
 
-        if cell_type_node is None or cell_instance_node is None or test_node is None or dataset_node is None:
+        if cell_spec_node is None or cell_instance_node is None or test_node is None or dataset_node is None:
             raise ValueError("Could not reconstruct BattinfoBundle from JSON-LD graph.")
 
-        _cell_type_id = str(cell_type_node.get("@id"))
+        _cell_spec_id = str(cell_spec_node.get("@id"))
         cell_specification_node = next(
             (
                 node
                 for node in graph
                 if _node_has_type(node, "BatteryCellSpecification")
-                and _ref_id(node.get("schema:about")) == _cell_type_id
+                and _ref_id(node.get("schema:about")) == _cell_spec_id
             ),
             None,
         )
         if cell_specification_node is None:
-            spec_ref_id = _ref_id(cell_type_node.get("schema:isBasedOn"))
+            spec_ref_id = _ref_id(cell_spec_node.get("schema:isBasedOn"))
             candidate = graph_by_id.get(spec_ref_id) if spec_ref_id is not None else None
             if isinstance(candidate, Mapping) and _node_has_type(candidate, "BatteryCellSpecification"):
                 cell_specification_node = candidate
+        if cell_specification_node is None and _node_has_type(cell_spec_node, "BatteryCellSpecification"):
+            # CellSpecification and CellSpecification are the same entity — a BatteryCellSpecification.
+            # When the graph carries a single spec node (the gold-standard shape), it serves
+            # as both; there is no separate "cell-spec-only" node to distinguish.
+            cell_specification_node = cell_spec_node
 
-        manufacturer_obj = cell_type_node.get("schema:manufacturer")
+        manufacturer_obj = cell_spec_node.get("schema:manufacturer")
         if not isinstance(manufacturer_obj, Mapping) and cell_specification_node is not None:
             manufacturer_obj = cell_specification_node.get("schema:manufacturer")
         manufacturer = (
@@ -2446,7 +2770,7 @@ class BattinfoBundle(BundleJsonModel):
             else manufacturer_obj
         )
         properties: dict[str, Any] = {}
-        property_source = cell_specification_node if cell_specification_node is not None else cell_type_node
+        property_source = cell_specification_node if cell_specification_node is not None else cell_spec_node
         for item in property_source.get("hasProperty", []):
             if isinstance(item, Mapping):
                 extracted = _extract_property_item(item)
@@ -2457,12 +2781,12 @@ class BattinfoBundle(BundleJsonModel):
         source_obj = (
             cell_specification_node.get("schema:isBasedOn")
             if cell_specification_node is not None
-            else cell_type_node.get("schema:isBasedOn")
+            else cell_spec_node.get("schema:isBasedOn")
         )
         if not isinstance(source_obj, Mapping):
             source_obj = {}
-        subclass_ids = _subclass_ref_ids(cell_type_node)
-        is_desc = cell_type_node.get("isDescriptionFor")
+        subclass_ids = _subclass_ref_ids(cell_spec_node)
+        is_desc = cell_spec_node.get("isDescriptionFor")
         is_desc_types = _type_values(is_desc) if isinstance(is_desc, Mapping) else []
         format_value = (
             "coin"
@@ -2475,37 +2799,37 @@ class BattinfoBundle(BundleJsonModel):
             if "PrismaticBattery" in subclass_ids or _node_has_type(cell_instance_node, "PrismaticBattery") or "PrismaticBattery" in is_desc_types
             else "unknown"
         )
-        cell_type = CellType(
-            id=str(cell_type_node["@id"]),
-            name=str(cell_type_node.get("schema:name") or f"{manufacturer} {cell_type_node.get('schema:model') or 'unknown'}"),
+        cell_spec = CellSpecification(
+            id=str(cell_spec_node["@id"]),
+            name=str(cell_spec_node.get("schema:name") or f"{manufacturer} {cell_spec_node.get('schema:model') or 'unknown'}"),
             manufacturer=str(manufacturer or "unknown"),
             model=str(
-                cell_type_node.get("schema:model")
+                cell_spec_node.get("schema:model")
                 or (cell_specification_node.get("schema:model") if isinstance(cell_specification_node, Mapping) else None)
-                or cell_type_node.get("schema:name")
+                or cell_spec_node.get("schema:name")
                 or "unknown"
             ),
             format=format_value,
             chemistry="unknown",
-            size_code=cell_type_node.get("schema:size") or (cell_specification_node.get("schema:size") if isinstance(cell_specification_node, Mapping) else None),
-            country_of_origin=_country_name_value(cell_type_node.get("schema:countryOfOrigin")),
-            year=_year_value(cell_type_node.get("schema:releaseDate")),
+            size_code=cell_spec_node.get("schema:size") or (cell_specification_node.get("schema:size") if isinstance(cell_specification_node, Mapping) else None),
+            country_of_origin=_country_name_value(cell_spec_node.get("schema:countryOfOrigin")),
+            year=_year_value(cell_spec_node.get("schema:releaseDate")),
             cell_specification_id=str(cell_specification_node.get("@id")) if isinstance(cell_specification_node, Mapping) else None,
-            nominal_properties=properties,
+            properties=properties,
             source=ProvenanceInfo(
                 type=source_obj.get("schema:additionalType"),
                 name=source_obj.get("schema:name"),
                 file=source_obj.get("schema:identifier"),
                 url=source_obj.get("schema:url") or source_obj.get("@id"),
                 citation=_citation_url_value(
-                    _ref_id(cell_type_node.get("schema:citation")) or source_obj.get("schema:citation"),
+                    _ref_id(cell_spec_node.get("schema:citation")) or source_obj.get("schema:citation"),
                     source_obj.get("bibo:doi"),
                 ),
                 retrieved_at=source_obj.get("schema:dateModified"),
                 workflow_version=source_obj.get("schema:version"),
                 comment=source_obj.get("schema:description"),
             ),
-            comment=_text_list(cell_type_node.get("schema:description")),
+            comment=_text_list(cell_spec_node.get("schema:description")),
         )
         cell_specification = None
         if isinstance(cell_specification_node, Mapping):
@@ -2518,9 +2842,9 @@ class BattinfoBundle(BundleJsonModel):
             cell_specification = CellSpecification(
                 id=str(cell_specification_node["@id"]),
                 manufacturer=str(spec_manufacturer or manufacturer or "unknown"),
-                model=str(cell_specification_node.get("schema:model") or cell_type.model),
-                format=cell_type.format,
-                chemistry=cell_type.chemistry,
+                model=str(cell_specification_node.get("schema:model") or cell_spec.model),
+                format=cell_spec.format,
+                chemistry=cell_spec.chemistry,
                 size_code=cell_specification_node.get("schema:size"),
                 properties=properties,
                 specification_comment=_text_list(cell_specification_node.get("schema:description")),
@@ -2541,11 +2865,23 @@ class BattinfoBundle(BundleJsonModel):
         cell_instance = CellInstance(
             id=str(cell_instance_node["@id"]),
             name=str(cell_instance_node.get("schema:name") or cell_instance_node["@id"]),
-            cell_type_id=str(cell_type_id or cell_type.id),
+            cell_spec_id=str(cell_spec_id or cell_spec.id),
             serial_number=cell_instance_node.get("schema:serialNumber"),
         )
         protocol_name, test_description = _protocol_from_description(test_node.get("schema:description"))
+        if protocol_name is None:
+            # Gold-standard tests record the protocol as schema:measurementTechnique.
+            mt = test_node.get("schema:measurementTechnique")
+            if isinstance(mt, str):
+                protocol_name = mt
+            elif isinstance(mt, list) and mt:
+                protocol_name = mt[0]
         instrument_name = _instrument_name(test_node.get("schema:instrument"))
+        if instrument_name is None:
+            # Gold-standard tests carry the instrument via hasTestEquipment, not schema:instrument.
+            equip = test_node.get("hasTestEquipment")
+            if isinstance(equip, Mapping):
+                instrument_name = equip.get("schema:name")
         test = Test(
             id=str(test_node["@id"]),
             name=str(test_node.get("schema:name") or test_node["@id"]),
@@ -2611,17 +2947,22 @@ class BattinfoBundle(BundleJsonModel):
             ),
             main_entity=[entity for item in _mapping_list(dataset_main_entity) if (entity := _canonical_main_entity(item)) is not None],
             distributions=[dist for item in _mapping_list(dataset_distribution) if (dist := _canonical_distribution(item)) is not None],
+            # In the gold-standard shape the dataset→test link lives on the test
+            # (prov:generated / hasOutput), not in the dataset's schema:about, so fall
+            # back to the reconstructed test/cell-instance of this single-dataset bundle.
             cell_instance_id=next(
-                (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/cell/" in ref_id), None
-            ),
+                (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/cell/" in ref_id),
+                None,
+            ) or cell_instance.id,
             test_id=next(
-                (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/test/" in ref_id), None
-            ),
+                (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/test/" in ref_id),
+                None,
+            ) or str(test_node.get("@id")),
         )
         return cls(
             bundle_name=dataset.name,
             cell_specification=cell_specification,
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             cell_instance=cell_instance,
             test=test,
             dataset=dataset,
@@ -2657,7 +2998,7 @@ class ZenodoCellRecord(BaseModel):
 
     schema_version: str = "1.0.0"
     kind: str = "BattinfoCellRecord"
-    cell_type: CellType
+    cell_spec: CellSpecification
     cell_specification: CellSpecification | None = None
     datasets: list[ZenodoDatasetEntry]
 
@@ -2665,7 +3006,7 @@ class ZenodoCellRecord(BaseModel):
         payload: dict[str, Any] = {
             "schema_version": self.schema_version,
             "kind": self.kind,
-            "cell_type": self.cell_type.to_record(),
+            "cell_spec": self.cell_spec.to_record(),
         }
         if self.cell_specification is not None:
             payload["cell_specification"] = self.cell_specification.to_library_record()
@@ -2687,9 +3028,9 @@ class ZenodoCellRecord(BaseModel):
     @classmethod
     def from_flat_json(cls, data: Mapping[str, Any]) -> "ZenodoCellRecord":
         data = dict(data)
-        cell_type_raw = data.get("cell_type")
-        if not isinstance(cell_type_raw, Mapping):
-            raise ValueError("ZenodoCellRecord must contain a 'cell_type' object.")
+        cell_spec_raw = data.get("cell_spec")
+        if not isinstance(cell_spec_raw, Mapping):
+            raise ValueError("ZenodoCellRecord must contain a 'cell_spec' object.")
         datasets_raw = data.get("datasets")
         if not isinstance(datasets_raw, list):
             raise ValueError("ZenodoCellRecord must contain a 'datasets' list.")
@@ -2699,8 +3040,8 @@ class ZenodoCellRecord(BaseModel):
         if isinstance(spec_raw, Mapping):
             cell_specification = CellSpecification.from_library_record(spec_raw)
 
-        cell_type = CellType.from_record(
-            cell_type_raw,
+        cell_spec = CellSpecification.from_record(
+            cell_spec_raw,
             cell_specification_id=cell_specification.id if cell_specification is not None else None,
         )
 
@@ -2726,7 +3067,7 @@ class ZenodoCellRecord(BaseModel):
         return cls(
             schema_version=str(data.get("schema_version", "1.0.0")),
             kind=str(data.get("kind", "BattinfoCellRecord")),
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             cell_specification=cell_specification,
             datasets=entries,
         )
@@ -2744,16 +3085,16 @@ class ZenodoCellRecord(BaseModel):
     ) -> "ZenodoCellRecord":
         """Build a ZenodoCellRecord from one or more single-dataset BattinfoBundles.
 
-        All bundles must share the same cell_type (checked by id).
+        All bundles must share the same cell_spec (checked by id).
         """
         if not bundles:
             raise ValueError("At least one BattinfoBundle is required.")
-        cell_type = bundles[0].cell_type
-        if any(b.cell_type.id != cell_type.id for b in bundles[1:]):
-            raise ValueError("All bundles must share the same cell_type.id.")
+        cell_spec = bundles[0].cell_spec
+        if any(b.cell_spec.id != cell_spec.id for b in bundles[1:]):
+            raise ValueError("All bundles must share the same cell_spec.id.")
         spec = cell_specification or bundles[0].cell_specification
         return cls(
-            cell_type=cell_type,
+            cell_spec=cell_spec,
             cell_specification=spec,
             datasets=[
                 ZenodoDatasetEntry(
@@ -2779,11 +3120,11 @@ __all__ = [
     "BattinfoBundle",
     "CELL_INSTANCE_FILENAME",
     "CELL_SPECIFICATION_FILENAME",
-    "CELL_TYPE_FILENAME",
+    "CELL_SPEC_FILENAME",
     "Coating",
     "CellInstance",
     "CellSpecification",
-    "CellType",
+    "CellSpecification",
     "ChecksumInfo",
     "CurrentCollector",
     "DATASET_FILENAME",
@@ -2799,7 +3140,9 @@ __all__ = [
     "SolventMixture",
     "CONFORMANCE_STATUS_VALUES",
     "CONFORMANCE_STATUS_IRI",
+    "DEVIATION_CATEGORIES",
     "Deviation",
+    "Conformance",
     "TestConformance",
     "TEST_SPEC_FILENAME",
     "TEST_PROTOCOL_FILENAME",

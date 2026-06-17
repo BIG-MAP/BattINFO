@@ -45,7 +45,7 @@ def test_written_ingest_manifest_validates_against_normative_schema(tmp_path: Pa
     manifest_report = write_ingest_manifest(
         ingest_root,
         resource_type="cell-instance",
-        type_record="battinfo-records/records/cell-type/google--g20m7--2025/record.json",
+        type_record="battinfo-records/records/cell-spec/google--g20m7--2025/record.json",
         resource_iri="https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
         publisher_id="demo-lab",
         license="CC-BY-4.0",
@@ -67,7 +67,7 @@ def test_inspect_ingest_root_rejects_manifest_outside_contract(tmp_path: Path) -
         json.dumps(
             {
                 "resource_type": "cell-instance",
-                "cell_type": "battinfo-records/records/cell-type/google--g20m7--2025/record.json"
+                "cell_spec": "battinfo-records/records/cell-spec/google--g20m7--2025/record.json"
             },
             indent=2,
         ),

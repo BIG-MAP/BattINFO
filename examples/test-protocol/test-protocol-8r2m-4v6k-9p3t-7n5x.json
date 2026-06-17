@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "1.0.0",
   "test_spec": {
     "id": "https://w3id.org/battinfo/spec/8r2m-4v6k-9p3t-7n5x",
     "short_id": "8r2m4v",
@@ -10,38 +10,43 @@
     "version": "1.0",
     "protocol_url": "https://example.org/protocols/cycle-life-1c"
   },
-  "conditions": {
-    "ambient_temperature": {
-      "value": 25.0,
-      "unit": "degC"
-    }
-  },
-  "setpoints": {
-    "charge_rate": {
-      "value": 1.0,
-      "unit": "C"
-    },
-    "discharge_rate": {
-      "value": 1.0,
-      "unit": "C"
-    }
-  },
-  "termination_criteria": {
-    "capacity_retention": {
-      "value": 80.0,
-      "unit": "%"
-    }
-  },
-  "measurement_outputs": [
+  "method": [
     {
-      "name": "Voltage",
-      "unit_text": "V"
-    },
-    {
-      "name": "Capacity",
-      "unit_text": "Ah"
+      "mode": "group",
+      "count": 500,
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": { "c_rate": { "value": 1.0, "unit": "A/Ah" } },
+          "termination": [ { "quantity": "voltage", "value": 4.2, "unit": "V", "direction": "above" } ],
+          "description": "Charge at 1C until 4.2 V"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": { "c_rate": { "value": 1.0, "unit": "A/Ah" } },
+          "termination": [ { "quantity": "voltage", "value": 2.5, "unit": "V", "direction": "below" } ],
+          "description": "Discharge at 1C until 2.5 V"
+        }
+      ]
     }
   ],
+  "record": { "time_s": 30 },
+  "conditions": {
+    "temperature": { "value": 25.0, "unit": "degC" }
+  },
+  "facets": {
+    "modes": ["group"],
+    "directions": ["charge", "discharge"],
+    "control_modes": ["current"],
+    "has_cv_hold": false,
+    "has_rest": false,
+    "has_eis": false,
+    "c_rates": [1.0],
+    "voltage_window_V": [2.5, 4.2],
+    "temperatures": [25.0]
+  },
   "provenance": {
     "source_type": "manual",
     "source_file": "cycle-life-1c.protocol.json",
