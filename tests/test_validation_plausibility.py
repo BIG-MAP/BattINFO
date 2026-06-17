@@ -64,7 +64,7 @@ def test_plausibility_accepts_valid_record() -> None:
         ("energy_density",              3000.0, "Wh/L"), # > physical limit
         # Mass magnitude errors
         ("mass",                        0.01,   "g"),    # <0.05 g (below coin cell)
-        ("mass",                        20000.0,"g"),    # 20 kg single cell
+        ("mass",                        100000.0,"g"),   # 100 kg single cell (above large-industrial-cell ceiling)
         # Dimension errors
         ("diameter",                    600.0,  "mm"),   # 60 cm diameter
         ("height",                      2500.0, "mm"),   # 2.5 m height

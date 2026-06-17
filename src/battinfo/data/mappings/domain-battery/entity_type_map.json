@@ -85,6 +85,11 @@
         "battery_types": [
           "LithiumManganeseDioxideBattery"
         ]
+      },
+      "li-metal": {
+        "battery_types": [
+          "LithiumMetalBattery"
+        ]
       }
     },
     "iec_code": {
@@ -187,6 +192,20 @@
         "battery_types": [
           "LithiumIonManganeseOxideBattery"
         ]
+      },
+      "nmc811": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonNickelManganeseCobaltOxideBattery"
+        ]
+      },
+      "nmca": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonNickelManganeseCobaltOxideBattery"
+        ]
       }
     },
     "negative_electrode_basis": {
@@ -219,6 +238,13 @@
         "node_type": "LithiumTitanateElectrode",
         "battery_types": [
           "LithiumIonTitanateBattery"
+        ]
+      },
+      "li-metal": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "LithiumElectrode",
+        "battery_types": [
+          "LithiumMetalBattery"
         ]
       }
     }

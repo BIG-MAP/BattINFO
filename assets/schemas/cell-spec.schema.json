@@ -300,6 +300,11 @@
         "type": "string"
       }
     },
+    "editorial": {
+      "type": "object",
+      "description": "Internal editorial metadata — review status and curation notes. Ignored by the publish pipeline; not forwarded to the registry semantic payload.",
+      "additionalProperties": true
+    },
     "construction": {
       "$ref": "modules/components/specification.schema.json#/properties/construction"
     },
@@ -474,6 +479,10 @@
         "type": {
           "const": "Organization"
         },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this manufacturer to its organization record."
+        },
         "name": {
           "type": "string",
           "minLength": 1
@@ -493,6 +502,10 @@
       "properties": {
         "type": {
           "const": "Brand"
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this brand to its organization record."
         },
         "name": {
           "type": "string",
@@ -517,6 +530,10 @@
     "SpecIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     }
   }
 }

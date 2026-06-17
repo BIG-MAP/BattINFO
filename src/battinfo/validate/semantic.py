@@ -97,11 +97,11 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     "charging_cutoff_voltage":      {"v": (1.0, 6.0)},
     "upper_voltage_limit":          {"v": (1.0, 6.0)},
     # Capacity — catches Ah/mAh confusion and orders-of-magnitude typos
-    "nominal_capacity":             {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
-    "minimum_capacity":             {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
-    "min_capacity":                 {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
-    "rated_capacity":               {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
-    "typical_capacity":             {"ah": (1e-4, 500.0), "mah": (0.1, 500_000.0)},
+    "nominal_capacity":             {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "minimum_capacity":             {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "min_capacity":                 {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "rated_capacity":               {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "typical_capacity":             {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
     # Energy
     "nominal_energy":               {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
     "typical_energy":               {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
@@ -111,7 +111,7 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     "specific_energy":              {"wh/kg": (1.0, 1000.0), "mah/g": (1.0, 500.0)},
     "energy_density":               {"wh/l": (1.0, 2500.0)},
     # Physical dimensions — single-cell bounds
-    "mass":                         {"g": (0.05, 15_000.0), "kg": (5e-5, 15.0)},
+    "mass":                         {"g": (0.05, 70_000.0), "kg": (5e-5, 70.0)},
     "diameter":                     {"mm": (0.5, 500.0)},
     "height":                       {"mm": (0.3, 2000.0)},
     "width":                        {"mm": (0.3, 2000.0)},

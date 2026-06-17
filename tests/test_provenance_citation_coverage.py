@@ -22,6 +22,11 @@ def test_records_with_source_url_have_citation() -> None:
 
             if not isinstance(doc, dict):
                 continue
+            # Organization records use a minimal provenance schema that does not
+            # permit a citation field (organization.schema.json forbids it), so the
+            # source_url -> citation rule does not apply to them.
+            if "organization" in doc:
+                continue
             provenance = doc.get("provenance")
             if not isinstance(provenance, dict):
                 continue

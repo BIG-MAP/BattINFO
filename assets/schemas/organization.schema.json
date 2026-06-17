@@ -68,7 +68,7 @@
           "type": "string",
           "format": "uri"
         },
-        "same_as": {
+        "sameAs": {
           "anyOf": [
             { "type": "string", "format": "uri" },
             {
@@ -137,7 +137,7 @@
       "properties": {
         "source_type": {
           "type": "string",
-          "enum": ["inferred", "manual", "external", "other"]
+          "enum": ["inferred", "manual", "external", "knowledge_base", "other"]
         },
         "source_url": {
           "anyOf": [
