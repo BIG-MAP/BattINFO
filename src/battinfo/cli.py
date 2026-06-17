@@ -2220,7 +2220,7 @@ def validate_staging_cell_spec(
     _emit_table([payload], ["ok", "record_id", "record_id_basis", "requires_record_id", "source_path"])
 
 
-@editorial_app.command("validate-staging-cell-spec")
+@editorial_app.command("validate-staging-cell-spec-batch")
 def validate_staging_cell_specs(
     input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
