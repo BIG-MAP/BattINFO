@@ -50,7 +50,9 @@ dev = [
   "nbformat>=5.9",
   "pyshacl>=0.25",
   "ruff>=0.6",
-  "pytest>=8.0"
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "mypy>=1.11"
 ]
 docs = [
   "sphinx>=7.3",
@@ -92,3 +94,47 @@ ignore = [
 # Test files use sys.path.insert before imports — this is intentional so tests
 # can be run without an editable install.
 "tests/*.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/battinfo"]
+ignore_missing_imports = true   # third-party libs (rdflib, pyld, rocrate, …) ship no stubs
+warn_redundant_casts = true
+warn_unused_ignores = false
+# Incremental adoption: the package ships py.typed, so types are gated. 31/50 modules
+# are already clean and ARE checked — new type errors in them (or any new module) fail CI.
+# The modules below carry pre-existing type debt and are excluded pending burn-down.
+# Burn-down priority: battinfo.ws (146 of the 212 errors, almost all from the AuthoringWorkspace
+# `list` method shadowing builtin `list` in annotations) is the highest-value single fix.
+
+[[tool.mypy.overrides]]
+module = [
+  "battinfo.ws",
+  "battinfo.publication",
+  "battinfo.authoring",
+  "battinfo.interop.protocols",
+  "battinfo.api",
+  "battinfo._workspace",
+  "battinfo.transform.json_to_jsonld",
+  "battinfo.interop.bpx",
+  "battinfo.cli",
+  "battinfo.bundle_adapter",
+  "battinfo.bundle",
+  "battinfo.local_workspace",
+  "battinfo.interop.converter",
+  "battinfo.contribution",
+  "battinfo.zenodo",
+  "battinfo.validate.schema",
+  "battinfo.validate.references",
+  "battinfo.validate.publication",
+  "battinfo.ingest",
+]
+ignore_errors = true
+
+[tool.coverage.run]
+source = ["battinfo"]
+
+[tool.coverage.report]
+# Baseline at adoption was 72%; floor set just below to gate regressions. Ratchet up over time.
+fail_under = 70
+show_missing = true

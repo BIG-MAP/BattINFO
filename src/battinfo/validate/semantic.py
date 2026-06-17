@@ -141,7 +141,9 @@ SIZE_CODE_PATTERN = re.compile(r"^[RP][A-Za-z0-9]+(?:[/-][A-Za-z0-9]+)*$")
 
 
 def _load_mapping_json(*parts: str) -> dict[str, Any]:
-    path = resources.files("battinfo").joinpath("data", "mappings", "domain-battery", *parts)
+    path = resources.files("battinfo")
+    for part in ("data", "mappings", "domain-battery", *parts):
+        path = path.joinpath(part)  # single-arg joinpath: multi-arg is Python 3.11+
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 

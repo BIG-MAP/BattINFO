@@ -3,6 +3,14 @@ __pycache__
 *.py[cod]
 .venv
 .pytest_cache
+.mypy_cache
+
+# Coverage
+.coverage
+.coverage.*
+.coverage_baseline.json
+coverage.xml
+htmlcov
 .jupyter-runtime-test
 .ci
 *.egg-info

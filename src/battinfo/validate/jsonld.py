@@ -158,7 +158,9 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
 
 
 def _load_mapping_json(*parts: str) -> dict[str, Any]:
-    path = resources.files("battinfo").joinpath("data", "mappings", "domain-battery", *parts)
+    path = resources.files("battinfo")
+    for part in ("data", "mappings", "domain-battery", *parts):
+        path = path.joinpath(part)  # single-arg joinpath: multi-arg is Python 3.11+
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 
@@ -311,7 +313,7 @@ def _cached_pyld_document(url: str) -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def _local_emmo_context() -> dict[str, Any]:
-    path = resources.files("battinfo").joinpath("data", "context", "domain-battery.context.json")
+    path = resources.files("battinfo").joinpath("data").joinpath("context").joinpath("domain-battery.context.json")
     with path.open("r", encoding="utf-8") as fh:
         return json.load(fh)
 
