@@ -4569,6 +4569,17 @@ class AuthoringWorkspace:
             ]
         if community:
             meta["communities"] = [{"identifier": community}]
+        # Funding project (grant) → a related identifier pointing at the project's
+        # resolvable page (CORDIS for EU grants). Safe: Zenodo always accepts a URL
+        # related identifier, so it never risks failing the deposit (unlike the
+        # native `grants` field, which 400s on an id Zenodo doesn't recognise).
+        ref = self._get_project()
+        if ref is not None and ref.id:
+            meta.setdefault("related_identifiers", []).append({
+                "identifier": ref.id,
+                "relation": "isPartOf",
+                "scheme": "url",
+            })
         return meta
 
     def _zenodo_state_path(self) -> Path:
@@ -5625,12 +5636,29 @@ def _simple_submission_payload(
     }
 
 
+def _lift_funding_to_provenance(payload: dict) -> None:
+    """Surface the record's funding grant at the submission provenance level.
+
+    Funding is already stamped on the embedded record (``ws.save()``); lifting it
+    to ``provenance.project`` gives the registry a normalised, top-level field to
+    filter on (\"everything from grant X\") without parsing each record kind.
+    """
+    records = ((payload.get("resource") or {}).get("semantic_payload") or {}).get("battinfo_records") or {}
+    if not isinstance(records, dict):
+        return
+    for rec in records.values():
+        if isinstance(rec, dict) and isinstance(rec.get("funding"), dict):
+            payload.setdefault("provenance", {})["project"] = rec["funding"]
+            return
+
+
 def _do_submit(payload: dict, url: str, key: str, title: str) -> list[dict]:
     """Submit one record, retrying once with a bumped source_version on 409."""
     import copy
 
     from battinfo.api import submit_publication_package
 
+    _lift_funding_to_provenance(payload)
     for attempt in range(2):
         try:
             result = submit_publication_package(payload, registry_base_url=url, api_key=key)

@@ -364,3 +364,54 @@ def test_zenodo_graph_carries_funding_on_catalog_and_members(
                   and "schema:DataCatalog" not in n["@type"])
     assert catalog["schema:funding"]["schema:identifier"] == "101103997"
     assert member["schema:funding"]["schema:identifier"] == "101103997"
+
+
+# ── Phase 5: registry-submit provenance + Zenodo grant linking ────────────────
+
+def test_lift_funding_to_submission_provenance() -> None:
+    grant = {"type": "Grant", "identifier": "101103997", "name": "DigiBatt"}
+    payload = {
+        "provenance": {"source_system": "battinfo-authoring"},
+        "resource": {"semantic_payload": {"battinfo_records": {"cell_spec": {"id": "x", "funding": grant}}}},
+    }
+    wsmod._lift_funding_to_provenance(payload)
+    assert payload["provenance"]["project"] == grant
+
+
+def test_lift_funding_noop_without_funding() -> None:
+    payload = {
+        "provenance": {"source_system": "battinfo-authoring"},
+        "resource": {"semantic_payload": {"battinfo_records": {"cell_spec": {"id": "x"}}}},
+    }
+    wsmod._lift_funding_to_provenance(payload)
+    assert "project" not in payload["provenance"]
+
+
+def test_zenodo_metadata_adds_cordis_related_identifier(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(wsmod, "_resolve_project_openaire", lambda ident, **k: dict(_RESOLVED))
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _populate(ws, tmp_path)
+    ws.project("101103997")
+    ws.save(validation_policy="strict")
+
+    meta = ws._build_zenodo_metadata(
+        title="T", description="D", creators=[{"name": "Ada"}],
+        contributors=None, license="CC-BY-4.0", community=None, extra_keywords=None,
+    )
+    assert {"identifier": "https://cordis.europa.eu/project/id/101103997",
+            "relation": "isPartOf", "scheme": "url"} in meta["related_identifiers"]
+
+
+def test_zenodo_metadata_no_related_identifier_without_project(
+    tmp_path: Path
+) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _populate(ws, tmp_path)
+    ws.save(validation_policy="strict")
+    meta = ws._build_zenodo_metadata(
+        title="T", description="D", creators=[{"name": "Ada"}],
+        contributors=None, license="CC-BY-4.0", community=None, extra_keywords=None,
+    )
+    assert "related_identifiers" not in meta
