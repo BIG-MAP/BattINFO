@@ -16,6 +16,8 @@ from urllib.request import urlopen
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
+from battinfo._jsonio import read_record_json as _load_json
+from battinfo._jsonio import write_json as _write_json
 from battinfo.bundle import BatteryTestType, CellProductType, CellSpecification
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
@@ -572,15 +574,6 @@ def _to_unix_time(value: object) -> int | None:
 
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
-
-
-def _load_json(path: Path) -> dict[str, Any]:
-    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
-
-
-def _write_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _normalized_dashed_uid(value: str | None = None) -> str:

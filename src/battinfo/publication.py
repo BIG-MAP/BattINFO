@@ -14,6 +14,8 @@ from urllib.parse import unquote, urlparse
 
 from rdflib import Dataset as RdfDataset
 
+from battinfo._jsonio import read_record_json as _load_json
+from battinfo._jsonio import write_json as _write_json
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -25,7 +27,6 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -222,15 +223,6 @@ DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
-
-
-def _load_json(path: Path) -> dict[str, Any]:
-    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
-
-
-def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _triple_count(payload: Mapping[str, Any]) -> int:

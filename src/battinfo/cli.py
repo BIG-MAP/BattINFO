@@ -6,6 +6,7 @@ from typing import Any
 
 import typer
 
+from battinfo._jsonio import write_json as _write_json_file
 from battinfo.api import (
     CellInstanceInput,
     CellSpecificationInput,
@@ -183,11 +184,6 @@ library_app.add_typer(library_template_app, name="template")
 
 def _emit_json(data: Any) -> None:
     typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
-
-
-def _write_json_file(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:

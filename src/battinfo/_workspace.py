@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import mimetypes
 import shutil
 from datetime import datetime, timezone
@@ -12,6 +11,7 @@ from urllib.parse import unquote, urlparse
 if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
 
+from battinfo._jsonio import read_record_json as _load_json
 from battinfo.api import (
     build_cell_spec_library_rdf,
     query_cell_instances,
@@ -45,7 +45,6 @@ from battinfo.bundle import (
     TestConformance,
     TestSpec,
 )
-from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import iri_namespace_map
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
@@ -145,10 +144,6 @@ def _with_default(value: str | None, fallback: str) -> str:
 
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
-
-
-def _load_json(path: Path) -> dict[str, Any]:
-    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _path_from_file_uri(uri: str) -> Path | None:

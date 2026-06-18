@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import json
 import re
 from enum import StrEnum
 from pathlib import Path
@@ -9,6 +8,8 @@ from typing import Any, ClassVar, Mapping, Self
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from battinfo._jsonio import read_record_json as _read_json
+from battinfo._jsonio import write_json as _write_json
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
@@ -58,15 +59,6 @@ class CellProductType(StrEnum):
 
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
-
-
-def _read_json(path: Path) -> dict[str, Any]:
-    return record_to_snake_aliases(json.loads(path.read_text(encoding="utf-8")))
-
-
-def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _short_id(entity_id: str) -> str:

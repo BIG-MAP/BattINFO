@@ -9,6 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from battinfo._jsonio import write_json as _write_json
 from battinfo._workspace import Workspace
 from battinfo.api import submit_publication_package
 from battinfo.validate.schema import build_validator, schema_for_rel_path
@@ -55,11 +56,6 @@ def _mtime_to_unix(path: Path) -> int:
 
 def _date_to_unix(date_text: str) -> int:
     return int(datetime.strptime(date_text, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp())
-
-
-def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _drop_none(value: Any) -> Any:

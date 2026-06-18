@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import mimetypes
 import shutil
 import tempfile
@@ -11,6 +10,8 @@ from urllib.parse import unquote, urlparse
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from battinfo._jsonio import read_json as _read_json
+from battinfo._jsonio import write_json as _write_json
 from battinfo._workspace import Workspace
 from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
 from battinfo.local_workspace import (
@@ -31,15 +32,6 @@ WORKSPACE_STATE_FILENAME = "battinfo-authoring-workspace.json"
 
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
-
-
-def _read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _now_iso() -> str:
