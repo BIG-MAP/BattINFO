@@ -1145,7 +1145,13 @@ def test_save_batch_handles_circular_linked_examples_as_a_set(tmp_path: Path) ->
         (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
+    # Only the tests linked to this A123 cell instance (other cells' tests, e.g. the
+    # NMC811 fleet showcase, link to different instances and aren't part of this batch).
+    a123_cell_id = "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
     for path in sorted((ROOT / "examples" / "test").glob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if doc.get("test", {}).get("cell_id") != a123_cell_id:
+            continue
         (tests_dir / path.name).write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
 
     summary = save_batch(

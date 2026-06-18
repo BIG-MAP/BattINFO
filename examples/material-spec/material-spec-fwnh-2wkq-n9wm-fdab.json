@@ -1,0 +1,40 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/fwnh-2wkq-n9wm-fdab",
+    "short_id": "fwnh2w",
+    "name": "MnO2",
+    "material_class": "active_material",
+    "electrode_polarity": "positive",
+    "formula": "MnO2",
+    "chemistry_family": "manganese-oxide",
+    "property": {
+      "specific_capacity": {
+        "value": 290,
+        "unit": "mAh/g",
+        "co_type": "Measured",
+        "conditions": {
+          "discharge_c_rate": {
+            "value": 0.1,
+            "unit": "C"
+          },
+          "temperature": {
+            "value": 25,
+            "unit": "degC"
+          }
+        }
+      },
+      "true_density": {
+        "value": 5.0,
+        "unit": "g/cm3"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781772766
+  },
+  "notes": [
+    "Manganese dioxide cathode active material for alkaline Zn-MnO2 cells (synthetic reference)."
+  ]
+}

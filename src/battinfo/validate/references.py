@@ -325,6 +325,34 @@ def validate_references_report(
                 allow_missing=allow_missing,
             )
 
+    if isinstance(doc.get("cell_spec"), Mapping):
+        for ref_field, expected_type in (
+            ("positive_electrode_spec_id", "electrode-spec"),
+            ("negative_electrode_spec_id", "electrode-spec"),
+            ("electrolyte_spec_id", "electrolyte-spec"),
+            ("separator_spec_id", "separator-spec"),
+            ("housing_spec_id", "housing-spec"),
+        ):
+            ref_id = doc.get(ref_field)
+            if isinstance(ref_id, str):
+                _check_reference(
+                    issues=issues,
+                    ref_id=ref_id,
+                    expected_type=expected_type,
+                    path=ref_field,
+                    source_root=root,
+                    resource_type=resource_type,
+                    missing_message=(
+                        f"Referenced {expected_type} not found in source_root. Register it first "
+                        f"or disable resolve_references. Missing: {ref_id}"
+                    ),
+                    mismatch_message=(
+                        f"Referenced {ref_field} must resolve to a {expected_type} record in source_root. "
+                        f"Found a different record type for: {ref_id}"
+                    ),
+                    allow_missing=allow_missing,
+                )
+
     if isinstance(doc.get("test"), Mapping):
         protocol_id = doc["test"].get("protocol_id")
         if isinstance(protocol_id, str):

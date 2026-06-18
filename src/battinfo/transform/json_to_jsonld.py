@@ -1503,6 +1503,34 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     for relation, value in housing_relations.items():
         battery[relation] = value
 
+    # Component-spec references: attach the @id of the referenced spec to each relation.
+    # If an inline holder / basis already produced a typed node, the @id is merged onto it;
+    # otherwise a bare {@id} reference node is emitted.
+    for ref_field, relation in (
+        ("positive_electrode_spec_id", "hasPositiveElectrode"),
+        ("negative_electrode_spec_id", "hasNegativeElectrode"),
+        ("electrolyte_spec_id", "hasElectrolyte"),
+        ("separator_spec_id", "hasSeparator"),
+    ):
+        ref_id = specification.get(ref_field)
+        if not isinstance(ref_id, str):
+            continue
+        existing = battery.get(relation)
+        if isinstance(existing, dict) and "@id" not in existing:
+            existing["@id"] = ref_id
+        elif existing is None:
+            battery[relation] = {"@id": ref_id}
+    housing_ref = specification.get("housing_spec_id")
+    if isinstance(housing_ref, str):
+        existing = battery.get("hasConstituent")
+        ref_node = {"@id": housing_ref}
+        if existing is None:
+            battery["hasConstituent"] = ref_node
+        elif isinstance(existing, list):
+            battery["hasConstituent"] = [*existing, ref_node]
+        else:
+            battery["hasConstituent"] = [existing, ref_node]
+
     # Electrode assembly (stack / jelly-roll geometry) → hasConstituent.
     assembly_node = _descriptor_electrode_assembly_to_jsonld(specification.get("construction"))
     if assembly_node is not None:
@@ -1819,7 +1847,9 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
         if "size_code" in product:
             specification["size_code"] = product["size_code"]
         for field in ("construction", "positive_electrode", "negative_electrode",
-                      "electrolyte", "separator", "housing"):
+                      "electrolyte", "separator", "housing",
+                      "positive_electrode_spec_id", "negative_electrode_spec_id",
+                      "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
             if field in data:
                 specification[field] = data[field]
         if "properties" in data:

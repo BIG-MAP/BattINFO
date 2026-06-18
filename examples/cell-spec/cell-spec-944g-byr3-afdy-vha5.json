@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/944g-byr3-afdy-vha5",
+    "short_id": "944gby",
+    "identifier": "cell-spec:944g-byr3-afdy-vha5",
+    "name": "EMPA COIN-LMFP-D",
+    "model": "COIN-LMFP-D",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "EMPA"
+    },
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LMFP",
+    "negative_electrode_basis": "graphite"
+  },
+  "properties": {
+    "nominal_capacity": {
+      "value": 0.0032,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.8,
+      "unit": "V"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "manual.json",
+    "source_url": null,
+    "retrieved_at": 1781772767
+  },
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/kewv-75y9-kqz5-8ty6",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+  "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+  "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+  "housing_spec_id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+  "notes": [
+    "Discovery LMFP-Graphite coin cell."
+  ]
+}

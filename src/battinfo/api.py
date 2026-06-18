@@ -145,6 +145,11 @@ class CellSpecificationInput(BaseModel):
     product_type: CellProductType | None = None
     positive_electrode_basis: str | None = None
     negative_electrode_basis: str | None = None
+    positive_electrode_spec_id: str | None = None
+    negative_electrode_spec_id: str | None = None
+    electrolyte_spec_id: str | None = None
+    separator_spec_id: str | None = None
+    housing_spec_id: str | None = None
     size_code: str | None = None
     iec_code: str | None = None
     country_of_origin: str | None = None
@@ -2219,6 +2224,20 @@ def _record_from_cell_spec(draft: CellSpecificationInput) -> dict[str, Any]:
         record["cell_spec"]["datasheet_revision"] = draft.datasheet_revision
     if draft.file_hash is not None:
         record["provenance"]["file_hash"] = draft.file_hash
+    # Component-spec references (top-level siblings of the inline holders).
+    _COMPONENT_SPEC_REF_PATTERNS = {
+        "positive_electrode_spec_id": "electrode-spec",
+        "negative_electrode_spec_id": "electrode-spec",
+        "electrolyte_spec_id": "electrolyte-spec",
+        "separator_spec_id": "separator-spec",
+        "housing_spec_id": "housing-spec",
+    }
+    for field_name, namespace in _COMPONENT_SPEC_REF_PATTERNS.items():
+        value = getattr(draft, field_name)
+        if value is not None:
+            if not _component_iri_re(namespace).fullmatch(value):
+                raise ValueError(f"{field_name} must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
+            record[field_name] = value
     if draft.notes:
         record["notes"] = list(draft.notes)
     return record_to_snake_aliases(record)

@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/venv-ff8p-nbk3-bxcn",
+    "short_id": "venvff",
+    "identifier": "cell-spec:venv-ff8p-nbk3-bxcn",
+    "name": "EMPA COIN-LNMO-D",
+    "model": "COIN-LNMO-D",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "EMPA"
+    },
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LNMO",
+    "negative_electrode_basis": "graphite"
+  },
+  "properties": {
+    "nominal_capacity": {
+      "value": 0.0028,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 4.7,
+      "unit": "V"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "manual.json",
+    "source_url": null,
+    "retrieved_at": 1781772767
+  },
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/ck8b-r1dz-h8my-3k05",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+  "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+  "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+  "housing_spec_id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+  "notes": [
+    "High-voltage LNMO-Graphite coin cell."
+  ]
+}

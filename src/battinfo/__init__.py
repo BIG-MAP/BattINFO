@@ -124,6 +124,7 @@ from battinfo.bundle_adapter import (
     specset_to_specs,
 )
 from battinfo.bundle_generated import SpecSet, SpecValue
+from battinfo.components import component_spec_from_holder, extract_component_specs
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.interop import (
@@ -304,6 +305,8 @@ __all__ = [
     "publish_ingest_workspace",
     "write_ingest_manifest",
     "extract_material_specs",
+    "extract_component_specs",
+    "component_spec_from_holder",
     "link_component_to_spec",
     "material_spec_from_component",
     "query",

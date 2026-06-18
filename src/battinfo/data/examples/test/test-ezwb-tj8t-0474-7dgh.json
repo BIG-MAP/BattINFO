@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/ezwb-tj8t-0474-7dgh",
+    "short_id": "ezwbtj",
+    "identifier": "test:ezwb-tj8t-0474-7dgh",
+    "cell_id": "https://w3id.org/battinfo/cell/ag7d-b4fp-r0sv-226m",
+    "name": "NMC811 coin baseline cycling",
+    "kind": "cycling",
+    "protocol_id": "https://w3id.org/battinfo/spec/8r2m-4v6k-9p3t-7n5x",
+    "status": "completed",
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "retrieved_at": 1781772876
+  },
+  "notes": [
+    "1C cycle-life test of the NMC811 Discovery coin cell."
+  ]
+}
