@@ -1,0 +1,40 @@
+# Pre-commit hooks for BattINFO. Mirrors the lint/format that CI enforces
+# (ruff on src/tests). Type-checking (mypy) and the test/alpha gates stay in CI
+# only — they need the full env and are too slow for a commit hook.
+#
+#   pip install pre-commit  (or: uv tool install pre-commit)
+#   pre-commit install
+#   pre-commit run --all-files
+#   pre-commit autoupdate          # bump the pinned revs
+#
+# Keep the ruff rev roughly aligned with the ruff used in CI (pyproject: ruff>=0.6).
+
+ci:
+  autofix_prs: true
+  autoupdate_schedule: monthly
+
+exclude: '\.ipynb$'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff               # lint (uses [tool.ruff] in pyproject.toml)
+        args: ["--fix"]
+        files: ^(src|tests)/
+      - id: ruff-format
+        files: ^(src|tests)/

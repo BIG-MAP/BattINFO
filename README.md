@@ -6,17 +6,26 @@ Create, validate, and publish battery metadata as machine-readable Linked Data �
 typed against [EMMO domain-battery](https://github.com/emmo-repo/domain-battery)
 and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 
-<!-- Badges -->
+<!-- Badges · status -->
 [![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/refactor_checks.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/refactor_checks.yml)
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FBIG-MAP%2FBattINFO%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](https://github.com/BIG-MAP/BattINFO/blob/main/pyproject.toml)
 [![Version](https://img.shields.io/badge/version-0.1.0--alpha-orange)](https://github.com/BIG-MAP/BattINFO/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 <br/>
+<!-- Badges · activity & quality -->
+[![Contributors](https://img.shields.io/github/contributors/BIG-MAP/BattINFO?color=informational)](https://github.com/BIG-MAP/BattINFO/graphs/contributors)
+[![Last commit](https://img.shields.io/github/last-commit/BIG-MAP/BattINFO/main)](https://github.com/BIG-MAP/BattINFO/commits/main)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-261230.svg)](https://github.com/astral-sh/ruff)
 [![Typed](https://img.shields.io/badge/typing-mypy-2A6DB2.svg)](http://mypy-lang.org/)
+<br/>
+<!-- Badges · domain alignment -->
 [![Ontology: EMMO domain-battery](https://img.shields.io/badge/ontology-EMMO%20domain--battery-6E4C9F.svg)](https://github.com/emmo-repo/domain-battery)
 [![Battery Pass](https://img.shields.io/badge/Battery%20Pass-v1.2.0-1B998B.svg)](https://thebatterypass.eu/)
-<!-- DOI: replace ZENODO_RECORD_ID with the concept DOI minted on the first Zenodo release -->
+<br/>
+<!-- Badges · learn & cite -->
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BIG-MAP/BattINFO/blob/main/docs/guides/01-concepts.ipynb)
+[![nbviewer](https://img.shields.io/badge/render-nbviewer-F37726?logo=jupyter&logoColor=white)](https://nbviewer.org/github/BIG-MAP/BattINFO/tree/main/docs/guides/)
+<!-- DOI: replace the placeholder with the concept DOI minted on the first Zenodo release -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 [**Quickstart**](QUICKSTART.md) ·
