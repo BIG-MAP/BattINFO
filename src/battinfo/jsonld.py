@@ -412,6 +412,10 @@ def _material_to_jsonld(record: dict) -> dict:
     return {"@context": doc.get("@context"), **node}
 
 
+# Same delegation for component spec/instance records (electrode, separator, …).
+_component_to_jsonld = _material_to_jsonld
+
+
 # ── Public dispatcher ─────────────────────────────────────────────────────────
 
 _TRANSFORMERS = {
@@ -424,6 +428,9 @@ _TRANSFORMERS = {
     "material-spec":  _material_to_jsonld,
     "material_spec":  _material_to_jsonld,
     "material":       _material_to_jsonld,
+    "electrode-spec": _component_to_jsonld,
+    "electrode_spec": _component_to_jsonld,
+    "electrode":      _component_to_jsonld,
 }
 
 

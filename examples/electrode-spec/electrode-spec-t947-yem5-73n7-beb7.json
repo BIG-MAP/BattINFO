@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.1.0",
+  "electrode_spec": {
+    "id": "https://w3id.org/battinfo/electrode-spec/t947-yem5-73n7-beb7",
+    "short_id": "t947ye",
+    "name": "NMC811 cathode",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "NMC811",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/npa4-0dnw-evyh-hhdm",
+            "property": {
+              "mass_fraction": {
+                "value": 0.96,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "loading": {
+          "value": 21,
+          "unit": "mg/cm2"
+        },
+        "thickness": {
+          "value": 64,
+          "unit": "um"
+        }
+      }
+    },
+    "current_collector": {
+      "name": "Aluminium foil",
+      "property": {
+        "thickness": {
+          "value": 15,
+          "unit": "um"
+        }
+      }
+    },
+    "polarity": "positive",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781742522
+  },
+  "notes": [
+    "NMC811 cathode (96/2/2 NMC811/PVDF/carbon black on Al foil). Discovery-Benchmark NMC811-Graphite cells."
+  ]
+}

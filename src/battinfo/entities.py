@@ -73,7 +73,22 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
         spec_ref_field="material_spec_id",
         spec_entity_type="material-spec",
     ),
+    EntityKind("electrode-spec", "electrode_spec", "electrode-spec.schema.json", "electrode-spec", "electrode-spec"),
+    EntityKind(
+        "electrode",
+        "electrode",
+        "electrode.schema.json",
+        "electrode",
+        "electrode",
+        spec_ref_field="electrode_spec_id",
+        spec_entity_type="electrode-spec",
+    ),
 )
+
+
+# Entity families that follow the generic component spec/instance pattern (reuse an
+# existing embedded holder schema). Used by the generic component API + JSON-LD dispatch.
+COMPONENT_FAMILIES: tuple[str, ...] = ("electrode",)
 
 ENTITY_BY_TYPE: dict[str, EntityKind] = {kind.entity_type: kind for kind in ENTITY_KINDS}
 ENTITY_BY_RECORD_KEY: dict[str, EntityKind] = {kind.record_key: kind for kind in ENTITY_KINDS}

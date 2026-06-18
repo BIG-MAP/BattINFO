@@ -12,6 +12,8 @@ from battinfo.api import (
     build_curated_cell_spec_submission,
     build_index,
     create_cell_instance,
+    create_component_instance,
+    create_component_spec,
     create_material,
     create_material_spec,
     index_stats,
@@ -23,6 +25,8 @@ from battinfo.api import (
     query,
     query_cell_instances,
     query_cell_specs,
+    query_component_instances,
+    query_component_specs,
     query_datasets,
     query_library_cell_specs,
     query_material_specs,
@@ -33,6 +37,8 @@ from battinfo.api import (
     save_batch,
     save_cell_instance,
     save_cell_spec,
+    save_component_instance,
+    save_component_spec,
     save_dataset,
     save_library_cell_spec,
     save_material,
@@ -44,6 +50,8 @@ from battinfo.api import (
     template_cell_instance,
     template_cell_spec,
     template_cell_spec_draft,
+    template_component_instance,
+    template_component_spec,
     template_dataset,
     template_library_cell_spec,
     template_material,
@@ -314,6 +322,14 @@ __all__ = [
     "save_library_cell_spec",
     "save_material_spec",
     "save_material",
+    "save_component_spec",
+    "save_component_instance",
+    "create_component_spec",
+    "create_component_instance",
+    "query_component_specs",
+    "query_component_instances",
+    "template_component_spec",
+    "template_component_instance",
     "save_test_spec",
     "save_test",
     "template_material_spec",
@@ -379,5 +395,14 @@ __all__ = [
     "specs_to_specset",
     "specset_to_specs",
 ]
+
+# Re-export the per-family component wrappers generated in api.py
+# (create_electrode_spec, query_electrode_specs, …).
+from battinfo import api as _api  # noqa: E402
+
+for _name in _api._COMPONENT_WRAPPER_NAMES:
+    globals()[_name] = getattr(_api, _name)
+__all__ += list(_api._COMPONENT_WRAPPER_NAMES)
+del _api, _name
 
 __version__ = "0.1.0"

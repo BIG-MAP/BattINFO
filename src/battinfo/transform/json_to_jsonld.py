@@ -8,6 +8,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from battinfo.entities import COMPONENT_FAMILIES
 from battinfo.validate.jsonld import validate_jsonld
 
 BATTERY_TYPE_MAP = {
@@ -1728,9 +1729,79 @@ def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _electrode_holder_node(body: dict[str, Any]) -> dict[str, Any]:
+    node: dict[str, Any] = {"@type": "Electrode"}
+    coating = _descriptor_electrode_coating_to_jsonld(body.get("coating"))
+    if coating:
+        node["hasCoating"] = coating
+    cc = _descriptor_current_collector_to_jsonld(body.get("current_collector"))
+    if cc:
+        node["hasCurrentCollector"] = cc
+    prop_nodes = _descriptor_property_nodes(body.get("property"))
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+    return node
+
+
+def _component_holder_node(family: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Build the domain-battery node for a component holder body, reusing the cell emitters."""
+    if family == "electrode":
+        return _electrode_holder_node(body)
+    if family == "electrolyte":
+        return _descriptor_electrolyte_to_jsonld(body) or {"@type": "ElectrolyteSolution"}
+    if family == "separator":
+        return _descriptor_separator_to_jsonld(body) or {"@type": "Separator"}
+    if family == "current-collector":
+        return _descriptor_current_collector_to_jsonld(body) or {"@type": "CurrentCollector"}
+    if family == "housing":
+        node: dict[str, Any] = {"@type": "schema:Product"}
+        node.update(_descriptor_housing_to_jsonld(body, body.get("cell_format")))
+        return node
+    return {"@type": "schema:Thing"}
+
+
+def _component_family_of(data: dict[str, Any]) -> tuple[str, dict[str, Any], bool] | None:
+    for family in COMPONENT_FAMILIES:
+        spec = data.get(f"{family}_spec")
+        if isinstance(spec, dict):
+            return family, spec, True
+        inst = data.get(family)
+        if isinstance(inst, dict):
+            return family, inst, False
+    return None
+
+
+def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
+    matched = _component_family_of(data)
+    assert matched is not None
+    family, body, is_spec = matched
+    node = _component_holder_node(family, body)
+    if isinstance(body.get("id"), str):
+        node["@id"] = body["id"]
+    if isinstance(body.get("name"), str) and body["name"] and "schema:name" not in node:
+        node["schema:name"] = body["name"]
+    if not is_spec and isinstance(body.get(f"{family}_spec_id"), str):
+        node["schema:isVariantOf"] = {"@id": body[f"{family}_spec_id"]}
+    citation = _citation_to_jsonld(data.get("provenance"))
+    if citation is not None:
+        node["schema:citation"] = citation
+    return {
+        "@context": _base_context(
+            include_battinfo=True,
+            include_has_battery=False,
+            include_has_measurement=False,
+            include_has_property=True,
+            include_bibo=_citation_doi_value(data.get("provenance")) is not None,
+        ),
+        "@graph": [node],
+    }
+
+
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("material_spec"), dict) or isinstance(data.get("material"), dict):
         return _to_domain_battery_jsonld_material(data)
+    if _component_family_of(data) is not None:
+        return _to_domain_battery_jsonld_component(data)
     if isinstance(data.get("specification"), dict) and data.get("schema_version") is not None:
         return _to_domain_battery_jsonld_descriptor(data)
     if isinstance(data.get("cell_spec"), dict) and data.get("schema_version") is not None:

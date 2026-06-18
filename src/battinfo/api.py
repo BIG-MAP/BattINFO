@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import difflib
+import functools
 import html
 import json
 import re
@@ -18,6 +19,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 from battinfo.bundle import BatteryTestType, CellProductType, CellSpecification
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
+    COMPONENT_FAMILIES,
     ENTITY_KINDS,
     entity_id_from_doc,
     entity_types_for_namespace,
@@ -4549,6 +4551,311 @@ def query_materials(
     return _paginate(filtered, limit=limit, offset=offset)
 
 
+# ── Generic component spec/instance factory ───────────────────────────────────
+# Component families (electrode/electrolyte/separator/current-collector/housing) all
+# follow one spec+instance shape that reuses an existing embedded holder. These generic
+# functions are parameterized by family; thin per-family wrappers are generated below.
+
+_UID_TAIL = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
+
+
+def _component_iri_re(namespace: str) -> re.Pattern[str]:
+    return re.compile(rf"^https://w3id\.org/battinfo/{re.escape(namespace)}/{_UID_TAIL}$")
+
+
+def _record_from_component_spec(
+    family: str,
+    *,
+    name: str,
+    body: dict[str, Any] | None = None,
+    manufacturer: str | dict[str, Any] | None = None,
+    supplier: str | dict[str, Any] | None = None,
+    product_id: str | None = None,
+    uid: str | None = None,
+    id: str | None = None,
+    source_type: str = "datasheet",
+    source_url: str | None = None,
+    citation: str | None = None,
+    retrieved_at: int | str | None = None,
+    notes: list[str] | None = None,
+    **extra: Any,
+) -> dict[str, Any]:
+    namespace = f"{family.replace('_', '-')}-spec"
+    if id is not None:
+        if not _component_iri_re(namespace).fullmatch(id):
+            raise ValueError(f"{namespace} id must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
+        if uid is not None:
+            _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
+        entity_id = id
+        _, dashed_uid = _iri_tail(entity_id)
+    else:
+        dashed_uid = _normalized_dashed_uid(uid)
+        entity_id = f"https://w3id.org/battinfo/{namespace}/{dashed_uid}"
+
+    spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
+    spec.update(body or {})
+    spec.update({k: v for k, v in extra.items() if v is not None})
+    for org_field, org_input in (("manufacturer", manufacturer), ("supplier", supplier)):
+        org = _org_value(org_input)
+        if org is not None:
+            spec[org_field] = org
+    if product_id is not None:
+        spec["product_id"] = product_id
+
+    record: dict[str, Any] = {
+        "schema_version": "0.1.0",
+        f"{family}_spec": spec,
+        "provenance": {"source_type": source_type, "retrieved_at": _to_unix_time(retrieved_at) or _now_unix()},
+    }
+    if source_url is not None:
+        record["provenance"]["source_url"] = source_url
+    citation_value = _citation_url_value(citation)
+    if citation_value is not None:
+        record["provenance"]["citation"] = citation_value
+    if notes:
+        record["notes"] = list(notes)
+    return record_to_snake_aliases(record)
+
+
+def _record_from_component_instance(
+    family: str,
+    *,
+    spec_id: str,
+    body: dict[str, Any] | None = None,
+    name: str | None = None,
+    lot_id: str | None = None,
+    supplier: str | dict[str, Any] | None = None,
+    dataset_ids: list[str] | None = None,
+    uid: str | None = None,
+    id: str | None = None,
+    source_type: str = "lab",
+    source_url: str | None = None,
+    citation: str | None = None,
+    retrieved_at: int | str | None = None,
+    notes: list[str] | None = None,
+) -> dict[str, Any]:
+    spec_namespace = f"{family}-spec"
+    if not _component_iri_re(spec_namespace).fullmatch(spec_id):
+        raise ValueError(f"{family}_spec_id must match https://w3id.org/battinfo/{spec_namespace}/{{uid}}.")
+    if id is not None:
+        if not _component_iri_re(family).fullmatch(id):
+            raise ValueError(f"{family} id must match https://w3id.org/battinfo/{family}/{{uid}}.")
+        if uid is not None:
+            _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
+        entity_id = id
+        _, dashed_uid = _iri_tail(entity_id)
+    else:
+        dashed_uid = _normalized_dashed_uid(uid)
+        entity_id = f"https://w3id.org/battinfo/{family}/{dashed_uid}"
+
+    instance: dict[str, Any] = {
+        "id": entity_id,
+        f"{family}_spec_id": spec_id,
+        "short_id": dashed_uid.replace("-", "")[:6],
+    }
+    instance.update(body or {})
+    if name is not None:
+        instance["name"] = name
+    if lot_id is not None:
+        instance["lot_id"] = lot_id
+    org = _org_value(supplier)
+    if org is not None:
+        instance["supplier"] = org
+    if dataset_ids:
+        for dataset_id in dataset_ids:
+            if not DATASET_IRI_RE.fullmatch(dataset_id):
+                raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+        instance["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
+
+    record: dict[str, Any] = {
+        "schema_version": "0.1.0",
+        family: instance,
+        "provenance": {"source_type": source_type, "retrieved_at": _to_unix_time(retrieved_at) or _now_unix()},
+    }
+    if source_url is not None:
+        record["provenance"]["source_url"] = source_url
+    citation_value = _citation_url_value(citation)
+    if citation_value is not None:
+        record["provenance"]["citation"] = citation_value
+    if notes:
+        record["notes"] = list(notes)
+    return record_to_snake_aliases(record)
+
+
+def create_component_spec(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical component-spec document for a family (electrode, separator, …)."""
+    record = _record_from_component_spec(family, **fields)
+    if validate:
+        _validate_canonical_record(record, policy=DEFAULT_POLICY)
+    return record
+
+
+def create_component_instance(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical component (instance) document for a family."""
+    record = _record_from_component_instance(family, **fields)
+    if validate:
+        _validate_canonical_record(record, policy=DEFAULT_POLICY)
+    return record
+
+
+def _save_component(
+    record: dict[str, Any] | PathLike,
+    *,
+    source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
+    mode: str = REGISTER_MODE_CREATE_ONLY,
+    duplicate_policy: str = DUPLICATE_POLICY_ERROR,
+    resolve_references: bool = True,
+    validate: bool = True,
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else dict(record)
+    return save_record(
+        doc,
+        source_root=source_root,
+        mode=mode,
+        duplicate_policy=duplicate_policy,
+        resolve_references=resolve_references,
+        build_jsonld=False,
+        build_html=False,
+        validate=validate,
+        validation_policy=validation_policy,
+        dry_run=dry_run,
+    )
+
+
+def save_component_spec(family: str, record: dict[str, Any] | PathLike, **kwargs: Any) -> dict[str, Any]:
+    """Save a component-spec record (or path) for a family."""
+    return _save_component(record, **kwargs)
+
+
+def save_component_instance(family: str, record: dict[str, Any] | PathLike, **kwargs: Any) -> dict[str, Any]:
+    """Save a component (instance) record (or path) for a family."""
+    return _save_component(record, **kwargs)
+
+
+def _query_component(
+    record_key: str,
+    directory: Path,
+    *,
+    id: str | None,
+    name: str | None,
+    short_id_prefix: str | None,
+    spec_ref_field: str | None,
+    spec_id: str | None,
+    limit: int,
+    offset: int,
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for path in _iter_json_files(directory):
+        doc = _load_json(path)
+        body = doc.get(record_key)
+        if not isinstance(body, Mapping):
+            continue
+        rec = {
+            "id": body.get("id"),
+            "name": body.get("name"),
+            "short_id": body.get("short_id"),
+            "path": str(path),
+            "record": doc,
+        }
+        if spec_ref_field:
+            rec[spec_ref_field] = body.get(spec_ref_field)
+        records.append(rec)
+
+    filtered: list[dict[str, Any]] = []
+    for rec in records:
+        if id is not None and rec.get("id") != id:
+            continue
+        if not _str_eq(rec.get("name"), name):
+            continue
+        if short_id_prefix and not str(rec.get("short_id", "")).lower().startswith(short_id_prefix.lower()):
+            continue
+        if spec_id is not None and spec_ref_field and rec.get(spec_ref_field) != spec_id:
+            continue
+        filtered.append(rec)
+    return _paginate(filtered, limit=limit, offset=offset)
+
+
+def query_component_specs(
+    family: str,
+    *,
+    directory: PathLike | None = None,
+    id: str | None = None,
+    name: str | None = None,
+    short_id_prefix: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    """Query reusable component specifications for a family."""
+    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / f"{family}-spec"
+    return _query_component(
+        f"{family}_spec", d, id=id, name=name, short_id_prefix=short_id_prefix,
+        spec_ref_field=None, spec_id=None, limit=limit, offset=offset,
+    )
+
+
+def query_component_instances(
+    family: str,
+    *,
+    directory: PathLike | None = None,
+    id: str | None = None,
+    name: str | None = None,
+    short_id_prefix: str | None = None,
+    spec_id: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    """Query physical component instances for a family."""
+    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / family
+    return _query_component(
+        family, d, id=id, name=name, short_id_prefix=short_id_prefix,
+        spec_ref_field=f"{family}_spec_id", spec_id=spec_id, limit=limit, offset=offset,
+    )
+
+
+def template_component_spec(family: str, *, name: str | None = None, uid: str | None = TEMPLATE_UID) -> dict[str, Any]:
+    """Build a starter component-spec document for a family."""
+    return _record_from_component_spec(
+        family, name=name or f"Example {family}", uid=uid,
+        notes=[f"Template-generated {family}-spec. Fill in the holder body before saving."],
+    )
+
+
+def template_component_instance(
+    family: str,
+    *,
+    spec_id: str | None = None,
+    uid: str | None = TEMPLATE_UID,
+) -> dict[str, Any]:
+    """Build a starter component (instance) document for a family."""
+    return _record_from_component_instance(
+        family, spec_id=spec_id or f"https://w3id.org/battinfo/{family}-spec/0000-0000-0000-0000", uid=uid,
+        notes=[f"Template-generated {family} instance. Set {family}_spec_id before saving."],
+    )
+
+
+# Per-family convenience wrappers (create_electrode_spec, save_electrode_spec, …).
+_COMPONENT_WRAPPER_NAMES: list[str] = []
+for _family in COMPONENT_FAMILIES:
+    for _verb, _generic, _suffix in (
+        ("create", create_component_spec, "spec"),
+        ("save", save_component_spec, "spec"),
+        ("template", template_component_spec, "spec"),
+        ("create", create_component_instance, "instance"),
+        ("save", save_component_instance, "instance"),
+        ("template", template_component_instance, "instance"),
+    ):
+        _wname = f"{_verb}_{_family}_spec" if _suffix == "spec" else f"{_verb}_{_family}"
+        globals()[_wname] = functools.partial(_generic, _family)
+        _COMPONENT_WRAPPER_NAMES.append(_wname)
+    _qspec = f"query_{_family}_specs"
+    _qinst = f"query_{_family}s" if not _family.endswith("s") else f"query_{_family}"
+    globals()[_qspec] = functools.partial(query_component_specs, _family)
+    globals()[_qinst] = functools.partial(query_component_instances, _family)
+    _COMPONENT_WRAPPER_NAMES.extend([_qspec, _qinst])
+
+
 def build_index(
     *,
     source_root: PathLike = DEFAULT_INDEX_SOURCE_ROOT,
@@ -4786,6 +5093,37 @@ def build_index(
         except Exception as exc:  # noqa: BLE001
             failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
 
+    # Component families (electrode/separator/…): one generic indexer per family.
+    component_index: dict[str, list[dict[str, Any]]] = {}
+    component_count = 0
+    for family in COMPONENT_FAMILIES:
+        for record_key, subdir in ((f"{family}_spec", f"{family}-spec"), (family, family)):
+            directory = src_root / subdir
+            rows: list[dict[str, Any]] = []
+            for path in sorted(directory.glob(glob)) if directory.exists() else []:
+                try:
+                    doc = _load_json(path)
+                    if validate:
+                        _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
+                    body = doc.get(record_key, {})
+                    if not isinstance(body, Mapping) or not isinstance(body.get("id"), str):
+                        raise ValueError(f"missing {record_key}.id")
+                    row = {
+                        "id": body["id"],
+                        "short_id": body.get("short_id") or _short_id_from_iri(body["id"]),
+                        "name": body.get("name"),
+                        "path": _relative_or_absolute(path, src_root),
+                    }
+                    if record_key.endswith("_spec"):
+                        row["polarity"] = body.get("polarity")
+                    else:
+                        row[f"{family}_spec_id"] = body.get(f"{family}_spec_id")
+                    rows.append(row)
+                except Exception as exc:  # noqa: BLE001
+                    failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
+            component_index[subdir] = rows
+            component_count += len(rows)
+
     out: dict[str, Any] = {
         "build_timestamp": _now_iso(),
         "source_root": str(src_root),
@@ -4796,6 +5134,7 @@ def build_index(
         "dataset_count": len(datasets),
         "material_spec_count": len(material_specs),
         "material_count": len(materials),
+        "component_count": component_count,
         "total_count": (
             len(cell_specs)
             + len(cell_instances)
@@ -4804,6 +5143,7 @@ def build_index(
             + len(datasets)
             + len(material_specs)
             + len(materials)
+            + component_count
         ),
         "failed": len(failures),
         "failures": failures,
@@ -4814,6 +5154,7 @@ def build_index(
         "datasets": datasets,
         "material_specs": material_specs,
         "materials": materials,
+        "components": component_index,
     }
 
     if out_path is not None:
@@ -4910,6 +5251,14 @@ __all__ = [
     "query_materials",
     "template_material_spec",
     "template_material",
+    "create_component_spec",
+    "create_component_instance",
+    "save_component_spec",
+    "save_component_instance",
+    "query_component_specs",
+    "query_component_instances",
+    "template_component_spec",
+    "template_component_instance",
     "DatasetInput",
     "TestSpecInput",
     "TestInput",
@@ -4956,6 +5305,9 @@ __all__ = [
     "template_test_protocol_draft",
     "query_test_protocols",
 ]
+
+# Per-family component wrappers (create_electrode_spec, query_electrode_specs, …).
+__all__ += _COMPONENT_WRAPPER_NAMES
 
 TestProtocolInput = TestSpecInput  # backward compat alias
 save_test_protocol = save_test_spec  # backward compat alias

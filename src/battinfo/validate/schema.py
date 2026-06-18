@@ -23,6 +23,8 @@ PROFILE_TO_SCHEMA = {
     "test": "test.schema.json",
     "material-spec": "material-spec.schema.json",
     "material": "material.schema.json",
+    "electrode-spec": "electrode-spec.schema.json",
+    "electrode": "electrode.schema.json",
 }
 
 FORMAT_CHECKER = FormatChecker()
