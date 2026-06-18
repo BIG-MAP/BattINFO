@@ -1,0 +1,58 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/wmqd-1fbt-zyya-k4bw",
+    "short_id": "wmqd1f",
+    "identifier": "test-protocol:wmqd-1fbt-zyya-k4bw",
+    "name": "EIS Impedance — 100 kHz to 10 mHz at 50% SOC, 25 C",
+    "kind": "impedance",
+    "description": "Electrochemical impedance spectroscopy from 100 kHz to 10 mHz, 10 mV AC, at 50% state of charge."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    },
+    "state_of_charge": {
+      "value": 50.0,
+      "unit": "%"
+    }
+  },
+  "method": [
+    {
+      "mode": "eis",
+      "direction": "hold",
+      "setpoints": {
+        "frequency_upper_limit": {
+          "value": 100000.0,
+          "unit": "Hz"
+        },
+        "frequency_lower_limit": {
+          "value": 0.01,
+          "unit": "Hz"
+        },
+        "ac_perturbation_amplitude": {
+          "value": 10.0,
+          "unit": "mV"
+        }
+      }
+    }
+  ],
+  "facets": {
+    "modes": [
+      "eis"
+    ],
+    "directions": [],
+    "control_modes": [],
+    "has_cv_hold": false,
+    "has_rest": false,
+    "has_eis": true,
+    "temperatures": [
+      25.0
+    ]
+  }
+}

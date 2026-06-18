@@ -1,0 +1,157 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/j19t-9cm0-f219-zh4y",
+    "short_id": "j19t9c",
+    "identifier": "test-protocol:j19t-9cm0-f219-zh4y",
+    "name": "Formation — Slow First Cycles at 25 C",
+    "kind": "formation",
+    "description": "First-cycle formation/activation: slow C/20 cycles to build the SEI, then a C/10 conditioning cycle."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.05,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ],
+      "description": "Charge at C/20 until 4.2 V"
+    },
+    {
+      "mode": "cv",
+      "direction": "hold",
+      "setpoints": {
+        "voltage": {
+          "value": 4.2,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "c_rate",
+          "value": 0.02,
+          "unit": "A/Ah",
+          "direction": "below"
+        }
+      ],
+      "description": "Hold at 4.2 V until C/50"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 1800.0,
+        "unit": "s"
+      },
+      "description": "Rest for 30 minutes"
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.05,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        }
+      ],
+      "description": "Discharge at C/20 until 2.5 V"
+    },
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.1,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ],
+      "description": "Charge at C/10 until 4.2 V"
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.1,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        }
+      ],
+      "description": "Discharge at C/10 until 2.5 V"
+    }
+  ],
+  "facets": {
+    "modes": [
+      "cc",
+      "cv",
+      "rest"
+    ],
+    "directions": [
+      "charge",
+      "discharge"
+    ],
+    "control_modes": [
+      "current",
+      "voltage"
+    ],
+    "has_cv_hold": true,
+    "has_rest": true,
+    "has_eis": false,
+    "c_rates": [
+      0.02,
+      0.05,
+      0.1
+    ],
+    "voltage_window_V": [
+      2.5,
+      4.2
+    ],
+    "temperatures": [
+      25.0
+    ]
+  }
+}

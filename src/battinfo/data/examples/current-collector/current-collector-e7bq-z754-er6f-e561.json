@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "current_collector": {
+    "id": "https://w3id.org/battinfo/current-collector/e7bq-z754-er6f-e561",
+    "current_collector_spec_id": "https://w3id.org/battinfo/current-collector-spec/z25y-gab5-hd3n-qfpr",
+    "short_id": "e7bqz7",
+    "property": {
+      "thickness": {
+        "value": 10,
+        "unit": "um"
+      }
+    },
+    "lot_id": "CU-FOIL-LOT-001"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781778468
+  },
+  "notes": [
+    "Copper anode current-collector foil lot."
+  ]
+}

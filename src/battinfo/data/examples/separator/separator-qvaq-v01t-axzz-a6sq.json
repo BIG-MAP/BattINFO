@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "separator": {
+    "id": "https://w3id.org/battinfo/separator/qvaq-v01t-axzz-a6sq",
+    "separator_spec_id": "https://w3id.org/battinfo/separator-spec/v94j-jm2h-t8d1-t5a6",
+    "short_id": "qvaqv0",
+    "property": {
+      "diameter": {
+        "value": 19,
+        "unit": "mm"
+      }
+    },
+    "lot_id": "SEP-CPE-LOT-001"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781778468
+  },
+  "notes": [
+    "A ceramic-coated PE separator disc lot."
+  ]
+}

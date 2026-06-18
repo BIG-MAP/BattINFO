@@ -1,0 +1,109 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/fj4k-hj6f-cd5v-36fb",
+    "short_id": "fj4khj",
+    "identifier": "test-protocol:fj4k-hj6f-cd5v-36fb",
+    "name": "Capacity Check — C/10 at 25 C",
+    "kind": "capacity_check",
+    "description": "Standard deliverable-capacity check: CC-CV charge then slow C/10 discharge."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.3333333333333333,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ],
+      "description": "Charge at C/3 until 4.2 V"
+    },
+    {
+      "mode": "cv",
+      "direction": "hold",
+      "setpoints": {
+        "voltage": {
+          "value": 4.2,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "c_rate",
+          "value": 0.05,
+          "unit": "A/Ah",
+          "direction": "below"
+        }
+      ],
+      "description": "Hold at 4.2 V until C/20"
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.1,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        }
+      ],
+      "description": "Discharge at C/10 until 2.5 V"
+    }
+  ],
+  "facets": {
+    "modes": [
+      "cc",
+      "cv"
+    ],
+    "directions": [
+      "charge",
+      "discharge"
+    ],
+    "control_modes": [
+      "current",
+      "voltage"
+    ],
+    "has_cv_hold": true,
+    "has_rest": false,
+    "has_eis": false,
+    "c_rates": [
+      0.05,
+      0.1,
+      0.3333333333333333
+    ],
+    "voltage_window_V": [
+      2.5,
+      4.2
+    ],
+    "temperatures": [
+      25.0
+    ]
+  }
+}

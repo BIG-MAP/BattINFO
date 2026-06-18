@@ -8,7 +8,8 @@
     "model": "COIN-ZNMNO2-ALK",
     "manufacturer": {
       "type": "Organization",
-      "name": "EMPA"
+      "name": "EMPA",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
     },
     "cell_format": "coin",
     "chemistry": "Zn-MnO2 alkaline",

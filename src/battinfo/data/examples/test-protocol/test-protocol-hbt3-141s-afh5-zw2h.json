@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/hbt3-141s-afh5-zw2h",
+    "short_id": "hbt314",
+    "identifier": "test-protocol:hbt3-141s-afh5-zw2h",
+    "name": "SEM Imaging",
+    "kind": "sem",
+    "description": "Scanning electron microscopy imaging of electrode/material morphology."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778245
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/xqs2-0xzp-hav7-ygq2",
+    "short_id": "xqs20x",
+    "identifier": "test-protocol:xqs2-0xzp-hav7-ygq2",
+    "name": "WLTP Drive-cycle Power Profile",
+    "kind": "wltp",
+    "description": "Worldwide harmonised Light-vehicles Test Procedure power profile applied at the cell level. The full time-resolved power trace is carried as a linked actionable artifact.",
+    "protocol_url": "https://unece.org/transport/standards/transport/vehicle-regulations-wp29/global"
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  }
+}

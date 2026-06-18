@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1.0",
+  "cell_instance": {
+    "id": "https://w3id.org/battinfo/cell/h7bv-e9yv-e1rz-n8pj",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/77tx-95x5-8tvd-n33a",
+    "short_id": "h7bve9",
+    "serial_number": "P025-CEL-025",
+    "batch_id": "P025"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781778468
+  },
+  "datasets": [
+    {
+      "id": "https://w3id.org/battinfo/dataset/6bhm-ryeg-ac8s-g698",
+      "role": "raw"
+    }
+  ],
+  "notes": [
+    "LFP-Graphite coin cell from the Discovery-Benchmark line."
+  ]
+}

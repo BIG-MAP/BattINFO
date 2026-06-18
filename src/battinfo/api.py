@@ -139,7 +139,7 @@ class CellSpecificationInput(BaseModel):
     id: str | None = None
     uid: str | None = None
     model_name: str
-    manufacturer: str
+    manufacturer: str | dict[str, Any]
     format: Literal["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"] = "unknown"
     chemistry: str = "unknown"
     product_type: CellProductType | None = None
@@ -2185,15 +2185,17 @@ def _record_from_cell_spec(draft: CellSpecificationInput) -> dict[str, Any]:
         dashed_uid = _normalized_dashed_uid(draft.uid)
         entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
+    manufacturer_org = _org_value(draft.manufacturer)
+    manufacturer_name = manufacturer_org["name"] if manufacturer_org else str(draft.manufacturer)
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "cell_spec": {
             "id": entity_id,
             "short_id": dashed_uid.replace("-", "")[:6],
             "identifier": f"cell-spec:{dashed_uid}",
-            "name": f"{draft.manufacturer} {draft.model_name}",
+            "name": f"{manufacturer_name} {draft.model_name}",
             "model": draft.model_name,
-            "manufacturer": {"type": "Organization", "name": draft.manufacturer},
+            "manufacturer": manufacturer_org or {"type": "Organization", "name": str(draft.manufacturer)},
             "cell_format": draft.format,
             "chemistry": draft.chemistry,
         },

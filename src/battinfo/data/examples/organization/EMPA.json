@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1.0",
+  "organization": {
+    "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv",
+    "short_id": "mtf884",
+    "type": "ResearchOrganization",
+    "name": "Empa",
+    "legalName": "Swiss Federal Laboratories for Materials Science and Technology",
+    "alternateName": [
+      "EMPA",
+      "Empa"
+    ],
+    "url": "https://www.empa.ch",
+    "sameAs": [
+      "https://ror.org/03xfaep3z",
+      "https://www.wikidata.org/wiki/Q673252"
+    ],
+    "location": {
+      "addressCountry": "CH",
+      "addressLocality": "Dübendorf"
+    },
+    "description": "Swiss Federal Laboratories for Materials Science and Technology, an interdisciplinary research institute of the ETH Domain with battery materials and electrochemistry activity."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "source_url": "https://www.empa.ch",
+    "retrieved_at": 1750000000
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": "0.1.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/8439-2h04-w77p-8hdj",
+    "short_id": "84392h",
+    "identifier": "test:8439-2h04-w77p-8hdj",
+    "cell_id": "https://w3id.org/battinfo/cell/h7bv-e9yv-e1rz-n8pj",
+    "name": "LFP coin baseline cycling",
+    "kind": "cycling",
+    "protocol_id": "https://w3id.org/battinfo/spec/8r2m-4v6k-9p3t-7n5x",
+    "status": "completed",
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/6bhm-ryeg-ac8s-g698"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "retrieved_at": 1781778468
+  }
+}

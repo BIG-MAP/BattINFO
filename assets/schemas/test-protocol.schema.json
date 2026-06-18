@@ -56,10 +56,13 @@
             "calendar_ageing",
             "formation",
             "rpt",
+            "quasi_ocv",
             "field",
             "duty_cycle",
             "wltp",
             "nedc",
+            "sem",
+            "characterization",
             "other"
           ]
         },

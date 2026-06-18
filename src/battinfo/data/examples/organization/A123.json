@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.1.0",
+  "organization": {
+    "id": "https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd",
+    "short_id": "9k3eab",
+    "type": "Manufacturer",
+    "name": "A123 Systems",
+    "legalName": "A123 Systems LLC",
+    "alternateName": [
+      "A123"
+    ],
+    "url": "https://www.a123systems.com",
+    "sameAs": [
+      "https://www.wikidata.org/wiki/Q4646934"
+    ],
+    "location": {
+      "addressCountry": "US",
+      "addressRegion": "Massachusetts"
+    },
+    "description": "Lithium iron phosphate cell and battery system manufacturer."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "source_url": "https://www.a123systems.com",
+    "retrieved_at": 1750000000
+  }
+}
