@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92",
+    "short_id": "tme20s",
+    "identifier": "cell-spec:tme2-0sy6-q89b-8m92",
+    "name": "EMPA COIN-NMC811-D",
+    "model": "COIN-NMC811-D",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "EMPA",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    },
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "NMC811",
+    "negative_electrode_basis": "graphite"
+  },
+  "properties": {
+    "nominal_capacity": {
+      "value": 0.0038,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.8,
+      "unit": "V"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "manual.json",
+    "source_url": null,
+    "retrieved_at": 1781772766
+  },
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/t947-yem5-73n7-beb7",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+  "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+  "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+  "housing_spec_id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+  "notes": [
+    "Discovery NMC811-Graphite coin cell."
+  ]
+}

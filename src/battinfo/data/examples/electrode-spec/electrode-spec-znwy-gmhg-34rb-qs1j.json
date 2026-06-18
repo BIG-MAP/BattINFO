@@ -1,0 +1,41 @@
+{
+  "schema_version": "0.1.0",
+  "electrode_spec": {
+    "id": "https://w3id.org/battinfo/electrode-spec/znwy-gmhg-34rb-qs1j",
+    "short_id": "znwygm",
+    "name": "Zn anode",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "Zinc",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/kg0e-vqce-3439-bnfk",
+            "property": {
+              "mass_fraction": {
+                "value": 0.95,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "loading": {
+          "value": 40,
+          "unit": "mg/cm2"
+        }
+      }
+    },
+    "current_collector": {
+      "name": "Brass mesh"
+    },
+    "polarity": "negative"
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781772766
+  },
+  "notes": [
+    "Zinc metal anode for alkaline Zn-MnO2 cells."
+  ]
+}

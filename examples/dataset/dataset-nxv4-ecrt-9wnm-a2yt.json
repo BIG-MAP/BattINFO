@@ -1,0 +1,32 @@
+{
+  "schema_version": "0.1.0",
+  "dataset": {
+    "id": "https://w3id.org/battinfo/dataset/nxv4-ecrt-9wnm-a2yt",
+    "short_id": "nxv4ec",
+    "identifier": "dataset:nxv4-ecrt-9wnm-a2yt",
+    "name": "NMC811 powder XRD pattern",
+    "access_url": "https://example.org/dataset/nxv4-ecrt-9wnm-a2yt",
+    "description": "X-ray diffraction pattern of an NMC811 cathode powder lot.",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "measurement_techniques": [
+      "X-ray diffraction"
+    ],
+    "variable_measured": [
+      {
+        "name": "two_theta",
+        "unit_text": "deg"
+      },
+      {
+        "name": "intensity",
+        "unit_text": "counts"
+      }
+    ],
+    "created_at": 1781778468,
+    "modified_at": 1781778468,
+    "published_at": 1781778468
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "retrieved_at": 1781778468
+  }
+}

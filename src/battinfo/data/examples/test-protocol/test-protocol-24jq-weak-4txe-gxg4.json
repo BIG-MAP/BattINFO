@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/24jq-weak-4txe-gxg4",
+    "short_id": "24jqwe",
+    "identifier": "test-protocol:24jq-weak-4txe-gxg4",
+    "name": "Field Operation Log",
+    "kind": "field",
+    "description": "Real-world field-operation duty applied to a cell/module (telematics-logged, not a lab protocol)."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778245
+  }
+}

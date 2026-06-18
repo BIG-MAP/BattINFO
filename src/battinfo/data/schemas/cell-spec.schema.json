@@ -323,6 +323,26 @@
     "housing": {
       "$ref": "modules/components/specification.schema.json#/properties/housing"
     },
+    "positive_electrode_spec_id": {
+      "$ref": "#/$defs/ElectrodeSpecIri",
+      "description": "Optional canonical IRI of a standalone electrode-spec for the positive electrode (used instead of, or alongside, the inline positive_electrode holder)."
+    },
+    "negative_electrode_spec_id": {
+      "$ref": "#/$defs/ElectrodeSpecIri",
+      "description": "Optional canonical IRI of a standalone electrode-spec for the negative electrode."
+    },
+    "electrolyte_spec_id": {
+      "$ref": "#/$defs/ElectrolyteSpecIri",
+      "description": "Optional canonical IRI of a standalone electrolyte-spec."
+    },
+    "separator_spec_id": {
+      "$ref": "#/$defs/SeparatorSpecIri",
+      "description": "Optional canonical IRI of a standalone separator-spec."
+    },
+    "housing_spec_id": {
+      "$ref": "#/$defs/HousingSpecIri",
+      "description": "Optional canonical IRI of a standalone housing-spec."
+    },
     "hazardous_substances": {
       "type": "array",
       "description": "Hazardous substances present in the battery (EU Battery Regulation Annex XIII §7.1).",
@@ -371,6 +391,9 @@
     "extinguishing_agent": {
       "type": "string",
       "description": "Usable extinguishing agent for the battery (EU Battery Regulation Annex VI Part A)."
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
     }
   },
   "$defs": {
@@ -534,6 +557,76 @@
     "OrganizationIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ElectrodeSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/electrode-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ElectrolyteSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/electrolyte-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "SeparatorSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/separator-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "HousingSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/housing-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
     }
   }
 }

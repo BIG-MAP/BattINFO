@@ -23,6 +23,16 @@ PROFILE_TO_SCHEMA = {
     "test": "test.schema.json",
     "material-spec": "material-spec.schema.json",
     "material": "material.schema.json",
+    "electrode-spec": "electrode-spec.schema.json",
+    "electrode": "electrode.schema.json",
+    "separator-spec": "separator-spec.schema.json",
+    "separator": "separator.schema.json",
+    "current-collector-spec": "current-collector-spec.schema.json",
+    "current-collector": "current-collector.schema.json",
+    "electrolyte-spec": "electrolyte-spec.schema.json",
+    "electrolyte": "electrolyte.schema.json",
+    "housing-spec": "housing-spec.schema.json",
+    "housing": "housing.schema.json",
 }
 
 FORMAT_CHECKER = FormatChecker()

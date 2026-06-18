@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/housing-spec.schema.json",
+  "title": "BattINFO Housing Spec",
+  "description": "Reusable housing specification. The 'spec' half of the housing-spec + housing pair.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "housing_spec",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "housing_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ComponentSpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cell_format": {
+          "type": "string",
+          "enum": [
+            "coin",
+            "cylindrical",
+            "pouch",
+            "prismatic",
+            "other",
+            "unknown"
+          ]
+        },
+        "case": {
+          "$ref": "#/$defs/Case"
+        },
+        "cap": {
+          "$ref": "#/$defs/HardwarePart"
+        },
+        "terminals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Terminal"
+          }
+        },
+        "seals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Seal"
+          }
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HardwarePart"
+          }
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "ComponentSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/housing-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "OrgRef": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ]
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet",
+            "manufacturer",
+            "measurement",
+            "lab",
+            "literature",
+            "manual",
+            "other"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
+      }
+    },
+    "Case": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size_code": {
+          "type": "string"
+        },
+        "coating": {
+          "type": "string"
+        },
+        "material": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "Terminal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "polarity": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "negative"
+          ]
+        },
+        "material": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "Seal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "material": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "HardwarePart": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "cap",
+            "lid",
+            "can",
+            "spring",
+            "spacer",
+            "other"
+          ]
+        },
+        "coating": {
+          "type": "string"
+        },
+        "material": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/13rn-1rjs-m94s-m7cq",
+    "short_id": "13rn1r",
+    "identifier": "test-protocol:13rn-1rjs-m94s-m7cq",
+    "name": "General Characterization",
+    "kind": "characterization",
+    "description": "General physical/electrochemical characterization (umbrella for non-standard characterization runs)."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778245
+  }
+}

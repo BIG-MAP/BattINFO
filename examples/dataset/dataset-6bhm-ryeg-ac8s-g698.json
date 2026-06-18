@@ -1,0 +1,40 @@
+{
+  "schema_version": "0.1.0",
+  "dataset": {
+    "id": "https://w3id.org/battinfo/dataset/6bhm-ryeg-ac8s-g698",
+    "short_id": "6bhmry",
+    "identifier": "dataset:6bhm-ryeg-ac8s-g698",
+    "name": "LFP coin cell cycling data",
+    "access_url": "https://example.org/dataset/6bhm-ryeg-ac8s-g698",
+    "description": "Raw galvanostatic cycling export for one LFP-Graphite coin cell.",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "measurement_techniques": [
+      "cycling"
+    ],
+    "variable_measured": [
+      {
+        "name": "voltage",
+        "unit_text": "V"
+      },
+      {
+        "name": "current",
+        "unit_text": "A"
+      },
+      {
+        "name": "capacity",
+        "unit_text": "Ah"
+      }
+    ],
+    "about": [
+      "https://w3id.org/battinfo/cell/h7bv-e9yv-e1rz-n8pj",
+      "https://w3id.org/battinfo/test/8439-2h04-w77p-8hdj"
+    ],
+    "created_at": 1781778468,
+    "modified_at": 1781778468,
+    "published_at": 1781778468
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "retrieved_at": 1781778468
+  }
+}

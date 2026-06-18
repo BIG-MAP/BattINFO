@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/4wds-z4wa-px8j-3qr4",
+    "short_id": "4wdsz4",
+    "identifier": "test-protocol:4wds-z4wa-px8j-3qr4",
+    "name": "Other / Custom Protocol",
+    "kind": "other",
+    "description": "Fallback for a non-standard or custom test protocol."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778245
+  }
+}

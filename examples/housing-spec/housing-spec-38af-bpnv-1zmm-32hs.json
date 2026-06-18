@@ -1,0 +1,46 @@
+{
+  "schema_version": "0.1.0",
+  "housing_spec": {
+    "id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+    "short_id": "38afbp",
+    "name": "CR2032 coin housing",
+    "cell_format": "coin",
+    "case": {
+      "size_code": "2032",
+      "material": "Stainless steel",
+      "property": {
+        "diameter": {
+          "value": 20,
+          "unit": "mm"
+        },
+        "height": {
+          "value": 3.2,
+          "unit": "mm"
+        }
+      }
+    },
+    "parts": [
+      {
+        "type": "spring",
+        "material": "Stainless steel"
+      },
+      {
+        "type": "spacer",
+        "material": "Stainless steel",
+        "property": {
+          "thickness": {
+            "value": 1.0,
+            "unit": "mm"
+          }
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "CR2032 coin-cell housing (case + spring + 1.0 mm spacer). Discovery-Benchmark coin-cell hardware."
+  ]
+}

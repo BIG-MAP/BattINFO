@@ -42,6 +42,7 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     "index.md",
+    "CONTENT-MODEL.md",
     "cell-descriptor-integration.md",
     "cell-descriptor-stable-subset.md",
     "cell-descriptor-standard.md",
@@ -60,10 +61,19 @@ html_theme = "pydata_sphinx_theme"
 
 html_theme_options = {
     "logo": {
-        "text": "BattINFO",
+        # Lockups from the canonical brand pack (../brand), copied via html_static_path.
+        "image_light": "_static/assets/logo/logo-horizontal.svg",
+        "image_dark": "_static/assets/logo/logo-horizontal-on-dark.svg",
         "alt_text": "BattINFO",
     },
     "github_url": "https://github.com/BIG-MAP/BattINFO",
+    # Back-links to the website (the "front door"). This reference site owns
+    # "how/reference"; battinfo.org owns "why/try". See docs/CONTENT-MODEL.md.
+    "external_links": [
+        {"name": "Home", "url": "https://battinfo.org"},
+        {"name": "Validate", "url": "https://battinfo.org/validate"},
+        {"name": "Convert", "url": "https://battinfo.org/convert"},
+    ],
     "navbar_align": "left",
     "navbar_end": ["navbar-icon-links"],
     "secondary_sidebar_items": ["page-toc"],
@@ -72,8 +82,13 @@ html_theme_options = {
     "show_version_warning_banner": False,
 }
 
-html_static_path = ["_static"]
-html_css_files = ["css/custom.css"]
+# The brand pack (logo, favicon, tokens) lives at repo-root/brand and is the
+# single source of truth. It is copied into the built site's _static/ so the
+# docs never fork brand values. See brand/BRAND.md.
+html_static_path = ["_static", "../brand"]
+html_favicon = "../brand/assets/favicon/favicon.svg"
+# tokens.css first so its CSS variables are defined before custom.css maps them.
+html_css_files = ["tokens.css", "css/custom.css"]
 html_show_sourcelink = False
 
 # nbsphinx — do not re-execute notebooks at build time

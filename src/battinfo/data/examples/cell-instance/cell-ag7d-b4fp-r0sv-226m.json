@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1.0",
+  "cell_instance": {
+    "id": "https://w3id.org/battinfo/cell/ag7d-b4fp-r0sv-226m",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92",
+    "short_id": "ag7db4",
+    "serial_number": "P025-CEL-001",
+    "batch_id": "P025"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781772876
+  },
+  "datasets": [
+    {
+      "id": "https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17",
+      "role": "raw"
+    }
+  ],
+  "notes": [
+    "Physical NMC811-Graphite coin cell from the DIGIBAT Discovery-Benchmark line."
+  ]
+}

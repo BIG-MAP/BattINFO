@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/0hpw-gkhk-gcg8-23x1",
+    "short_id": "0hpwgk",
+    "identifier": "cell-spec:0hpw-gkhk-gcg8-23x1",
+    "name": "EMPA COIN-NMC622-D",
+    "model": "COIN-NMC622-D",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "EMPA",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    },
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "NMC622",
+    "negative_electrode_basis": "graphite"
+  },
+  "properties": {
+    "nominal_capacity": {
+      "value": 0.0036,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.7,
+      "unit": "V"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "manual.json",
+    "source_url": null,
+    "retrieved_at": 1781772767
+  },
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/f75a-tq2f-4tey-nba7",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+  "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+  "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+  "housing_spec_id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+  "notes": [
+    "Discovery NMC622-Graphite coin cell."
+  ]
+}

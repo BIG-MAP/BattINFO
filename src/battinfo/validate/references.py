@@ -145,6 +145,107 @@ def _check_reference(
         )
 
 
+# cell / test / dataset keep their bespoke reference blocks above; every other
+# registry family (material + the component families) uses the uniform pattern:
+# an optional instance->spec link, an optional datasets[] array, and material-spec
+# references named ``material_spec_id`` / ``base_material_id`` anywhere in the body.
+_BESPOKE_REF_TYPES = frozenset({"cell-spec", "cell", "test-protocol", "test", "dataset"})
+_MATERIAL_REF_KEYS = frozenset({"material_spec_id", "base_material_id"})
+
+
+def _collect_material_spec_refs(node: Any, path: str, out: list[tuple[str, str]]) -> None:
+    if isinstance(node, Mapping):
+        for key, value in node.items():
+            child_path = f"{path}.{key}" if path else str(key)
+            if key in _MATERIAL_REF_KEYS and isinstance(value, str):
+                out.append((child_path, value))
+            else:
+                _collect_material_spec_refs(value, child_path, out)
+    elif isinstance(node, list):
+        for idx, item in enumerate(node):
+            _collect_material_spec_refs(item, f"{path}[{idx}]", out)
+
+
+def _check_registry_family_references(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    root: Path,
+    resource_type: str | None,
+    allow_missing: bool,
+) -> None:
+    kind = kind_for_doc(doc)
+    if kind is None or kind.entity_type in _BESPOKE_REF_TYPES:
+        return
+    body = doc.get(kind.record_key)
+    if not isinstance(body, Mapping):
+        return
+
+    if kind.spec_ref_field and kind.spec_entity_type:
+        spec_ref = body.get(kind.spec_ref_field)
+        if isinstance(spec_ref, str):
+            _check_reference(
+                issues=issues,
+                ref_id=spec_ref,
+                expected_type=kind.spec_entity_type,
+                path=f"{kind.record_key}.{kind.spec_ref_field}",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    f"Referenced {kind.spec_entity_type} not found in source_root. Register it first "
+                    f"or disable resolve_references. Missing: {spec_ref}"
+                ),
+                mismatch_message=(
+                    f"Referenced {kind.spec_ref_field} must resolve to a {kind.spec_entity_type} record. "
+                    f"Found a different record type for: {spec_ref}"
+                ),
+                allow_missing=allow_missing,
+            )
+
+    datasets = body.get("datasets")
+    if isinstance(datasets, list):
+        for idx, link in enumerate(datasets):
+            if not (isinstance(link, Mapping) and isinstance(link.get("id"), str)):
+                continue
+            _check_reference(
+                issues=issues,
+                ref_id=link["id"],
+                expected_type="dataset",
+                path=f"{kind.record_key}.datasets[{idx}].id",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    "Referenced dataset not found in source_root. Register the dataset first "
+                    f"or disable resolve_references. Missing: {link['id']}"
+                ),
+                mismatch_message=(
+                    "Referenced dataset must resolve to a dataset record in source_root. "
+                    f"Found a different record type for: {link['id']}"
+                ),
+                allow_missing=allow_missing,
+            )
+
+    material_refs: list[tuple[str, str]] = []
+    _collect_material_spec_refs(body, kind.record_key, material_refs)
+    for path, ref_id in material_refs:
+        _check_reference(
+            issues=issues,
+            ref_id=ref_id,
+            expected_type="material-spec",
+            path=path,
+            source_root=root,
+            resource_type=resource_type,
+            missing_message=(
+                "Referenced material_spec not found in source_root. Register it first "
+                f"or disable resolve_references. Missing: {ref_id}"
+            ),
+            mismatch_message=(
+                "Referenced material must resolve to a material-spec record. "
+                f"Found a different record type for: {ref_id}"
+            ),
+            allow_missing=allow_missing,
+        )
+
+
 def validate_references_report(
     doc: dict[str, Any],
     source_root: str | Path,
@@ -223,6 +324,34 @@ def validate_references_report(
                 ),
                 allow_missing=allow_missing,
             )
+
+    if isinstance(doc.get("cell_spec"), Mapping):
+        for ref_field, expected_type in (
+            ("positive_electrode_spec_id", "electrode-spec"),
+            ("negative_electrode_spec_id", "electrode-spec"),
+            ("electrolyte_spec_id", "electrolyte-spec"),
+            ("separator_spec_id", "separator-spec"),
+            ("housing_spec_id", "housing-spec"),
+        ):
+            ref_id = doc.get(ref_field)
+            if isinstance(ref_id, str):
+                _check_reference(
+                    issues=issues,
+                    ref_id=ref_id,
+                    expected_type=expected_type,
+                    path=ref_field,
+                    source_root=root,
+                    resource_type=resource_type,
+                    missing_message=(
+                        f"Referenced {expected_type} not found in source_root. Register it first "
+                        f"or disable resolve_references. Missing: {ref_id}"
+                    ),
+                    mismatch_message=(
+                        f"Referenced {ref_field} must resolve to a {expected_type} record in source_root. "
+                        f"Found a different record type for: {ref_id}"
+                    ),
+                    allow_missing=allow_missing,
+                )
 
     if isinstance(doc.get("test"), Mapping):
         protocol_id = doc["test"].get("protocol_id")
@@ -352,82 +481,7 @@ def validate_references_report(
                     allow_missing=allow_missing,
                 )
 
-    if isinstance(doc.get("material"), Mapping):
-        material_spec_id = doc["material"].get("material_spec_id")
-        if isinstance(material_spec_id, str):
-            _check_reference(
-                issues=issues,
-                ref_id=material_spec_id,
-                expected_type="material-spec",
-                path="material.material_spec_id",
-                source_root=root,
-                resource_type=resource_type,
-                missing_message=(
-                    "Referenced material_spec not found in source_root. Register the material spec first "
-                    f"or disable resolve_references. Missing: {material_spec_id}"
-                ),
-                mismatch_message=(
-                    "Referenced material_spec must resolve to a material-spec record in source_root. "
-                    f"Found a different record type for: {material_spec_id}"
-                ),
-                allow_missing=allow_missing,
-            )
-        datasets = doc["material"].get("datasets")
-        if isinstance(datasets, list):
-            for idx, link in enumerate(datasets):
-                if not (isinstance(link, Mapping) and isinstance(link.get("id"), str)):
-                    continue
-                _check_reference(
-                    issues=issues,
-                    ref_id=link["id"],
-                    expected_type="dataset",
-                    path=f"material.datasets[{idx}].id",
-                    source_root=root,
-                    resource_type=resource_type,
-                    missing_message=(
-                        "Referenced dataset not found in source_root. Register the dataset first "
-                        f"or disable resolve_references. Missing: {link['id']}"
-                    ),
-                    mismatch_message=(
-                        "Referenced dataset must resolve to a dataset record in source_root. "
-                        f"Found a different record type for: {link['id']}"
-                    ),
-                    allow_missing=allow_missing,
-                )
-
-    if isinstance(doc.get("material_spec"), Mapping):
-        composition = doc["material_spec"].get("composition")
-        if isinstance(composition, Mapping):
-            comp_refs: list[tuple[str, str]] = []
-            base = composition.get("base_material_id")
-            if isinstance(base, str):
-                comp_refs.append(("material_spec.composition.base_material_id", base))
-            for group in ("coatings", "constituents"):
-                items = composition.get(group)
-                if isinstance(items, list):
-                    comp_refs.extend(
-                        (f"material_spec.composition.{group}[{idx}].material_spec_id", item["material_spec_id"])
-                        for idx, item in enumerate(items)
-                        if isinstance(item, Mapping) and isinstance(item.get("material_spec_id"), str)
-                    )
-            for path, ref_id in comp_refs:
-                _check_reference(
-                    issues=issues,
-                    ref_id=ref_id,
-                    expected_type="material-spec",
-                    path=path,
-                    source_root=root,
-                    resource_type=resource_type,
-                    missing_message=(
-                        "Referenced material_spec not found in source_root. Register it first "
-                        f"or disable resolve_references. Missing: {ref_id}"
-                    ),
-                    mismatch_message=(
-                        "Referenced material in composition must resolve to a material-spec record. "
-                        f"Found a different record type for: {ref_id}"
-                    ),
-                    allow_missing=allow_missing,
-                )
+    _check_registry_family_references(doc, issues, root, resource_type, allow_missing)
 
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)
 

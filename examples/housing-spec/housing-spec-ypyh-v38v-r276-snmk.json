@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.1.0",
+  "housing_spec": {
+    "id": "https://w3id.org/battinfo/housing-spec/ypyh-v38v-r276-snmk",
+    "short_id": "ypyhv3",
+    "name": "LFP 100Ah prismatic housing",
+    "cell_format": "prismatic",
+    "case": {
+      "material": "Aluminium",
+      "property": {
+        "wall_thickness": {
+          "value": 0.8,
+          "unit": "mm"
+        },
+        "weight": {
+          "value": 95,
+          "unit": "g"
+        }
+      }
+    },
+    "terminals": [
+      {
+        "polarity": "positive",
+        "material": "Aluminium",
+        "property": {
+          "width": {
+            "value": 20,
+            "unit": "mm"
+          }
+        }
+      },
+      {
+        "polarity": "negative",
+        "material": "Copper",
+        "property": {
+          "width": {
+            "value": 20,
+            "unit": "mm"
+          }
+        }
+      }
+    ],
+    "seals": [
+      {
+        "material": "Polypropylene"
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Prismatic Al housing with Al/Cu terminals and PP seals. Cell_Design_Tool LFP 100 Ah prismatic."
+  ]
+}

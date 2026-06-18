@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "current_collector": {
+    "id": "https://w3id.org/battinfo/current-collector/dwnd-tyk8-be76-1a3j",
+    "current_collector_spec_id": "https://w3id.org/battinfo/current-collector-spec/vkaf-f5bv-fwt2-e6yz",
+    "short_id": "dwndty",
+    "property": {
+      "thickness": {
+        "value": 15,
+        "unit": "um"
+      }
+    },
+    "lot_id": "AL-FOIL-LOT-001"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781778468
+  },
+  "notes": [
+    "Aluminium cathode current-collector foil lot."
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/ev9g-3eje-xfg8-n19f",
+    "short_id": "ev9g3e",
+    "identifier": "test-protocol:ev9g-3eje-xfg8-n19f",
+    "name": "DCIR — 10 s Pulse Resistance at 50% SOC, 25 C",
+    "kind": "dcir",
+    "description": "DC internal resistance from a 10 s discharge pulse and rest at 50% state of charge."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    },
+    "state_of_charge": {
+      "value": 50.0,
+      "unit": "%"
+    }
+  },
+  "method": [
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 3600.0,
+        "unit": "s"
+      },
+      "description": "Rest for 1 hour"
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "c_rate": {
+          "value": 1.0,
+          "unit": "A/Ah"
+        }
+      },
+      "duration": {
+        "value": 10.0,
+        "unit": "s"
+      },
+      "description": "Discharge at 1C for 10 seconds"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 40.0,
+        "unit": "s"
+      },
+      "description": "Rest for 40 seconds"
+    },
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.75,
+          "unit": "A/Ah"
+        }
+      },
+      "duration": {
+        "value": 10.0,
+        "unit": "s"
+      },
+      "description": "Charge at 0.75C for 10 seconds"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 600.0,
+        "unit": "s"
+      },
+      "description": "Rest for 10 minutes"
+    }
+  ],
+  "facets": {
+    "modes": [
+      "rest",
+      "cc"
+    ],
+    "directions": [
+      "charge",
+      "discharge"
+    ],
+    "control_modes": [
+      "current"
+    ],
+    "has_cv_hold": false,
+    "has_rest": true,
+    "has_eis": false,
+    "c_rates": [
+      0.75,
+      1.0
+    ],
+    "temperatures": [
+      25.0
+    ]
+  }
+}

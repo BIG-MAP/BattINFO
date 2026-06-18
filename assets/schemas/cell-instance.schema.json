@@ -224,6 +224,9 @@
       "items": {
         "type": "string"
       }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
     }
   },
   "$defs": {
@@ -280,6 +283,60 @@
     "SpecIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
     }
   }
 }

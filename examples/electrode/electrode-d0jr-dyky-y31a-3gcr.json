@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.1.0",
+  "electrode": {
+    "id": "https://w3id.org/battinfo/electrode/d0jr-dyky-y31a-3gcr",
+    "electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/t947-yem5-73n7-beb7",
+    "short_id": "d0jrdy",
+    "property": {
+      "diameter": {
+        "value": 11,
+        "unit": "mm"
+      },
+      "mass": {
+        "value": 23.0,
+        "unit": "mg"
+      }
+    },
+    "name": "NMC811 cathode disc (11 mm)",
+    "lot_id": "CATH-NMC811-001"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781742522
+  },
+  "notes": [
+    "A built NMC811 cathode disc (11 mm) from the Discovery-Benchmark coin-cell line."
+  ]
+}

@@ -65,3 +65,15 @@ def test_test_examples_cover_alpha_hardening_kinds() -> None:
     expected = {"cycling", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
     assert expected.issubset(observed)
 
+
+def test_test_protocol_examples_cover_full_battery_test_type_enum() -> None:
+    from battinfo.bundle import BatteryTestType
+
+    examples_dir = ROOT / "examples" / "test-protocol"
+    observed = {
+        json.loads(path.read_text(encoding="utf-8"))["test_spec"]["kind"]
+        for path in sorted(examples_dir.glob("*.json"))
+    }
+    expected = {kind.value for kind in BatteryTestType}
+    assert observed == expected, f"missing: {expected - observed}; extra: {observed - expected}"
+

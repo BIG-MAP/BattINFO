@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "electrode_spec": {
+    "id": "https://w3id.org/battinfo/electrode-spec/ck8b-r1dz-h8my-3k05",
+    "short_id": "ck8br1",
+    "name": "LNMO cathode",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "LNMO",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/83bd-jmk7-2x47-s04a",
+            "property": {
+              "mass_fraction": {
+                "value": 0.96,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "loading": {
+          "value": 19,
+          "unit": "mg/cm2"
+        }
+      }
+    },
+    "current_collector": {
+      "name": "Aluminium foil",
+      "property": {
+        "thickness": {
+          "value": 15,
+          "unit": "um"
+        }
+      }
+    },
+    "polarity": "positive",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781772766
+  },
+  "notes": [
+    "LNMO cathode (96/2/2 LNMO/PVDF/carbon black on Al foil)."
+  ]
+}

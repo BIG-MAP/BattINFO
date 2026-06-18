@@ -1,0 +1,32 @@
+{
+  "schema_version": "0.1.0",
+  "separator_spec": {
+    "id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+    "short_id": "wgym4x",
+    "name": "Celgard 2400",
+    "material": "polypropylene",
+    "structure": "monolayer",
+    "property": {
+      "thickness": {
+        "value": 25,
+        "unit": "um"
+      },
+      "porosity": {
+        "value": 0.41,
+        "unit": "1"
+      }
+    },
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Celgard",
+      "id": "https://w3id.org/battinfo/organization/9jcc-71jq-m4vk-r8jm"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Celgard 2400 monolayer PP separator. Discovery-Benchmark cells use Celgard separators."
+  ]
+}

@@ -58,9 +58,15 @@ def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path
     test_dir = ROOT / "examples" / "test"
     expected_kinds = {"cycling", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
 
+    # Only the tests linked to this A123 cell instance (the NMC811 fleet showcase test
+    # links to a different instance and is validated by test_cell_fleet).
+    a123_cell_id = cell_instance_doc["cell_instance"]["id"]
     for path in sorted(test_dir.glob("*.json")):
+        doc = _load_json(path)
+        if doc.get("test", {}).get("cell_id") != a123_cell_id:
+            continue
         payload = save_test(
-            _load_json(path),
+            doc,
             source_root=source_root,
             resolve_references=False,
             validation_policy="strict",

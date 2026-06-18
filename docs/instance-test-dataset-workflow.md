@@ -49,6 +49,48 @@ Dataset linkage policy for alpha:
 - a dataset must reference at least one BattINFO cell
 - a dataset may reference a BattINFO test when a concrete test record exists
 
+## Project Provenance (Funding)
+
+Beyond the per-record linkage chain, a whole authoring workspace can be tagged
+with the **funding project (grant)** that produced the work, so every record —
+cell spec, cell instance, test, test protocol, and dataset — can be traced back
+to its project (for example, everything done under EU grant 101103997 /
+*DigiBatt*).
+
+Set it once per workspace:
+
+```python
+import battinfo
+ws = battinfo.workspace(".")
+
+ws.project("101103997")          # just the grant identifier (the common case)
+# Title, funder, and programme are resolved from OpenAIRE and cached in
+# .battinfo/workspace.json; for EU grants a resolvable CORDIS IRI is derived.
+# Pass name=/funder=/... to fill them in by hand when you are offline or the
+# grant is not in OpenAIRE; manual values win and survive ws.project(refresh=True).
+
+ws.project()                     # show the current project
+ws.project(clear=True)           # remove the tag
+```
+
+How it propagates:
+
+- **On `ws.save()`** every record gets a top-level `funding` block (schema
+  `Funding` → schema.org `Grant`); re-saving back-fills records authored before
+  the project was set. The block is workspace-managed — when no project is set,
+  records are left untouched.
+- **In JSON-LD** (`ws.export("json-ld")`, RO-Crate, the Zenodo graph) it renders
+  as `schema:funding` → a `schema:Grant` node with `schema:funder`. The funding
+  *programme* is kept only in the native record (schema.org has no standard term
+  for it).
+- **On `ws.submit()`** the grant is surfaced at the submission `provenance.project`
+  so the registry can filter by project.
+- **On `ws.zenodo()`** the project's CORDIS page is added to the deposit's
+  related identifiers (`relation: isPartOf`).
+
+The `funding` block is an optional top-level property of every record envelope
+schema (`assets/schemas/{cell-spec,cell-instance,test,test-protocol,dataset}.schema.json`).
+
 ## Current Example Chain
 
 - descriptor:

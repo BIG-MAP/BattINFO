@@ -24,36 +24,81 @@
         "kind"
       ],
       "properties": {
-        "id": { "$ref": "#/$defs/SpecIri" },
-        "short_id": { "$ref": "#/$defs/ShortId" },
-        "identifier": { "type": "string", "minLength": 1 },
-        "name": { "type": "string", "minLength": 1 },
-        "description": { "type": "string" },
+        "id": {
+          "$ref": "#/$defs/SpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
         "kind": {
           "type": "string",
           "enum": [
-            "cycling", "capacity_check", "rate_capability", "hppc", "ici",
-            "gitt", "dcir", "eis", "impedance", "calendar_ageing", "formation",
-            "rpt", "field", "duty_cycle", "wltp", "nedc", "other"
+            "cycling",
+            "capacity_check",
+            "rate_capability",
+            "hppc",
+            "ici",
+            "gitt",
+            "dcir",
+            "eis",
+            "impedance",
+            "calendar_ageing",
+            "formation",
+            "rpt",
+            "quasi_ocv",
+            "field",
+            "duty_cycle",
+            "wltp",
+            "nedc",
+            "sem",
+            "characterization",
+            "other"
           ]
         },
-        "version": { "type": "string" },
-        "protocol_url": { "type": "string", "format": "uri" }
+        "version": {
+          "type": "string"
+        },
+        "protocol_url": {
+          "type": "string",
+          "format": "uri"
+        }
       }
     },
     "method": {
       "type": "array",
       "description": "Ordered, typed descriptive steps. Canonical structured form of the procedure.",
-      "items": { "$ref": "#/$defs/Step" }
+      "items": {
+        "$ref": "#/$defs/Step"
+      }
     },
     "record": {
       "type": "object",
       "description": "Protocol-level default data-recording cadence (PyBaMM `period` / aurora `record`).",
       "additionalProperties": false,
       "properties": {
-        "time_s": { "type": "number", "exclusiveMinimum": 0 },
-        "voltage_V": { "type": "number", "exclusiveMinimum": 0 },
-        "current_mA": { "type": "number", "exclusiveMinimum": 0 }
+        "time_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "voltage_V": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "current_mA": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "safety": {
@@ -61,18 +106,50 @@
       "description": "Global instrument hard limits, distinct from per-step termination.",
       "additionalProperties": false,
       "properties": {
-        "max_voltage_V": { "type": ["number", "null"] },
-        "min_voltage_V": { "type": ["number", "null"] },
-        "max_current_mA": { "type": ["number", "null"] },
-        "min_current_mA": { "type": ["number", "null"] },
-        "max_capacity_mAh": { "type": ["number", "null"] },
-        "delay_s": { "type": ["number", "null"] }
+        "max_voltage_V": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "min_voltage_V": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "max_current_mA": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "min_current_mA": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "max_capacity_mAh": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "delay_s": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
       }
     },
     "conditions": {
       "type": "object",
       "description": "Protocol-level ambient conditions, each a typed quantity (e.g. temperature).",
-      "additionalProperties": { "$ref": "#/$defs/Quantity" }
+      "additionalProperties": {
+        "$ref": "#/$defs/Quantity"
+      }
     },
     "facets": {
       "type": "object",
@@ -82,37 +159,70 @@
     "artifacts": {
       "type": "array",
       "description": "Actionable-layer links to runnable protocol files.",
-      "items": { "$ref": "#/$defs/Artifact" }
+      "items": {
+        "$ref": "#/$defs/Artifact"
+      }
     },
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": [ "source_type", "retrieved_at" ],
+      "required": [
+        "source_type",
+        "retrieved_at"
+      ],
       "properties": {
         "source_type": {
           "type": "string",
-          "enum": [ "manual", "lab", "simulation", "import", "other" ]
+          "enum": [
+            "manual",
+            "lab",
+            "simulation",
+            "import",
+            "other"
+          ]
         },
         "source_url": {
-          "anyOf": [ { "type": "string", "format": "uri" }, { "type": "null" } ]
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "citation": { "type": "string", "format": "uri" },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
         "citation_doi": {
           "type": "string",
           "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
         },
-        "source_file": { "type": "string" },
+        "source_file": {
+          "type": "string"
+        },
         "derived_from_artifact": {
           "type": "string",
           "description": "Role or locator of the artifact this method was derived from."
         },
-        "retrieved_at": { "$ref": "#/$defs/UnixTime" },
-        "workflow_version": { "type": "string" }
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "workflow_version": {
+          "type": "string"
+        }
       }
     },
     "notes": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
     }
   },
   "$defs": {
@@ -132,76 +242,234 @@
     "Quantity": {
       "type": "object",
       "additionalProperties": false,
-      "required": [ "value", "unit" ],
+      "required": [
+        "value",
+        "unit"
+      ],
       "properties": {
-        "value": { "type": "number" },
-        "unit": { "type": "string", "minLength": 1 }
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "Termination": {
       "type": "object",
       "additionalProperties": false,
-      "required": [ "quantity", "value", "unit" ],
+      "required": [
+        "quantity",
+        "value",
+        "unit"
+      ],
       "properties": {
         "quantity": {
           "type": "string",
-          "enum": [ "voltage", "current", "c_rate", "capacity", "duration" ]
+          "enum": [
+            "voltage",
+            "current",
+            "c_rate",
+            "capacity",
+            "duration"
+          ]
         },
-        "value": { "type": "number" },
-        "unit": { "type": "string", "minLength": 1 },
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
         "direction": {
           "type": "string",
-          "enum": [ "below", "above", "elapsed" ]
+          "enum": [
+            "below",
+            "above",
+            "elapsed"
+          ]
         }
       }
     },
     "Step": {
       "type": "object",
       "additionalProperties": false,
-      "required": [ "mode" ],
+      "required": [
+        "mode"
+      ],
       "properties": {
         "mode": {
           "type": "string",
-          "enum": [ "cc", "cv", "cccv", "cp", "cr", "rest", "eis", "scan", "group" ]
+          "enum": [
+            "cc",
+            "cv",
+            "cccv",
+            "cp",
+            "cr",
+            "rest",
+            "eis",
+            "scan",
+            "group"
+          ]
         },
         "direction": {
           "type": "string",
-          "enum": [ "charge", "discharge", "hold", "rest", "none" ]
+          "enum": [
+            "charge",
+            "discharge",
+            "hold",
+            "rest",
+            "none"
+          ]
         },
         "setpoints": {
           "type": "object",
-          "additionalProperties": { "$ref": "#/$defs/Quantity" }
+          "additionalProperties": {
+            "$ref": "#/$defs/Quantity"
+          }
         },
         "termination": {
           "type": "array",
-          "items": { "$ref": "#/$defs/Termination" }
+          "items": {
+            "$ref": "#/$defs/Termination"
+          }
         },
-        "duration": { "$ref": "#/$defs/Quantity" },
-        "temperature": { "$ref": "#/$defs/Quantity" },
-        "period": { "type": "object", "additionalProperties": true },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "description": { "type": "string" },
-        "count": { "type": "integer", "minimum": 1 },
-        "steps": { "type": "array", "items": { "$ref": "#/$defs/Step" } }
+        "duration": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "temperature": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "period": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Step"
+          }
+        }
       }
     },
     "Artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": [ "role", "format", "locator" ],
+      "required": [
+        "role",
+        "format",
+        "locator"
+      ],
       "properties": {
         "role": {
           "type": "string",
-          "enum": [ "source_protocol", "executed_protocol", "vendor_export", "simulation_input", "other" ]
+          "enum": [
+            "source_protocol",
+            "executed_protocol",
+            "vendor_export",
+            "simulation_input",
+            "other"
+          ]
         },
-        "format": { "type": "string", "minLength": 1 },
-        "locator": { "type": "string", "minLength": 1 },
-        "media_type": { "type": "string" },
-        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "byte_size": { "type": "integer", "minimum": 0 },
-        "conforms_to": { "type": "string" },
-        "generated": { "type": "array", "items": { "type": "string" } },
-        "generated_from": { "type": "string" }
+        "format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conforms_to": {
+          "type": "string"
+        },
+        "generated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "generated_from": {
+          "type": "string"
+        }
+      }
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
       }
     }
   }

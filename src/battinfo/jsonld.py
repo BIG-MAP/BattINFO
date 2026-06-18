@@ -398,6 +398,32 @@ def _provenance(prov: dict) -> dict:
     return out
 
 
+def funding_to_jsonld(funding: Any) -> dict | None:
+    """Convert a record ``funding`` block to a schema.org ``Grant`` node.
+
+    Mirrors the ``funders`` → ``schema:funder`` pattern.  Returns ``None`` when
+    there is nothing identifying to emit.  The ``program`` field is intentionally
+    not exported — schema.org has no standard term for a funding programme, so it
+    is kept only in the native record block (avoids inventing IRIs).
+    """
+    if not isinstance(funding, dict):
+        return None
+    out: dict = {"@type": "schema:Grant"}
+    if funding.get("id"):
+        out["@id"] = funding["id"]
+    if funding.get("identifier"):
+        out["schema:identifier"] = funding["identifier"]
+    if funding.get("name"):
+        out["schema:name"] = funding["name"]
+    if funding.get("acronym"):
+        out["schema:alternateName"] = funding["acronym"]
+    funder = funding.get("funder")
+    if isinstance(funder, dict) and funder.get("name"):
+        out["schema:funder"] = {"@type": "schema:Organization", "schema:name": funder["name"]}
+    # Nothing beyond the bare @type → not worth emitting.
+    return out if len(out) > 1 else None
+
+
 def _material_to_jsonld(record: dict) -> dict:
     """Transform a material-spec or material (instance) record to JSON-LD.
 
@@ -412,6 +438,10 @@ def _material_to_jsonld(record: dict) -> dict:
     return {"@context": doc.get("@context"), **node}
 
 
+# Same delegation for component spec/instance records (electrode, separator, …).
+_component_to_jsonld = _material_to_jsonld
+
+
 # ── Public dispatcher ─────────────────────────────────────────────────────────
 
 _TRANSFORMERS = {
@@ -424,6 +454,21 @@ _TRANSFORMERS = {
     "material-spec":  _material_to_jsonld,
     "material_spec":  _material_to_jsonld,
     "material":       _material_to_jsonld,
+    "electrode-spec": _component_to_jsonld,
+    "electrode_spec": _component_to_jsonld,
+    "electrode":      _component_to_jsonld,
+    "separator-spec": _component_to_jsonld,
+    "separator_spec": _component_to_jsonld,
+    "separator":      _component_to_jsonld,
+    "current-collector-spec": _component_to_jsonld,
+    "current_collector_spec": _component_to_jsonld,
+    "current_collector":      _component_to_jsonld,
+    "electrolyte-spec": _component_to_jsonld,
+    "electrolyte_spec": _component_to_jsonld,
+    "electrolyte":      _component_to_jsonld,
+    "housing-spec": _component_to_jsonld,
+    "housing_spec": _component_to_jsonld,
+    "housing":      _component_to_jsonld,
 }
 
 
@@ -459,4 +504,12 @@ def record_to_jsonld(record: dict, record_type: str) -> dict:
             f"Unknown record_type {record_type!r}. "
             f"Supported: {sorted({k.replace('_','-') for k in _TRANSFORMERS})}."
         )
-    return fn(record)
+    node = fn(record)
+    # Funding (workspace grant) → schema:funding/Grant, for every record kind whose
+    # node uses the schema.org context. Material/component nodes delegate to the
+    # domain-battery emitter (a different context) and are skipped.
+    if fn is not _material_to_jsonld:
+        grant = funding_to_jsonld(record.get("funding"))
+        if grant is not None:
+            node["schema:funding"] = grant
+    return node

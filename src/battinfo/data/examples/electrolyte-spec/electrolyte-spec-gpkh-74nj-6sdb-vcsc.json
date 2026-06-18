@@ -1,0 +1,63 @@
+{
+  "schema_version": "0.1.0",
+  "electrolyte_spec": {
+    "id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+    "short_id": "gpkh74",
+    "name": "1M LiPF6 in EC:EMC 3:7",
+    "family": "organic",
+    "salt": {
+      "name": "LiPF6",
+      "material_spec_id": "https://w3id.org/battinfo/material-spec/fpeg-3wg8-e6cs-2vn1",
+      "cation": "Li+",
+      "anion": "PF6-",
+      "property": {
+        "concentration": {
+          "value": 1.0,
+          "unit": "mol/L"
+        }
+      }
+    },
+    "solvent_mixture": {
+      "component": [
+        {
+          "name": "EC",
+          "material_spec_id": "https://w3id.org/battinfo/material-spec/efxx-b9yg-wh00-d23a",
+          "property": {
+            "volume_fraction": {
+              "value": 0.3,
+              "unit": "1"
+            }
+          }
+        },
+        {
+          "name": "EMC",
+          "material_spec_id": "https://w3id.org/battinfo/material-spec/hy9g-22sd-czdb-nmm4",
+          "property": {
+            "volume_fraction": {
+              "value": 0.7,
+              "unit": "1"
+            }
+          }
+        }
+      ]
+    },
+    "property": {
+      "conductivity": {
+        "value": 10.0,
+        "unit": "mS/cm"
+      }
+    },
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Organic Li-ion electrolyte, 1M LiPF6 in EC:EMC 3:7 wt. Discovery-Benchmark electrolyte (Canrud)."
+  ]
+}

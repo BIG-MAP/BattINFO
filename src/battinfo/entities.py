@@ -73,6 +73,52 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
         spec_ref_field="material_spec_id",
         spec_entity_type="material-spec",
     ),
+    EntityKind("electrode-spec", "electrode_spec", "electrode-spec.schema.json", "electrode-spec", "electrode-spec"),
+    EntityKind(
+        "electrode",
+        "electrode",
+        "electrode.schema.json",
+        "electrode",
+        "electrode",
+        spec_ref_field="electrode_spec_id",
+        spec_entity_type="electrode-spec",
+    ),
+    EntityKind("separator-spec", "separator_spec", "separator-spec.schema.json", "separator-spec", "separator-spec"),
+    EntityKind(
+        "separator", "separator", "separator.schema.json", "separator", "separator",
+        spec_ref_field="separator_spec_id", spec_entity_type="separator-spec",
+    ),
+    EntityKind(
+        "current-collector-spec", "current_collector_spec", "current-collector-spec.schema.json",
+        "current-collector-spec", "current-collector-spec",
+    ),
+    EntityKind(
+        "current-collector", "current_collector", "current-collector.schema.json",
+        "current-collector", "current-collector",
+        spec_ref_field="current_collector_spec_id", spec_entity_type="current-collector-spec",
+    ),
+    EntityKind("electrolyte-spec", "electrolyte_spec", "electrolyte-spec.schema.json", "electrolyte-spec", "electrolyte-spec"),
+    EntityKind(
+        "electrolyte", "electrolyte", "electrolyte.schema.json", "electrolyte", "electrolyte",
+        spec_ref_field="electrolyte_spec_id", spec_entity_type="electrolyte-spec",
+    ),
+    EntityKind("housing-spec", "housing_spec", "housing-spec.schema.json", "housing-spec", "housing-spec"),
+    EntityKind(
+        "housing", "housing", "housing.schema.json", "housing", "housing",
+        spec_ref_field="housing_spec_id", spec_entity_type="housing-spec",
+    ),
+)
+
+
+# Entity families that follow the generic component spec/instance pattern (reuse an
+# existing embedded holder schema). Underscore identifiers; the generic API derives the
+# hyphen IRI namespace via ``family.replace("_", "-")``.
+COMPONENT_FAMILIES: tuple[str, ...] = (
+    "electrode",
+    "separator",
+    "current_collector",
+    "electrolyte",
+    "housing",
 )
 
 ENTITY_BY_TYPE: dict[str, EntityKind] = {kind.entity_type: kind for kind in ENTITY_KINDS}

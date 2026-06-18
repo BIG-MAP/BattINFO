@@ -1,0 +1,86 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/t163-7ba5-r0kn-h9my",
+    "short_id": "t1637b",
+    "identifier": "test-protocol:t163-7ba5-r0kn-h9my",
+    "name": "Quasi-OCV — C/25 Discharge at 25 C",
+    "kind": "quasi_ocv",
+    "description": "Quasi-equilibrium open-circuit voltage profile mapped by a very slow C/25 charge and discharge."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.04,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ],
+      "description": "Charge at C/25 until 4.2 V"
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.04,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        }
+      ],
+      "description": "Discharge at C/25 until 2.5 V"
+    }
+  ],
+  "facets": {
+    "modes": [
+      "cc"
+    ],
+    "directions": [
+      "charge",
+      "discharge"
+    ],
+    "control_modes": [
+      "current"
+    ],
+    "has_cv_hold": false,
+    "has_rest": false,
+    "has_eis": false,
+    "c_rates": [
+      0.04
+    ],
+    "voltage_window_V": [
+      2.5,
+      4.2
+    ],
+    "temperatures": [
+      25.0
+    ]
+  }
+}

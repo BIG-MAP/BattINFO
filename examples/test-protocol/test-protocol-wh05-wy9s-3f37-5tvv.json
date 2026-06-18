@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/wh05-wy9s-3f37-5tvv",
+    "short_id": "wh05wy",
+    "identifier": "test-protocol:wh05-wy9s-3f37-5tvv",
+    "name": "NEDC Drive-cycle Power Profile",
+    "kind": "nedc",
+    "description": "New European Driving Cycle power profile (legacy) applied at the cell level; full trace in a linked artifact.",
+    "protocol_url": "https://en.wikipedia.org/wiki/New_European_Driving_Cycle"
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778245
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  }
+}

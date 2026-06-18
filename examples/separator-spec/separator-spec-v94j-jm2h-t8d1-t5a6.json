@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "separator_spec": {
+    "id": "https://w3id.org/battinfo/separator-spec/v94j-jm2h-t8d1-t5a6",
+    "short_id": "v94jjm",
+    "name": "Ceramic-coated PE",
+    "material": "polyethylene",
+    "structure": "monolayer",
+    "coating": "Al2O3",
+    "property": {
+      "thickness": {
+        "value": 20,
+        "unit": "um"
+      },
+      "porosity": {
+        "value": 0.42,
+        "unit": "1"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Ceramic (Al2O3) coated PE separator for higher thermal stability."
+  ]
+}

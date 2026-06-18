@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "dataset": {
+    "id": "https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17",
+    "short_id": "nns1gh",
+    "identifier": "dataset:nns1-gh5p-v5n1-td17",
+    "name": "NMC811 coin cell cycling data",
+    "access_url": "https://example.org/dataset/nns1-gh5p-v5n1-td17",
+    "description": "Raw galvanostatic cycling export for one NMC811-Graphite coin cell.",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "measurement_techniques": [
+      "cycling"
+    ],
+    "measurement_methods": [
+      "galvanostatic cycling"
+    ],
+    "variable_measured": [
+      {
+        "name": "voltage",
+        "unit_text": "V"
+      },
+      {
+        "name": "current",
+        "unit_text": "A"
+      },
+      {
+        "name": "capacity",
+        "unit_text": "Ah"
+      }
+    ],
+    "about": [
+      "https://w3id.org/battinfo/cell/ag7d-b4fp-r0sv-226m",
+      "https://w3id.org/battinfo/test/ezwb-tj8t-0474-7dgh"
+    ],
+    "created_at": 1781772876,
+    "modified_at": 1781772876,
+    "published_at": 1781772876
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "retrieved_at": 1781772876
+  }
+}

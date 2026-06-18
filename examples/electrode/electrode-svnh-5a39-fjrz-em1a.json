@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.1.0",
+  "electrode": {
+    "id": "https://w3id.org/battinfo/electrode/svnh-5a39-fjrz-em1a",
+    "electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+    "short_id": "svnh5a",
+    "property": {
+      "diameter": {
+        "value": 16,
+        "unit": "mm"
+      },
+      "mass": {
+        "value": 25.8,
+        "unit": "mg"
+      }
+    },
+    "name": "Graphite anode disc (16 mm)",
+    "lot_id": "ANODE-GR-001"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781778468
+  },
+  "notes": [
+    "A built graphite anode disc (16 mm)."
+  ]
+}

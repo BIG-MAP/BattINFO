@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01",
+    "short_id": "86k66t",
+    "identifier": "cell-spec:86k6-6tzd-c4sf-5s01",
+    "name": "EMPA PRISM-LFP-100AH",
+    "model": "PRISM-LFP-100AH",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "EMPA",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    },
+    "cell_format": "prismatic",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "LFP",
+    "negative_electrode_basis": "graphite"
+  },
+  "properties": {
+    "nominal_capacity": {
+      "value": 100.0,
+      "unit": "Ah"
+    },
+    "nominal_voltage": {
+      "value": 3.2,
+      "unit": "V"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "source_file": "manual.json",
+    "source_url": null,
+    "retrieved_at": 1781772767
+  },
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/a86t-cxgj-c8h4-2y7b",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+  "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+  "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+  "housing_spec_id": "https://w3id.org/battinfo/housing-spec/ypyh-v38v-r276-snmk",
+  "notes": [
+    "LFP 100 Ah prismatic engineering cell (Cell_Design_Tool)."
+  ]
+}

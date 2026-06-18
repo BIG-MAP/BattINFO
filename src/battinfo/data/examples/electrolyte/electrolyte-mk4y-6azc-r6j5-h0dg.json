@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "electrolyte": {
+    "id": "https://w3id.org/battinfo/electrolyte/mk4y-6azc-r6j5-h0dg",
+    "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+    "short_id": "mk4y6a",
+    "property": {
+      "conductivity": {
+        "value": 10.2,
+        "unit": "mS/cm"
+      }
+    },
+    "lot_id": "ELYTE-LIPF6-LOT-001"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781778468
+  },
+  "notes": [
+    "A mixed batch of the 1M LiPF6 EC:EMC organic electrolyte."
+  ]
+}

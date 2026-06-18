@@ -13,7 +13,7 @@ BattINFO
 
 **BattINFO** is the semantic data layer for battery science — a Python library, CLI, and canonical asset suite that validates, maps, and publishes battery metadata as machine-readable Linked Data aligned with the `EMMO Battery Domain Ontology <https://emmo-repo.github.io/domain-battery/>`_.
 
-Here is a minimal example that creates a canonical cell-type record and publishes it locally:
+Here is a minimal example that creates a canonical cell-spec record and publishes it locally. It uses the same flagship cell shown on `battinfo.org <https://battinfo.org>`_ (A123 ANR26650M1-B); the full canonical record lives at ``examples/cell-spec/A123__ANR26650M1-B.json``.
 
 .. tab-set::
 
@@ -21,34 +21,38 @@ Here is a minimal example that creates a canonical cell-type record and publishe
 
       .. code-block:: python
 
-         from battinfo import CellType, publish
+         from battinfo import CellSpecification, publish
 
-         cell_type = CellType(
-             manufacturer="Energizer",
-             model="CR2032",
-             format="coin",
-             chemistry="Li-primary",
+         spec = CellSpecification(
+             manufacturer="A123",
+             model="ANR26650M1-B",
+             cell_format="cylindrical",
+             chemistry="Li-ion",
+             nominal_capacity={"value": 2.5, "unit": "Ah"},
          )
 
-         result = publish(cell_type, destination="local")
-         # → writes a canonical BattINFO record under .battinfo/
+         result = publish(spec, destination="local")
+         # → writes a canonical BattINFO record with a persistent spec IRI
 
    .. tab-item:: Canonical record (JSON)
 
       .. code-block:: json
 
          {
-           "product": {
-             "id": "https://w3id.org/battinfo/cell/...",
-             "short_id": "...",
-             "manufacturer": "Energizer",
-             "model": "CR2032",
-             "format": "coin",
-             "chemistry": "Li-primary"
+           "schema_version": "0.1.0",
+           "cell_spec": {
+             "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+             "name": "A123 ANR26650M1-B",
+             "model": "ANR26650M1-B",
+             "manufacturer": { "type": "Organization", "name": "A123" },
+             "category": "battery cell",
+             "cell_format": "cylindrical",
+             "chemistry": "Li-ion",
+             "positive_electrode_basis": "LFP"
            },
-           "provenance": {
-             "source_type": "lab",
-             "retrieved_at": "2025-05-15"
+           "properties": {
+             "nominal_capacity": { "value": 2.5, "unit": "Ah" },
+             "nominal_voltage":  { "value": 3.3, "unit": "V" }
            }
          }
 
@@ -57,13 +61,18 @@ Here is a minimal example that creates a canonical cell-type record and publishe
       .. code-block:: json
 
          {
-           "@context": "https://w3id.org/battinfo/context.json",
-           "@type": "battinfo:CellType",
-           "@id": "https://w3id.org/battinfo/cell/...",
-           "schema:manufacturer": "Energizer",
-           "schema:name": "CR2032",
-           "battinfo:format": "coin",
-           "battinfo:chemistry": "Li-primary"
+           "@context": "https://w3id.org/battinfo/context/domain-battery.jsonld",
+           "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+           "@type": ["BatteryCell", "CylindricalBattery", "LithiumIonBattery"],
+           "skos:prefLabel": "A123 ANR26650M1-B",
+           "manufacturer": { "@type": "Organization", "name": "A123" },
+           "hasProperty": [
+             {
+               "@type": ["NominalCapacity", "ConventionalProperty"],
+               "hasNumericalPart": { "@type": "Real", "hasNumericalValue": 2.5 },
+               "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+             }
+           ]
          }
 
 

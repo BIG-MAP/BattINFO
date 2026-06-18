@@ -1,0 +1,94 @@
+{
+  "schema_version": "0.1.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/pbsv-hspm-j9rt-qhax",
+    "short_id": "pbsvhs",
+    "identifier": "test-protocol:pbsv-hspm-j9rt-qhax",
+    "name": "Duty Cycle — Mixed-Load Micro-cycle at 25 C",
+    "kind": "duty_cycle",
+    "description": "Representative repeated mixed-load duty cycle (e.g. drive/charge micro-cycle)."
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778244
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "c_rate": {
+          "value": 2.0,
+          "unit": "A/Ah"
+        }
+      },
+      "duration": {
+        "value": 30.0,
+        "unit": "s"
+      },
+      "description": "Discharge at 2C for 30 seconds"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 10.0,
+        "unit": "s"
+      },
+      "description": "Rest for 10 seconds"
+    },
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 1.0,
+          "unit": "A/Ah"
+        }
+      },
+      "duration": {
+        "value": 20.0,
+        "unit": "s"
+      },
+      "description": "Charge at 1C for 20 seconds"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 10.0,
+        "unit": "s"
+      },
+      "description": "Rest for 10 seconds"
+    }
+  ],
+  "facets": {
+    "modes": [
+      "cc",
+      "rest"
+    ],
+    "directions": [
+      "charge",
+      "discharge"
+    ],
+    "control_modes": [
+      "current"
+    ],
+    "has_cv_hold": false,
+    "has_rest": true,
+    "has_eis": false,
+    "c_rates": [
+      1.0,
+      2.0
+    ],
+    "temperatures": [
+      25.0
+    ]
+  }
+}

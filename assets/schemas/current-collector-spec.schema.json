@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/current-collector-spec.schema.json",
+  "title": "BattINFO Current Collector Spec",
+  "description": "Reusable current collector specification. The 'spec' half of the current-collector-spec + current-collector pair.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "current_collector_spec",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "current_collector_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ComponentSpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "material_spec_id": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "ComponentSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/current-collector-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "OrgRef": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ]
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet",
+            "manufacturer",
+            "measurement",
+            "lab",
+            "literature",
+            "manual",
+            "other"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
+      }
+    }
+  }
+}

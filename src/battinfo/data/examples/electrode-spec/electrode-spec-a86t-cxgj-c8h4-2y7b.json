@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "electrode_spec": {
+    "id": "https://w3id.org/battinfo/electrode-spec/a86t-cxgj-c8h4-2y7b",
+    "short_id": "a86tcx",
+    "name": "LFP cathode",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "LFP",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/5ms1-9jv8-hr54-mn4e",
+            "property": {
+              "mass_fraction": {
+                "value": 0.96,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "loading": {
+          "value": 20,
+          "unit": "mg/cm2"
+        }
+      }
+    },
+    "current_collector": {
+      "name": "Aluminium foil",
+      "property": {
+        "thickness": {
+          "value": 15,
+          "unit": "um"
+        }
+      }
+    },
+    "polarity": "positive",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781772766
+  },
+  "notes": [
+    "LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil)."
+  ]
+}
