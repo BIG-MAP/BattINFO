@@ -71,7 +71,7 @@ conditions as `schema:PropertyValue`s — not just prose — so they are queryab
 Every `@id` either resolves to a node in the document or is a typed stub pointing at the
 authoritative resource (e.g. a remote `BatteryCellSpecification` with `rdfs:isDefinedBy`).
 Registry IRI resolution (`w3id.org/battinfo/spec/…`) and the published context URL are
-tracked in `dereferenceability.md`.
+handled by the BattINFO registry deployment.
 
 ## Round-trip fidelity (`ws.import_`)
 

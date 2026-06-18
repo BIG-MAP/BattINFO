@@ -66,7 +66,7 @@ shared across cells.
 
 The NMC811 coin demonstrates the complete graph end-to-end:
 
-```
+```text
 cell-spec COIN-NMC811-D  →  cell-instance (P025-CEL-001)  →  test (cycling)  →  dataset
         ↓ references
    electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs

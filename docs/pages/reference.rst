@@ -9,3 +9,4 @@ Full reference documentation for the BattINFO Python API, CLI, and validation co
    ../python-api
    ../cli-spec
    ../validation-contract
+   ../reading-a-record

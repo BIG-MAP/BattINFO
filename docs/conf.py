@@ -41,16 +41,12 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
+    # Maintainer-only working notes (see docs/internal/README.md) — kept in-repo
+    # but never rendered into the site.
+    "internal/**",
+    # GitHub-facing docs landing (the rendered site uses index.rst) and the alpha
+    # scope note, both linked from README.md but not part of the toctree.
     "index.md",
-    "CONTENT-MODEL.md",
-    "cell-descriptor-integration.md",
-    "cell-descriptor-stable-subset.md",
-    "cell-descriptor-standard.md",
-    "converter-compatibility.md",
-    "dataset-registry-intake-spec.md",
-    "editorial-cell-type-workflow.md",
-    "resolver.md",
-    "validation-roadmap.md",
     "alpha-scope.md",
 ]
 
