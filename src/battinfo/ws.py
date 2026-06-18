@@ -507,6 +507,73 @@ class ProjectRef:
         return f"{label} ({self.identifier})" if label else self.identifier
 
 
+_ORCID_RE = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+
+
+def _normalize_orcid(value: str) -> str:
+    """Return the bare ORCID id (``0000-0002-1825-0097``) from an id or full URL."""
+    token = str(value).strip()
+    token = re.sub(r"^https?://orcid\.org/", "", token, flags=re.IGNORECASE).rstrip("/")
+    token = token.upper()
+    if not _ORCID_RE.match(token):
+        raise ValueError(
+            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 "
+            "(or the full https://orcid.org/… URL)."
+        )
+    return token
+
+
+@dataclass
+class ContributorRef:
+    """The person contributing records from this workspace, identified by ORCID.
+
+    Stamped onto each dataset's ``creators`` at ``save()`` so platform
+    contributions can be attributed to a person (the ORCID is the durable key).
+    """
+
+    orcid: str  # bare id, e.g. "0000-0002-1825-0097"
+    name: str | None = None
+    affiliation: str | None = None
+
+    @property
+    def orcid_url(self) -> str:
+        return f"https://orcid.org/{self.orcid}"
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ContributorRef":
+        return cls(
+            orcid=_normalize_orcid(str(data.get("orcid") or "")),
+            name=data.get("name"),
+            affiliation=data.get("affiliation"),
+        )
+
+    def to_dict(self) -> dict:
+        out: dict[str, Any] = {"orcid": self.orcid}
+        if self.name:
+            out["name"] = self.name
+        if self.affiliation:
+            out["affiliation"] = self.affiliation
+        return out
+
+    def creator_block(self) -> dict:
+        """A schema-valid ``Person`` creator carrying the ORCID in ``same_as``.
+
+        ``publication._datacite_creators`` / ``_schema_agent_node`` already read
+        ``same_as`` for ``orcid.org/`` URIs, so this flows into DataCite and
+        JSON-LD with an ORCID nameIdentifier automatically.
+        """
+        block: dict[str, Any] = {"type": "Person"}
+        if self.name:
+            block["name"] = self.name
+        block["same_as"] = self.orcid_url
+        if self.affiliation:
+            block["affiliation"] = {"type": "Organization", "name": self.affiliation}
+        return block
+
+    def summary(self) -> str:
+        return f"{self.name} ({self.orcid_url})" if self.name else self.orcid_url
+
+
 def _oa_text(value: Any) -> str | None:
     """Pull a plain string out of OpenAIRE's polymorphic JSON values."""
     if value is None:
@@ -847,6 +914,10 @@ class AuthoringWorkspace:
         # .battinfo/workspace.json on first access via _get_project()
         self._project_ref: ProjectRef | None = None
         self._project_loaded = False
+        # workspace-level contributor (ORCID); lazily loaded from
+        # .battinfo/workspace.json on first access via _get_contributor()
+        self._contributor_ref: ContributorRef | None = None
+        self._contributor_loaded = False
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -1204,6 +1275,135 @@ class AuthoringWorkspace:
                 p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n",
                              encoding="utf-8")
                 stamped += 1
+        return stamped
+
+    def contributor(
+        self,
+        orcid: str | None = None,
+        *,
+        name: str | None = None,
+        affiliation: str | None = None,
+        clear: bool = False,
+    ) -> dict | None:
+        """Tag this workspace with the contributor's ORCID for attribution.
+
+        Once set, the contributor is added to every dataset you ``save()`` (as a
+        ``creators`` entry carrying the ORCID), so platform contributions can be
+        traced back to a person. The ORCID is the durable key; ``name`` is shown
+        in the record.
+
+        Returns the record-level ``creators`` entry (or ``None`` when cleared or
+        unset).
+
+        Examples
+        --------
+        ::
+
+            ws.contributor("0000-0002-1825-0097", name="Jane Researcher")
+            ws.contributor()                       # show the current contributor
+            ws.contributor(affiliation="SINTEF")   # fill in / update a field
+            ws.contributor(clear=True)             # remove the contributor tag
+        """
+        if clear:
+            self._set_contributor(None)
+            print("Workspace contributor cleared.")
+            return None
+
+        current = self._get_contributor()
+
+        # Getter (no ORCID supplied): optionally patch name/affiliation in place.
+        if orcid is None:
+            if current is None:
+                print('No contributor set. Tag this workspace with your ORCID, e.g.:\n'
+                      '    ws.contributor("0000-0002-1825-0097", name="Your Name")')
+                return None
+            if name is not None or affiliation is not None:
+                current = ContributorRef(
+                    orcid=current.orcid,
+                    name=name if name is not None else current.name,
+                    affiliation=affiliation if affiliation is not None else current.affiliation,
+                )
+                self._set_contributor(current)
+            self._print_contributor(current)
+            return current.creator_block()
+
+        # Setter: ORCID supplied. Preserve unspecified fields when re-setting the same id.
+        ref = ContributorRef(orcid=_normalize_orcid(orcid), name=name, affiliation=affiliation)
+        if current is not None and current.orcid == ref.orcid:
+            if ref.name is None:
+                ref.name = current.name
+            if ref.affiliation is None:
+                ref.affiliation = current.affiliation
+        if not ref.name:
+            raise ValueError(
+                'contributor name is required, e.g. '
+                'ws.contributor("0000-0002-1825-0097", name="Your Name").'
+            )
+        self._set_contributor(ref)
+        self._print_contributor(ref)
+        return ref.creator_block()
+
+    def _get_contributor(self) -> "ContributorRef | None":
+        """Current workspace contributor, loaded from disk on first access."""
+        if not self._contributor_loaded:
+            data = self._load_workspace_state().get("contributor")
+            self._contributor_ref = ContributorRef.from_dict(data) if data else None
+            self._contributor_loaded = True
+        return self._contributor_ref
+
+    def _set_contributor(self, ref: "ContributorRef | None") -> None:
+        state = self._load_workspace_state()
+        if ref is None:
+            state.pop("contributor", None)
+        else:
+            state.setdefault("schema_version", "0.1.0")
+            state["contributor"] = ref.to_dict()
+        self._save_workspace_state(state)
+        self._contributor_ref = ref
+        self._contributor_loaded = True
+
+    def _print_contributor(self, ref: "ContributorRef") -> None:
+        print(f"Workspace contributor: {ref.summary()}")
+        if ref.affiliation:
+            print(f"  affiliation: {ref.affiliation}")
+        print("  Saved to .battinfo/workspace.json; added to dataset creators on ws.save().")
+
+    def _stamp_contributor(self, result: dict) -> int:
+        """Add the workspace contributor to every dataset's ``creators`` on save.
+
+        Idempotent: a dataset already listing the contributor's ORCID (in any
+        creator's ``same_as``) is left untouched, so re-saving never duplicates.
+        Only datasets carry a ``creators`` field, so other record types are
+        skipped. No-op when no contributor is set.
+        """
+        ref = self._get_contributor()
+        if ref is None:
+            return 0
+        block = ref.creator_block()
+        stamped = 0
+        for item in result.get("datasets", []):
+            path = item.get("path") if isinstance(item, dict) else str(item)
+            if not path:
+                continue
+            p = Path(path)
+            if not p.exists():
+                continue
+            record = json.loads(p.read_text(encoding="utf-8"))
+            dataset = record.get("dataset")
+            if not isinstance(dataset, dict):
+                continue
+            creators = dataset.get("creators")
+            if not isinstance(creators, list):
+                creators = []
+            already = any(
+                isinstance(c, dict) and c.get("same_as") == ref.orcid_url for c in creators
+            )
+            if already:
+                continue
+            creators.append(block)
+            dataset["creators"] = creators
+            p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            stamped += 1
         return stamped
 
     def convert(self, pattern: str | None = None, fmt: str = "csv") -> list[Path]:
@@ -1746,8 +1946,10 @@ class AuthoringWorkspace:
                 if p:
                     self._session_paths.add(Path(p))
 
-        # Stamp the workspace's funding project (grant) onto every record written.
+        # Stamp the workspace's funding project (grant) onto every record written,
+        # and the contributor (ORCID) onto every dataset, for attribution.
         stamped = self._stamp_project_funding(result)
+        self._stamp_contributor(result)
 
         # Build id -> human name from the finalized in-memory objects so the
         # confirmation shows what was written, not just counts.
