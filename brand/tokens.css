@@ -1,0 +1,59 @@
+/* ============================================================================
+   BattINFO — Brand design tokens  v1.0
+   Single source of truth for the visual identity.
+   Consumed by: docs/_static/css/custom.css (Sphinx), web/ (future site).
+   Do not fork these values — import this file and map onto your framework.
+   ========================================================================= */
+:root {
+  /* Brand ------------------------------------------------------------------ */
+  --bi-ink:        #102A43;   /* text, symbol, headers        */
+  --bi-teal-500:   #12A394;   /* brand fills, LARGE display only (fails AA as text) */
+  --bi-teal-700:   #0C7A6E;   /* links, teal text, buttons (AA-safe, 5.2:1)        */
+  --bi-favicon-teal: #19C2AE; /* brighter teal, ≤32px legibility only              */
+
+  /* Neutral & surface ------------------------------------------------------ */
+  --bi-slate-700:  #2E4257;   /* secondary text               */
+  --bi-muted:      #5A6570;   /* tertiary / captions          */
+  --bi-surface:    #FFFFFF;   /* cards                        */
+  --bi-paper:      #F3F2EE;   /* page background              */
+  --bi-border:     #E7E5DF;   /* hairlines                    */
+  --bi-tint:       #E4F4F1;   /* teal wash, tags              */
+
+  /* Semantic states (solid / tint) — all AA-verified on white -------------- */
+  --bi-success:     #178050;  --bi-success-tint: #E4F4EC;   /* 4.95 */
+  --bi-warning:     #946007;  --bi-warning-tint: #FBF0DA;   /* 5.34 */
+  --bi-error:       #C8372D;  --bi-error-tint:   #FBE7E4;   /* 5.20 */
+  --bi-info:        #2563B8;  --bi-info-tint:    #E5EEFA;   /* 5.91 */
+
+  /* Interaction states ----------------------------------------------------- */
+  --bi-ink-hover:   #1D3A57;  /* primary btn hover            */
+  --bi-ink-active:  #0A1B2C;  /* primary btn active           */
+  --bi-disabled-bg: #C2C8CE;  /* disabled surface             */
+  --bi-focus-ring:  #0C7A6E;  /* 2px focus ring               */
+
+  /* Type ------------------------------------------------------------------- */
+  --bi-font:       "Plus Jakarta Sans", system-ui, sans-serif;
+  --bi-font-mono:  "JetBrains Mono", ui-monospace, monospace;
+
+  /* Type scale  (size · weight · letter-spacing · line-height) ------------- */
+  --bi-display-size: 3.5rem;    --bi-display-weight: 800; /* tracking -2.5%, lh 1.05 */
+  --bi-h1-size:      2.5rem;    --bi-h1-weight:      700; /* tracking -2%,   lh 1.1  */
+  --bi-h2-size:      1.5rem;    --bi-h2-weight:      700; /* lh 1.25                 */
+  --bi-body-lg-size: 1.125rem;  --bi-body-lg-weight: 500; /* lh 1.55                 */
+  --bi-body-size:    1rem;      --bi-body-weight:    500; /* lh 1.6                  */
+  --bi-caption-size: 0.75rem;   /* mono, uppercase, used for labels/eyebrows         */
+
+  /* Spacing (4px base) ----------------------------------------------------- */
+  --bi-space-xs: 4px;   --bi-space-sm: 8px;
+  --bi-space-md: 16px;  --bi-space-lg: 24px;
+  --bi-space-xl: 48px;
+
+  /* Radius ----------------------------------------------------------------- */
+  --bi-radius-control: 6px;
+  --bi-radius-button:  10px;
+  --bi-radius-card:    14px;
+
+  /* Elevation -------------------------------------------------------------- */
+  --bi-shadow-sm: 0 1px 3px rgba(20,30,40,0.08);
+  --bi-shadow-md: 0 6px 20px rgba(20,30,40,0.12);
+}

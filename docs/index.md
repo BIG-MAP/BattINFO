@@ -34,6 +34,7 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 
 | | |
 |---|---|
+| **[Data federation](data-federation.md)** | Why battery data needs federation, how BattINFO is the backbone, and Battery Genome in practice |
 | **[Cell descriptor standard](cell-descriptor-standard.md)** | Normative cell descriptor specification |
 | **[Ontology / profile architecture](ontology-profile-architecture.md)** | How BattINFO, EMMO, and schema.org compose |
 | **[Schemas](../assets/schemas/)** | JSON Schema (draft 2020-12) files for all record types |
