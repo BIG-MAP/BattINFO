@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.11", "3.12"]
     defaults:
       run:
         shell: bash   # consistent shell on Windows so the wheel-smoke glob + pip steps work

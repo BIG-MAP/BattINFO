@@ -7,7 +7,7 @@ name = "battinfo"
 version = "0.1.0"
 description = "Implementation and interoperability layer for the domain-battery ontology."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
@@ -28,8 +28,8 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering",
   "Typing :: Typed",
 ]
@@ -115,7 +115,7 @@ ignore = [
 "tests/*.py" = ["E402"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 files = ["src/battinfo"]
 ignore_missing_imports = true   # third-party libs (rdflib, pyld, rocrate, …) ship no stubs
 warn_redundant_casts = true
