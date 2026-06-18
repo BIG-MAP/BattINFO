@@ -9,7 +9,9 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parents[2]
 
 UID = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
-CELL_TYPE_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/cell/{UID}$")
+# cell-spec IRIs live under /spec/ (post cell->spec migration); validates
+# cell_spec.id and cell_instance.type_id. Cell *instances* keep /cell/.
+CELL_TYPE_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/spec/{UID}$")
 CELL_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/cell/{UID}$")
 DATASET_IRI_RE = re.compile(rf"^https://w3id\.org/battinfo/dataset/{UID}$")
 SHORT_ID_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{6,16}$")
@@ -36,8 +38,8 @@ def _check_cell_specs(dir_path: Path, errors: list[str]) -> None:
     for path in sorted(dir_path.glob("*.json")):
         _check_filename_policy(path, errors)
         doc = _load(path)
-        # Accept both new-style "cell_spec" key and legacy "cell_spec" key
-        cell_spec = doc.get("cell_spec") or doc.get("cell_spec")
+        # Accept the new-style "cell_spec" key, falling back to the legacy "product" key
+        cell_spec = doc.get("cell_spec") or doc.get("product")
         if not isinstance(cell_spec, dict):
             errors.append(f"{path}: missing product/cell_spec object")
             continue
