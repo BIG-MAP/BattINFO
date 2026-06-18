@@ -1,0 +1,76 @@
+{
+  "id": "bdc_000001",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "performance"
+  ],
+  "publication_date": "2020",
+  "source_urls": [
+    "https://doi.org/10.5281/zenodo.3633834"
+  ],
+  "download_urls": [
+    "https://zenodo.org/api/records/3633835/files-archive"
+  ],
+  "overview": {
+    "feature": "20,000 EIS spectra",
+    "case": "CoinCase",
+    "cell_module_pack": "BatteryCell",
+    "manufacturer": "Eunicell",
+    "battery_model": "LIR2032",
+    "iec_battery_code": "ICR2032"
+  },
+  "code": {
+    "url": "https://github.com/YunweiZhang/ML-identify-battery-degradation",
+    "available": true,
+    "urls": [
+      "https://github.com/YunweiZhang/ML-identify-battery-degradation"
+    ]
+  },
+  "electrodes": {
+    "positive": "LithiumCobaltOxide",
+    "negative": "Carbon"
+  },
+  "reported_values": {
+    "rated_capacity_Ah": 0.045,
+    "number_of_specimens": 12.0
+  },
+  "available_measurements": {
+    "discharge_capacity": true,
+    "internal_resistance": false,
+    "eis": true,
+    "pseudo_ocv": false
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": null,
+    "battery_cycler_model": null,
+    "anomaly_mentioned": false,
+    "owner": "Univ. of Cambridge and Newcastle",
+    "data_modality": "TimeSeriesDataSet",
+    "in_previous_reviews": true,
+    "purpose": "Impedance-spectroscopy dataset for machine-learning identification of lithium-ion battery degradation patterns."
+  },
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "bib_citation_data": "zhang_2020",
+  "data_group": "PerformanceData",
+  "comment": "20,000 EIS spectra",
+  "publications": [
+    {
+      "url": "https://doi.org/10.1038/s41467-020-15235-7",
+      "bib_citation": "zhang2020identifying"
+    }
+  ],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.02.11",
+      "curator": "import_excel.py",
+      "source": "BatteryDataCommons.xlsx:Performance data"
+    }
+  ]
+}

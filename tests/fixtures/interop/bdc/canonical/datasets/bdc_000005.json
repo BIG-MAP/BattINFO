@@ -1,0 +1,73 @@
+{
+  "id": "bdc_000005",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "performance"
+  ],
+  "publication_date": "2015",
+  "source_urls": [
+    "https://doi.org/10.6078/D1MS3X"
+  ],
+  "download_urls": [
+    "https://datadryad.org/dataset/downloadZip/doi_10_6078_D1MS3X__v20150818.zip"
+  ],
+  "overview": {
+    "feature": null,
+    "case": "R18650",
+    "cell_module_pack": "BatteryCell",
+    "manufacturer": null,
+    "battery_model": null,
+    "iec_battery_code": "ICR18650"
+  },
+  "code": {
+    "url": "https://github.com/wang-fujin/Battery-dataset-preprocessing-code-library",
+    "available": true,
+    "urls": [
+      "https://github.com/wang-fujin/Battery-dataset-preprocessing-code-library",
+      "https://github.com/nicolet5/DiffCapAnalyzer"
+    ]
+  },
+  "electrodes": {
+    "positive": "LithiumCobaltOxide",
+    "negative": "Carbon"
+  },
+  "reported_values": {
+    "rated_capacity_Ah": 2.6,
+    "number_of_specimens": 42.0
+  },
+  "available_measurements": {
+    "discharge_capacity": true,
+    "internal_resistance": false,
+    "eis": false,
+    "pseudo_ocv": false
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": null,
+    "battery_cycler_model": null,
+    "anomaly_mentioned": false,
+    "owner": "University of California",
+    "data_modality": "TimeSeriesDataSet",
+    "in_previous_reviews": true,
+    "purpose": "A series of tests were carried out in order to explore alternate charging protocols to the standard CCCV. Using such alternative protocols, it was possible to apply higher currents to achieve faster charging without cell degradation. In addition, baseline tests were carried out in order to study capacity fade."
+  },
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "bib_citation_data": "Berkeley",
+  "data_group": "PerformanceData",
+  "comment": null,
+  "publications": [],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.02.11",
+      "curator": "import_excel.py",
+      "source": "BatteryDataCommons.xlsx:Performance data"
+    }
+  ],
+  "title": "Fast Charging Tests"
+}

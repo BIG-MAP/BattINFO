@@ -1,0 +1,85 @@
+{
+  "id": "bdc_000014",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "performance"
+  ],
+  "publication_date": "2022",
+  "source_urls": [
+    "https://doi.org/10.17632/4fx8cjprxm.1"
+  ],
+  "download_urls": [
+    "https://data.mendeley.com/public-api/zip/4fx8cjprxm/download/1"
+  ],
+  "overview": {
+    "feature": null,
+    "case": "Unknown",
+    "cell_module_pack": "BatteryCell",
+    "manufacturer": "Turnigy",
+    "battery_model": "Graphene 5000mAh 65C",
+    "iec_battery_code": null
+  },
+  "code": {
+    "url": null,
+    "available": false
+  },
+  "electrodes": {
+    "positive": "LithiumPolymer",
+    "negative": "Carbon"
+  },
+  "reported_values": {
+    "rated_capacity_Ah": 5.0,
+    "number_of_specimens": 1.0
+  },
+  "available_measurements": {
+    "discharge_capacity": true,
+    "internal_resistance": true,
+    "eis": false,
+    "pseudo_ocv": true
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": "Digatron",
+    "battery_cycler_model": "Firing Circuits Universal Battery Tester",
+    "anomaly_mentioned": false,
+    "owner": "McMaster University",
+    "data_modality": "TimeSeriesDataSet",
+    "in_previous_reviews": true,
+    "kind_of_data": "PerformanceData",
+    "purpose": "Turnigy Graphene 5000mAh 65C Li-ion Battery Data."
+  },
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "bib_citation_data": "kollmeyer2020turnigy",
+  "data_group": "PerformanceData",
+  "comment": null,
+  "publications": [
+    {
+      "url": "https://doi.org/10.1016/j.est.2021.103660",
+      "bib_citation": "vidal2022estimating"
+    }
+  ],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.02.11",
+      "curator": "import_excel.py",
+      "source": "BatteryDataCommons.xlsx:Performance data"
+    },
+    {
+      "event": "enriched",
+      "release": "v2026.03.02",
+      "curator": "update_from_excel_v1.py",
+      "source": "BatteryDataCommons_V1.xlsx:Performance data"
+    }
+  ],
+  "license_name": "https://creativecommons.org/licenses/by/4.0/",
+  "performance_details": {
+    "eis_temperature": "Not applicable",
+    "eis_frequency_range": "Not applicable"
+  }
+}

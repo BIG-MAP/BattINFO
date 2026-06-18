@@ -11,6 +11,9 @@ specifically, see [converter-compatibility.md](converter-compatibility.md).)
 |--------|-------------|----------|----------|
 | **BattINFO Converter** JSON-LD | `import_converter_jsonld[_record]`, `import_converter_package`, `batch_import_converter_directory` | cell-spec → instance, test-spec, test, dataset | `tests/fixtures/converter/*` (RO-Crate / BatteryTest shapes); `tests/fixtures/interop/converter-versions/*` (real tool outputs v1.0.0–v1.1.17) |
 | **Solid-state DB** (tabular CSV) | `batch_import_solid_state_db`, `from_solid_state_db_row` | material-spec ×N → cell-spec → instance → test | `tests/fixtures/interop/solid-state-db/*` |
+| **Discovery-Benchmark** (`.eln` RO-Crate) | `import_discovery_eln` | material-spec → electrode-spec → cell-spec → instance → test → dataset (+ electrolyte-spec) | `tests/fixtures/interop/discovery/ro-crate-metadata.sample.json` |
+| **Discovery-Benchmark** (`.xlsx`) | `import_discovery_xlsx` | material-spec + electrolyte-spec + cell-spec → instance → test | `tests/fixtures/interop/discovery/discovery-benchmark.sample.xlsx` |
+| **Battery Data Commons** (registry JSON) | `batch_import_bdc` / `import_bdc_record`; `to_bdc_record` (export) | dataset + cell-spec → instance + material-spec ×N + test per measurement | `tests/fixtures/interop/bdc/canonical/datasets/*` |
 | **BPX** (Battery Parameter eXchange) | `from_bpx` / `to_bpx` / `save_bpx` | cell-spec ⇄ BPX | `examples/cell-spec/A123__ANR26650M1-B.json` |
 | **battdat / BDF** (timeseries CSV) | `from_battdat` | test + dataset | synthetic in `test_ingest.py` |
 | **Cycler protocols** | `import_aurora_unicycler`, `import_pybamm_experiment`, `import_bmgen_jsonld` | test-spec (structured method) | inline in `test_protocol_importers.py` |
@@ -54,8 +57,36 @@ trim. Full workbooks/CSVs stay out of the repo (size + third-party licensing);
 the importers accept a path so the full files can be run locally.
 
 This keeps interop tests hermetic and deterministic without repo bloat. New
-sources (e.g. Battery Data Commons, the DIGIBAT Discovery `.eln`) should be added
-the same way.
+sources should be added the same way.
+
+### Battery Data Commons (two-way seam)
+
+`battinfo.interop.battery_data_commons` is a **two-way** seam with the BDC dataset
+registry — the first step toward native BattINFO integration into BDC. See the
+field mapping and integration plan in
+[battery-data-commons.md](battery-data-commons.md). `import_bdc_record` maps a BDC
+canonical record into a dataset + cell-spec → instance + electrode material-specs
++ a test per reported measurement; `to_bdc_record` exports a BattINFO cell back to
+the BDC shape. Software-tool records are skipped (no cell).
+
+### Discovery-Benchmark (two shapes, one dataset)
+
+The DIGIBAT Discovery-Benchmark ships as both a BattINFO-annotated RO-Crate
+(`.eln`) and a flat workbook (`.xlsx`) describing the same ~259 coin cells.
+`battinfo.interop.discovery` offers an entry point for each:
+
+- `import_discovery_eln(path)` — the rich path. 259 cells share 13 characterized
+  electrodes and 9 electrolytes, so it mints **deduplicated** material-specs,
+  electrode-specs and electrolyte-specs and wires each cell-spec to them by IRI,
+  plus a cycling test and a dataset per cell.
+- `import_discovery_xlsx(path)` — the flat path. One row per cell → material-spec
+  + electrolyte-spec + cell-spec → instance → test (no electrode-specs; the sheet
+  has no separable electrode entities).
+
+Both return a `DiscoveryImportPackage` and mint identifiers deterministically from
+each entity's Discovery refcode / item id, so re-import is idempotent (modulo the
+provenance retrieval timestamp) and a shared entity (e.g. an electrolyte named
+identically in both shapes) maps to the **same** IRI across the two importers.
 
 ### Converter version matrix
 

@@ -1,0 +1,93 @@
+{
+  "id": "bdc_000007",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "performance"
+  ],
+  "publication_date": "2023",
+  "source_urls": [
+    "https://doi.org/10.57745/R9Y6UR"
+  ],
+  "download_urls": [],
+  "overview": {
+    "feature": null,
+    "case": "R18650",
+    "cell_module_pack": "BatteryCell",
+    "manufacturer": "Samsung",
+    "battery_model": "ICR18650-26J",
+    "iec_battery_code": "ICR18650"
+  },
+  "code": {
+    "url": "https://entrepot.recherche.data.gouv.fr/file.xhtml?persistentId=doi:10.57745/4SGE0J&version=1.3&toolType=PREVIEW",
+    "available": true,
+    "urls": [
+      "https://entrepot.recherche.data.gouv.fr/file.xhtml?persistentId=doi:10.57745/4SGE0J&version=1.3&toolType=PREVIEW"
+    ],
+    "language": "Matlab with DATTES"
+  },
+  "electrodes": {
+    "positive": "LithiumCobaltOxide",
+    "negative": "Carbon"
+  },
+  "reported_values": {
+    "rated_capacity_Ah": 2.6,
+    "number_of_specimens": 3.0
+  },
+  "available_measurements": {
+    "discharge_capacity": true,
+    "internal_resistance": true,
+    "eis": false,
+    "pseudo_ocv": true
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": "Biologic",
+    "battery_cycler_model": "VSP",
+    "anomaly_mentioned": false,
+    "owner": "University Gustave Eiffel",
+    "data_modality": "TimeSeriesDataSet",
+    "in_previous_reviews": true,
+    "sampling": "1 s",
+    "file_format": ".mps, .mpt, .m",
+    "size": "65.7 Mo",
+    "kind_of_data": "PerformanceData",
+    "cyclers_raw_files_available": true,
+    "repository_self_explanatory": true,
+    "purpose": "This dataset contains characterization measurement that were performed at the University Gustave Eiffel by Simone Sottile and supervised by Marwan Hassini and Eduardo Redondo-Iglesias (eduardo.redondo@univ-eiffel.fr)."
+  },
+  "license": {
+    "name": "Etalab 2.0",
+    "url": "https://spdx.org/licenses/etalab-2.0.html"
+  },
+  "license_url": "https://spdx.org/licenses/etalab-2.0.html",
+  "bib_citation_data": "simone_data",
+  "data_group": "PerformanceData",
+  "comment": null,
+  "publications": [],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.02.11",
+      "curator": "import_excel.py",
+      "source": "BatteryDataCommons.xlsx:Performance data"
+    },
+    {
+      "event": "enriched",
+      "release": "v2026.03.02",
+      "curator": "update_from_excel_v1.py",
+      "source": "BatteryDataCommons_V1.xlsx:Performance data"
+    }
+  ],
+  "license_name": "https://spdx.org/licenses/etalab-2.0.html",
+  "performance_details": {
+    "capacity_test_temperature": "5, 10, 15, 20, 25, 30, 35, 40",
+    "resistance_test_soc": "90, 80, 70, 60, 50, 40, 30, 20, 10",
+    "resistance_test_temperature": "5, 10, 15, 20, 25, 30, 35, 40",
+    "eis_temperature": "Not applicable",
+    "eis_frequency_range": "Not applicable",
+    "low_current_charge_c_rate": "C/10",
+    "low_current_discharge_c_rate": "C/10",
+    "low_current_temperature": "5, 10, 15, 20, 25, 30, 35, 40"
+  }
+}

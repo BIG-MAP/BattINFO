@@ -1,4 +1,11 @@
 from battinfo.interop.battdat import BattdatImportResult, from_battdat
+from battinfo.interop.battery_data_commons import (
+    BdcImportPackage,
+    BdcRecordImport,
+    batch_import_bdc,
+    import_bdc_record,
+    to_bdc_record,
+)
 from battinfo.interop.bpx import (
     BpxExportResult,
     BpxImportResult,
@@ -16,6 +23,12 @@ from battinfo.interop.converter import (
     import_converter_package,
     import_dataset_record,
 )
+from battinfo.interop.discovery import (
+    DiscoveryCell,
+    DiscoveryImportPackage,
+    import_discovery_eln,
+    import_discovery_xlsx,
+)
 from battinfo.interop.protocols import (
     import_aurora_unicycler,
     import_bmgen_jsonld,
@@ -29,6 +42,15 @@ from battinfo.interop.solid_state_db import (
 )
 
 __all__ = [
+    "BdcImportPackage",
+    "BdcRecordImport",
+    "batch_import_bdc",
+    "import_bdc_record",
+    "to_bdc_record",
+    "DiscoveryCell",
+    "DiscoveryImportPackage",
+    "import_discovery_eln",
+    "import_discovery_xlsx",
     "SolidStateImportResult",
     "batch_import_solid_state_db",
     "from_solid_state_db_row",

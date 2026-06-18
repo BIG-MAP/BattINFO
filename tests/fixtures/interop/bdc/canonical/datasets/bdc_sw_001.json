@@ -1,0 +1,88 @@
+{
+  "id": "bdc_sw_001",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "software"
+  ],
+  "publication_date": "2012",
+  "source_urls": [
+    "https://www.hnei.hawaii.edu/alawa/"
+  ],
+  "download_urls": [],
+  "overview": {
+    "feature": null,
+    "case": null,
+    "cell_module_pack": null,
+    "manufacturer": null,
+    "battery_model": null,
+    "iec_battery_code": null
+  },
+  "code": {
+    "url": null,
+    "available": null,
+    "language": null,
+    "urls": []
+  },
+  "electrodes": {
+    "positive": null,
+    "negative": null
+  },
+  "reported_values": {
+    "rated_capacity_Ah": null,
+    "number_of_specimens": null
+  },
+  "available_measurements": {
+    "discharge_capacity": null,
+    "internal_resistance": null,
+    "eis": null,
+    "pseudo_ocv": null
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": null,
+    "battery_cycler_model": null,
+    "anomaly_mentioned": null,
+    "owner": null,
+    "data_modality": null,
+    "in_previous_reviews": false,
+    "purpose": "‘Alawa is a software suite based on the mechanistic model developed by the Hawai‘i Natural Energy Institute. The toolbox enables the emulation of the impact of all degradation modes (loss of ion in…."
+  },
+  "license": {
+    "name": "https://www.hnei.hawaii.edu/wp-content/uploads/Alawa-License-Agreement-Terms-and-Conditions.pdf",
+    "url": null
+  },
+  "license_url": null,
+  "bib_citation_data": null,
+  "data_group": "SoftwareData",
+  "comment": null,
+  "publications": [
+    {
+      "url": "https://doi.org/10.1016/j.jpowsour.2012.07.016",
+      "bib_citation": null
+    }
+  ],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.03.02",
+      "curator": "update_from_excel_v1.py",
+      "source": "BatteryDataCommons_V1.xlsx"
+    }
+  ],
+  "software": {
+    "name": "alawa",
+    "gui_or_language": "Matlab",
+    "public_commercial": "Request for sharing",
+    "features": {
+      "cycler_data_processing": false,
+      "battery_metrics": false,
+      "physics_modelling": true,
+      "experiment_modelling": true
+    },
+    "battery_cyclers_supported": "Not applicable",
+    "documentation": true,
+    "ongoing_maintenance": true
+  },
+  "license_name": "https://www.hnei.hawaii.edu/wp-content/uploads/Alawa-License-Agreement-Terms-and-Conditions.pdf"
+}

@@ -1,0 +1,72 @@
+{
+  "id": "bdc_000004",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "performance"
+  ],
+  "publication_date": "2019",
+  "source_urls": [
+    "https://web.calce.umd.edu/batteries/data/"
+  ],
+  "download_urls": [],
+  "overview": {
+    "feature": "144 cells",
+    "case": "PouchCase",
+    "cell_module_pack": "BatteryCell",
+    "manufacturer": "AA Portable Power Corp",
+    "battery_model": "PL-325085-2C",
+    "iec_battery_code": null
+  },
+  "code": {
+    "url": "https://github.com/wang-fujin/Battery-dataset-preprocessing-code-library",
+    "available": true,
+    "urls": [
+      "https://github.com/wang-fujin/Battery-dataset-preprocessing-code-library",
+      "https://github.com/nicolet5/DiffCapAnalyzer"
+    ]
+  },
+  "electrodes": {
+    "positive": "LithiumCobaltOxide",
+    "negative": "Carbon"
+  },
+  "reported_values": {
+    "rated_capacity_Ah": 1.5,
+    "number_of_specimens": 144.0
+  },
+  "available_measurements": {
+    "discharge_capacity": true,
+    "internal_resistance": false,
+    "eis": false,
+    "pseudo_ocv": false
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": null,
+    "battery_cycler_model": null,
+    "anomaly_mentioned": false,
+    "owner": "University of Maryland",
+    "data_modality": "TimeSeriesDataSet",
+    "in_previous_reviews": true,
+    "purpose": "Accelerated degradation model for C-rate loading of lithium-ion batteries."
+  },
+  "license": null,
+  "license_url": "No license",
+  "bib_citation_data": "CALCE",
+  "data_group": "PerformanceData",
+  "comment": "144 cells",
+  "publications": [
+    {
+      "url": "https://doi.org/10.1016/j.ijepes.2018.12.016",
+      "bib_citation": "saxena2019accelerated"
+    }
+  ],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.02.11",
+      "curator": "import_excel.py",
+      "source": "BatteryDataCommons.xlsx:Performance data"
+    }
+  ]
+}

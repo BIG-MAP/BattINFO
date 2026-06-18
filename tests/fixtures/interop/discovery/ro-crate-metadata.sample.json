@@ -1,0 +1,2043 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "Dataset": "http://schema.org/Dataset",
+      "File": "http://schema.org/MediaObject",
+      "hasPart": "http://schema.org/hasPart"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "dateCreated": "2026-06-03T13:11:50.071025+00:00",
+      "sdPublisher": {
+        "@id": "https://digibat.dept.ic.ac.uk"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "DIGIBAT Discovery Benchmark",
+      "description": "<h2>DIGIBAT Discovery Benchmark</h2><p>A reference dataset comprising ~250 lithium-ion coin cells systematically fabricated via automated assembly equipment at <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.imperial.ac.uk/digibat/\">DIGIBAT</a> facility. Designed to span common cathode/anode/electrolyte chemistries, as a shared benchmark for battery-informatics tooling.</p><h3>Characterisation</h3><p>The dataset is designed as a dual-layer knowledge graph that cleanly segregates precursor material characterisation from the final electrochemical cell performance:</p><ul><li><p><strong>Precursor-level characterisation:</strong> Microstructural, morphological, and chemical properties—including SEM/TEM, XRD, and XPS are mapped directly to individual electrode precursor records (e.g., <code>P025-ELD-001</code>) rather than individual cells.</p></li><li><p><strong>Cell-level characterisation:</strong> In-situ and operational testing data—such as Neware cycling exports (<code>.xlsx</code>) and BioLogic CV/EIS data (<code>.mpr</code>)—are anchored directly to the respective coin cell entry (e.g., <code>P025-CEL-001</code>).</p></li><li><p><strong>Visual records:</strong> Raw cell assembly photos are attached directly to each cell record. (Note: electrode alignment images are only available for cell batches built using the <code>EQP-D02-Cellerate</code>).</p></li></ul><h3>Mass-correction note</h3><p>The original charge/discharge capacities recorded in cell-side files used the total electrode disc mass (e.g. 23 mg) rather than the active material mass after subtracting current collector foil (e.g. 20 mg). Capacities have been recalculated; the corrected nominal capacity is shown on each cell record as <code>characteristic_mass</code> / <code>nominal_voltage</code>. Some cells turn out to be limited on the carbon side after recalculation — for those the nominal capacity is taken as <code>min(cathode, anode)</code>. The per-file raw capacity values in the cycling exports are therefore <em>stale</em>; the cell-record value is the source of truth.</p><h3>Infrastructure &amp; Funding</h3><ul><li><p><strong>Ingestion Pipeline:</strong> The ingestion code that produced this collection is acessible on <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://github.com/datalab-industries/digibat-datalab-deployment/tree/main/scripts/discovery_benchmark\">Github</a></p></li><li><p><strong>Sponsorship:</strong> This campaign to generate open, multimodal battery datasets for the research community is supported by the <strong>Henry Royce Institute</strong>, <strong>UK Research and Innovation (UKRI)</strong>, and <strong>Department for Science, Innovation & Technology</strong> through UKRI.</p></li></ul><h3>Project Contributions &amp; Framework</h3><p>A collaborative milestone involving the multi-disciplinary deployment of laboratory automation, data engineering, and informatics tools:</p><ul><li><p><strong>Data Creators:</strong> Dr Rob Hunter, Dr Niamh Hartley</p></li><li><p><strong>Data Curators:</strong> Dr Matthew Evans (datalab integration), Dr Lucas Garcia Verga (Data architecture), Dr Felix Mildner (BattINFO annotation, DigiBOT creator), Dr Ben Smith (datalab systems), Shirley Xiong (CellSeer visualisation)</p></li><li><p><strong>Project Manager:</strong> Dr Jingyu Feng</p></li><li><p><strong>Project Leaders:</strong> Prof Magda Titirici, Prof Aron Walsh, Prof Sam Cooper</p></li></ul><p></p>",
+      "hasPart": [
+        {
+          "@id": "./P025-ELD-001/"
+        },
+        {
+          "@id": "./P025-ELD-002/"
+        },
+        {
+          "@id": "./P025-ELD-003/"
+        },
+        {
+          "@id": "./P025-ELD-004/"
+        },
+        {
+          "@id": "./P025-ELD-005/"
+        },
+        {
+          "@id": "./P025-ELD-006/"
+        },
+        {
+          "@id": "./P025-ELD-007/"
+        },
+        {
+          "@id": "./P025-ELD-008/"
+        },
+        {
+          "@id": "./P025-ELD-009/"
+        },
+        {
+          "@id": "./P025-ELD-010/"
+        },
+        {
+          "@id": "./P025-ELD-011/"
+        },
+        {
+          "@id": "./P025-ELD-012/"
+        },
+        {
+          "@id": "./P025-ELD-013/"
+        },
+        {
+          "@id": "./P025-ELY-001/"
+        },
+        {
+          "@id": "./P025-ELY-002/"
+        },
+        {
+          "@id": "./P025-ELY-003/"
+        },
+        {
+          "@id": "./P025-ELY-004/"
+        },
+        {
+          "@id": "./P025-ELY-005/"
+        },
+        {
+          "@id": "./P025-ELY-006/"
+        },
+        {
+          "@id": "./P025-ELY-007/"
+        },
+        {
+          "@id": "./P025-ELY-008/"
+        },
+        {
+          "@id": "./P025-ELY-009/"
+        },
+        {
+          "@id": "./P025-INV-SPW/"
+        },
+        {
+          "@id": "./P025-INV-S15/"
+        },
+        {
+          "@id": "./P025-INV-S10/"
+        },
+        {
+          "@id": "./P025-INV-S05/"
+        },
+        {
+          "@id": "./P025-INV-CLG/"
+        },
+        {
+          "@id": "./P025-INV-GFA/"
+        },
+        {
+          "@id": "./P025-CEL-009/"
+        },
+        {
+          "@id": "./P025-CEL-010/"
+        },
+        {
+          "@id": "./P025-CEL-011/"
+        },
+        {
+          "@id": "./P025-CEL-039/"
+        },
+        {
+          "@id": "./P025-CEL-004/"
+        },
+        {
+          "@id": "./P025-CEL-005/"
+        },
+        {
+          "@id": "./P025-CEL-006/"
+        },
+        {
+          "@id": "./P025-CEL-001/"
+        },
+        {
+          "@id": "./P025-CEL-002/"
+        },
+        {
+          "@id": "./P025-CEL-003/"
+        },
+        {
+          "@id": "./P025-CEL-036/"
+        },
+        {
+          "@id": "./P025-CEL-007/"
+        },
+        {
+          "@id": "./P025-CEL-008/"
+        },
+        {
+          "@id": "./P025-CEL-012/"
+        },
+        {
+          "@id": "./P025-CEL-013/"
+        },
+        {
+          "@id": "./P025-CEL-014/"
+        },
+        {
+          "@id": "./P025-CEL-037/"
+        },
+        {
+          "@id": "./P025-CEL-015/"
+        },
+        {
+          "@id": "./P025-CEL-016/"
+        },
+        {
+          "@id": "./P025-CEL-017/"
+        },
+        {
+          "@id": "./P025-CEL-018/"
+        },
+        {
+          "@id": "./P025-CEL-019/"
+        },
+        {
+          "@id": "./P025-CEL-020/"
+        },
+        {
+          "@id": "./P025-CEL-021/"
+        },
+        {
+          "@id": "./P025-CEL-022/"
+        },
+        {
+          "@id": "./P025-CEL-027/"
+        },
+        {
+          "@id": "./P025-CEL-029/"
+        },
+        {
+          "@id": "./P025-CEL-025/"
+        },
+        {
+          "@id": "./P025-CEL-026/"
+        },
+        {
+          "@id": "./P025-CEL-038/"
+        },
+        {
+          "@id": "./P025-CEL-033/"
+        },
+        {
+          "@id": "./P025-CEL-034/"
+        },
+        {
+          "@id": "./P025-CEL-031/"
+        },
+        {
+          "@id": "./P025-CEL-032/"
+        },
+        {
+          "@id": "./P025-CEL-046/"
+        },
+        {
+          "@id": "./P025-CEL-047/"
+        },
+        {
+          "@id": "./P025-CEL-050/"
+        },
+        {
+          "@id": "./P025-CEL-051/"
+        },
+        {
+          "@id": "./P025-CEL-048/"
+        },
+        {
+          "@id": "./P025-CEL-043/"
+        },
+        {
+          "@id": "./P025-CEL-044/"
+        },
+        {
+          "@id": "./P025-CEL-045/"
+        },
+        {
+          "@id": "./P025-CEL-040/"
+        },
+        {
+          "@id": "./P025-CEL-041/"
+        },
+        {
+          "@id": "./P025-CEL-042/"
+        },
+        {
+          "@id": "./P025-CEL-052/"
+        },
+        {
+          "@id": "./P025-CEL-053/"
+        },
+        {
+          "@id": "./P025-CEL-054/"
+        },
+        {
+          "@id": "./P025-CEL-055/"
+        },
+        {
+          "@id": "./P025-CEL-056/"
+        },
+        {
+          "@id": "./P025-CEL-057/"
+        },
+        {
+          "@id": "./P025-CEL-061/"
+        },
+        {
+          "@id": "./P025-CEL-062/"
+        },
+        {
+          "@id": "./P025-CEL-063/"
+        },
+        {
+          "@id": "./P025-CEL-058/"
+        },
+        {
+          "@id": "./P025-CEL-059/"
+        },
+        {
+          "@id": "./P025-CEL-060/"
+        },
+        {
+          "@id": "./P025-CEL-073/"
+        },
+        {
+          "@id": "./P025-CEL-074/"
+        },
+        {
+          "@id": "./P025-CEL-075/"
+        },
+        {
+          "@id": "./P025-CEL-070/"
+        },
+        {
+          "@id": "./P025-CEL-071/"
+        },
+        {
+          "@id": "./P025-CEL-072/"
+        },
+        {
+          "@id": "./P025-CEL-067/"
+        },
+        {
+          "@id": "./P025-CEL-068/"
+        },
+        {
+          "@id": "./P025-CEL-069/"
+        },
+        {
+          "@id": "./P025-CEL-064/"
+        },
+        {
+          "@id": "./P025-CEL-065/"
+        },
+        {
+          "@id": "./P025-CEL-066/"
+        },
+        {
+          "@id": "./P025-CEL-109/"
+        },
+        {
+          "@id": "./P025-CEL-110/"
+        },
+        {
+          "@id": "./P025-CEL-111/"
+        },
+        {
+          "@id": "./P025-CEL-106/"
+        },
+        {
+          "@id": "./P025-CEL-107/"
+        },
+        {
+          "@id": "./P025-CEL-108/"
+        },
+        {
+          "@id": "./P025-CEL-103/"
+        },
+        {
+          "@id": "./P025-CEL-104/"
+        },
+        {
+          "@id": "./P025-CEL-105/"
+        },
+        {
+          "@id": "./P025-CEL-100/"
+        },
+        {
+          "@id": "./P025-CEL-101/"
+        },
+        {
+          "@id": "./P025-CEL-102/"
+        },
+        {
+          "@id": "./P025-CEL-079/"
+        },
+        {
+          "@id": "./P025-CEL-076/"
+        },
+        {
+          "@id": "./P025-CEL-077/"
+        },
+        {
+          "@id": "./P025-CEL-078/"
+        },
+        {
+          "@id": "./P025-CEL-080/"
+        },
+        {
+          "@id": "./P025-CEL-081/"
+        },
+        {
+          "@id": "./P025-CEL-085/"
+        },
+        {
+          "@id": "./P025-CEL-086/"
+        },
+        {
+          "@id": "./P025-CEL-087/"
+        },
+        {
+          "@id": "./P025-CEL-082/"
+        },
+        {
+          "@id": "./P025-CEL-083/"
+        },
+        {
+          "@id": "./P025-CEL-084/"
+        },
+        {
+          "@id": "./P025-CEL-097/"
+        },
+        {
+          "@id": "./P025-CEL-098/"
+        },
+        {
+          "@id": "./P025-CEL-099/"
+        },
+        {
+          "@id": "./P025-CEL-094/"
+        },
+        {
+          "@id": "./P025-CEL-095/"
+        },
+        {
+          "@id": "./P025-CEL-096/"
+        },
+        {
+          "@id": "./P025-CEL-091/"
+        },
+        {
+          "@id": "./P025-CEL-092/"
+        },
+        {
+          "@id": "./P025-CEL-093/"
+        },
+        {
+          "@id": "./P025-CEL-088/"
+        },
+        {
+          "@id": "./P025-CEL-089/"
+        },
+        {
+          "@id": "./P025-CEL-090/"
+        },
+        {
+          "@id": "./P025-CEL-112/"
+        },
+        {
+          "@id": "./P025-CEL-113/"
+        },
+        {
+          "@id": "./P025-CEL-114/"
+        },
+        {
+          "@id": "./P025-CEL-155/"
+        },
+        {
+          "@id": "./P025-CEL-156/"
+        },
+        {
+          "@id": "./P025-CEL-158/"
+        },
+        {
+          "@id": "./P025-CEL-159/"
+        },
+        {
+          "@id": "./P025-CEL-151/"
+        },
+        {
+          "@id": "./P025-CEL-152/"
+        },
+        {
+          "@id": "./P025-CEL-153/"
+        },
+        {
+          "@id": "./P025-CEL-148/"
+        },
+        {
+          "@id": "./P025-CEL-149/"
+        },
+        {
+          "@id": "./P025-CEL-150/"
+        },
+        {
+          "@id": "./P025-CEL-160/"
+        },
+        {
+          "@id": "./P025-CEL-161/"
+        },
+        {
+          "@id": "./P025-CEL-162/"
+        },
+        {
+          "@id": "./P025-CEL-163/"
+        },
+        {
+          "@id": "./P025-CEL-164/"
+        },
+        {
+          "@id": "./P025-CEL-165/"
+        },
+        {
+          "@id": "./P025-CEL-166/"
+        },
+        {
+          "@id": "./P025-CEL-167/"
+        },
+        {
+          "@id": "./P025-CEL-168/"
+        },
+        {
+          "@id": "./P025-CEL-169/"
+        },
+        {
+          "@id": "./P025-CEL-170/"
+        },
+        {
+          "@id": "./P025-CEL-171/"
+        },
+        {
+          "@id": "./P025-CEL-172/"
+        },
+        {
+          "@id": "./P025-CEL-173/"
+        },
+        {
+          "@id": "./P025-CEL-174/"
+        },
+        {
+          "@id": "./P025-CEL-175/"
+        },
+        {
+          "@id": "./P025-CEL-176/"
+        },
+        {
+          "@id": "./P025-CEL-177/"
+        },
+        {
+          "@id": "./P025-CEL-178/"
+        },
+        {
+          "@id": "./P025-CEL-179/"
+        },
+        {
+          "@id": "./P025-CEL-180/"
+        },
+        {
+          "@id": "./P025-CEL-181/"
+        },
+        {
+          "@id": "./P025-CEL-182/"
+        },
+        {
+          "@id": "./P025-CEL-183/"
+        },
+        {
+          "@id": "./P025-CEL-208/"
+        },
+        {
+          "@id": "./P025-CEL-209/"
+        },
+        {
+          "@id": "./P025-CEL-210/"
+        },
+        {
+          "@id": "./P025-CEL-211/"
+        },
+        {
+          "@id": "./P025-CEL-212/"
+        },
+        {
+          "@id": "./P025-CEL-213/"
+        },
+        {
+          "@id": "./P025-CEL-214/"
+        },
+        {
+          "@id": "./P025-CEL-215/"
+        },
+        {
+          "@id": "./P025-CEL-216/"
+        },
+        {
+          "@id": "./P025-CEL-217/"
+        },
+        {
+          "@id": "./P025-CEL-218/"
+        },
+        {
+          "@id": "./P025-CEL-219/"
+        },
+        {
+          "@id": "./P025-CEL-184/"
+        },
+        {
+          "@id": "./P025-CEL-185/"
+        },
+        {
+          "@id": "./P025-CEL-186/"
+        },
+        {
+          "@id": "./P025-CEL-187/"
+        },
+        {
+          "@id": "./P025-CEL-188/"
+        },
+        {
+          "@id": "./P025-CEL-189/"
+        },
+        {
+          "@id": "./P025-CEL-190/"
+        },
+        {
+          "@id": "./P025-CEL-191/"
+        },
+        {
+          "@id": "./P025-CEL-192/"
+        },
+        {
+          "@id": "./P025-CEL-193/"
+        },
+        {
+          "@id": "./P025-CEL-194/"
+        },
+        {
+          "@id": "./P025-CEL-195/"
+        },
+        {
+          "@id": "./P025-CEL-196/"
+        },
+        {
+          "@id": "./P025-CEL-197/"
+        },
+        {
+          "@id": "./P025-CEL-198/"
+        },
+        {
+          "@id": "./P025-CEL-199/"
+        },
+        {
+          "@id": "./P025-CEL-200/"
+        },
+        {
+          "@id": "./P025-CEL-201/"
+        },
+        {
+          "@id": "./P025-CEL-202/"
+        },
+        {
+          "@id": "./P025-CEL-203/"
+        },
+        {
+          "@id": "./P025-CEL-204/"
+        },
+        {
+          "@id": "./P025-CEL-205/"
+        },
+        {
+          "@id": "./P025-CEL-206/"
+        },
+        {
+          "@id": "./P025-CEL-207/"
+        },
+        {
+          "@id": "./P025-CEL-223/"
+        },
+        {
+          "@id": "./P025-CEL-224/"
+        },
+        {
+          "@id": "./P025-CEL-225/"
+        },
+        {
+          "@id": "./P025-CEL-232/"
+        },
+        {
+          "@id": "./P025-CEL-233/"
+        },
+        {
+          "@id": "./P025-CEL-234/"
+        },
+        {
+          "@id": "./P025-CEL-235/"
+        },
+        {
+          "@id": "./P025-CEL-236/"
+        },
+        {
+          "@id": "./P025-CEL-237/"
+        },
+        {
+          "@id": "./P025-CEL-226/"
+        },
+        {
+          "@id": "./P025-CEL-227/"
+        },
+        {
+          "@id": "./P025-CEL-228/"
+        },
+        {
+          "@id": "./P025-CEL-220/"
+        },
+        {
+          "@id": "./P025-CEL-221/"
+        },
+        {
+          "@id": "./P025-CEL-222/"
+        },
+        {
+          "@id": "./P025-CEL-229/"
+        },
+        {
+          "@id": "./P025-CEL-230/"
+        },
+        {
+          "@id": "./P025-CEL-231/"
+        },
+        {
+          "@id": "./P025-CEL-249/"
+        },
+        {
+          "@id": "./P025-CEL-240/"
+        },
+        {
+          "@id": "./P025-CEL-243/"
+        },
+        {
+          "@id": "./P025-CEL-246/"
+        },
+        {
+          "@id": "./P025-CEL-238/"
+        },
+        {
+          "@id": "./P025-CEL-247/"
+        },
+        {
+          "@id": "./P025-CEL-239/"
+        },
+        {
+          "@id": "./P025-CEL-245/"
+        },
+        {
+          "@id": "./P025-CEL-248/"
+        },
+        {
+          "@id": "./P025-CEL-251/"
+        },
+        {
+          "@id": "./P025-CEL-252/"
+        },
+        {
+          "@id": "./P025-CEL-250/"
+        },
+        {
+          "@id": "./P025-CEL-049/"
+        },
+        {
+          "@id": "./P025-CEL-253/"
+        },
+        {
+          "@id": "./P025-CEL-254/"
+        },
+        {
+          "@id": "./P025-CEL-255/"
+        },
+        {
+          "@id": "./P025-CEL-256/"
+        },
+        {
+          "@id": "./P025-CEL-257/"
+        },
+        {
+          "@id": "./P025-CEL-258/"
+        },
+        {
+          "@id": "./P025-CEL-259/"
+        },
+        {
+          "@id": "./P025-CEL-260/"
+        },
+        {
+          "@id": "./P025-CEL-261/"
+        },
+        {
+          "@id": "./P025-CEL-262/"
+        },
+        {
+          "@id": "./P025-CEL-263/"
+        },
+        {
+          "@id": "./P025-CEL-264/"
+        },
+        {
+          "@id": "./P025-CEL-115/"
+        },
+        {
+          "@id": "./P025-CEL-116/"
+        },
+        {
+          "@id": "./P025-CEL-117/"
+        },
+        {
+          "@id": "./P025-CEL-121/"
+        },
+        {
+          "@id": "./P025-CEL-122/"
+        },
+        {
+          "@id": "./P025-CEL-123/"
+        },
+        {
+          "@id": "./P025-CEL-118/"
+        },
+        {
+          "@id": "./P025-CEL-119/"
+        },
+        {
+          "@id": "./P025-CEL-120/"
+        },
+        {
+          "@id": "./P025-CEL-124/"
+        },
+        {
+          "@id": "./P025-CEL-125/"
+        },
+        {
+          "@id": "./P025-CEL-126/"
+        },
+        {
+          "@id": "./P025-CEL-127/"
+        },
+        {
+          "@id": "./P025-CEL-128/"
+        },
+        {
+          "@id": "./P025-CEL-129/"
+        },
+        {
+          "@id": "./P025-CEL-130/"
+        },
+        {
+          "@id": "./P025-CEL-131/"
+        },
+        {
+          "@id": "./P025-CEL-132/"
+        },
+        {
+          "@id": "./P025-CEL-133/"
+        },
+        {
+          "@id": "./P025-CEL-134/"
+        },
+        {
+          "@id": "./P025-CEL-135/"
+        },
+        {
+          "@id": "./P025-CEL-136/"
+        },
+        {
+          "@id": "./P025-CEL-137/"
+        },
+        {
+          "@id": "./P025-CEL-138/"
+        },
+        {
+          "@id": "./P025-CEL-139/"
+        },
+        {
+          "@id": "./P025-CEL-140/"
+        },
+        {
+          "@id": "./P025-CEL-141/"
+        },
+        {
+          "@id": "./P025-CEL-142/"
+        },
+        {
+          "@id": "./P025-CEL-143/"
+        },
+        {
+          "@id": "./P025-CEL-144/"
+        },
+        {
+          "@id": "./P025-CEL-145/"
+        },
+        {
+          "@id": "./P025-CEL-146/"
+        },
+        {
+          "@id": "./P025-CEL-147/"
+        },
+        {
+          "@id": "./P025-CEL-241/"
+        },
+        {
+          "@id": "./P025-CEL-244/"
+        },
+        {
+          "@id": "./P025-CEL-242/"
+        },
+        {
+          "@id": "./P025-CEL-157/"
+        },
+        {
+          "@id": "./P025-CEL-154/"
+        }
+      ],
+      "version": "1",
+      "license": {
+        "@id": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "datePublished": "2026-06-03T13:11:50.071025+00:00",
+      "creator": [
+        {
+          "@id": "https://profiles.imperial.ac.uk/r.hunter"
+        },
+        {
+          "@id": "#niamh-hartley"
+        },
+        {
+          "@id": "https://ml-evs.science/"
+        },
+        {
+          "@id": "#lucas-garcia-verga"
+        },
+        {
+          "@id": "https://profiles.imperial.ac.uk/f.mildner19"
+        },
+        {
+          "@id": "#ben-smith"
+        },
+        {
+          "@id": "#shirley-xiong"
+        },
+        {
+          "@id": "https://profiles.imperial.ac.uk/j.feng19"
+        },
+        {
+          "@id": "https://profiles.imperial.ac.uk/m.titirici"
+        },
+        {
+          "@id": "https://profiles.imperial.ac.uk/a.walsh"
+        },
+        {
+          "@id": "https://profiles.imperial.ac.uk/samuel.cooper"
+        }
+      ],
+      "publisher": {
+        "@id": "https://www.imperial.ac.uk/digibat/"
+      },
+      "funding": [
+        {
+          "@id": "#grant-ep-w036517-1"
+        },
+        {
+          "@id": "#grant-henry-royce-institute"
+        },
+        {
+          "@id": "#grant-ukri2711"
+        },
+        {
+          "@id": "#department-DIST"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-CEL-001/",
+      "@type": [
+        "Dataset",
+        "CoinCell"
+      ],
+      "name": "CEL-1-NMC811-Graphite",
+      "identifier": "digibat:LOOXHF",
+      "url": "https://purl.datalab-org.io/digibat:LOOXHF",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-03-23T15:55:29+00:00",
+      "hasPart": [
+        {
+          "@id": "./P025-CEL-001/CEL-1-NMC811-Graphite.xlsx"
+        }
+      ],
+      "hasPositiveElectrode": [
+        {
+          "@id": "./P025-ELD-010/"
+        }
+      ],
+      "hasNegativeElectrode": [
+        {
+          "@id": "./P025-ELD-011/"
+        }
+      ],
+      "hasElectrolyte": [
+        {
+          "@id": "./P025-ELY-004/"
+        }
+      ],
+      "hasConstituent": [
+        {
+          "@id": "./P025-CEL-001/#positive-electrode-amount"
+        },
+        {
+          "@id": "./P025-CEL-001/#negative-electrode-amount"
+        }
+      ],
+      "hasProperty": [
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 18.772892775
+          },
+          "hasMeasurementUnit": "MilliGram"
+        },
+        {
+          "@type": [
+            "Volume",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6e-05
+          },
+          "hasMeasurementUnit": "Litre",
+          "name": "Electrolyte volume"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-CEL-012/",
+      "@type": [
+        "Dataset",
+        "CoinCell"
+      ],
+      "name": "CEL-12-NMC622-Graphite",
+      "identifier": "digibat:RXTTSA",
+      "url": "https://purl.datalab-org.io/digibat:RXTTSA",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-03-23T15:55:40+00:00",
+      "hasPart": [
+        {
+          "@id": "./P025-CEL-012/CEL-12-NMC622-Graphite-2.xlsx"
+        },
+        {
+          "@id": "./P025-CEL-012/CEL-12-NMC622-Graphite.xlsx"
+        }
+      ],
+      "hasPositiveElectrode": [
+        {
+          "@id": "./P025-ELD-012/"
+        }
+      ],
+      "hasNegativeElectrode": [
+        {
+          "@id": "./P025-ELD-011/"
+        }
+      ],
+      "hasElectrolyte": [
+        {
+          "@id": "./P025-ELY-004/"
+        }
+      ],
+      "hasConstituent": [
+        {
+          "@id": "./P025-CEL-012/#positive-electrode-amount"
+        },
+        {
+          "@id": "./P025-CEL-012/#negative-electrode-amount"
+        }
+      ],
+      "hasProperty": [
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 37.491919625
+          },
+          "hasMeasurementUnit": "MilliGram"
+        },
+        {
+          "@type": [
+            "Volume",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6e-05
+          },
+          "hasMeasurementUnit": "Litre",
+          "name": "Electrolyte volume"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-CEL-025/",
+      "@type": [
+        "Dataset",
+        "CoinCell"
+      ],
+      "name": "CEL-25-LFP-Graphite",
+      "identifier": "digibat:FVOWEU",
+      "url": "https://purl.datalab-org.io/digibat:FVOWEU",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-03-23T15:56:24+00:00",
+      "hasPart": [
+        {
+          "@id": "./P025-CEL-025/CEL-25-LFP-Graphite-2.xlsx"
+        },
+        {
+          "@id": "./P025-CEL-025/CEL-25-LFP-Graphite.xlsx"
+        }
+      ],
+      "hasPositiveElectrode": [
+        {
+          "@id": "./P025-ELD-009/"
+        }
+      ],
+      "hasNegativeElectrode": [
+        {
+          "@id": "./P025-ELD-011/"
+        }
+      ],
+      "hasElectrolyte": [
+        {
+          "@id": "./P025-ELY-004/"
+        }
+      ],
+      "hasConstituent": [
+        {
+          "@id": "./P025-CEL-025/#positive-electrode-amount"
+        },
+        {
+          "@id": "./P025-CEL-025/#negative-electrode-amount"
+        }
+      ],
+      "hasProperty": [
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 19.920808125
+          },
+          "hasMeasurementUnit": "MilliGram"
+        },
+        {
+          "@type": [
+            "Volume",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6e-05
+          },
+          "hasMeasurementUnit": "Litre",
+          "name": "Electrolyte volume"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-CEL-148/",
+      "@type": [
+        "Dataset",
+        "CoinCell"
+      ],
+      "name": "CEL-148-LCO-Graphite",
+      "identifier": "digibat:VWYLWT",
+      "url": "https://purl.datalab-org.io/digibat:VWYLWT",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-03-10T11:09:00+00:00",
+      "hasPart": [
+        {
+          "@id": "./P025-CEL-148/CEL-148-LCO-Graphite.xlsx"
+        },
+        {
+          "@id": "./P025-CEL-148/build_report.xlsx"
+        }
+      ],
+      "hasPositiveElectrode": [
+        {
+          "@id": "./P025-ELD-001/"
+        }
+      ],
+      "hasNegativeElectrode": [
+        {
+          "@id": "./P025-ELD-007/"
+        }
+      ],
+      "hasElectrolyte": [
+        {
+          "@id": "./P025-ELY-001/"
+        }
+      ],
+      "hasConstituent": [
+        {
+          "@id": "./P025-CEL-148/#positive-electrode-amount"
+        },
+        {
+          "@id": "./P025-CEL-148/#negative-electrode-amount"
+        }
+      ],
+      "hasProperty": [
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 23.372568
+          },
+          "hasMeasurementUnit": "MilliGram"
+        },
+        {
+          "@type": [
+            "Volume",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6e-05
+          },
+          "hasMeasurementUnit": "Litre",
+          "name": "Electrolyte volume"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-CEL-184/",
+      "@type": [
+        "Dataset",
+        "CoinCell"
+      ],
+      "name": "CEL-184-LMFP-Graphite",
+      "identifier": "digibat:VNSQXB",
+      "url": "https://purl.datalab-org.io/digibat:VNSQXB",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-03-11T15:41:00+00:00",
+      "hasPart": [
+        {
+          "@id": "./P025-CEL-184/CEL-184-LMFP-Graphite.xlsx"
+        },
+        {
+          "@id": "./P025-CEL-184/build_report.xlsx"
+        }
+      ],
+      "hasPositiveElectrode": [
+        {
+          "@id": "./P025-ELD-005/"
+        }
+      ],
+      "hasNegativeElectrode": [
+        {
+          "@id": "./P025-ELD-007/"
+        }
+      ],
+      "hasElectrolyte": [
+        {
+          "@id": "./P025-ELY-001/"
+        }
+      ],
+      "hasConstituent": [
+        {
+          "@id": "./P025-CEL-184/#positive-electrode-amount"
+        },
+        {
+          "@id": "./P025-CEL-184/#negative-electrode-amount"
+        }
+      ],
+      "hasProperty": [
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 22.820057325
+          },
+          "hasMeasurementUnit": "MilliGram"
+        },
+        {
+          "@type": [
+            "Volume",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6e-05
+          },
+          "hasMeasurementUnit": "Litre",
+          "name": "Electrolyte volume"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-001/",
+      "@type": [
+        "Dataset",
+        "PositiveElectrode"
+      ],
+      "name": "LiCoO2 (LCO) (MTI)",
+      "identifier": "digibat:XEIPWR",
+      "url": "https://purl.datalab-org.io/digibat:XEIPWR",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:11.577000+00:00",
+      "hasPart": [],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-001/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 11.04
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 3.5
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.96
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 7.164
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 648000.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        },
+        {
+          "@type": [
+            "CoatingThickness",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 33.0
+          },
+          "hasMeasurementUnit": "MicroMetre",
+          "name": "Coating thickness"
+        },
+        {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 50.0
+          },
+          "hasMeasurementUnit": "MicroMetre",
+          "name": "Total thickness"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-001/#active-material",
+      "@type": [
+        "LithiumCobaltOxide",
+        "ActiveMaterial"
+      ],
+      "name": "LithiumCobaltOxide"
+    },
+    {
+      "@id": "./P025-ELD-005/",
+      "@type": [
+        "Dataset",
+        "PositiveElectrode"
+      ],
+      "name": "LiMn0.6Fe0.4PO4 (MTI)",
+      "identifier": "digibat:IIOOYT",
+      "url": "https://purl.datalab-org.io/digibat:IIOOYT",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:17.231000+00:00",
+      "hasPart": [],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-005/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 13.286
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 1.9
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.949
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 7.2
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 540000.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        },
+        {
+          "@type": [
+            "CoatingThickness",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 68.0
+          },
+          "hasMeasurementUnit": "MicroMetre",
+          "name": "Coating thickness"
+        },
+        {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 84.0
+          },
+          "hasMeasurementUnit": "MicroMetre",
+          "name": "Total thickness"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-005/#active-material",
+      "@type": [
+        "LithiumManganeseIronPhosphate",
+        "ActiveMaterial"
+      ],
+      "name": "LithiumManganeseIronPhosphate"
+    },
+    {
+      "@id": "./P025-ELD-007/",
+      "@type": [
+        "Dataset",
+        "NegativeElectrode"
+      ],
+      "name": "Single Layer CMS Graphite (MTI)",
+      "identifier": "digibat:PKVYDT",
+      "url": "https://purl.datalab-org.io/digibat:PKVYDT",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:19.058000+00:00",
+      "hasPart": [],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-007/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 5.8716
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 1.2
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.932
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6.8508
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 1188000.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        },
+        {
+          "@type": [
+            "CoatingThickness",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 41.0
+          },
+          "hasMeasurementUnit": "MicroMetre",
+          "name": "Coating thickness"
+        },
+        {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 50.0
+          },
+          "hasMeasurementUnit": "MicroMetre",
+          "name": "Total thickness"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-007/#active-material",
+      "@type": [
+        "Graphite",
+        "ActiveMaterial"
+      ],
+      "name": "Graphite"
+    },
+    {
+      "@id": "./P025-ELD-009/",
+      "@type": [
+        "Dataset",
+        "PositiveElectrode"
+      ],
+      "name": "LFP (Canrud)",
+      "identifier": "digibat:KPMSUE",
+      "url": "https://purl.datalab-org.io/digibat:KPMSUE",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:23.175000+00:00",
+      "hasPart": [],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-009/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 11.2545
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 1.8
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.915
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6.084
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 540000.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-009/#active-material",
+      "@type": [
+        "LithiumIronPhosphate",
+        "ActiveMaterial"
+      ],
+      "name": "LithiumIronPhosphate"
+    },
+    {
+      "@id": "./P025-ELD-010/",
+      "@type": [
+        "Dataset",
+        "PositiveElectrode"
+      ],
+      "name": "NMC811 (Canrud)",
+      "identifier": "digibat:QYQXTW",
+      "url": "https://purl.datalab-org.io/digibat:QYQXTW",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:23.887000+00:00",
+      "hasPart": [
+        {
+          "@id": "./P025-ELD-010/ELD-010-NMC811_electrode_survey.xlsx"
+        }
+      ],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-010/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 20.3175
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 2.8
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.945
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 13.752
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 676800.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-010/#active-material",
+      "@type": [
+        "LithiumNickelManganeseCobaltOxide",
+        "ActiveMaterial"
+      ],
+      "name": "LithiumNickelManganeseCobaltOxide"
+    },
+    {
+      "@id": "./P025-ELD-011/",
+      "@type": [
+        "Dataset",
+        "NegativeElectrode"
+      ],
+      "name": "Graphite (Canrud)",
+      "identifier": "digibat:XCFQAS",
+      "url": "https://purl.datalab-org.io/digibat:XCFQAS",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:24.273000+00:00",
+      "hasPart": [],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-011/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 5.5506
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 1.3
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.957
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 6.804
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 1224000.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-011/#active-material",
+      "@type": [
+        "Graphite",
+        "ActiveMaterial"
+      ],
+      "name": "Graphite"
+    },
+    {
+      "@id": "./P025-ELD-012/",
+      "@type": [
+        "Dataset",
+        "PositiveElectrode"
+      ],
+      "name": "NMC622 (Canrud)",
+      "identifier": "digibat:YUGFJC",
+      "url": "https://purl.datalab-org.io/digibat:YUGFJC",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:25.162000+00:00",
+      "hasPart": [],
+      "hasActiveMaterial": {
+        "@id": "./P025-ELD-012/#active-material"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "MassLoading",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 9.67
+          },
+          "hasMeasurementUnit": "MilliGramPerSquareCentiMetre",
+          "name": "Active material loading"
+        },
+        {
+          "@type": [
+            "Density",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 2.8
+          },
+          "hasMeasurementUnit": "GramPerCubicCentiMetre",
+          "name": "Compaction density"
+        },
+        {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 0.967
+          },
+          "name": "Active material mass fraction"
+        },
+        {
+          "@type": [
+            "AreicCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 5.832
+          },
+          "hasMeasurementUnit": "CoulombPerSquareCentiMetre",
+          "name": "Areal capacity"
+        },
+        {
+          "@type": [
+            "SpecificCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "Number",
+            "hasNumericalValue": 604800.0
+          },
+          "hasMeasurementUnit": "CoulombPerKilogram",
+          "name": "Specific capacity"
+        }
+      ]
+    },
+    {
+      "@id": "./P025-ELD-012/#active-material",
+      "@type": [
+        "LithiumNickelManganeseCobaltOxide",
+        "ActiveMaterial"
+      ],
+      "name": "LithiumNickelManganeseCobaltOxide"
+    },
+    {
+      "@id": "./P025-ELY-001/",
+      "@type": [
+        "Dataset",
+        "Electrolyte"
+      ],
+      "name": "1.0 M LiPF6 in EC/DEC=50/50 (v/v), battery grade",
+      "identifier": "digibat:UIEEFH",
+      "url": "https://purl.datalab-org.io/digibat:UIEEFH",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:25.871000+00:00",
+      "hasPart": []
+    },
+    {
+      "@id": "./P025-ELY-004/",
+      "@type": [
+        "Dataset",
+        "Electrolyte"
+      ],
+      "name": "1M LiPF6 EC:EMC=3:7wt%",
+      "identifier": "digibat:VRQKEO",
+      "url": "https://purl.datalab-org.io/digibat:VRQKEO",
+      "authors": [
+        {
+          "@id": "./people/69e74a6f59d5e32683fe6072"
+        }
+      ],
+      "dateCreated": "2026-05-14T22:59:27.766000+00:00",
+      "hasPart": []
+    }
+  ]
+}

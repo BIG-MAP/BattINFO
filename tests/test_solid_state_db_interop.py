@@ -89,10 +89,25 @@ def test_all_iris_unique() -> None:
     assert len(iris) == len(set(iris)) == 36
 
 
+def _strip_import_stamps(records: list[dict]) -> list[dict]:
+    import copy
+    records = copy.deepcopy(records)
+    for r in records:
+        for holder in r.values():
+            if isinstance(holder, dict):
+                for key in ("retrieved_at", "created_at", "modified_at", "published_at"):
+                    holder.pop(key, None)
+    return records
+
+
 def test_import_is_idempotent() -> None:
-    """Deterministic IRIs: the same sheet re-imports to byte-identical records."""
-    a = [r.records() for r in batch_import_solid_state_db(FIXTURE, validate=False)]
-    b = [r.records() for r in batch_import_solid_state_db(FIXTURE, validate=False)]
+    """Deterministic IRIs: the same sheet re-imports to identical records.
+
+    (Modulo the builder's wall-clock import-time stamps — the minted IRIs and all
+    substantive content are deterministic.)
+    """
+    a = [_strip_import_stamps(r.records()) for r in batch_import_solid_state_db(FIXTURE, validate=False)]
+    b = [_strip_import_stamps(r.records()) for r in batch_import_solid_state_db(FIXTURE, validate=False)]
     assert a == b
 
 

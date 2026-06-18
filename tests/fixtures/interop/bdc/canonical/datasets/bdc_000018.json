@@ -1,0 +1,90 @@
+{
+  "id": "bdc_000018",
+  "record_status": "active",
+  "withdrawn_reason": null,
+  "replaced_by": null,
+  "categories": [
+    "performance"
+  ],
+  "publication_date": "2022",
+  "source_urls": [
+    "https://doi.org/10.17632/m9w7grpjc7.1"
+  ],
+  "download_urls": [
+    "https://data.mendeley.com/public-api/zip/m9w7grpjc7/download/1"
+  ],
+  "overview": {
+    "feature": null,
+    "case": "R21700",
+    "cell_module_pack": "BatteryCell",
+    "manufacturer": "Samsung",
+    "battery_model": "30T-INR21700",
+    "iec_battery_code": "INR21700"
+  },
+  "code": {
+    "url": null,
+    "available": false
+  },
+  "electrodes": {
+    "positive": "LithiumNickelManganeseCobaltOxide",
+    "negative": "Carbon"
+  },
+  "reported_values": {
+    "rated_capacity_Ah": 3.0,
+    "number_of_specimens": 1.0
+  },
+  "available_measurements": {
+    "discharge_capacity": true,
+    "internal_resistance": false,
+    "eis": false,
+    "pseudo_ocv": true
+  },
+  "source_metadata": {
+    "battery_cycler_manufacturer": "Arbin",
+    "battery_cycler_model": "LBT21084",
+    "anomaly_mentioned": false,
+    "owner": "University of Windsor",
+    "data_modality": "TimeSeriesDataSet",
+    "in_previous_reviews": true,
+    "kind_of_data": "PerformanceData",
+    "purpose": "The data presents battery terminal voltage and current recorded during the OCV-SOC characterization process of Li-ion battery - Samsung 30T-INR21700."
+  },
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "bib_citation_data": "sundaresan_2022_data",
+  "data_group": "PerformanceData",
+  "comment": null,
+  "publications": [
+    {
+      "url": "https://doi.org/10.3390/en15239142",
+      "bib_citation": "sundaresan_2022"
+    }
+  ],
+  "provenance": [
+    {
+      "event": "added",
+      "release": "v2026.02.11",
+      "curator": "import_excel.py",
+      "source": "BatteryDataCommons.xlsx:Performance data"
+    },
+    {
+      "event": "enriched",
+      "release": "v2026.03.02",
+      "curator": "update_from_excel_v1.py",
+      "source": "BatteryDataCommons_V1.xlsx:Performance data"
+    }
+  ],
+  "license_name": "https://creativecommons.org/licenses/by/4.0/",
+  "performance_details": {
+    "resistance_test_c_rate": "Not applicable",
+    "resistance_test_duration": "Not applicable",
+    "resistance_test_rest": "Not applicable",
+    "resistance_test_soc": "Not applicable",
+    "resistance_test_temperature": "Not applicable",
+    "eis_temperature": "Not applicable",
+    "eis_frequency_range": "Not applicable"
+  }
+}
