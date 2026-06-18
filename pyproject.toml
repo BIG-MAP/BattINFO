@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,18 +8,30 @@ version = "0.1.0"
 description = "Implementation and interoperability layer for the domain-battery ontology."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-2.0-only"
-license-files = ["LICENSE"]
+license = "Apache-2.0"
+license-files = ["LICENSE", "LICENSE-DATA"]
 authors = [
   { name = "BattINFO Team" }
+]
+keywords = [
+  "batteries",
+  "ontology",
+  "EMMO",
+  "linked data",
+  "JSON-LD",
+  "FAIR data",
+  "Battery Pass",
+  "semantic web",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Topic :: Scientific/Engineering",
+  "Typing :: Typed",
 ]
 dependencies = [
   "pydantic>=2.7",
@@ -61,6 +73,13 @@ docs = [
   "nbsphinx>=0.9",
   "sphinx-design>=0.6",
 ]
+
+[project.urls]
+Homepage = "https://github.com/BIG-MAP/BattINFO"
+Repository = "https://github.com/BIG-MAP/BattINFO"
+Documentation = "https://github.com/BIG-MAP/BattINFO/tree/main/docs"
+Issues = "https://github.com/BIG-MAP/BattINFO/issues"
+Changelog = "https://github.com/BIG-MAP/BattINFO/blob/main/CHANGELOG.md"
 
 [project.scripts]
 battinfo = "battinfo.cli:app"

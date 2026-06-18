@@ -1,1 +1,10 @@
+# Source distribution contents. The wheel's data files are declared via
+# [tool.setuptools.package-data] in pyproject.toml; this manifest makes the
+# sdist self-contained and explicit.
+include README.md QUICKSTART.md CHANGELOG.md CONTRIBUTING.md SECURITY.md
+include CODE_OF_CONDUCT.md CITATION.cff LICENSE LICENSE-DATA NOTICE IDENTIFIER_POLICY.md
+include pyproject.toml
+recursive-include src/battinfo/data *
+recursive-include src/battinfo py.typed
 global-exclude *.py[cod]
+global-exclude __pycache__/*
