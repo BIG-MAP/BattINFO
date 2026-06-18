@@ -20,7 +20,7 @@ import difflib
 import json
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -428,6 +428,169 @@ def _ror_url(ror: str) -> str:
     return ror if ror.startswith("http") else f"https://ror.org/{ror.rsplit('/', 1)[-1]}"
 
 
+# ── Funding / project provenance ─────────────────────────────────────────────
+# A workspace may be tagged with one funding project (e.g. an EU grant agreement
+# number such as 101103997).  The grant *identifier* is authoritative and stored
+# verbatim; descriptive fields (title, funder, programme) are resolved lazily
+# from OpenAIRE and cached, so the common case is just ``ws.project("101103997")``.
+_OPENAIRE_PROJECTS_API = "https://api.openaire.eu/search/projects"
+_CORDIS_PROJECT_URL = "https://cordis.europa.eu/project/id/{}"
+
+
+def _is_eu_grant(identifier: str) -> bool:
+    """Heuristic: EU Framework Programme grant agreement numbers are 6-9 digits."""
+    return identifier.isdigit() and 6 <= len(identifier) <= 9
+
+
+@dataclass
+class ProjectRef:
+    """A funding project (grant) attached to a workspace and its records."""
+
+    identifier: str
+    name: str | None = None
+    funder: str | None = None
+    program: str | None = None
+    acronym: str | None = None
+    id: str | None = None  # resolvable IRI (CORDIS project page for EU grants)
+    resolved: bool = False  # True once remote enrichment has been attempted
+    manual: list[str] = field(default_factory=list)  # fields set by hand, kept on refresh
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ProjectRef":
+        return cls(
+            identifier=str(data.get("identifier") or "").strip(),
+            name=data.get("name"),
+            funder=data.get("funder"),
+            program=data.get("program"),
+            acronym=data.get("acronym"),
+            id=data.get("id"),
+            resolved=bool(data.get("resolved", False)),
+            manual=list(data.get("manual") or []),
+        )
+
+    def to_dict(self) -> dict:
+        out: dict[str, Any] = {"identifier": self.identifier}
+        for key in ("name", "funder", "program", "acronym", "id"):
+            value = getattr(self, key)
+            if value:
+                out[key] = value
+        out["resolved"] = self.resolved
+        if self.manual:
+            out["manual"] = sorted(self.manual)
+        return out
+
+    def default_iri(self) -> str | None:
+        """Canonical resolvable IRI for the grant (CORDIS page for EU numbers)."""
+        if _is_eu_grant(self.identifier):
+            return _CORDIS_PROJECT_URL.format(self.identifier)
+        return None
+
+    def funding_block(self) -> dict:
+        """Record-level ``funding`` block (maps to schema:funding/Grant in JSON-LD)."""
+        block: dict[str, Any] = {"type": "Grant", "identifier": self.identifier}
+        iri = self.id or self.default_iri()
+        if iri:
+            block["id"] = iri
+        if self.name:
+            block["name"] = self.name
+        if self.acronym:
+            block["acronym"] = self.acronym
+        if self.funder:
+            block["funder"] = {"type": "Organization", "name": self.funder}
+        if self.program:
+            block["program"] = self.program
+        return block
+
+    def summary(self) -> str:
+        """One-line human description, e.g. ``DigiBatt (101103997)``."""
+        label = self.acronym or self.name
+        return f"{label} ({self.identifier})" if label else self.identifier
+
+
+def _oa_text(value: Any) -> str | None:
+    """Pull a plain string out of OpenAIRE's polymorphic JSON values."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return value.strip() or None
+    if isinstance(value, dict):
+        for key in ("$", "content", "value", "name", "classname"):
+            if key in value:
+                text = _oa_text(value[key])
+                if text:
+                    return text
+    if isinstance(value, list):
+        for item in value:
+            text = _oa_text(item)
+            if text:
+                return text
+    return None
+
+
+def _find_first(node: Any, key: str) -> Any:
+    """Depth-first search for the first value stored under *key* anywhere in *node*."""
+    if isinstance(node, dict):
+        if key in node:
+            return node[key]
+        for value in node.values():
+            found = _find_first(value, key)
+            if found is not None:
+                return found
+    elif isinstance(node, list):
+        for item in node:
+            found = _find_first(item, key)
+            if found is not None:
+                return found
+    return None
+
+
+def _parse_openaire_project(payload: dict) -> dict:
+    """Extract ``{name, acronym, funder, program}`` from an OpenAIRE projects response.
+
+    Tolerant of the API's deeply-nested, version-dependent shape; returns only
+    the fields it can find.
+    """
+    project = _find_first(payload, "oaf:project")
+    if not isinstance(project, dict):
+        project = payload  # fall back to scanning the whole payload
+    out: dict[str, str] = {}
+    name = _oa_text(_find_first(project, "title"))
+    if name:
+        out["name"] = name
+    acronym = _oa_text(_find_first(project, "acronym"))
+    if acronym:
+        out["acronym"] = acronym
+    fundingtree = _find_first(project, "fundingtree")
+    scope = fundingtree if fundingtree is not None else project
+    funder = _oa_text(_find_first(scope, "funder"))
+    if funder:
+        out["funder"] = funder
+    program = _oa_text(_find_first(scope, "funding_level_0"))
+    if program:
+        out["program"] = program
+    return out
+
+
+def _resolve_project_openaire(identifier: str, *, timeout: float = 15.0) -> dict:
+    """Look up grant descriptive metadata from OpenAIRE.
+
+    Returns ``{}`` on any failure (offline, not found, parse error) so callers
+    degrade gracefully to the bare identifier.
+    """
+    import urllib.parse
+    import urllib.request
+
+    query = urllib.parse.urlencode({"grantID": identifier, "format": "json", "size": 1})
+    url = f"{_OPENAIRE_PROJECTS_API}?{query}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+            payload = json.loads(resp.read().decode())
+        return _parse_openaire_project(payload)
+    except Exception:
+        return {}
+
+
 def _property_value(name: str, value: Any, group: str = "") -> dict:
     """Build a schema:PropertyValue for a structured test condition/setpoint.
 
@@ -680,6 +843,10 @@ class AuthoringWorkspace:
         # paths written by the most recent ws.save() — submit() uses this to
         # avoid re-submitting records from previous sessions in the same directory
         self._session_paths: set[Path] = set()
+        # workspace-level funding project (grant); lazily loaded from
+        # .battinfo/workspace.json on first access via _get_project()
+        self._project_ref: ProjectRef | None = None
+        self._project_loaded = False
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -838,6 +1005,206 @@ class AuthoringWorkspace:
             print(f"  workspace:  {wid}")
             print(f"  publisher:  {pid}")
             return {"workspace_id": wid, "publisher_id": pid}
+
+    # ── Project / funding provenance ────────────────────────────────────────────
+
+    def project(
+        self,
+        identifier: str | None = None,
+        *,
+        name: str | None = None,
+        funder: str | None = None,
+        program: str | None = None,
+        acronym: str | None = None,
+        id: str | None = None,
+        refresh: bool = False,
+        clear: bool = False,
+    ) -> dict | None:
+        """Tag this workspace with a funding project (grant) for provenance.
+
+        The grant *identifier* (e.g. an EU grant agreement number like
+        ``"101103997"``) is normally all you need — the project title, funder and
+        programme are looked up from OpenAIRE and cached in
+        ``.battinfo/workspace.json``.  Once set, the project is stamped onto every
+        record you ``save()``, so you can trace which work belongs to which grant.
+
+        Anything you pass explicitly (``name=``, ``funder=`` …) overrides the
+        looked-up value and is preserved across ``refresh=True``.
+
+        Returns the record-level ``funding`` block (or ``None`` when cleared or
+        unset).
+
+        Examples
+        --------
+        ::
+
+            ws.project("101103997")                    # tag with an EU grant
+            ws.project()                               # show the current project
+            ws.project("101103997", name="DigiBatt")   # override / fill in by hand
+            ws.project(refresh=True)                   # re-fetch from OpenAIRE
+            ws.project(clear=True)                     # remove the project tag
+        """
+        if clear:
+            self._set_project(None)
+            print("Workspace project cleared.")
+            return None
+
+        overrides = {
+            key: value
+            for key, value in (
+                ("name", name), ("funder", funder), ("program", program),
+                ("acronym", acronym), ("id", id),
+            )
+            if value is not None
+        }
+        current = self._get_project()
+
+        # Getter: no identifier supplied.
+        if identifier is None:
+            if current is None:
+                print('No project set. Tag this workspace with a grant, e.g.:\n'
+                      '    ws.project("101103997")')
+                return None
+            ref = current
+            if overrides or refresh:
+                ref = self._resolve_and_store(current.identifier, overrides=overrides,
+                                              base=current, refresh=True)
+            self._print_project(ref)
+            return ref.funding_block()
+
+        # Setter: identifier supplied.
+        identifier = str(identifier).strip()
+        if not identifier:
+            raise ValueError("project identifier must be a non-empty string.")
+        base = current if (current is not None and current.identifier == identifier) else None
+        ref = self._resolve_and_store(identifier, overrides=overrides, base=base,
+                                      refresh=refresh or base is None)
+        self._print_project(ref)
+        return ref.funding_block()
+
+    def _resolve_and_store(
+        self,
+        identifier: str,
+        *,
+        overrides: dict[str, str],
+        base: "ProjectRef | None",
+        refresh: bool,
+    ) -> "ProjectRef":
+        """Build the project ref (remote lookup + overrides), persist it, return it.
+
+        Manual overrides always win and are remembered (``ProjectRef.manual``) so
+        they survive a later ``refresh=True``.  Remote resolution only fills fields
+        the user did not set by hand.  Resolution is skipped when the grant is
+        already resolved and ``refresh`` is False, so re-setting the same id never
+        re-hits the network.
+        """
+        fields: dict[str, Any] = {}
+        manual: set[str] = set()
+        if base is not None:
+            manual |= set(base.manual)
+            fields.update({
+                key: getattr(base, key)
+                for key in ("name", "funder", "program", "acronym", "id")
+                if getattr(base, key)
+            })
+        manual |= set(overrides)
+        # Effective manual values = this call's overrides on top of remembered ones.
+        manual_values = {key: fields[key] for key in manual if key in fields}
+        manual_values.update(overrides)
+
+        resolved = base.resolved if base is not None else False
+        if refresh or not resolved:
+            remote = _resolve_project_openaire(identifier)
+            for key, value in remote.items():
+                if key not in manual:  # never overwrite a hand-set field
+                    fields[key] = value
+            resolved = True
+        fields.update(manual_values)
+        ref = ProjectRef(identifier=identifier, resolved=resolved,
+                         manual=sorted(manual), **fields)
+        if not ref.id:
+            ref.id = ref.default_iri()
+        self._set_project(ref)
+        return ref
+
+    def _print_project(self, ref: "ProjectRef") -> None:
+        print(f"Workspace project: {ref.summary()}")
+        if ref.funder:
+            print(f"  funder:   {ref.funder}")
+        if ref.program:
+            print(f"  program:  {ref.program}")
+        if ref.id:
+            print(f"  id:       {ref.id}")
+        if not ref.name and not ref.acronym:
+            print("  (descriptive metadata not resolved — offline, or grant not in")
+            print('   OpenAIRE; set it by hand e.g. ws.project(name="...", funder="..."),')
+            print("   or retry with ws.project(refresh=True))")
+        print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
+
+    def _workspace_state_path(self) -> Path:
+        return self._root / ".battinfo" / "workspace.json"
+
+    def _load_workspace_state(self) -> dict:
+        p = self._workspace_state_path()
+        return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+
+    def _save_workspace_state(self, state: dict) -> None:
+        p = self._workspace_state_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    def _get_project(self) -> "ProjectRef | None":
+        """Current workspace project, loaded from disk on first access."""
+        if not self._project_loaded:
+            data = self._load_workspace_state().get("project")
+            self._project_ref = ProjectRef.from_dict(data) if data else None
+            self._project_loaded = True
+        return self._project_ref
+
+    def _set_project(self, ref: "ProjectRef | None") -> None:
+        state = self._load_workspace_state()
+        if ref is None:
+            state.pop("project", None)
+        else:
+            state.setdefault("schema_version", "0.1.0")
+            state["project"] = ref.to_dict()
+        self._save_workspace_state(state)
+        self._project_ref = ref
+        self._project_loaded = True
+
+    def _funding_block(self) -> dict | None:
+        """The record-level ``funding`` block for this workspace, or ``None``."""
+        ref = self._get_project()
+        return ref.funding_block() if ref else None
+
+    def _stamp_project_funding(self, result: dict) -> int:
+        """Stamp the workspace's ``funding`` block onto every record just written.
+
+        Called by :meth:`save` after the records are serialized.  Re-stamps the
+        full set each save, so records authored before the project was assigned
+        are back-filled on the next save.  No-op when no project is set (existing
+        records are left untouched — clearing the project does not strip them).
+        """
+        block = self._funding_block()
+        if block is None:
+            return 0
+        stamped = 0
+        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
+            for item in result.get(key, []):
+                path = item.get("path") if isinstance(item, dict) else str(item)
+                if not path:
+                    continue
+                p = Path(path)
+                if not p.exists():
+                    continue
+                record = json.loads(p.read_text(encoding="utf-8"))
+                if record.get("funding") == block:
+                    continue
+                record["funding"] = block
+                p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n",
+                             encoding="utf-8")
+                stamped += 1
+        return stamped
 
     def convert(self, pattern: str | None = None, fmt: str = "csv") -> list[Path]:
         """Convert raw cycler files to BDF (Battery Data Format).
@@ -1062,7 +1429,8 @@ class AuthoringWorkspace:
     def commands(self) -> None:
         """Print the workspace commands, grouped by stage of the workflow."""
         groups = [
-            ("Set up",   ["setup()", "login(api_key=...)", "whoami()"]),
+            ("Set up",   ["setup()", "login(api_key=...)", "whoami()",
+                          "project('101103997')               # tag work with a grant"]),
             ("Discover", ["search('duracell mn2400')           # cell-specs (fuzzy)",
                           "search(type='cell', serial='...')   # existing instances",
                           "template('cell-spec', ...)", "bdf_columns()"]),
@@ -1373,6 +1741,9 @@ class AuthoringWorkspace:
                 if p:
                     self._session_paths.add(Path(p))
 
+        # Stamp the workspace's funding project (grant) onto every record written.
+        stamped = self._stamp_project_funding(result)
+
         # Build id -> human name from the finalized in-memory objects so the
         # confirmation shows what was written, not just counts.
         name_by_id: dict[str, str] = {}
@@ -1404,6 +1775,10 @@ class AuthoringWorkspace:
                 print(f"  {label:11} {name[:36]:36} [{status}]  {rel}")
             if len(items) > 10:
                 print(f"  {label:11} ... +{len(items) - 10} more")
+        if stamped:
+            ref = self._get_project()
+            label = ref.summary() if ref else "project"
+            print(f"  funding:    {label} stamped onto {stamped} record(s)")
         print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
 
@@ -3044,10 +3419,25 @@ class AuthoringWorkspace:
             TEST_CONDITION_CLASS,
             TEST_CONDITION_GENERIC_CLASSES,
             TEST_CONDITION_UNIT_IRI,
+            funding_to_jsonld,
             setpoint_emmo_class,
             step_emmo_class,
             termination_emmo_class,
         )
+
+        # Workspace funding project (grant) → schema:funding/Grant. The grant is
+        # workspace-uniform, so the first record carrying it defines the deposit's
+        # funding; attached to the catalog and (like license/creators) to each
+        # member, since RDF has no part-of inheritance.
+        _funding_grant: dict | None = None
+        for _recs in record_sets.values():
+            for _rec in _recs:
+                if isinstance(_rec, dict):
+                    _funding_grant = funding_to_jsonld(_rec.get("funding"))
+                    if _funding_grant is not None:
+                        break
+            if _funding_grant is not None:
+                break
 
         _DATA_DIR = Path(__file__).parent / "data"
 
@@ -3763,6 +4153,8 @@ class AuthoringWorkspace:
                         _cov_ends.append(_e)
             if _ds.get("spatial_coverage"):
                 member["schema:spatialCoverage"] = _ds["spatial_coverage"]
+            if _funding_grant is not None:
+                member["schema:funding"] = _funding_grant
             _all_downloads.extend(schema_dists)
             dataset_member_nodes.append(member)
 
@@ -3866,6 +4258,9 @@ class AuthoringWorkspace:
             lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
             catalog_node["dcterms:license"] = {"@id": lic_iri}
             catalog_node["schema:license"]  = {"@id": lic_iri}
+        if _funding_grant is not None:
+            # Deposit-level funding: the grant under which the whole collection was produced.
+            catalog_node["schema:funding"] = _funding_grant
         provider_node = None
         if creators:
             catalog_node["schema:creator"] = [_agent_node(c) for c in creators]

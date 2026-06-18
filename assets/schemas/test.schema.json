@@ -249,33 +249,71 @@
     "artifacts": {
       "type": "array",
       "description": "Actionable-layer links to runnable protocol/vendor files produced by or executed in this test.",
-      "items": { "$ref": "#/$defs/Artifact" }
+      "items": {
+        "$ref": "#/$defs/Artifact"
+      }
     },
     "notes": {
       "type": "array",
       "items": {
         "type": "string"
       }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
     }
   },
   "$defs": {
     "Artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": [ "role", "format", "locator" ],
+      "required": [
+        "role",
+        "format",
+        "locator"
+      ],
       "properties": {
         "role": {
           "type": "string",
-          "enum": [ "source_protocol", "executed_protocol", "vendor_export", "simulation_input", "other" ]
+          "enum": [
+            "source_protocol",
+            "executed_protocol",
+            "vendor_export",
+            "simulation_input",
+            "other"
+          ]
         },
-        "format": { "type": "string", "minLength": 1 },
-        "locator": { "type": "string", "minLength": 1 },
-        "media_type": { "type": "string" },
-        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "byte_size": { "type": "integer", "minimum": 0 },
-        "conforms_to": { "type": "string" },
-        "generated": { "type": "array", "items": { "type": "string" } },
-        "generated_from": { "type": "string" }
+        "format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conforms_to": {
+          "type": "string"
+        },
+        "generated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "generated_from": {
+          "type": "string"
+        }
       }
     },
     "UnixTime": {
@@ -302,6 +340,60 @@
     "SpecIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
     }
   }
 }
