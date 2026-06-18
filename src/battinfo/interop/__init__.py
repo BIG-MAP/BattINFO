@@ -21,8 +21,18 @@ from battinfo.interop.protocols import (
     import_bmgen_jsonld,
     import_pybamm_experiment,
 )
+from battinfo.interop.solid_state_db import (
+    SolidStateImportResult,
+    batch_import_solid_state_db,
+    from_solid_state_db_row,
+    iter_solid_state_records,
+)
 
 __all__ = [
+    "SolidStateImportResult",
+    "batch_import_solid_state_db",
+    "from_solid_state_db_row",
+    "iter_solid_state_records",
     "BattdatImportResult",
     "BpxExportResult",
     "BpxImportResult",
