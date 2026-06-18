@@ -1,0 +1,6 @@
+# Example records (the canonical source and its packaged mirror) are byte-compared
+# by scripts/sync_examples.py --check. Force LF on every platform so the check is
+# stable on Windows CI: core.autocrlf=true would otherwise rewrite line endings on
+# checkout, making the LF-generated copy differ from the checked-out files.
+examples/** text eol=lf
+src/battinfo/data/examples/** text eol=lf

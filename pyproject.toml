@@ -57,6 +57,8 @@ processing = [
 ]
 dev = [
   "build>=1.2",
+  "setuptools>=77",   # build backend, needed in-env for `build --no-isolation` (alpha gate)
+  "wheel",
   "datamodel-code-generator>=0.25",
   "linkml>=1.8",
   "nbformat>=5.9",
