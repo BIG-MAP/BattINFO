@@ -1751,7 +1751,7 @@ def _component_holder_node(family: str, body: dict[str, Any]) -> dict[str, Any]:
         return _descriptor_electrolyte_to_jsonld(body) or {"@type": "ElectrolyteSolution"}
     if family == "separator":
         return _descriptor_separator_to_jsonld(body) or {"@type": "Separator"}
-    if family == "current-collector":
+    if family == "current_collector":
         return _descriptor_current_collector_to_jsonld(body) or {"@type": "CurrentCollector"}
     if family == "housing":
         node: dict[str, Any] = {"@type": "schema:Product"}

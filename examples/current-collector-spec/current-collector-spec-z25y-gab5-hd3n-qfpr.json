@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.1.0",
+  "current_collector_spec": {
+    "id": "https://w3id.org/battinfo/current-collector-spec/z25y-gab5-hd3n-qfpr",
+    "short_id": "z25yga",
+    "name": "Copper foil",
+    "property": {
+      "thickness": {
+        "value": 10,
+        "unit": "um"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Copper foil anode current collector (10 um)."
+  ]
+}

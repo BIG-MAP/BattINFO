@@ -35,6 +35,11 @@
           "type": "string",
           "minLength": 1
         },
+        "material_spec_id": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Optional canonical IRI of a standalone material-spec for the salt."
+        },
         "cation": {
           "type": "string"
         },

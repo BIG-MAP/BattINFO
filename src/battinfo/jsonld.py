@@ -431,6 +431,18 @@ _TRANSFORMERS = {
     "electrode-spec": _component_to_jsonld,
     "electrode_spec": _component_to_jsonld,
     "electrode":      _component_to_jsonld,
+    "separator-spec": _component_to_jsonld,
+    "separator_spec": _component_to_jsonld,
+    "separator":      _component_to_jsonld,
+    "current-collector-spec": _component_to_jsonld,
+    "current_collector_spec": _component_to_jsonld,
+    "current_collector":      _component_to_jsonld,
+    "electrolyte-spec": _component_to_jsonld,
+    "electrolyte_spec": _component_to_jsonld,
+    "electrolyte":      _component_to_jsonld,
+    "housing-spec": _component_to_jsonld,
+    "housing_spec": _component_to_jsonld,
+    "housing":      _component_to_jsonld,
 }
 
 

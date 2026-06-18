@@ -4634,19 +4634,20 @@ def _record_from_component_instance(
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
 ) -> dict[str, Any]:
-    spec_namespace = f"{family}-spec"
+    base_namespace = family.replace("_", "-")
+    spec_namespace = f"{base_namespace}-spec"
     if not _component_iri_re(spec_namespace).fullmatch(spec_id):
         raise ValueError(f"{family}_spec_id must match https://w3id.org/battinfo/{spec_namespace}/{{uid}}.")
     if id is not None:
-        if not _component_iri_re(family).fullmatch(id):
-            raise ValueError(f"{family} id must match https://w3id.org/battinfo/{family}/{{uid}}.")
+        if not _component_iri_re(base_namespace).fullmatch(id):
+            raise ValueError(f"{family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/{family}/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/{base_namespace}/{dashed_uid}"
 
     instance: dict[str, Any] = {
         "id": entity_id,
@@ -4788,7 +4789,7 @@ def query_component_specs(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Query reusable component specifications for a family."""
-    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / f"{family}-spec"
+    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / f"{family.replace('_', '-')}-spec"
     return _query_component(
         f"{family}_spec", d, id=id, name=name, short_id_prefix=short_id_prefix,
         spec_ref_field=None, spec_id=None, limit=limit, offset=offset,
@@ -4807,7 +4808,7 @@ def query_component_instances(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Query physical component instances for a family."""
-    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / family
+    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / family.replace("_", "-")
     return _query_component(
         family, d, id=id, name=name, short_id_prefix=short_id_prefix,
         spec_ref_field=f"{family}_spec_id", spec_id=spec_id, limit=limit, offset=offset,
@@ -5097,7 +5098,8 @@ def build_index(
     component_index: dict[str, list[dict[str, Any]]] = {}
     component_count = 0
     for family in COMPONENT_FAMILIES:
-        for record_key, subdir in ((f"{family}_spec", f"{family}-spec"), (family, family)):
+        _base = family.replace("_", "-")
+        for record_key, subdir in ((f"{family}_spec", f"{_base}-spec"), (family, _base)):
             directory = src_root / subdir
             rows: list[dict[str, Any]] = []
             for path in sorted(directory.glob(glob)) if directory.exists() else []:

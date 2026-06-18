@@ -1,0 +1,25 @@
+{
+  "schema_version": "0.1.0",
+  "current_collector_spec": {
+    "id": "https://w3id.org/battinfo/current-collector-spec/vkaf-f5bv-fwt2-e6yz",
+    "short_id": "vkaff5",
+    "name": "Aluminium foil",
+    "property": {
+      "thickness": {
+        "value": 15,
+        "unit": "um"
+      },
+      "areal_mass": {
+        "value": 40.5,
+        "unit": "mg/cm2"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Aluminium foil cathode current collector (15 um)."
+  ]
+}
