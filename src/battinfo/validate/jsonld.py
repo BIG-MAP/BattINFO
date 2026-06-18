@@ -148,6 +148,12 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "ExpandedMesh",
     "ElectrospunMesh",
     "Foil",
+    "WovenMesh",
+    # Current-collector material classes (emitted from the foil/mesh name)
+    "Nickel",
+    "StainlessSteel",
+    "Titanium",
+    "Carbon",
     "IonicLiquidElectrolyte",
     "LiquidElectrolyte",
     "MassFraction",

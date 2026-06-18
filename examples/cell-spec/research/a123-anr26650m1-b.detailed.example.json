@@ -44,7 +44,7 @@
       "unit": "A"
     },
     "pulse_charging_current": {
-      "max_value": 5.0,
+      "max_value": 10.0,
       "unit": "A"
     },
     "nominal_continuous_discharging_current": {
@@ -128,7 +128,7 @@
             "name": "LFP",
             "property": {
               "mass_fraction": {
-                "value": 0.94,
+                "value": 0.935,
                 "unit": "1"
               },
               "particle_d50": {
@@ -202,7 +202,7 @@
     },
     "property": {
       "compaction_density": {
-        "value": 2.9,
+        "value": 2.34,
         "unit": "g/cm^3"
       }
     },

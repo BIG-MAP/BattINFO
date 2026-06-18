@@ -48,7 +48,7 @@
             "name": "LFP",
             "property": {
               "mass_fraction": {
-                "value": 0.94,
+                "value": 0.935,
                 "unit": "1"
               },
               "particle_d50": {
@@ -126,7 +126,7 @@
     },
     "property": {
       "compaction_density": {
-        "value": 2.9,
+        "value": 2.34,
         "unit": "g/cm^3"
       }
     },
