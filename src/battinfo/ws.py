@@ -1460,19 +1460,24 @@ class AuthoringWorkspace:
             "# 1. One-time: log in (get a key at the registry settings page)\n"
             'ws.login(api_key="YOUR_KEY")        # or ws.setup() to see options\n'
             "\n"
-            "# 2. Convert raw cycler files (NEWARE/Biologic/Excel/... auto-detected)\n"
+            "# 2. Tag this work with the project that funded it (optional, once per\n"
+            "#    workspace). The grant is stamped onto every record you save, so all\n"
+            "#    your work stays traceable to the project that produced it.\n"
+            'ws.project("101103997")              # e.g. an EU grant agreement number\n'
+            "\n"
+            "# 3. Convert raw cycler files (NEWARE/Biologic/Excel/... auto-detected)\n"
             "ws.convert()                         # -> bdf/*.bdf.csv\n"
             "\n"
-            "# 3. Find your cell in the registry (fuzzy search)\n"
+            "# 4. Find your cell in the registry (fuzzy search)\n"
             'spec = ws.search("samsung inr21700 50e")[0]\n'
             "\n"
-            "# 4. Register the physical cells you tested\n"
+            "# 5. Register the physical cells you tested\n"
             'ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])\n'
             "\n"
-            "# 5. Attach a test + data to a cell (explicit)\n"
+            "# 6. Attach a test + data to a cell (explicit)\n"
             'ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")\n'
             "\n"
-            "# 6. Publish (add zenodo=True for a citable DOI)\n"
+            "# 7. Publish (add zenodo=True for a citable DOI)\n"
             "ws.save()\n"
             'ws.publish(note="My cycling campaign, 2026")\n'
             "\n"
