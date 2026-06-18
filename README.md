@@ -1,6 +1,11 @@
 <div align="center">
 
-<img src="brand/assets/social/og-image.png" alt="BattINFO — the semantic data layer for battery technology" width="760">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/assets/logo/logo-horizontal-dark.png">
+  <img alt="BattINFO" src="brand/assets/logo/logo-horizontal-light.png" width="420">
+</picture>
+
+### The semantic data layer for battery technology
 
 Create, validate, and publish battery metadata as machine-readable Linked Data —
 typed against [EMMO domain-battery](https://github.com/emmo-repo/domain-battery)
