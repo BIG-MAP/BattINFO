@@ -11,7 +11,7 @@ export function SiteFooter() {
               Batt<span className="text-brand-600">INFO</span>
             </span>
             <p className="mt-2 max-w-xs text-sm text-ink-muted">
-              The data layer for battery technology. Built on{" "}
+              The semantic data layer for battery technology. Built on{" "}
               <a href={site.emmo} className="underline hover:text-ink" target="_blank" rel="noreferrer">
                 EMMO domain-battery
               </a>

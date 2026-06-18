@@ -18,10 +18,10 @@ const guides = [
 ];
 
 const reference = [
-  { id: "schemas", title: "JSON Schemas", body: "Draft 2020-12 schemas for every record type — the canonical contract.", href: `${site.github}/tree/master/assets/schemas` },
-  { id: "ontology", title: "Ontology (battinfo.ttl)", body: "OWL application ontology importing pinned EMMO domain-battery + domain-electrochemistry.", href: `${site.github}/blob/master/battinfo.ttl` },
-  { id: "identifiers", title: "Identifier policy", body: "How w3id.org/battinfo IRIs are minted, governed, and kept stable.", href: `${site.github}/blob/master/IDENTIFIER_POLICY.md` },
-  { id: "mappings", title: "Property & unit mappings", body: "Curated property→EMMO-IRI and unit→EMMO/QUDT-IRI tables driving the JSON-LD transform.", href: `${site.github}/tree/master/assets/mappings` },
+  { id: "schemas", title: "JSON Schemas", body: "Draft 2020-12 schemas for every record type — the canonical contract.", href: `${site.github}/tree/main/assets/schemas` },
+  { id: "ontology", title: "Ontology (battinfo.ttl)", body: "OWL application ontology importing pinned EMMO domain-battery + domain-electrochemistry.", href: `${site.github}/blob/main/battinfo.ttl` },
+  { id: "identifiers", title: "Identifier policy", body: "How w3id.org/battinfo IRIs are minted, governed, and kept stable.", href: `${site.github}/blob/main/IDENTIFIER_POLICY.md` },
+  { id: "mappings", title: "Property & unit mappings", body: "Curated property→EMMO-IRI and unit→EMMO/QUDT-IRI tables driving the JSON-LD transform.", href: `${site.github}/tree/main/assets/mappings` },
 ];
 
 function SectionHeading({ id, kicker, title }: { id?: string; kicker: string; title: string }) {
@@ -146,7 +146,7 @@ export default function DocsPage() {
         <p className="mt-4 text-sm text-ink-muted">
           The roadmap for the canonical, same-engine web tools is in{" "}
           <a
-            href={`${site.github}/blob/master/docs/web-validator-converter-plan.md`}
+            href={`${site.github}/blob/main/docs/web-validator-converter-plan.md`}
             target="_blank"
             rel="noreferrer"
             className="text-brand-600 underline"

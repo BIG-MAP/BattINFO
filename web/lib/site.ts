@@ -13,8 +13,8 @@ export const site = {
   // "how/reference" — see docs/CONTENT-MODEL.md. TODO: point at
   // https://docs.battinfo.org once the Sphinx site is deployed; until then the
   // canonical reference is the docs/ tree on GitHub.
-  reference: "https://github.com/BattINFO/BattINFO/tree/main/docs",
-  github: "https://github.com/BattINFO/BattINFO",
+  reference: "https://github.com/BIG-MAP/BattINFO/tree/main/docs",
+  github: "https://github.com/BIG-MAP/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
   emmo: "https://github.com/emmo-repo/domain-battery",
   emmoElectrochem: "https://github.com/emmo-repo/domain-electrochemistry",

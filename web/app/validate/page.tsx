@@ -158,7 +158,7 @@ export default function ValidatePage() {
             Convert this record to JSON-LD →
           </Link>
           <a
-            href={`${site.github}/blob/master/docs/validation-contract.md`}
+            href={`${site.github}/blob/main/docs/validation-contract.md`}
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-brand-600 hover:text-brand-700"
