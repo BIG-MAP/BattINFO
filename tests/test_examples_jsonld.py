@@ -39,3 +39,21 @@ def test_example_emits_valid_jsonld(path: Path):
     doc = json.loads(path.read_text(encoding="utf-8"))
     # raises ValueError("json-ld validation failed: ...") on an unmapped @type
     to_jsonld(doc, target="domain-battery")
+
+
+def test_example_iris_are_unique():
+    """No two example records may claim the same canonical IRI."""
+    seen: dict[str, str] = {}
+    dups: list[str] = []
+    for path in sorted(EXAMPLES.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        key = next((k for k in EMITTING_KEYS | {"organization"} if k in doc), None)
+        if key is None:
+            continue
+        iri = doc[key].get("id") if isinstance(doc[key], dict) else None
+        if not isinstance(iri, str):
+            continue
+        if iri in seen:
+            dups.append(f"{iri}: {path.name} and {seen[iri]}")
+        seen[iri] = path.name
+    assert not dups, "duplicate IRIs:\n  " + "\n  ".join(dups)

@@ -120,11 +120,8 @@ def test_template_test_protocol_accepts_new_alpha_kinds() -> None:
 
 
 def test_shipped_example_chain_is_consistent() -> None:
-    descriptor = json.loads(
-        (ROOT / "examples" / "cell-spec" / "research" / "a123-anr26650m1-b.detailed.example.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    # The canonical A123 cell-spec anchors the linked chain. The research/ detailed
+    # and extended/minimal descriptors are separate example records (own IRIs).
     cell_spec = json.loads(
         (ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
     )
@@ -142,8 +139,7 @@ def test_shipped_example_chain_is_consistent() -> None:
         )
     )
 
-    assert descriptor["cell_spec"]["id"] == cell_spec["cell_spec"]["id"]
-    assert descriptor["cell_spec"]["id"] == cell_instance["cell_instance"]["cell_spec_id"]
+    assert cell_spec["cell_spec"]["id"] == cell_instance["cell_instance"]["cell_spec_id"]
     assert cell_instance["cell_instance"]["id"] == test_record["test"]["cell_id"]
     assert test_record["test"]["id"] in dataset["dataset"]["about"]
     assert cell_instance["cell_instance"]["id"] in dataset["dataset"]["about"]
