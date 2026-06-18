@@ -280,6 +280,40 @@ class TestBuildZenodoMetadata:
         m = self._meta()
         assert "2 datasets" in m["description"]
 
+    def test_no_related_identifiers_without_citations(self) -> None:
+        # _make_record builds datasets with no citations → no related_identifiers key.
+        m = self._meta()
+        assert "related_identifiers" not in m
+
+    def test_article_citations_become_related_identifiers(self) -> None:
+        record = _make_record(2)
+        # Self-citation (the dataset's own DOI) must be excluded; the article kept.
+        record.datasets[0].dataset.citations = [
+            {"kind": "dataset", "doi": "10.5281/zenodo.123"},
+            {"kind": "article", "doi": "10.1038/s41467-020-15235-7"},
+        ]
+        # Same article on a second dataset (dedup) + a distinct article.
+        record.datasets[1].dataset.citations = [
+            {"kind": "article", "doi": "10.1038/s41467-020-15235-7"},
+            {"kind": "article", "doi": "10.1016/j.ijepes.2018.12.016"},
+        ]
+        m = _build_zenodo_metadata(
+            record,
+            creators=CREATORS,
+            title=None,
+            description=None,
+            license="cc-by-4.0",
+            community=None,
+            extra_keywords=None,
+        )
+        rels = m["related_identifiers"]
+        dois = [r["identifier"] for r in rels]
+        assert "10.5281/zenodo.123" not in dois            # self-citation excluded
+        assert dois.count("10.1038/s41467-020-15235-7") == 1  # deduped across datasets
+        assert "10.1016/j.ijepes.2018.12.016" in dois
+        assert all(r["relation"] == "isSupplementTo" and r["scheme"] == "doi" for r in rels)
+        assert all(r.get("resource_type") == "publication-article" for r in rels)
+
 
 # ── ZenodoClient ──────────────────────────────────────────────────────────────
 

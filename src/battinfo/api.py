@@ -1140,6 +1140,196 @@ def promote_staging_cell_specs(
     }
 
 
+# ── Staging dataset promotion ─────────────────────────────────────────────────
+# Datasets carry their own canonical IRI and `bdc:` identifier, so promotion is
+# simpler than cell-spec: no manufacturer/model token derivation. Citations (the
+# dataset↔publication links) pass through unchanged into the curated record.
+
+def _staging_dataset_input(source: dict[str, Any] | PathLike) -> tuple[dict[str, Any], Path | None]:
+    """Load a staging dataset record (a ``{schema_version, dataset, provenance}`` doc)."""
+    source_path: Path | None = None
+    if isinstance(source, (str, Path)):
+        source_path = _as_path(source)
+        payload = _load_json(source_path)
+    else:
+        payload = record_to_snake_aliases(dict(source))
+    if not isinstance(payload.get("dataset"), Mapping):
+        raise ValueError("staging dataset record must have a top-level 'dataset' object.")
+    return payload, source_path
+
+
+def _dataset_record_id(value: str) -> str:
+    """Canonical curated id for a dataset, preserving the bdc scheme (e.g. 'bdc_000001').
+
+    Unlike ``_editorial_record_id`` (which hyphenates underscores for descriptive
+    cell-spec slugs), this keeps the dataset's own identifier intact, stripping only
+    a leading namespace prefix such as ``bdc:``.
+    """
+    token = value.strip().lower()
+    if ":" in token:
+        token = token.split(":", 1)[-1]
+    return re.sub(r"[^a-z0-9_-]+", "-", token).strip("-_")
+
+
+def _staging_dataset_identity(payload: Mapping[str, Any], source_path: Path | None) -> dict[str, Any]:
+    """Resolve the curated record id for a dataset from its identifier/short_id/filename."""
+    dataset = payload.get("dataset")
+    dataset = dataset if isinstance(dataset, Mapping) else {}
+    record_id: str | None = None
+    basis = "none"
+    for key, source_basis in (("identifier", "identifier"), ("short_id", "short_id")):
+        raw = dataset.get(key)
+        if isinstance(raw, str) and raw.strip():
+            candidate = _dataset_record_id(raw)
+            if candidate:
+                record_id, basis = candidate, source_basis
+                break
+    if record_id is None and source_path is not None and source_path.stem and not source_path.stem.startswith("_"):
+        candidate = _dataset_record_id(source_path.stem)
+        if candidate:
+            record_id, basis = candidate, "filename"
+    return {
+        "record_id": record_id,
+        "record_id_basis": basis,
+        "record_id_hint": "bdc_000001",
+        "requires_record_id": record_id is None,
+    }
+
+
+def validate_staging_dataset(
+    source: dict[str, Any] | PathLike,
+    *,
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+) -> dict[str, Any]:
+    """Validate a staging dataset record without writing anything to disk."""
+    payload, source_path = _staging_dataset_input(source)
+    identity = _staging_dataset_identity(payload, source_path)
+    report = validate_record_report(payload, policy=validation_policy)
+    return {
+        "ok": report.ok,
+        "source_path": str(source_path) if source_path is not None else None,
+        "record_id": identity["record_id"],
+        "record_id_basis": identity["record_id_basis"],
+        "record_id_hint": identity["record_id_hint"],
+        "requires_record_id": identity["requires_record_id"],
+        "record": payload,
+        "issues": [
+            {
+                "severity": issue.severity,
+                "code": issue.code,
+                "path": issue.path,
+                "message": issue.message,
+                "hint": issue.hint,
+            }
+            for issue in report.issues
+        ],
+    }
+
+
+def validate_staging_datasets(
+    *,
+    input_dir: PathLike,
+    glob: str = "*.json",
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+) -> dict[str, Any]:
+    """Validate every staging dataset record in a directory."""
+    input_root = _as_path(input_dir)
+    if not input_root.exists() or not input_root.is_dir():
+        raise ValueError(f"input_dir does not exist: {input_root}")
+    results: list[dict[str, Any]] = []
+    for path in sorted(input_root.glob(glob)):
+        if path.name.startswith("_"):
+            continue
+        results.append(validate_staging_dataset(path, validation_policy=validation_policy))
+    return {
+        "status": "ok",
+        "input_dir": str(input_root),
+        "processed": len(results),
+        "ok": sum(1 for item in results if item["ok"]),
+        "failed": sum(1 for item in results if not item["ok"]),
+        "results": results,
+    }
+
+
+def promote_staging_dataset(
+    source: dict[str, Any] | PathLike,
+    *,
+    curated_root: PathLike,
+    record_id: str | None = None,
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Promote a validated staging dataset record into the curated record store.
+
+    The curated id is taken from the record's own identifier (or ``record_id`` if
+    given). Writes ``curated_root/<record-id>/record.json``. Pass ``dry_run=True``
+    to validate + resolve the id without writing files.
+    """
+    payload, source_path = _staging_dataset_input(source)
+    identity = _staging_dataset_identity(payload, source_path)
+    if record_id is not None:
+        resolved_record_id = _dataset_record_id(record_id)
+    else:
+        resolved_record_id = identity["record_id"]
+        if not isinstance(resolved_record_id, str) or not resolved_record_id:
+            raise ValueError(
+                "staging dataset does not have a safe automatic record id. "
+                f"Provide --record-id explicitly; suggested pattern: {identity['record_id_hint']}."
+            )
+
+    report = validate_record_report(payload, policy=validation_policy)
+    if not report.ok:
+        raise ValueError(f"staging dataset validation failed: {'; '.join(report.render_errors())}")
+
+    curated_root_path = _as_path(curated_root)
+    target_path = curated_root_path / resolved_record_id / "record.json"
+    if not dry_run:
+        _write_json(target_path, payload)
+    return {
+        "status": "ok",
+        "record_id": resolved_record_id,
+        "record_id_basis": identity["record_id_basis"] if record_id is None else "manual",
+        "source_path": str(source_path) if source_path is not None else None,
+        "target_path": str(target_path),
+        "record": payload,
+        "dry_run": dry_run,
+    }
+
+
+def promote_staging_datasets(
+    *,
+    input_dir: PathLike,
+    curated_root: PathLike,
+    glob: str = "*.json",
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Promote every staging dataset record in a directory."""
+    input_root = _as_path(input_dir)
+    if not input_root.exists() or not input_root.is_dir():
+        raise ValueError(f"input_dir does not exist: {input_root}")
+    promoted: list[dict[str, Any]] = []
+    for path in sorted(input_root.glob(glob)):
+        if path.name.startswith("_"):
+            continue
+        promoted.append(
+            promote_staging_dataset(
+                path,
+                curated_root=curated_root,
+                validation_policy=validation_policy,
+                dry_run=dry_run,
+            )
+        )
+    return {
+        "status": "ok",
+        "input_dir": str(input_root),
+        "curated_root": str(_as_path(curated_root)),
+        "processed": len(promoted),
+        "dry_run": dry_run,
+        "results": promoted,
+    }
+
+
 def _curated_cell_spec_source(
     source: dict[str, Any] | PathLike,
 ) -> tuple[dict[str, Any], Path | None, str | None]:
@@ -5295,6 +5485,8 @@ __all__ = [
     "publish_record",
     "promote_staging_cell_spec",
     "promote_staging_cell_specs",
+    "promote_staging_dataset",
+    "promote_staging_datasets",
     "query",
     "query_cell_instances",
     "query_library_cell_specs",
@@ -5322,6 +5514,8 @@ __all__ = [
     "submit_publication_package",
     "validate_staging_cell_spec",
     "validate_staging_cell_specs",
+    "validate_staging_dataset",
+    "validate_staging_datasets",
     "TestProtocolInput",
     "save_test_protocol",
     "template_test_protocol",

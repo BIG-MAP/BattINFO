@@ -35,6 +35,12 @@ from battinfo.api import (
     promote_staging_cell_specs as api_promote_staging_cell_specs,
 )
 from battinfo.api import (
+    promote_staging_dataset as api_promote_staging_dataset,
+)
+from battinfo.api import (
+    promote_staging_datasets as api_promote_staging_datasets,
+)
+from battinfo.api import (
     publish_batch as api_publish_batch,
 )
 from battinfo.api import (
@@ -111,6 +117,12 @@ from battinfo.api import (
 )
 from battinfo.api import (
     validate_staging_cell_specs as api_validate_staging_cell_specs,
+)
+from battinfo.api import (
+    validate_staging_dataset as api_validate_staging_dataset,
+)
+from battinfo.api import (
+    validate_staging_datasets as api_validate_staging_datasets,
 )
 from battinfo.bundle import CellSpecification
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
@@ -2294,6 +2306,123 @@ def promote_staging_cell_specs(
     policy_name = _check_validation_policy(validation_policy)
     try:
         payload = api_promote_staging_cell_specs(
+            input_dir=input_dir,
+            curated_root=curated_root,
+            glob=glob,
+            validation_policy=policy_name,
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    summary = {
+        "status": payload["status"],
+        "input_dir": payload["input_dir"],
+        "curated_root": payload["curated_root"],
+        "processed": payload["processed"],
+        "dry_run": payload["dry_run"],
+    }
+    _emit_table([summary], ["status", "input_dir", "curated_root", "processed", "dry_run"])
+
+
+@editorial_app.command("validate-staging-dataset")
+def validate_staging_dataset(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging dataset JSON record."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Validate one staging dataset record and preview its curated record id."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_validate_staging_dataset(input_path, validation_policy=policy_name)
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _emit_table([payload], ["ok", "record_id", "record_id_basis", "requires_record_id", "source_path"])
+
+
+@editorial_app.command("validate-staging-dataset-batch")
+def validate_staging_datasets(
+    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging dataset records."),
+    glob: str = typer.Option("*.json", help="Glob for staging records."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Validate all staging dataset records in a directory."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_validate_staging_datasets(
+            input_dir=input_dir,
+            glob=glob,
+            validation_policy=policy_name,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    summary = {
+        "status": payload["status"],
+        "input_dir": payload["input_dir"],
+        "processed": payload["processed"],
+        "ok": payload["ok"],
+        "failed": payload["failed"],
+    }
+    _emit_table([summary], ["status", "input_dir", "processed", "ok", "failed"])
+
+
+@editorial_app.command("promote-staging-dataset")
+def promote_staging_dataset(
+    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging dataset JSON record."),
+    curated_root: Path = typer.Option(Path("records/dataset"), help="Curated dataset root."),
+    record_id: str | None = typer.Option(None, "--record-id", help="Override the curated record id."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Promote one staging dataset record into records/dataset/<record-id>/record.json."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_promote_staging_dataset(
+            input_path,
+            curated_root=curated_root,
+            record_id=record_id,
+            validation_policy=policy_name,
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(code=1) from exc
+    if fmt == "json":
+        _emit_json(payload)
+        return
+    _emit_table([payload], ["status", "record_id", "record_id_basis", "source_path", "target_path", "dry_run"])
+
+
+@editorial_app.command("promote-staging-dataset-batch")
+def promote_staging_datasets(
+    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging dataset records."),
+    curated_root: Path = typer.Option(Path("records/dataset"), help="Curated dataset root."),
+    glob: str = typer.Option("*.json", help="Glob for staging records."),
+    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
+    output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
+) -> None:
+    """Promote all staging dataset records into curated record.json directories."""
+    fmt = _check_output_format(output_format)
+    policy_name = _check_validation_policy(validation_policy)
+    try:
+        payload = api_promote_staging_datasets(
             input_dir=input_dir,
             curated_root=curated_root,
             glob=glob,

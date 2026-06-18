@@ -284,6 +284,38 @@ def _resolve_token(token: str | None) -> str:
     )
 
 
+def _related_identifiers_from_citations(record: ZenodoCellRecord) -> list[dict[str, str]]:
+    """Map the record's dataset citations to Zenodo ``related_identifiers``.
+
+    The Zenodo deposit *is* the dataset(s), so each article citation
+    (``kind != "dataset"``) becomes an ``isSupplementTo`` relation pointing at
+    the publication DOI. The dataset's own self-citation (``kind == "dataset"``)
+    is skipped — it describes this deposit, not a related work. The relationship
+    itself originates in the BattINFO record's ``dataset.citations``; this only
+    re-expresses it in Zenodo's native vocabulary so the published deposit is
+    self-describing. DOIs are de-duplicated across all datasets in the record.
+    """
+    out: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for entry in record.datasets:
+        for citation in entry.dataset.citations:
+            if not isinstance(citation, dict):
+                continue
+            doi = citation.get("doi")
+            kind = citation.get("kind") or "article"
+            if not isinstance(doi, str) or not doi.strip() or kind == "dataset":
+                continue
+            doi = doi.strip()
+            if doi in seen:
+                continue
+            seen.add(doi)
+            related: dict[str, str] = {"identifier": doi, "relation": "isSupplementTo", "scheme": "doi"}
+            if kind == "article":
+                related["resource_type"] = "publication-article"
+            out.append(related)
+    return out
+
+
 def _build_zenodo_metadata(
     record: ZenodoCellRecord,
     *,
@@ -336,6 +368,10 @@ def _build_zenodo_metadata(
     }
     if community is not None:
         metadata["communities"] = [{"identifier": community}]
+
+    related_identifiers = _related_identifiers_from_citations(record)
+    if related_identifiers:
+        metadata["related_identifiers"] = related_identifiers
 
     return metadata
 
