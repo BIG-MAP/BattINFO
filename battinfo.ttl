@@ -56,8 +56,8 @@ as Linked Data."""@en ;
     dcterms:contributor
         "BattINFO contributors — see https://w3id.org/battinfo for full list"@en ;
 
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/legalcode> ;
-    dcterms:rights "Creative Commons Attribution 4.0 International (CC BY 4.0)"@en ;
+    dcterms:license <https://www.apache.org/licenses/LICENSE-2.0> ;
+    dcterms:rights "Apache License 2.0"@en ;
     dcterms:source <https://github.com/BIG-MAP/BattINFO> ;
 
     rdfs:seeAlso <https://w3id.org/emmo/domain/battery> ;

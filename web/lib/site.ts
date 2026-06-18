@@ -18,7 +18,7 @@ export const site = {
   pypi: "https://pypi.org/project/battinfo/",
   emmo: "https://github.com/emmo-repo/domain-battery",
   emmoElectrochem: "https://github.com/emmo-repo/domain-electrochemistry",
-  license: "GPL-2.0-only (tooling) · CC-BY-4.0 (documentation)",
+  license: "Apache-2.0",
   // Pinned upstream ontology versions — keep in sync with battinfo.ttl.
   versions: {
     domainBattery: "0.18.7",

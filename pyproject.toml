@@ -9,7 +9,7 @@ description = "Implementation and interoperability layer for the domain-battery 
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
-license-files = ["LICENSE", "LICENSE-DATA"]
+license-files = ["LICENSE"]
 authors = [
   { name = "BattINFO Team" }
 ]
