@@ -19,6 +19,9 @@ dist
 !assets/examples/workspaces/**/dist/
 !assets/examples/workspaces/**/dist/**
 build
+# ...but .tools/build/ is hand-written tooling, not a build-artifact dir
+!.tools/build/
+!.tools/build/**
 .battinfo
 WORK_LOG.md
 CLAUDE.md

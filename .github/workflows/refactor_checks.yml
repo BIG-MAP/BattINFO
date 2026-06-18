@@ -28,20 +28,25 @@ jobs:
       - name: Install Package + Dependencies (locked)
         run: uv sync --all-extras --frozen --python ${{ matrix.python-version }}
 
+      # NOTE: the tool steps below use `--no-sync` so they reuse the
+      # `--all-extras` venv created above. Without it, a bare `uv run` re-reads
+      # `.python-version` (3.11), recreates the venv with default deps only, and
+      # the dev tools (ruff/mypy/pytest) disappear — which also breaks the 3.10
+      # matrix leg.
       - name: Lint (ruff)
-        run: uv run ruff check src tests
+        run: uv run --no-sync ruff check src tests
 
       - name: Type Check (mypy)
-        run: uv run mypy
+        run: uv run --no-sync mypy
 
       - name: Run Unit Tests + Coverage Gate
-        run: uv run pytest -q tests --cov=battinfo --cov-report=term-missing
+        run: uv run --no-sync pytest -q tests --cov=battinfo --cov-report=term-missing
 
       - name: Lint Identifier Policy Compliance
-        run: uv run python .tools/quality/lint_identifier_policy.py
+        run: uv run --no-sync python .tools/quality/lint_identifier_policy.py
 
       - name: Run Alpha Verification Gate
-        run: uv run python .tools/quality/run_alpha_verification.py
+        run: uv run --no-sync python .tools/quality/run_alpha_verification.py
 
       - name: Smoke Test Installed Wheel
         run: |
