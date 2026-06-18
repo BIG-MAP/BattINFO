@@ -424,6 +424,34 @@ def funding_to_jsonld(funding: Any) -> dict | None:
     return out if len(out) > 1 else None
 
 
+def contributor_to_jsonld(contributor: Any) -> list[dict] | None:
+    """Convert a record ``contributor`` list to schema.org ``Person`` nodes.
+
+    Each entry is a person who contributed the record to the platform
+    (attribution). When an ORCID is present in ``same_as`` it becomes the node's
+    ``@id`` (the canonical person identifier). Returns ``None`` when there is
+    nothing to emit.
+    """
+    if not isinstance(contributor, list):
+        return None
+    out: list[dict] = []
+    for person in contributor:
+        if not isinstance(person, dict):
+            continue
+        node: dict = {"@type": "schema:Person"}
+        if person.get("same_as"):
+            node["@id"] = person["same_as"]
+        name = person.get("name")
+        if isinstance(name, str) and name.strip():
+            node["schema:name"] = name
+        aff = person.get("affiliation")
+        if isinstance(aff, dict) and aff.get("name"):
+            node["schema:affiliation"] = {"@type": "schema:Organization", "schema:name": aff["name"]}
+        if len(node) > 1:  # more than the bare @type
+            out.append(node)
+    return out or None
+
+
 def _material_to_jsonld(record: dict) -> dict:
     """Transform a material-spec or material (instance) record to JSON-LD.
 
@@ -512,4 +540,7 @@ def record_to_jsonld(record: dict, record_type: str) -> dict:
         grant = funding_to_jsonld(record.get("funding"))
         if grant is not None:
             node["schema:funding"] = grant
+        people = contributor_to_jsonld(record.get("contributor"))
+        if people is not None:
+            node["schema:contributor"] = people
     return node

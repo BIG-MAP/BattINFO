@@ -261,6 +261,14 @@
     },
     "funding": {
       "$ref": "#/$defs/Funding"
+    },
+    "contributor": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "minItems": 1,
+      "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Distinct from data authorship (creators)."
     }
   },
   "$defs": {
@@ -392,6 +400,69 @@
               "format": "uri"
             }
           }
+        }
+      }
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Person"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "given_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri"
+        },
+        "affiliation": {
+          "$ref": "#/$defs/Organization"
         }
       }
     }

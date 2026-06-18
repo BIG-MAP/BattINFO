@@ -42,8 +42,8 @@ def test_normalize_orcid_rejects_invalid() -> None:
 
 # ── ContributorRef model ──────────────────────────────────────────────────────
 
-def test_creator_block_shape() -> None:
-    block = ContributorRef(ORCID, name="Jane Researcher", affiliation="SINTEF").creator_block()
+def test_person_block_shape() -> None:
+    block = ContributorRef(ORCID, name="Jane Researcher", affiliation="SINTEF").person_block()
     assert block == {
         "type": "Person",
         "name": "Jane Researcher",
@@ -52,8 +52,8 @@ def test_creator_block_shape() -> None:
     }
 
 
-def test_creator_block_minimal() -> None:
-    block = ContributorRef(ORCID, name="Jane Researcher").creator_block()
+def test_person_block_minimal() -> None:
+    block = ContributorRef(ORCID, name="Jane Researcher").person_block()
     assert block == {"type": "Person", "name": "Jane Researcher", "same_as": ORCID_URL}
 
 
@@ -128,31 +128,29 @@ def _populate(ws: AuthoringWorkspace, tmp_path: Path) -> None:
                    test=test, path=data_file, license="CC-BY-4.0")
 
 
-def _dataset_records(records_root: Path) -> list[dict]:
+def _all_records(records_root: Path) -> list[dict]:
     out = []
     for p in records_root.rglob("*.json"):
         if "index" in p.name:
             continue
-        rec = json.loads(p.read_text(encoding="utf-8"))
-        if isinstance(rec.get("dataset"), dict):
-            out.append(rec)
+        out.append(json.loads(p.read_text(encoding="utf-8")))
     return out
 
 
-def _creator_orcids(record: dict) -> list[str]:
-    return [c.get("same_as") for c in record["dataset"].get("creators", []) if isinstance(c, dict)]
+def _contributor_orcids(record: dict) -> list[str]:
+    return [c.get("same_as") for c in record.get("contributor", []) if isinstance(c, dict)]
 
 
-def test_save_stamps_contributor_on_datasets(tmp_path: Path) -> None:
+def test_save_stamps_contributor_on_every_record(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _populate(ws, tmp_path)
     ws.contributor(ORCID, name="Jane Researcher")
     ws.save(validation_policy="strict")
 
-    datasets = _dataset_records(ws._records_root)
-    assert datasets, "expected a dataset record"
-    for rec in datasets:
-        assert ORCID_URL in _creator_orcids(rec)
+    records = _all_records(ws._records_root)
+    assert records, "expected record files"
+    for rec in records:
+        assert ORCID_URL in _contributor_orcids(rec), f"missing contributor: {rec.keys()}"
 
 
 def test_resave_does_not_duplicate_contributor(tmp_path: Path) -> None:
@@ -162,26 +160,71 @@ def test_resave_does_not_duplicate_contributor(tmp_path: Path) -> None:
     ws.save(validation_policy="strict")
     result = ws.save(validation_policy="strict")  # re-runs strict validation over stamped files
     assert result["index"]["failed"] == 0
-    for rec in _dataset_records(ws._records_root):
-        assert _creator_orcids(rec).count(ORCID_URL) == 1
+    for rec in _all_records(ws._records_root):
+        assert _contributor_orcids(rec).count(ORCID_URL) == 1
 
 
-def test_contributor_backfills_datasets_saved_before_set(tmp_path: Path) -> None:
+def test_contributor_backfills_records_saved_before_set(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _populate(ws, tmp_path)
     ws.save(validation_policy="strict")  # no contributor yet
-    for rec in _dataset_records(ws._records_root):
-        assert ORCID_URL not in _creator_orcids(rec)
+    for rec in _all_records(ws._records_root):
+        assert ORCID_URL not in _contributor_orcids(rec)
 
     ws.contributor(ORCID, name="Jane Researcher")
     ws.save(validation_policy="strict")  # re-save back-fills
-    for rec in _dataset_records(ws._records_root):
-        assert ORCID_URL in _creator_orcids(rec)
+    for rec in _all_records(ws._records_root):
+        assert ORCID_URL in _contributor_orcids(rec)
 
 
-def test_no_contributor_leaves_datasets_unstamped(tmp_path: Path) -> None:
+def test_no_contributor_leaves_records_unstamped(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _populate(ws, tmp_path)
     ws.save(validation_policy="strict")
-    for rec in _dataset_records(ws._records_root):
-        assert ORCID_URL not in _creator_orcids(rec)
+    for rec in _all_records(ws._records_root):
+        assert ORCID_URL not in _contributor_orcids(rec)
+
+
+# ── contributor → schema:contributor in JSON-LD ───────────────────────────────
+
+def test_contributor_to_jsonld_shape() -> None:
+    from battinfo.jsonld import contributor_to_jsonld
+
+    out = contributor_to_jsonld([
+        {"type": "Person", "name": "Jane Researcher", "same_as": ORCID_URL,
+         "affiliation": {"type": "Organization", "name": "SINTEF"}},
+    ])
+    assert out == [{
+        "@type": "schema:Person",
+        "@id": ORCID_URL,
+        "schema:name": "Jane Researcher",
+        "schema:affiliation": {"@type": "schema:Organization", "schema:name": "SINTEF"},
+    }]
+
+
+def test_contributor_to_jsonld_handles_none_and_empty() -> None:
+    from battinfo.jsonld import contributor_to_jsonld
+
+    assert contributor_to_jsonld(None) is None
+    assert contributor_to_jsonld([]) is None
+
+
+def test_record_to_jsonld_emits_contributor_for_every_kind(tmp_path: Path) -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _populate(ws, tmp_path)
+    ws.contributor(ORCID, name="Jane Researcher")
+    ws.save(validation_policy="strict")
+
+    type_by_dir = {"cell-spec": "cell-spec", "cell-instance": "cell-instance",
+                   "test": "test", "dataset": "dataset"}
+    examples = ws._records_root / "examples"
+    seen = set()
+    for subdir, rtype in type_by_dir.items():
+        for p in sorted((examples / subdir).glob("*.json")):
+            node = record_to_jsonld(json.loads(p.read_text(encoding="utf-8")), rtype)
+            people = node.get("schema:contributor")
+            assert people and people[0]["@id"] == ORCID_URL, f"{rtype} missing schema:contributor"
+            seen.add(rtype)
+    assert seen == set(type_by_dir.values())

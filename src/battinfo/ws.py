@@ -555,12 +555,12 @@ class ContributorRef:
             out["affiliation"] = self.affiliation
         return out
 
-    def creator_block(self) -> dict:
-        """A schema-valid ``Person`` creator carrying the ORCID in ``same_as``.
+    def person_block(self) -> dict:
+        """A schema-valid ``Person`` node carrying the ORCID in ``same_as``.
 
-        ``publication._datacite_creators`` / ``_schema_agent_node`` already read
-        ``same_as`` for ``orcid.org/`` URIs, so this flows into DataCite and
-        JSON-LD with an ORCID nameIdentifier automatically.
+        Stamped into each record's top-level ``contributor`` list. ``same_as`` is
+        the standard ORCID slot that ``_schema_agent_node`` / ``contributor_to_jsonld``
+        read, so this flows into JSON-LD (and DataCite) with an ORCID identifier.
         """
         block: dict[str, Any] = {"type": "Person"}
         if self.name:
@@ -1325,7 +1325,7 @@ class AuthoringWorkspace:
                 )
                 self._set_contributor(current)
             self._print_contributor(current)
-            return current.creator_block()
+            return current.person_block()
 
         # Setter: ORCID supplied. Preserve unspecified fields when re-setting the same id.
         ref = ContributorRef(orcid=_normalize_orcid(orcid), name=name, affiliation=affiliation)
@@ -1341,7 +1341,7 @@ class AuthoringWorkspace:
             )
         self._set_contributor(ref)
         self._print_contributor(ref)
-        return ref.creator_block()
+        return ref.person_block()
 
     def _get_contributor(self) -> "ContributorRef | None":
         """Current workspace contributor, loaded from disk on first access."""
@@ -1366,44 +1366,41 @@ class AuthoringWorkspace:
         print(f"Workspace contributor: {ref.summary()}")
         if ref.affiliation:
             print(f"  affiliation: {ref.affiliation}")
-        print("  Saved to .battinfo/workspace.json; added to dataset creators on ws.save().")
+        print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
 
     def _stamp_contributor(self, result: dict) -> int:
-        """Add the workspace contributor to every dataset's ``creators`` on save.
+        """Stamp the workspace contributor onto every record's ``contributor`` list.
 
-        Idempotent: a dataset already listing the contributor's ORCID (in any
-        creator's ``same_as``) is left untouched, so re-saving never duplicates.
-        Only datasets carry a ``creators`` field, so other record types are
-        skipped. No-op when no contributor is set.
+        Mirrors :meth:`_stamp_project_funding`: the contributor (a ``Person`` with
+        the ORCID in ``same_as``) is added to the top-level ``contributor`` array of
+        every record written, so contributions of any kind are attributable.
+        Idempotent (a record already listing the ORCID is skipped, so re-saving
+        never duplicates) and back-fills records authored before the contributor was
+        set. No-op when no contributor is set.
         """
         ref = self._get_contributor()
         if ref is None:
             return 0
-        block = ref.creator_block()
+        person = ref.person_block()
         stamped = 0
-        for item in result.get("datasets", []):
-            path = item.get("path") if isinstance(item, dict) else str(item)
-            if not path:
-                continue
-            p = Path(path)
-            if not p.exists():
-                continue
-            record = json.loads(p.read_text(encoding="utf-8"))
-            dataset = record.get("dataset")
-            if not isinstance(dataset, dict):
-                continue
-            creators = dataset.get("creators")
-            if not isinstance(creators, list):
-                creators = []
-            already = any(
-                isinstance(c, dict) and c.get("same_as") == ref.orcid_url for c in creators
-            )
-            if already:
-                continue
-            creators.append(block)
-            dataset["creators"] = creators
-            p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            stamped += 1
+        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
+            for item in result.get(key, []):
+                path = item.get("path") if isinstance(item, dict) else str(item)
+                if not path:
+                    continue
+                p = Path(path)
+                if not p.exists():
+                    continue
+                record = json.loads(p.read_text(encoding="utf-8"))
+                contributors = record.get("contributor")
+                if not isinstance(contributors, list):
+                    contributors = []
+                if any(isinstance(c, dict) and c.get("same_as") == ref.orcid_url for c in contributors):
+                    continue
+                contributors.append(person)
+                record["contributor"] = contributors
+                p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                stamped += 1
         return stamped
 
     def convert(self, pattern: str | None = None, fmt: str = "csv") -> list[Path]:

@@ -324,6 +324,14 @@
     },
     "funding": {
       "$ref": "#/$defs/Funding"
+    },
+    "contributor": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "minItems": 1,
+      "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Distinct from data authorship (creators)."
     }
   },
   "$defs": {
