@@ -820,6 +820,7 @@ class MaterialComponent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
+    material_spec_id: str | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None

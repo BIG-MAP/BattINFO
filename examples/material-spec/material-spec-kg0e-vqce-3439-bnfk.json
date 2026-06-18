@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/kg0e-vqce-3439-bnfk",
+    "short_id": "kg0evq",
+    "name": "Zinc",
+    "material_class": "metal_electrode",
+    "electrode_polarity": "negative",
+    "formula": "Zn",
+    "chemistry_family": "metal",
+    "property": {
+      "specific_capacity": {
+        "value": 820,
+        "unit": "mAh/g"
+      },
+      "true_density": {
+        "value": 7.14,
+        "unit": "g/cm3"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740345
+  },
+  "notes": [
+    "Zinc metal anode for aqueous/alkaline cells (synthetic reference example)."
+  ]
+}

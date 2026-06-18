@@ -36,6 +36,26 @@
       "type": "string",
       "minLength": 1,
       "description": "Canonical compact unit symbol/code, for example V, A, Ah, Wh/kg."
+    },
+    "co_type": {
+      "type": "string",
+      "enum": [
+        "Measured",
+        "Conventional",
+        "Rated",
+        "Nominal"
+      ],
+      "description": "Nature of the value: a directly Measured property, a declared Conventional/Nominal value, or a Rated value established under a rating procedure. Drives the EMMO property-nature co-type in JSON-LD."
+    },
+    "conditions": {
+      "type": "object",
+      "description": "Measurement parameters/conditions under which this quantity holds (e.g. discharge_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Each entry is itself a quantity; emitted as hasMeasurementParameter in JSON-LD.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "$ref": "#"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [
@@ -84,4 +104,3 @@
     }
   ]
 }
-

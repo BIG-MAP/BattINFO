@@ -92,6 +92,17 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "Galvanostat",
     "MeasuringInstrument",
     "Potentiostat",
+    # Material-spec property + property-nature + measurement-parameter terms (Phase 1.5)
+    "SpecificCapacity",
+    "SpecificSurfaceArea",
+    "MolarMass",
+    "Voltage",
+    "MeasuredProperty",
+    "NominalProperty",
+    "CRate",
+    "ElectricCurrent",
+    "LowerVoltageLimit",
+    "UpperVoltageLimit",
     # Electrode composition, electrolyte, separator (descriptor pipeline)
     "ActiveMassLoading",
     "ActiveMaterial",

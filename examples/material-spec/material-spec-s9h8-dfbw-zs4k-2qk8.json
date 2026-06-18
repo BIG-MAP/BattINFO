@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/s9h8-dfbw-zs4k-2qk8",
+    "short_id": "s9h8df",
+    "name": "KOH",
+    "material_class": "electrolyte_salt",
+    "formula": "KOH",
+    "chemistry_family": "alkali-hydroxide",
+    "property": {
+      "molar_mass": {
+        "value": 56.11,
+        "unit": "g/mol"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740346
+  },
+  "notes": [
+    "Potassium hydroxide; solute substance for aqueous alkaline electrolytes (e.g. 7M KOH in H2O)."
+  ]
+}

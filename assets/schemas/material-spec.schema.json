@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/material-spec.schema.json",
+  "title": "BattINFO Material Spec",
+  "description": "Reusable specification of a battery material (e.g. graphite, LFP, NMC811, PVDF, carbon black). The 'spec' half of the spec+instance pair; a material instance is a physical lot/batch realizing this spec.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "material_spec",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "material_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/MaterialSpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable material name / grade (e.g. 'LFP', 'Graphite', 'NMC811', 'PVDF')."
+        },
+        "material_class": {
+          "type": "string",
+          "enum": [
+            "active_material",
+            "binder",
+            "conductive_additive",
+            "current_collector",
+            "separator_material",
+            "electrolyte_salt",
+            "electrolyte_solvent",
+            "electrolyte_additive",
+            "metal_electrode",
+            "coating",
+            "other"
+          ],
+          "description": "Functional role of this material in a cell, used for querying."
+        },
+        "electrode_polarity": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "negative",
+            "none"
+          ],
+          "description": "For active materials: the electrode polarity this material is typically used at."
+        },
+        "formula": {
+          "type": "string",
+          "description": "Chemical formula or idealized composition (e.g. 'LiFePO4', 'C', 'Zn', '(C2H2F2)n')."
+        },
+        "chemistry_family": {
+          "type": "string",
+          "description": "Coarse chemistry family label (e.g. 'olivine', 'layered-oxide', 'spinel', 'graphitic-carbon')."
+        },
+        "emmo_type": {
+          "type": "string",
+          "description": "Optional EMMO/domain-battery class label or IRI for this material; informs JSON-LD @type."
+        },
+        "cas_number": {
+          "type": "string",
+          "description": "CAS Registry Number, when applicable."
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer / supplier product or grade identifier."
+        },
+        "composition": {
+          "$ref": "#/$defs/Composition"
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "description": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet",
+            "manufacturer",
+            "measurement",
+            "lab",
+            "literature",
+            "manual",
+            "other"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "MaterialSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "OrgRef": {
+      "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ]
+    },
+    "MaterialRef": {
+      "description": "Reference to another material by canonical material-spec IRI and/or a free-text name.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "material_spec_id": {
+          "$ref": "#/$defs/MaterialSpecIri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "material_spec_id"
+          ]
+        },
+        {
+          "required": [
+            "name"
+          ]
+        }
+      ]
+    },
+    "Composition": {
+      "type": "object",
+      "description": "Structured composition for derived/blended materials: a base material with surface coatings, dopants, and/or constituent fractions.",
+      "additionalProperties": false,
+      "properties": {
+        "base_material_id": {
+          "$ref": "#/$defs/MaterialSpecIri",
+          "description": "Parent/base material this grade derives from (e.g. base NMC811 for an Al2O3-coated grade)."
+        },
+        "coatings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MaterialRef"
+          },
+          "description": "Surface coating layers (e.g. Al2O3), each optionally carrying its own properties (thickness, mass_fraction)."
+        },
+        "dopants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "element"
+            ],
+            "properties": {
+              "element": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fraction": {
+                "$ref": "modules/common/quantity.schema.json"
+              }
+            }
+          }
+        },
+        "constituents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MaterialRef"
+          },
+          "description": "Constituent materials of a blend/mixture, each with a fraction under its property map."
+        }
+      }
+    }
+  }
+}

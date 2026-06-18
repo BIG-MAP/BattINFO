@@ -6,6 +6,13 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.entities import (
+    entity_id_from_doc,
+    entity_types_for_namespace,
+    iter_entity_files,
+    kind_for_doc,
+    save_entity_path,
+)
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -44,74 +51,34 @@ def _iri_tail(iri: str) -> tuple[str, str]:
 
 
 def _entity_id(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
-        return doc["cell_spec"]["id"]
-    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
-        return doc["cell_spec"]["id"]
-    if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
-        return doc["cell_instance"]["id"]
-    if isinstance(doc.get("test_spec"), Mapping) and isinstance(doc["test_spec"].get("id"), str):
-        return doc["test_spec"]["id"]
-    if isinstance(doc.get("test"), Mapping) and isinstance(doc["test"].get("id"), str):
-        return doc["test"]["id"]
-    if isinstance(doc.get("dataset"), Mapping) and isinstance(doc["dataset"].get("id"), str):
-        return doc["dataset"]["id"]
-    raise ValueError("Could not locate canonical entity id in document.")
+    entity_id = entity_id_from_doc(doc)
+    if entity_id is None:
+        raise ValueError("Could not locate canonical entity id in document.")
+    return entity_id
 
 
 def _entity_type_from_doc(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("cell_spec"), Mapping) or isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec"
-    if isinstance(doc.get("cell_instance"), Mapping):
-        return "cell"
-    if isinstance(doc.get("test_spec"), Mapping):
-        return "test-protocol"
-    if isinstance(doc.get("test"), Mapping):
-        return "test"
-    if isinstance(doc.get("dataset"), Mapping):
-        return "dataset"
-    raise ValueError("Unsupported record type: expected product/cell_spec, cell_instance, test, or dataset.")
+    kind = kind_for_doc(doc)
+    if kind is None:
+        raise ValueError(
+            "Unsupported record type: expected cell_spec, cell_instance, test_spec, "
+            "test, dataset, material_spec, or material."
+        )
+    return kind.entity_type
 
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
-    if entity_type == "cell-spec":
-        directory = source_root / "cell-spec"
-    elif entity_type == "cell":
-        directory = source_root / "cell-instance"
-    elif entity_type == "test-protocol":
-        directory = source_root / "test-protocol"
-    elif entity_type == "test":
-        directory = source_root / "test"
-    elif entity_type == "dataset":
-        directory = source_root / "dataset"
-    else:
-        return []
-    if not directory.exists():
-        return []
-    return sorted(directory.glob("*.json"))
+    return iter_entity_files(entity_type, source_root)
 
 
 def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
-    filename = f"{entity_type}-{uid}.json" if entity_type != "cell-spec" else f"cell-spec-{uid}.json"
-    if entity_type == "cell-spec":
-        return source_root / "cell-spec" / filename
-    if entity_type == "cell":
-        return source_root / "cell-instance" / filename
-    if entity_type == "test-protocol":
-        return source_root / "test-protocol" / filename
-    if entity_type == "test":
-        return source_root / "test" / filename
-    if entity_type == "dataset":
-        return source_root / "dataset" / filename
-    raise ValueError(f"Unsupported entity type: {entity_type}")
+    return save_entity_path(entity_type, uid, source_root)
 
 
 def _candidate_types(namespace: str) -> list[str]:
-    # cell/ covers both cell-spec specs and cell instances (shared IRI namespace).
-    # test/ covers both test-protocol specs and test executions.
-    if namespace == "spec":
-        return ["cell-spec", "test-protocol"]
-    return [namespace]
+    # A namespace can map to several types (spec/ covers both cell-spec specs and
+    # test-protocol specs); the registry resolves this.
+    return entity_types_for_namespace(namespace)
 
 
 def _find_record(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
@@ -380,6 +347,83 @@ def validate_references_report(
                     ),
                     mismatch_message=(
                         "Referenced cell must resolve to a cell-instance record in source_root. "
+                        f"Found a different record type for: {ref_id}"
+                    ),
+                    allow_missing=allow_missing,
+                )
+
+    if isinstance(doc.get("material"), Mapping):
+        material_spec_id = doc["material"].get("material_spec_id")
+        if isinstance(material_spec_id, str):
+            _check_reference(
+                issues=issues,
+                ref_id=material_spec_id,
+                expected_type="material-spec",
+                path="material.material_spec_id",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    "Referenced material_spec not found in source_root. Register the material spec first "
+                    f"or disable resolve_references. Missing: {material_spec_id}"
+                ),
+                mismatch_message=(
+                    "Referenced material_spec must resolve to a material-spec record in source_root. "
+                    f"Found a different record type for: {material_spec_id}"
+                ),
+                allow_missing=allow_missing,
+            )
+        datasets = doc["material"].get("datasets")
+        if isinstance(datasets, list):
+            for idx, link in enumerate(datasets):
+                if not (isinstance(link, Mapping) and isinstance(link.get("id"), str)):
+                    continue
+                _check_reference(
+                    issues=issues,
+                    ref_id=link["id"],
+                    expected_type="dataset",
+                    path=f"material.datasets[{idx}].id",
+                    source_root=root,
+                    resource_type=resource_type,
+                    missing_message=(
+                        "Referenced dataset not found in source_root. Register the dataset first "
+                        f"or disable resolve_references. Missing: {link['id']}"
+                    ),
+                    mismatch_message=(
+                        "Referenced dataset must resolve to a dataset record in source_root. "
+                        f"Found a different record type for: {link['id']}"
+                    ),
+                    allow_missing=allow_missing,
+                )
+
+    if isinstance(doc.get("material_spec"), Mapping):
+        composition = doc["material_spec"].get("composition")
+        if isinstance(composition, Mapping):
+            comp_refs: list[tuple[str, str]] = []
+            base = composition.get("base_material_id")
+            if isinstance(base, str):
+                comp_refs.append(("material_spec.composition.base_material_id", base))
+            for group in ("coatings", "constituents"):
+                items = composition.get(group)
+                if isinstance(items, list):
+                    comp_refs.extend(
+                        (f"material_spec.composition.{group}[{idx}].material_spec_id", item["material_spec_id"])
+                        for idx, item in enumerate(items)
+                        if isinstance(item, Mapping) and isinstance(item.get("material_spec_id"), str)
+                    )
+            for path, ref_id in comp_refs:
+                _check_reference(
+                    issues=issues,
+                    ref_id=ref_id,
+                    expected_type="material-spec",
+                    path=path,
+                    source_root=root,
+                    resource_type=resource_type,
+                    missing_message=(
+                        "Referenced material_spec not found in source_root. Register it first "
+                        f"or disable resolve_references. Missing: {ref_id}"
+                    ),
+                    mismatch_message=(
+                        "Referenced material in composition must resolve to a material-spec record. "
                         f"Found a different record type for: {ref_id}"
                     ),
                     allow_missing=allow_missing,

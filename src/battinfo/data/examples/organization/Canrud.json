@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1.0",
+  "organization": {
+    "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z",
+    "short_id": "9rfaw6",
+    "type": "Manufacturer",
+    "name": "Canrud",
+    "description": "Battery materials supplier (cathode, anode, electrolyte) used in the DIGIBAT Discovery-Benchmark coin-cell builds.",
+    "url": "https://www.canrud.com"
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1750000000
+  }
+}

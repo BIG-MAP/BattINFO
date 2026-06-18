@@ -1,0 +1,68 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/8y74-2v75-76kr-t9by",
+    "short_id": "8y742v",
+    "name": "Al2O3-coated NMC811",
+    "material_class": "active_material",
+    "electrode_polarity": "positive",
+    "formula": "LiNi0.8Mn0.1Co0.1O2",
+    "chemistry_family": "layered-oxide",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    },
+    "composition": {
+      "base_material_id": "https://w3id.org/battinfo/material-spec/npa4-0dnw-evyh-hhdm",
+      "coatings": [
+        {
+          "material_spec_id": "https://w3id.org/battinfo/material-spec/k0dr-c32c-yrvy-bbfr",
+          "name": "Al2O3",
+          "property": {
+            "thickness": {
+              "value": 5,
+              "unit": "nm"
+            }
+          }
+        }
+      ]
+    },
+    "property": {
+      "specific_capacity": {
+        "value": 198,
+        "unit": "mAh/g",
+        "co_type": "Measured",
+        "conditions": {
+          "discharge_c_rate": {
+            "value": 0.1,
+            "unit": "C"
+          },
+          "lower_voltage_limit": {
+            "value": 3.0,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 4.3,
+            "unit": "V"
+          },
+          "temperature": {
+            "value": 25,
+            "unit": "degC"
+          },
+          "counter_electrode": {
+            "value_text": "Li metal",
+            "unit_text": "n/a"
+          }
+        }
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740346
+  },
+  "notes": [
+    "Surface-coated NMC811 grade: base NMC811 with a nanometric Al2O3 coating to suppress surface reactivity."
+  ]
+}

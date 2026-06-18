@@ -46,6 +46,7 @@ from battinfo.bundle import (
     TestSpec,
 )
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.entities import iri_namespace_map
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -123,15 +124,12 @@ def _stable_uid(seed: str) -> str:
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
+# Derived from the entity registry (registered record types), plus extra
+# namespaces for things that are not yet first-class record types.
 _IRI_NAMESPACE: dict[str, str] = {
-    "cell-spec": "spec",
-    "cell": "cell",
-    "test-protocol": "spec",
-    "test": "test",
-    "dataset": "dataset",
+    **iri_namespace_map(),
     "organization": "organization",
     "electrode": "electrode",
-    "material": "material",
 }
 
 

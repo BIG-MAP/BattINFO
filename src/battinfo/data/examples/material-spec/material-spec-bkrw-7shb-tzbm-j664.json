@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+    "short_id": "bkrw7s",
+    "name": "PVDF",
+    "material_class": "binder",
+    "formula": "(C2H2F2)n",
+    "chemistry_family": "fluoropolymer",
+    "property": {
+      "molar_mass": {
+        "value": 534000,
+        "unit": "g/mol"
+      },
+      "true_density": {
+        "value": 1.78,
+        "unit": "g/cm3"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740345
+  },
+  "notes": [
+    "Polyvinylidene fluoride binder."
+  ]
+}

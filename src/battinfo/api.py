@@ -17,6 +17,14 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo.bundle import BatteryTestType, CellProductType, CellSpecification
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.entities import (
+    ENTITY_KINDS,
+    entity_id_from_doc,
+    entity_types_for_namespace,
+    iter_entity_files,
+    kind_for_doc,
+    save_entity_path,
+)
 from battinfo.transform.json_to_jsonld import _descriptor_quantity_node as _jsonld_quantity_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
@@ -47,6 +55,12 @@ DATASET_IRI_RE = re.compile(
 TEST_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
+MATERIAL_SPEC_IRI_RE = re.compile(
+    r"^https://w3id\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+)
+MATERIAL_IRI_RE = re.compile(
+    r"^https://w3id\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+)
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 EXAMPLES_ROOT = PACKAGE_ROOT / "data" / "examples"
@@ -57,18 +71,14 @@ DEFAULT_CELL_INSTANCES_DIR = EXAMPLES_ROOT / "cell-instance"
 DEFAULT_TEST_PROTOCOLS_DIR = EXAMPLES_ROOT / "test-protocol"
 DEFAULT_TESTS_DIR = EXAMPLES_ROOT / "test"
 DEFAULT_DATASETS_DIR = EXAMPLES_ROOT / "dataset"
+DEFAULT_MATERIAL_SPECS_DIR = EXAMPLES_ROOT / "material-spec"
+DEFAULT_MATERIALS_DIR = EXAMPLES_ROOT / "material"
 DEFAULT_LIBRARY_CELL_TYPES_DIR = Path(".battinfo") / "library" / "cell-spec"
 DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR = Path(".battinfo") / "library-rdf" / "cell-spec"
 DEFAULT_LIBRARY_AGGREGATE_JSONLD = Path(".battinfo") / "library" / "cell-spec.jsonld"
 DEFAULT_LIBRARY_MANIFEST_JSON = Path(".battinfo") / "library-rdf" / "cell-spec.index.json"
 DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR = Path("src") / "battinfo" / "data" / "library" / "cell-spec"
-DEFAULT_PUBLISH_SOURCES = (
-    DEFAULT_CELL_TYPES_DIR,
-    DEFAULT_CELL_INSTANCES_DIR,
-    DEFAULT_TEST_PROTOCOLS_DIR,
-    DEFAULT_TESTS_DIR,
-    DEFAULT_DATASETS_DIR,
-)
+DEFAULT_PUBLISH_SOURCES = tuple(EXAMPLES_ROOT / kind.subdir for kind in ENTITY_KINDS)
 DEFAULT_INDEX_SOURCE_ROOT = EXAMPLES_ROOT
 DEFAULT_REGISTRATION_SOURCE_ROOT = Path("examples")
 TEMPLATE_UID = "0000000000000000"
@@ -2091,61 +2101,27 @@ def create_cell_instance(
 
 
 def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
-    if entity_type == "cell-spec":
-        return source_root / "cell-spec" / f"cell-spec-{uid}.json"
-    if entity_type == "cell":
-        return source_root / "cell-instance" / f"cell-{uid}.json"
-    if entity_type == "test-protocol":
-        return source_root / "test-protocol" / f"test-protocol-{uid}.json"
-    if entity_type == "test":
-        return source_root / "test" / f"test-{uid}.json"
-    if entity_type == "dataset":
-        return source_root / "dataset" / f"dataset-{uid}.json"
-    raise ValueError(f"Unsupported entity type for save path: {entity_type}")
+    return save_entity_path(entity_type, uid, source_root)
 
 
 def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
-    if entity_type == "cell-spec":
-        directory = source_root / "cell-spec"
-    elif entity_type == "cell":
-        directory = source_root / "cell-instance"
-    elif entity_type == "test-protocol":
-        directory = source_root / "test-protocol"
-    elif entity_type == "test":
-        directory = source_root / "test"
-    elif entity_type == "dataset":
-        directory = source_root / "dataset"
-    else:
-        return []
-    if not directory.exists():
-        return []
-    return sorted(directory.glob("*.json"))
+    return iter_entity_files(entity_type, source_root)
 
 
 def _logical_entity_type_from_doc(doc: Mapping[str, Any]) -> str:
     """Return the logical entity type from document structure, independent of IRI namespace."""
-    if isinstance(doc.get("cell_spec"), Mapping) or isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec"
-    if isinstance(doc.get("cell_instance"), Mapping):
-        return "cell"
-    if isinstance(doc.get("test_spec"), Mapping):
-        return "test-protocol"
-    if isinstance(doc.get("test"), Mapping):
-        return "test"
-    if isinstance(doc.get("dataset"), Mapping):
-        return "dataset"
-    raise ValueError("Cannot determine entity type: expected product/cell_spec, cell_instance, test_protocol, test, or dataset key.")
+    kind = kind_for_doc(doc)
+    if kind is None:
+        raise ValueError(
+            "Cannot determine entity type: expected cell_spec, cell_instance, test_spec, "
+            "test, dataset, material_spec, or material key."
+        )
+    return kind.entity_type
 
 
 def _candidate_types_for_namespace(namespace: str) -> list[str]:
     """Map an IRI namespace to the candidate internal entity types to search."""
-    if namespace == "spec":
-        return ["cell-spec", "test-protocol"]
-    if namespace == "cell":
-        return ["cell"]
-    if namespace == "test":
-        return ["test"]
-    return [namespace]
+    return entity_types_for_namespace(namespace)
 
 
 def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
@@ -3408,35 +3384,20 @@ def save_batch(
 
 
 def _entity_id(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
-        return doc["cell_spec"]["id"]
-    if isinstance(doc.get("cell_spec"), Mapping) and isinstance(doc["cell_spec"].get("id"), str):
-        return doc["cell_spec"]["id"]
-    if isinstance(doc.get("cell_instance"), Mapping) and isinstance(doc["cell_instance"].get("id"), str):
-        return doc["cell_instance"]["id"]
-    if isinstance(doc.get("test_spec"), Mapping) and isinstance(doc["test_spec"].get("id"), str):
-        return doc["test_spec"]["id"]
-    if isinstance(doc.get("test"), Mapping) and isinstance(doc["test"].get("id"), str):
-        return doc["test"]["id"]
-    if isinstance(doc.get("dataset"), Mapping) and isinstance(doc["dataset"].get("id"), str):
-        return doc["dataset"]["id"]
-    raise ValueError("Could not locate canonical entity id in document.")
+    entity_id = entity_id_from_doc(doc)
+    if entity_id is None:
+        raise ValueError("Could not locate canonical entity id in document.")
+    return entity_id
 
 
 def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec.schema.json"
-    if isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec.schema.json"
-    if isinstance(doc.get("cell_instance"), Mapping):
-        return "cell-instance.schema.json"
-    if isinstance(doc.get("test_spec"), Mapping):
-        return "test-protocol.schema.json"
-    if isinstance(doc.get("test"), Mapping):
-        return "test.schema.json"
-    if isinstance(doc.get("dataset"), Mapping):
-        return "dataset.schema.json"
-    raise ValueError("Unsupported record type: expected product/cell_spec, cell_instance, test_protocol, test, or dataset.")
+    kind = kind_for_doc(doc)
+    if kind is None:
+        raise ValueError(
+            "Unsupported record type: expected cell_spec, cell_instance, test_spec, "
+            "test, dataset, material_spec, or material."
+        )
+    return kind.schema_file
 
 
 def _iri_tail(iri: str) -> tuple[str, str]:
@@ -4177,6 +4138,417 @@ def _relative_or_absolute(path: Path, root: Path) -> str:
         return str(path)
 
 
+class MaterialSpecInput(BaseModel):
+    """Typed input for saving a new canonical material-spec resource."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: str = "0.1.0"
+    id: str | None = None
+    uid: str | None = None
+    name: str
+    material_class: str | None = None
+    electrode_polarity: str | None = None
+    formula: str | None = None
+    chemistry_family: str | None = None
+    emmo_type: str | None = None
+    cas_number: str | None = None
+    manufacturer: str | dict[str, Any] | None = None
+    supplier: str | dict[str, Any] | None = None
+    product_id: str | None = None
+    composition: dict[str, Any] | None = None
+    property: dict[str, Any] = Field(default_factory=dict)
+    description: str | None = None
+    source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = "datasheet"
+    source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
+    retrieved_at: int | str | None = None
+    notes: list[str] = Field(default_factory=list)
+
+
+class MaterialInput(BaseModel):
+    """Typed input for saving a new canonical material (instance) resource."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: str = "0.1.0"
+    id: str | None = None
+    uid: str | None = None
+    material_spec_id: str
+    name: str | None = None
+    lot_id: str | None = None
+    batch_id: str | None = None
+    supplier: str | dict[str, Any] | None = None
+    received_date: int | str | None = None
+    dataset_ids: list[str] = Field(default_factory=list)
+    property: dict[str, Any] = Field(default_factory=dict)
+    source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = "lab"
+    source_url: str | None = None
+    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
+    retrieved_at: int | str | None = None
+    notes: list[str] = Field(default_factory=list)
+
+
+def _org_value(value: str | dict[str, Any] | None) -> dict[str, Any] | None:
+    """Coerce a manufacturer/supplier input to a structured Organization object."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        return {"type": "Organization", "name": text} if text else None
+    if isinstance(value, Mapping):
+        org: dict[str, Any] = {"type": "Organization"}
+        for key in ("name", "id", "url"):
+            if value.get(key) is not None:
+                org[key] = value[key]
+        return org if org.get("name") else None
+    return None
+
+
+def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
+    if draft.id is not None:
+        if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.id):
+            raise ValueError("material spec id must match https://w3id.org/battinfo/material-spec/{uid}.")
+        if draft.uid is not None:
+            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
+        entity_id = draft.id
+        _, dashed_uid = _iri_tail(entity_id)
+    else:
+        dashed_uid = _normalized_dashed_uid(draft.uid)
+        entity_id = f"https://w3id.org/battinfo/material-spec/{dashed_uid}"
+
+    spec: dict[str, Any] = {
+        "id": entity_id,
+        "short_id": dashed_uid.replace("-", "")[:6],
+        "name": draft.name,
+    }
+    for field_name in (
+        "material_class",
+        "electrode_polarity",
+        "formula",
+        "chemistry_family",
+        "emmo_type",
+        "cas_number",
+        "product_id",
+        "description",
+    ):
+        value = getattr(draft, field_name)
+        if value is not None:
+            spec[field_name] = value
+    for org_field in ("manufacturer", "supplier"):
+        org = _org_value(getattr(draft, org_field))
+        if org is not None:
+            spec[org_field] = org
+    if draft.composition:
+        spec["composition"] = draft.composition
+    if draft.property:
+        spec["property"] = draft.property
+
+    record: dict[str, Any] = {
+        "schema_version": draft.schema_version,
+        "material_spec": spec,
+        "provenance": {
+            "source_type": draft.source_type,
+            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+        },
+    }
+    if draft.source_url is not None:
+        record["provenance"]["source_url"] = draft.source_url
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        record["provenance"]["citation"] = citation
+    if draft.notes:
+        record["notes"] = list(draft.notes)
+    return record_to_snake_aliases(record)
+
+
+def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
+    if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.material_spec_id):
+        raise ValueError("material_spec_id must match https://w3id.org/battinfo/material-spec/{uid}.")
+    if draft.id is not None:
+        if not MATERIAL_IRI_RE.fullmatch(draft.id):
+            raise ValueError("material id must match https://w3id.org/battinfo/material/{uid}.")
+        if draft.uid is not None:
+            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
+        entity_id = draft.id
+        _, dashed_uid = _iri_tail(entity_id)
+    else:
+        dashed_uid = _normalized_dashed_uid(draft.uid)
+        entity_id = f"https://w3id.org/battinfo/material/{dashed_uid}"
+
+    material: dict[str, Any] = {
+        "id": entity_id,
+        "material_spec_id": draft.material_spec_id,
+        "short_id": dashed_uid.replace("-", "")[:6],
+    }
+    for field_name in ("name", "lot_id", "batch_id"):
+        value = getattr(draft, field_name)
+        if value is not None:
+            material[field_name] = value
+    supplier = _org_value(draft.supplier)
+    if supplier is not None:
+        material["supplier"] = supplier
+    if draft.received_date is not None:
+        received = _to_unix_time(draft.received_date)
+        material["received_date"] = received if received is not None else draft.received_date
+    if draft.dataset_ids:
+        for dataset_id in draft.dataset_ids:
+            if not DATASET_IRI_RE.fullmatch(dataset_id):
+                raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+        material["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in draft.dataset_ids]
+    if draft.property:
+        material["property"] = draft.property
+
+    record: dict[str, Any] = {
+        "schema_version": draft.schema_version,
+        "material": material,
+        "provenance": {
+            "source_type": draft.source_type,
+            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+        },
+    }
+    if draft.source_url is not None:
+        record["provenance"]["source_url"] = draft.source_url
+    citation = _citation_url_value(draft.citation)
+    if citation is not None:
+        record["provenance"]["citation"] = citation
+    if draft.notes:
+        record["notes"] = list(draft.notes)
+    return record_to_snake_aliases(record)
+
+
+def template_material_spec(*, name: str = "Example Material", uid: str | None = TEMPLATE_UID) -> dict[str, Any]:
+    """Build a starter canonical material-spec document for save workflows."""
+    return _record_from_material_spec(
+        MaterialSpecInput(
+            uid=uid,
+            name=name,
+            notes=["Template-generated record. Set name/material_class/formula/property before saving."],
+        )
+    )
+
+
+def template_material(
+    *,
+    material_spec_id: str = "https://w3id.org/battinfo/material-spec/0000-0000-0000-0000",
+    uid: str | None = TEMPLATE_UID,
+) -> dict[str, Any]:
+    """Build a starter canonical material (instance) document for save workflows."""
+    return _record_from_material(
+        MaterialInput(
+            uid=uid,
+            material_spec_id=material_spec_id,
+            notes=["Template-generated record. Set material_spec_id/lot_id/property before saving."],
+        )
+    )
+
+
+def create_material_spec(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical material-spec document from typed fields."""
+    record = _record_from_material_spec(MaterialSpecInput(**fields))
+    if validate:
+        _validate_canonical_record(record, policy=DEFAULT_POLICY)
+    return record
+
+
+def create_material(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical material (instance) document from typed fields."""
+    record = _record_from_material(MaterialInput(**fields))
+    if validate:
+        _validate_canonical_record(record, policy=DEFAULT_POLICY)
+    return record
+
+
+def save_material_spec(
+    draft: MaterialSpecInput | dict[str, Any] | PathLike,
+    *,
+    source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
+    mode: str = REGISTER_MODE_CREATE_ONLY,
+    duplicate_policy: str = DUPLICATE_POLICY_ERROR,
+    resolve_references: bool = True,
+    validate: bool = True,
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Save a material-spec from either draft payload or canonical record."""
+    if isinstance(draft, (str, Path)):
+        return save_material_spec(
+            _load_json(_as_path(draft)),
+            source_root=source_root,
+            mode=mode,
+            duplicate_policy=duplicate_policy,
+            resolve_references=resolve_references,
+            validate=validate,
+            validation_policy=validation_policy,
+            dry_run=dry_run,
+        )
+    if isinstance(draft, MaterialSpecInput):
+        record = _record_from_material_spec(draft)
+    elif isinstance(draft, Mapping) and isinstance(draft.get("material_spec"), Mapping):
+        record = dict(draft)
+    else:
+        record = _record_from_material_spec(MaterialSpecInput.model_validate(draft))
+    return save_record(
+        record,
+        source_root=source_root,
+        mode=mode,
+        duplicate_policy=duplicate_policy,
+        resolve_references=resolve_references,
+        build_jsonld=False,
+        build_html=False,
+        validate=validate,
+        validation_policy=validation_policy,
+        dry_run=dry_run,
+    )
+
+
+def save_material(
+    draft: MaterialInput | dict[str, Any] | PathLike,
+    *,
+    source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
+    mode: str = REGISTER_MODE_CREATE_ONLY,
+    duplicate_policy: str = DUPLICATE_POLICY_ERROR,
+    resolve_references: bool = True,
+    validate: bool = True,
+    validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Save a material (instance) from either draft payload or canonical record."""
+    if isinstance(draft, (str, Path)):
+        return save_material(
+            _load_json(_as_path(draft)),
+            source_root=source_root,
+            mode=mode,
+            duplicate_policy=duplicate_policy,
+            resolve_references=resolve_references,
+            validate=validate,
+            validation_policy=validation_policy,
+            dry_run=dry_run,
+        )
+    if isinstance(draft, MaterialInput):
+        record = _record_from_material(draft)
+    elif isinstance(draft, Mapping) and isinstance(draft.get("material"), Mapping):
+        record = dict(draft)
+    else:
+        record = _record_from_material(MaterialInput.model_validate(draft))
+    return save_record(
+        record,
+        source_root=source_root,
+        mode=mode,
+        duplicate_policy=duplicate_policy,
+        resolve_references=resolve_references,
+        build_jsonld=False,
+        build_html=False,
+        validate=validate,
+        validation_policy=validation_policy,
+        dry_run=dry_run,
+    )
+
+
+def query_material_specs(
+    *,
+    id: str | None = None,
+    short_id_prefix: str | None = None,
+    name: str | None = None,
+    material_class: str | None = None,
+    formula: str | None = None,
+    manufacturer: str | None = None,
+    source_type: str | None = None,
+    directory: PathLike = DEFAULT_MATERIAL_SPECS_DIR,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    """Query reusable material specifications."""
+    records: list[dict[str, Any]] = []
+    for path in _iter_json_files(_as_path(directory)):
+        doc = _load_json(path)
+        spec = doc.get("material_spec", {})
+        prov = doc.get("provenance", {})
+        if not isinstance(spec, Mapping):
+            continue
+        records.append(
+            {
+                "id": spec.get("id"),
+                "short_id": spec.get("short_id"),
+                "name": spec.get("name"),
+                "material_class": spec.get("material_class"),
+                "formula": spec.get("formula"),
+                "manufacturer": spec.get("manufacturer"),
+                "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                "path": str(path),
+                "record": doc,
+            }
+        )
+
+    filtered: list[dict[str, Any]] = []
+    for rec in records:
+        if id is not None and rec.get("id") != id:
+            continue
+        if short_id_prefix and not str(rec.get("short_id", "")).lower().startswith(short_id_prefix.lower()):
+            continue
+        if not _str_eq(rec.get("name"), name):
+            continue
+        if not _str_eq(rec.get("material_class"), material_class):
+            continue
+        if not _str_eq(rec.get("formula"), formula):
+            continue
+        if not _str_eq(rec.get("manufacturer"), manufacturer):
+            continue
+        if not _str_eq(rec.get("source_type"), source_type):
+            continue
+        filtered.append(rec)
+
+    return _paginate(filtered, limit=limit, offset=offset)
+
+
+def query_materials(
+    *,
+    id: str | None = None,
+    material_spec_id: str | None = None,
+    short_id_prefix: str | None = None,
+    lot_id: str | None = None,
+    source_type: str | None = None,
+    directory: PathLike = DEFAULT_MATERIALS_DIR,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    """Query physical material lots/batches."""
+    records: list[dict[str, Any]] = []
+    for path in _iter_json_files(_as_path(directory)):
+        doc = _load_json(path)
+        material = doc.get("material", {})
+        prov = doc.get("provenance", {})
+        if not isinstance(material, Mapping):
+            continue
+        records.append(
+            {
+                "id": material.get("id"),
+                "material_spec_id": material.get("material_spec_id"),
+                "short_id": material.get("short_id"),
+                "lot_id": material.get("lot_id"),
+                "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                "path": str(path),
+                "record": doc,
+            }
+        )
+
+    filtered: list[dict[str, Any]] = []
+    for rec in records:
+        if id is not None and rec.get("id") != id:
+            continue
+        if material_spec_id is not None and rec.get("material_spec_id") != material_spec_id:
+            continue
+        if short_id_prefix and not str(rec.get("short_id", "")).lower().startswith(short_id_prefix.lower()):
+            continue
+        if not _str_eq(rec.get("lot_id"), lot_id):
+            continue
+        if not _str_eq(rec.get("source_type"), source_type):
+            continue
+        filtered.append(rec)
+
+    return _paginate(filtered, limit=limit, offset=offset)
+
+
 def build_index(
     *,
     source_root: PathLike = DEFAULT_INDEX_SOURCE_ROOT,
@@ -4195,6 +4567,8 @@ def build_index(
     test_specs: list[dict[str, Any]] = []
     tests: list[dict[str, Any]] = []
     datasets: list[dict[str, Any]] = []
+    material_specs: list[dict[str, Any]] = []
+    materials: list[dict[str, Any]] = []
     failures: list[dict[str, str]] = []
 
     cell_specs_dir = src_root / "cell-spec"
@@ -4202,6 +4576,8 @@ def build_index(
     test_protocols_dir = src_root / "test-protocol"
     tests_dir = src_root / "test"
     datasets_dir = src_root / "dataset"
+    material_specs_dir = src_root / "material-spec"
+    materials_dir = src_root / "material"
 
     for path in sorted(cell_specs_dir.glob(glob)) if cell_specs_dir.exists() else []:
         try:
@@ -4363,6 +4739,53 @@ def build_index(
         except Exception as exc:  # noqa: BLE001
             failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
 
+    for path in sorted(material_specs_dir.glob(glob)) if material_specs_dir.exists() else []:
+        try:
+            doc = _load_json(path)
+            if validate:
+                _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
+            spec = doc.get("material_spec", {})
+            prov = doc.get("provenance", {})
+            if not isinstance(spec, Mapping) or not isinstance(spec.get("id"), str):
+                raise ValueError("missing material_spec.id")
+            material_specs.append(
+                {
+                    "id": spec["id"],
+                    "short_id": spec.get("short_id") or _short_id_from_iri(spec["id"]),
+                    "name": spec.get("name"),
+                    "material_class": spec.get("material_class"),
+                    "formula": spec.get("formula"),
+                    "manufacturer": spec.get("manufacturer"),
+                    "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                    "path": _relative_or_absolute(path, src_root),
+                }
+            )
+        except Exception as exc:  # noqa: BLE001
+            failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
+
+    for path in sorted(materials_dir.glob(glob)) if materials_dir.exists() else []:
+        try:
+            doc = _load_json(path)
+            if validate:
+                _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
+            material = doc.get("material", {})
+            prov = doc.get("provenance", {})
+            if not isinstance(material, Mapping) or not isinstance(material.get("id"), str):
+                raise ValueError("missing material.id")
+            materials.append(
+                {
+                    "id": material["id"],
+                    "material_spec_id": material.get("material_spec_id"),
+                    "short_id": material.get("short_id") or _short_id_from_iri(material["id"]),
+                    "name": material.get("name"),
+                    "lot_id": material.get("lot_id"),
+                    "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                    "path": _relative_or_absolute(path, src_root),
+                }
+            )
+        except Exception as exc:  # noqa: BLE001
+            failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
+
     out: dict[str, Any] = {
         "build_timestamp": _now_iso(),
         "source_root": str(src_root),
@@ -4371,7 +4794,17 @@ def build_index(
         "test_spec_count": len(test_specs),
         "test_count": len(tests),
         "dataset_count": len(datasets),
-        "total_count": len(cell_specs) + len(cell_instances) + len(test_specs) + len(tests) + len(datasets),
+        "material_spec_count": len(material_specs),
+        "material_count": len(materials),
+        "total_count": (
+            len(cell_specs)
+            + len(cell_instances)
+            + len(test_specs)
+            + len(tests)
+            + len(datasets)
+            + len(material_specs)
+            + len(materials)
+        ),
         "failed": len(failures),
         "failures": failures,
         "cell_specs": cell_specs,
@@ -4379,6 +4812,8 @@ def build_index(
         "test_specs": test_specs,
         "tests": tests,
         "datasets": datasets,
+        "material_specs": material_specs,
+        "materials": materials,
     }
 
     if out_path is not None:
@@ -4422,10 +4857,26 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         if isinstance(doc.get("dataset_count"), int)
         else len(doc.get("datasets", [])) if isinstance(doc.get("datasets"), list) else 0
     )
+    material_spec_count = (
+        int(doc["material_spec_count"])
+        if isinstance(doc.get("material_spec_count"), int)
+        else len(doc.get("material_specs", [])) if isinstance(doc.get("material_specs"), list) else 0
+    )
+    material_count = (
+        int(doc["material_count"])
+        if isinstance(doc.get("material_count"), int)
+        else len(doc.get("materials", [])) if isinstance(doc.get("materials"), list) else 0
+    )
     total_count = (
         int(doc["total_count"])
         if isinstance(doc.get("total_count"), int)
-        else cell_spec_count + cell_instance_count + test_spec_count + test_count + dataset_count
+        else cell_spec_count
+        + cell_instance_count
+        + test_spec_count
+        + test_count
+        + dataset_count
+        + material_spec_count
+        + material_count
     )
     failed = int(doc["failed"]) if isinstance(doc.get("failed"), int) else 0
 
@@ -4436,6 +4887,8 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         "test_spec_count": test_spec_count,
         "test_count": test_count,
         "dataset_count": dataset_count,
+        "material_spec_count": material_spec_count,
+        "material_count": material_count,
         "total_count": total_count,
         "failed": failed,
     }
@@ -4447,6 +4900,16 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
 __all__ = [
     "CellSpecificationInput",
     "CellInstanceInput",
+    "MaterialSpecInput",
+    "MaterialInput",
+    "create_material_spec",
+    "create_material",
+    "save_material_spec",
+    "save_material",
+    "query_material_specs",
+    "query_materials",
+    "template_material_spec",
+    "template_material",
     "DatasetInput",
     "TestSpecInput",
     "TestInput",

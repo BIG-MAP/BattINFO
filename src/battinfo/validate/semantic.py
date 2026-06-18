@@ -17,6 +17,19 @@ from battinfo.validate.core import (
 )
 
 SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
+    # Material properties (material-spec / material `property` map)
+    "specific_capacity": {"mah/g", "ah/kg"},
+    "specific_discharge_capacity": {"mah/g", "ah/kg"},
+    "first_cycle_efficiency": {"%", "percent"},
+    "true_density": {"g/cm3", "kg/m3"},
+    "tap_density": {"g/cm3", "kg/m3"},
+    "density": {"g/cm3", "kg/m3"},
+    "bet_surface_area": {"m2/g"},
+    "particle_size_d10": {"um", "nm"},
+    "particle_size_d50": {"um", "nm"},
+    "particle_size_d90": {"um", "nm"},
+    "average_voltage": {"v", "mv"},
+    "molar_mass": {"g/mol", "kg/mol"},
     "nominal_capacity": {"ah", "mah"},
     "minimum_capacity": {"ah", "mah"},
     "min_capacity": {"ah", "mah"},
@@ -90,6 +103,19 @@ PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
 # These are loose sanity checks — clearly-impossible values only — not chemistry-specific.
 # All comparisons use the numeric value as-is in the stated unit (no conversion).
 SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
+    # Material properties — loose sanity bounds catching decimal/units typos
+    "specific_capacity":            {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
+    "specific_discharge_capacity":  {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
+    "first_cycle_efficiency":       {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "true_density":                 {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
+    "tap_density":                  {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
+    "density":                      {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
+    "bet_surface_area":             {"m2/g": (0.0, 5000.0)},
+    "particle_size_d10":            {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "particle_size_d50":            {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "particle_size_d90":            {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "average_voltage":              {"v": (0.0, 6.0), "mv": (0.0, 6000.0)},
+    "molar_mass":                   {"g/mol": (1.0, 2_000_000.0), "kg/mol": (0.001, 2000.0)},
     # Voltages — catches decimal-shift errors (e.g. 35 V instead of 3.5 V)
     "nominal_voltage":              {"v": (0.3, 5.5), "mv": (300.0, 5500.0)},
     "charging_voltage":             {"v": (0.3, 6.0), "mv": (300.0, 6000.0)},
@@ -584,6 +610,12 @@ def validate_semantic_report(
     specs = doc.get("properties")
     if isinstance(specs, Mapping):
         _validate_specs(specs, issues, resource_type, hard_issue_severity)
+
+    # material-spec / material carry their quantities under <body>.property
+    for body_key in ("material_spec", "material"):
+        body = doc.get(body_key)
+        if isinstance(body, Mapping) and isinstance(body.get("property"), Mapping):
+            _validate_specs(body["property"], issues, resource_type, hard_issue_severity)
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):

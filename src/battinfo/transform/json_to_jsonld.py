@@ -370,6 +370,29 @@ def _profile_binding_target(path: str, default: str) -> str:
     return target if isinstance(target, str) and target else default
 
 
+# co_type token (on a quantity) -> EMMO property-nature class. RatedProperty is not
+# yet published, so it falls back to ConventionalProperty (see ontology-additions-needed).
+_CO_TYPE_CLASS: dict[str, str] = {
+    "Measured": "MeasuredProperty",
+    "Conventional": "ConventionalProperty",
+    "Nominal": "NominalProperty",
+    "Rated": "ConventionalProperty",
+}
+
+# Measurement-parameter (condition) key -> EMMO class, for hasMeasurementParameter.
+# Keys without a resolvable class fall through to a generic node + rdfs:label.
+_MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
+    "c_rate": "CRate",
+    "discharge_c_rate": "CRate",
+    "charge_c_rate": "CRate",
+    "current": "ElectricCurrent",
+    "temperature": "CelsiusTemperature",
+    "lower_voltage_limit": "LowerVoltageLimit",
+    "upper_voltage_limit": "UpperVoltageLimit",
+    "voltage": "Voltage",
+}
+
+
 def _descriptor_quantity_node(
     name: str, quantity: dict[str, Any], *, term: str | None = None
 ) -> dict[str, Any] | None:
@@ -377,7 +400,9 @@ def _descriptor_quantity_node(
         return None
 
     resolved_term = term or _property_type_term(name)
-    node: dict[str, Any] = {"@type": [resolved_term, _property_co_type(name)]}
+    co_token = quantity.get("co_type")
+    co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
+    node: dict[str, Any] = {"@type": [resolved_term, co_class or _property_co_type(name)]}
 
     # Emit the primary (nominal/typical) value only.  EMMO's canonical pattern for a
     # ConventionalProperty is a single RealData node; a range (min/max) is correctly
@@ -397,6 +422,21 @@ def _descriptor_quantity_node(
         node["hasMeasurementUnit"] = iri
     elif unit:
         node["schema:unitText"] = unit
+
+    conditions = quantity.get("conditions")
+    if isinstance(conditions, dict):
+        params: list[dict[str, Any]] = []
+        for ckey in sorted(conditions):
+            cqty = conditions[ckey]
+            if not isinstance(cqty, dict):
+                continue
+            cterm = _MEASUREMENT_PARAMETER_TERMS.get(ckey)
+            cnode = _descriptor_quantity_node(ckey, cqty, term=cterm)
+            if cnode is not None:
+                cnode.setdefault("rdfs:label", ckey)
+                params.append(cnode)
+        if params:
+            node["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
 
     return node if len(node) > 1 else None
 
@@ -1634,7 +1674,63 @@ def _to_domain_battery_jsonld_descriptor(data: dict[str, Any]) -> dict[str, Any]
     return doc
 
 
+# Material-spec/material `property` key -> EMMO class (these resolve in the bundled
+# domain-battery context). Keys not listed fall through to the curated map / battinfo:.
+_MATERIAL_PROPERTY_TERMS: dict[str, str] = {
+    "specific_capacity": "SpecificCapacity",
+    "specific_discharge_capacity": "DischargingSpecificCapacity",
+    "true_density": "Density",
+    "tap_density": "Density",
+    "density": "Density",
+    "bet_surface_area": "SpecificSurfaceArea",
+    "molar_mass": "MolarMass",
+    "particle_size_d50": "D50ParticleSize",
+    "average_voltage": "Voltage",
+    "mass": "Mass",
+}
+
+
+def _material_node(body: dict[str, Any]) -> dict[str, Any]:
+    """Build a domain-battery JSON-LD node for a material spec/instance body."""
+    node: dict[str, Any] = {}
+    if isinstance(body.get("id"), str):
+        node["@id"] = body["id"]
+    name = body.get("name")
+    emmo_class = _material_emmo_class(name) if isinstance(name, str) and name else None
+    node["@type"] = emmo_class or "schema:ChemicalSubstance"
+    if isinstance(name, str) and name:
+        node["schema:name"] = name
+    if isinstance(body.get("formula"), str) and body["formula"]:
+        node["schema:molecularFormula"] = body["formula"]
+    if isinstance(body.get("material_spec_id"), str):
+        node["schema:isVariantOf"] = {"@id": body["material_spec_id"]}
+    prop_nodes = _descriptor_property_nodes(body.get("property"), term_overrides=_MATERIAL_PROPERTY_TERMS)
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+    return node
+
+
+def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
+    body = data.get("material_spec") if isinstance(data.get("material_spec"), dict) else data.get("material")
+    node = _material_node(body if isinstance(body, dict) else {})
+    citation = _citation_to_jsonld(data.get("provenance"))
+    if citation is not None:
+        node["schema:citation"] = citation
+    return {
+        "@context": _base_context(
+            include_battinfo=True,
+            include_has_battery=False,
+            include_has_measurement=False,
+            include_has_property=True,
+            include_bibo=_citation_doi_value(data.get("provenance")) is not None,
+        ),
+        "@graph": [node],
+    }
+
+
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
+    if isinstance(data.get("material_spec"), dict) or isinstance(data.get("material"), dict):
+        return _to_domain_battery_jsonld_material(data)
     if isinstance(data.get("specification"), dict) and data.get("schema_version") is not None:
         return _to_domain_battery_jsonld_descriptor(data)
     if isinstance(data.get("cell_spec"), dict) and data.get("schema_version") is not None:

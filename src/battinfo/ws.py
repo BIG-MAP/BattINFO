@@ -24,6 +24,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from battinfo.entities import record_set_dirs
+
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
 _SHORT_ID_RE = re.compile(r"-([a-z0-9]{6})(?:\.|$)")
@@ -456,9 +458,9 @@ def _provider(creators: list[dict] | None, contributors: list[dict] | None) -> t
     return "", ""
 
 
-# Record-type subdirectories under a workspace's records ``examples/`` folder, in the
-# order the JSON-LD builder consumes them.
-_RECORD_SET_DIRS = ("cell-spec", "cell-instance", "test", "test-protocol", "dataset")
+# Record-type subdirectories under a workspace's records ``examples/`` folder.
+# Derived from the entity registry so new record types are picked up automatically.
+_RECORD_SET_DIRS = record_set_dirs()
 
 
 def _read_record_sets(examples: Path) -> dict[str, list[dict]]:
@@ -1542,6 +1544,8 @@ class AuthoringWorkspace:
             "test":          ("test",           "name",          "id"),
             "dataset":       ("dataset",        "name",          "id"),
             "test-protocol": ("test_spec",  "name",          "id"),
+            "material-spec": ("material_spec",  "name",          "id"),
+            "material":      ("material",       "name",          "id"),
         }
 
         for subdir, (record_key, name_field, id_field) in _TYPE_KEYS.items():

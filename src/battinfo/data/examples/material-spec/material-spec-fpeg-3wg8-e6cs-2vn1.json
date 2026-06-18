@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/fpeg-3wg8-e6cs-2vn1",
+    "short_id": "fpeg3w",
+    "name": "LiPF6",
+    "material_class": "electrolyte_salt",
+    "formula": "LiPF6",
+    "chemistry_family": "lithium-salt",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    },
+    "property": {
+      "molar_mass": {
+        "value": 151.9,
+        "unit": "g/mol"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740346
+  },
+  "notes": [
+    "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1.0",
+  "organization": {
+    "id": "https://w3id.org/battinfo/organization/9jcc-71jq-m4vk-r8jm",
+    "short_id": "9jcc71",
+    "type": "Manufacturer",
+    "name": "Celgard",
+    "description": "Separator manufacturer (microporous polyolefin membranes) referenced in the Discovery-Benchmark cells.",
+    "url": "https://www.celgard.com"
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1750000000
+  }
+}

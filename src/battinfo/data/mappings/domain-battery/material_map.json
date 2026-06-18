@@ -17,7 +17,13 @@
       "aliases": [
         "nmc",
         "lithium nickel manganese cobalt oxide",
-        "linimnco2"
+        "linimnco2",
+        "nmc811",
+        "nmc 811",
+        "nmc622",
+        "nmc 622",
+        "lini0.8mn0.1co0.1o2",
+        "lini0.6mn0.2co0.2o2"
       ],
       "emmo_class": "LithiumNickelManganeseCobaltOxide"
     },
@@ -211,6 +217,40 @@
         "cu"
       ],
       "emmo_class": "Copper"
+    },
+    {
+      "symbol": "EMC",
+      "aliases": [
+        "emc",
+        "ethyl methyl carbonate",
+        "ethylmethyl carbonate"
+      ],
+      "emmo_class": "EthylMethylCarbonate"
+    },
+    {
+      "symbol": "LMFP",
+      "aliases": [
+        "lmfp",
+        "lithium manganese iron phosphate",
+        "limnfepo4"
+      ],
+      "emmo_class": "LithiumManganeseIronPhosphate"
+    },
+    {
+      "symbol": "Zinc",
+      "aliases": [
+        "zinc",
+        "zn"
+      ],
+      "emmo_class": "Zinc"
+    },
+    {
+      "symbol": "KOH",
+      "aliases": [
+        "koh",
+        "potassium hydroxide"
+      ],
+      "emmo_class": "PotassiumHydroxide"
     }
   ]
 }

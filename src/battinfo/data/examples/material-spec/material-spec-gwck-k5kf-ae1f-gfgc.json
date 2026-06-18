@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/gwck-k5kf-ae1f-gfgc",
+    "short_id": "gwckk5",
+    "name": "Graphite",
+    "material_class": "active_material",
+    "electrode_polarity": "negative",
+    "formula": "C",
+    "chemistry_family": "graphitic-carbon",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    },
+    "property": {
+      "specific_capacity": {
+        "value": 360,
+        "unit": "mAh/g",
+        "co_type": "Measured",
+        "conditions": {
+          "discharge_c_rate": {
+            "value": 0.1,
+            "unit": "C"
+          },
+          "lower_voltage_limit": {
+            "value": 0.01,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 1.5,
+            "unit": "V"
+          },
+          "temperature": {
+            "value": 25,
+            "unit": "degC"
+          },
+          "counter_electrode": {
+            "value_text": "Li metal",
+            "unit_text": "n/a"
+          }
+        }
+      },
+      "true_density": {
+        "value": 2.26,
+        "unit": "g/cm3"
+      },
+      "particle_size_d50": {
+        "value": 15,
+        "unit": "um"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740345
+  },
+  "notes": [
+    "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode)."
+  ]
+}

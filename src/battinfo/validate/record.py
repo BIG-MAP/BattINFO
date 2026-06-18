@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.entities import kind_for_doc
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationPolicy,
@@ -19,33 +20,18 @@ from battinfo.validate.shacl import validate_shacl_report
 
 
 def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
-    if isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec.schema.json"
-    if isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec.schema.json"
-    if isinstance(doc.get("cell_instance"), Mapping):
-        return "cell-instance.schema.json"
-    if isinstance(doc.get("test_spec"), Mapping):
-        return "test-protocol.schema.json"
-    if isinstance(doc.get("test"), Mapping):
-        return "test.schema.json"
-    if isinstance(doc.get("dataset"), Mapping):
-        return "dataset.schema.json"
-    raise ValueError("Unsupported record type: expected product/cell_spec, cell_instance, test_protocol, test, or dataset.")
+    kind = kind_for_doc(doc)
+    if kind is None:
+        raise ValueError(
+            "Unsupported record type: expected cell_spec, cell_instance, test_spec, "
+            "test, dataset, material_spec, or material."
+        )
+    return kind.schema_file
 
 
 def _resource_type(doc: dict[str, Any]) -> str | None:
-    if isinstance(doc.get("cell_spec"), Mapping) or isinstance(doc.get("cell_spec"), Mapping):
-        return "cell-spec"
-    if isinstance(doc.get("cell_instance"), Mapping):
-        return "cell"
-    if isinstance(doc.get("test_spec"), Mapping):
-        return "test-protocol"
-    if isinstance(doc.get("test"), Mapping):
-        return "test"
-    if isinstance(doc.get("dataset"), Mapping):
-        return "dataset"
-    return None
+    kind = kind_for_doc(doc)
+    return kind.entity_type if kind is not None else None
 
 
 def validate_record_report(

@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/hy9g-22sd-czdb-nmm4",
+    "short_id": "hy9g22",
+    "name": "EMC",
+    "material_class": "electrolyte_solvent",
+    "formula": "C4H8O3",
+    "chemistry_family": "carbonate-solvent",
+    "property": {
+      "molar_mass": {
+        "value": 104.1,
+        "unit": "g/mol"
+      },
+      "density": {
+        "value": 1.01,
+        "unit": "g/cm3"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740346
+  },
+  "notes": [
+    "Ethyl methyl carbonate; linear carbonate solvent."
+  ]
+}

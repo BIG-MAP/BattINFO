@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+    "short_id": "r5xt4h",
+    "name": "Carbon black",
+    "material_class": "conductive_additive",
+    "formula": "C",
+    "chemistry_family": "amorphous-carbon",
+    "property": {
+      "bet_surface_area": {
+        "value": 62,
+        "unit": "m2/g"
+      },
+      "true_density": {
+        "value": 1.8,
+        "unit": "g/cm3"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740345
+  },
+  "notes": [
+    "Conductive carbon additive (e.g. Super P-grade)."
+  ]
+}

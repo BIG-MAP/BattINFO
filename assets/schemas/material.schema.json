@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/material.schema.json",
+  "title": "BattINFO Material Instance",
+  "description": "A physical lot/batch of a material that realizes a material spec. The 'instance' half of the spec+instance pair.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "material",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "material": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "material_spec_id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/MaterialIri"
+        },
+        "material_spec_id": {
+          "$ref": "#/$defs/MaterialSpecIri"
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable label for this physical lot (e.g. a lab/inventory id)."
+        },
+        "lot_id": {
+          "type": "string",
+          "description": "Manufacturer / supplier lot or batch number."
+        },
+        "batch_id": {
+          "type": "string"
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef"
+        },
+        "received_date": {
+          "$ref": "#/$defs/FlexDate"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/FlexDate"
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DatasetLink"
+          },
+          "uniqueItems": true,
+          "description": "Characterization datasets for this material lot (XRD, SEM, ICP, PSD, ...)."
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet",
+            "manufacturer",
+            "measurement",
+            "lab",
+            "literature",
+            "manual",
+            "other"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
+    },
+    "FlexDate": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/UnixTime"
+        },
+        {
+          "type": "string",
+          "description": "ISO 8601 date string (YYYY-MM-DD or YYYY-MM)."
+        }
+      ]
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "MaterialIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "MaterialSpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "DatasetIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "DatasetLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/DatasetIri"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "raw",
+            "processed",
+            "report",
+            "metadata",
+            "other"
+          ]
+        }
+      }
+    },
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "OrgRef": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ]
+    }
+  }
+}

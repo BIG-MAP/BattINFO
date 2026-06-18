@@ -1,0 +1,57 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/qwae-x6cg-c61k-njw7",
+    "short_id": "qwaex6",
+    "name": "LMFP",
+    "material_class": "active_material",
+    "electrode_polarity": "positive",
+    "formula": "LiMn0.7Fe0.3PO4",
+    "chemistry_family": "olivine",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    },
+    "property": {
+      "specific_capacity": {
+        "value": 155,
+        "unit": "mAh/g",
+        "co_type": "Measured",
+        "conditions": {
+          "discharge_c_rate": {
+            "value": 0.1,
+            "unit": "C"
+          },
+          "lower_voltage_limit": {
+            "value": 2.5,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 4.3,
+            "unit": "V"
+          },
+          "temperature": {
+            "value": 25,
+            "unit": "degC"
+          },
+          "counter_electrode": {
+            "value_text": "Li metal",
+            "unit_text": "n/a"
+          }
+        }
+      },
+      "average_voltage": {
+        "value": 3.8,
+        "unit": "V"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740345
+  },
+  "notes": [
+    "Lithium manganese iron phosphate cathode. Discovery-Benchmark LMFP-Graphite cells."
+  ]
+}

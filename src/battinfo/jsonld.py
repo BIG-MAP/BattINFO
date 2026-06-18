@@ -398,6 +398,20 @@ def _provenance(prov: dict) -> dict:
     return out
 
 
+def _material_to_jsonld(record: dict) -> dict:
+    """Transform a material-spec or material (instance) record to JSON-LD.
+
+    Delegates to the domain-battery emitter (EMMO-typed node with
+    properties-with-conditions) and returns the single node with its context.
+    """
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    doc = to_jsonld(record, target="domain-battery")
+    graph = doc.get("@graph") or []
+    node = dict(graph[0]) if graph else {}
+    return {"@context": doc.get("@context"), **node}
+
+
 # ── Public dispatcher ─────────────────────────────────────────────────────────
 
 _TRANSFORMERS = {
@@ -407,6 +421,9 @@ _TRANSFORMERS = {
     "cell_instance":  cell_instance_to_jsonld,
     "test":           test_to_jsonld,
     "dataset":        dataset_to_jsonld,
+    "material-spec":  _material_to_jsonld,
+    "material_spec":  _material_to_jsonld,
+    "material":       _material_to_jsonld,
 }
 
 

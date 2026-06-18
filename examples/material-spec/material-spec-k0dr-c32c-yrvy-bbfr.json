@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.1.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/material-spec/k0dr-c32c-yrvy-bbfr",
+    "short_id": "k0drc3",
+    "name": "Alumina",
+    "material_class": "coating",
+    "formula": "Al2O3",
+    "chemistry_family": "ceramic-oxide",
+    "property": {
+      "true_density": {
+        "value": 3.95,
+        "unit": "g/cm3"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781740345
+  },
+  "notes": [
+    "Aluminium oxide ceramic coating material (cathode surface coating)."
+  ]
+}

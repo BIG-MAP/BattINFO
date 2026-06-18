@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "material": {
+    "id": "https://w3id.org/battinfo/material/syzh-8sbd-ygb1-kfgg",
+    "material_spec_id": "https://w3id.org/battinfo/material-spec/npa4-0dnw-evyh-hhdm",
+    "short_id": "syzh8s",
+    "lot_id": "CANRUD-NMC811-2026-04",
+    "supplier": {
+      "type": "Organization",
+      "name": "Canrud",
+      "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
+    },
+    "datasets": [
+      {
+        "id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+        "role": "raw"
+      }
+    ],
+    "property": {
+      "mass": {
+        "value": 18.77,
+        "unit": "mg"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781740346
+  },
+  "notes": [
+    "Physical lot of NMC811 from Canrud (Discovery-Benchmark inventory)."
+  ]
+}

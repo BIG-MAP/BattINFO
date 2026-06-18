@@ -21,6 +21,8 @@ PROFILE_TO_SCHEMA = {
     "batterypass": "profiles/batterypass.schema.json",
     "test-protocol": "test-protocol.schema.json",
     "test": "test.schema.json",
+    "material-spec": "material-spec.schema.json",
+    "material": "material.schema.json",
 }
 
 FORMAT_CHECKER = FormatChecker()

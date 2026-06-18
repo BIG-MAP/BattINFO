@@ -114,6 +114,7 @@ from battinfo.api import (
 )
 from battinfo.bundle import CellSpecification
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
+from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.local_workspace import LocalWorkspace
 from battinfo.publish import publish as publish_object
@@ -356,9 +357,7 @@ def _safe_echo(text: str) -> None:
         sys.stdout.flush()
 
 
-_RECORD_TYPE_KEYS = frozenset(
-    {"cell_spec", "cell_spec", "cell_instance", "test_spec", "test", "dataset"}
-)
+_RECORD_TYPE_KEYS = frozenset(kind.record_key for kind in ENTITY_KINDS)
 
 
 def _is_full_record(data: dict) -> bool:
