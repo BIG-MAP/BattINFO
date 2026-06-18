@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { validateCellType, type Issue } from "@/lib/validate";
-import { cellTypeInput } from "@/lib/examples";
+import { toolDemoInput } from "@/lib/examples";
 import { site } from "@/lib/site";
 
-const SAMPLE = JSON.stringify(cellTypeInput, null, 2);
+const SAMPLE = JSON.stringify(toolDemoInput, null, 2);
 
 function IssueRow({ issue }: { issue: Issue }) {
   const isError = issue.severity === "error";

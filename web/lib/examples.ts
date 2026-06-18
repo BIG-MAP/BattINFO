@@ -1,10 +1,21 @@
-// PLACEHOLDER fixtures for the Examples page.
+// Example fixtures for the website.
 //
-// These mirror examples/cell-type/A123__ANR26650M1-B.json but are inlined so
-// the website stays self-contained during active development. Replace with a
-// build-time sync from `examples/**` once the sync script exists (see README).
+// SINGLE SOURCE OF TRUTH: the authored-input record comes from examples/** in
+// the repo, surfaced via the generated module below (run `npm run sync:examples`
+// to regenerate). The full example content must come from examples/** — only
+// short, curated teasers (the hero / install / Python snippets, and the
+// illustrative JSON-LD that the Python transform can't yet emit as a file) live
+// inline here. See docs/CONTENT-MODEL.md §4.
 
-export const cellTypeInput = {
+export { cellSpecInput, cellSpecCanonical } from "./examples.generated";
+
+// Sample for the client-demo Validate/Convert tools. These tools' simplified
+// in-browser logic (lib/validate.ts, lib/convert.ts) still expects the
+// pre-migration `product`/`specs` shape, so their sample must match that shape
+// or the demos break. FOLLOW-UP: migrate validate.ts + convert.ts to the
+// canonical `cell_spec`/`properties` shape, then point them at cellSpecInput
+// and delete this. See docs/CONTENT-MODEL.md §4.
+export const toolDemoInput = {
   schema_version: "0.1.0",
   product: {
     name: "A123 ANR26650M1-B",
@@ -27,8 +38,10 @@ export const cellTypeInput = {
 
 // Representative of the JSON-LD that BattINFO emits — EMMO domain-battery
 // aligned, with @type stacking and the canonical quantity pattern. Illustrative
-// (abbreviated); the canonical transform lives in the Python package.
-export const cellTypeJsonLd = {
+// (abbreviated); the canonical transform lives in the Python package. This stays
+// a curated teaser until the Python transform can emit canonical JSON-LD into
+// examples/** (then it joins the sync).
+export const cellSpecJsonLd = {
   "@context": "https://w3id.org/battinfo/context/domain-battery.jsonld",
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
   "@type": [
@@ -65,15 +78,15 @@ export const heroSnippet = `{
   "nominal_voltage":  { "value": 3.3, "unit": "V" }
 }`;
 
-export const quickstartPython = `from battinfo import CellType, publish
+export const quickstartPython = `from battinfo import CellSpecification, publish
 
 result = publish(
-    CellType(
+    CellSpecification(
         manufacturer="A123",
         model="ANR26650M1-B",
-        format="cylindrical",
+        cell_format="cylindrical",
         chemistry="Li-ion",
-        nominal_properties={"nominal_capacity": {"value": 2.5, "unit": "Ah"}},
+        nominal_capacity={"value": 2.5, "unit": "Ah"},
     ),
     destination="local",
 )

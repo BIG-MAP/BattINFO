@@ -46,6 +46,28 @@ export default function DocsPage() {
         </p>
       </header>
 
+      {/* Handoff to the developer reference. This page is the user-facing hub;
+          the exhaustive API/CLI/schema reference lives in the Sphinx docs. */}
+      <a
+        href={site.reference}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-8 flex flex-col gap-1 rounded-2xl border border-brand-200 bg-brand-50/50 p-6 transition hover:border-brand-300 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <h2 className="text-base font-semibold text-ink">
+            Building with BattINFO? Open the developer reference →
+          </h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Full Python API, CLI commands, JSON Schemas, the validation contract,
+            and executable notebook tutorials.
+          </p>
+        </div>
+        <span className="mt-2 flex-none rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white sm:mt-0">
+          Developer reference
+        </span>
+      </a>
+
       {/* Quickstart */}
       <section id="quickstart" className="mt-16 scroll-mt-24">
         <SectionHeading kicker="Quickstart" title="Install and publish a record" />
@@ -55,7 +77,7 @@ export default function DocsPage() {
         </div>
         <p className="mt-4 text-sm text-ink-muted">
           Full notebook walkthroughs ship in the repo under{" "}
-          <a href={`${site.github}/tree/master/docs/guides`} className="text-brand-600 underline" target="_blank" rel="noreferrer">
+          <a href={`${site.reference}/guides`} className="text-brand-600 underline" target="_blank" rel="noreferrer">
             docs/guides
           </a>
           .
@@ -69,7 +91,7 @@ export default function DocsPage() {
           {guides.map((g) => (
             <a
               key={g.n}
-              href={`${site.github}/tree/master/docs/guides`}
+              href={`${site.reference}/guides`}
               target="_blank"
               rel="noreferrer"
               className="prose-card transition hover:border-brand-300 hover:shadow-md"

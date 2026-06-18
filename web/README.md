@@ -46,11 +46,18 @@ The site is a presentation layer. The sources of truth stay where they live:
 |---|---|---|
 | Term / IRI reference | `battinfo.ttl`, `assets/ontology/` | build-time sync script (TODO) |
 | Schema browser | `assets/schemas/*.json` | build-time sync script (TODO) |
-| Examples | `examples/**` | build-time sync script (TODO) |
+| Examples (flagship record) | `examples/cell-spec/A123__ANR26650M1-B.json` | `npm run sync:examples` → `lib/examples.generated.ts` (committed) |
 
-Until those sync scripts exist, the pages use small inlined fixtures under
-`lib/` clearly marked as placeholders. Resolution of `w3id.org/battinfo/` IRIs
-stays on w3id.org — this site never serves as the IRI resolver.
+```bash
+npm run sync:examples   # regenerate lib/examples.generated.ts from examples/**
+```
+
+`lib/examples.generated.ts` is generated and **committed** (so the Vercel build,
+scoped to `web/`, never reaches outside it). CI should re-run the sync and fail
+on a dirty diff. The remaining inline fixtures under `lib/` are clearly marked
+teasers; see `docs/CONTENT-MODEL.md` §4 for what is and isn't synced yet.
+Resolution of `w3id.org/battinfo/` IRIs stays on w3id.org — this site never
+serves as the IRI resolver.
 
 ## Status
 

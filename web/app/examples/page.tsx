@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
-import { cellTypeInput, cellTypeJsonLd } from "@/lib/examples";
+import { cellSpecInput, cellSpecJsonLd } from "@/lib/examples";
 
 export const metadata: Metadata = {
   title: "Examples",
@@ -22,7 +22,7 @@ export default function ExamplesPage() {
       <section className="mt-12">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-2xl font-semibold tracking-tight text-ink">
-            Cell type · A123 ANR26650M1-B
+            Cell spec · A123 ANR26650M1-B
           </h2>
           <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-mono text-xs text-ink-muted">
             cylindrical · LFP · Li-ion
@@ -32,11 +32,11 @@ export default function ExamplesPage() {
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <div>
             <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-ink-faint">Input — authored JSON</h3>
-            <CodeBlock label="cell-type.json" code={JSON.stringify(cellTypeInput, null, 2)} />
+            <CodeBlock label="cell-spec.json" code={JSON.stringify(cellSpecInput, null, 2)} />
           </div>
           <div>
             <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-brand-600">Output — EMMO JSON-LD</h3>
-            <CodeBlock label="cell-type.jsonld" code={JSON.stringify(cellTypeJsonLd, null, 2)} />
+            <CodeBlock label="cell-spec.jsonld" code={JSON.stringify(cellSpecJsonLd, null, 2)} />
           </div>
         </div>
       </section>

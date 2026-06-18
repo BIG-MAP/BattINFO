@@ -1,9 +1,13 @@
+/* Brand typefaces — Plus Jakarta Sans (UI/headings) + JetBrains Mono (code/data).
+   See ../../brand/BRAND.md §3. @import must precede the @tailwind directives. */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -12,12 +16,12 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-white text-ink antialiased;
+    @apply bg-paper text-ink antialiased;
   }
 }
 
 @layer components {
   .prose-card {
-    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm;
+    @apply rounded-2xl border border-border bg-surface p-6 shadow-sm;
   }
 }

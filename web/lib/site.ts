@@ -3,12 +3,17 @@
 
 export const site = {
   name: "BattINFO",
-  tagline: "The data layer for battery technology",
+  tagline: "The semantic data layer for battery technology",
   description:
     "BattINFO makes battery data machine-readable and interoperable: a shared vocabulary, ready-to-use JSON Schemas, a Python library and CLI, and persistent identifiers that turn datasheets, specs, and test data into data any tool can read.",
   url: "https://battinfo.org",
   // The IRI namespace is resolved by w3id.org, NOT by this site.
   iriBase: "https://w3id.org/battinfo/",
+  // Developer reference (Sphinx). This site owns "why/try"; the reference owns
+  // "how/reference" — see docs/CONTENT-MODEL.md. TODO: point at
+  // https://docs.battinfo.org once the Sphinx site is deployed; until then the
+  // canonical reference is the docs/ tree on GitHub.
+  reference: "https://github.com/BattINFO/BattINFO/tree/main/docs",
   github: "https://github.com/BattINFO/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
   emmo: "https://github.com/emmo-repo/domain-battery",
@@ -23,6 +28,7 @@ export const site = {
 } as const;
 
 export const primaryNav = [
+  { label: "Federation", href: "/federation" },
   { label: "Docs", href: "/docs" },
   { label: "Examples", href: "/examples" },
   { label: "Validate", href: "/validate" },

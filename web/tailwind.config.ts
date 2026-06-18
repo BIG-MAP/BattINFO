@@ -3,6 +3,12 @@ import type { Config } from "tailwindcss";
 // Palette is keyed `brand` / `volt` (not literal colour names) so a future
 // visual refresh never requires touching markup — mirrors the rebrand-proof
 // convention used elsewhere in the ecosystem.
+//
+// Values are the canonical BattINFO brand pack (see ../brand/tokens.css, the
+// single source of truth). The ramp is anchored on the brand tokens:
+//   brand-500 = Signal Teal 500 #12A394 (fills / large display only)
+//   brand-600 = Signal Teal 700 #0C7A6E (AA-safe links, buttons, teal text)
+// When the brand changes, update brand/tokens.css and mirror it here.
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
@@ -12,38 +18,44 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Primary — deep semantic-web indigo/blue.
+        // Primary — BattINFO Signal Teal. 600 is the AA-safe text/UI shade.
         brand: {
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
-          950: "#1e1b4b",
+          50: "#e4f4f1",
+          100: "#c9ece6",
+          200: "#9cdcd3",
+          300: "#5fc6b8",
+          400: "#21ad9d",
+          500: "#12a394",
+          600: "#0c7a6e",
+          700: "#0a6358",
+          800: "#084e46",
+          900: "#063a34",
+          950: "#042722",
         },
-        // Accent — "volt" energy green, used sparingly for emphasis/validation.
+        // Accent — "volt": on-brand semantic success green (validation states),
+        // anchored on Success #178050 / tint #E4F4EC from the brand pack.
         volt: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
+          50: "#e4f4ec",
+          100: "#c7e9d6",
+          200: "#97d6b4",
+          300: "#5bbd8b",
+          400: "#2c9e66",
+          500: "#178050",
+          600: "#136b43",
+          700: "#105737",
+          800: "#0c4329",
+          900: "#08301e",
         },
         ink: {
-          DEFAULT: "#0f172a",
-          muted: "#475569",
-          faint: "#94a3b8",
+          DEFAULT: "#102a43", // Ink — primary text, headers
+          muted: "#5a6570", // Muted — secondary text, captions
+          faint: "#8a877e", // tertiary labels / eyebrows
         },
+        // Brand neutrals & surfaces (from brand/tokens.css).
+        paper: "#f3f2ee", // page background
+        surface: "#ffffff", // cards
+        border: "#e7e5df", // hairlines
+        tint: "#e4f4f1", // teal wash, tags
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],

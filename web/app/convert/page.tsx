@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { convertCellType } from "@/lib/convert";
-import { cellTypeInput } from "@/lib/examples";
+import { toolDemoInput } from "@/lib/examples";
 import { site } from "@/lib/site";
 
-const SAMPLE = JSON.stringify(cellTypeInput, null, 2);
+const SAMPLE = JSON.stringify(toolDemoInput, null, 2);
 
 type Tab = "domain-battery" | "converter-compatible" | "authored";
 
