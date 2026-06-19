@@ -163,7 +163,7 @@ Published records use:
 
 ## Project status
 
-> **Pre-release (alpha).** **938 tests** pass across Python 3.11 and 3.12 on Linux
+> **Beta.** **938 tests** pass across Python 3.11 and 3.12 on Linux
 > and Windows. Ontology dependency versions are pinned and verified.
 > See [`docs/alpha-scope.md`](docs/alpha-scope.md).
 

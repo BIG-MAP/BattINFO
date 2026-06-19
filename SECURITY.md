@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-BattINFO is in pre-release (alpha). Security fixes are applied to the latest
+BattINFO is in beta. Security fixes are applied to the latest
 `main` branch and the most recent release.
 
 | Version | Supported |
