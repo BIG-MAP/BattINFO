@@ -126,8 +126,8 @@ bi.query_material_specs(material_class="active_material")
 
 ## Examples
 
-Canonical examples live in [`examples/material-spec/`](../examples/material-spec/) and
-[`examples/material/`](../examples/material/) (the single source of truth, mirrored into
+Canonical examples live in [`examples/material-spec/`](https://github.com/BIG-MAP/BattINFO/tree/main/examples/material-spec) and
+[`examples/material/`](https://github.com/BIG-MAP/BattINFO/tree/main/examples/material) (the single source of truth, mirrored into
 the wheel by `scripts/sync_examples.py`). Coverage spans graphite, LFP, NMC811, NMC622,
 LCO, LMFP, LNMO, zinc, carbon black, PVDF, and the KOH / LiPF6 / EC / EMC electrolyte
 constituents. The Li-ion cathode/anode actives and electrolyte salts/solvents are

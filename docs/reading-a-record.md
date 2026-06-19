@@ -7,7 +7,7 @@ the node types, and how to follow the links.
 
 ## The node graph at a glance
 
-```
+```text
 dcat:Catalog (the deposit)          ── the DOI, title, licence, creators, publisher, keywords, version
  ├─ dcat:dataset / schema:hasPart ─▶ dcat:Dataset (one per test result)
  │                                    ├─ dcat:distribution ─▶ dcat:Distribution (downloadURL, checksum)

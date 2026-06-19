@@ -3,10 +3,9 @@ name: Docs
 # Builds the Sphinx documentation and checks that the guide notebooks parse,
 # so docs and the advertised notebooks cannot silently rot.
 #
-# Note: the build is intentionally non-strict (no -W) for now — there is a
-# known backlog of warnings (ipython3 lexer, a couple of myst xref targets).
-# Once cleared, add `-W` to make warnings blocking. Notebook *execution*
-# (nbmake) is deferred until the publish path is fully offline (see CI notes).
+# The build is strict (-W): any Sphinx warning fails the job. Notebook
+# *execution* (nbmake) is deferred — the notebooks ship with stored outputs
+# (nbsphinx_execute = "never"), so this renders them without a kernel.
 
 on:
   push:
@@ -36,8 +35,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pandoc
       - name: Install (locked, all extras)
         run: uv sync --all-extras --frozen
-      - name: Sphinx build
-        run: uv run --no-sync sphinx-build -b html docs docs/_build/html
+      - name: Sphinx build (warnings are errors)
+        run: uv run --no-sync sphinx-build -b html -W --keep-going docs docs/_build/html
       - name: Validate guide notebooks parse
         run: |
           uv run --no-sync python - <<'PY'

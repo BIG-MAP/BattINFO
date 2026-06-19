@@ -84,6 +84,7 @@ docs = [
   "pydata-sphinx-theme>=0.15",
   "myst-parser>=3.0",
   "nbsphinx>=0.9",
+  "ipython>=8.0",   # provides the 'ipython3' Pygments lexer nbsphinx needs for notebook cells
   "sphinx-design>=0.6",
 ]
 
