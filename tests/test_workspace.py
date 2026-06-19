@@ -361,7 +361,7 @@ def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> 
     )
 
     specification = workspace.describe_cell(
-        manufacturer="AlphaLab",
+        manufacturer="ExampleLab",
         model="POUCH-ML-NMC-042",
         format="pouch",
         chemistry="NMC/graphite",
@@ -395,7 +395,7 @@ def test_workspace_describes_saves_and_queries_detailed_cell(tmp_path: Path) -> 
             comment="Entered from pilot-line formulation and assembly records.",
         ),
         specification_comment="Representative multilayer pouch build authored from engineering records.",
-        comment="Human-authored detailed cell description for alpha workflow demonstration.",
+        comment="Human-authored detailed cell description for workflow demonstration.",
     )
 
     results = workspace.save_descriptions()
@@ -428,8 +428,8 @@ def test_workspace_record_test_creates_linked_dataset(tmp_path: Path) -> None:
     )
     cell = workspace.cell(
         cell_spec,
-        serial_number="a123-anr26650m1-b-alpha-001",
-        batch_id="A123-ALPHA-01",
+        serial_number="a123-anr26650m1-b-sn-001",
+        batch_id="A123-BATCH-01",
         source_type="lab",
     )
 
@@ -636,7 +636,7 @@ def test_workspace_publish_can_infer_missing_dataset_links_from_workspace(tmp_pa
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_spec, serial_number="alpha-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="sn-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -679,7 +679,7 @@ def test_workspace_build_publication_package_can_emit_dcat_export(tmp_path: Path
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_spec, serial_number="alpha-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="sn-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",
@@ -722,7 +722,7 @@ def test_workspace_build_release_exports_registry_ready_local_workspace(tmp_path
         specs={"nominal_voltage": quantity(3.3, "V")},
         source_file="a123-anr26650m1-b.manual.json",
     )
-    cell = workspace.cell(cell_spec, serial_number="alpha-001", source_type="lab")
+    cell = workspace.cell(cell_spec, serial_number="sn-001", source_type="lab")
     test = workspace.test(
         cell,
         kind="cycling",

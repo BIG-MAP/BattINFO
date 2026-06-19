@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0.0",
   "cell_spec": {
-    "id": "https://w3id.org/battinfo/spec/3f7k-2m9r-4t6p-8v5q",
-    "name": "AlphaLab POUCH-SL-LFP-001",
+    "id": "https://w3id.org/battinfo/spec/5j9r-4k7p-2m8t-6v3q",
+    "name": "ExampleLab PRISM-LFP-020",
     "manufacturer": {
       "type": "Organization",
-      "name": "AlphaLab"
+      "name": "ExampleLab"
     },
-    "model": "POUCH-SL-LFP-001",
-    "cell_format": "pouch",
+    "model": "PRISM-LFP-020",
+    "cell_format": "prismatic",
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
     "negative_electrode_basis": "graphite"
   },
   "properties": {
     "nominal_capacity": {
-      "value": 0.12,
+      "value": 20.0,
       "unit": "Ah"
     },
     "nominal_voltage": {
@@ -25,9 +25,9 @@
   },
   "construction": {
     "assembly_type": "stacked",
-    "layering": "single_layer",
-    "layer_count": 1,
-    "comment": "Single-layer pouch alpha fixture."
+    "layering": "multilayer",
+    "layer_count": 24,
+    "comment": "Stacked prismatic example fixture."
   },
   "positive_electrode": {
     "coating": {
@@ -37,7 +37,7 @@
             "name": "LFP",
             "property": {
               "mass_fraction": {
-                "value": 0.93,
+                "value": 0.94,
                 "unit": "1"
               }
             }
@@ -48,7 +48,7 @@
             "name": "PVDF",
             "property": {
               "mass_fraction": {
-                "value": 0.04,
+                "value": 0.03,
                 "unit": "1"
               }
             }
@@ -68,7 +68,7 @@
       },
       "property": {
         "loading": {
-          "value": 14.0,
+          "value": 24.0,
           "unit": "mg/cm^2"
         }
       }
@@ -105,7 +105,7 @@
       },
       "property": {
         "loading": {
-          "value": 8.0,
+          "value": 13.0,
           "unit": "mg/cm^2"
         }
       }
@@ -122,7 +122,7 @@
           "name": "EC",
           "property": {
             "volume_fraction": {
-              "value": 0.4,
+              "value": 0.25,
               "unit": "1"
             }
           }
@@ -131,7 +131,7 @@
           "name": "EMC",
           "property": {
             "volume_fraction": {
-              "value": 0.6,
+              "value": 0.75,
               "unit": "1"
             }
           }
@@ -146,27 +146,38 @@
           "unit": "mol/L"
         }
       }
-    }
+    },
+    "additive": [
+      {
+        "name": "FEC",
+        "property": {
+          "volume_fraction": {
+            "value": 0.03,
+            "unit": "1"
+          }
+        }
+      }
+    ]
   },
   "separator": {
-    "material": "PP membrane",
+    "material": "Ceramic-coated PP",
     "property": {
       "thickness": {
-        "value": 16.0,
+        "value": 18.0,
         "unit": "um"
       }
     }
   },
   "provenance": {
     "source_type": "manual",
-    "source_name": "BattINFO alpha fixtures",
-    "source_file": "examples/cell-descriptors/alpha-pouch-single-layer-detailed.example.json",
+    "source_name": "BattINFO example fixtures",
+    "source_file": "examples/cell-descriptors/prismatic-detailed.example.json",
     "retrieved_at": 1773201600,
-    "workflow_version": "alpha-fixtures-0.1",
-    "comment": "Canonical detailed single-layer pouch fixture."
+    "workflow_version": "example-fixtures-0.1",
+    "comment": "Canonical detailed prismatic fixture."
   },
   "notes": [
-    "Detailed single-layer pouch descriptor for alpha validation coverage.",
-    "Alpha fixture for detailed single-layer pouch-cell descriptions."
+    "Detailed prismatic descriptor for validation coverage.",
+    "Example fixture for detailed prismatic-cell descriptions."
   ]
 }

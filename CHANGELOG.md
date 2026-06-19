@@ -92,6 +92,6 @@ continued from the prior ontology releases (… 0.5.0, 0.6.0 → **0.7.0**).
 
 ---
 
-## [0.1.0-alpha] — 2026-03-01 (initial alpha)
+## [0.1.0-alpha] — 2026-03-01
 
-Initial alpha release. Core cell-descriptor validation, mapping, and publication workflows.
+Initial internal pre-release. Core cell-descriptor validation, mapping, and publication workflows.

@@ -165,23 +165,23 @@ Published records use:
 
 > **Beta.** **938 tests** pass across Python 3.11 and 3.12 on Linux
 > and Windows. Ontology dependency versions are pinned and verified.
-> See [`docs/alpha-scope.md`](docs/alpha-scope.md).
+> See [`docs/scope.md`](docs/scope.md) for the full capability map.
 
-**In scope for alpha**
+**Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
 - CLI and Python API covering `cell-spec`, `cell-instance`, `test`, `dataset`, and `test-protocol` records.
 
 **Preview (may still change)**
-- Reusable cell-spec library flows beyond the alpha walkthrough fixtures.
+- Reusable cell-spec library flows beyond the walkthrough fixtures.
 
 **In development (no stability promise)**
 - Registry sync/query (`battinfo push`, `battinfo registry`).
 - Large-scale reference validation.
 
-Run the alpha verification gate locally:
+Run the verification gate locally:
 
 ```powershell
-.venv\Scripts\python .tools/quality/run_alpha_verification.py
+.venv\Scripts\python .tools/quality/run_verification.py
 ```
 
 ## Repository layout

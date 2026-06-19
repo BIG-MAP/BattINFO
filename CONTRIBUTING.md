@@ -48,8 +48,8 @@ uv run pytest -q tests --cov=battinfo --cov-report=term-missing
 # Identifier-policy compliance
 uv run python .tools/quality/lint_identifier_policy.py
 
-# Alpha verification gate (pytest + installed-smoke + wheel build)
-uv run python .tools/quality/run_alpha_verification.py
+# Verification gate (pytest + installed-smoke + wheel build)
+uv run python .tools/quality/run_verification.py
 ```
 
 ## Project conventions

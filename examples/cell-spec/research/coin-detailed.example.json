@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0.0",
   "cell_spec": {
-    "id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m",
-    "name": "AlphaLab CYL-LFP-18650",
+    "id": "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r",
+    "name": "ExampleLab COIN-LFP-2032",
     "manufacturer": {
       "type": "Organization",
-      "name": "AlphaLab"
+      "name": "ExampleLab"
     },
-    "model": "CYL-LFP-18650",
-    "cell_format": "cylindrical",
+    "model": "COIN-LFP-2032",
+    "cell_format": "coin",
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
     "negative_electrode_basis": "graphite",
-    "size_code": "18650"
+    "size_code": "2032"
   },
   "properties": {
     "nominal_capacity": {
-      "value": 1.5,
+      "value": 0.04,
       "unit": "Ah"
     },
     "nominal_voltage": {
@@ -25,10 +25,9 @@
     }
   },
   "construction": {
-    "assembly_type": "wound",
-    "layering": "multilayer",
-    "layer_count": 32,
-    "comment": "Jelly-roll cylindrical alpha fixture."
+    "assembly_type": "stacked",
+    "layering": "not_applicable",
+    "comment": "Coin-cell example fixture with stacked pellet-style components."
   },
   "positive_electrode": {
     "coating": {
@@ -38,7 +37,7 @@
             "name": "LFP",
             "property": {
               "mass_fraction": {
-                "value": 0.94,
+                "value": 0.92,
                 "unit": "1"
               }
             }
@@ -49,7 +48,7 @@
             "name": "PVDF",
             "property": {
               "mass_fraction": {
-                "value": 0.03,
+                "value": 0.04,
                 "unit": "1"
               }
             }
@@ -60,7 +59,7 @@
             "name": "Carbon black",
             "property": {
               "mass_fraction": {
-                "value": 0.03,
+                "value": 0.04,
                 "unit": "1"
               }
             }
@@ -68,24 +67,14 @@
         ]
       },
       "property": {
-        "loading": {
-          "value": 17.5,
-          "unit": "mg/cm^2"
-        },
         "thickness": {
-          "value": 64.0,
+          "value": 55.0,
           "unit": "um"
         }
       }
     },
     "current_collector": {
-      "name": "Al foil",
-      "property": {
-        "thickness": {
-          "value": 15.0,
-          "unit": "um"
-        }
-      }
+      "name": "Al foil"
     }
   },
   "negative_electrode": {
@@ -116,19 +105,13 @@
       },
       "property": {
         "thickness": {
-          "value": 72.0,
+          "value": 48.0,
           "unit": "um"
         }
       }
     },
     "current_collector": {
-      "name": "Cu foil",
-      "property": {
-        "thickness": {
-          "value": 10.0,
-          "unit": "um"
-        }
-      }
+      "name": "Cu foil"
     }
   },
   "electrolyte": {
@@ -139,16 +122,16 @@
           "name": "EC",
           "property": {
             "volume_fraction": {
-              "value": 0.3,
+              "value": 0.5,
               "unit": "1"
             }
           }
         },
         {
-          "name": "EMC",
+          "name": "DEC",
           "property": {
             "volume_fraction": {
-              "value": 0.7,
+              "value": 0.5,
               "unit": "1"
             }
           }
@@ -163,38 +146,27 @@
           "unit": "mol/L"
         }
       }
-    },
-    "additive": [
-      {
-        "name": "VC",
-        "property": {
-          "volume_fraction": {
-            "value": 0.02,
-            "unit": "1"
-          }
-        }
-      }
-    ]
+    }
   },
   "separator": {
-    "material": "PE/PP trilayer",
+    "material": "PP membrane",
     "property": {
       "thickness": {
-        "value": 18.0,
+        "value": 20.0,
         "unit": "um"
       }
     }
   },
   "provenance": {
     "source_type": "manual",
-    "source_name": "BattINFO alpha fixtures",
-    "source_file": "examples/cell-descriptors/alpha-cylindrical-detailed.example.json",
+    "source_name": "BattINFO example fixtures",
+    "source_file": "examples/cell-descriptors/coin-detailed.example.json",
     "retrieved_at": 1773201600,
-    "workflow_version": "alpha-fixtures-0.1",
-    "comment": "Canonical detailed cylindrical fixture."
+    "workflow_version": "example-fixtures-0.1",
+    "comment": "Canonical detailed coin-cell fixture."
   },
   "notes": [
-    "Detailed cylindrical descriptor for alpha validation coverage.",
-    "Alpha fixture for detailed cylindrical-cell descriptions."
+    "Detailed coin-cell descriptor for validation coverage.",
+    "Example fixture for detailed coin-cell descriptions."
   ]
 }

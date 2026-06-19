@@ -12,7 +12,7 @@
 If you are new here, start with `Workspace`. The [guide notebooks](guides/01-concepts.ipynb)
 walk through the full authoring flow end to end.
 
-Alpha scope:
+Scope:
 - core: `Workspace`, publication, canonical record save/query/publish/index helpers, and the guide notebooks
 - preview: reusable cell-spec library workflows beyond the guide walkthrough fixtures
 

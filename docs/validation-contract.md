@@ -1,6 +1,6 @@
 # BattINFO Validation Contract
 
-This document defines the validation behavior that alpha consumers can rely on for the supported BattINFO scope.
+This document defines the validation behavior that consumers can rely on for the supported BattINFO scope.
 
 ## Supported Entry Points
 
@@ -106,9 +106,9 @@ Exit codes:
 - `0` when no error-severity issues are present
 - `1` when one or more error-severity issues are present
 
-## Current Alpha Boundary
+## Current Boundary
 
-For alpha, reference validation is supported against repository-style source trees through `source_root`.
+Reference validation is supported against repository-style source trees through `source_root`.
 
-This is sufficient for the core alpha scope, but it is not yet the long-term scalability model for larger external registries or snapshots.
+This is sufficient for the core scope, but it is not yet the long-term scalability model for larger external registries or snapshots.
 

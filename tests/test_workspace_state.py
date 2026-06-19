@@ -141,7 +141,7 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
     cell = workspace.cell(
         cell_spec,
         serial_number="cr2032-001",
-        batch_id="CR2032-ALPHA",
+        batch_id="CR2032-B01",
         source_type="lab",
     )
     test_a = workspace.test(

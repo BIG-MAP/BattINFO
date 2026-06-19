@@ -65,7 +65,7 @@ processing = [
 ]
 dev = [
   "build>=1.2",
-  "setuptools>=77",   # build backend, needed in-env for `build --no-isolation` (alpha gate)
+  "setuptools>=77",   # build backend, needed in-env for `build --no-isolation` (verification gate)
   "wheel",
   "twine>=5.0",       # dist metadata validation (`twine check`) before publishing
   "datamodel-code-generator>=0.25",

@@ -24,7 +24,7 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_alpha_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path: Path) -> None:
+def test_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     index_path = tmp_path / ".battinfo" / "index.json"
 

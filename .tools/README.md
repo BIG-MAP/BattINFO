@@ -6,7 +6,7 @@ Layout:
 - `build/` generated artifacts, schema/model generation, and resolver/library build helpers
 - `datasheets/` datasheet generation, validation, quality gates, and curation reporting
 - `library/` cell library normalization and validation utilities
-- `quality/` policy, repo-quality checks, and alpha verification helpers used in CI
+- `quality/` policy, repo-quality checks, and verification helpers used in CI
 - `semantic/` semantic mapping and publication support utilities
 
 These tools are not the primary user interface for BattINFO.

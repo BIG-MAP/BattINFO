@@ -68,7 +68,7 @@ def test_query_cell_instances_and_datasets() -> None:
     assert tests
 
 
-def test_query_tests_by_new_alpha_kind() -> None:
+def test_query_tests_by_new_kind() -> None:
     rows = query_tests(kind="hppc", limit=10)
     assert rows
     assert all(row["kind"] == "hppc" for row in rows)
@@ -107,13 +107,13 @@ def test_query_rejects_unknown_kind() -> None:
         query("unknown-kind")
 
 
-def test_template_test_accepts_new_alpha_kinds() -> None:
+def test_template_test_accepts_new_kinds() -> None:
     for kind in ("hppc", "ici", "gitt", "dcir", "eis", "formation", "rate_capability"):
         record = template_test(kind=kind)
         assert record["test"]["kind"] == kind
 
 
-def test_template_test_protocol_accepts_new_alpha_kinds() -> None:
+def test_template_test_protocol_accepts_new_kinds() -> None:
     for kind in ("hppc", "ici", "gitt", "dcir", "eis", "formation", "rate_capability"):
         record = template_test_spec(kind=kind)
         assert record["test_spec"]["kind"] == kind
@@ -1353,7 +1353,7 @@ def test_library_flat_dict_carries_full_physical_structure(tmp_path: Path) -> No
     payload = save_library_cell_spec(
         {
             "uid": "5h8k2m9q4v6n3t7r",
-            "manufacturer": "AlphaLab",
+            "manufacturer": "ExampleLab",
             "model": "COIN-LFP-2032",
             "format": "coin",
             "chemistry": "Li-ion",
@@ -1393,7 +1393,7 @@ def test_library_flat_dict_carries_full_physical_structure(tmp_path: Path) -> No
             },
             "separator": {"material": "PP membrane", "property": {"thickness": {"value": 20.0, "unit": "um"}}},
             "housing": {"case": {"size_code": "2032", "material": "Stainless steel"}},
-            "source_file": "alpha-coin-detailed.json",
+            "source_file": "coin-detailed.json",
         },
         library_root=library_root,
         package_root=packaged_root,

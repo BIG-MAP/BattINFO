@@ -56,7 +56,7 @@ def test_test_schema_and_examples_are_synced_between_assets_and_package() -> Non
         )
 
 
-def test_test_examples_cover_alpha_hardening_kinds() -> None:
+def test_test_examples_cover_hardening_kinds() -> None:
     examples_dir = ROOT / "examples" / "test"
     observed = {
         json.loads(path.read_text(encoding="utf-8"))["test"]["kind"]

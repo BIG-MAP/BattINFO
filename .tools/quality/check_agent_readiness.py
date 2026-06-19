@@ -34,7 +34,7 @@ def main() -> None:
         manifest["source_of_truth"]["notebooks"],
         manifest["docs"]["agent_guide"],
         manifest["docs"]["readme"],
-        manifest["docs"]["alpha_scope"],
+        manifest["docs"]["scope"],
         manifest["docs"]["python_api"],
         manifest["docs"]["notebooks"],
     ]

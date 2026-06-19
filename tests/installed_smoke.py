@@ -45,7 +45,7 @@ def main() -> None:
             chemistry="Li-primary",
             size_code="R2032",
         )
-        cell = battinfo.CellInstance(cell_spec=cell_spec, serial_number="energizer-cr2032-alpha")
+        cell = battinfo.CellInstance(cell_spec=cell_spec, serial_number="energizer-cr2032-001")
         test = battinfo.Test(
             cell=cell,
             kind="capacity_check",

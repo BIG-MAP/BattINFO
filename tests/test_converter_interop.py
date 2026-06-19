@@ -213,7 +213,7 @@ def test_import_converter_jsonld_record_builds_valid_descriptor_record() -> None
 def test_import_converter_jsonld_supports_canonical_overrides() -> None:
     result = import_converter_jsonld(
         _load_fixture(),
-        manufacturer="AlphaLab",
+        manufacturer="ExampleLab",
         model="COIN-LFP-2032",
         chemistry="Li-ion",
         id="https://w3id.org/battinfo/cell/1c4m-7p9q-2k6t-8v3r",
@@ -221,7 +221,7 @@ def test_import_converter_jsonld_supports_canonical_overrides() -> None:
     specification = result.record["specification"]
 
     assert specification["id"] == "https://w3id.org/battinfo/cell/1c4m-7p9q-2k6t-8v3r"
-    assert specification["manufacturer"] == "AlphaLab"
+    assert specification["manufacturer"] == "ExampleLab"
     assert specification["model"] == "COIN-LFP-2032"
     assert specification["chemistry"] == "Li-ion"
 

@@ -9,15 +9,15 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-ALPHA_TESTS = [
-    "tests/test_alpha_workflow.py",
-    "tests/test_alpha_descriptor_matrix.py",
-    "tests/test_alpha_scope_acceptance.py",
+ACCEPTANCE_TESTS = [
+    "tests/test_core_workflow.py",
+    "tests/test_descriptor_matrix.py",
+    "tests/test_scope_acceptance.py",
 ]
 
 
 def _run(step: str, command: list[str]) -> dict[str, object]:
-    print(f"[alpha] {step}: {' '.join(command)}", flush=True)
+    print(f"[verify] {step}: {' '.join(command)}", flush=True)
     subprocess.run(command, cwd=ROOT, check=True)
     return {
         "step": step,
@@ -27,7 +27,7 @@ def _run(step: str, command: list[str]) -> dict[str, object]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the BattINFO alpha verification gate.")
+    parser = argparse.ArgumentParser(description="Run the BattINFO verification gate.")
     parser.add_argument(
         "--skip-build",
         action="store_true",
@@ -41,7 +41,7 @@ def main() -> None:
     args = parser.parse_args()
 
     steps: list[dict[str, object]] = []
-    steps.append(_run("pytest", [sys.executable, "-m", "pytest", "-q", *ALPHA_TESTS]))
+    steps.append(_run("pytest", [sys.executable, "-m", "pytest", "-q", *ACCEPTANCE_TESTS]))
     steps.append(_run("installed-smoke", [sys.executable, "tests/installed_smoke.py"]))
 
     if args.skip_build:
@@ -58,7 +58,7 @@ def main() -> None:
 
     if importlib.util.find_spec("build") is None:
         raise SystemExit(
-            "The 'build' package is not installed. Run 'python -m pip install -e .[dev]' before alpha verification."
+            "The 'build' package is not installed. Run 'python -m pip install -e .[dev]' before verification."
         )
     steps.append(_run("build", [sys.executable, "-m", "build", "--no-isolation"]))
 

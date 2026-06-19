@@ -45,7 +45,7 @@ This means:
 - the test identifies the concrete activity or campaign performed on that item
 - the dataset identifies the produced data asset
 
-Dataset linkage policy for alpha:
+Dataset linkage policy:
 - a dataset must reference at least one BattINFO cell
 - a dataset may reference a BattINFO test when a concrete test record exists
 

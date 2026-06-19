@@ -21,7 +21,7 @@ from battinfo.api import (
 )
 
 
-def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
+def test_core_workflow_end_to_end(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     publish_root = tmp_path / "site"
     index_path = tmp_path / ".battinfo" / "index.json"
@@ -42,7 +42,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
         CellInstanceInput(
             uid="1f8r6v2k9p4m3t7x",
             cell_spec_id=cell_spec["id"],
-            serial_number="ALPHA-001",
+            serial_number="SN-001",
             source_type="lab",
         ),
         source_root=source_root,
@@ -53,7 +53,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
         TestInput(
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell_instance["id"],
-            name="MN1500 alpha baseline cycling",
+            name="MN1500 baseline cycling",
             kind="cycling",
             source_type="measurement",
         ),
@@ -64,7 +64,7 @@ def test_alpha_core_workflow_end_to_end(tmp_path: Path) -> None:
     dataset = save_dataset(
         DatasetInput(
             uid="8c1h8pk68034vav6",
-            title="MN1500 alpha dataset",
+            title="MN1500 dataset",
             source_type="measurement",
             format="application/x-hdf5",
             related_cell_ids=[cell_instance["id"]],

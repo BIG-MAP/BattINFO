@@ -22,7 +22,7 @@ export default function HomePage() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-volt-500" />
-                Open standard · Alpha
+                Open standard · Beta
               </span>
               <h1 className="mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
                 The data layer for{" "}

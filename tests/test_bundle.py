@@ -382,7 +382,7 @@ def test_cell_specification_accepts_nested_objects() -> None:
 def test_cell_specification_accepts_human_first_helper_objects() -> None:
     spec = CellSpecification(
         id="https://w3id.org/battinfo/cell/4f2m-8k7p-1t9x-6q3r",
-        manufacturer="AlphaLab",
+        manufacturer="ExampleLab",
         model="POUCH-ML-NMC-042",
         format="pouch",
         chemistry="NMC/graphite",

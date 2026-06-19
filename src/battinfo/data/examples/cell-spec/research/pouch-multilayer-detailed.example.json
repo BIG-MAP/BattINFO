@@ -2,10 +2,10 @@
   "schema_version": "1.0.0",
   "cell_spec": {
     "id": "https://w3id.org/battinfo/spec/4h8p-3t6m-9q2k-7v5r",
-    "name": "AlphaLab POUCH-ML-LFP-018",
+    "name": "ExampleLab POUCH-ML-LFP-018",
     "manufacturer": {
       "type": "Organization",
-      "name": "AlphaLab"
+      "name": "ExampleLab"
     },
     "model": "POUCH-ML-LFP-018",
     "cell_format": "pouch",
@@ -27,7 +27,7 @@
     "assembly_type": "stacked",
     "layering": "multilayer",
     "layer_count": 18,
-    "comment": "Multilayer pouch alpha fixture."
+    "comment": "Multilayer pouch example fixture."
   },
   "positive_electrode": {
     "coating": {
@@ -170,14 +170,14 @@
   },
   "provenance": {
     "source_type": "manual",
-    "source_name": "BattINFO alpha fixtures",
-    "source_file": "examples/cell-descriptors/alpha-pouch-multilayer-detailed.example.json",
+    "source_name": "BattINFO example fixtures",
+    "source_file": "examples/cell-descriptors/pouch-multilayer-detailed.example.json",
     "retrieved_at": 1773201600,
-    "workflow_version": "alpha-fixtures-0.1",
+    "workflow_version": "example-fixtures-0.1",
     "comment": "Canonical detailed multilayer pouch fixture."
   },
   "notes": [
-    "Detailed multilayer pouch descriptor for alpha validation coverage.",
-    "Alpha fixture for detailed multilayer pouch-cell descriptions."
+    "Detailed multilayer pouch descriptor for validation coverage.",
+    "Example fixture for detailed multilayer pouch-cell descriptions."
   ]
 }

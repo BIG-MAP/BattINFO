@@ -45,8 +45,8 @@ jobs:
       - name: Lint Identifier Policy Compliance
         run: uv run --no-sync python .tools/quality/lint_identifier_policy.py
 
-      - name: Run Alpha Verification Gate
-        run: uv run --no-sync python .tools/quality/run_alpha_verification.py
+      - name: Run Verification Gate
+        run: uv run --no-sync python .tools/quality/run_verification.py
 
       - name: Smoke Test Installed Wheel
         run: |

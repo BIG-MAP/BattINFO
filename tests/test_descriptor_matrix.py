@@ -15,14 +15,14 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_alpha_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path: Path) -> None:
+def test_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path: Path) -> None:
     examples_dir = ROOT / "examples" / "cell-spec" / "research"
     example_names = [
-        "alpha-coin-detailed.example.json",
-        "alpha-cylindrical-detailed.example.json",
-        "alpha-pouch-single-layer-detailed.example.json",
-        "alpha-pouch-multilayer-detailed.example.json",
-        "alpha-prismatic-detailed.example.json",
+        "coin-detailed.example.json",
+        "cylindrical-detailed.example.json",
+        "pouch-single-layer-detailed.example.json",
+        "pouch-multilayer-detailed.example.json",
+        "prismatic-detailed.example.json",
     ]
 
     library_root = tmp_path / "library" / "cell-spec"

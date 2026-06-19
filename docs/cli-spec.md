@@ -1,4 +1,4 @@
-# BattINFO CLI Specification (Alpha Scope)
+# BattINFO CLI Specification (Scope)
 
 ## 1. Scope
 

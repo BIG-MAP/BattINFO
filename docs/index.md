@@ -58,7 +58,7 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 
 | | |
 |---|---|
-| **[Alpha scope](alpha-scope.md)** | What is in scope for alpha testing, what is in development |
+| **[Scope](scope.md)** | What is supported, what is in development |
 | **[CHANGELOG](../CHANGELOG.md)** | Release history and notable changes |
 
 ---

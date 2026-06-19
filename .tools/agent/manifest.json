@@ -3,7 +3,7 @@
   "repo": {
     "name": "BattINFO",
     "python": ">=3.10",
-    "status": "alpha-ready-scope"
+    "status": "supported-scope"
   },
   "install": {
     "venv": "python -m venv .venv",
@@ -13,8 +13,8 @@
     ]
   },
   "verification": {
-    "primary": ".\\.venv\\Scripts\\python .tools/quality/run_alpha_verification.py",
-    "machine_readable": ".\\.venv\\Scripts\\python .tools/quality/run_alpha_verification.py --report-json .battinfo/reports/alpha-verification.json",
+    "primary": ".\\.venv\\Scripts\\python .tools/quality/run_verification.py",
+    "machine_readable": ".\\.venv\\Scripts\\python .tools/quality/run_verification.py --report-json .battinfo/reports/verification.json",
     "focused": [
       ".\\.venv\\Scripts\\python -m pytest -q tests/test_workspace.py",
       ".\\.venv\\Scripts\\python -m pytest -q tests/test_bundle.py",
@@ -27,7 +27,7 @@
     "public_exports": "src/battinfo/__init__.py",
     "low_level_api": "src/battinfo/api.py"
   },
-  "alpha_scope": {
+  "scope": {
     "supported_cases": [
       "simple commercial cell",
       "detailed cell description",
@@ -63,7 +63,7 @@
   "docs": {
     "agent_guide": "AGENTS.md",
     "readme": "README.md",
-    "alpha_scope": "docs/alpha-scope.md",
+    "scope": "docs/scope.md",
     "python_api": "docs/python-api.md",
     "notebooks": "docs/guides"
   }
