@@ -19,7 +19,6 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 BATTINFO_TTL = ROOT / "ontology" / "battinfo.ttl"
 
@@ -78,8 +77,8 @@ def _compare_versions(declared: str, latest: str) -> int:
     """Return -1/0/1 like cmp, comparing semver strings numerically."""
     def parts(v: str) -> tuple[int, ...]:
         return tuple(int(x) for x in re.split(r"[.-]", v) if x.isdigit())
-    d, l = parts(declared), parts(latest)
-    return (d > l) - (d < l)
+    dec, lat = parts(declared), parts(latest)
+    return (dec > lat) - (dec < lat)
 
 
 def main(argv: list[str] | None = None) -> int:

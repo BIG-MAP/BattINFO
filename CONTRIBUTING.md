@@ -32,8 +32,8 @@ Run tools via `uv run <cmd>`; no manual venv activation is needed.
 ## Quality gate
 
 Every pull request must pass the same checks CI runs across Python 3.11/3.12 on
-Linux and Windows ([Refactor Checks](.github/workflows/refactor_checks.yml)).
-Run them locally before pushing:
+Linux and Windows ([CI](.github/workflows/ci.yml)). Run them locally before
+pushing:
 
 ```powershell
 # Lint

@@ -17,7 +17,6 @@ import sys
 import urllib.request
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 CONTEXT_PATH = ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"

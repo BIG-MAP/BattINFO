@@ -12,7 +12,7 @@ typed against [EMMO domain-battery](https://github.com/emmo-repo/domain-battery)
 and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 
 <!-- Badges · status -->
-[![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/refactor_checks.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/refactor_checks.yml)
+[![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FBIG-MAP%2FBattINFO%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](https://github.com/BIG-MAP/BattINFO/blob/main/pyproject.toml)
 [![Version](https://img.shields.io/badge/version-0.7.0-blue)](https://github.com/BIG-MAP/BattINFO/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -218,7 +218,9 @@ uv run pytest -q tests
 ```
 
 CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
-[Refactor Checks](.github/workflows/refactor_checks.yml) workflow.
+[CI](.github/workflows/ci.yml) workflow, alongside
+[Security](.github/workflows/security.yml) (pip-audit + CodeQL) and
+[Docs](.github/workflows/docs.yml) builds.
 
 ## Citation
 

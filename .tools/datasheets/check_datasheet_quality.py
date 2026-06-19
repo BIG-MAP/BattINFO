@@ -6,7 +6,6 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DIR = ROOT / ".battinfo" / "datasheets" / "generated-cell-specs"
 

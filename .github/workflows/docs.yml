@@ -1,0 +1,52 @@
+name: Docs
+
+# Builds the Sphinx documentation and checks that the guide notebooks parse,
+# so docs and the advertised notebooks cannot silently rot.
+#
+# Note: the build is intentionally non-strict (no -W) for now — there is a
+# known backlog of warnings (ipython3 lexer, a couple of myst xref targets).
+# Once cleared, add `-W` to make warnings blocking. Notebook *execution*
+# (nbmake) is deferred until the publish path is fully offline (see CI notes).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: docs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install (locked, all extras)
+        run: uv sync --all-extras --frozen --python 3.12
+      - name: Sphinx build
+        run: uv run --no-sync sphinx-build -b html docs docs/_build/html
+      - name: Validate guide notebooks parse
+        run: |
+          uv run --no-sync python - <<'PY'
+          import glob, nbformat
+          nbs = sorted(glob.glob("docs/guides/*.ipynb"))
+          for nb in nbs:
+              nbformat.read(nb, as_version=4)
+          print(f"OK: {len(nbs)} notebooks parsed")
+          PY
+      - name: Upload rendered site
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-html
+          path: docs/_build/html

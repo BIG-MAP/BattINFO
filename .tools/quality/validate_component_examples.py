@@ -1,10 +1,12 @@
 """Validate component and record examples against their schemas."""
 from __future__ import annotations
+
 import json
 import pathlib
+
+import jsonschema
 import referencing
 import referencing.jsonschema
-import jsonschema
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCHEMA_DIR = ROOT / "assets" / "schemas"

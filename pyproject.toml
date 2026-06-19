@@ -75,6 +75,7 @@ dev = [
   "ruff>=0.6",
   "pytest>=8.0",
   "pytest-cov>=5.0",
+  "pytest-timeout>=2.3",
   "mypy>=1.11"
 ]
 docs = [
@@ -115,6 +116,13 @@ battinfo = ["**/__pycache__/*", "**/*.py[cod]"]
 
 [tool.pytest.ini_options]
 norecursedirs = ["legacy"]
+# --strict-markers: unknown markers are an error (typo guard).
+# --timeout: per-test wall-clock cap so a hung test can never stall CI.
+addopts = "--strict-markers --timeout=300"
+markers = [
+  "network: test makes outbound network calls (publish/JSON-LD context resolution is not yet fully offline)",
+  "slow: long-running test",
+]
 
 [tool.ruff]
 line-length = 120
@@ -126,9 +134,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Test files use sys.path.insert before imports — this is intentional so tests
-# can be run without an editable install.
+# Test files and maintainer scripts use sys.path.insert before imports — this is
+# intentional so they can run without an editable install.
 "tests/*.py" = ["E402"]
+".tools/**/*.py" = ["E402"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -170,6 +179,7 @@ ignore_errors = true
 source = ["battinfo"]
 
 [tool.coverage.report]
-# Baseline at adoption was 72%; floor set just below to gate regressions. Ratchet up over time.
-fail_under = 70
+# Current total ~73%; floor set just below to lock in the level and gate
+# regressions. Ratchet up as cli.py / ws.py coverage improves.
+fail_under = 72
 show_missing = true

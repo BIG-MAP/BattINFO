@@ -1,0 +1,104 @@
+name: CI
+
+# Continuous integration for the battinfo package and its content.
+# Runs on every push/PR, and is reusable (workflow_call) so the release
+# pipeline can require it as a pre-publish gate. Tags are handled by
+# release.yml, which invokes this workflow.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install (locked)
+        run: uv sync --all-extras --frozen --python 3.12
+      - name: Ruff
+        run: uv run --no-sync ruff check src tests scripts .tools
+      - name: Mypy
+        run: uv run --no-sync mypy
+
+  test:
+    name: Test (py${{ matrix.python-version }} · ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install (locked)
+        run: uv sync --all-extras --frozen --python ${{ matrix.python-version }}
+      - name: Unit tests + coverage gate
+        run: uv run --no-sync pytest -q tests --cov=battinfo --cov-report=term-missing --cov-report=xml
+      - name: Identifier-policy compliance
+        run: uv run --no-sync python .tools/quality/lint_identifier_policy.py
+      - name: Packaged examples are in sync with source
+        run: uv run --no-sync python scripts/sync_examples.py --check
+      - name: EMMO context freshness (informational)
+        continue-on-error: true
+        run: uv run --no-sync python scripts/assemble_context.py --check
+      - name: Upload coverage report
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+
+  package:
+    name: Build & verify distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Build sdist + wheel
+        run: uv build
+      - name: Validate distribution metadata
+        run: uvx twine check dist/*
+      - name: Install wheel into a clean environment and smoke-test
+        run: |
+          uv venv /tmp/smoke --python 3.12
+          uv pip install --python /tmp/smoke dist/*.whl
+          /tmp/smoke/bin/python -c "import battinfo; print('version', battinfo.__version__)"
+          /tmp/smoke/bin/python tests/installed_smoke.py
+          /tmp/smoke/bin/battinfo --help > /dev/null
+      - name: Upload distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
