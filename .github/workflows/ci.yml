@@ -90,13 +90,17 @@ jobs:
         run: uv build
       - name: Validate distribution metadata
         run: uvx twine check dist/*
-      - name: Install wheel into a clean environment and smoke-test
+      # Smoke the built wheel against the *locked* dependency versions (what we
+      # support and lock), not whatever floats latest from PyPI — otherwise the
+      # smoke is non-deterministic. Dependency-bump compatibility is covered
+      # separately by Dependabot PRs (which re-run this CI).
+      - name: Install built wheel (locked deps) and smoke-test
         run: |
-          uv venv /tmp/smoke --python 3.12
-          uv pip install --python /tmp/smoke dist/*.whl
-          /tmp/smoke/bin/python -c "import battinfo; print('version', battinfo.__version__)"
-          /tmp/smoke/bin/python tests/installed_smoke.py
-          /tmp/smoke/bin/battinfo --help > /dev/null
+          uv sync --all-extras --frozen --python 3.12
+          uv pip install --reinstall --no-deps dist/*.whl
+          uv run --no-sync python -c "import battinfo; print('version', battinfo.__version__)"
+          uv run --no-sync python tests/installed_smoke.py
+          uv run --no-sync battinfo --help > /dev/null
       - name: Upload distribution
         uses: actions/upload-artifact@v4
         with:
