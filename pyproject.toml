@@ -76,6 +76,7 @@ dev = [
   "pytest>=8.0",
   "pytest-cov>=5.0",
   "pytest-timeout>=2.3",
+  "pytest-socket>=0.7",
   "mypy>=1.11"
 ]
 docs = [
@@ -118,9 +119,12 @@ battinfo = ["**/__pycache__/*", "**/*.py[cod]"]
 norecursedirs = ["legacy"]
 # --strict-markers: unknown markers are an error (typo guard).
 # --timeout: per-test wall-clock cap so a hung test can never stall CI.
-addopts = "--strict-markers --timeout=300"
+# --disable-socket: enforce that the suite is fully offline. The publish/JSON-LD
+#   path resolves bundled contexts locally; all other network use is mocked.
+#   Loopback is allowed for any local-IPC use. A test that legitimately needs the
+#   network must opt in with @pytest.mark.enable_socket.
+addopts = "--strict-markers --timeout=300 --disable-socket --allow-hosts=127.0.0.1,::1,localhost"
 markers = [
-  "network: test makes outbound network calls (publish/JSON-LD context resolution is not yet fully offline)",
   "slow: long-running test",
 ]
 

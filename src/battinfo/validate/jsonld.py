@@ -29,6 +29,16 @@ from battinfo.validate.core import (
 # fallback so that JSON-LD processing works without network access.  Run
 # .tools/quality/refresh_emmo_context.py to update the bundled copy.
 _EMMO_BATTERY_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
+_BATTINFO_RECORDS_CONTEXT_URL = "https://w3id.org/battinfo/context/records/v1.json"
+
+# Remote JSON-LD context URLs whose documents are bundled with the package, so
+# that validation, URDNA2015 normalization, and RDF materialization run fully
+# offline (no live network at publish/validate time). Refresh the bundled copies
+# via .tools/quality/refresh_emmo_context.py.
+_LOCAL_CONTEXT_FILES = {
+    _EMMO_BATTERY_CONTEXT_URL: "domain-battery.context.json",
+    _BATTINFO_RECORDS_CONTEXT_URL: "records.context.json",
+}
 
 _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "BatteryCell",
@@ -260,7 +270,8 @@ def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
             dataset = Dataset()
-            dataset.parse(data=json.dumps(data), format="json-ld")
+            # Inline bundled contexts so rdflib never fetches them over the network.
+            dataset.parse(data=json.dumps(_inline_local_contexts(data)), format="json-ld")
     except Exception as exc:  # noqa: BLE001
         issues.append(
             ValidationIssue(
@@ -328,21 +339,63 @@ def _cached_pyld_document(url: str) -> dict[str, Any]:
     return loader(url, {})
 
 
-@lru_cache(maxsize=1)
-def _local_emmo_context() -> dict[str, Any]:
-    path = resources.files("battinfo").joinpath("data").joinpath("context").joinpath("domain-battery.context.json")
+def _normalize_context_url(url: str) -> str:
+    # Records sometimes carry a trailing slash or stray '.'; normalize for lookup.
+    return url.strip().rstrip("/.")
+
+
+@lru_cache(maxsize=8)
+def _local_context_document(filename: str) -> dict[str, Any]:
+    path = resources.files("battinfo").joinpath("data").joinpath("context").joinpath(filename)
     with path.open("r", encoding="utf-8") as fh:
         return json.load(fh)
 
 
+def _resolve_local_context(url: str) -> dict[str, Any] | None:
+    """Return the bundled context document for a known remote URL, else None."""
+    key = _normalize_context_url(url)
+    for known_url, filename in _LOCAL_CONTEXT_FILES.items():
+        if key == _normalize_context_url(known_url):
+            return _local_context_document(filename)
+    return None
+
+
 def _pyld_document_loader(url: str, options: dict[str, Any]) -> dict[str, Any]:
-    # Serve the bundled EMMO context from the local file to avoid a live network
-    # dependency at validation time.  This makes JSON-LD processing reproducible and
-    # allows offline use.  The bundled copy is refreshed via
-    # .tools/quality/refresh_emmo_context.py when EMMO releases a new version.
-    if url == _EMMO_BATTERY_CONTEXT_URL or url.rstrip("/") == _EMMO_BATTERY_CONTEXT_URL:
-        return {"contextUrl": None, "documentUrl": url, "document": _local_emmo_context()}
+    # Serve bundled contexts from local files so URDNA2015 normalization is
+    # reproducible and works offline.  Bundled records never reference contexts
+    # outside _LOCAL_CONTEXT_FILES, so the network fallback below is not taken
+    # during normal publication/validation.
+    local = _resolve_local_context(url)
+    if local is not None:
+        return {"contextUrl": None, "documentUrl": url, "document": local}
     return copy.deepcopy(_cached_pyld_document(url))
+
+
+def _inline_context_value(value: Any) -> Any:
+    """Replace any known remote @context URL with its bundled context object."""
+    if isinstance(value, str):
+        local = _resolve_local_context(value)
+        if local is not None:
+            return local.get("@context", local)
+        return value
+    if isinstance(value, list):
+        return [_inline_context_value(item) for item in value]
+    return value
+
+
+def _inline_local_contexts(node: Any) -> Any:
+    """Deep-copy ``node`` with every known remote @context URL replaced by its
+    bundled context object.  rdflib's JSON-LD parser resolves contexts through its
+    own loader (it does not honour PyLD's documentLoader), so inlining the bundled
+    contexts is what lets RDF materialization run without a live network."""
+    if isinstance(node, dict):
+        return {
+            key: (_inline_context_value(value) if key == "@context" else _inline_local_contexts(value))
+            for key, value in node.items()
+        }
+    if isinstance(node, list):
+        return [_inline_local_contexts(item) for item in node]
+    return node
 
 
 def _urdna2015_issues(data: dict[str, Any]) -> list[ValidationIssue]:

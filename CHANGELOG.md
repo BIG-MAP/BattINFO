@@ -19,6 +19,12 @@ continued from the prior ontology releases (… 0.5.0, 0.6.0 → **0.7.0**).
 - Unified the package and ontology on one version; `battinfo.ttl` `owl:versionIRI`/`owl:versionInfo` bumped to 0.7.0.
 - Single-sourced the version from `battinfo.__version__` (pyproject `dynamic`), so it can no longer drift across files.
 - Added a PyPI trusted-publishing (OIDC) release workflow, `RELEASING.md`, and a `twine check` step in CI.
+- Redesigned CI into a publication-grade suite (lint/type, matrix tests, packaging, security/pip-audit + CodeQL, docs build) with the test suite as a pre-publish gate.
+
+### Reliability
+
+- JSON-LD validation, URDNA2015 normalization, and RDF materialization now run **fully offline**. The EMMO domain-battery and battinfo records contexts are resolved from bundled copies for **both** rdflib and PyLD (previously only PyLD/URDNA2015 used the local EMMO copy, and rdflib still fetched contexts over the network). Publishing or validating a record no longer requires a live network connection.
+- The test suite is socket-blocked (`pytest-socket`) to enforce offline operation; this also cut test wall-clock roughly 6× by removing context-fetch timeouts.
 
 ### Ontology
 
