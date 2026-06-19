@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-06-19
+
+First publication of the `battinfo` **Python package** (library + CLI) to PyPI.
+The package, CLI, and OWL application ontology now share a single version line,
+continued from the prior ontology releases (… 0.5.0, 0.6.0 → **0.7.0**).
+
+### Packaging & release
+
+- First PyPI release of `battinfo` (`pip install battinfo`); requires Python 3.11+.
+- Unified the package and ontology on one version; `battinfo.ttl` `owl:versionIRI`/`owl:versionInfo` bumped to 0.7.0.
+- Single-sourced the version from `battinfo.__version__` (pyproject `dynamic`), so it can no longer drift across files.
+- Added a PyPI trusted-publishing (OIDC) release workflow, `RELEASING.md`, and a `twine check` step in CI.
+
 ### Ontology
 
 - Upgraded EMMO dependency pins: domain-battery 0.18.8 → **0.19.0** (introduces `BatterySpecification` class hierarchy)
@@ -75,7 +88,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Added `tests/test_authoring.py`: 50 tests covering all `battinfo.authoring` exported functions
 - Added entity type mapping tests in `test_mapping_governance.py`: na-ion, LCO, NCA (no node_type), silicon-graphite, hard-carbon
 - `test_publish.py` expanded: resolver JSON-LD correctness, `schema:valueReference` absence, cell instance dual `@type`, `publish()` local/registry/battery-genome destinations, `save_record()` lifecycle
-- Total: 291 tests, all passing
+- Suite total at release: 938 tests, all passing on Python 3.11/3.12 (Linux + Windows)
 
 ---
 

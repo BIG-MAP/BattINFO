@@ -8,8 +8,8 @@ Status:
 - release tagging and external tester rollout happen separately
 
 Tested runtime support:
-- Python 3.10
 - Python 3.11
+- Python 3.12
 
 ## Core Scope
 

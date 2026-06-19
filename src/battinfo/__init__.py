@@ -434,4 +434,4 @@ for _name in _api._COMPONENT_WRAPPER_NAMES:
 __all__ += list(_api._COMPONENT_WRAPPER_NAMES)
 del _api, _name
 
-__version__ = "0.1.0"
+__version__ = "0.7.0"

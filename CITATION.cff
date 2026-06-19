@@ -3,7 +3,27 @@ title: "BattINFO: The semantic data layer for battery science"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
 authors:
-  - name: "BattINFO Team"
+  - given-names: "Simon"
+    family-names: "Clark"
+    orcid: "https://orcid.org/0000-0002-8758-6109"
+  - given-names: "Jesper"
+    family-names: "Friis"
+    orcid: "https://orcid.org/0000-0002-1560-809X"
+  - given-names: "Francesca"
+    family-names: "Lønstad Bleken"
+    orcid: "https://orcid.org/0000-0001-8869-3718"
+  - given-names: "Eibar"
+    family-names: "Flores"
+    orcid: "https://orcid.org/0000-0003-2954-1233"
+  - given-names: "Simon"
+    family-names: "Stier"
+    orcid: "https://orcid.org/0009-0008-6968-1998"
+  - given-names: "Corsin"
+    family-names: "Battaglia"
+    orcid: "https://orcid.org/0000-0002-5003-1134"
+# Wider community contributions are acknowledged in CONTRIBUTORS.md and the
+# GitHub contributor graph; per-record contributors are credited via ORCID in
+# the published metadata itself.
 repository-code: "https://github.com/BIG-MAP/BattINFO"
 url: "https://github.com/BIG-MAP/BattINFO"
 abstract: >-
@@ -22,6 +42,6 @@ keywords:
   - Battery Pass
   - semantic web
 license: Apache-2.0
-version: 0.1.0
+version: 0.7.0
 # date-released: 2026-XX-XX   # set on the first tagged release
 # doi: 10.5281/zenodo.XXXXXXX  # set after the first Zenodo deposit

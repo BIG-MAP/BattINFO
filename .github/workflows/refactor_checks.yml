@@ -31,8 +31,8 @@ jobs:
       # NOTE: the tool steps below use `--no-sync` so they reuse the
       # `--all-extras` venv created above. Without it, a bare `uv run` re-reads
       # `.python-version` (3.11), recreates the venv with default deps only, and
-      # the dev tools (ruff/mypy/pytest) disappear — which also breaks the 3.10
-      # matrix leg.
+      # the dev tools (ruff/mypy/pytest) disappear — which also breaks the
+      # non-default (3.12) matrix leg.
       - name: Lint (ruff)
         run: uv run --no-sync ruff check src tests
 
@@ -53,3 +53,6 @@ jobs:
           uv build
           uv pip install --reinstall dist/*.whl
           uv run --no-sync python tests/installed_smoke.py
+
+      - name: Validate Distribution Metadata (twine check)
+        run: uv run --no-sync python -m twine check dist/*

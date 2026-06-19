@@ -14,7 +14,7 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 <!-- Badges · status -->
 [![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/refactor_checks.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/refactor_checks.yml)
 [![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FBIG-MAP%2FBattINFO%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](https://github.com/BIG-MAP/BattINFO/blob/main/pyproject.toml)
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha-orange)](https://github.com/BIG-MAP/BattINFO/releases)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue)](https://github.com/BIG-MAP/BattINFO/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 <br/>
 <!-- Badges · activity & quality -->
@@ -79,14 +79,21 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 ## Installation
 
-Requires **Python 3.10+**. This repo uses [uv](https://docs.astral.sh/uv/).
+Requires **Python 3.11+**.
 
-```powershell
-uv sync          # creates .venv and installs from uv.lock
+```bash
+pip install battinfo
 ```
 
-Optional extras: `.[storage]` (S3), `.[processing]` (data analysis), `.[docs]`
-(Sphinx), and `.[dev]` (full test/lint/build toolchain).
+Optional extras: `battinfo[storage]` (S3), `battinfo[processing]` (data
+analysis), `battinfo[docs]` (Sphinx), and `battinfo[dev]` (full test/lint/build
+toolchain).
+
+**Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
+
+```powershell
+uv sync --all-extras   # creates .venv and installs from uv.lock
+```
 
 ## Quickstart
 
@@ -142,7 +149,7 @@ repo root with the `.venv` kernel.
 
 | Layer | What it provides |
 |-------|-----------------|
-| `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0 with pinned versioned IRIs |
+| `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.19.0 and domain-electrochemistry 0.34.0 with pinned versioned IRIs |
 | [`assets/mappings/domain-battery/`](assets/mappings/domain-battery/) | 47 curated property→EMMO-IRI mappings and 27 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 23 JSON Schema (draft 2020-12) files covering cell specs, cell instances, electrodes, electrolytes, separators, tests, datasets, and organisations |
 | [`src/battinfo/transform/json_to_jsonld.py`](src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
@@ -156,7 +163,7 @@ Published records use:
 
 ## Project status
 
-> **Pre-release (alpha).** **468 tests** pass across Python 3.10 and 3.11 on Linux
+> **Pre-release (alpha).** **938 tests** pass across Python 3.11 and 3.12 on Linux
 > and Windows. Ontology dependency versions are pinned and verified.
 > See [`docs/alpha-scope.md`](docs/alpha-scope.md).
 
@@ -210,7 +217,7 @@ uv run mypy
 uv run pytest -q tests
 ```
 
-CI runs the same checks across Python 3.10/3.11 on Linux and Windows via the
+CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
 [Refactor Checks](.github/workflows/refactor_checks.yml) workflow.
 
 ## Citation
@@ -221,7 +228,7 @@ archived on Zenodo, the concept DOI badge above will resolve to a citable record
 ```bibtex
 @software{battinfo,
   title        = {BattINFO: The semantic data layer for battery technology},
-  author       = {{BattINFO Team}},
+  author       = {Clark, Simon and Friis, Jesper and L{\o}nstad Bleken, Francesca and Flores, Eibar and Stier, Simon and Battaglia, Corsin},
   year         = {2026},
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.XXXXXXX},

@@ -17,7 +17,7 @@ By participating in this project you agree to abide by our
 
 ## Development setup
 
-Requires **Python 3.10+**. This project uses [uv](https://docs.astral.sh/uv/)
+Requires **Python 3.11+**. This project uses [uv](https://docs.astral.sh/uv/)
 for environment and dependency management. `uv sync` manages a `.venv` at the
 repo root from the committed `uv.lock` — do not use system Python or `pip`
 directly.
@@ -31,7 +31,7 @@ Run tools via `uv run <cmd>`; no manual venv activation is needed.
 
 ## Quality gate
 
-Every pull request must pass the same checks CI runs across Python 3.10/3.11 on
+Every pull request must pass the same checks CI runs across Python 3.11/3.12 on
 Linux and Windows ([Refactor Checks](.github/workflows/refactor_checks.yml)).
 Run them locally before pushing:
 
@@ -72,6 +72,11 @@ uv run python .tools/quality/run_alpha_verification.py
 - [ ] New behaviour is covered by tests.
 - [ ] User-facing changes are noted in [`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`.
 - [ ] Docs/examples updated if the change affects them.
+
+## Releasing
+
+Maintainers: see [`RELEASING.md`](RELEASING.md) for the tag-driven PyPI release
+procedure.
 
 ## Reporting security issues
 

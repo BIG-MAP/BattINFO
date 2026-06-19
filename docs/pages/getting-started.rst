@@ -12,7 +12,7 @@ BattINFO is the semantic data layer for battery science. It gives you:
 Installation
 ------------
 
-BattINFO requires Python 3.10 or later.
+BattINFO requires Python 3.11 or later.
 
 .. code-block:: bash
 

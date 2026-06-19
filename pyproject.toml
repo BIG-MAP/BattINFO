@@ -4,14 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "battinfo"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Implementation and interoperability layer for the domain-battery ontology."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
-  { name = "BattINFO Team" }
+  { name = "Simon Clark" },
+  { name = "Jesper Friis" },
+  { name = "Francesca Lønstad Bleken" },
+  { name = "Eibar Flores" },
+  { name = "Simon Stier" },
+  { name = "Corsin Battaglia" },
+]
+maintainers = [
+  { name = "Simon Clark", email = "j.simon.clark@gmail.com" },
 ]
 keywords = [
   "batteries",
@@ -59,6 +67,7 @@ dev = [
   "build>=1.2",
   "setuptools>=77",   # build backend, needed in-env for `build --no-isolation` (alpha gate)
   "wheel",
+  "twine>=5.0",       # dist metadata validation (`twine check`) before publishing
   "datamodel-code-generator>=0.25",
   "linkml>=1.8",
   "nbformat>=5.9",
@@ -88,6 +97,11 @@ battinfo = "battinfo.cli:app"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+
+# Single source of truth for the version: src/battinfo/__init__.py __version__.
+# setuptools resolves this statically (AST) without importing the package.
+[tool.setuptools.dynamic]
+version = { attr = "battinfo.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

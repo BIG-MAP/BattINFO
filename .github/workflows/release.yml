@@ -1,0 +1,119 @@
+name: Release
+
+# Publishes the `battinfo` package to PyPI via OIDC Trusted Publishing.
+# No API tokens are stored: PyPI verifies the GitHub OIDC identity instead.
+#
+# Usage:
+#   - Push a tag `vX.Y.Z` (must match battinfo.__version__) -> builds, checks,
+#     publishes to PyPI, and drafts a GitHub Release.
+#   - Run manually (workflow_dispatch) with target=testpypi for a dry run.
+#
+# One-time setup (maintainer, on each index):
+#   PyPI/TestPyPI -> Account -> Publishing -> add a GitHub trusted publisher:
+#     owner=BIG-MAP  repo=BattINFO  workflow=release.yml  environment=pypi (or testpypi)
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Publish target for a manual run"
+        type: choice
+        options: [testpypi, pypi]
+        default: testpypi
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & validate distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Build sdist + wheel
+        run: uv build
+
+      - name: Validate metadata (twine check)
+        run: uvx twine check dist/*
+
+      - name: Verify tag matches built version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          built="$(ls dist/*.whl | sed -E 's/.*battinfo-([^-]+)-py3.*/\1/')"
+          echo "tag=$tag  built=$built"
+          if [ "$tag" != "$built" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version $built (set battinfo.__version__)."
+            exit 1
+          fi
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/battinfo
+    permissions:
+      id-token: write   # required for OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/battinfo
+    permissions:
+      id-token: write   # required for OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Draft GitHub Release
+    needs: publish-pypi
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # required to create the release
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: dist/*

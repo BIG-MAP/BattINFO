@@ -6,11 +6,11 @@ BattINFO turns battery metadata into machine-readable Linked Data. In five minut
 
 ## Prerequisites
 
-- Python 3.10 or 3.11
-- A terminal at the repo root
+- Python 3.11+
+- A terminal
 
-```powershell
-uv sync          # creates .venv and installs from uv.lock
+```bash
+pip install battinfo
 ```
 
 ---

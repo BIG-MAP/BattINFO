@@ -7,8 +7,8 @@ BattINFO is in pre-release (alpha). Security fixes are applied to the latest
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x (alpha) | :white_check_mark: |
-| < 0.1.0 | :x: |
+| 0.7.x | :white_check_mark: |
+| < 0.7.0 | :x: |
 
 ## Reporting a vulnerability
 

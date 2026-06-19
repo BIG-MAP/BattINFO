@@ -25,8 +25,8 @@
 
 battinfo: a owl:Ontology ;
 
-    owl:versionIRI <https://w3id.org/battinfo/0.1.0/battinfo> ;
-    owl:versionInfo "0.1.0" ;
+    owl:versionIRI <https://w3id.org/battinfo/0.7.0/battinfo> ;
+    owl:versionInfo "0.7.0" ;
 
     # Pinned EMMO domain imports.  Use versioned IRIs so that records
     # published against this ontology remain interpretable even after
