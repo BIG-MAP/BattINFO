@@ -106,7 +106,7 @@ _UNIT_TABLE: dict[str, tuple[str, str, float]] = {
     "mv": ("voltage", "V", 1e-3),
     "ohm": ("resistance", "Ohm", 1.0),
     "ohms": ("resistance", "Ohm", 1.0),
-    "Ω": ("resistance", "Ohm", 1.0),
+    "ω": ("resistance", "Ohm", 1.0),  # lowercased Ω (U+03A9 -> U+03C9) after .lower()
 }
 
 _TIME_TABLE: dict[str, float] = {
@@ -116,8 +116,19 @@ _TIME_TABLE: dict[str, float] = {
 }
 
 _CRATE_DIV_RE = re.compile(r"^([cd])\s*/\s*([\d.]+)$", re.IGNORECASE)
-_NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zΩ]+)$", re.IGNORECASE)
+_NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zΩω]+)$", re.IGNORECASE)
 _TIME_RE = re.compile(r"^([\d.]+)\s*([a-z]+)$", re.IGNORECASE)
+
+
+def _to_float(token: str, text: str) -> float:
+    """Coerce a numeric token, raising ``ExperimentSyntaxError`` (the module's
+    documented exception) rather than leaking a raw ``ValueError`` when the token
+    is malformed — e.g. a multi-dot typo like ``4.2.1`` that the ``[\\d.]+``
+    patterns admit but ``float()`` rejects."""
+    try:
+        return float(token)
+    except ValueError:
+        raise ExperimentSyntaxError(f"Could not parse number '{token}' in '{text}'.") from None
 
 
 def _parse_value(text: str) -> tuple[str, Quantity]:
@@ -128,7 +139,7 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
     token = text.strip()
     div = _CRATE_DIV_RE.match(token)
     if div:
-        denom = float(div.group(2))
+        denom = _to_float(div.group(2), text)
         if denom == 0:
             raise ExperimentSyntaxError(f"C-rate divisor cannot be zero: '{text}'.")
         return "c_rate", Quantity(value=1.0 / denom, unit="A/Ah")
@@ -137,7 +148,7 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
         raise ExperimentSyntaxError(
             f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '4.1 V'."
         )
-    number = float(m.group(1))
+    number = _to_float(m.group(1), text)
     unit_key = m.group(2).lower()
     if unit_key not in _UNIT_TABLE:
         raise ExperimentSyntaxError(f"Unknown unit '{m.group(2)}' in '{text}'.")
@@ -152,7 +163,7 @@ def _parse_duration(text: str) -> Quantity:
         raise ExperimentSyntaxError(
             f"Could not parse duration '{text}'. Expected e.g. '30 minutes', '1 hour', '90 seconds'."
         )
-    return Quantity(value=float(m.group(1)) * _TIME_TABLE[m.group(2).lower()], unit="s")
+    return Quantity(value=_to_float(m.group(1), text) * _TIME_TABLE[m.group(2).lower()], unit="s")
 
 
 def _termination_from_value(kind: str, qty: Quantity, direction: str | None) -> Termination:

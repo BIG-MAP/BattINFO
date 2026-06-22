@@ -68,7 +68,14 @@ def record_to_snake_aliases(record: Mapping[str, Any]) -> dict[str, Any]:
 def _map_keys(payload: dict[str, Any], mapping: Mapping[str, str]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for key, value in payload.items():
-        out[mapping.get(key, key)] = value
+        target = mapping.get(key, key)
+        # If a record carries BOTH a legacy camelCase alias and its already-migrated
+        # snake_case key, they collide on the same output key. Deterministically keep
+        # the canonical (snake_case) value rather than letting dict iteration order
+        # decide which one wins (silent, order-dependent data loss).
+        if target in out and key in mapping:
+            continue  # `key` is an alias; the canonical value is already present
+        out[target] = value
     return out
 
 

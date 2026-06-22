@@ -137,21 +137,28 @@ def _extract_specs(
 ) -> dict[str, Any]:
     """Map BPX Cell parameters to BattINFO spec-property dicts."""
     specs: dict[str, Any] = {}
-    unmapped: list[str] = []
+    known_no_spec: list[str] = []  # in our table, deliberately no BattINFO equivalent
+    unknown: list[str] = []        # not in our table at all
 
     for bpx_key, raw_value in cell_params.items():
-        mapping = _BPX_CELL_MAP.get(bpx_key)
-        if mapping is None:
-            # Key not in our table at all — unknown parameter
-            unmapped.append(bpx_key)
+        if bpx_key not in _BPX_CELL_MAP:
+            unknown.append(bpx_key)
             continue
+        mapping = _BPX_CELL_MAP[bpx_key]
         if mapping is None:
-            # Explicitly mapped to None — known but no battinfo equivalent
+            # Explicitly mapped to None — a recognised physics/transport parameter
+            # with no cell-level spec equivalent.
+            known_no_spec.append(bpx_key)
             continue
         battinfo_key, unit, scale = mapping
-        if not isinstance(raw_value, (int, float)):
+        if not isinstance(raw_value, (int, float)) or isinstance(raw_value, bool):
             warnings.append(
                 f"BPX field '{bpx_key}' has non-numeric value {raw_value!r}; skipped."
+            )
+            continue
+        if not math.isfinite(raw_value):
+            warnings.append(
+                f"BPX field '{bpx_key}' has non-finite value {raw_value!r}; skipped."
             )
             continue
         value = float(raw_value) * scale
@@ -163,12 +170,18 @@ def _extract_specs(
         if battinfo_key not in specs:
             specs[battinfo_key] = {"value": value, "unit": unit}
 
-    if unmapped:
+    if known_no_spec:
         warnings.append(
             f"BPX Cell parameters with no BattINFO spec equivalent "
             f"(physics/transport parameters — not cell-level specs): "
-            f"{', '.join(unmapped[:8])}"
-            + (" …" if len(unmapped) > 8 else "")
+            f"{', '.join(known_no_spec[:8])}"
+            + (" …" if len(known_no_spec) > 8 else "")
+        )
+    if unknown:
+        warnings.append(
+            f"Unknown BPX Cell parameters (not recognised): "
+            f"{', '.join(unknown[:8])}"
+            + (" …" if len(unknown) > 8 else "")
         )
     return specs
 
@@ -253,6 +266,22 @@ def from_bpx(
 
     specs = _extract_specs(cell_params, warnings if extra_warnings else [])
 
+    # Recover cell mass from Density x Volume when it wasn't carried as a cell-level
+    # mass field: to_bpx emits mass only as Density [kg.m-3] (with Volume [m3]), so
+    # without this a BattINFO -> BPX -> BattINFO round-trip silently loses the mass.
+    if "mass" not in specs:
+        density = cell_params.get("Density [kg.m-3]")
+        volume = cell_params.get("Volume [m3]")
+        if (
+            isinstance(density, (int, float)) and not isinstance(density, bool) and math.isfinite(density)
+            and isinstance(volume, (int, float)) and not isinstance(volume, bool) and math.isfinite(volume)
+        ):
+            specs["mass"] = {"value": _sig6(density * volume * 1000.0), "unit": "g"}  # kg -> g
+            warnings.append(
+                "Recovered cell mass from Density x Volume. Exact diameter/height are not "
+                "reconstructed from the BPX physics fields (Volume/surface area)."
+            )
+
     if not specs:
         warnings.append(
             "No BattINFO-mappable specs found in BPX Cell parameters.  "
@@ -327,6 +356,11 @@ def _scalar(props: Mapping[str, Any], key: str) -> tuple[float, str | None] | No
     value = q.get("value")
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         return None
+    if not math.isfinite(value):
+        # NaN / +-inf would serialise to the bare tokens NaN/Infinity, which are
+        # not valid JSON per RFC 8259 and crash strict (e.g. the bpx library's)
+        # parsers. Drop the value rather than emit an invalid .bpx.json.
+        return None
     unit = q.get("unit")
     return float(value), (str(unit) if unit is not None else None)
 
@@ -400,8 +434,13 @@ class BpxExportResult:
     warnings: list[str] = field(default_factory=list)
 
     def to_json(self, *, indent: int = 2) -> str:
-        """Serialise the BPX document to a JSON string."""
-        return json.dumps(self.bpx, indent=indent, ensure_ascii=False)
+        """Serialise the BPX document to a JSON string.
+
+        ``allow_nan=False`` so any non-finite value that slipped through fails
+        loudly here rather than emitting the bare tokens ``NaN``/``Infinity``
+        (invalid JSON per RFC 8259, rejected by strict parsers).
+        """
+        return json.dumps(self.bpx, indent=indent, ensure_ascii=False, allow_nan=False)
 
     def save(self, path: PathLike) -> Path:
         """Write the BPX document to ``path`` and return it."""

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 from battinfo.bundle import CellInstance, CellSpecification, ProvenanceInfo, Test, TestSpec
+from battinfo.interop.protocols import _num
 
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
@@ -185,7 +186,13 @@ def _normalize_to_coin_cell(payload: dict[str, Any]) -> tuple[dict[str, Any], di
                     payload = dict(node)
                     break
             else:
-                payload = dict(graph[0]) if graph else payload
+                # No BatteryTest node; fall back to the first object node. Guard the
+                # type so a @graph whose first element is a bare string/IRI (a valid
+                # JSON-LD node) yields a clean result instead of a cryptic
+                # `dict(<str>)` ValueError.
+                first_map = next((n for n in graph if isinstance(n, Mapping)), None)
+                if first_map is not None:
+                    payload = dict(first_map)
 
     # Shape 2: BatteryTest wrapper with hasTestObject (v3.x and v1.1.x after above)
     if "BatteryTest" in _node_types(payload):
@@ -609,11 +616,13 @@ def _map_unit(value: Any) -> str | None:
 
 def _quantity_value(node: Mapping[str, Any]) -> Any:
     numerical = node.get("hasNumericalPart")
-    if isinstance(numerical, Mapping):
-        if "hasNumberValue" in numerical:
-            return numerical.get("hasNumberValue")
-        if "hasNumberValue" in numerical or "hasNumericalValue" in numerical:
-            return numerical.get("hasNumberValue", numerical.get("hasNumericalValue"))
+    if isinstance(numerical, Mapping) and ("hasNumberValue" in numerical or "hasNumericalValue" in numerical):
+        raw = numerical.get("hasNumberValue", numerical.get("hasNumericalValue"))
+        # A numerical part must be numeric. Coerce numbers-stored-as-text ("15")
+        # leniently; drop non-numeric placeholders ("n/a") so they don't survive as
+        # a string in a quantity .value (silent type confusion downstream). The task
+        # path (_task_chain_to_method) already coerces the same data via float().
+        return _num(raw)
     if "hasStringValue" in node:
         return node.get("hasStringValue")
     return None
@@ -830,9 +839,34 @@ def _map_electrolyte(node: dict[str, Any] | None, warnings: list[str]) -> dict[s
         raw_solutes = solute_node.get("hasConstituent")
         raw_solute_count = len(raw_solutes) if isinstance(raw_solutes, list) else (1 if isinstance(raw_solutes, Mapping) else 0)
         if raw_solute_count > 1:
-            warnings.append(
-                "Converter electrolyte export included multiple solutes; BattINFO imported the first non-zero solute as electrolyte.salt."
-            )
+            # The model carries a single salt, so blended-salt electrolytes (e.g.
+            # LiPF6 + LiFSI) would otherwise lose every co-salt. Preserve any real
+            # (non-zero) co-salt beyond the primary in electrolyte.comment so the
+            # data round-trips rather than vanishing.
+            chosen_name = salt_component.get("name") if salt_component else None
+            dropped: list[str] = []
+            for comp in _map_component_group(raw_solutes) or []:
+                if comp.get("name") == chosen_name:
+                    continue
+                conc = comp.get("property", {}).get("concentration") if isinstance(comp.get("property"), Mapping) else None
+                conc_value = conc.get("value") if isinstance(conc, Mapping) else None
+                if not isinstance(conc_value, (int, float)) or conc_value == 0:
+                    continue  # zero / placeholder solute — intentionally not modelled
+                label = str(comp.get("name", "unknown"))
+                label += f" ({conc_value} {conc.get('unit')})" if conc.get("unit") else f" ({conc_value})"
+                dropped.append(label)
+            if dropped:
+                note = "Additional electrolyte solute(s) not modelled as the primary salt: " + ", ".join(dropped)
+                existing = out.get("comment")
+                out["comment"] = f"{existing} {note}" if isinstance(existing, str) and existing else note
+                warnings.append(
+                    "Converter electrolyte export included multiple solutes; the additional non-zero "
+                    "solute(s) were preserved in electrolyte.comment."
+                )
+            else:
+                warnings.append(
+                    "Converter electrolyte export included multiple solutes; BattINFO imported the first non-zero solute as electrolyte.salt."
+                )
 
         additive_node = _mapping_or_none(solute_node.get("hasAdditive"))
         if additive_node is not None:

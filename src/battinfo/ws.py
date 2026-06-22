@@ -239,12 +239,14 @@ def _find_records_repo(root: Path) -> Path | None:
         if p.exists():
             return p
 
-    candidates = [
-        root.parents[1] / "battinfo-records",
-        root.parents[2] / "battinfo-records",
-        root.parent / "battinfo-records",
-        root / "battinfo-records",
-    ]
+    candidates = []
+    for depth in (1, 2):
+        try:
+            candidates.append(root.parents[depth] / "battinfo-records")
+        except IndexError:
+            pass  # shallow path (e.g. a drive root) — fewer ancestors than expected
+    candidates.append(root.parent / "battinfo-records")
+    candidates.append(root / "battinfo-records")
     for c in candidates:
         if (c / "records").exists():
             return c
@@ -4731,27 +4733,39 @@ class AuthoringWorkspace:
                 except Exception:
                     continue
 
+        def _clean_meta(v: Any) -> str | None:
+            """Drop empty / placeholder ('unknown') metadata so it never leaks into
+            the published title, description, or keywords (no double spaces, no
+            literal 'unknown')."""
+            text = str(v).strip() if v is not None else ""
+            return text if text and text.lower() != "unknown" else None
+
         s0 = specs[0] if specs else {}
         n_ds = len(list((self._records_root / "examples" / "dataset").glob("*.json"))
                    if (self._records_root / "examples" / "dataset").exists() else [])
 
-        auto_title = (
-            f"{s0.get('manufacturer','')} {s0.get('model','')} — BattINFO Battery Dataset".strip()
-            if s0 else "Battery Dataset — BattINFO"
-        )
-        auto_desc = (
-            f"Battery dataset for {s0.get('manufacturer','')} {s0.get('model','')} "
-            f"({s0.get('format','')}, {s0.get('chemistry','')}). "
-            f"Contains {n_ds} dataset(s). "
-            "Published via BattINFO (https://github.com/BIG-MAP/BattINFO)."
-            if s0 else "Battery dataset published via BattINFO."
-        )
+        if s0:
+            name_parts = [p for p in (_clean_meta(s0.get("manufacturer")), _clean_meta(s0.get("model"))) if p]
+            attr_parts = [p for p in (_clean_meta(s0.get("format")), _clean_meta(s0.get("chemistry"))) if p]
+            subject = " ".join(name_parts)
+            auto_title = f"{subject or 'Battery'} — BattINFO Battery Dataset"
+            if attr_parts:
+                subject = f"{subject} ({', '.join(attr_parts)})".strip()
+            auto_desc = (
+                f"Battery dataset for {subject or 'battery cells'}. "
+                f"Contains {n_ds} dataset(s). "
+                "Published via BattINFO (https://github.com/BIG-MAP/BattINFO)."
+            )
+        else:
+            auto_title = "Battery Dataset — BattINFO"
+            auto_desc = "Battery dataset published via BattINFO."
 
         kw: list[str] = ["BattINFO", "battery", "electrochemistry"]
         for s in specs:
             for v in (s["manufacturer"], s["model"], s["chemistry"], s["format"], s["iec_code"]):
-                if v and v not in kw:
-                    kw.append(v)
+                cv = _clean_meta(v)
+                if cv and cv not in kw:
+                    kw.append(cv)
         for k in (extra_keywords or []):
             if k not in kw:
                 kw.append(k)

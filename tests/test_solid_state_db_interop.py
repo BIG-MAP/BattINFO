@@ -35,6 +35,32 @@ def _rows() -> list[dict[str, str]]:
         return list(csv.DictReader(fh))
 
 
+def test_read_rows_does_not_duplicate_rows_of_large_cp1252_file(tmp_path: Path) -> None:
+    """A cp1252 file larger than the IO buffer must not duplicate rows.
+
+    Regression: ``_read_rows`` was a lazy generator wrapped in
+    ``try/except UnicodeDecodeError`` around ``yield from``. On a cp1252 file
+    (the documented master-sheet encoding) bigger than the read buffer, the
+    utf-8 attempt streamed every row preceding the first non-ASCII byte to the
+    consumer before raising, then the cp1252 fallback re-yielded the whole file
+    from the start — silently importing those rows twice with no error.
+    """
+    from battinfo.interop.solid_state_db import _read_rows
+
+    header = b"ID,CAM_Material,AAM_Material,Lead_Author\n"
+    body = b"".join(("%d,LiCoO2,Li,Smith\n" % i).encode("ascii") for i in range(2000))
+    body += b"9999,LFP,Li,M\xfcller\n"  # single cp1252 'ü' on the final row
+    path = tmp_path / "ss_big.csv"
+    path.write_bytes(header + body)
+
+    parsed = list(_read_rows(path))
+    ids = [row["ID"] for row in parsed]
+
+    assert len(parsed) == 2001
+    assert len(ids) == len(set(ids)), "rows were duplicated during encoding fallback"
+    assert ids[-1] == "9999"
+
+
 def test_fixture_present_and_wide() -> None:
     rows = _rows()
     assert len(rows) == 6

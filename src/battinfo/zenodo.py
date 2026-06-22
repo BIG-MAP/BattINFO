@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -166,7 +167,8 @@ class ZenodoClient:
         deposit_id: int | str,
         files: dict[Path, str],
         *,
-        timeout: float = 300.0,
+        timeout: float = 900.0,
+        retries: int = 4,
     ) -> dict[Path, str]:
         """Upload files to a deposit via the S3-compatible bucket URL.
 
@@ -191,21 +193,35 @@ class ZenodoClient:
             # Zenodo's S3-compatible bucket endpoint requires application/octet-stream
             # regardless of actual file type — it rejects other Content-Type values.
             data = local_path.read_bytes()
-            req = urllib.request.Request(
-                upload_url,
-                data=data,
-                headers={
-                    "Authorization": f"Bearer {self._token}",
-                    "Content-Type": "application/octet-stream",
-                },
-                method="PUT",
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=timeout) as r:
-                    file_record = json.loads(r.read())
-            except urllib.error.HTTPError as exc:
-                body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
-                raise ZenodoError(f"Upload failed for {zenodo_name}: {exc.code} {body[:300]}") from exc
+            # Retry transient network failures (socket read/write timeouts, dropped
+            # connections) with backoff — large data files over a slow or flaky link
+            # otherwise fail a whole publish. A bucket PUT is idempotent by filename,
+            # so re-uploading the same name simply overwrites. HTTP errors (auth, quota)
+            # are not transient and fail fast.
+            file_record = None
+            for attempt in range(1, retries + 1):
+                req = urllib.request.Request(
+                    upload_url,
+                    data=data,
+                    headers={
+                        "Authorization": f"Bearer {self._token}",
+                        "Content-Type": "application/octet-stream",
+                    },
+                    method="PUT",
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=timeout) as r:
+                        file_record = json.loads(r.read())
+                    break
+                except urllib.error.HTTPError as exc:
+                    body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+                    raise ZenodoError(f"Upload failed for {zenodo_name}: {exc.code} {body[:300]}") from exc
+                except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                    if attempt >= retries:
+                        raise ZenodoError(
+                            f"Upload of {zenodo_name} failed after {retries} attempts: {exc}"
+                        ) from exc
+                    time.sleep(min(30.0, 5.0 * attempt))
 
             download_url = (
                 file_record.get("links", {}).get("download")
@@ -284,6 +300,30 @@ def _resolve_token(token: str | None) -> str:
     )
 
 
+def _normalized_citation_doi(citation: dict[str, Any]) -> str | None:
+    """Return a bare DOI (e.g. ``10.1038/...``) for a citation, or ``None``.
+
+    Accepts the DOI as a bare string or a ``doi.org`` URL, in either the ``doi``
+    or ``url`` field — so a citation carrying its identifier only as a URL is not
+    dropped, and a URL-form DOI is normalised to the bare form Zenodo requires for
+    ``scheme="doi"`` (a full URL is rejected by the API). Reuses the shared
+    ``_citation_doi_from_url`` rather than re-implementing DOI parsing.
+    """
+    from battinfo.publication import _citation_doi_from_url  # local import avoids any import cycle
+
+    for key in ("doi", "url"):
+        value = citation.get(key)
+        if not isinstance(value, str) or not value.strip():
+            continue
+        value = value.strip()
+        extracted = _citation_doi_from_url(value)
+        if extracted:
+            return extracted
+        if value.lower().startswith("10."):  # already a bare DOI
+            return value
+    return None
+
+
 def _related_identifiers_from_citations(record: ZenodoCellRecord) -> list[dict[str, str]]:
     """Map the record's dataset citations to Zenodo ``related_identifiers``.
 
@@ -301,12 +341,14 @@ def _related_identifiers_from_citations(record: ZenodoCellRecord) -> list[dict[s
         for citation in entry.dataset.citations:
             if not isinstance(citation, dict):
                 continue
-            doi = citation.get("doi")
             kind = citation.get("kind") or "article"
-            if not isinstance(doi, str) or not doi.strip() or kind == "dataset":
+            if kind == "dataset":
                 continue
-            doi = doi.strip()
-            if doi in seen:
+            # Accept the DOI from the 'doi' or 'url' field, bare or as a doi.org URL,
+            # and normalise to the bare form Zenodo requires for scheme='doi' (a full
+            # URL is rejected). This also rescues citations whose DOI is only in 'url'.
+            doi = _normalized_citation_doi(citation)
+            if doi is None or doi in seen:
                 continue
             seen.add(doi)
             related: dict[str, str] = {"identifier": doi, "relation": "isSupplementTo", "scheme": "doi"}
@@ -328,14 +370,25 @@ def _build_zenodo_metadata(
 ) -> dict[str, Any]:
     ct = record.cell_spec
 
-    resolved_title = title or f"{ct.name} — BattINFO Reference Datasets"
+    def _clean_meta(val: Any) -> str | None:
+        """Drop empty / placeholder ('unknown') metadata so it never leaks into the
+        published title, description, or keywords."""
+        text = str(val).strip() if val is not None else ""
+        return text if text and text.lower() != "unknown" else None
+
+    clean_name = _clean_meta(ct.name) or _clean_meta(ct.model) or "Battery"
+    resolved_title = title or f"{clean_name} — BattINFO Reference Datasets"
 
     if description is None:
         n = len(record.datasets)
+        name_parts = [p for p in (_clean_meta(ct.manufacturer), _clean_meta(ct.model)) if p]
+        attr_parts = [p for p in (_clean_meta(ct.format), _clean_meta(ct.chemistry)) if p]
+        subject = " ".join(name_parts)
+        if attr_parts:
+            subject = f"{subject} ({', '.join(attr_parts)})".strip()
+        subject = subject or "battery cells"
         resolved_description = (
-            f"BattINFO reference battery cycling datasets for the "
-            f"{ct.manufacturer} {ct.model} "
-            f"({ct.format}, {ct.chemistry}). "
+            f"BattINFO reference battery cycling datasets for {subject}. "
             f"Contains {n} dataset{'s' if n != 1 else ''}. "
             f"Published via the BattINFO battery data framework."
         )
@@ -343,7 +396,8 @@ def _build_zenodo_metadata(
         resolved_description = description
 
     kw: list[str] = ["BattINFO", "battery", "battery cycling"]
-    for val in (ct.manufacturer, ct.model, ct.format, ct.chemistry):
+    for raw in (ct.manufacturer, ct.model, ct.format, ct.chemistry):
+        val = _clean_meta(raw)
         if val and val not in kw:
             kw.append(val)
     if ct.iec_code and ct.iec_code not in kw:

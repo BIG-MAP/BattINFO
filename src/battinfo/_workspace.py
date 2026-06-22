@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import mimetypes
 import shutil
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -140,6 +141,35 @@ def _entity_iri(entity_type: str, seed: str) -> str:
 def _with_default(value: str | None, fallback: str) -> str:
     text = (value or "").strip()
     return text or fallback
+
+
+def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str) -> None:
+    """Ensure auto-minted IRIs are unique across distinct authored entities.
+
+    Deterministic IRIs are seeded from a record's identity fields, so two
+    genuinely-distinct entities whose identity fields happen to match — e.g. two
+    unnamed cycling tests on one cell, or two cells from one batch with no serial
+    number — mint the *same* IRI. On save each record is written to a file named
+    after its IRI, so the duplicate silently overwrote its sibling and one record
+    was lost. Re-mint any collisions with a stable ordinal-seeded IRI so every
+    distinct record persists. Records whose IRI is already unique are untouched,
+    keeping the blast radius to the (rare) colliding case only.
+    """
+    seen: set[str] = set()
+    for entity in entities:
+        current = getattr(entity, "id", None)
+        if current is None:
+            continue
+        if current not in seen:
+            seen.add(current)
+            continue
+        ordinal = 1
+        candidate = _entity_iri(entity_type, f"{current}::{ordinal}")
+        while candidate in seen:
+            ordinal += 1
+            candidate = _entity_iri(entity_type, f"{current}::{ordinal}")
+        entity.id = candidate
+        seen.add(candidate)
 
 
 def _as_path(path: PathLike) -> Path:
@@ -1714,6 +1744,9 @@ class Workspace:
 
         finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
+        # Break IRI collisions before datasets link to these ids (cell_map holds
+        # the same objects, so in-place re-minting propagates to dataset linking).
+        _disambiguate_entity_ids(finalized_cells, "cell")
 
         finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
         test_spec_map = {
@@ -1722,8 +1755,10 @@ class Workspace:
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}
+        _disambiguate_entity_ids(finalized_tests, "test")
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
+        _disambiguate_entity_ids(finalized_datasets, "dataset")
 
         dataset_ids_by_cell: dict[str, list[str]] = {}
         for dataset in finalized_datasets:

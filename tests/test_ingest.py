@@ -91,6 +91,54 @@ def test_build_ingest_workspace_bundles_submission_with_preview_image(tmp_path: 
     )
 
 
+def test_build_ingest_workspace_keeps_unrecognized_kind_csvs_and_pairs_by_file(tmp_path: Path) -> None:
+    """Every timeseries CSV yields its own dataset+test wired to its own file.
+
+    Regression: the build loop zipped tests filtered to ``kind != "other"``
+    against all timeseries datasets, so a CSV whose inferred kind was ``other``
+    (e.g. ``eis``/``hppc``/``gitt``) was dropped from the bundle AND shifted the
+    alignment, wiring the remaining tests' protocol/date onto the wrong files.
+    """
+    ingest_root = tmp_path / "lab--cellx--2026--abc123"
+    photo_dir = ingest_root / "image" / "photo"
+    raw_dir = ingest_root / "timeseries" / "raw"
+    photo_dir.mkdir(parents=True)
+    raw_dir.mkdir(parents=True)
+    (photo_dir / "IMG_0001.jpg").write_bytes(b"fake-jpeg")
+    for date, token in (("2026-04-01", "eis"), ("2026-04-02", "rate"), ("2026-04-03", "capacity")):
+        (raw_dir / f"lab__cellx--2026--abc123__{date}__{token}__25degC.csv").write_text(
+            "time_s,voltage_v\n0,4.20\n1,4.18\n",
+            encoding="utf-8",
+        )
+
+    payload = build_ingest_workspace(
+        ingest_root,
+        resource_type="cell-instance",
+        type_record=EXAMPLE_CELL_TYPE,
+        workspace_root=tmp_path / "workspace",
+        workspace_id="ingest-pairing-demo",
+        publisher_id="demo-lab",
+        source_version="demo-2026-04-01",
+        artifact_base_url="http://127.0.0.1:8040",
+        clean=True,
+        bundle=True,
+    )
+
+    # All three CSVs survive (eis is no longer dropped): 3 timeseries tests,
+    # and 4 datasets total (1 photo + 3 CSV).
+    assert payload["counts"]["timeseries_tests"] == 3
+    assert payload["counts"]["datasets"] == 4
+    dataset_resources = [
+        item for item in payload["submission_package"]["resources"] if item.get("resource_type") == "dataset"
+    ]
+    assert len(dataset_resources) == 4
+
+    # The eis CSV infers to the "other" kind — the exact case the old zip-filter
+    # dropped — yet it now contributes a surviving dataset above.
+    eis_test = next(item for item in payload["inspection"]["tests"] if "__eis__" in item["source_file"])
+    assert eis_test["kind"] == "other"
+
+
 def test_write_ingest_manifest_supports_folder_only_followup_commands(tmp_path: Path) -> None:
     ingest_root = _make_ingest_root(tmp_path)
     manifest = write_ingest_manifest(

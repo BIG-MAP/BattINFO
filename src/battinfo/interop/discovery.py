@@ -55,6 +55,7 @@ from battinfo.api import (
     create_material_spec,
 )
 from battinfo.bundle import BatteryTestType
+from battinfo.interop.protocols import _num
 
 PathLike = str | Path
 
@@ -366,8 +367,15 @@ def _find_property(node: Mapping[str, Any], emmo_type: str, name: str | None = N
             continue
         if emmo_type in _node_types(prop) and (name is None or prop.get("name") == name):
             num = prop.get("hasNumericalPart")
-            value = num.get("hasNumericalValue") if isinstance(num, Mapping) else None
-            if value is not None:
+            raw = num.get("hasNumericalValue") if isinstance(num, Mapping) else None
+            if raw is not None:
+                # JSON-LD / RO-Crate numbers are commonly serialized as strings
+                # (e.g. "6e-05"); coerce leniently like the sibling readers do
+                # (protocols/converter/ws via _num) so downstream arithmetic and
+                # quantity values are numeric, not a string that crashes or corrupts.
+                value = _num(raw)
+                if value is None:
+                    continue
                 unit = _EMMO_UNIT.get(prop.get("hasMeasurementUnit", ""), None)
                 return {"value": value, "unit": unit}
     return None
@@ -498,7 +506,10 @@ def import_discovery_xlsx(
     ws = wb[sheet]
     rows = list(ws.iter_rows(min_row=1, values_only=True))
     wb.close()
-    header = [str(h).strip() if h is not None else "" for h in rows[0]]
+    # An empty target sheet (blank/template export or truncated save) has no header
+    # row; treat it as a header with no columns so the rest yields an empty package
+    # instead of an IndexError on rows[0].
+    header = [str(h).strip() if h is not None else "" for h in rows[0]] if rows else []
 
     def col(name: str, occurrence: int = 0) -> int | None:
         seen = -1

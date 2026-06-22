@@ -570,12 +570,16 @@ def build_ingest_workspace(
             comment=["Standalone instance photo dataset."],
         )
 
-    for test_entry, dataset_entry in zip(
-        [item for item in inspection["tests"] if item["kind"] != "other"],
-        [item for item in inspection["datasets"] if item["role"] == "timeseries"],
-        strict=False,
-    ):
+    # Pair each timeseries dataset with the test discovered from the SAME source
+    # file. Zipping two independently-filtered lists silently mis-aligned (and
+    # dropped) any CSV whose inferred kind was "other" (e.g. eis/hppc/gitt), so
+    # its metadata was wired onto the wrong file and one CSV vanished entirely.
+    tests_by_path = {str(item["path"]): item for item in inspection["tests"]}
+    for dataset_entry in [item for item in inspection["datasets"] if item["role"] == "timeseries"]:
         csv_path = Path(str(dataset_entry["path"]))
+        test_entry = tests_by_path.get(str(dataset_entry["path"]))
+        if test_entry is None:
+            continue
         date_text = _infer_date_text(csv_path)
         created_csv_tests += 1
         started_at = _date_to_unix(date_text) if date_text is not None else _mtime_to_unix(csv_path)

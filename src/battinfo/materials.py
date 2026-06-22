@@ -9,6 +9,7 @@ referenced from many cells (dedup), without rewiring the cell-spec fleet.
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Mapping
 
 from battinfo._workspace import _stable_uid
@@ -26,7 +27,25 @@ def _component_dict(component: Any) -> dict[str, Any]:
     raise TypeError("component must be a MaterialComponent or mapping")
 
 
+def _as_material_list(value: Any) -> list:
+    """Normalise a material group to a list, tolerating a single embedded mapping.
+
+    Authoring a one-material group as a bare dict (``component={"active_material":
+    {"name": "LFP"}}``) instead of a list previously iterated the dict's *keys*,
+    silently dropping the material. Wrap a lone mapping into a one-element list.
+    """
+    if isinstance(value, Mapping):
+        return [value]
+    if isinstance(value, list):
+        return value
+    return []
+
+
 def _intrinsic_property(prop: Any) -> dict[str, Any]:
+    # Tolerate a single-element list wrapping the property mapping rather than
+    # silently dropping it.
+    if isinstance(prop, list) and len(prop) == 1 and isinstance(prop[0], Mapping):
+        prop = prop[0]
     if not isinstance(prop, Mapping):
         return {}
     return {k: v for k, v in prop.items() if k not in _CELL_LOCAL_PROPERTY_KEYS}
@@ -93,7 +112,7 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
         component = coating.get("component") if isinstance(coating, Mapping) else None
         if isinstance(component, Mapping):
             for group, mclass in group_class.items():
-                for item in component.get(group) or []:
+                for item in _as_material_list(component.get(group)):
                     if isinstance(item, Mapping) and item.get("name"):
                         pol = polarity if group == "active_material" else "none"
                         yield item, mclass, pol
@@ -108,10 +127,10 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
             yield salt, "electrolyte_salt", "none"
         solvent_mixture = electrolyte.get("solvent_mixture")
         if isinstance(solvent_mixture, Mapping):
-            for item in solvent_mixture.get("component") or []:
+            for item in _as_material_list(solvent_mixture.get("component")):
                 if isinstance(item, Mapping) and item.get("name"):
                     yield item, "electrolyte_solvent", "none"
-        for item in electrolyte.get("additive") or []:
+        for item in _as_material_list(electrolyte.get("additive")):
             if isinstance(item, Mapping) and item.get("name"):
                 yield item, "electrolyte_additive", "none"
 
@@ -128,11 +147,25 @@ def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str
     (case-insensitive), so a material shared across electrodes yields one spec.
     """
     seen: dict[str, dict[str, Any]] = {}
+    seen_identity: dict[str, tuple[Any, dict[str, Any]]] = {}
     for holder, mclass, polarity in _iter_embedded_materials(cell_spec_record):
         key = str(holder["name"]).strip().lower()
+        identity = (holder.get("molecular_formula"), _intrinsic_property(holder.get("property")))
         if key in seen:
+            # Name-based dedup is intentional (e.g. "Graphite"/"graphite" → one spec),
+            # but two materials that share a name yet differ in formula / intrinsic
+            # properties are genuinely distinct — surface that rather than silently
+            # dropping one's data.
+            if identity != seen_identity[key]:
+                warnings.warn(
+                    f"extract_material_specs: multiple materials named {holder['name']!r} differ in "
+                    f"formula/intrinsic properties; keeping the first and dropping the rest. "
+                    f"Give them distinct names to retain both.",
+                    stacklevel=2,
+                )
             continue
         seen[key] = material_spec_from_component(
             holder, material_class=mclass, electrode_polarity=polarity
         )
+        seen_identity[key] = identity
     return list(seen.values())

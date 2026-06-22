@@ -32,6 +32,8 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
+import math
 from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -137,9 +139,15 @@ def _number(value: Any) -> float | None:
     if text is None:
         return None
     try:
-        return float(text)
+        number = float(text)
     except ValueError:
         return None
+    # 'nan'/'inf'/'-inf' parse fine but are not real measurements; reject them so
+    # they neither crash int() downstream (e.g. cycle-life) nor land as nonsense
+    # text in cell-spec notes.
+    if not math.isfinite(number):
+        return None
+    return number
 
 
 def _label(code: str | None) -> str | None:
@@ -346,17 +354,27 @@ def from_solid_state_db_row(
 
 
 def _read_rows(path: Path) -> Iterator[dict[str, str]]:
-    """Yield rows from the CSV, auto-detecting utf-8 / utf-8-sig / cp1252."""
+    """Yield rows from the CSV, auto-detecting utf-8 / utf-8-sig / cp1252.
+
+    The whole file is decoded up front *before* any row is yielded. Decoding
+    lazily (catching ``UnicodeDecodeError`` around ``yield from``) is unsafe: on
+    a cp1252 file larger than the IO read buffer — the documented master-sheet
+    encoding — the utf-8 attempt streams every row preceding the first
+    undecodable byte to the consumer before raising, and the cp1252 fallback
+    then re-yields the file from the start, silently duplicating those rows.
+    """
+    raw = path.read_bytes()
+    text: str | None = None
     for encoding in ("utf-8-sig", "cp1252"):
         try:
-            with open(path, encoding=encoding, newline="") as fh:
-                yield from csv.DictReader(fh)
-            return
+            text = raw.decode(encoding)
+            break
         except UnicodeDecodeError:
             continue
-    # Last resort: replace undecodable bytes rather than fail the whole import.
-    with open(path, encoding="utf-8", errors="replace", newline="") as fh:
-        yield from csv.DictReader(fh)
+    if text is None:
+        # Last resort: replace undecodable bytes rather than fail the whole import.
+        text = raw.decode("utf-8", errors="replace")
+    yield from csv.DictReader(io.StringIO(text, newline=""))
 
 
 def batch_import_solid_state_db(

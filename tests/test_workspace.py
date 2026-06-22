@@ -99,6 +99,41 @@ def test_workspace_saves_and_queries_simple_chain(tmp_path: Path) -> None:
     assert workspace.query("cells", cell_spec_id=cell_spec.id, dataset_id=dataset.id)[0]["id"] == cell.id
 
 
+def test_finalize_disambiguates_colliding_test_and_cell_ids(tmp_path: Path) -> None:
+    """Distinct same-kind tests and batch-mate cells must not collapse to one id.
+
+    Regression: IRIs were seeded only from identity fields, so two unnamed
+    cycling tests on one cell (or two cells from one batch with no serial) minted
+    the SAME IRI. On save each record is written to a file named after its IRI,
+    so the duplicate silently overwrote its sibling and one record was lost.
+    """
+    workspace = Workspace(root=tmp_path / "workspace")
+    cell_spec = workspace.cell_spec(manufacturer="Acme", model="X1", format="coin", chemistry="Li-ion")
+
+    # Two cells from one production lot, no serial/name to distinguish them.
+    workspace.cell(cell_spec, batch_id="LOT-A", source_type="lab")
+    workspace.cell(cell_spec, batch_id="LOT-A", source_type="lab")
+
+    # Two cycling tests on one cell, distinguished only by their timing.
+    cell = workspace.cell(cell_spec, serial_number="sn-1", source_type="lab")
+    workspace.test(cell, kind="cycling", protocol="Cycling", status="completed", started_at=1000, ended_at=2000)
+    workspace.test(cell, kind="cycling", protocol="Cycling", status="completed", started_at=3000, ended_at=4000)
+
+    records = workspace.render()
+    cell_ids = [item["cell_instance"]["id"] for item in records["cell_instances"]]
+    test_ids = [item["test"]["id"] for item in records["tests"]]
+    assert len(cell_ids) == 3 and len(set(cell_ids)) == 3
+    assert len(test_ids) == 2 and len(set(test_ids)) == 2
+
+    report = workspace.save_workspace()
+    assert report["cell_count"] == 3
+    assert report["test_count"] == 2
+
+    reopened = Workspace.open(tmp_path / "workspace")
+    assert len(reopened.cells) == 3
+    assert len(reopened.tests) == 2
+
+
 def test_workspace_loads_cell_spec_from_validated_json_record(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
 

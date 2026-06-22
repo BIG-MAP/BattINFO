@@ -1194,9 +1194,16 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
         return None
     unit = quantity.get("unit", "")
     if unit == "%":
+        try:
+            scaled = round(float(value) / 100, 6)
+        except (TypeError, ValueError):
+            # Non-numeric fraction (e.g. a string from CSV/spreadsheet ingestion):
+            # emit verbatim via the standard path rather than crashing the whole
+            # document transform on `value / 100`.
+            return _emmo_quantity_node(emmo_type, quantity)
         return {
             "@type": [emmo_type, "ConventionalProperty"],
-            "hasNumericalPart": {"@type": "RealData", "hasNumberValue": round(value / 100, 6)},
+            "hasNumericalPart": {"@type": "RealData", "hasNumberValue": scaled},
             "hasMeasurementUnit": _UNIT_ONE_IRI,
         }
     return _emmo_quantity_node(emmo_type, quantity)

@@ -108,6 +108,35 @@ def test_import_is_idempotent() -> None:
 # ── BattINFO → BDC ───────────────────────────────────────────────────────────
 
 
+def test_to_bdc_record_converts_mah_capacity_to_ah() -> None:
+    """mAh capacity must be scaled to the Ah-typed BDC field, not copied verbatim.
+
+    Regression: ``to_bdc_record`` wrote ``capacity["value"]`` straight into
+    ``rated_capacity_Ah`` with no unit conversion, so a 45 mAh coin cell (the
+    idiomatic unit) was contributed to the commons as 45 Ah — a 1000× error.
+    """
+    record = to_bdc_record(
+        {
+            "cell_spec": {"model": "Y", "cell_format": "coin"},
+            "properties": {"nominal_capacity": {"value": 45.0, "unit": "mAh"}},
+        }
+    )
+    assert record["reported_values"]["rated_capacity_Ah"] == 0.045
+
+
+def test_to_bdc_record_preserves_ah_capacity_and_drops_unknown_units() -> None:
+    ah = to_bdc_record(
+        {"cell_spec": {"model": "Y"}, "properties": {"nominal_capacity": {"value": 2.5, "unit": "Ah"}}}
+    )
+    assert ah["reported_values"]["rated_capacity_Ah"] == 2.5
+
+    # An unconvertible unit is omitted rather than written verbatim under an Ah key.
+    weird = to_bdc_record(
+        {"cell_spec": {"model": "Y"}, "properties": {"nominal_capacity": {"value": 2.5, "unit": "C"}}}
+    )
+    assert "rated_capacity_Ah" not in weird.get("reported_values", {})
+
+
 def test_to_bdc_round_trips_core_descriptor() -> None:
     imp = import_bdc_record(_record("bdc_000001.json"))
     out = to_bdc_record(imp.cell_spec, dataset=imp.dataset, bdc_id=imp.bdc_id)

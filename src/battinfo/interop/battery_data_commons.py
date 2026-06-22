@@ -76,6 +76,28 @@ _MEASUREMENT_KIND = {
 # Values BDC uses for "not a real single material".
 _UNKNOWN_MATERIAL = {None, "", "Unknown", "Multiple", "N/A", "NA"}
 
+# Capacity units → Ampere-hours, for the Ah-typed BDC ``rated_capacity_Ah`` field.
+_CAPACITY_TO_AH = {"Ah": 1.0, "A.h": 1.0, "mAh": 1e-3}
+
+
+def _capacity_to_ah(capacity: Mapping[str, Any]) -> float | None:
+    """Convert a nominal-capacity quantity to Ampere-hours for BDC export.
+
+    The BDC field is ``rated_capacity_Ah``, so a mAh-authored value (the
+    idiomatic coin-cell unit, producible via ``battinfo.quantity``) must be
+    scaled — writing it verbatim previously claimed e.g. 45 Ah for a 45 mAh
+    cell (a 1000× error). Returns ``None`` (so the field is omitted) when the
+    value is non-numeric or the unit is not a recognised capacity unit, rather
+    than emitting an unconvertible value under an Ah-typed key.
+    """
+    value = capacity.get("value")
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return None
+    scale = _CAPACITY_TO_AH.get(str(capacity.get("unit") or "Ah"))
+    if scale is None:
+        return None
+    return value * scale
+
 
 @dataclass(slots=True)
 class BdcRecordImport:
@@ -158,14 +180,18 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     material-specs across records; pass nothing for a standalone call.
     """
     materials = _materials if _materials is not None else {}
-    categories = [str(c) for c in (record.get("categories") or [])]
+    # Drop null/blank category entries rather than coercing them to the literal
+    # keyword 'None' (which would survive validation and land in dataset.keywords).
+    categories = [str(c).strip() for c in (record.get("categories") or []) if c is not None and str(c).strip()]
     if "software" in categories or record.get("software"):
         return None
 
     bdc_id = str(record.get("id") or "bdc_unknown")
-    overview = record.get("overview") or {}
-    electrodes = record.get("electrodes") or {}
-    reported = record.get("reported_values") or {}
+    # Tolerate type-drift in external records: a scalar/list where a mapping is
+    # expected becomes {} rather than crashing later on `.get` with a bare AttributeError.
+    overview = record.get("overview") if isinstance(record.get("overview"), Mapping) else {}
+    electrodes = record.get("electrodes") if isinstance(record.get("electrodes"), Mapping) else {}
+    reported = record.get("reported_values") if isinstance(record.get("reported_values"), Mapping) else {}
     source_meta = record.get("source_metadata") or {}
     citation = _first([p.get("url") for p in (record.get("publications") or []) if isinstance(p, Mapping)]) \
         or _first(record.get("source_urls"))
@@ -198,7 +224,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
 
     specs: dict[str, Any] = {}
     cap = reported.get("rated_capacity_Ah")
-    if isinstance(cap, (int, float)) and cap > 0:
+    if isinstance(cap, (int, float)) and not isinstance(cap, bool) and cap > 0:
         specs["nominal_capacity"] = {"value": cap, "unit": "Ah"}
 
     notes = [f"Imported from Battery Data Commons record {bdc_id}."]
@@ -321,12 +347,17 @@ def to_bdc_record(cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | 
     fmt = cs.get("cell_format")
     case = _FORMAT_CASE.get(fmt) or (cs.get("size_code") if fmt == "cylindrical" else None) or "Unknown"
 
+    # Don't contribute placeholders injected on import back to the commons: a
+    # sentinel 'Unknown' manufacturer and a 'bdc_'-prefixed model (the id-fallback
+    # import uses when a record has no real model) are not catalogue facts.
+    model = cs.get("model")
+    model_is_id_fallback = isinstance(model, str) and model.startswith("bdc_")
     overview = {
         "feature": (dataset or {}).get("dataset", {}).get("name") if dataset else cs.get("name"),
         "case": case,
         "cell_module_pack": "BatteryCell",
-        "manufacturer": manufacturer_name,
-        "battery_model": cs.get("model"),
+        "manufacturer": manufacturer_name if manufacturer_name not in _UNKNOWN_MATERIAL else None,
+        "battery_model": None if model_is_id_fallback else model,
         "iec_battery_code": cs.get("iec_code"),
     }
     record: dict[str, Any] = {
@@ -345,8 +376,10 @@ def to_bdc_record(cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | 
         "provenance": [{"event": "exported", "source": "battinfo", "curator": "battinfo.interop.battery_data_commons"}],
     }
     capacity = (cell_spec.get("properties") or {}).get("nominal_capacity") if "properties" in cell_spec else None
-    if isinstance(capacity, Mapping) and capacity.get("value") is not None:
-        record["reported_values"]["rated_capacity_Ah"] = capacity["value"]
+    if isinstance(capacity, Mapping):
+        capacity_ah = _capacity_to_ah(capacity)
+        if capacity_ah is not None:
+            record["reported_values"]["rated_capacity_Ah"] = capacity_ah
 
     if dataset is not None:
         ds = dataset.get("dataset", dataset)

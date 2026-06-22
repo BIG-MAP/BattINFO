@@ -18,6 +18,7 @@ Usage::
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -333,7 +334,9 @@ def test_to_jsonld(record: dict) -> dict:
     if test.get("protocol_id"):
         node["battinfo:testProtocol"] = {"@id": test["protocol_id"]}
     if test.get("dataset_ids"):
-        node["battinfo:hasDataset"] = [{"@id": d} for d in test["dataset_ids"]]
+        # Skip None / non-string entries so a partial record never emits {"@id": null}
+        # (invalid JSON-LD — @id must be a string IRI).
+        node["battinfo:hasDataset"] = [{"@id": d} for d in test["dataset_ids"] if isinstance(d, str) and d]
     if prov:
         node["battinfo:provenance"] = _provenance(prov)
 
@@ -357,8 +360,15 @@ def dataset_to_jsonld(record: dict) -> dict:
         node["dcat:accessURL"] = {"@id": ds["access_url"]}
     if ds.get("created_at"):
         node["dcterms:created"] = ds["created_at"]
-    if ds.get("about"):
-        node["dcterms:subject"] = [{"@id": iri} for iri in ds["about"]]
+    about = ds.get("about")
+    if about:
+        # Tolerate a single IRI string (wrap it) instead of iterating it
+        # character-by-character into one bogus @id node per character.
+        if isinstance(about, str):
+            about = [about]
+        subjects = [{"@id": iri} for iri in about if isinstance(iri, str) and iri]
+        if subjects:
+            node["dcterms:subject"] = subjects
 
     dists = ds.get("distributions") or []
     if dists:
@@ -370,7 +380,7 @@ def dataset_to_jsonld(record: dict) -> dict:
             if d.get("encoding_format"):
                 dist["dcat:mediaType"] = d["encoding_format"]
             cs = d.get("checksum")
-            if cs:
+            if isinstance(cs, Mapping):
                 dist["spdx:checksum"] = {
                     "@type": "spdx:Checksum",
                     "spdx:checksumAlgorithm": f"spdx:checksumAlgorithm_{cs.get('algorithm', '')}",

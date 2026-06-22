@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from functools import lru_cache
 from importlib import resources
@@ -416,6 +417,20 @@ def _validate_specs(
     for spec_name, spec_value in specs.items():
         if not isinstance(spec_value, Mapping):
             continue
+        # A non-finite numeric (NaN / +-Infinity) is never a valid measurement and
+        # is not JSON-serialisable per RFC 8259 — always a hard error, regardless of
+        # policy, so it can never be persisted or published.
+        for value_key in ("value", "typical_value", "min_value", "max_value"):
+            raw = spec_value.get(value_key)
+            if isinstance(raw, (int, float)) and not isinstance(raw, bool) and not math.isfinite(raw):
+                _append_issue(
+                    issues,
+                    code="semantic.value_not_finite",
+                    severity="error",
+                    path=f"specs.{spec_name}.{value_key}",
+                    message=f"value for '{spec_name}.{value_key}' is not finite (NaN/Infinity); not a valid measurement.",
+                    resource_type=resource_type,
+                )
         unit = _unit_token(spec_value)
         if unit is not None and spec_name in SPEC_UNIT_COMPATIBILITY:
             normalized = _normalized_unit(unit)
@@ -554,7 +569,7 @@ def _validate_dataset_semantics(
             value = checksum.get("value")
             if not isinstance(algorithm, str) or not isinstance(value, str):
                 continue
-            expected_length = {"sha256": 64, "sha512": 128, "md5": 32}.get(algorithm)
+            expected_length = {"sha256": 64, "sha512": 128, "md5": 32}.get(algorithm.lower())
             if expected_length is None:
                 continue
             is_hex = all(ch in "0123456789abcdefABCDEF" for ch in value)
