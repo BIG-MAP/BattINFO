@@ -2657,11 +2657,12 @@ class AuthoringWorkspace:
         pid = publisher_id  or os.environ.get("BATTINFO_PUBLISHER_ID")
         ver = source_version or datetime.date.today().isoformat()
 
-        # If a Zenodo DOI is provided (or stored from ws.zenodo()), include it in provenance
+        # The Zenodo DOI (passed, or stored from ws.zenodo()) is recorded as
+        # provenance.citation_doi — a field the registry record schemas allow — so
+        # each submitted record links to its archived dataset. The schemas do not
+        # include a free-text provenance.comment field (additionalProperties: false),
+        # so `note` is accepted for API compatibility but not attached to provenance.
         resolved_doi = doi or self._load_zenodo_state().get("doi")
-        if resolved_doi:
-            doi_note = f"Zenodo DOI: {resolved_doi}"
-            note = f"{note}. {doi_note}" if note else doi_note
 
         if not url:
             raise RuntimeError(
@@ -2723,6 +2724,58 @@ class AuthoringWorkspace:
 
         results: list[dict] = []
 
+        # ── Cross-record relationship graph ───────────────────────────────────
+        # Read every saved record (not just this session's) so links resolve even
+        # when only a subset is re-submitted. Forward references are fine: the
+        # registry stores a relationship's target IRI whether or not the target
+        # resource exists yet, and per-record submission is not scope-validated.
+        def _load_all(subdir: str, key: str) -> dict[str, tuple[dict, dict]]:
+            out: dict[str, tuple[dict, dict]] = {}
+            d = examples / subdir
+            if d.exists():
+                for f in sorted(d.glob("*.json")):
+                    try:
+                        rec = json.loads(f.read_text(encoding="utf-8"))
+                    except Exception:
+                        continue
+                    inner = rec.get(key) or {}
+                    iri = inner.get("id")
+                    if iri:
+                        out[iri] = (rec, inner)
+            return out
+
+        _all_datasets = _load_all("dataset", "dataset")
+        _all_tests = _load_all("test", "test")
+
+        # cell IRI -> [dataset IRIs] / [test IRIs]; cell IRI -> preview png url;
+        # dataset IRI -> {"cell": iri, "test": iri}; test_spec IRI -> [test IRIs]
+        cell_datasets: dict[str, list[str]] = {}
+        cell_tests: dict[str, list[str]] = {}
+        cell_preview_png: dict[str, str] = {}
+        ds_links: dict[str, dict] = {}
+        spec_tests: dict[str, list[str]] = {}
+
+        for ds_iri, (_ds_rec, ds_inner) in _all_datasets.items():
+            about = ds_inner.get("about") or []
+            cell_iri = next((a for a in about if "/cell/" in a), None)
+            test_iri = next((a for a in about if "/test/" in a), None)
+            ds_links[ds_iri] = {"cell": cell_iri, "test": test_iri}
+            if cell_iri:
+                cell_datasets.setdefault(cell_iri, []).append(ds_iri)
+                if cell_iri not in cell_preview_png:
+                    for dist in ds_inner.get("distributions") or []:
+                        if (dist.get("name") or "").endswith(".png"):
+                            cell_preview_png[cell_iri] = dist.get("content_url") or ""
+                            break
+
+        for t_iri, (_t_rec, t_inner) in _all_tests.items():
+            cell_iri = t_inner.get("cell_id")
+            if cell_iri:
+                cell_tests.setdefault(cell_iri, []).append(t_iri)
+            proto_iri = t_inner.get("protocol_id")
+            if proto_iri:
+                spec_tests.setdefault(proto_iri, []).append(t_iri)
+
         # ── Cell specs ────────────────────────────────────────────────────────
         for src in (_glob("cell-spec") if _want("cell-spec") else []):
             raw = json.loads(src.read_text(encoding="utf-8"))
@@ -2734,10 +2787,10 @@ class AuthoringWorkspace:
             title = f"{mfr_name} {model}".strip()
             source_local_id = _make_record_slug(mfr_name, model, year)
 
-            if note:
+            if resolved_doi:
                 raw = dict(raw)
                 prov = dict(raw.get("provenance") or {})
-                prov["comment"] = note
+                prov.setdefault("citation_doi", resolved_doi)
                 raw["provenance"] = prov
 
             payload = _cell_spec_submission_payload(
@@ -2753,18 +2806,72 @@ class AuthoringWorkspace:
             ci = raw.get("cell_instance", {})
             label = ci.get("name") or ci.get("serial_number") or ci.get("short_id", "")
             source_local_id = ci.get("short_id") or label.lower().replace(" ", "-")
-            if note:
+            if resolved_doi:
                 raw = dict(raw)
                 prov = dict(raw.get("provenance") or {})
-                prov["comment"] = note
+                prov.setdefault("citation_doi", resolved_doi)
                 raw["provenance"] = prov
             spec_record = _find_spec_record(cell_spec_dir, ci.get("cell_spec_id", ""))
+
+            # Relationships: instanceOf -> cell_spec, hasDataset -> each dataset,
+            # hasTest -> each test (mirrors the canonical cell page model).
+            self_iri = ci.get("id")
+            related: list[dict] = []
+            spec_iri = ci.get("cell_spec_id")
+            if spec_iri:
+                related.append({"relationship": "instanceOf", "resource_type": "cell_spec", "canonical_iri": spec_iri})
+            for ds_iri in cell_datasets.get(self_iri, []):
+                related.append({"relationship": "hasDataset", "resource_type": "dataset", "canonical_iri": ds_iri})
+            for t_iri in cell_tests.get(self_iri, []):
+                related.append({"relationship": "hasTest", "resource_type": "test", "canonical_iri": t_iri})
+
+            # Hero preview: a linked dataset's static plot PNG (public R2 URL after upload).
+            preview = None
+            png = cell_preview_png.get(self_iri)
+            if png:
+                preview = {"image": {
+                    "src": png,
+                    "alt": f"{label} dataset preview",
+                    "caption": "Measurement preview from a linked dataset.",
+                }}
+
             payload = _cell_instance_submission_payload(
                 raw, wid=wid, pid=pid, ver=ver,
                 source_local_id=source_local_id, title=label,
                 spec_record=spec_record,
+                related_resources=related,
+                preview=preview,
             )
             results.extend(_do_submit(payload, url, key, label))
+
+        # ── Test specs (protocols) ────────────────────────────────────────────
+        # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
+        # so a test's conformsTo relationship resolves to a real page.
+        for src in (_glob("test-protocol") if _want("test-protocol") else []):
+            raw = json.loads(src.read_text(encoding="utf-8"))
+            tp = raw.get("test_spec", {})
+            title = tp.get("name") or tp.get("short_id", "")
+            source_local_id = tp.get("short_id") or src.stem
+            if resolved_doi:
+                raw = dict(raw)
+                prov = dict(raw.get("provenance") or {})
+                prov.setdefault("citation_doi", resolved_doi)
+                raw["provenance"] = prov
+
+            # Reverse links: hasTest -> each test that conforms to this protocol.
+            self_iri = tp.get("id")
+            related = [
+                {"relationship": "hasTest", "resource_type": "test", "canonical_iri": t_iri}
+                for t_iri in spec_tests.get(self_iri, [])
+            ]
+
+            payload = _simple_submission_payload(
+                raw, resource_type="test_spec", rdf_type="TestSpec",
+                record_key="test_spec", wid=wid, pid=pid, ver=ver,
+                source_local_id=source_local_id, title=title,
+                related_resources=related,
+            )
+            results.extend(_do_submit(payload, url, key, title))
 
         # ── Tests ─────────────────────────────────────────────────────────────
         for src in (_glob("test") if _want("test") else []):
@@ -2772,11 +2879,24 @@ class AuthoringWorkspace:
             test = raw.get("test", {})
             title = test.get("name") or test.get("short_id", "")
             source_local_id = test.get("short_id") or src.stem
+            if resolved_doi:
+                raw = dict(raw)
+                prov = dict(raw.get("provenance") or {})
+                prov.setdefault("citation_doi", resolved_doi)
+                raw["provenance"] = prov
+
+            # Relationships: testsCell -> cell, conformsTo -> test_spec.
+            related = []
+            if test.get("cell_id"):
+                related.append({"relationship": "testsCell", "resource_type": "cell", "canonical_iri": test["cell_id"]})
+            if test.get("protocol_id"):
+                related.append({"relationship": "conformsTo", "resource_type": "test_spec", "canonical_iri": test["protocol_id"]})
+
             payload = _simple_submission_payload(
                 raw, resource_type="test", rdf_type="BatteryTest",
                 record_key="test", wid=wid, pid=pid, ver=ver,
                 source_local_id=source_local_id, title=title,
-                related_cell_id=test.get("cell_id"),
+                related_resources=related,
             )
             results.extend(_do_submit(payload, url, key, title))
 
@@ -2786,10 +2906,40 @@ class AuthoringWorkspace:
             ds = raw.get("dataset", {})
             title = ds.get("name") or ds.get("short_id", "")
             source_local_id = ds.get("short_id") or src.stem
+            # Build the page-model distributions (promoting ws.process()'s plot files to
+            # plot_data/plot_static) and strip those plots from the inner record so it
+            # stays schema-valid (the inner role enum excludes plot_* roles).
+            top_dists, inner_dists = _build_dataset_distributions(ds)
+            self_iri = ds.get("id")
+            ds = {**ds, "distributions": inner_dists}
+            if resolved_doi:
+                prov = dict(raw.get("provenance") or {})
+                prov.setdefault("citation_doi", resolved_doi)
+                raw = {**raw, "dataset": ds, "provenance": prov}
+            else:
+                raw = {**raw, "dataset": ds}
+
+            # Relationships: aboutCell -> cell, generatedByTest -> test.
+            links = ds_links.get(self_iri, {})
+            related = []
+            if links.get("cell"):
+                related.append({"relationship": "aboutCell", "resource_type": "cell", "canonical_iri": links["cell"]})
+            if links.get("test"):
+                related.append({"relationship": "generatedByTest", "resource_type": "test", "canonical_iri": links["test"]})
+
+            # Preview image: this dataset's static plot PNG.
+            preview = None
+            png_dist = next((d for d in top_dists if d.get("role") == "plot_static"), None)
+            if png_dist and png_dist.get("access_url"):
+                preview = {"image": {"src": png_dist["access_url"], "alt": f"{title} preview"}}
+
             payload = _simple_submission_payload(
                 raw, resource_type="dataset", rdf_type="Dataset",
                 record_key="dataset", wid=wid, pid=pid, ver=ver,
                 source_local_id=source_local_id, title=title,
+                distributions=top_dists,
+                related_resources=related,
+                preview=preview,
             )
             results.extend(_do_submit(payload, url, key, title))
 
@@ -2900,6 +3050,81 @@ class AuthoringWorkspace:
         self._search_cache = None  # force rebuild on next search
         print(f"  approved: {result.get('title')}  [{result.get('status')}]  {result.get('canonical_iri', '')}")
         return result
+
+    def process(self, *, max_points: int = 4000) -> list[Path]:
+        """Generate a curve preview (interactive + static) for each saved dataset.
+
+        For every dataset record, reads its processed BDF file (parquet or csv) and
+        writes a downsampled Plotly figure ``<stem>.plot.json`` and a ``<stem>.png``
+        next to it, then registers them on the dataset.  ``ws.upload()`` pushes them
+        to R2 and ``ws.submit()`` exposes them as ``plot_data`` / ``plot_static``
+        distributions — what the platform renders as the dataset's curve preview.
+
+        Run **after** ``ws.save()`` and **before** ``ws.upload()``::
+
+            ws.save()
+            ws.process()
+            ws.upload()
+            ws.submit()
+
+        Requires the plotting extras (``pip install "battinfo[processing]"``);
+        datasets whose columns are unrecognised are skipped with a warning.
+        """
+        import hashlib
+
+        from battinfo import processing
+
+        ds_dir = self._records_root / "examples" / "dataset"
+        if not ds_dir.exists():
+            print("  No dataset records — run ws.save() first.")
+            return []
+
+        written: list[Path] = []
+        for record_path in sorted(ds_dir.glob("*.json")):
+            raw = json.loads(record_path.read_text(encoding="utf-8"))
+            ds = raw.get("dataset", {})
+            dists = ds.get("distributions") or []
+            if any((d.get("name") or "").endswith(".plot.json") for d in dists):
+                continue  # preview already generated
+
+            processed = next((d for d in dists if d.get("role") == "processed"), None)
+            src_url = (processed or {}).get("content_url") or ds.get("access_url") or ""
+            local = Path(src_url.replace("file:///", "").replace("file://", ""))
+            if not local.is_absolute():
+                local = self._root / local
+            if not local.exists():
+                print(f"  WARNING: processed file not found, skipping preview: {local.name}")
+                continue
+
+            json_path, png_path = processing.generate_dataset_plots(
+                local, local.parent, title=ds.get("name"), max_points=max_points
+            )
+            if json_path is None and png_path is None:
+                print(f"  could not generate a preview for {ds.get('name')} (unrecognised columns?)")
+                continue
+
+            for path, fmt in ((json_path, "application/json"), (png_path, "image/png")):
+                if path is None or not path.exists():
+                    continue
+                dists.append({
+                    # Schema-safe inner role; ws.submit() promotes *.plot.json/*.png
+                    # to plot_data/plot_static in the page-model distributions.
+                    "role": "other",
+                    "content_url": path.resolve().as_uri(),
+                    "name": path.name,
+                    "encoding_format": fmt,
+                    "content_size": str(path.stat().st_size),
+                    "checksum": {"algorithm": "sha256", "value": hashlib.sha256(path.read_bytes()).hexdigest()},
+                })
+                written.append(path)
+                print(f"  preview: {path.name}  ->  {ds.get('name')}")
+
+            ds["distributions"] = dists
+            raw["dataset"] = ds
+            record_path.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
+
+        print(f"\nGenerated {len(written)} preview file(s) across the datasets.")
+        return written
 
     def upload(
         self,
@@ -5455,7 +5680,7 @@ class AuthoringWorkspace:
                     "ws.add('test', cell=..., conformance=...) to flag each test."
                 )
             return self._add_tests_by_filename(
-                test_type, datasets, protocol_name, protocol_url,
+                test_type, datasets, protocol_name, protocol_url, protocol_ref,
                 instrument, license, description, status,
             )
 
@@ -5510,6 +5735,7 @@ class AuthoringWorkspace:
         datasets: "str | list[str | Path]",
         protocol_name: str | None,
         protocol_url: str | None,
+        protocol_ref: Any,
         instrument: str | None,
         license: str | None,
         description: str | None,
@@ -5553,7 +5779,7 @@ class AuthoringWorkspace:
                 continue
             test = self._ws.record_test(
                 cell, kind=test_type, path=f, protocol=protocol_name,
-                protocol_url=protocol_url, description=description,
+                protocol_url=protocol_url, protocol_ref=protocol_ref, description=description,
                 instrument=instrument, status=status, license=license,
                 format=_guess_format(f),
                 source_path=self._resolve_raw_source(f),
@@ -5697,6 +5923,7 @@ def _cell_spec_submission_payload(
     ver: str,
     source_local_id: str,
     title: str,
+    related_resources: list[dict] | None = None,
 ) -> dict:
     return {
         "schema_version": "0.1.0",
@@ -5723,7 +5950,7 @@ def _cell_spec_submission_payload(
                 "@type": "CellSpecification",
                 "battinfo_records": {"cell_spec": record},
             },
-            "related_resources": [],
+            "related_resources": related_resources or [],
             "distributions": [],
         },
         "artifacts": [],
@@ -5754,16 +5981,31 @@ def _cell_instance_submission_payload(
     source_local_id: str,
     title: str,
     spec_record: dict | None = None,
+    related_resources: list[dict] | None = None,
+    preview: dict | None = None,
 ) -> dict:
     ci = record.get("cell_instance", {})
-    related: list[dict] = []
-    cell_spec_id = ci.get("cell_spec_id")
-    if cell_spec_id:
-        related.append({
-            "relationship": "instanceOf",
-            "resource_type": "cell_spec",
-            "canonical_iri": cell_spec_id,
-        })
+    if related_resources is not None:
+        related = related_resources
+    else:
+        related = []
+        cell_spec_id = ci.get("cell_spec_id")
+        if cell_spec_id:
+            related.append({
+                "relationship": "instanceOf",
+                "resource_type": "cell_spec",
+                "canonical_iri": cell_spec_id,
+            })
+
+    semantic_payload: dict = {
+        "@type": "CellInstance",
+        "battinfo_records": {
+            "cell": record,
+            **({"cell_spec": spec_record} if spec_record else {}),
+        },
+    }
+    if preview:
+        semantic_payload["preview"] = preview
 
     return {
         "schema_version": "0.1.0",
@@ -5786,19 +6028,42 @@ def _cell_instance_submission_payload(
             "resource_type": "cell",
             "source_local_id": source_local_id,
             "title": title,
-            "semantic_payload": {
-                "@type": "CellInstance",
-                "battinfo_records": {
-                    "cell": record,
-                    **({"cell_spec": spec_record} if spec_record else {}),
-                },
-            },
+            "semantic_payload": semantic_payload,
             "related_resources": related,
             "distributions": [],
         },
         "artifacts": [],
         "validation": {"ok": True, "errors": [], "policy": "default"},
     }
+
+
+def _build_dataset_distributions(ds: dict) -> tuple[list[dict], list[dict]]:
+    """Split a dataset's distributions into (page-model, inner-record) lists.
+
+    Returns ``(top_level, inner)``. Plot files (added by :meth:`AuthoringWorkspace.process`
+    as role ``other`` with ``*.plot.json`` / ``*.png`` names) are *promoted* to
+    ``plot_data`` / ``plot_static`` in the page-model ``top_level`` list (the platform
+    renders these as the curve preview) and *dropped* from the schema-validated inner
+    record, which keeps only the measurement distributions. Measurement distributions
+    appear in both. URLs are whatever the record holds — public R2 URLs after
+    :meth:`upload`."""
+    top_level: list[dict] = []
+    inner: list[dict] = []
+    for d in ds.get("distributions") or []:
+        name = d.get("name") or ""
+        url = d.get("content_url") or ds.get("access_url") or ""
+        fmt = d.get("encoding_format")
+        if name.endswith(".plot.json"):
+            top_level.append({"title": name, "access_url": url, "role": "plot_data",
+                              "media_type": fmt or "application/json"})
+        elif name.endswith(".png"):
+            top_level.append({"title": name, "access_url": url, "role": "plot_static",
+                              "media_type": fmt or "image/png"})
+        else:
+            inner.append(d)
+            top_level.append({"title": name or d.get("role") or "data", "access_url": url,
+                              "role": d.get("role") or "processed", "media_type": fmt})
+    return top_level, inner
 
 
 def _simple_submission_payload(
@@ -5813,14 +6078,26 @@ def _simple_submission_payload(
     source_local_id: str,
     title: str,
     related_cell_id: str | None = None,
+    distributions: list[dict] | None = None,
+    related_resources: list[dict] | None = None,
+    preview: dict | None = None,
 ) -> dict:
-    related: list[dict] = []
-    if related_cell_id:
-        related.append({
-            "relationship": "about",
-            "resource_type": "cell",
-            "canonical_iri": related_cell_id,
-        })
+    if related_resources is not None:
+        related = related_resources
+    else:
+        related = []
+        if related_cell_id:
+            related.append({
+                "relationship": "about",
+                "resource_type": "cell",
+                "canonical_iri": related_cell_id,
+            })
+    semantic_payload: dict = {
+        "@type": rdf_type,
+        "battinfo_records": {record_key: record},
+    }
+    if preview:
+        semantic_payload["preview"] = preview
     return {
         "schema_version": "0.1.0",
         "kind": "BattinfoSubmission",
@@ -5842,12 +6119,9 @@ def _simple_submission_payload(
             "resource_type": resource_type,
             "source_local_id": source_local_id,
             "title": title,
-            "semantic_payload": {
-                "@type": rdf_type,
-                "battinfo_records": {record_key: record},
-            },
+            "semantic_payload": semantic_payload,
             "related_resources": related,
-            "distributions": [],
+            "distributions": distributions or [],
         },
         "artifacts": [],
         "validation": {"ok": True, "errors": [], "policy": "default"},

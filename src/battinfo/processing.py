@@ -88,13 +88,48 @@ def process_timeseries_csv(
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 def _read_bdf_csv(path: Path):
-    """Read a BDF CSV into a DataFrame, returning None on failure."""
+    """Read a BDF CSV or Parquet file into a DataFrame, returning None on failure."""
     try:
         import pandas as pd
-        df = pd.read_csv(path)
-        return df
+        if str(path).lower().endswith(".parquet"):
+            return pd.read_parquet(path)
+        return pd.read_csv(path)
     except Exception:
         return None
+
+
+def _downsample(df: "Any", max_points: int | None):
+    """Thin a DataFrame to at most *max_points* rows (evenly), for a light preview."""
+    if max_points and len(df) > max_points:
+        step = len(df) // max_points + 1
+        return df.iloc[::step]
+    return df
+
+
+def generate_dataset_plots(
+    data_path: Path,
+    out_dir: Path,
+    *,
+    title: str | None = None,
+    max_points: int = 4000,
+    xunit: str = "h",
+    yunit: str = "V",
+    yyunit: str = "mA",
+) -> tuple[Path | None, Path | None]:
+    """Generate a downsampled interactive Plotly JSON + static PNG from a BDF file.
+
+    Reads CSV or Parquet, thins to ``max_points`` for a lightweight web preview, and
+    writes ``<stem>.plot.json`` (for ``role=plot_data``) and ``<stem>.png`` (for
+    ``role=plot_static``) into *out_dir*. Returns ``(plot_json_path, plot_png_path)``;
+    either may be ``None`` if the optional plotting deps are absent or the columns are
+    not recognised.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stem = data_path.stem.replace(".bdf", "")
+    plot_title = title or stem
+    json_path = _make_interactive_plot(data_path, out_dir, stem, plot_title, xunit, yunit, yyunit, max_points=max_points)
+    png_path = _make_static_plot(data_path, out_dir, stem, plot_title, xunit, yunit, yyunit, max_points=max_points)
+    return json_path, png_path
 
 
 def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
@@ -201,6 +236,7 @@ def _make_static_plot(
     xunit: str,
     yunit: str,
     yyunit: str,
+    max_points: int | None = None,
 ) -> Path | None:
     """Generate a static PNG via bdf.plot; return output path or None."""
     try:
@@ -217,6 +253,7 @@ def _make_static_plot(
     df = _read_bdf_csv(source)
     if df is None:
         return None
+    df = _downsample(df, max_points)
 
     voltage_col = next((c for c in df.columns if "voltage" in c.lower()), None)
     current_col = next((c for c in df.columns if "current" in c.lower()), None)
@@ -255,6 +292,7 @@ def _make_interactive_plot(
     xunit: str,
     yunit: str,
     yyunit: str,
+    max_points: int | None = None,
 ) -> Path | None:
     """Generate a Plotly figure JSON file for client-side rendering.
 
@@ -276,6 +314,7 @@ def _make_interactive_plot(
     df = _read_bdf_csv(source)
     if df is None:
         return None
+    df = _downsample(df, max_points)
 
     voltage_col = next((c for c in df.columns if "voltage" in c.lower()), None)
     current_col = next((c for c in df.columns if "current" in c.lower()), None)
