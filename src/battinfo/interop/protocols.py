@@ -11,6 +11,7 @@ summary; the linked artifact remains the executable source of truth.
 from __future__ import annotations
 
 import json
+import math
 import time
 from pathlib import Path
 from typing import Any
@@ -52,13 +53,19 @@ def _looks_like_path(source: Any) -> bool:
 
 
 def _num(value: Any) -> float | None:
-    """aurora-unicycler JSON stores numbers as strings; coerce leniently."""
+    """aurora-unicycler JSON stores numbers as strings; coerce leniently.
+
+    A non-finite result (NaN / +-Infinity) is rejected as ``None``: it is never a
+    valid measurement and is not JSON-serialisable (RFC 8259), so it must never be
+    coerced into a quantity that later survives validation and fails on export.
+    """
     if value is None:
         return None
     try:
-        return float(value)
+        result = float(value)
     except (TypeError, ValueError):
         return None
+    return result if math.isfinite(result) else None
 
 
 def _q(value: float, unit: str) -> Quantity:

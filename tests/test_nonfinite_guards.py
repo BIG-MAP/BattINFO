@@ -55,3 +55,35 @@ def test_validation_rejects_non_finite_spec_value() -> None:
     result = validate_record(doc, policy="strict")
     assert result.ok is False
     assert any(i.code == "semantic.value_not_finite" for i in result.issues)
+
+
+def test_num_rejects_non_finite() -> None:
+    # The shared protocol/discovery/converter numeric coercion must reject non-finite
+    # rather than coercing NaN/Inf into a quantity that later fails json.dumps.
+    from battinfo.interop.protocols import _num
+
+    assert _num("NaN") is None
+    assert _num("Infinity") is None
+    assert _num("-inf") is None
+    assert _num(float("nan")) is None
+    assert _num("3.5") == 3.5
+
+
+def test_validation_rejects_nested_non_finite_quantity() -> None:
+    # The flat specs check missed deeply-nested quantities (e.g. an electrode
+    # coating's property.loading.value); the recursive walk catches them.
+    from battinfo.validate.semantic import validate_semantic_report
+
+    doc = {"electrode_spec": {"coating": {"property": {"loading": {"value": float("nan"), "unit": "mg/cm2"}}}}}
+    result = validate_semantic_report(doc, policy="strict")
+    assert any(i.code == "semantic.value_not_finite" for i in result.issues)
+
+
+def test_walk_non_finite_no_false_positive_on_clean_record() -> None:
+    # The whole-record non-finite walk must not flag any value in a clean shipped record.
+    from battinfo.validate.semantic import validate_semantic_report
+
+    doc = json.loads((ROOT / "src/battinfo/data/examples/cell-spec/cell-spec-0hpw-gkhk-gcg8-23x1.json")
+                     .read_text(encoding="utf-8"))
+    result = validate_semantic_report(doc, policy="strict")
+    assert not any(i.code == "semantic.value_not_finite" for i in result.issues)
