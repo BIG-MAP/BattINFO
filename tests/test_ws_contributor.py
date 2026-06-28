@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo.ws import (  # noqa: E402
     AuthoringWorkspace,
     ContributorRef,
+    ProjectRef,
     _normalize_orcid,
 )
 
@@ -151,6 +152,54 @@ def test_save_stamps_contributor_on_every_record(tmp_path: Path) -> None:
     assert records, "expected record files"
     for rec in records:
         assert ORCID_URL in _contributor_orcids(rec), f"missing contributor: {rec.keys()}"
+
+
+def test_interrupted_contributor_stamp_leaves_records_valid(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The contributor stamp rewrites canonical record files in place; an
+    # interrupted stamp must never leave a truncated/half-written record (R-5).
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _populate(ws, tmp_path)
+    ws.contributor(ORCID, name="Jane Researcher")
+    ws.save(validation_policy="strict")
+
+    record_files = [p for p in ws._records_root.rglob("*.json") if "index" not in p.name]
+    assert record_files
+
+    def boom(*args, **kwargs):
+        raise OSError("simulated crash during contributor stamp")
+
+    monkeypatch.setattr("battinfo.ws._atomic_write_text", boom)
+    with pytest.raises(OSError):
+        ws.save(validation_policy="strict")
+
+    # Every record on disk is still valid JSON — never truncated by the failed stamp.
+    for p in record_files:
+        json.loads(p.read_text(encoding="utf-8"))
+
+
+def test_interrupted_funding_stamp_leaves_records_valid(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Same R-5 guarantee for the funding (project) stamp path (ws.py:_stamp_project_funding).
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _populate(ws, tmp_path)
+    ws._set_project(ProjectRef(identifier="101103997", name="DigiBatt", funder="EU"))
+    ws.save(validation_policy="strict")
+
+    record_files = [p for p in ws._records_root.rglob("*.json") if "index" not in p.name]
+    assert record_files
+
+    def boom(*args, **kwargs):
+        raise OSError("simulated crash during funding stamp")
+
+    monkeypatch.setattr("battinfo.ws._atomic_write_text", boom)
+    with pytest.raises(OSError):
+        ws.save(validation_policy="strict")
+
+    for p in record_files:
+        json.loads(p.read_text(encoding="utf-8"))
 
 
 def test_resave_does_not_duplicate_contributor(tmp_path: Path) -> None:
