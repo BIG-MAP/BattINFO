@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo.entities import record_set_dirs
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
@@ -1274,8 +1275,7 @@ class AuthoringWorkspace:
                 if record.get("funding") == block:
                     continue
                 record["funding"] = block
-                p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n",
-                             encoding="utf-8")
+                _atomic_write_text(p, json.dumps(record, indent=2, ensure_ascii=False) + "\n")
                 stamped += 1
         return stamped
 
@@ -1401,7 +1401,7 @@ class AuthoringWorkspace:
                     continue
                 contributors.append(person)
                 record["contributor"] = contributors
-                p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                _atomic_write_text(p, json.dumps(record, indent=2, ensure_ascii=False) + "\n")
                 stamped += 1
         return stamped
 
@@ -3121,7 +3121,7 @@ class AuthoringWorkspace:
 
             ds["distributions"] = dists
             raw["dataset"] = ds
-            record_path.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
+            _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
 
         print(f"\nGenerated {len(written)} preview file(s) across the datasets.")
         return written
@@ -3293,7 +3293,7 @@ class AuthoringWorkspace:
             urls.append(primary_url or new_dists[0]["content_url"])
             raw["dataset"]["access_url"] = primary_url or new_dists[0]["content_url"]
             raw["dataset"]["distributions"] = new_dists
-            record_path.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
+            _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
 
             # Keep session paths in sync so submit() picks up the updated record
             self._session_paths.add(record_path)

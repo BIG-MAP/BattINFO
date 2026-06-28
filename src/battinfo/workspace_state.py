@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import mimetypes
+import os
 import shutil
 import tempfile
 from datetime import datetime, timezone
@@ -43,6 +44,31 @@ def _relative_to(root: Path, path: Path) -> str:
         return path.relative_to(root).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _swap_dir(staging: Path, target: Path) -> None:
+    """Atomically replace directory ``target`` with ``staging``.
+
+    Renames the existing ``target`` aside, moves ``staging`` into place, then
+    removes the old copy. Both moves are atomic renames; on failure the original
+    ``target`` is restored. This never destroys a live directory before its
+    replacement is durably in place (cf. ``shutil.rmtree`` then re-write, which
+    loses the whole group if interrupted in between).
+    """
+    backup: Path | None = None
+    if target.exists():
+        backup = target.with_name(staging.name + ".bak")
+        if backup.exists():
+            shutil.rmtree(backup, ignore_errors=True)
+        os.replace(target, backup)
+    try:
+        os.replace(staging, target)
+    except BaseException:
+        if backup is not None and not target.exists():
+            os.replace(backup, target)  # roll back to the original
+        raise
+    if backup is not None:
+        shutil.rmtree(backup, ignore_errors=True)
 
 
 def _guess_media_type(path: str | None) -> str | None:
@@ -534,15 +560,29 @@ class WorkspaceStateStore:
             "tests": self.root / manifest.paths.tests,
             "datasets": self.root / manifest.paths.datasets,
         }
-        for path in roots.values():
-            if path.exists():
-                shutil.rmtree(path)
-            path.mkdir(parents=True, exist_ok=True)
-
-        for key, items in record_groups.items():
-            for record in items:
-                filename = f"{self._record_short_id(key, record)}.json"
-                _write_json(roots[key] / filename, record)
+        # Stage each record group into a fresh sibling directory and atomically
+        # swap it into place. We never rmtree a live record directory *before* its
+        # replacement is durably written — a crash/Ctrl-C mid-write would otherwise
+        # wipe the entire group with no recovery.
+        staging_dirs: dict[str, Path] = {}
+        try:
+            for key, root in roots.items():
+                root.parent.mkdir(parents=True, exist_ok=True)
+                staging_dirs[key] = Path(
+                    tempfile.mkdtemp(dir=str(root.parent), prefix=f".{root.name}.staging-")
+                )
+            for key, items in record_groups.items():
+                staging = staging_dirs[key]
+                for record in items:
+                    filename = f"{self._record_short_id(key, record)}.json"
+                    _write_json(staging / filename, record)
+            for key, root in roots.items():
+                _swap_dir(staging_dirs[key], root)
+        finally:
+            # Swapped staging dirs are already consumed (renamed); un-swapped ones
+            # are cleaned up here so an error path never leaks a staging directory.
+            for staging in staging_dirs.values():
+                shutil.rmtree(staging, ignore_errors=True)
 
         dataset_by_id = {dataset.id: dataset for dataset in self.datasets if dataset.id is not None}
         artifacts_root = self.root / manifest.artifacts_dir / "dataset"
@@ -651,13 +691,24 @@ class WorkspaceStateStore:
             "tests": target_root / "test",
             "datasets": target_root / "dataset",
         }
-        for key, path in groups.items():
-            if path.exists():
-                shutil.rmtree(path)
-            path.mkdir(parents=True, exist_ok=True)
-            for record in records[key]:
-                filename = f"{self._record_short_id(key, record)}.json"
-                _write_json(path / filename, record)
+        # Stage each group then atomically swap, so an interrupted write never
+        # destroys an existing group before its replacement is durable (R-5).
+        staging_dirs: dict[str, Path] = {}
+        try:
+            for key, path in groups.items():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                staging_dirs[key] = Path(
+                    tempfile.mkdtemp(dir=str(path.parent), prefix=f".{path.name}.staging-")
+                )
+            for key, staging in staging_dirs.items():
+                for record in records[key]:
+                    filename = f"{self._record_short_id(key, record)}.json"
+                    _write_json(staging / filename, record)
+            for key, path in groups.items():
+                _swap_dir(staging_dirs[key], path)
+        finally:
+            for staging in staging_dirs.values():
+                shutil.rmtree(staging, ignore_errors=True)
 
     @staticmethod
     def _load_records(directory: Path) -> list[dict[str, Any]]:
