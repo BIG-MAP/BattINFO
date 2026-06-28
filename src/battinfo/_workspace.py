@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import mimetypes
 import shutil
 from collections.abc import Sequence
@@ -143,33 +144,76 @@ def _with_default(value: str | None, fallback: str) -> str:
     return text or fallback
 
 
+# Fields that vary across runs (or are the IRI itself) and must NOT influence a
+# content-derived disambiguation seed — otherwise a re-minted IRI would be unstable
+# across re-runs (e.g. a finalize-time ``retrieved_at`` timestamp).
+_VOLATILE_SEED_KEYS = frozenset(
+    {"id", "uid", "retrieved_at", "created_at", "modified_at", "generated_at", "imported_at"}
+)
+
+
+def _strip_volatile(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _strip_volatile(v) for k, v in value.items() if k not in _VOLATILE_SEED_KEYS}
+    if isinstance(value, list):
+        return [_strip_volatile(v) for v in value]
+    return value
+
+
+def _content_seed(entity: Any) -> str:
+    """A stable, order-independent seed from an entity's distinguishing content
+    (its canonical record minus the IRI and volatile timestamps)."""
+    data = entity.model_dump(mode="json", exclude_none=True)
+    return json.dumps(_strip_volatile(data), sort_keys=True, ensure_ascii=False)
+
+
 def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str) -> None:
     """Ensure auto-minted IRIs are unique across distinct authored entities.
 
     Deterministic IRIs are seeded from a record's identity fields, so two
     genuinely-distinct entities whose identity fields happen to match — e.g. two
-    unnamed cycling tests on one cell, or two cells from one batch with no serial
-    number — mint the *same* IRI. On save each record is written to a file named
-    after its IRI, so the duplicate silently overwrote its sibling and one record
-    was lost. Re-mint any collisions with a stable ordinal-seeded IRI so every
-    distinct record persists. Records whose IRI is already unique are untouched,
-    keeping the blast radius to the (rare) colliding case only.
+    cell-specs for one manufacturer+model with different capacities, or two unnamed
+    cycling tests on one cell — mint the *same* IRI. On save each record is written
+    to a file named after its IRI, so the duplicate silently overwrote its sibling
+    and one record was lost.
+
+    When >=2 entities collide on one IRI, re-mint *every* member of that group from a
+    hash of its distinguishing content (``{iri}::{content}``). This is
+    order-independent — a given record keeps the same IRI regardless of sibling order
+    or re-run — and guarantees distinct content can never overwrite. A genuine
+    full-content duplicate (identical content) falls back to a stable ordinal suffix
+    so it still persists. Entities whose IRI is already unique are untouched,
+    preserving the idempotent identity-seeded IRI for the common single-record case.
+
+    Note: adding an identity-colliding sibling later re-mints a previously-unique record
+    to a content-seeded IRI — the deliberate cost of order-independence. This loses no
+    data within a workspace, since save() stages-then-swaps the full finalized set.
     """
+    by_id: dict[str, list[Any]] = {}
+    for entity in entities:
+        current = getattr(entity, "id", None)
+        if current is not None:
+            by_id.setdefault(current, []).append(entity)
+
     seen: set[str] = set()
     for entity in entities:
         current = getattr(entity, "id", None)
         if current is None:
             continue
-        if current not in seen:
-            seen.add(current)
-            continue
-        ordinal = 1
-        candidate = _entity_iri(entity_type, f"{current}::{ordinal}")
-        while candidate in seen:
-            ordinal += 1
-            candidate = _entity_iri(entity_type, f"{current}::{ordinal}")
-        entity.id = candidate
-        seen.add(candidate)
+        group = by_id.get(current)
+        if group is not None and len(group) > 1:
+            # Distinct entities sharing an IRI: re-seed from content (order-independent).
+            current = _entity_iri(entity_type, f"{current}::{_content_seed(entity)}")
+        if current in seen:
+            # Genuine full-content duplicate — keep both with a stable ordinal suffix.
+            ordinal = 1
+            candidate = _entity_iri(entity_type, f"{current}::dup{ordinal}")
+            while candidate in seen:
+                ordinal += 1
+                candidate = _entity_iri(entity_type, f"{current}::dup{ordinal}")
+            current = candidate
+        entity.id = current
+        seen.add(current)
 
 
 def _as_path(path: PathLike) -> Path:
@@ -1743,6 +1787,11 @@ class Workspace:
     def _finalize(self) -> dict[str, list[Any]]:
         finalized_cell_specs = [self._finalize_cell_spec(item) for item in self.cell_specs]
         cell_spec_map = {id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)}
+        # Break cell-spec IRI collisions before cells link to them: distinct specs that
+        # share identity fields must not overwrite each other on save, and each cell must
+        # link to its own spec (cell_spec_map holds the same objects, so in-place
+        # re-minting propagates into _finalize_cell's cell_spec_id lookup below).
+        _disambiguate_entity_ids(finalized_cell_specs, "cell-spec")
 
         finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
@@ -1754,6 +1803,8 @@ class Workspace:
         test_spec_map = {
             id(original): finalized for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True)
         }
+        # Break test-spec IRI collisions before tests link to them via conformsTo.
+        _disambiguate_entity_ids(finalized_test_specs, "test-protocol")
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}

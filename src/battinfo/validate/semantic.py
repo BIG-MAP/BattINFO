@@ -417,20 +417,9 @@ def _validate_specs(
     for spec_name, spec_value in specs.items():
         if not isinstance(spec_value, Mapping):
             continue
-        # A non-finite numeric (NaN / +-Infinity) is never a valid measurement and
-        # is not JSON-serialisable per RFC 8259 — always a hard error, regardless of
-        # policy, so it can never be persisted or published.
-        for value_key in ("value", "typical_value", "min_value", "max_value"):
-            raw = spec_value.get(value_key)
-            if isinstance(raw, (int, float)) and not isinstance(raw, bool) and not math.isfinite(raw):
-                _append_issue(
-                    issues,
-                    code="semantic.value_not_finite",
-                    severity="error",
-                    path=f"specs.{spec_name}.{value_key}",
-                    message=f"value for '{spec_name}.{value_key}' is not finite (NaN/Infinity); not a valid measurement.",
-                    resource_type=resource_type,
-                )
+        # Non-finite numerics (NaN / +-Infinity) are caught record-wide by
+        # _walk_non_finite (called from validate_semantic_report), so nested
+        # quantities are covered too, not just flat specs.
         unit = _unit_token(spec_value)
         if unit is not None and spec_name in SPEC_UNIT_COMPATIBILITY:
             normalized = _normalized_unit(unit)
@@ -603,6 +592,39 @@ def _validate_test_semantics(
         )
 
 
+def _walk_non_finite(
+    value: Any,
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Recursively flag any non-finite float (NaN / +-Infinity) anywhere in the record.
+
+    Non-finite numerics are never valid measurements and are not JSON-serialisable
+    (RFC 8259), so they are a hard error regardless of policy or nesting depth. This
+    catches values a flat specs check misses — e.g. an electrode coating's nested
+    ``property.loading.value`` reached via create_component_spec.
+    """
+    if isinstance(value, bool):
+        return
+    if isinstance(value, float) and not math.isfinite(value):
+        label = path or "<root>"
+        _append_issue(
+            issues,
+            code="semantic.value_not_finite",
+            severity="error",
+            path=label,
+            message=f"value at '{label}' is not finite (NaN/Infinity); not a valid measurement.",
+            resource_type=resource_type,
+        )
+    elif isinstance(value, Mapping):
+        for key, sub in value.items():
+            _walk_non_finite(sub, f"{path}.{key}" if path else str(key), issues, resource_type)
+    elif isinstance(value, (list, tuple)):
+        for index, sub in enumerate(value):
+            _walk_non_finite(sub, f"{path}[{index}]", issues, resource_type)
+
+
 def validate_semantic_report(
     doc: dict[str, Any],
     *,
@@ -621,6 +643,10 @@ def validate_semantic_report(
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
     _validate_controlled_values(doc, issues, resource_type)
     _validate_size_code(doc, issues, resource_type, hard_issue_severity)
+    # Non-finite numerics are invalid anywhere in the record (RFC 8259); walk the
+    # whole doc so nested quantities (electrode coating, etc.) are caught, not just
+    # flat specs.
+    _walk_non_finite(doc, "", issues, resource_type)
 
     specs = doc.get("properties")
     if isinstance(specs, Mapping):
