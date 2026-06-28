@@ -189,9 +189,12 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     bdc_id = str(record.get("id") or "bdc_unknown")
     # Tolerate type-drift in external records: a scalar/list where a mapping is
     # expected becomes {} rather than crashing later on `.get` with a bare AttributeError.
-    overview = record.get("overview") if isinstance(record.get("overview"), Mapping) else {}
-    electrodes = record.get("electrodes") if isinstance(record.get("electrodes"), Mapping) else {}
-    reported = record.get("reported_values") if isinstance(record.get("reported_values"), Mapping) else {}
+    _overview = record.get("overview")
+    overview = _overview if isinstance(_overview, Mapping) else {}
+    _electrodes = record.get("electrodes")
+    electrodes = _electrodes if isinstance(_electrodes, Mapping) else {}
+    _reported = record.get("reported_values")
+    reported = _reported if isinstance(_reported, Mapping) else {}
     source_meta = record.get("source_metadata") or {}
     citation = _first([p.get("url") for p in (record.get("publications") or []) if isinstance(p, Mapping)]) \
         or _first(record.get("source_urls"))
