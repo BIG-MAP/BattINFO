@@ -1106,6 +1106,12 @@ def package_batch(
 
     entries: list[ZenodoDatasetEntry] = []
     file_sets: list[tuple[Path | None, Path | None]] = []
+    # Fail closed on duplicate cell IRIs across folders (e.g. two cells sharing a
+    # serial / cell_name): publishing both would silently overwrite one on ingest.
+    # A unique cell IRI is necessary but NOT sufficient — distinct data files within one
+    # cell can still mint colliding test IRIs, so the test seed below carries a per-file
+    # discriminator and build_zenodo_package asserts test/dataset @id uniqueness.
+    seen_cell_iris: dict[str, str] = {}
 
     for cell_dir in cell_dirs:
         cell_manifest = yaml.safe_load(
@@ -1124,6 +1130,15 @@ def package_batch(
             ),
         )
         ci = _finalize_cell_instance(raw_ci, cell_spec=cell_spec, dataset_dir=cell_dir)
+        if ci.id is not None:
+            prior = seen_cell_iris.get(ci.id)
+            if prior is not None:
+                raise ValueError(
+                    f"Cell folders {prior!r} and {cell_dir.name!r} resolve to the same cell IRI "
+                    f"({ci.id}) — two cells must not share a serial / cell_name within a batch, or "
+                    "one would silently overwrite the other on ingest. Give each cell a unique serial."
+                )
+            seen_cell_iris[ci.id] = cell_dir.name
 
         pairs = _collect_data_files(cell_dir)
         if not pairs:
@@ -1132,12 +1147,11 @@ def package_batch(
         for raw_path, bdf_path in pairs:
             subdir_name = raw_path.parent.name
             test_kind = _test_kind_from_path(raw_path, subdir_name)
-            date_text = DATE_RE.search(raw_path.name)
-            date_str = date_text.group("date") if date_text else None
-
-            test_name = f"{ci.name or cell_dir.name} {test_kind}"
-            if date_str:
-                test_name = f"{test_name} {date_str}"
+            # raw_path.stem is unique per file in the folder, so two same-kind data files
+            # in one cell mint distinct test IRIs. The filename date alone is insufficient:
+            # undated same-kind files previously collided onto one test @id and overwrote
+            # each other on ingest.
+            test_name = f"{ci.name or cell_dir.name} {test_kind} {raw_path.stem}"
 
             raw_test = Test(
                 cell_instance_id=ci.id,

@@ -2374,6 +2374,24 @@ def build_zenodo_package(
             f"length ({len(record.datasets)})."
         )
 
+    # Fail closed if two distinct records minted the same test/dataset IRI: writing both
+    # to one @id silently overwrites one on harvest/ingest (the archive is source of
+    # truth). Cells legitimately repeat across entries (one cell, many tests), so only
+    # test and dataset @ids — which must be globally distinct — are checked here.
+    minted_iris: dict[str, str] = {}
+    for entry in record.datasets:
+        for kind, obj in (("test", entry.test), ("dataset", entry.dataset)):
+            iri = getattr(obj, "id", None)
+            if iri is None:
+                continue
+            if iri in minted_iris:
+                raise ValueError(
+                    f"Duplicate {kind} IRI {iri}: two records would overwrite each other on "
+                    "ingest. Ensure cells have unique serials and data files within a cell "
+                    "have distinct names."
+                )
+            minted_iris[iri] = kind
+
     staging = _as_path(staging_dir)
     staging.mkdir(parents=True, exist_ok=True)
 
