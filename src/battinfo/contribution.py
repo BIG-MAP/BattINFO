@@ -741,6 +741,7 @@ def init_batch(
 
     # ── per-cell folders ───────────────────────────────────────────────────────
     cells: list[dict[str, Any]] = []
+    seen_folders: dict[str, str] = {}
     for i in range(count):
         sn = serial_numbers[i].strip() if serial_numbers else None
         cell_iri = (
@@ -749,6 +750,17 @@ def init_batch(
             else _generate_cell_iri(cell_spec_iri, batch_id, i, sn)
         )
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
+        # Fail closed on a within-batch folder collision: two cells that slug to the same
+        # folder (e.g. duplicate serials) would otherwise reuse the dir (mkdir exist_ok)
+        # and the second cell's manifest would silently overwrite the first's on disk.
+        prior = seen_folders.get(folder_name)
+        if prior is not None:
+            raise ValueError(
+                f"Cells {prior!r} and {sn or folder_name!r} both map to folder "
+                f"{folder_name!r} — a duplicate serial / cell name would overwrite one "
+                "cell's manifest on disk. Give each cell a unique serial."
+            )
+        seen_folders[folder_name] = sn or folder_name
         cell_name = sn or folder_name
 
         cell_dir = output_dir / folder_name

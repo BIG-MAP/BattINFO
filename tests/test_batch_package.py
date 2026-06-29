@@ -48,6 +48,13 @@ def _make_batch(tmp_path: Path, n_cells: int = 2, n_files_per_cell: int = 2) -> 
     return batch_dir
 
 
+def test_init_batch_rejects_duplicate_serials(tmp_path: Path) -> None:
+    # Two cells with the same serial slug to the same folder; init_batch must fail closed
+    # instead of silently overwriting the first cell's manifest on disk (mkdir exist_ok).
+    with pytest.raises(ValueError, match="unique serial"):
+        init_batch(tmp_path / "batch", "Energizer CR2032", 2, serial_numbers=["SN1", "SN1"])
+
+
 # ── _collect_data_files ────────────────────────────────────────────────────────
 
 class TestCollectDataFiles:
