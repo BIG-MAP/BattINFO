@@ -51,6 +51,27 @@ def _strip_import_stamps(records: list[dict]) -> list[dict]:
 # ── RO-Crate (.eln) ──────────────────────────────────────────────────────────
 
 
+def test_electrolyte_parser_dedupes_solvents() -> None:
+    from battinfo.interop.discovery import _parse_electrolyte
+
+    merged = _parse_electrolyte("1M LiPF6 EC:EC=1:1")["solvents"]
+    assert [n for n, _ in merged] == ["EC"], "a malformed EC:EC token minted a duplicate solvent"
+    normal = _parse_electrolyte("1M LiPF6 EC:EMC=3:7")["solvents"]
+    assert [n for n, _ in normal] == ["EC", "EMC"], "distinct solvents must be unaffected"
+
+
+def test_find_property_drops_non_finite_value() -> None:
+    from battinfo.interop.discovery import _find_property
+
+    nan_node = {"hasProperty": [{"@type": "MassLoading",
+                                 "hasNumericalPart": {"hasNumericalValue": "NaN"}}]}
+    assert _find_property(nan_node, "MassLoading") is None, "a NaN value must be dropped, never coerced"
+    ok_node = {"hasProperty": [{"@type": "MassLoading",
+                                "hasNumericalPart": {"hasNumericalValue": "2.5"}}]}
+    prop = _find_property(ok_node, "MassLoading")
+    assert prop is not None and prop["value"] == 2.5
+
+
 def test_eln_builds_linked_spec_graph() -> None:
     pkg = import_discovery_eln(ELN, validate=True)
     assert pkg.source == "eln"

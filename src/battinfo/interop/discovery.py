@@ -154,6 +154,27 @@ def _qty(value: float, unit: str | None) -> dict[str, Any]:
     return q
 
 
+def _dedupe_solvents(solvents: list[tuple[str, float | None]]) -> list[tuple[str, float | None]]:
+    """Merge repeated solvent names into one component, summing known volume fractions.
+
+    A malformed token like ``EC:EC=1:1`` (or a stray colon code) would otherwise emit two
+    components for the same solvent; collapse them so the importer never invents a phantom
+    duplicate.
+    """
+    merged: dict[str, float | None] = {}
+    for name, frac in solvents:
+        if name not in merged:
+            merged[name] = frac
+            continue
+        prev = merged[name]
+        if prev is None:
+            merged[name] = frac
+        elif frac is not None:
+            merged[name] = round(prev + frac, 4)
+        # else both None — keep the single None entry
+    return list(merged.items())
+
+
 def _parse_electrolyte(name: str) -> dict[str, Any]:
     """Parse '1M LiPF6 EC:EMC=3:7wt%' → salt, concentration, solvent fractions."""
     out: dict[str, Any] = {"family": "organic", "name": name}
@@ -168,10 +189,12 @@ def _parse_electrolyte(name: str) -> dict[str, Any]:
         names = solv.group(1).split(":")
         ratios = [float(x) for x in solv.group(2).split(":")] if solv.group(2) and ":" in solv.group(2) else []
         total = sum(ratios) if ratios else 0.0
+        solvents: list[tuple[str, float | None]]
         if ratios and len(ratios) == len(names) and total > 0:
-            out["solvents"] = [(n, round(r / total, 4)) for n, r in zip(names, ratios)]
+            solvents = [(n, round(r / total, 4)) for n, r in zip(names, ratios)]
         else:
-            out["solvents"] = [(n, None) for n in names]
+            solvents = [(n, None) for n in names]
+        out["solvents"] = _dedupe_solvents(solvents)
     return out
 
 

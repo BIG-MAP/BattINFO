@@ -108,6 +108,7 @@ class BdcRecordImport:
     cell_spec: dict[str, Any]
     cell_instance: dict[str, Any]
     tests: list[dict[str, Any]] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -180,6 +181,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     material-specs across records; pass nothing for a standalone call.
     """
     materials = _materials if _materials is not None else {}
+    warnings: list[str] = []
     # Drop null/blank category entries rather than coercing them to the literal
     # keyword 'None' (which would survive validation and land in dataset.keywords).
     categories = [str(c).strip() for c in (record.get("categories") or []) if c is not None and str(c).strip()]
@@ -229,6 +231,11 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     cap = reported.get("rated_capacity_Ah")
     if isinstance(cap, (int, float)) and not isinstance(cap, bool) and cap > 0:
         specs["nominal_capacity"] = {"value": cap, "unit": "Ah"}
+    elif cap is not None:
+        warnings.append(
+            f"BDC record {bdc_id}: dropped rated_capacity_Ah={cap!r} (not a usable positive "
+            "number); nominal_capacity omitted."
+        )
 
     notes = [f"Imported from Battery Data Commons record {bdc_id}."]
     if source_meta.get("data_modality"):
@@ -300,7 +307,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
         citation=citation,
     )))
 
-    return BdcRecordImport(bdc_id, dataset, cell_spec, cell_instance, tests)
+    return BdcRecordImport(bdc_id, dataset, cell_spec, cell_instance, tests, warnings=warnings)
 
 
 def batch_import_bdc(source: PathLike, *, limit: int | None = None,
@@ -330,7 +337,11 @@ def batch_import_bdc(source: PathLike, *, limit: int | None = None,
         if imp is not None:
             imports.append(imp)
 
-    return BdcImportPackage(material_specs=list(materials.values()), imports=imports, warnings=[])
+    return BdcImportPackage(
+        material_specs=list(materials.values()),
+        imports=imports,
+        warnings=[w for imp in imports for w in imp.warnings],
+    )
 
 
 # ── BattINFO → BDC ──────────────────────────────────────────────────────────

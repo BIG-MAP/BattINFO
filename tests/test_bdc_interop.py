@@ -37,6 +37,29 @@ def _record(name: str) -> dict:
 # ── BDC → BattINFO ───────────────────────────────────────────────────────────
 
 
+def test_bdc_warns_on_non_numeric_capacity() -> None:
+    rec = import_bdc_record({
+        "id": "bdc_x", "categories": ["dataset"],
+        "overview": {"battery_model": "X", "manufacturer": "M", "case": "cylindrical"},
+        "electrodes": {"positive": "NMC", "negative": "graphite"},
+        "reported_values": {"rated_capacity_Ah": "45"},  # present but not a usable number
+    }, validate=False)
+    assert rec is not None
+    assert any("rated_capacity_Ah" in w for w in rec.warnings), "a dropped capacity was not surfaced"
+
+
+def test_batch_import_bdc_aggregates_warnings(tmp_path: Path) -> None:
+    rec = {
+        "id": "bdc_bad", "record_status": "active", "categories": ["dataset"],
+        "overview": {"battery_model": "X", "manufacturer": "M", "case": "cylindrical"},
+        "electrodes": {"positive": "NMC", "negative": "graphite"},
+        "reported_values": {"rated_capacity_Ah": "not-a-number"},
+    }
+    (tmp_path / "bdc_bad.json").write_text(json.dumps(rec), encoding="utf-8")
+    pkg = batch_import_bdc(tmp_path, validate=False)
+    assert any("rated_capacity_Ah" in w for w in pkg.warnings), "BdcImportPackage.warnings stayed empty"
+
+
 def test_batch_import_skips_software_and_builds_chains() -> None:
     pkg = batch_import_bdc(FX, validate=True)
     ids = {imp.bdc_id for imp in pkg.imports}
