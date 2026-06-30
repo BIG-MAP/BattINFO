@@ -189,7 +189,8 @@ def test_do_submit_retries_on_409_with_version_bump(monkeypatch: pytest.MonkeyPa
     }
     result = ws_module._do_submit(payload, "https://registry.example", "k", "Test Record")
     assert calls["n"] == 2  # 409, then a bumped-version retry that succeeds
-    assert result and result[0]["status_code"] == 200
+    assert result["ok"] and result["status"] == "published"
+    assert result["result"]["status_code"] == 200
 
 
 @pytest.mark.parametrize("body", [b"42", b'"ok"', b"[1, 2]"])
@@ -209,4 +210,4 @@ def test_do_submit_scalar_2xx_body_does_not_abort_batch(monkeypatch: pytest.Monk
     _patch_urlopen(monkeypatch, [_FakeResp(200, b"42")])
     payload = {"source_version": "v1", "provenance": {}, "resource": {"source_version": "v1"}}
     result = ws_module._do_submit(payload, "https://registry.example", "k", "Test Record")
-    assert result == []
+    assert result["ok"] is False and result["status"] == "error"  # one failed record, batch not aborted

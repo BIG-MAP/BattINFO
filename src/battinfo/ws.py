@@ -34,6 +34,38 @@ _SHORT_ID_RE = re.compile(r"-([a-z0-9]{6})(?:\.|$)")
 # NEWARE server suffix in filenames: _<IP>-<instrument>-<channels>
 _SERVER_RE = re.compile(r"_\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-")
 
+# ── Registry publication-intent mode tokens (shared contract with the registry) ──
+# The registry is a CURATED INDEX, not a write-through store: submissions are
+# STAGED by default — they land in the registry's review queue (status
+# "validated") and a curator promotes them. Pass
+# publication_mode=CANONICAL_PUBLICATION_MODE for the privileged immediate-publish
+# path. STAGED_PUBLICATION_MODE is the token the registry accepts for staged
+# submission (confirmed 2026-06-28) and is the single source of truth for the mode.
+STAGED_PUBLICATION_MODE = "staged-publication"
+CANONICAL_PUBLICATION_MODE = "canonical-publication"
+
+
+class SubmitError(RuntimeError):
+    """Raised when one or more records fail to submit (and ``allow_partial`` is False).
+
+    Carries the structured outcome so a caller / CI / notebook can see exactly what
+    happened instead of a misleading success: ``failed`` (records that errored or
+    were rejected), ``submitted`` (records that reached the registry), and
+    ``outcomes`` (every record's result).
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        failed: list[dict] | None = None,
+        outcomes: list[dict] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.outcomes = outcomes or []
+        self.failed = failed if failed is not None else [o for o in self.outcomes if not o.get("ok")]
+        self.submitted = [o for o in self.outcomes if o.get("ok")]
+
 # ── Template specs included for each cell format/chemistry ────────────────────
 # Values are {"value": null, "unit": "<SI unit>"} — user fills in value.
 _CYLINDRICAL_PRIMARY_SPECS: dict[str, dict] = {
@@ -2005,10 +2037,12 @@ class AuthoringWorkspace:
         sandbox: bool = False,
         doi: str | None = None,
         only: str | list[str] | None = None,
+        publication_mode: str = STAGED_PUBLICATION_MODE,
+        allow_partial: bool = False,
     ) -> list[dict]:
-        """Save and publish the workspace in one call.
+        """Save and submit the workspace in one call (staged for review by default).
 
-        The common path — publish straight to the registry::
+        The common path — save and submit to the registry's review queue::
 
             ws.publish(note="LFP aging campaign, Feb 2026")
 
@@ -2046,7 +2080,10 @@ class AuthoringWorkspace:
             self.upload()
             result = self.zenodo(publish=True, sandbox=sandbox)
             doi = doi or result.doi
-        return self.submit(note=note, doi=doi, only=only)
+        return self.submit(
+            note=note, doi=doi, only=only,
+            publication_mode=publication_mode, allow_partial=allow_partial,
+        )
 
     def status(
         self,
@@ -2603,13 +2640,26 @@ class AuthoringWorkspace:
         source_version: str | None = None,
         note: str | None = None,
         doi: str | None = None,
+        *,
+        publication_mode: str = STAGED_PUBLICATION_MODE,
+        allow_partial: bool = False,
+        submit_all: bool = False,
     ) -> list[dict]:
-        """Submit workspace records to the battinfo registry.
+        """Submit workspace records to the battinfo registry (staged for review).
 
-        POSTs saved records directly to the registry API.  Submissions use
-        canonical-publication mode, so records are published immediately and
-        appear on the platform right away — there is no separate approval step
-        for your own submissions.  No git or filesystem dependency.
+        POSTs saved records to the registry API.  By default submissions are
+        STAGED (``publication_mode="staged-publication"``): they enter the
+        registry's review queue (status ``validated``) and a curator promotes them
+        to the public index — the registry is a curated index, not a write-through
+        store.  Track staged records with :meth:`pending` / :meth:`status`.  Pass
+        ``publication_mode="canonical-publication"`` for the privileged
+        immediate-publish path.
+
+        Fails closed and observable: every record's outcome is reported, and if any
+        record fails (or a record file is unreadable) :class:`SubmitError` is raised
+        — unless ``allow_partial=True``, in which case failures are returned in the
+        outcome list instead.  Returns a list of per-record outcome dicts (``ok``,
+        ``status``, ``error``, ``iri`` …).  No git or filesystem dependency.
 
         Credentials can be passed as arguments or set as environment variables:
 
@@ -2687,42 +2737,84 @@ class AuthoringWorkspace:
             print("  No records found — run ws.save() first.")
             return []
 
-        # Normalise the `only` filter to a set of canonical directory names
+        # ── Validate the `only` filter (fail loud on an unknown token) ──────────
         _ALIASES: dict[str, str] = {
-            "cell-spec":      "cell-spec",
-            "cell_spec":      "cell-spec",
-            "cell-instance":  "cell-instance",
-            "cell_instance":  "cell-instance",
-            "test-spec":      "test-protocol",
-            "test_spec":      "test-protocol",
-            "test-protocol":  "test-protocol",
-            "test":           "test",
-            "dataset":        "dataset",
+            "cell-spec": "cell-spec", "cell_spec": "cell-spec",
+            "cell-instance": "cell-instance", "cell_instance": "cell-instance",
+            "test-spec": "test-protocol", "test_spec": "test-protocol",
+            "test-protocol": "test-protocol",
+            "test": "test", "dataset": "dataset",
         }
+        allowed: set[str] | None
         if only is not None:
-            raw_only = [only] if isinstance(only, str) else list(only)
-            allowed: set[str] | None = {
-                _ALIASES.get(rt.lower().replace("_", "-"), rt.lower())
-                for rt in raw_only
-            }
+            if isinstance(only, str):
+                raw_only = [only]
+            elif isinstance(only, (list, tuple, set)):
+                raw_only = list(only)
+            else:
+                raise ValueError(f"only= must be a string or list of strings, got {only!r}")
+            allowed = set()
+            for rt in raw_only:
+                if not isinstance(rt, str):
+                    raise ValueError(f"only= must be a string or list of strings, got {rt!r}")
+                token = _ALIASES.get(rt.lower().replace("_", "-"))
+                if token is None:
+                    raise ValueError(
+                        f"unknown record type {rt!r} in only=. Valid values: "
+                        "cell-spec, cell-instance, test-spec, test, dataset."
+                    )
+                allowed.add(token)
         else:
-            allowed = None   # None means all types
+            allowed = None  # None means all types
 
-        def _want(subdir: str) -> bool:
-            return allowed is None or subdir in allowed
+        _SUBDIRS = ("cell-spec", "cell-instance", "test-protocol", "test", "dataset")
 
-        def _glob(subdir: str) -> list[Path]:
+        def _all_in(subdir: str) -> list[Path]:
             d = examples / subdir
-            if not d.exists():
-                return []
-            all_files = sorted(d.glob("*.json"))
-            if self._session_paths:
-                # Only submit what was written by the most recent ws.save()
-                return [f for f in all_files if f in self._session_paths]
-            # Fallback: no session tracking (e.g. submit called without save in this session)
-            return all_files
+            return sorted(d.glob("*.json")) if d.exists() else []
 
-        results: list[dict] = []
+        wanted = [s for s in _SUBDIRS if allowed is None or s in allowed]
+
+        # ── Select which files to submit (R-9: never silently submit leftovers) ─
+        if self._session_paths:
+            # Only what the most recent ws.save() wrote this session.
+            selected = {s: [f for f in _all_in(s) if f in self._session_paths] for s in wanted}
+        elif submit_all:
+            selected = {s: _all_in(s) for s in wanted}
+        else:
+            on_disk = sum(len(_all_in(s)) for s in wanted)
+            if on_disk:
+                raise SubmitError(
+                    f"No records were saved in this session, but {on_disk} record(s) exist on "
+                    "disk. Call ws.save() first, or pass submit_all=True to submit them."
+                )
+            selected = {s: [] for s in wanted}
+
+        # ── Up-front integrity pass: parse every file before any network call ───
+        # A corrupt / truncated / BOM / non-UTF-8 record fails the batch loudly here
+        # rather than aborting mid-submit after some records are already live.
+        parsed: dict[Path, dict] = {}
+        unreadable: list[dict] = []
+        for s in wanted:
+            for f in selected[s]:
+                try:
+                    parsed[f] = json.loads(f.read_text(encoding="utf-8"))
+                except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
+                    print(f"  ERROR: {f.name} — unreadable/corrupt ({exc})")
+                    unreadable.append({"title": f.name, "source_local_id": f.stem, "ok": False,
+                                       "status": "unreadable", "error": str(exc), "iri": "",
+                                       "result": None})
+        if unreadable and not allow_partial:
+            raise SubmitError(
+                f"{len(unreadable)} record file(s) are unreadable/corrupt; aborting before "
+                "submitting (nothing was sent). Fix or remove them, or pass allow_partial=True.",
+                failed=unreadable, outcomes=unreadable,
+            )
+
+        def _selected(subdir: str) -> list[Path]:
+            return [f for f in selected.get(subdir, []) if f in parsed]
+
+        outcomes: list[dict] = list(unreadable)
 
         # ── Cross-record relationship graph ───────────────────────────────────
         # Read every saved record (not just this session's) so links resolve even
@@ -2777,8 +2869,8 @@ class AuthoringWorkspace:
                 spec_tests.setdefault(proto_iri, []).append(t_iri)
 
         # ── Cell specs ────────────────────────────────────────────────────────
-        for src in (_glob("cell-spec") if _want("cell-spec") else []):
-            raw = json.loads(src.read_text(encoding="utf-8"))
+        for src in _selected("cell-spec"):
+            raw = parsed[src]
             product = raw.get("cell_spec", {})
             mfr = product.get("manufacturer", {})
             mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
@@ -2797,12 +2889,13 @@ class AuthoringWorkspace:
                 raw, wid=wid, pid=pid, ver=ver,
                 source_local_id=source_local_id, title=title,
             )
-            results.extend(_do_submit(payload, url, key, title))
+            outcomes.append(_do_submit(payload, url, key, title,
+                                       source_local_id=source_local_id, publication_mode=publication_mode))
 
         # ── Cell instances ────────────────────────────────────────────────────
         cell_spec_dir = examples / "cell-spec"
-        for src in (_glob("cell-instance") if _want("cell-instance") else []):
-            raw = json.loads(src.read_text(encoding="utf-8"))
+        for src in _selected("cell-instance"):
+            raw = parsed[src]
             ci = raw.get("cell_instance", {})
             label = ci.get("name") or ci.get("serial_number") or ci.get("short_id", "")
             source_local_id = ci.get("short_id") or label.lower().replace(" ", "-")
@@ -2842,13 +2935,14 @@ class AuthoringWorkspace:
                 related_resources=related,
                 preview=preview,
             )
-            results.extend(_do_submit(payload, url, key, label))
+            outcomes.append(_do_submit(payload, url, key, label,
+                                       source_local_id=source_local_id, publication_mode=publication_mode))
 
         # ── Test specs (protocols) ────────────────────────────────────────────
         # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
         # so a test's conformsTo relationship resolves to a real page.
-        for src in (_glob("test-protocol") if _want("test-protocol") else []):
-            raw = json.loads(src.read_text(encoding="utf-8"))
+        for src in _selected("test-protocol"):
+            raw = parsed[src]
             tp = raw.get("test_spec", {})
             title = tp.get("name") or tp.get("short_id", "")
             source_local_id = tp.get("short_id") or src.stem
@@ -2871,11 +2965,12 @@ class AuthoringWorkspace:
                 source_local_id=source_local_id, title=title,
                 related_resources=related,
             )
-            results.extend(_do_submit(payload, url, key, title))
+            outcomes.append(_do_submit(payload, url, key, title,
+                                       source_local_id=source_local_id, publication_mode=publication_mode))
 
         # ── Tests ─────────────────────────────────────────────────────────────
-        for src in (_glob("test") if _want("test") else []):
-            raw = json.loads(src.read_text(encoding="utf-8"))
+        for src in _selected("test"):
+            raw = parsed[src]
             test = raw.get("test", {})
             title = test.get("name") or test.get("short_id", "")
             source_local_id = test.get("short_id") or src.stem
@@ -2898,11 +2993,12 @@ class AuthoringWorkspace:
                 source_local_id=source_local_id, title=title,
                 related_resources=related,
             )
-            results.extend(_do_submit(payload, url, key, title))
+            outcomes.append(_do_submit(payload, url, key, title,
+                                       source_local_id=source_local_id, publication_mode=publication_mode))
 
         # ── Datasets ──────────────────────────────────────────────────────────
-        for src in (_glob("dataset") if _want("dataset") else []):
-            raw = json.loads(src.read_text(encoding="utf-8"))
+        for src in _selected("dataset"):
+            raw = parsed[src]
             ds = raw.get("dataset", {})
             title = ds.get("name") or ds.get("short_id", "")
             source_local_id = ds.get("short_id") or src.stem
@@ -2941,20 +3037,29 @@ class AuthoringWorkspace:
                 related_resources=related,
                 preview=preview,
             )
-            results.extend(_do_submit(payload, url, key, title))
+            outcomes.append(_do_submit(payload, url, key, title,
+                                       source_local_id=source_local_id, publication_mode=publication_mode))
 
-        if results:
-            statuses = {(r.get("response") or {}).get("status") for r in results}
+        if outcomes:
             self._search_cache = None
-            print(f"\nSubmitted {len(results)} record(s) to {url}")
-            if "published" in statuses:
-                print("  Published - records are live on the platform. Run ws.status() to see them.")
-            if "validated" in statuses:
-                print("  Some records are staged for review (status: validated) - "
-                      "a registry admin approves them with ws.approve(<id>).")
-            if {"failed", "rejected"} & statuses:
-                print("  Some records did not publish (failed/rejected) - see messages above.")
-        return results
+            live = [o for o in outcomes if o.get("status") == "published"]
+            staged = [o for o in outcomes if o.get("status") == "validated"]
+            failed = [o for o in outcomes if not o.get("ok")]
+            print(f"\nAttempted {len(outcomes)} record(s) to {url}: "
+                  f"{len(live)} live, {len(staged)} staged for review, {len(failed)} failed")
+            if live:
+                print("  Live records are on the platform. Run ws.status() to see them.")
+            if staged:
+                print("  Staged records await a registry admin's approval "
+                      "(ws.pending() to list, ws.approve(<id>) to promote).")
+            if failed:
+                print(f"  {len(failed)} record(s) did NOT publish — see the ERROR lines above.")
+                if not allow_partial:
+                    raise SubmitError(
+                        f"{len(failed)} of {len(outcomes)} record(s) failed to submit.",
+                        failed=failed, outcomes=outcomes,
+                    )
+        return outcomes
 
     def pending(
         self,
@@ -5934,7 +6039,7 @@ def _cell_spec_submission_payload(
         "publisher_id": pid,
         "source_version": ver,
         "title": title,
-        "publication_intent": {"mode": "canonical-publication"},
+        "publication_intent": {"mode": STAGED_PUBLICATION_MODE},
         "provenance": {
             "source_system": "battinfo-authoring",
             "workflow_name": "authoring-workspace-submission",
@@ -6016,7 +6121,7 @@ def _cell_instance_submission_payload(
         "publisher_id": pid,
         "source_version": ver,
         "title": title,
-        "publication_intent": {"mode": "canonical-publication"},
+        "publication_intent": {"mode": STAGED_PUBLICATION_MODE},
         "provenance": {
             "source_system": "battinfo-authoring",
             "workflow_name": "authoring-workspace-submission",
@@ -6107,7 +6212,7 @@ def _simple_submission_payload(
         "publisher_id": pid,
         "source_version": ver,
         "title": title,
-        "publication_intent": {"mode": "canonical-publication"},
+        "publication_intent": {"mode": STAGED_PUBLICATION_MODE},
         "provenance": {
             "source_system": "battinfo-authoring",
             "workflow_name": "authoring-workspace-submission",
@@ -6144,24 +6249,42 @@ def _lift_funding_to_provenance(payload: dict) -> None:
             return
 
 
-def _do_submit(payload: dict, url: str, key: str, title: str) -> list[dict]:
-    """Submit one record, retrying once with a bumped source_version on 409."""
+def _do_submit(
+    payload: dict,
+    url: str,
+    key: str,
+    title: str,
+    *,
+    source_local_id: str = "",
+    publication_mode: str = STAGED_PUBLICATION_MODE,
+) -> dict:
+    """Submit one record; return a structured outcome (never silently drop it).
+
+    Retries once with a bumped source_version on 409. Returns a dict with ``ok``
+    (True for published/validated, False for failed/rejected/errored), ``status``,
+    ``error`` (the message when not ok), ``iri`` and the raw ``result``. A failed
+    record is reported in the outcome, never swallowed, so the batch surfaces it.
+    """
     import copy
 
     from battinfo.api import submit_publication_package
 
+    payload.setdefault("publication_intent", {})["mode"] = publication_mode
     _lift_funding_to_provenance(payload)
     for attempt in range(2):
         try:
             result = submit_publication_package(payload, registry_base_url=url, api_key=key)
-            resources = (result.get("response") or {}).get("resources") or []
-            iri    = resources[0].get("canonical_iri", "") if resources else ""
-            status = (result.get("response") or {}).get("status", "unknown")
+            response = result.get("response") if isinstance(result.get("response"), dict) else {}
+            status = response.get("status", "unknown")
+            resources = response.get("resources") or []
+            iri = resources[0].get("canonical_iri", "") if resources else ""
+            ok = status not in ("failed", "rejected", "error")
             print(f"  {title}  [{status}]  {iri}")
-            return [result]
+            return {"title": title, "source_local_id": source_local_id, "ok": ok,
+                    "status": status, "iri": iri, "error": None, "result": result}
         except RuntimeError as exc:
             if attempt == 0 and "409" in str(exc):
-                # Payload changed since last submission — bump source_version and retry
+                # Payload changed since last submission — bump source_version and retry.
                 payload = copy.deepcopy(payload)
                 ver = payload.get("source_version", "")
                 payload["source_version"] = _bump_version(ver)
@@ -6169,8 +6292,11 @@ def _do_submit(payload: dict, url: str, key: str, title: str) -> list[dict]:
                     payload["resource"]["source_version"] = payload["source_version"]  # type: ignore[index]
                 continue
             print(f"  ERROR: {title} — {exc}")
-            return []
-    return []
+            return {"title": title, "source_local_id": source_local_id, "ok": False,
+                    "status": "error", "iri": "", "error": str(exc), "result": None}
+    # Unreachable in practice (the loop returns on every path); defensive for mypy.
+    return {"title": title, "source_local_id": source_local_id, "ok": False,
+            "status": "error", "iri": "", "error": "submission failed after retry", "result": None}
 
 
 def _bump_version(ver: str) -> str:
