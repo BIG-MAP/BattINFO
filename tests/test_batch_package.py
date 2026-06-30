@@ -48,6 +48,13 @@ def _make_batch(tmp_path: Path, n_cells: int = 2, n_files_per_cell: int = 2) -> 
     return batch_dir
 
 
+def test_init_batch_rejects_duplicate_serials(tmp_path: Path) -> None:
+    # Two cells with the same serial slug to the same folder; init_batch must fail closed
+    # instead of silently overwriting the first cell's manifest on disk (mkdir exist_ok).
+    with pytest.raises(ValueError, match="unique serial"):
+        init_batch(tmp_path / "batch", "Energizer CR2032", 2, serial_numbers=["SN1", "SN1"])
+
+
 # ── _collect_data_files ────────────────────────────────────────────────────────
 
 class TestCollectDataFiles:
@@ -150,6 +157,44 @@ class TestPackageBatch:
         result = package_batch(batch, creators=CREATORS)
         assert result["cell_count"] == 2
         assert result["entry_count"] == 6
+
+    def test_rejects_duplicate_cell_iri_across_folders(self, tmp_path: Path) -> None:
+        # Two cells sharing a serial / cell_name resolve to the same IRI; publishing
+        # both would silently overwrite one on ingest, so package_batch must fail closed
+        # (the second IRI-minting path the Phase 3 review flagged as a known gap).
+        import yaml
+
+        from battinfo.contribution import CONTRIBUTION_MANIFEST
+
+        batch = _make_batch(tmp_path, n_cells=2)
+        cell_dirs = sorted(
+            d for d in batch.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
+        )
+        assert len(cell_dirs) == 2
+        m0 = yaml.safe_load((cell_dirs[0] / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8"))
+        m1_path = cell_dirs[1] / CONTRIBUTION_MANIFEST
+        m1 = yaml.safe_load(m1_path.read_text(encoding="utf-8"))
+        m1["cell_iri"] = m0["cell_iri"]  # force the duplicate-serial collision
+        m1_path.write_text(yaml.safe_dump(m1), encoding="utf-8")
+        with pytest.raises(ValueError, match="same cell IRI"):
+            package_batch(batch, creators=CREATORS)
+
+    def test_same_kind_undated_files_get_distinct_test_iris(self, tmp_path: Path) -> None:
+        # Multiple same-kind, undated data files in ONE cell must mint distinct test IRIs
+        # (the test seed now carries a per-file discriminator). Previously they collapsed
+        # onto a single test @id and overwrote each other on ingest, despite a unique cell IRI.
+        import re
+
+        batch_dir = tmp_path / "batch"
+        result = init_batch(batch_dir, "Energizer CR2032", 1, batch_id="LOT", lab="L", operator="O")
+        cell = batch_dir / result["cells"][0]["folder"]
+        for n in (1, 2, 3):
+            (cell / f"cycling_00{n}.csv").write_text("time,voltage\n0,3.0\n1,2.9\n", encoding="utf-8")
+        pkg = package_batch(batch_dir, creators=CREATORS)
+        assert pkg["entry_count"] == 3
+        bundle_text = (Path(pkg["staging_dir"]) / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
+        test_ids = set(re.findall(r"https://w3id\.org/battinfo/test/[a-z0-9-]+", bundle_text))
+        assert len(test_ids) == 3, "undated same-kind tests in one cell collided onto one IRI"
 
     def test_bundle_json_parseable(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path)
