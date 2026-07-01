@@ -922,15 +922,19 @@ def add_to_batch(
 _RAW_EXTENSIONS = {".csv", ".nda", ".ndax", ".ccs", ".txt", ".xlsx", ".mpt", ".mpr", ".idf", ".dta"}
 
 
-def _group_files_by_cell(folder: Path) -> dict[str, list[Path]]:
+def _group_files_by_cell(folder: Path, n_cells: int | None = None) -> dict[str, list[Path]]:
     """Detect cell groupings from a flat folder of raw data files.
 
     Tries a series of filename patterns to find a consistent numeric token
-    that identifies the cell/channel number.  Falls back to treating all
-    files as a single cell if no pattern matches.
+    that identifies the cell/channel number.
 
     Returns an ordered dict mapping cell_key (e.g. ``"1"``, ``"2"``) to a
     list of :class:`Path` objects for that cell's files.
+
+    If no grouping can be detected among multiple files, raises ``ValueError``
+    rather than silently collapsing them into one cell (which mis-attributes
+    every file to a single synthetic cell). Pass ``n_cells=1`` to confirm the
+    files genuinely belong to one cell.
     """
     import re
 
@@ -988,8 +992,15 @@ def _group_files_by_cell(folder: Path) -> dict[str, list[Path]]:
                     groups.setdefault(key, []).append(f)
                 return dict(sorted(groups.items(), key=lambda kv: int(kv[0])))
 
-    # Cannot detect grouping — treat as single cell
-    return {"1": raw}
+    # Cannot detect a grouping. Silently collapsing >1 file into one synthetic cell
+    # mis-attributes every file, so require the caller to confirm it is genuinely one cell.
+    if n_cells == 1:
+        return {"1": raw}
+    raise ValueError(
+        f"Could not detect a cell grouping among {len(raw)} raw files in {folder}: their "
+        f"filenames share no distinguishing numeric token. If these are genuinely one cell, "
+        f"pass n_cells=1; otherwise rename the files so each cell has a distinct number."
+    )
 
 
 def _collect_data_files(cell_dir: Path) -> list[tuple[Path, Path | None]]:
@@ -1284,7 +1295,7 @@ def push_batch(
             )) for d in subdirs_with_files}
         else:
             # Flat layout: group by filename pattern then move
-            groups = _group_files_by_cell(folder)
+            groups = _group_files_by_cell(folder, n_cells=n_cells)
             if not groups:
                 raise ValueError(f"No raw data files found in {folder}.")
 
