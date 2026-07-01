@@ -296,3 +296,55 @@ def test_submit_error_partitions_outcomes(tmp_path: Path, monkeypatch: pytest.Mo
     assert len(exc_info.value.outcomes) == 2
     assert len(exc_info.value.failed) == 1
     assert len(exc_info.value.submitted) == 1
+
+
+# ── C-6: validate at submit (no validation lie) ───────────────────────────────
+
+def test_submit_fails_closed_on_unrecognised_record(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = _saved_ws(tmp_path)
+    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    spec_file.write_text('{"bogus": {}}', encoding="utf-8")  # valid JSON, not a known record type
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    with pytest.raises(SubmitError):
+        ws.submit(**_CREDS)
+    assert fake.calls == 0  # blocked before any network call
+
+
+def test_submit_fails_closed_on_invalid_record(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import json
+
+    ws = _saved_ws(tmp_path)
+    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    rec = json.loads(spec_file.read_text(encoding="utf-8"))
+    rec["cell_spec"] = {"name": "broken"}  # recognised as a cell_spec, but missing required fields
+    spec_file.write_text(json.dumps(rec), encoding="utf-8")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    with pytest.raises(SubmitError):
+        ws.submit(**_CREDS)
+    assert fake.calls == 0  # an invalid record never reaches the registry
+
+
+def test_submit_payload_carries_real_validation_block(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = _saved_ws(tmp_path)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+    block = fake.payloads[0]["validation"]
+    # The real verdict, not the builder's hardcoded {"ok": True, ..., "policy": "default"}.
+    assert block["ok"] is True
+    assert block["policy"] == "publisher"
+
+
+@pytest.mark.parametrize("body", ["[1, 2, 3]", "5", "true", "null", '"hello"'])
+def test_submit_fails_closed_on_non_object_record(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, body: str
+) -> None:
+    # A hand-edited record that is valid JSON but NOT an object (array/number/bool/null/
+    # string) must fail closed with a clean SubmitError, not crash submit() with a raw
+    # TypeError from validate_record.
+    ws = _saved_ws(tmp_path)
+    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    spec_file.write_text(body, encoding="utf-8")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    with pytest.raises(SubmitError):
+        ws.submit(**_CREDS)
+    assert fake.calls == 0

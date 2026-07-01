@@ -2790,31 +2790,59 @@ class AuthoringWorkspace:
                 )
             selected = {s: [] for s in wanted}
 
-        # ── Up-front integrity pass: parse every file before any network call ───
-        # A corrupt / truncated / BOM / non-UTF-8 record fails the batch loudly here
-        # rather than aborting mid-submit after some records are already live.
+        # ── Up-front integrity pass: parse AND validate every record before any network
+        # call. A corrupt/unreadable or invalid record fails the batch loudly here rather
+        # than aborting mid-submit or publishing bad data. Records are validated at save(),
+        # but re-validating catches hand-edited / external / save-bypassed records, and the
+        # real verdict travels in each payload for the registry's promotion gate (instead of
+        # a hardcoded validation: ok=True).
+        from battinfo.validate.record import validate_record
+
         parsed: dict[Path, dict] = {}
-        unreadable: list[dict] = []
+        validations: dict[Path, dict] = {}
+        prefailed: list[dict] = []
         for s in wanted:
             for f in selected[s]:
                 try:
-                    parsed[f] = json.loads(f.read_text(encoding="utf-8"))
+                    rec = json.loads(f.read_text(encoding="utf-8"))
                 except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
                     print(f"  ERROR: {f.name} — unreadable/corrupt ({exc})")
-                    unreadable.append({"title": f.name, "source_local_id": f.stem, "ok": False,
-                                       "status": "unreadable", "error": str(exc), "iri": "",
-                                       "result": None})
-        if unreadable and not allow_partial:
+                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
+                                      "status": "unreadable", "error": str(exc), "iri": "", "result": None})
+                    continue
+                if not isinstance(rec, dict):
+                    error = "not a JSON object record"
+                    print(f"  ERROR: {f.name} — {error}")
+                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
+                                      "status": "invalid", "error": error, "iri": "", "result": None})
+                    continue
+                try:
+                    result = validate_record(rec, policy="publisher")
+                except (ValueError, TypeError) as exc:  # unrecognised / non-object record
+                    error = f"not a recognised record ({exc})"
+                    print(f"  ERROR: {f.name} — {error}")
+                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
+                                      "status": "invalid", "error": error, "iri": "", "result": None})
+                    continue
+                if not result.ok:
+                    error = "; ".join(result.errors)
+                    print(f"  ERROR: {f.name} — failed validation: {error}")
+                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
+                                      "status": "invalid", "error": error, "iri": "", "result": None})
+                    continue
+                parsed[f] = rec
+                validations[f] = {"ok": True, "errors": list(result.errors), "policy": "publisher"}
+        if prefailed and not allow_partial:
             raise SubmitError(
-                f"{len(unreadable)} record file(s) are unreadable/corrupt; aborting before "
-                "submitting (nothing was sent). Fix or remove them, or pass allow_partial=True.",
-                failed=unreadable, outcomes=unreadable,
+                f"{len(prefailed)} record(s) are unreadable or failed validation; aborting before "
+                "submitting (nothing was sent). Fix them, or pass allow_partial=True.",
+                failed=prefailed, outcomes=prefailed,
             )
 
         def _selected(subdir: str) -> list[Path]:
             return [f for f in selected.get(subdir, []) if f in parsed]
 
-        outcomes: list[dict] = list(unreadable)
+        outcomes: list[dict] = list(prefailed)
 
         # ── Cross-record relationship graph ───────────────────────────────────
         # Read every saved record (not just this session's) so links resolve even
@@ -2890,7 +2918,8 @@ class AuthoringWorkspace:
                 source_local_id=source_local_id, title=title,
             )
             outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode))
+                                       source_local_id=source_local_id, publication_mode=publication_mode,
+                                       validation=validations[src]))
 
         # ── Cell instances ────────────────────────────────────────────────────
         cell_spec_dir = examples / "cell-spec"
@@ -2936,7 +2965,8 @@ class AuthoringWorkspace:
                 preview=preview,
             )
             outcomes.append(_do_submit(payload, url, key, label,
-                                       source_local_id=source_local_id, publication_mode=publication_mode))
+                                       source_local_id=source_local_id, publication_mode=publication_mode,
+                                       validation=validations[src]))
 
         # ── Test specs (protocols) ────────────────────────────────────────────
         # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
@@ -2966,7 +2996,8 @@ class AuthoringWorkspace:
                 related_resources=related,
             )
             outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode))
+                                       source_local_id=source_local_id, publication_mode=publication_mode,
+                                       validation=validations[src]))
 
         # ── Tests ─────────────────────────────────────────────────────────────
         for src in _selected("test"):
@@ -2994,7 +3025,8 @@ class AuthoringWorkspace:
                 related_resources=related,
             )
             outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode))
+                                       source_local_id=source_local_id, publication_mode=publication_mode,
+                                       validation=validations[src]))
 
         # ── Datasets ──────────────────────────────────────────────────────────
         for src in _selected("dataset"):
@@ -3038,7 +3070,8 @@ class AuthoringWorkspace:
                 preview=preview,
             )
             outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode))
+                                       source_local_id=source_local_id, publication_mode=publication_mode,
+                                       validation=validations[src]))
 
         if outcomes:
             self._search_cache = None
@@ -6257,6 +6290,7 @@ def _do_submit(
     *,
     source_local_id: str = "",
     publication_mode: str = STAGED_PUBLICATION_MODE,
+    validation: dict[str, Any] | None = None,
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
@@ -6270,6 +6304,8 @@ def _do_submit(
     from battinfo.api import submit_publication_package
 
     payload.setdefault("publication_intent", {})["mode"] = publication_mode
+    if validation is not None:
+        payload["validation"] = validation  # the real verdict, not the builder's ok=True default
     _lift_funding_to_provenance(payload)
     for attempt in range(2):
         try:
