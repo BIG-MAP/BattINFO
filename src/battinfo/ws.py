@@ -1019,6 +1019,13 @@ class AuthoringWorkspace:
         for key, value in remaining.items():
             out.append(f"{key:22} = {value}")
         path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        # A-6: this file holds API keys / R2 secrets / Zenodo tokens — restrict to owner-only.
+        # Best-effort: a no-op on Windows and filesystems without POSIX permission bits.
+        try:
+            import os
+            os.chmod(path, 0o600)
+        except OSError:
+            pass
         return path
 
     def login(self, api_key: str, *, registry_url: str | None = None) -> dict:
