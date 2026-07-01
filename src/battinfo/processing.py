@@ -13,8 +13,31 @@ which pulls in: batterydf, matplotlib, plotly.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, NamedTuple
+
+_PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
+def _is_valid_png(path: Path) -> bool:
+    """A non-empty file starting with the PNG signature — cheap content sanity so a stale or
+    partially-written .png is regenerated rather than reused and published (C-4)."""
+    try:
+        with path.open("rb") as handle:
+            return handle.read(len(_PNG_MAGIC)) == _PNG_MAGIC
+    except OSError:
+        return False
+
+
+def _is_valid_plot_json(path: Path) -> bool:
+    """Parseable JSON carrying a Plotly figure's ``data`` key — so a stale/garbage .plot.json is
+    regenerated rather than reused and published (C-4)."""
+    try:
+        obj = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return isinstance(obj, dict) and "data" in obj
 
 
 class ProcessedTimeseries(NamedTuple):
@@ -215,10 +238,18 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
     try:
         import contextlib as _cl
         import io as _io
+        df = None
         if out_path.exists():
             import pandas as pd
-            df = pd.read_parquet(out_path)
-        else:
+            try:
+                df = pd.read_parquet(out_path)
+            except Exception:
+                # A corrupt cached .bdf.parquet must not be swallowed into a "no deps" result
+                # (which would leave the poison in place to fail every future run): drop it and
+                # regenerate from the raw source (R-8).
+                out_path.unlink(missing_ok=True)
+                df = None
+        if df is None:
             # Suppress any diagnostic prints from batterydf plugins
             with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
                 df = bdf.read(raw_path, validate=False)
@@ -247,8 +278,8 @@ def _make_static_plot(
         return None
 
     out_path = work_dir / f"{stem}.png"
-    if out_path.exists():
-        return out_path
+    if out_path.exists() and _is_valid_png(out_path):
+        return out_path  # reuse only a content-valid artifact; else fall through to regenerate
 
     df = _read_bdf_csv(source)
     if df is None:
@@ -261,6 +292,8 @@ def _make_static_plot(
 
     if voltage_col is None or time_col is None:
         return None
+    if len(df) < 2 or df[voltage_col].dropna().empty:
+        return None  # degenerate input (empty / single-row / all-NaN voltage) -> no real preview (C-5)
 
     try:
         bdf.plot(
@@ -308,8 +341,8 @@ def _make_interactive_plot(
         return None
 
     out_path = work_dir / f"{stem}.plot.json"
-    if out_path.exists():
-        return out_path
+    if out_path.exists() and _is_valid_plot_json(out_path):
+        return out_path  # reuse only a content-valid artifact; else fall through to regenerate
 
     df = _read_bdf_csv(source)
     if df is None:
@@ -322,6 +355,8 @@ def _make_interactive_plot(
 
     if voltage_col is None or time_col is None:
         return None
+    if len(df) < 2 or df[voltage_col].dropna().empty:
+        return None  # degenerate input (empty / single-row / all-NaN voltage) -> no real preview (C-5)
 
     try:
         fig = bdf.explore(
