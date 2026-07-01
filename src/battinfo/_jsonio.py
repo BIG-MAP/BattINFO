@@ -19,8 +19,12 @@ from battinfo.canonical_aliases import record_to_snake_aliases
 
 
 def read_json(path: Path) -> dict[str, Any]:
-    """Parse a UTF-8 JSON file into a dict."""
-    return json.loads(path.read_text(encoding="utf-8"))
+    """Parse a UTF-8 JSON file into a dict.
+
+    Uses ``utf-8-sig`` so a leading BOM (the Windows/Excel/legacy-instrument norm) is tolerated
+    rather than corrupting the first key — a plain UTF-8 file reads identically. Routing record
+    loads through here gives one uniform encoding policy (R-10)."""
+    return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
 def read_record_json(path: Path) -> dict[str, Any]:
