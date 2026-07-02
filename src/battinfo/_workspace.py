@@ -1715,23 +1715,6 @@ class Workspace:
             )
         return results
 
-    def build_index(
-        self,
-        *,
-        source_root: PathLike | None = None,
-        out_path: PathLike | None = None,
-        validate: bool = True,
-        validation_policy: str = "strict",
-    ) -> dict[str, Any]:
-        target_root = _as_path(source_root) if source_root is not None else self.source_root
-        target_index = _as_path(out_path) if out_path is not None else self.index_path
-        return build_index_api(
-            source_root=target_root,
-            out_path=target_index,
-            validate=validate,
-            validation_policy=validation_policy,
-        )
-
     def query_cell_specs(self, **filters: Any) -> list[dict[str, Any]]:
         filters.setdefault("cell_specs_dir", self.source_root / "cell-spec")
         return query_cell_specs(**filters)
