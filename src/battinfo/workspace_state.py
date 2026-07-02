@@ -31,6 +31,32 @@ WORKSPACE_STATE_SCHEMA_VERSION = "0.1.0"
 WORKSPACE_STATE_FILENAME = "battinfo-authoring-workspace.json"
 
 
+def _state_version_key(version: str) -> tuple[int, int]:
+    """(major, minor) of a schema version, for compatibility comparison.
+
+    While the schema is pre-1.0, a minor bump may be breaking, so both components are compared.
+    An unparseable version sorts lowest so it is never mistaken for a newer format."""
+    parts = (version.split(".") + ["0", "0"])[:2]
+    try:
+        return (int(parts[0]), int(parts[1]))
+    except ValueError:
+        return (-1, -1)
+
+
+def _assert_compatible_state_version(raw: object) -> None:
+    """Raise a clear error if the on-disk workspace state was written by a newer, incompatible
+    schema than this BattINFO understands — rather than silently loading it under the current
+    model and misinterpreting fields whose meaning may have changed. (D-8)"""
+    on_disk = raw.get("schema_version") if isinstance(raw, dict) else None
+    if not isinstance(on_disk, str) or not on_disk:
+        return  # absent/legacy: tolerate and let the current model apply its defaults
+    if _state_version_key(on_disk) > _state_version_key(WORKSPACE_STATE_SCHEMA_VERSION):
+        raise ValueError(
+            f"Workspace state schema_version {on_disk!r} is newer than this BattINFO supports "
+            f"({WORKSPACE_STATE_SCHEMA_VERSION!r}); upgrade BattINFO to open this workspace."
+        )
+
+
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
 
@@ -461,7 +487,9 @@ class WorkspaceStateStore:
     @classmethod
     def open(cls, root: PathLike) -> "WorkspaceStateStore":
         root_path = _as_path(root)
-        manifest = WorkspaceManifest.model_validate(_read_json(root_path / WORKSPACE_STATE_FILENAME))
+        raw = _read_json(root_path / WORKSPACE_STATE_FILENAME)
+        _assert_compatible_state_version(raw)
+        manifest = WorkspaceManifest.model_validate(raw)
         store = cls(
             root_path,
             name=manifest.workspace_id,

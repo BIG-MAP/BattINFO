@@ -247,6 +247,7 @@ def import_converter_jsonld_record(
     model: str | None = None,
     chemistry: str | None = None,
     schema_version: str = "1.0.0",
+    validate: bool = True,
 ) -> ConverterImportResult:
     raw_payload, source_file = _load_source(source)
     warnings: list[str] = []
@@ -410,8 +411,18 @@ def import_converter_jsonld_record(
         warnings=warnings,
     )
 
+    result_specification = CellSpecification.from_library_record(record)
+    if validate:
+        # Match the other interop importers: schema-validate the emitted cell-spec so a malformed
+        # import fails loudly here, not silently downstream. `to_record()` is the canonical
+        # projection the validator expects (the library record uses a different key layout). Lazy
+        # import avoids an interop<->api import cycle. (D-6)
+        from battinfo.api import _validate_canonical_record  # noqa: PLC0415
+
+        _validate_canonical_record(result_specification.to_record())
+
     return ConverterImportResult(
-        specification=CellSpecification.from_library_record(record),
+        specification=result_specification,
         record=record,
         warnings=warnings,
         test_specs=test_specs,
@@ -427,6 +438,7 @@ def import_converter_package(
     model: str | None = None,
     chemistry: str | None = None,
     schema_version: str = "1.0.0",
+    validate: bool = True,
 ) -> ConverterImportPackage:
     imported = import_converter_jsonld_record(
         source,
@@ -435,6 +447,7 @@ def import_converter_package(
         model=model,
         chemistry=chemistry,
         schema_version=schema_version,
+        validate=validate,
     )
     specification = imported.specification
     cell_spec = CellSpecification.from_cell_specification(specification)
