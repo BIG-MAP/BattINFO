@@ -2872,6 +2872,21 @@ def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None
     raise ValueError(report.errors[0].message)
 
 
+def _record_content_differs(existing_path: PathLike, new_doc: Mapping[str, Any]) -> bool:
+    """True if the record already on disk differs from *new_doc* in a meaningful way.
+
+    Volatile timestamps and identity scaffolding (see ``_strip_volatile``) are ignored, so an
+    idempotent re-save of unchanged content reports False and a real edit reports True. A
+    missing or unreadable existing file is treated as "differs" (the write is not a no-op)."""
+    from battinfo._workspace import _strip_volatile
+
+    try:
+        existing = _load_json(_as_path(existing_path))
+    except (OSError, ValueError):
+        return True
+    return _strip_volatile(existing) != _strip_volatile(dict(new_doc))
+
+
 def save_record(
     record: dict[str, Any] | PathLike,
     *,
@@ -2921,12 +2936,19 @@ def save_record(
         )
 
     operation = "updated" if existing_path is not None else "created"
+    # An upsert that replaces an existing record with genuinely different content (ignoring
+    # volatile timestamps) is reported explicitly, so a same-IRI overwrite is never silent —
+    # the caller can surface it or choose mode='create_only' to refuse it. (A-4)
+    content_changed = False
+    if existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT:
+        content_changed = _record_content_differs(existing_path, doc)
     payload: dict[str, Any] = {
         "status": "dry-run" if dry_run else operation,
         "id": entity_id,
         "entity_type": entity_type,
         "path": str(target_path),
         "mode": mode_normalized,
+        "content_changed": content_changed,
         "published": False,
     }
 
