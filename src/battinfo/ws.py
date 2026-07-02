@@ -3666,6 +3666,7 @@ class AuthoringWorkspace:
         published  = False
 
         if publish:
+            self._assert_publishable(jsonld)  # fail closed BEFORE minting an irreversible DOI (R-7)
             pub = client.publish_deposit(deposit_id)
             doi = pub.get("doi", prereserved_doi)
             published = True
@@ -3863,14 +3864,11 @@ class AuthoringWorkspace:
         )
 
         out = Path(output) if output else self._root / "battinfo.preview.jsonld"
-        out.write_text(json.dumps(jsonld, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"  Written: {out}")
-        print(f"  Graph nodes: {len(jsonld.get('@graph', []))}")
-        print(f"  Data files:  {len(data_filenames)}")
 
-        # Gold-standard review: run the FULL publication validator (JSON-LD + structural
-        # + SHACL), not just the syntactic JSON-LD check, so a metadata-poor or
-        # non-conformant preview is surfaced here rather than discovered after upload.
+        # Gold-standard review runs BEFORE the file is written, so a metadata-poor or
+        # non-conformant record is surfaced up front rather than after an authoritative-looking
+        # file has already been produced (D-4). Uses the FULL publication validator (JSON-LD +
+        # structural + SHACL), not just the syntactic JSON-LD check.
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
             report = validate_publication_report(jsonld, policy="publisher")
@@ -3885,9 +3883,39 @@ class AuthoringWorkspace:
                     print(f"    ERROR   {i.message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
-        except Exception as exc:  # noqa: BLE001 — preview must still return its path
+        except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
             print(f"  Gold-standard validation could not run: {exc}")
+
+        out.write_text(json.dumps(jsonld, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  Written: {out}")
+        print(f"  Graph nodes: {len(jsonld.get('@graph', []))}")
+        print(f"  Data files:  {len(data_filenames)}")
         return out
+
+    def _assert_publishable(self, jsonld: dict) -> None:
+        """Fail closed before minting an irreversible DOI: refuse to publish a record that has
+        validation errors, or a distribution whose data file is missing from the deposit (R-7).
+
+        Missing data files are checked from the most recent :meth:`_bundle_data_files` run."""
+        missing = getattr(self, "_missing_data_files", [])
+        if missing:
+            raise RuntimeError(
+                f"Refusing to publish: {len(missing)} distribution data file(s) are missing and were "
+                f"not uploaded, so the deposit would be incomplete: {'; '.join(missing[:5])}. "
+                "Fix the paths (or remove the distributions), then re-run."
+            )
+        try:
+            from battinfo.validate import validate_publication_report  # noqa: PLC0415
+            report = validate_publication_report(jsonld, policy="publisher")
+        except Exception as exc:  # noqa: BLE001
+            raise RuntimeError(f"Could not validate the record before publishing: {exc}") from exc
+        errors = [i for i in report.issues if i.severity == "error"]
+        if errors:
+            raise RuntimeError(
+                f"Refusing to publish: {len(errors)} validation error(s) in the record "
+                "(run ws.preview_jsonld() to see them, or leave the deposit as a draft): "
+                + "; ".join(i.message for i in errors[:5])
+            )
 
     def _bundle_data_files(self, tmpdir: Path, examples: Path) -> list[str]:
         """Copy data files into *tmpdir*, zipping by test kind when >90 files."""
@@ -3910,6 +3938,7 @@ class AuthoringWorkspace:
 
         # Collect local data file paths
         collected: list[tuple[Path, str]] = []  # (local_path, kind)
+        missing: list[str] = []  # file-scheme distributions whose local file is absent
         ds_dir = examples / "dataset"
         if ds_dir.exists():
             for ds_file in sorted(ds_dir.glob("*.json")):
@@ -3925,8 +3954,16 @@ class AuthoringWorkspace:
                         lp = Path(url.replace("file:///", "").replace("file://", ""))
                         if lp.exists():
                             collected.append((lp, kind))
+                        else:
+                            # Do NOT silently drop a distribution whose data file is missing: the
+                            # deposit would be published incomplete (a distribution pointing at a
+                            # file that was never uploaded). Warn now; block publish later (R-7).
+                            missing.append(str(lp))
+                            print(f"  ⚠️  data file for a distribution is missing (not uploaded): {lp}")
                 except Exception:
                     continue
+        # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
+        self._missing_data_files = missing
 
         # Deduplicate (a file may appear in multiple distributions)
         seen: set[str] = set()
