@@ -6352,14 +6352,14 @@ def _do_submit(
             resources = response.get("resources") or []
             iri = resources[0].get("canonical_iri", "") if resources else ""
             ok = status not in ("failed", "rejected", "error")
-            # Echo only sanitised, known-safe display values in the progress line — never a raw
-            # registry-response field. The status is looked up from a fixed set (so a literal is
-            # printed, not the response value) and the IRI is a regex-extracted http(s) substring;
-            # both are defensive and break a CodeQL clear-text-logging false positive that treats
-            # the whole response as credential-tainted.
+            # Progress line: log only local/sanitised fields, never a raw registry-response value.
+            # `title` is local and the status is resolved to a literal from a fixed set; the
+            # canonical IRI is returned below for programmatic use but not echoed here. (CodeQL
+            # conservatively treats the whole HTTP response as credential-tainted because the
+            # api_key travels in the request headers, so any response-derived value read into a
+            # log is flagged.)
             display_status = next((s for s in _DISPLAY_STATUSES if s == status), "unknown")
-            _iri_match = re.match(r"https?://[\w.\-/:#%]+", iri) if isinstance(iri, str) else None
-            print(f"  {title}  [{display_status}]  {_iri_match.group(0) if _iri_match else ''}")
+            print(f"  {title}  [{display_status}]")
             return {"title": title, "source_local_id": source_local_id, "ok": ok,
                     "status": status, "iri": iri, "error": None, "result": result}
         except RuntimeError as exc:
