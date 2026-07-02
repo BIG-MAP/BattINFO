@@ -1968,16 +1968,22 @@ class AuthoringWorkspace:
             "via ws.add('test', data=...)."
         )
 
-    def save(self, validation_policy: str = "strict") -> dict:
+    def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
         """Save all records and rebuild the workspace index.
 
         Returns a summary dict with counts of written records.
         Only the records saved in this call will be submitted by the next
         ``ws.submit()`` — records left over from previous sessions in the
         same directory are ignored.
+
+        ``mode`` controls how an existing on-disk record with the same IRI is
+        treated. The default ``"upsert"`` updates it in place (the normal
+        edit-and-resave loop). Pass ``"create_only"`` to instead refuse to touch
+        any record that already exists, so a fresh authoring run cannot silently
+        overwrite records left by a previous session.
         """
         result = self._ws.save(
-            mode="upsert",
+            mode=mode,
             resolve_references=False,
             validation_policy=validation_policy,
         )
@@ -6381,6 +6387,7 @@ def _do_submit(
     if validation is not None:
         payload["validation"] = validation  # the real verdict, not the builder's ok=True default
     _lift_funding_to_provenance(payload)
+    bumped_version: str | None = None
     for attempt in range(2):
         try:
             result = submit_publication_package(payload, registry_base_url=url, api_key=key)
@@ -6398,22 +6405,33 @@ def _do_submit(
             display_status = next((s for s in _DISPLAY_STATUSES if s == status), "unknown")
             print(f"  {title}  [{display_status}]")
             return {"title": title, "source_local_id": source_local_id, "ok": ok,
-                    "status": status, "iri": iri, "error": None, "result": result}
+                    "status": status, "iri": iri, "error": None, "result": result,
+                    "version_bumped": bumped_version}
         except RuntimeError as exc:
-            if attempt == 0 and "409" in str(exc):
-                # Payload changed since last submission — bump source_version and retry.
+            # Prefer the structured status code (RegistryClientError.status_code) over matching
+            # the string "409", which could appear anywhere in an error/response body.
+            is_conflict = getattr(exc, "status_code", None) == 409 or "409" in str(exc)
+            if attempt == 0 and is_conflict:
+                # The registry already holds a record for this identity. It de-duplicates an
+                # identical re-submission on its side, so a 409 here means the content genuinely
+                # differs — bump source_version and retry as a new version. This is surfaced
+                # (printed + returned as version_bumped) rather than silently proliferating -vN.
                 payload = copy.deepcopy(payload)
                 ver = payload.get("source_version", "")
-                payload["source_version"] = _bump_version(ver)
+                bumped_version = _bump_version(ver)
+                payload["source_version"] = bumped_version
                 if "resource" in payload:
-                    payload["resource"]["source_version"] = payload["source_version"]  # type: ignore[index]
+                    payload["resource"]["source_version"] = bumped_version  # type: ignore[index]
+                print(f"  {title}  [conflict — retrying as version {bumped_version}]")
                 continue
             print(f"  ERROR: {title} — {exc}")
             return {"title": title, "source_local_id": source_local_id, "ok": False,
-                    "status": "error", "iri": "", "error": str(exc), "result": None}
+                    "status": "error", "iri": "", "error": str(exc), "result": None,
+                    "version_bumped": bumped_version}
     # Unreachable in practice (the loop returns on every path); defensive for mypy.
     return {"title": title, "source_local_id": source_local_id, "ok": False,
-            "status": "error", "iri": "", "error": "submission failed after retry", "result": None}
+            "status": "error", "iri": "", "error": "submission failed after retry", "result": None,
+            "version_bumped": bumped_version}
 
 
 def _bump_version(ver: str) -> str:
