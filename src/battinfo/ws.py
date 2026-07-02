@@ -24,7 +24,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from battinfo._jsonio import atomic_write_text as _atomic_write_text, read_json as _read_json
+from battinfo._jsonio import atomic_write_text as _atomic_write_text
+from battinfo._jsonio import read_json as _read_json
 from battinfo.entities import record_set_dirs
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
