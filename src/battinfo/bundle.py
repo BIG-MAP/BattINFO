@@ -1308,6 +1308,19 @@ class CellSpecification(BundleJsonModel):
             datasheet_revision=product.get("datasheet_revision"),
             cell_specification_id=cell_specification_id,
             properties=dict(record.get("properties", {})) if isinstance(record.get("properties"), Mapping) else {},
+            construction=copy.deepcopy(record.get("construction", {}))
+            if isinstance(record.get("construction"), Mapping)
+            else {},
+            positive_electrode=copy.deepcopy(record.get("positive_electrode")),
+            negative_electrode=copy.deepcopy(record.get("negative_electrode")),
+            electrolyte=copy.deepcopy(record.get("electrolyte")),
+            separator=copy.deepcopy(record.get("separator")),
+            housing=copy.deepcopy(record.get("housing"))
+            if record.get("housing") is not None
+            else _housing_from_coin_hardware(record.get("coin_hardware")),
+            specification_comment=[str(item) for item in record.get("specification_comment", [])]
+            if isinstance(record.get("specification_comment"), list)
+            else [],
             bibliography=dict(record.get("bibliography", {}))
             if isinstance(record.get("bibliography"), Mapping)
             else {},
@@ -1408,6 +1421,24 @@ class CellSpecification(BundleJsonModel):
             record["bibliography"] = dict(self.bibliography)
         if self.comment:
             record["notes"] = list(self.comment)
+        # Datasheet structure lives at the top level of the canonical record (the schema already
+        # defines these siblings of `cell_spec`). Emitting it here makes to_record()/from_record()
+        # lossless — previously the whole electrode/electrolyte/separator/housing datasheet was
+        # silently dropped on save (the "electrode-drop" data-loss bug).
+        if self.construction:
+            record["construction"] = copy.deepcopy(self.construction)
+        if self.positive_electrode is not None:
+            record["positive_electrode"] = self.positive_electrode.model_dump(mode="json", exclude_none=True)
+        if self.negative_electrode is not None:
+            record["negative_electrode"] = self.negative_electrode.model_dump(mode="json", exclude_none=True)
+        if self.electrolyte is not None:
+            record["electrolyte"] = self.electrolyte.model_dump(mode="json", exclude_none=True)
+        if self.separator is not None:
+            record["separator"] = self.separator.model_dump(mode="json", exclude_none=True)
+        if self.housing is not None:
+            record["housing"] = self.housing.model_dump(mode="json", exclude_none=True)
+        if self.specification_comment:
+            record["specification_comment"] = list(self.specification_comment)
         return record_to_snake_aliases(record)
 
     # ── Datasheet "library" record format (merged from the former CellSpecification) ──
