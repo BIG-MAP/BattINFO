@@ -73,6 +73,7 @@ class ZenodoClient:
         content_type: str = "application/json",
         extra_headers: dict[str, str] | None = None,
         timeout: float = 60.0,
+        max_attempts: int = 3,
     ) -> dict:
         url = self._base.rstrip("/") + path
         headers = {
@@ -80,14 +81,36 @@ class ZenodoClient:
             "Content-Type": content_type,
             **(extra_headers or {}),
         }
-        req = urllib.request.Request(url, data=data, headers=headers, method=method)
-        try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                body = resp.read()
-                return json.loads(body) if body else {}
-        except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
-            raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}") from exc
+        # Only idempotent reads are retried. A write (POST/PUT/DELETE) is sent exactly once, even on
+        # a timeout, because a retry could duplicate an irreversible action (e.g. double-publish).
+        idempotent = method.upper() in ("GET", "HEAD")
+        attempts = max_attempts if idempotent else 1
+        last_exc: Exception | None = None
+        for attempt in range(attempts):
+            req = urllib.request.Request(url, data=data, headers=headers, method=method)
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    body = resp.read()
+                    return json.loads(body) if body else {}
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+                # Retry idempotent reads on transient server states (cold start / rate limit).
+                if idempotent and exc.code in (429, 500, 502, 503, 504) and attempt < attempts - 1:
+                    last_exc = exc
+                    time.sleep(0.5 * (2 ** attempt))
+                    continue
+                raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}") from exc
+            except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                # Connection reset / DNS / timeout: previously escaped as a raw, opaque exception.
+                # Retry idempotent reads; otherwise surface as a clean ZenodoError.
+                if idempotent and attempt < attempts - 1:
+                    last_exc = exc
+                    time.sleep(0.5 * (2 ** attempt))
+                    continue
+                raise ZenodoError(f"Zenodo request failed ({method} {url}): {exc}") from exc
+        raise ZenodoError(  # pragma: no cover — loop always returns or raises above
+            f"Zenodo request failed after {attempts} attempt(s) ({method} {url}): {last_exc}"
+        )
 
     def _json(self, method: str, path: str, payload: dict | None = None) -> dict:
         body = json.dumps(payload or {}).encode("utf-8")
@@ -123,8 +146,25 @@ class ZenodoClient:
         return self._json("GET", f"/deposit/depositions/{deposit_id}")
 
     def publish_deposit(self, deposit_id: int | str) -> dict:
-        """Publish a draft deposit. This action is irreversible."""
-        return self._json("POST", f"/deposit/depositions/{deposit_id}/actions/publish")
+        """Publish a draft deposit. This action is irreversible.
+
+        The publish POST is never retried (a retry could mint a second DOI). But a transient
+        failure — a timeout or dropped connection — may still have committed server-side, leaving
+        the caller unsure whether the DOI exists. On such a failure we confirm by re-reading the
+        deposit: if it is already published, the publish succeeded and we return it; otherwise the
+        original error is raised so the caller does not believe a draft went out.
+        """
+        try:
+            return self._json("POST", f"/deposit/depositions/{deposit_id}/actions/publish")
+        except ZenodoError as exc:
+            try:
+                deposit = self.get_deposit(deposit_id)
+            except ZenodoError:
+                raise exc from None
+            state = str(deposit.get("state") or "").lower()
+            if state == "done" or deposit.get("submitted") is True:
+                return deposit
+            raise
 
     def discard_deposit(self, deposit_id: int | str) -> None:
         """Discard (delete) an unpublished draft deposit."""
