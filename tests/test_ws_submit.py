@@ -167,6 +167,48 @@ def test_submit_fails_closed_on_corrupt_record_before_any_network(
     assert fake.calls == 0  # aborted before submitting ANY record (incl. the good one)
 
 
+def test_submit_fails_closed_on_corrupt_sibling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # R-6: a corrupt NON-selected sibling (its relationships would be silently stripped from the
+    # submitted graph) must fail closed, not publish a record with links quietly missing.
+    ws = _saved_ws(tmp_path, n=1)
+    ds_dir = ws._records_root / "examples" / "dataset"
+    ds_dir.mkdir(parents=True, exist_ok=True)
+    (ds_dir / "corrupt.json").write_text("{ not valid json", encoding="utf-8")
+
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    with pytest.raises(SubmitError):
+        ws.submit(**_CREDS)
+    assert fake.calls == 0
+
+
+def test_submit_allow_partial_tolerates_corrupt_sibling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _saved_ws(tmp_path, n=1)
+    ds_dir = ws._records_root / "examples" / "dataset"
+    ds_dir.mkdir(parents=True, exist_ok=True)
+    (ds_dir / "corrupt.json").write_text("{ not valid json", encoding="utf-8")
+
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(allow_partial=True, **_CREDS)  # explicit opt-in: proceed without that relationship
+    assert fake.calls == 1
+
+
+def test_submit_reads_bom_sibling_instead_of_dropping_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # R-10: a BOM-prefixed (Excel/Windows norm) but otherwise valid sibling must be read, not
+    # treated as corrupt and dropped/aborted.
+    ws = _saved_ws(tmp_path, n=1)
+    ds_dir = ws._records_root / "examples" / "dataset"
+    ds_dir.mkdir(parents=True, exist_ok=True)
+    bom_json = chr(0xFEFF) + '{"dataset": {"id": "https://w3id.org/battinfo/dataset/x"}}'
+    (ds_dir / "d.json").write_text(bom_json, encoding="utf-8")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)  # must NOT raise
+    assert fake.calls == 1
+
+
 def test_submit_rejects_unknown_only_filter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
     _patch_registry(monkeypatch, lambda p: _result("validated"))

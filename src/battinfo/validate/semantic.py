@@ -87,6 +87,12 @@ SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
     "maximum_storage_temperature": {"°c", "c", "degc", "k"},
     "storage_temperature_min": {"°c", "c", "degc", "k"},
     "storage_temperature_max": {"°c", "c", "degc", "k"},
+    # Health / efficiency / self-discharge (D-1: these unit-bearing specs previously had NO
+    # compatibility entry, so any unit — e.g. state_of_health in 'furlongs' — passed strict).
+    "ac_internal_resistance": {"ω", "ohm", "mω", "mohm", "milliohm"},
+    "initial_coulombic_efficiency": {"%", "percent"},
+    "state_of_health": {"%", "percent"},
+    "self_discharge_rate": {"%", "percent", "%/month", "%/day", "%/year", "%/week", "%/hour", "%/h"},
 }
 
 PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
@@ -152,6 +158,8 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     "capacity_fade":                     {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
     "capacity_threshold_exhaustion":     {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
     "initial_coulombic_efficiency":      {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "state_of_health":                   {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "self_discharge_rate":               {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
 }
 
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"

@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -45,6 +47,36 @@ def test_semantic_validation_rejects_unit_mismatch_for_nominal_continuous_curren
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
+
+
+# D-1: these unit-bearing SpecSet props previously had NO unit-compatibility entry, so any unit
+# (e.g. state_of_health in 'furlongs') passed strict/publisher and flowed to submit.
+@pytest.mark.parametrize(
+    "spec_key, bad_unit",
+    [
+        ("state_of_health", "furlongs"),
+        ("initial_coulombic_efficiency", "kg"),
+        ("ac_internal_resistance", "%"),
+        ("self_discharge_rate", "volts"),
+    ],
+)
+def test_semantic_validation_rejects_bad_unit_for_health_specs(spec_key: str, bad_unit: str) -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["properties"][spec_key] = {"value": 50, "unit": bad_unit}
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not report.ok
+    assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
+
+
+@pytest.mark.parametrize(
+    "spec_key, good_unit",
+    [("state_of_health", "%"), ("initial_coulombic_efficiency", "%"), ("ac_internal_resistance", "mOhm")],
+)
+def test_semantic_validation_accepts_valid_unit_for_health_specs(spec_key: str, good_unit: str) -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["properties"][spec_key] = {"value": 50, "unit": good_unit}
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
 
 
 def test_semantic_validation_rejects_invalid_spec_range_ordering() -> None:

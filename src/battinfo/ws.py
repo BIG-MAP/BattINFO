@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
+from battinfo._jsonio import read_json as _read_json
 from battinfo.entities import record_set_dirs
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
@@ -742,9 +743,13 @@ def _read_record_sets(examples: Path) -> dict[str, list[dict]]:
         if subdir.exists():
             for f in sorted(subdir.glob("*.json")):
                 try:
-                    recs.append(json.loads(f.read_text(encoding="utf-8")))
-                except Exception:
-                    continue
+                    recs.append(_read_json(f))
+                except (OSError, ValueError) as exc:
+                    # Fail closed: silently skipping a corrupt/BOM record would publish an
+                    # incomplete Zenodo graph with records missing and no error (R-6, R-10).
+                    raise ValueError(
+                        f"Cannot assemble the record bundle: {f} is unreadable ({exc})."
+                    ) from exc
         record_sets[name] = recs
     return record_sets
 
@@ -1015,6 +1020,13 @@ class AuthoringWorkspace:
         for key, value in remaining.items():
             out.append(f"{key:22} = {value}")
         path.write_text("\n".join(out) + "\n", encoding="utf-8")
+        # A-6: this file holds API keys / R2 secrets / Zenodo tokens — restrict to owner-only.
+        # Best-effort: a no-op on Windows and filesystems without POSIX permission bits.
+        try:
+            import os
+            os.chmod(path, 0o600)
+        except OSError:
+            pass
         return path
 
     def login(self, api_key: str, *, registry_url: str | None = None) -> dict:
@@ -2849,14 +2861,20 @@ class AuthoringWorkspace:
         # when only a subset is re-submitted. Forward references are fine: the
         # registry stores a relationship's target IRI whether or not the target
         # resource exists yet, and per-record submission is not scope-validated.
+        _corrupt_siblings: list[tuple[Path, str]] = []
+
         def _load_all(subdir: str, key: str) -> dict[str, tuple[dict, dict]]:
             out: dict[str, tuple[dict, dict]] = {}
             d = examples / subdir
             if d.exists():
                 for f in sorted(d.glob("*.json")):
                     try:
-                        rec = json.loads(f.read_text(encoding="utf-8"))
-                    except Exception:
+                        rec = _read_json(f)
+                    except (OSError, ValueError) as exc:
+                        # Do NOT silently drop a corrupt/BOM sibling: it would strip the cross-
+                        # record relationship it provides from the submitted graph with no error,
+                        # publishing a record with real links silently missing (R-6, R-10).
+                        _corrupt_siblings.append((f, str(exc)))
                         continue
                     inner = rec.get(key) or {}
                     iri = inner.get("id")
@@ -2866,6 +2884,19 @@ class AuthoringWorkspace:
 
         _all_datasets = _load_all("dataset", "dataset")
         _all_tests = _load_all("test", "test")
+        if _corrupt_siblings and not allow_partial:
+            failures = [
+                {"title": f.name, "source_local_id": f.stem, "ok": False, "status": "unreadable",
+                 "error": err, "iri": "", "result": None}
+                for f, err in _corrupt_siblings
+            ]
+            listing = "; ".join(f"{f.name} ({err})" for f, err in _corrupt_siblings)
+            raise SubmitError(
+                f"{len(_corrupt_siblings)} sibling record file(s) are unreadable and would silently "
+                f"drop cross-record relationships from the submission: {listing}. Fix them, or pass "
+                "allow_partial=True to submit without those relationships.",
+                failed=failures, outcomes=failures,
+            )
 
         # cell IRI -> [dataset IRIs] / [test IRIs]; cell IRI -> preview png url;
         # dataset IRI -> {"cell": iri, "test": iri}; test_spec IRI -> [test IRIs]
@@ -6282,6 +6313,12 @@ def _lift_funding_to_provenance(payload: dict) -> None:
             return
 
 
+# Statuses we will echo verbatim in a progress line; anything else prints as "unknown".
+_DISPLAY_STATUSES = frozenset(
+    {"validated", "published", "staged_unanchored", "ok", "unknown", "failed", "rejected", "error"}
+)
+
+
 def _do_submit(
     payload: dict,
     url: str,
@@ -6315,7 +6352,14 @@ def _do_submit(
             resources = response.get("resources") or []
             iri = resources[0].get("canonical_iri", "") if resources else ""
             ok = status not in ("failed", "rejected", "error")
-            print(f"  {title}  [{status}]  {iri}")
+            # Progress line: log only local/sanitised fields, never a raw registry-response value.
+            # `title` is local and the status is resolved to a literal from a fixed set; the
+            # canonical IRI is returned below for programmatic use but not echoed here. (CodeQL
+            # conservatively treats the whole HTTP response as credential-tainted because the
+            # api_key travels in the request headers, so any response-derived value read into a
+            # log is flagged.)
+            display_status = next((s for s in _DISPLAY_STATUSES if s == status), "unknown")
+            print(f"  {title}  [{display_status}]")
             return {"title": title, "source_local_id": source_local_id, "ok": ok,
                     "status": status, "iri": iri, "error": None, "result": result}
         except RuntimeError as exc:

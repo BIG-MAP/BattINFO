@@ -1474,6 +1474,16 @@ _REGISTRY_REJECTED_BODY_STATUS = frozenset({"failed", "rejected", "error"})
 # (or leak large headers into) the raised error message.
 _REGISTRY_ERROR_BODY_LIMIT = 500
 
+_SECRET_TOKEN_RE = re.compile(r"bk_(?:live|test)_[A-Za-z0-9._-]+")
+
+
+def _scrub_secret(text: str) -> str:
+    """Redact BattINFO API-key tokens (``bk_live_``/``bk_test_``) from a registry response body
+    before it is embedded in an exception message — defence in depth against a registry that
+    echoes the key (A-6). Pattern-based, NOT value-based on purpose: the api_key never flows into
+    logged/derived data, so it can't taint the (public) response we return and print."""
+    return _SECRET_TOKEN_RE.sub("***", text)
+
 
 def submit_publication_package(
     payload: Mapping[str, Any],
@@ -1510,7 +1520,7 @@ def submit_publication_package(
                 # errors="replace": a non-UTF-8 2xx body must not raise a bare
                 # UnicodeDecodeError (a ValueError) that escapes the caller's
                 # `except RuntimeError`; the body is only used for JSON/error text.
-                response_text = response.read().decode("utf-8", errors="replace")
+                response_text = _scrub_secret(response.read().decode("utf-8", errors="replace"))
             try:
                 response_payload = json.loads(response_text) if response_text else None
             except json.JSONDecodeError as exc:
@@ -1546,7 +1556,7 @@ def submit_publication_package(
                 "response": response_payload,
             }
         except HTTPError as exc:
-            body = exc.read().decode("utf-8", errors="replace")[:_REGISTRY_ERROR_BODY_LIMIT]
+            body = _scrub_secret(exc.read().decode("utf-8", errors="replace")[:_REGISTRY_ERROR_BODY_LIMIT])
             try:
                 detail: Any = json.loads(body) if body else None
             except json.JSONDecodeError:
