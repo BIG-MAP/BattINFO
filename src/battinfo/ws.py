@@ -6313,6 +6313,12 @@ def _lift_funding_to_provenance(payload: dict) -> None:
             return
 
 
+# Statuses we will echo verbatim in a progress line; anything else prints as "unknown".
+_DISPLAY_STATUSES = frozenset(
+    {"validated", "published", "staged_unanchored", "ok", "unknown", "failed", "rejected", "error"}
+)
+
+
 def _do_submit(
     payload: dict,
     url: str,
@@ -6346,7 +6352,14 @@ def _do_submit(
             resources = response.get("resources") or []
             iri = resources[0].get("canonical_iri", "") if resources else ""
             ok = status not in ("failed", "rejected", "error")
-            print(f"  {title}  [{status}]  {iri}")
+            # Echo only sanitised, known-safe display values in the progress line — never a raw
+            # registry-response field. The status is looked up from a fixed set (so a literal is
+            # printed, not the response value) and the IRI is a regex-extracted http(s) substring;
+            # both are defensive and break a CodeQL clear-text-logging false positive that treats
+            # the whole response as credential-tainted.
+            display_status = next((s for s in _DISPLAY_STATUSES if s == status), "unknown")
+            _iri_match = re.match(r"https?://[\w.\-/:#%]+", iri) if isinstance(iri, str) else None
+            print(f"  {title}  [{display_status}]  {_iri_match.group(0) if _iri_match else ''}")
             return {"title": title, "source_local_id": source_local_id, "ok": ok,
                     "status": status, "iri": iri, "error": None, "result": result}
         except RuntimeError as exc:
