@@ -16,13 +16,13 @@ from battinfo.api import _scrub_secret
 from battinfo.ws import AuthoringWorkspace
 
 
-def test_scrub_secret_redacts_key_and_tokens() -> None:
+def test_scrub_secret_redacts_key_tokens() -> None:
     key = "bk_live_ABC123def456"
-    scrubbed = _scrub_secret(f"401 Unauthorized: key {key} rejected; also bk_test_zzz999", key)
+    scrubbed = _scrub_secret(f"401 Unauthorized: key {key} rejected; also bk_test_zzz999")
     assert key not in scrubbed
-    assert "bk_test_zzz999" not in scrubbed  # any bk_ token redacted, not just the one we sent
+    assert "bk_test_zzz999" not in scrubbed  # any BattINFO key token redacted
     assert "Unauthorized" in scrubbed  # non-secret context preserved
-    assert _scrub_secret("no secrets here", "") == "no secrets here"
+    assert _scrub_secret("no secrets here") == "no secrets here"
 
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX permission bits are a no-op on Windows")
