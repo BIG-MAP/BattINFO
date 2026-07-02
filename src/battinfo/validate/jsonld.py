@@ -260,6 +260,42 @@ def _walk_relative_type_errors(node: Any, path: str, errors: list[str]) -> None:
             _walk_relative_type_errors(item, next_path, errors)
 
 
+def _is_bare_relative_id(value: str) -> bool:
+    """True if this ``@id`` is a bare token that silently resolves to a machine-local IRI.
+
+    A usable ``@id`` is an absolute IRI carrying a scheme (``http:``, ``urn:``, …), a compact
+    CURIE (``prefix:local``), or a blank-node label (``_:b0``). A bare token with none of these —
+    e.g. ``c1`` or an unmapped unit symbol — has no scheme and no CURIE colon, so rdflib resolves
+    it against the document base (the current working directory on export), silently producing
+    ``file:///…/token`` and leaking the authoring machine's filesystem into the record. (Explicit
+    ``file:`` IRIs are left alone: the offline DCAT bundle links its sibling data files that way
+    by design.)
+    """
+    if not value or value.startswith(("_:", "@")):
+        return False  # blank node / JSON-LD keyword — not a resolvable IRI
+    return ":" not in value
+
+
+def _walk_relative_id_errors(node: Any, path: str, errors: list[str]) -> None:
+    if isinstance(node, dict):
+        for key, value in node.items():
+            next_path = f"{path}.{key}" if path else key
+            if key == "@context":
+                continue
+            if key == "@id":
+                if isinstance(value, str) and _is_bare_relative_id(value):
+                    errors.append(
+                        f"{next_path}: bare @id '{value}' has no scheme or CURIE prefix and "
+                        "would export to a cwd-relative file:// IRI"
+                    )
+                continue
+            _walk_relative_id_errors(value, next_path, errors)
+    elif isinstance(node, list):
+        for idx, item in enumerate(node):
+            next_path = f"{path}[{idx}]" if path else f"[{idx}]"
+            _walk_relative_id_errors(item, next_path, errors)
+
+
 def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
     # rdflib 7.x emits DeprecationWarning for internal APIs (Dataset.default_context,
@@ -452,6 +488,25 @@ def validate_jsonld_report(
                 path=path if _ else "",
                 message=message if _ else rendered,
                 validator="@type",
+                resource_type="jsonld",
+            )
+        )
+    # @id portability is enforced only for publication: mid-pipeline authoring and staging forms
+    # legitimately carry local ids and file:// staging links that are rewritten to their final
+    # w3id/Zenodo IRIs before a record is published. At publish time (publisher policy) any such
+    # value that survived is a real leak — a cwd-relative or file:// IRI in the released RDF.
+    id_errors: list[str] = []
+    if resolved_policy.name == "publisher":
+        _walk_relative_id_errors(data, "", id_errors)
+    for rendered in id_errors:
+        path, _, message = rendered.partition(": ")
+        issues.append(
+            ValidationIssue(
+                code="jsonld.id_not_portable",
+                severity="error",
+                path=path if _ else "",
+                message=message if _ else rendered,
+                validator="@id",
                 resource_type="jsonld",
             )
         )

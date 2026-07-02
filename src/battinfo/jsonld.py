@@ -221,7 +221,13 @@ def _quantity(value: Any, unit: str) -> dict:
     """
     node: dict = {"hasNumericalPart": {"hasNumberValue": value}}
     unit_iri = _UNIT_MAP.get(unit)
-    node["hasMeasurementUnit"] = {"@id": unit_iri} if unit_iri else unit
+    if unit_iri:
+        node["hasMeasurementUnit"] = {"@id": unit_iri}
+    elif unit:
+        # Unmapped unit: emit a plain-text literal. hasMeasurementUnit is @id-typed in the
+        # records context, so a bare symbol there is coerced to a cwd-relative file:// IRI on
+        # RDF export — a portability leak. schema:unitText keeps the symbol as a literal (D-2).
+        node["schema:unitText"] = unit
     return node
 
 

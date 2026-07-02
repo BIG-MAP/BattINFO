@@ -1255,9 +1255,13 @@ def _cell_spec_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
         "@type": type_name,
         "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
     }
-    unit_iri = UNIT_IRI_MAP.get(unit, unit)
+    unit_iri = UNIT_IRI_MAP.get(unit)
     if unit_iri:
         node["hasMeasurementUnit"] = unit_iri
+    elif unit:
+        # Unmapped unit: emit a plain-text literal rather than a bare symbol under the @id-typed
+        # hasMeasurementUnit (which would export to a cwd-relative file:// IRI). D-2.
+        node["schema:unitText"] = unit
     return node
 
 
