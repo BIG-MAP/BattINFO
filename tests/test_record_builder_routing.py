@@ -16,6 +16,7 @@ from battinfo.api import (
     TestInput,
     _record_from_cell_instance,
     _record_from_test,
+    _to_unix_time,
 )
 
 _SPEC = "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r"
@@ -31,7 +32,7 @@ def test_cell_instance_routes_through_model_and_validates() -> None:
     assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
     ci = rec["cell_instance"]
     assert ci["cell_spec_id"] == _SPEC and ci["serial_number"] == "FAC-002" and ci["batch_id"] == "B1"
-    assert ci["manufactured_at"] == 1642201200  # ISO string converted to unix, as before
+    assert ci["manufactured_at"] == _to_unix_time("2022-01-15")  # ISO string converted to unix
     assert rec["datasets"] == [{"id": _DS, "role": "raw"}]
     assert rec["measured"] == {"mass": {"value": 45, "unit": "g"}}
 
@@ -72,5 +73,6 @@ def test_test_routes_through_model_mapping_fields_and_validates() -> None:
     assert t["cell_id"] == "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
     assert t["kind"] == "capacity_check" and t["instrument_name"] == "Maccor"
     assert t["protocol_name"] == "CC discharge C/5" and t["protocol_url"] == "https://x/proto"
-    assert t["started_at"] == 1643670000 and t["ended_at"] == 1643756400  # ISO -> unix
+    assert t["started_at"] == _to_unix_time("2022-02-01")  # ISO -> unix
+    assert t["ended_at"] == _to_unix_time("2022-02-02")
     assert t["dataset_ids"] == [_DS]
