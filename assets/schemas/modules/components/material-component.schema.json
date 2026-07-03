@@ -27,6 +27,10 @@
     "product_id": {
       "type": "string"
     },
+    "molecular_formula": {
+      "type": "string",
+      "description": "Optional chemical formula of the material (e.g. 'LiFePO4')."
+    },
     "property": {
       "$ref": "../common/quantitative-properties.schema.json"
     },

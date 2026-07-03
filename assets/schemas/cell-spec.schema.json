@@ -300,6 +300,12 @@
         "type": "string"
       }
     },
+    "specification_comment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "editorial": {
       "type": "object",
       "description": "Internal editorial metadata — review status and curation notes. Ignored by the publish pipeline; not forwarded to the registry semantic payload.",
