@@ -1395,9 +1395,53 @@ class CellSpecification(BundleJsonModel):
             comment=["Generated from the linked CellSpecification."],
         )
 
+    # ── Draft vs. publish-ready ──────────────────────────────────────────────────
+    # The model is deliberately tolerant to construct — importers build it from arbitrary external
+    # data, and a GUI/notebook fills it in incrementally, so a half-filled spec is a valid *draft*.
+    # Publish-readiness — the strictness the former input DTOs enforced at construction time — is a
+    # policy applied here, at finalize(), NOT baked into the field types. One model therefore serves
+    # both interactive drafting and strict publishing.
+    _REQUIRED_FOR_PUBLISH: ClassVar[tuple[tuple[str, str], ...]] = (
+        ("id", "id (mint one via publish() or build_publication_package())"),
+        ("name", "name"),
+        ("manufacturer", "manufacturer"),
+        ("model", "model"),
+        ("format", "format"),
+        ("chemistry", "chemistry"),
+    )
+
+    def publish_readiness_problems(self) -> list[str]:
+        """The reasons this spec is not yet publish-ready (empty list == ready).
+
+        A field counts as unset if it is None, blank, or the ``"unknown"`` placeholder that tolerant
+        construction leaves on ``format``/``chemistry``."""
+        problems: list[str] = []
+        for field, label in self._REQUIRED_FOR_PUBLISH:
+            value = getattr(self, field)
+            if value is None or (isinstance(value, str) and value.strip() in {"", "unknown"}):
+                problems.append(label)
+        return problems
+
+    def is_publishable(self) -> bool:
+        """True when every field required to publish is set (never raises — for a GUI/CLI check)."""
+        return not self.publish_readiness_problems()
+
+    def finalize(self) -> "CellSpecification":
+        """Assert publish-readiness and return self, so ``spec.finalize().to_record()`` reads cleanly.
+
+        Raises listing every still-missing field at once. A draft is valid to hold and to persist via
+        ``model_dump``; ``finalize()`` is the gate it must pass to become a published record."""
+        problems = self.publish_readiness_problems()
+        if problems:
+            raise ValueError("CellSpecification is not publish-ready; set: " + ", ".join(problems))
+        return self
+
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("CellSpecification.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
+            raise ValueError(
+                "CellSpecification has no id yet (it is still a draft). Mint one via publish() or "
+                "build_publication_package(); call finalize() to check everything needed to publish."
+            )
         if self.name is None:
             raise ValueError("CellSpecification.name is required before serialization.")
         record: dict[str, Any] = {
