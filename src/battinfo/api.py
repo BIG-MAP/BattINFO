@@ -2542,48 +2542,37 @@ def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
         if not CELL_IRI_RE.fullmatch(draft.id):
             raise ValueError("cell-instance id must match https://w3id.org/battinfo/cell/{uid}.")
         if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
+            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
-        _, dashed_uid = _iri_tail(entity_id)
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/cell/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(draft.uid)}"
 
-    dataset_ids = list(dict.fromkeys([*draft.dataset_ids, *( [draft.dataset_id] if draft.dataset_id else [])]))
-    record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
-        "cell_instance": {
-            "id": entity_id,
-            "cell_spec_id": draft.cell_spec_id,
-            "short_id": dashed_uid.replace("-", "")[:6],
-        },
-        "provenance": {
-            "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
-        },
-    }
-    if draft.serial_number is not None:
-        record["cell_instance"]["serial_number"] = draft.serial_number
-    if draft.batch_id is not None:
-        record["cell_instance"]["batch_id"] = draft.batch_id
+    manufactured_at: int | None = None
     if draft.manufactured_at is not None:
         manufactured_at = _to_unix_time(draft.manufactured_at)
         if manufactured_at is None:
             raise ValueError("manufactured_at must be a Unix timestamp or ISO datetime string.")
-        record["cell_instance"]["manufactured_at"] = manufactured_at
-    if draft.measured:
-        record["measured"] = draft.measured
-    if draft.source_url is not None:
-        record["provenance"]["source_url"] = draft.source_url
-    citation = _citation_url_value(draft.citation)
-    if citation is not None:
-        record["provenance"]["citation"] = citation
-    if dataset_ids:
-        record["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
-    if draft.notes:
-        record["notes"] = list(draft.notes)
-    return record
+    dataset_ids = list(dict.fromkeys([*draft.dataset_ids, *([draft.dataset_id] if draft.dataset_id else [])]))
+    from battinfo.bundle import CellInstance, ProvenanceInfo  # noqa: PLC0415
+
+    # Build the record through the one model (its to_record is the single serializer).
+    return CellInstance(
+        schema_version=draft.schema_version,
+        id=entity_id,
+        cell_spec_id=draft.cell_spec_id,
+        serial_number=draft.serial_number,
+        batch_id=draft.batch_id,
+        manufactured_at=manufactured_at,
+        measured=draft.measured or {},
+        dataset_ids=dataset_ids,
+        source=ProvenanceInfo(
+            type=draft.source_type,
+            url=draft.source_url,
+            citation=_citation_url_value(draft.citation),
+            retrieved_at=_to_unix_time(draft.retrieved_at) or _now_unix(),
+        ),
+        comment=list(draft.notes),
+    ).to_record()
 
 
 def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
