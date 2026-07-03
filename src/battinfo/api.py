@@ -2463,77 +2463,70 @@ def _assert_id_matches_uid(entity_id: str, uid: str) -> None:
         raise ValueError("Provided id and uid do not match.")
 
 
+_COMPONENT_SPEC_REF_NAMESPACES = {
+    "positive_electrode_spec_id": "electrode-spec",
+    "negative_electrode_spec_id": "electrode-spec",
+    "electrolyte_spec_id": "electrolyte-spec",
+    "separator_spec_id": "separator-spec",
+    "housing_spec_id": "housing-spec",
+}
+
+
 def _record_from_cell_spec(draft: CellSpecificationInput) -> dict[str, Any]:
+    from battinfo.bundle import CellSpecification, ProvenanceInfo  # noqa: PLC0415
+
+    # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
     if draft.id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(draft.id):
             raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
         if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
+            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
-        _, dashed_uid = _iri_tail(entity_id)
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
-
-    manufacturer_org = _org_value(draft.manufacturer)
-    manufacturer_name = manufacturer_org["name"] if manufacturer_org else str(draft.manufacturer)
-    record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
-        "cell_spec": {
-            "id": entity_id,
-            "short_id": dashed_uid.replace("-", "")[:6],
-            "identifier": f"cell-spec:{dashed_uid}",
-            "name": f"{manufacturer_name} {draft.model_name}",
-            "model": draft.model_name,
-            "manufacturer": manufacturer_org or {"type": "Organization", "name": str(draft.manufacturer)},
-            "cell_format": draft.format,
-            "chemistry": draft.chemistry,
-        },
-        "properties": draft.specs,
-        "provenance": {
-            "source_type": draft.source_type,
-            "source_file": draft.source_file,
-            "source_url": draft.source_url,
-            "retrieved_at": draft.retrieved_at or _now_unix(),
-        },
-    }
-    citation = _citation_url_value(draft.citation)
-    if citation is not None:
-        record["provenance"]["citation"] = citation
-    if draft.positive_electrode_basis is not None:
-        record["cell_spec"]["positive_electrode_basis"] = draft.positive_electrode_basis
-    if draft.negative_electrode_basis is not None:
-        record["cell_spec"]["negative_electrode_basis"] = draft.negative_electrode_basis
-    if draft.size_code is not None:
-        record["cell_spec"]["size_code"] = draft.size_code
-    if draft.iec_code is not None:
-        record["cell_spec"]["iec_code"] = draft.iec_code
-    if draft.country_of_origin is not None:
-        record["cell_spec"]["country_of_origin"] = draft.country_of_origin
-    if draft.year is not None:
-        record["cell_spec"]["year"] = draft.year
-    if draft.datasheet_revision is not None:
-        record["cell_spec"]["datasheet_revision"] = draft.datasheet_revision
-    if draft.file_hash is not None:
-        record["provenance"]["file_hash"] = draft.file_hash
-    # Component-spec references (top-level siblings of the inline holders).
-    _COMPONENT_SPEC_REF_PATTERNS = {
-        "positive_electrode_spec_id": "electrode-spec",
-        "negative_electrode_spec_id": "electrode-spec",
-        "electrolyte_spec_id": "electrolyte-spec",
-        "separator_spec_id": "separator-spec",
-        "housing_spec_id": "housing-spec",
-    }
-    for field_name, namespace in _COMPONENT_SPEC_REF_PATTERNS.items():
+        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(draft.uid)}"
+    # Validate component-spec reference IRIs at the input boundary.
+    for field_name, namespace in _COMPONENT_SPEC_REF_NAMESPACES.items():
         value = getattr(draft, field_name)
-        if value is not None:
-            if not _component_iri_re(namespace).fullmatch(value):
-                raise ValueError(f"{field_name} must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
-            record[field_name] = value
-    if draft.notes:
-        record["notes"] = list(draft.notes)
-    return record_to_snake_aliases(record)
+        if value is not None and not _component_iri_re(namespace).fullmatch(value):
+            raise ValueError(f"{field_name} must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
+
+    org = _org_value(draft.manufacturer)
+    manufacturer_name = org["name"] if org else str(draft.manufacturer)
+    # Build the record through the one model (the source of truth) rather than hand-assembling a
+    # parallel canonical dict — to_record() is now the single serializer.
+    return CellSpecification(
+        schema_version=draft.schema_version,
+        id=entity_id,
+        name=f"{manufacturer_name} {draft.model_name}",
+        manufacturer=manufacturer_name,
+        manufacturer_id=(org or {}).get("id"),
+        model=draft.model_name,
+        format=draft.format,
+        chemistry=draft.chemistry,
+        product_type=draft.product_type,
+        positive_electrode_basis=draft.positive_electrode_basis,
+        negative_electrode_basis=draft.negative_electrode_basis,
+        positive_electrode_spec_id=draft.positive_electrode_spec_id,
+        negative_electrode_spec_id=draft.negative_electrode_spec_id,
+        electrolyte_spec_id=draft.electrolyte_spec_id,
+        separator_spec_id=draft.separator_spec_id,
+        housing_spec_id=draft.housing_spec_id,
+        size_code=draft.size_code,
+        iec_code=draft.iec_code,
+        country_of_origin=draft.country_of_origin,
+        year=draft.year,
+        datasheet_revision=draft.datasheet_revision,
+        properties=draft.specs,
+        source=ProvenanceInfo(
+            type=draft.source_type,
+            file=draft.source_file,
+            url=draft.source_url,
+            citation=_citation_url_value(draft.citation),
+            file_hash=draft.file_hash,
+            retrieved_at=draft.retrieved_at or _now_unix(),
+        ),
+        comment=list(draft.notes),
+    ).to_record()
 
 
 def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
