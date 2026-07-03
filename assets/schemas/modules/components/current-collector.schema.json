@@ -5,9 +5,6 @@
   "description": "Current collector material and quantitative properties.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "name"
-  ],
   "properties": {
     "name": {
       "type": "string",
