@@ -70,6 +70,45 @@ def test_inline_component_schema_reconciled_with_model() -> None:
     assert report.ok, [i.message for i in report.errors][:5]
 
 
+def test_manufacturer_id_provenance_and_component_refs_round_trip() -> None:
+    # PR A: complete the model. Three fields the canonical record supports but the model used to drop
+    # on save — the manufacturer organization id, the extra provenance fields the converter populates,
+    # and the standalone component-spec references — must now survive to_record/from_record losslessly.
+    from battinfo.bundle import CellSpecification, ProvenanceInfo
+
+    spec = CellSpecification(
+        id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+        name="Acme X", manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
+        size_code="R2032",
+        manufacturer_id="https://w3id.org/battinfo/organization/1111-2222-3333-4444",
+        positive_electrode_spec_id="https://w3id.org/battinfo/electrode-spec/5555-6666-7777-8888",
+        electrolyte_spec_id="https://w3id.org/battinfo/electrolyte-spec/9999-aaaa-bbbb-cccc",
+        source=ProvenanceInfo(type="converter-jsonld", name="BattINFO Converter",
+                              workflow_version="app=1.1.17", comment="blended salt note"),
+    )
+    rec = spec.to_record()
+
+    # manufacturer is emitted as an Organization node carrying the id (not a bare string).
+    assert rec["cell_spec"]["manufacturer"]["id"] == spec.manufacturer_id
+    # component refs are top-level siblings of cell_spec (per the schema), not under cell_spec.
+    assert rec["positive_electrode_spec_id"] == spec.positive_electrode_spec_id
+    assert "positive_electrode_spec_id" not in rec["cell_spec"]
+    # the previously-dropped provenance fields are present.
+    assert rec["provenance"]["source_name"] == "BattINFO Converter"
+    assert rec["provenance"]["workflow_version"] == "app=1.1.17"
+    assert rec["provenance"]["comment"] == "blended salt note"
+
+    assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
+
+    back = CellSpecification.from_record(rec)
+    assert back.manufacturer_id == spec.manufacturer_id
+    assert back.positive_electrode_spec_id == spec.positive_electrode_spec_id
+    assert back.electrolyte_spec_id == spec.electrolyte_spec_id
+    assert (back.source.name, back.source.workflow_version, back.source.comment) == (
+        "BattINFO Converter", "app=1.1.17", "blended salt note")
+    assert back.to_record() == rec  # fully idempotent
+
+
 def test_electrode_drop_regression() -> None:
     # The specific bug: a spec with electrodes must not lose them through canonical serialization.
     rich = next(

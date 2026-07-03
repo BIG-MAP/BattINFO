@@ -1155,6 +1155,10 @@ class CellSpecification(BundleJsonModel):
     id: str | None = None
     name: str | None = None
     manufacturer: str = ""
+    # Canonical IRI of the manufacturer's organization record. The schema types manufacturer as an
+    # Organization object; keeping the name a plain string preserves the fluent authoring API while
+    # this optional id carries the org link (previously dropped on save).
+    manufacturer_id: str | None = None
     model: str = ""
     format: str = "unknown"
     chemistry: str = "unknown"
@@ -1176,10 +1180,25 @@ class CellSpecification(BundleJsonModel):
     electrolyte: Electrolyte | None = None
     separator: Separator | None = None
     housing: Housing | None = None
+    # Optional canonical IRIs of standalone component-spec records this cell-spec references (used
+    # instead of, or alongside, the inline holders above). The schema permits these; the model
+    # previously dropped them, so only the JSON-LD inline re-map preserved them.
+    positive_electrode_spec_id: str | None = None
+    negative_electrode_spec_id: str | None = None
+    electrolyte_spec_id: str | None = None
+    separator_spec_id: str | None = None
+    housing_spec_id: str | None = None
     specification_comment: list[str] = Field(default_factory=list)
     bibliography: dict[str, Any] = Field(default_factory=dict)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
+    # Audit note (model-as-source-of-truth): the cell-spec schema also permits `brand`,
+    # `battery_category`, `category`, `url`, `additional_type`, `manufacturing_place`, `editorial`,
+    # `hazardous_substances`, `critical_raw_materials`, `extinguishing_agent`, `funding`, and
+    # `contributor`. These are intentionally NOT modeled here yet: none are authored through this
+    # model today, so nothing is lost on save (unlike manufacturer.id / provenance / component refs,
+    # which were). `funding`/`contributor` currently attach at the workspace layer, not the record.
+    # Add them here (brand/category/… as objects where the schema requires) when a use case arrives.
 
     @field_validator("construction", "properties", mode="before")
     @classmethod
@@ -1284,6 +1303,7 @@ class CellSpecification(BundleJsonModel):
             provenance = {}
         manufacturer = product.get("manufacturer")
         manufacturer_name = manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
+        manufacturer_id = manufacturer.get("id") if isinstance(manufacturer, Mapping) else None
         notes = record.get("notes")
         if not isinstance(notes, list):
             notes = []
@@ -1294,6 +1314,7 @@ class CellSpecification(BundleJsonModel):
             id=str(product["id"]),
             name=str(product.get("name") or f"{manufacturer_name} {product.get('model')}"),
             manufacturer=str(manufacturer_name),
+            manufacturer_id=manufacturer_id,
             model=str(product["model"]),
             format=str(product.get("cell_format", "unknown")),
             chemistry=str(product.get("chemistry", "unknown")),
@@ -1306,6 +1327,11 @@ class CellSpecification(BundleJsonModel):
             rechargeable=product.get("rechargeable"),
             year=_year_value(product.get("year")),
             datasheet_revision=product.get("datasheet_revision"),
+            positive_electrode_spec_id=record.get("positive_electrode_spec_id"),
+            negative_electrode_spec_id=record.get("negative_electrode_spec_id"),
+            electrolyte_spec_id=record.get("electrolyte_spec_id"),
+            separator_spec_id=record.get("separator_spec_id"),
+            housing_spec_id=record.get("housing_spec_id"),
             cell_specification_id=cell_specification_id,
             properties=dict(record.get("properties", {})) if isinstance(record.get("properties"), Mapping) else {},
             construction=copy.deepcopy(record.get("construction", {}))
@@ -1326,11 +1352,14 @@ class CellSpecification(BundleJsonModel):
             else {},
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
+                name=provenance.get("source_name"),
                 file=provenance.get("source_file"),
                 url=provenance.get("source_url"),
                 citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
                 retrieved_at=provenance.get("retrieved_at"),
+                workflow_version=provenance.get("workflow_version"),
                 file_hash=provenance.get("file_hash"),
+                comment=provenance.get("comment"),
             ),
             comment=[str(item) for item in notes],
         )
@@ -1404,8 +1433,21 @@ class CellSpecification(BundleJsonModel):
             record["cell_spec"]["year"] = self.year
         if self.datasheet_revision is not None:
             record["cell_spec"]["datasheet_revision"] = self.datasheet_revision
+        if self.manufacturer_id is not None:
+            record["cell_spec"]["manufacturer"]["id"] = self.manufacturer_id
+        for _ref in ("positive_electrode_spec_id", "negative_electrode_spec_id",
+                     "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
+            _ref_value = getattr(self, _ref)
+            if _ref_value is not None:
+                record[_ref] = _ref_value  # top-level sibling of cell_spec, per the schema
         if self.source.type is not None:
             record["provenance"]["source_type"] = self.source.type
+        if self.source.name is not None:
+            record["provenance"]["source_name"] = self.source.name
+        if self.source.workflow_version is not None:
+            record["provenance"]["workflow_version"] = self.source.workflow_version
+        if self.source.comment is not None:
+            record["provenance"]["comment"] = self.source.comment
         if self.source.file is not None:
             record["provenance"]["source_file"] = self.source.file
         if self.source.url is not None:
