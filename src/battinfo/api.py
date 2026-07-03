@@ -2542,48 +2542,37 @@ def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
         if not CELL_IRI_RE.fullmatch(draft.id):
             raise ValueError("cell-instance id must match https://w3id.org/battinfo/cell/{uid}.")
         if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
+            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
-        _, dashed_uid = _iri_tail(entity_id)
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/cell/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(draft.uid)}"
 
-    dataset_ids = list(dict.fromkeys([*draft.dataset_ids, *( [draft.dataset_id] if draft.dataset_id else [])]))
-    record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
-        "cell_instance": {
-            "id": entity_id,
-            "cell_spec_id": draft.cell_spec_id,
-            "short_id": dashed_uid.replace("-", "")[:6],
-        },
-        "provenance": {
-            "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
-        },
-    }
-    if draft.serial_number is not None:
-        record["cell_instance"]["serial_number"] = draft.serial_number
-    if draft.batch_id is not None:
-        record["cell_instance"]["batch_id"] = draft.batch_id
+    manufactured_at: int | None = None
     if draft.manufactured_at is not None:
         manufactured_at = _to_unix_time(draft.manufactured_at)
         if manufactured_at is None:
             raise ValueError("manufactured_at must be a Unix timestamp or ISO datetime string.")
-        record["cell_instance"]["manufactured_at"] = manufactured_at
-    if draft.measured:
-        record["measured"] = draft.measured
-    if draft.source_url is not None:
-        record["provenance"]["source_url"] = draft.source_url
-    citation = _citation_url_value(draft.citation)
-    if citation is not None:
-        record["provenance"]["citation"] = citation
-    if dataset_ids:
-        record["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
-    if draft.notes:
-        record["notes"] = list(draft.notes)
-    return record
+    dataset_ids = list(dict.fromkeys([*draft.dataset_ids, *([draft.dataset_id] if draft.dataset_id else [])]))
+    from battinfo.bundle import CellInstance, ProvenanceInfo  # noqa: PLC0415
+
+    # Build the record through the one model (its to_record is the single serializer).
+    return CellInstance(
+        schema_version=draft.schema_version,
+        id=entity_id,
+        cell_spec_id=draft.cell_spec_id,
+        serial_number=draft.serial_number,
+        batch_id=draft.batch_id,
+        manufactured_at=manufactured_at,
+        measured=draft.measured or {},
+        dataset_ids=dataset_ids,
+        source=ProvenanceInfo(
+            type=draft.source_type,
+            url=draft.source_url,
+            citation=_citation_url_value(draft.citation),
+            retrieved_at=_to_unix_time(draft.retrieved_at) or _now_unix(),
+        ),
+        comment=list(draft.notes),
+    ).to_record()
 
 
 def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
@@ -2723,65 +2712,45 @@ def _record_from_test(draft: TestInput) -> dict[str, Any]:
         if not TEST_IRI_RE.fullmatch(draft.id):
             raise ValueError("test id must match https://w3id.org/battinfo/test/{uid}.")
         if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
+            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
-        _, dashed_uid = _iri_tail(entity_id)
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/test/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(draft.uid)}"
 
-    record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
-        "test": {
-            "id": entity_id,
-            "short_id": dashed_uid.replace("-", "")[:6],
-            "identifier": f"test:{dashed_uid}",
-            "cell_id": draft.cell_id,
-            "name": draft.name,
-            "kind": draft.kind,
-        },
-        "provenance": {
-            "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
-        },
-    }
-    if draft.description is not None:
-        record["test"]["description"] = draft.description
-    if draft.protocol_id is not None:
-        record["test"]["protocol_id"] = draft.protocol_id
-    if draft.status is not None:
-        record["test"]["status"] = draft.status
-    if draft.protocol_name is not None:
-        record["test"]["protocol_name"] = draft.protocol_name
-    if draft.protocol_url is not None:
-        record["test"]["protocol_url"] = draft.protocol_url
-    if draft.instrument_name is not None:
-        record["test"]["instrument_name"] = draft.instrument_name
-    if draft.started_at is not None:
-        started_at = _to_unix_time(draft.started_at)
-        if started_at is None:
-            raise ValueError("started_at must be a Unix timestamp or ISO datetime string.")
-        record["test"]["started_at"] = started_at
-    if draft.ended_at is not None:
-        ended_at = _to_unix_time(draft.ended_at)
-        if ended_at is None:
-            raise ValueError("ended_at must be a Unix timestamp or ISO datetime string.")
-        record["test"]["ended_at"] = ended_at
-    if draft.dataset_ids:
-        record["test"]["dataset_ids"] = list(dict.fromkeys(draft.dataset_ids))
-    if draft.source_url is not None:
-        record["provenance"]["source_url"] = draft.source_url
-    citation = _citation_url_value(draft.citation)
-    if citation is not None:
-        record["provenance"]["citation"] = citation
-    if draft.source_file is not None:
-        record["provenance"]["source_file"] = draft.source_file
-    if draft.workflow_version is not None:
-        record["provenance"]["workflow_version"] = draft.workflow_version
-    if draft.notes:
-        record["notes"] = list(draft.notes)
-    return record_to_snake_aliases(record)
+    started_at = _to_unix_time(draft.started_at) if draft.started_at is not None else None
+    if draft.started_at is not None and started_at is None:
+        raise ValueError("started_at must be a Unix timestamp or ISO datetime string.")
+    ended_at = _to_unix_time(draft.ended_at) if draft.ended_at is not None else None
+    if draft.ended_at is not None and ended_at is None:
+        raise ValueError("ended_at must be a Unix timestamp or ISO datetime string.")
+    from battinfo.bundle import ProtocolInfo, ProvenanceInfo, Test  # noqa: PLC0415
+
+    # Build the record through the one model (its to_record maps test_type/cell_instance_id/
+    # instrument/protocol back to the record's kind/cell_id/instrument_name/protocol_* fields).
+    return Test(
+        schema_version=draft.schema_version,
+        id=entity_id,
+        cell_instance_id=draft.cell_id,
+        name=draft.name,
+        test_type=draft.kind,
+        description=draft.description,
+        protocol_id=draft.protocol_id,
+        status=draft.status,
+        protocol=ProtocolInfo(name=draft.protocol_name, url=draft.protocol_url),
+        instrument=draft.instrument_name,
+        started_at=started_at,
+        ended_at=ended_at,
+        dataset_ids=list(dict.fromkeys(draft.dataset_ids)),
+        source=ProvenanceInfo(
+            type=draft.source_type,
+            url=draft.source_url,
+            citation=_citation_url_value(draft.citation),
+            file=draft.source_file,
+            workflow_version=draft.workflow_version,
+            retrieved_at=_to_unix_time(draft.retrieved_at) or _now_unix(),
+        ),
+        comment=list(draft.notes),
+    ).to_record()
 
 
 def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
