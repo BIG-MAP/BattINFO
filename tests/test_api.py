@@ -11,7 +11,6 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
     CellInstanceInput,
-    CellSpecificationInput,
     DatasetInput,
     TestInput,
     TestProtocolInput,
@@ -49,6 +48,7 @@ from battinfo.api import (
     template_test_spec_draft,
     validate_staging_cell_spec,
 )
+from battinfo.bundle import CellSpecification
 from battinfo.validate import validate_references_report
 
 
@@ -596,7 +596,7 @@ def test_promote_staging_cell_spec_preserves_double_hyphen_record_id(tmp_path: P
 
 def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> None:
     cell_spec = save_cell_spec(
-        CellSpecificationInput(
+        CellSpecification(
             uid="7d9k2m4p8t3x6nq5",
             manufacturer="A123",
             model_name="ANR26650M1-B",
@@ -807,7 +807,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
 
     cell_spec_payload = save_cell_spec(
-        CellSpecificationInput(
+        CellSpecification(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",
@@ -821,7 +821,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     assert cell_spec_payload["id"].startswith("https://w3id.org/battinfo/spec/")
 
     exists_payload = save_cell_spec(
-        CellSpecificationInput(
+        CellSpecification(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",

@@ -9,7 +9,6 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
     CellInstanceInput,
-    CellSpecificationInput,
     DatasetInput,
     TestInput,
     build_index,
@@ -19,6 +18,7 @@ from battinfo.api import (
     save_dataset,
     save_test,
 )
+from battinfo.bundle import CellSpecification
 
 
 def test_core_workflow_end_to_end(tmp_path: Path) -> None:
@@ -27,7 +27,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
     index_path = tmp_path / ".battinfo" / "index.json"
 
     cell_spec = save_cell_spec(
-        CellSpecificationInput(
+        CellSpecification(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",

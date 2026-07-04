@@ -42,7 +42,6 @@ from typing import Any
 from battinfo.api import (
     UID_ALPHABET,
     CellInstanceInput,
-    CellSpecificationInput,
     DatasetInput,
     TestInput,
     _normalized_dashed_uid,
@@ -54,7 +53,7 @@ from battinfo.api import (
     create_component_spec,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType
+from battinfo.bundle import BatteryTestType, CellSpecification
 from battinfo.interop.protocols import _num
 
 PathLike = str | Path
@@ -293,7 +292,7 @@ class _Builder:
                  test_name: str | None = None, test_description: str | None = None,
                  dataset_file: str | None = None) -> DiscoveryCell:
         seed = refcode or cell_id
-        cell_spec = self._check(_record_from_cell_spec(CellSpecificationInput(
+        cell_spec = self._check(_record_from_cell_spec(CellSpecification(
             uid=_uid("discovery", "cell-spec", seed),
             model_name=model_name,
             manufacturer={"type": "Organization", "name": manufacturer},

@@ -42,7 +42,6 @@ from typing import Any
 from battinfo.api import (
     UID_ALPHABET,
     CellInstanceInput,
-    CellSpecificationInput,
     MaterialSpecInput,
     TestInput,
     _normalized_dashed_uid,
@@ -52,7 +51,7 @@ from battinfo.api import (
     _record_from_test,
     _validate_canonical_record,
 )
-from battinfo.bundle import BatteryTestType
+from battinfo.bundle import BatteryTestType, CellSpecification
 
 PathLike = str | Path
 
@@ -280,7 +279,7 @@ def from_solid_state_db_row(
         notes.append(f"reported in {journal} ({_clean(row.get('Publication_date')) or 'n.d.'})")
 
     cell_uid = _uid_from_seed(seed, "cell-spec")
-    cell_spec = _record_from_cell_spec(CellSpecificationInput(
+    cell_spec = _record_from_cell_spec(CellSpecification(
         uid=cell_uid,
         model_name=model_name,
         manufacturer={"type": "Organization", "name": manufacturer},
