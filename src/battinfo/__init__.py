@@ -1,7 +1,6 @@
 from battinfo._workspace import Workspace, q, quantity
 from battinfo.api import (
     CellInstanceInput,
-    CellSpecificationInput,
     DatasetInput,
     MaterialInput,
     MaterialSpecInput,
@@ -281,7 +280,6 @@ __all__ = [
     "CurrentCollectorTab",
     "TableColumn",
     "TableSchema",
-    "CellSpecificationInput",
     "CellInstanceInput",
     "DatasetInput",
     "MaterialSpecInput",

@@ -9,7 +9,6 @@ import typer
 from battinfo._jsonio import write_json as _write_json_file
 from battinfo.api import (
     CellInstanceInput,
-    CellSpecificationInput,
     DatasetInput,
     TestInput,
     TestSpecInput,
@@ -1884,7 +1883,7 @@ def save_cell_spec(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: CellSpecificationInput | dict[str, Any] | Path = input_path
+            draft_obj: CellSpecification | dict[str, Any] | Path = input_path
         else:
             if not manufacturer or not model_name:
                 raise ValueError("--manufacturer and --model-name are required when --input is not provided.")
@@ -1894,7 +1893,7 @@ def save_cell_spec(
                 if not isinstance(loaded_specs, dict):
                     raise ValueError("--specs must point to a JSON object.")
                 specs = loaded_specs
-            draft_obj = CellSpecificationInput(
+            draft_obj = CellSpecification(
                 uid=uid,
                 model_name=model_name,
                 manufacturer=manufacturer,

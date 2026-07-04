@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import battinfo as bi
+from battinfo.bundle import CellSpecification
 from battinfo.transform.json_to_jsonld import to_jsonld
 from battinfo.validate.record import validate_record
 
@@ -63,7 +64,7 @@ def test_nmc811_chain_resolves_end_to_end():
 
 def test_missing_component_reference_is_flagged(tmp_path):
     from battinfo import api
-    rec = api._record_from_cell_spec(api.CellSpecificationInput(
+    rec = api._record_from_cell_spec(CellSpecification(
         uid="cmiss123456789ab", model_name="X", manufacturer="Y", format="coin", chemistry="Li-ion",
         electrolyte_spec_id="https://w3id.org/battinfo/electrolyte-spec/0000-0000-0000-0000"))
     result = validate_record(rec, source_root=tmp_path)

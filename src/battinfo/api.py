@@ -19,7 +19,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo.bundle import BatteryTestType, CellProductType, CellSpecification
+from battinfo.bundle import BatteryTestType, CellSpecification
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
@@ -133,45 +133,11 @@ def _citation_url_value(citation: object = None, citation_doi: object = None) ->
     return None
 
 
-class CellSpecificationInput(BaseModel):
-    """Typed input for saving a new canonical cell-spec resource."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    schema_version: str = "0.1.0"
-    id: str | None = None
-    uid: str | None = None
-    model_name: str
-    manufacturer: str | dict[str, Any]
-    format: Literal["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"] = "unknown"
-    chemistry: str = "unknown"
-    product_type: CellProductType | None = None
-    positive_electrode_basis: str | None = None
-    negative_electrode_basis: str | None = None
-    positive_electrode_spec_id: str | None = None
-    negative_electrode_spec_id: str | None = None
-    electrolyte_spec_id: str | None = None
-    separator_spec_id: str | None = None
-    housing_spec_id: str | None = None
-    size_code: str | None = None
-    iec_code: str | None = None
-    country_of_origin: str | None = None
-    year: int | None = None
-    datasheet_revision: str | None = None
-    specs: dict[str, Any] = Field(default_factory=dict)
-    source_type: Literal["datasheet", "label", "catalog", "manual", "other"] = "datasheet"
-    source_file: str = "manual.json"
-    source_url: str | None = None
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
-    file_hash: str | None = None
-    retrieved_at: int | None = None
-    notes: list[str] = Field(default_factory=list)
-
-
-# NOTE: the former ``CellDatasheetInput`` (a thin, lossy library-input model that could only
-# carry construction/property dicts) has been retired. Detailed specs are authored via
-# ``cell_description()`` → ``CellSpecification`` bundle, or supplied as a library-format dict;
-# both flow through ``save_library_cell_spec`` / ``_library_record_from_input``.
+# NOTE: the former ``CellSpecificationInput`` DTO has been retired — the ``CellSpecification`` model
+# (battinfo.bundle) now absorbs the flat authoring input shape directly (model_name/specs/notes, a
+# dict manufacturer, flat provenance kwargs, a transient uid), so one model is both the source of
+# truth and the thing callers construct. ``_record_from_cell_spec`` mints the IRI + applies save-time
+# provenance defaults. (The former ``CellDatasheetInput`` was likewise retired earlier.)
 
 
 class CellInstanceInput(BaseModel):
@@ -319,7 +285,7 @@ def template_cell_spec(
     source_file: str = "template-cell-spec.json",
 ) -> dict[str, Any]:
     """Build a starter canonical cell-spec document for save workflows."""
-    draft = CellSpecificationInput(
+    draft = CellSpecification(
         uid=uid,
         model_name=model_name,
         manufacturer=manufacturer,
@@ -689,7 +655,7 @@ def _find_library_descriptor_path_by_id(entity_id: str, library_root: Path) -> P
 
 def _validate_cell_specification(doc: dict[str, Any]) -> None:
     # Specification-format docs (internal library format) are not validated against the
-    # cell-spec schema — their structure is enforced by CellSpecificationInput upstream.
+    # cell-spec schema — their structure is enforced by the cell-spec model upstream.
     if isinstance(doc.get("specification"), Mapping):
         return
     result = validate_json(doc, profile="cell-spec")
@@ -787,7 +753,7 @@ def _editorial_date_token(value: object) -> str | None:
 
 def _staging_cell_spec_identity(
     source: dict[str, Any] | PathLike,
-    draft: CellSpecificationInput,
+    draft: CellSpecification,
 ) -> dict[str, Any]:
     if isinstance(source, (str, Path)):
         payload = _load_json(_as_path(source))
@@ -796,10 +762,10 @@ def _staging_cell_spec_identity(
     provenance = payload.get("provenance")
     provenance_map = provenance if isinstance(provenance, Mapping) else {}
 
-    base_record_id = _editorial_record_id(draft.manufacturer, draft.model_name)
+    base_record_id = _editorial_record_id(draft.manufacturer, draft.model)
 
     if draft.year is not None:
-        resolved = _editorial_record_id(draft.manufacturer, draft.model_name, draft.year)
+        resolved = _editorial_record_id(draft.manufacturer, draft.model, draft.year)
         return {
             "record_id": resolved,
             "record_id_basis": "year",
@@ -815,7 +781,7 @@ def _staging_cell_spec_identity(
     )
     for candidate in revision_candidates:
         if isinstance(candidate, str) and candidate.strip():
-            resolved = _editorial_record_id(draft.manufacturer, draft.model_name, candidate)
+            resolved = _editorial_record_id(draft.manufacturer, draft.model, candidate)
             return {
                 "record_id": resolved,
                 "record_id_basis": "revision",
@@ -834,7 +800,7 @@ def _staging_cell_spec_identity(
     for candidate in date_candidates:
         date_token = _editorial_date_token(candidate)
         if date_token is not None:
-            resolved = _editorial_record_id(draft.manufacturer, draft.model_name, date_token)
+            resolved = _editorial_record_id(draft.manufacturer, draft.model, date_token)
             return {
                 "record_id": resolved,
                 "record_id_basis": "evidence_date",
@@ -854,7 +820,7 @@ def _staging_cell_spec_input(
     source: dict[str, Any] | PathLike,
     *,
     uid: str | None = None,
-) -> tuple[CellSpecificationInput, Path | None]:
+) -> tuple[CellSpecification, Path | None]:
     source_path: Path | None = None
     if isinstance(source, (str, Path)):
         source_path = _as_path(source)
@@ -873,7 +839,7 @@ def _staging_cell_spec_input(
         manufacturer_obj = product.get("manufacturer")
         manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
         return (
-            CellSpecificationInput(
+            CellSpecification(
                 schema_version=str(record_payload.get("schema_version") or "0.1.0"),
                 id=product.get("id") if isinstance(product.get("id"), str) else None,
                 uid=uid,
@@ -936,7 +902,7 @@ def _staging_cell_spec_input(
     retrieved_at = payload.get("retrieved_at", provenance.get("retrieved_at"))
 
     return (
-        CellSpecificationInput(
+        CellSpecification(
             uid=uid,
             manufacturer=manufacturer.strip(),
             model_name=str(model_name).strip(),
@@ -2472,61 +2438,31 @@ _COMPONENT_SPEC_REF_NAMESPACES = {
 }
 
 
-def _record_from_cell_spec(draft: CellSpecificationInput) -> dict[str, Any]:
-    from battinfo.bundle import CellSpecification, ProvenanceInfo  # noqa: PLC0415
-
-    # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
-    if draft.id is not None:
-        if not CELL_SPEC_IRI_RE.fullmatch(draft.id):
-            raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
-        if draft.uid is not None:
-            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
-        entity_id = draft.id
-    else:
-        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(draft.uid)}"
+def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
     # Validate component-spec reference IRIs at the input boundary.
     for field_name, namespace in _COMPONENT_SPEC_REF_NAMESPACES.items():
-        value = getattr(draft, field_name)
+        value = getattr(spec, field_name)
         if value is not None and not _component_iri_re(namespace).fullmatch(value):
             raise ValueError(f"{field_name} must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
-
-    org = _org_value(draft.manufacturer)
-    manufacturer_name = org["name"] if org else str(draft.manufacturer)
-    # Build the record through the one model (the source of truth) rather than hand-assembling a
-    # parallel canonical dict — to_record() is now the single serializer.
-    return CellSpecification(
-        schema_version=draft.schema_version,
-        id=entity_id,
-        name=f"{manufacturer_name} {draft.model_name}",
-        manufacturer=manufacturer_name,
-        manufacturer_id=(org or {}).get("id"),
-        model=draft.model_name,
-        format=draft.format,
-        chemistry=draft.chemistry,
-        product_type=draft.product_type,
-        positive_electrode_basis=draft.positive_electrode_basis,
-        negative_electrode_basis=draft.negative_electrode_basis,
-        positive_electrode_spec_id=draft.positive_electrode_spec_id,
-        negative_electrode_spec_id=draft.negative_electrode_spec_id,
-        electrolyte_spec_id=draft.electrolyte_spec_id,
-        separator_spec_id=draft.separator_spec_id,
-        housing_spec_id=draft.housing_spec_id,
-        size_code=draft.size_code,
-        iec_code=draft.iec_code,
-        country_of_origin=draft.country_of_origin,
-        year=draft.year,
-        datasheet_revision=draft.datasheet_revision,
-        properties=draft.specs,
-        source=ProvenanceInfo(
-            type=draft.source_type,
-            file=draft.source_file,
-            url=draft.source_url,
-            citation=_citation_url_value(draft.citation),
-            file_hash=draft.file_hash,
-            retrieved_at=draft.retrieved_at or _now_unix(),
-        ),
-        comment=list(draft.notes),
-    ).to_record()
+    # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
+    if spec.id is not None:
+        if not CELL_SPEC_IRI_RE.fullmatch(spec.id):
+            raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
+        if spec.uid is not None:
+            _assert_id_matches_uid(spec.id, _normalized_dashed_uid(spec.uid))
+        entity_id = spec.id
+    else:
+        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(spec.uid)}"
+    # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the caller.
+    finalized = spec.model_copy(deep=True)
+    finalized.id = entity_id
+    if finalized.source.type is None:
+        finalized.source.type = "datasheet"
+    if finalized.source.file is None:
+        finalized.source.file = "manual.json"
+    if finalized.source.retrieved_at is None:
+        finalized.source.retrieved_at = _now_unix()
+    return finalized.to_record()
 
 
 def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
@@ -2935,7 +2871,7 @@ def save_record(
 
 
 def save_cell_spec(
-    draft: CellSpecificationInput | dict[str, Any] | PathLike,
+    draft: CellSpecification | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2968,24 +2904,7 @@ def save_cell_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, CellSpecificationBundle):
-        return save_record(
-            draft.to_record(),
-            source_root=source_root,
-            mode=mode,
-            duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references,
-            publish=publish,
-            publish_root=publish_root,
-            build_jsonld=build_jsonld,
-            build_html=build_html,
-            validate=validate,
-            validation_policy=validation_policy,
-            dry_run=dry_run,
-        )
-    if isinstance(draft, Mapping) and (
-        isinstance(draft.get("cell_spec"), Mapping) or isinstance(draft.get("cell_spec"), Mapping)
-    ):
+    if isinstance(draft, Mapping) and isinstance(draft.get("cell_spec"), Mapping):
         return save_record(
             dict(draft),
             source_root=source_root,
@@ -3000,8 +2919,8 @@ def save_cell_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, CellSpecificationInput) else CellSpecificationInput.model_validate(draft)
-    record = _record_from_cell_spec(draft_model)
+    spec = draft if isinstance(draft, CellSpecificationBundle) else CellSpecificationBundle(**dict(draft))
+    record = _record_from_cell_spec(spec)
     return save_record(
         record,
         source_root=source_root,
@@ -5540,7 +5459,6 @@ __all__ = [
     "RegistryError",
     "RegistryClientError",
     "RegistryTransientError",
-    "CellSpecificationInput",
     "CellInstanceInput",
     "MaterialSpecInput",
     "MaterialInput",

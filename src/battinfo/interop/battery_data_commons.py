@@ -37,7 +37,6 @@ from typing import Any
 from battinfo.api import (
     UID_ALPHABET,
     CellInstanceInput,
-    CellSpecificationInput,
     DatasetInput,
     TestInput,
     _normalized_dashed_uid,
@@ -48,7 +47,7 @@ from battinfo.api import (
     _validate_canonical_record,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType
+from battinfo.bundle import BatteryTestType, CellSpecification
 
 PathLike = str | Path
 
@@ -243,7 +242,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     if source_meta.get("owner"):
         notes.append(f"dataset owner: {source_meta['owner']}")
 
-    cell_spec = _check(_record_from_cell_spec(CellSpecificationInput(
+    cell_spec = _check(_record_from_cell_spec(CellSpecification(
         uid=_uid("bdc", "cell-spec", bdc_id),
         model_name=_clean(overview.get("battery_model")) or bdc_id,
         manufacturer={"type": "Organization", "name": _clean(overview.get("manufacturer")) or "Unknown"},
