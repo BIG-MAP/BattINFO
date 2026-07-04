@@ -41,9 +41,7 @@ from typing import Any
 
 from battinfo.api import (
     UID_ALPHABET,
-    CellInstanceInput,
     DatasetInput,
-    TestInput,
     _normalized_dashed_uid,
     _record_from_cell_instance,
     _record_from_cell_spec,
@@ -53,7 +51,7 @@ from battinfo.api import (
     create_component_spec,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType, CellSpecification
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
 from battinfo.interop.protocols import _num
 
 PathLike = str | Path
@@ -310,7 +308,7 @@ class _Builder:
         )))
         cell_spec_id = cell_spec["cell_spec"]["id"]
 
-        cell_instance = self._check(_record_from_cell_instance(CellInstanceInput(
+        cell_instance = self._check(_record_from_cell_instance(CellInstance(
             uid=_uid("discovery", "cell-instance", seed),
             cell_spec_id=cell_spec_id,
             serial_number=cell_id,
@@ -322,7 +320,7 @@ class _Builder:
         test: dict[str, Any] | None = None
         dataset: dict[str, Any] | None = None
         if test_name is not None:
-            test = self._check(_record_from_test(TestInput(
+            test = self._check(_record_from_test(Test(
                 uid=_uid("discovery", "test", seed),
                 cell_id=cell_uid,
                 name=test_name,

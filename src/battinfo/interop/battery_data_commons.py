@@ -36,9 +36,7 @@ from typing import Any
 
 from battinfo.api import (
     UID_ALPHABET,
-    CellInstanceInput,
     DatasetInput,
-    TestInput,
     _normalized_dashed_uid,
     _record_from_cell_instance,
     _record_from_cell_spec,
@@ -47,7 +45,7 @@ from battinfo.api import (
     _validate_canonical_record,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType, CellSpecification
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
 
 PathLike = str | Path
 
@@ -260,7 +258,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     )))
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
-    cell_instance = _check(_record_from_cell_instance(CellInstanceInput(
+    cell_instance = _check(_record_from_cell_instance(CellInstance(
         uid=_uid("bdc", "cell-instance", bdc_id),
         cell_spec_id=cell_spec_id,
         serial_number=bdc_id,
@@ -274,7 +272,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     for flag, (kind, label) in _MEASUREMENT_KIND.items():
         if (record.get("available_measurements") or {}).get(flag):
             techniques.append(label)
-            tests.append(_check(_record_from_test(TestInput(
+            tests.append(_check(_record_from_test(Test(
                 uid=_uid("bdc", "test", bdc_id, flag),
                 cell_id=cell_uid,
                 name=label,

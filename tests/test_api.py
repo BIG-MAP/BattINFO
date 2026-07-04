@@ -10,9 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
-    CellInstanceInput,
     DatasetInput,
-    TestInput,
     TestProtocolInput,
     build_cell_spec_library_rdf,
     build_curated_cell_spec_submission,
@@ -48,7 +46,7 @@ from battinfo.api import (
     template_test_spec_draft,
     validate_staging_cell_spec,
 )
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellInstance, CellSpecification, Test
 from battinfo.validate import validate_references_report
 
 
@@ -608,7 +606,7 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
         mode="upsert",
     )
     cell = save_cell_instance(
-        CellInstanceInput(
+        CellInstance(
             uid="3m6k9t2p7x4h9nq8",
             cell_spec_id=cell_spec["id"],
         ),
@@ -627,7 +625,7 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
         mode="upsert",
     )
     test = save_test(
-        TestInput(
+        Test(
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell["id"],
             name="A123 cycle life run",
@@ -835,7 +833,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     assert exists_payload["status"] == "exists"
 
     cell_instance_payload = save_cell_instance(
-        CellInstanceInput(
+        CellInstance(
             uid="1f8r6v2k9p4m3t7x",
             cell_spec_id=cell_spec_payload["id"],
             serial_number="LAB-001",
@@ -847,7 +845,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     assert cell_instance_payload["status"] == "created"
 
     test_payload = save_test(
-        TestInput(
+        Test(
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell_instance_payload["id"],
             name="Duracell MN1500 baseline cycling",
@@ -914,7 +912,7 @@ def test_save_record_accepts_canonical_records_and_paths(tmp_path: Path) -> None
 def test_save_cell_instance_missing_reference_is_deferred_until_set_validation(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     payload = save_cell_instance(
-        CellInstanceInput(
+        CellInstance(
             uid="eysh4h5sk4bxzkgg",
             cell_spec_id="https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq",
             dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",

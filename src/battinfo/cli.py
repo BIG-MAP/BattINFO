@@ -8,9 +8,7 @@ import typer
 
 from battinfo._jsonio import write_json as _write_json_file
 from battinfo.api import (
-    CellInstanceInput,
     DatasetInput,
-    TestInput,
     TestSpecInput,
 )
 from battinfo.api import (
@@ -124,7 +122,7 @@ from battinfo.api import (
 from battinfo.api import (
     validate_staging_datasets as api_validate_staging_datasets,
 )
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellInstance, CellSpecification, Test
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
@@ -1957,17 +1955,16 @@ def save_cell_instance(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: CellInstanceInput | dict[str, Any] | Path = input_path
+            draft_obj: CellInstance | dict[str, Any] | Path = input_path
         else:
             if not cell_spec_id:
                 raise ValueError("--cell-spec-id is required when --input is not provided.")
-            draft_obj = CellInstanceInput(
+            draft_obj = CellInstance(
                 uid=uid,
                 cell_spec_id=cell_spec_id,
                 serial_number=serial_number,
                 source_type=source_type,  # type: ignore[arg-type]
-                dataset_id=(dataset_id[0] if dataset_id else None),
-                dataset_ids=(dataset_id[1:] if len(dataset_id) > 1 else []),
+                dataset_ids=list(dataset_id),
             )
         payload = api_save_cell_instance(
             draft_obj,
@@ -2168,11 +2165,11 @@ def save_test(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: TestInput | dict[str, Any] | Path = input_path
+            draft_obj: Test | dict[str, Any] | Path = input_path
         else:
             if not cell_id or not name:
                 raise ValueError("--cell-id and --name are required when --input is not provided.")
-            draft_obj = TestInput(
+            draft_obj = Test(
                 uid=uid,
                 cell_id=cell_id,
                 name=name,

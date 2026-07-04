@@ -41,9 +41,7 @@ from typing import Any
 
 from battinfo.api import (
     UID_ALPHABET,
-    CellInstanceInput,
     MaterialSpecInput,
-    TestInput,
     _normalized_dashed_uid,
     _record_from_cell_instance,
     _record_from_cell_spec,
@@ -51,7 +49,7 @@ from battinfo.api import (
     _record_from_test,
     _validate_canonical_record,
 )
-from battinfo.bundle import BatteryTestType, CellSpecification
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
 
 PathLike = str | Path
 
@@ -294,7 +292,7 @@ def from_solid_state_db_row(
     ))
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
-    cell_instance = _record_from_cell_instance(CellInstanceInput(
+    cell_instance = _record_from_cell_instance(CellInstance(
         uid=_uid_from_seed(seed, "cell-instance"),
         cell_spec_id=cell_spec_id,
         source_type="lab",
@@ -320,7 +318,7 @@ def from_solid_state_db_row(
             desc_parts.append(f"areal capacity {areal_cap} mAh/cm2")
         if cycle_life is not None:
             desc_parts.append(f"{int(cycle_life)} cycles")
-        test = _record_from_test(TestInput(
+        test = _record_from_test(Test(
             uid=_uid_from_seed(seed, "test", "clc"),
             cell_id=cell_id,
             name="Constant-current cycle-life test",

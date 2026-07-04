@@ -19,7 +19,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo.bundle import BatteryTestType, CellSpecification
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
@@ -140,28 +140,6 @@ def _citation_url_value(citation: object = None, citation_doi: object = None) ->
 # provenance defaults. (The former ``CellDatasheetInput`` was likewise retired earlier.)
 
 
-class CellInstanceInput(BaseModel):
-    """Typed input for saving a new canonical cell-instance resource."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    schema_version: str = "0.1.0"
-    id: str | None = None
-    uid: str | None = None
-    cell_spec_id: str
-    serial_number: str | None = None
-    batch_id: str | None = None
-    manufactured_at: int | str | None = None
-    measured: dict[str, Any] | None = None
-    source_type: Literal["measurement", "lab", "bms", "other"] = "measurement"
-    dataset_id: str | None = None
-    dataset_ids: list[str] = Field(default_factory=list)
-    source_url: str | None = None
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
-    retrieved_at: int | str | None = None
-    notes: list[str] = Field(default_factory=list)
-
-
 class DatasetInput(BaseModel):
     """Typed input for saving a new canonical dataset resource."""
 
@@ -209,36 +187,6 @@ class DatasetInput(BaseModel):
     citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     retrieved_at: int | None = None
     curated_by: str | None = None
-    notes: list[str] = Field(default_factory=list)
-
-
-class TestInput(BaseModel):
-    """Typed input for saving a new canonical test resource."""
-
-    model_config = ConfigDict(extra="forbid")
-    __test__ = False
-
-    schema_version: str = "0.1.0"
-    id: str | None = None
-    uid: str | None = None
-    cell_id: str
-    name: str
-    kind: TestKind
-    protocol_id: str | None = None
-    description: str | None = None
-    status: Literal["planned", "running", "completed", "aborted", "other"] | None = None
-    protocol_name: str | None = None
-    protocol_url: str | None = None
-    instrument_name: str | None = None
-    started_at: int | str | None = None
-    ended_at: int | str | None = None
-    dataset_ids: list[str] = Field(default_factory=list)
-    source_type: Literal["measurement", "lab", "simulation", "manual", "other"] = "measurement"
-    source_url: str | None = None
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
-    source_file: str | None = None
-    retrieved_at: int | str | None = None
-    workflow_version: str | None = None
     notes: list[str] = Field(default_factory=list)
 
 
@@ -383,7 +331,7 @@ def template_cell_instance(
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
     """Build a starter canonical cell-instance document for save workflows."""
-    draft = CellInstanceInput(
+    draft = CellInstance(
         uid=uid,
         cell_spec_id=cell_spec_id,
         source_type=source_type,
@@ -422,7 +370,7 @@ def template_test(
     dataset_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     """Build a starter canonical test document for save workflows."""
-    draft = TestInput(
+    draft = Test(
         uid=uid,
         cell_id=cell_id,
         name=name,
@@ -2465,50 +2413,33 @@ def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
     return finalized.to_record()
 
 
-def _record_from_cell_instance(draft: CellInstanceInput) -> dict[str, Any]:
-    if not CELL_SPEC_IRI_RE.fullmatch(draft.cell_spec_id):
+def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
+    if instance.cell_spec_id is None or not CELL_SPEC_IRI_RE.fullmatch(instance.cell_spec_id):
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
-    if draft.dataset_id is not None and not DATASET_IRI_RE.fullmatch(draft.dataset_id):
-        raise ValueError("dataset_id must match https://w3id.org/battinfo/dataset/{uid}.")
-    for dataset_id in draft.dataset_ids:
+    for dataset_id in instance.dataset_ids:
         if not DATASET_IRI_RE.fullmatch(dataset_id):
             raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
-
-    if draft.id is not None:
-        if not CELL_IRI_RE.fullmatch(draft.id):
+    if instance.id is not None:
+        if not CELL_IRI_RE.fullmatch(instance.id):
             raise ValueError("cell-instance id must match https://w3id.org/battinfo/cell/{uid}.")
-        if draft.uid is not None:
-            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
-        entity_id = draft.id
+        if instance.uid is not None:
+            _assert_id_matches_uid(instance.id, _normalized_dashed_uid(instance.uid))
+        entity_id = instance.id
     else:
-        entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(draft.uid)}"
-
-    manufactured_at: int | None = None
-    if draft.manufactured_at is not None:
-        manufactured_at = _to_unix_time(draft.manufactured_at)
-        if manufactured_at is None:
+        entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(instance.uid)}"
+    # Finalize a copy (mint the id, convert manufactured_at, apply save-time provenance defaults).
+    finalized = instance.model_copy(deep=True)
+    finalized.id = entity_id
+    if finalized.manufactured_at is not None:
+        converted = _to_unix_time(finalized.manufactured_at)
+        if converted is None:
             raise ValueError("manufactured_at must be a Unix timestamp or ISO datetime string.")
-    dataset_ids = list(dict.fromkeys([*draft.dataset_ids, *([draft.dataset_id] if draft.dataset_id else [])]))
-    from battinfo.bundle import CellInstance, ProvenanceInfo  # noqa: PLC0415
-
-    # Build the record through the one model (its to_record is the single serializer).
-    return CellInstance(
-        schema_version=draft.schema_version,
-        id=entity_id,
-        cell_spec_id=draft.cell_spec_id,
-        serial_number=draft.serial_number,
-        batch_id=draft.batch_id,
-        manufactured_at=manufactured_at,
-        measured=draft.measured or {},
-        dataset_ids=dataset_ids,
-        source=ProvenanceInfo(
-            type=draft.source_type,
-            url=draft.source_url,
-            citation=_citation_url_value(draft.citation),
-            retrieved_at=_to_unix_time(draft.retrieved_at) or _now_unix(),
-        ),
-        comment=list(draft.notes),
-    ).to_record()
+        finalized.manufactured_at = converted
+    if finalized.source.type is None:
+        finalized.source.type = "measurement"
+    if finalized.source.retrieved_at is None:
+        finalized.source.retrieved_at = _now_unix()
+    return finalized.to_record()
 
 
 def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
@@ -2635,58 +2566,37 @@ def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
     return record_to_snake_aliases(record)
 
 
-def _record_from_test(draft: TestInput) -> dict[str, Any]:
-    if not CELL_IRI_RE.fullmatch(draft.cell_id):
+def _record_from_test(test: Test) -> dict[str, Any]:
+    if test.cell_instance_id is None or not CELL_IRI_RE.fullmatch(test.cell_instance_id):
         raise ValueError("cell_id must match https://w3id.org/battinfo/cell/{uid}.")
-    if draft.protocol_id is not None and not TEST_PROTOCOL_IRI_RE.fullmatch(draft.protocol_id):
+    if test.protocol_id is not None and not TEST_PROTOCOL_IRI_RE.fullmatch(test.protocol_id):
         raise ValueError("protocol_id must match https://w3id.org/battinfo/spec/{uid}.")
-    for dataset_id in draft.dataset_ids:
+    for dataset_id in test.dataset_ids:
         if not DATASET_IRI_RE.fullmatch(dataset_id):
             raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
-
-    if draft.id is not None:
-        if not TEST_IRI_RE.fullmatch(draft.id):
+    if test.id is not None:
+        if not TEST_IRI_RE.fullmatch(test.id):
             raise ValueError("test id must match https://w3id.org/battinfo/test/{uid}.")
-        if draft.uid is not None:
-            _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
-        entity_id = draft.id
+        if test.uid is not None:
+            _assert_id_matches_uid(test.id, _normalized_dashed_uid(test.uid))
+        entity_id = test.id
     else:
-        entity_id = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(draft.uid)}"
-
-    started_at = _to_unix_time(draft.started_at) if draft.started_at is not None else None
-    if draft.started_at is not None and started_at is None:
-        raise ValueError("started_at must be a Unix timestamp or ISO datetime string.")
-    ended_at = _to_unix_time(draft.ended_at) if draft.ended_at is not None else None
-    if draft.ended_at is not None and ended_at is None:
-        raise ValueError("ended_at must be a Unix timestamp or ISO datetime string.")
-    from battinfo.bundle import ProtocolInfo, ProvenanceInfo, Test  # noqa: PLC0415
-
-    # Build the record through the one model (its to_record maps test_type/cell_instance_id/
-    # instrument/protocol back to the record's kind/cell_id/instrument_name/protocol_* fields).
-    return Test(
-        schema_version=draft.schema_version,
-        id=entity_id,
-        cell_instance_id=draft.cell_id,
-        name=draft.name,
-        test_type=draft.kind,
-        description=draft.description,
-        protocol_id=draft.protocol_id,
-        status=draft.status,
-        protocol=ProtocolInfo(name=draft.protocol_name, url=draft.protocol_url),
-        instrument=draft.instrument_name,
-        started_at=started_at,
-        ended_at=ended_at,
-        dataset_ids=list(dict.fromkeys(draft.dataset_ids)),
-        source=ProvenanceInfo(
-            type=draft.source_type,
-            url=draft.source_url,
-            citation=_citation_url_value(draft.citation),
-            file=draft.source_file,
-            workflow_version=draft.workflow_version,
-            retrieved_at=_to_unix_time(draft.retrieved_at) or _now_unix(),
-        ),
-        comment=list(draft.notes),
-    ).to_record()
+        entity_id = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(test.uid)}"
+    # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
+    finalized = test.model_copy(deep=True)
+    finalized.id = entity_id
+    for _time_field in ("started_at", "ended_at"):
+        value = getattr(finalized, _time_field)
+        if value is not None:
+            converted = _to_unix_time(value)
+            if converted is None:
+                raise ValueError(f"{_time_field} must be a Unix timestamp or ISO datetime string.")
+            setattr(finalized, _time_field, converted)
+    if finalized.source.type is None:
+        finalized.source.type = "measurement"
+    if finalized.source.retrieved_at is None:
+        finalized.source.retrieved_at = _now_unix()
+    return finalized.to_record()
 
 
 def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
@@ -2938,7 +2848,7 @@ def save_cell_spec(
 
 
 def save_cell_instance(
-    draft: CellInstanceInput | dict[str, Any] | PathLike,
+    draft: CellInstance | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2971,21 +2881,6 @@ def save_cell_instance(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, CellInstanceBundle):
-        return save_record(
-            draft.to_record(),
-            source_root=source_root,
-            mode=mode,
-            duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references,
-            publish=publish,
-            publish_root=publish_root,
-            build_jsonld=build_jsonld,
-            build_html=build_html,
-            validate=validate,
-            validation_policy=validation_policy,
-            dry_run=dry_run,
-        )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_instance"), Mapping):
         return save_record(
             dict(draft),
@@ -3001,8 +2896,8 @@ def save_cell_instance(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, CellInstanceInput) else CellInstanceInput.model_validate(draft)
-    record = _record_from_cell_instance(draft_model)
+    instance = draft if isinstance(draft, CellInstanceBundle) else CellInstanceBundle(**dict(draft))
+    record = _record_from_cell_instance(instance)
     return save_record(
         record,
         source_root=source_root,
@@ -3102,7 +2997,7 @@ def save_dataset(
 
 
 def save_test(
-    draft: TestInput | dict[str, Any] | PathLike,
+    draft: Test | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -3135,21 +3030,6 @@ def save_test(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, TestBundle):
-        return save_record(
-            draft.to_record(),
-            source_root=source_root,
-            mode=mode,
-            duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references,
-            publish=publish,
-            publish_root=publish_root,
-            build_jsonld=build_jsonld,
-            build_html=build_html,
-            validate=validate,
-            validation_policy=validation_policy,
-            dry_run=dry_run,
-        )
     if isinstance(draft, Mapping) and isinstance(draft.get("test"), Mapping):
         return save_record(
             dict(draft),
@@ -3165,8 +3045,8 @@ def save_test(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, TestInput) else TestInput.model_validate(draft)
-    record = _record_from_test(draft_model)
+    test = draft if isinstance(draft, TestBundle) else TestBundle(**dict(draft))
+    record = _record_from_test(test)
     return save_record(
         record,
         source_root=source_root,
@@ -5459,7 +5339,6 @@ __all__ = [
     "RegistryError",
     "RegistryClientError",
     "RegistryTransientError",
-    "CellInstanceInput",
     "MaterialSpecInput",
     "MaterialInput",
     "create_material_spec",
@@ -5480,7 +5359,6 @@ __all__ = [
     "template_component_instance",
     "DatasetInput",
     "TestSpecInput",
-    "TestInput",
     "build_cell_spec_library_rdf",
     "build_index",
     "build_curated_cell_spec_submission",
