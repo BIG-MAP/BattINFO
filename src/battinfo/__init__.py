@@ -1,10 +1,8 @@
 from battinfo._workspace import Workspace, q, quantity
 from battinfo.api import (
-    CellInstanceInput,
     DatasetInput,
     MaterialInput,
     MaterialSpecInput,
-    TestInput,
     TestProtocolInput,  # backward compat alias
     TestSpecInput,
     build_cell_spec_library_rdf,
@@ -280,13 +278,11 @@ __all__ = [
     "CurrentCollectorTab",
     "TableColumn",
     "TableSchema",
-    "CellInstanceInput",
     "DatasetInput",
     "MaterialSpecInput",
     "MaterialInput",
     "TestSpecInput",
     "TestProtocolInput",
-    "TestInput",
     "build_cell_spec_library_rdf",
     "build_index",
     "build_curated_cell_spec_submission",

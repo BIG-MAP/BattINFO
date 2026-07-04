@@ -8,9 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
-    CellInstanceInput,
     DatasetInput,
-    TestInput,
     build_index,
     publish_batch,
     save_cell_instance,
@@ -18,7 +16,7 @@ from battinfo.api import (
     save_dataset,
     save_test,
 )
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellInstance, CellSpecification, Test
 
 
 def test_core_workflow_end_to_end(tmp_path: Path) -> None:
@@ -39,7 +37,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
         validation_policy="strict",
     )
     cell_instance = save_cell_instance(
-        CellInstanceInput(
+        CellInstance(
             uid="1f8r6v2k9p4m3t7x",
             cell_spec_id=cell_spec["id"],
             serial_number="SN-001",
@@ -50,7 +48,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
         validation_policy="strict",
     )
     test = save_test(
-        TestInput(
+        Test(
             uid="5p7v2n8k4m3t6q9r",
             cell_id=cell_instance["id"],
             name="MN1500 baseline cycling",

@@ -1684,6 +1684,8 @@ class CellInstance(BundleJsonModel):
 
     kind: str = "CellInstance"
     id: str | None = None
+    # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
+    uid: str | None = Field(default=None, exclude=True, repr=False)
     name: str | None = None
     cell_spec_id: str | None = None
     cell_spec: CellSpecification | None = Field(default=None, exclude=True, repr=False)
@@ -1699,6 +1701,19 @@ class CellInstance(BundleJsonModel):
     comment: list[str] = Field(default_factory=list)
 
     def __init__(self, cell_spec: CellSpecification | None = None, /, **data: Any) -> None:
+        # Absorb the flat authoring/input shape (formerly CellInstanceInput).
+        if "notes" in data and "comment" not in data:
+            data["comment"] = data.pop("notes")
+        _dataset_id = data.pop("dataset_id", None)
+        if _dataset_id is not None:
+            data["dataset_ids"] = list(dict.fromkeys([*(data.get("dataset_ids") or []), _dataset_id]))
+        _flat_provenance = {
+            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
+            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+        }
+        if any(key in data for key in _flat_provenance) and "source" not in data:
+            data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
         if cell_spec is not None and "cell_spec" not in data and "cell_spec_id" not in data:
             data["cell_spec"] = cell_spec
         super().__init__(**data)
@@ -2158,6 +2173,8 @@ class Test(BundleJsonModel):
     kind: str = "Test"
     __test__ = False
     id: str | None = None
+    # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
+    uid: str | None = Field(default=None, exclude=True, repr=False)
     name: str | None = None
     test_type: BatteryTestType = Field(
         default=BatteryTestType.OTHER,
@@ -2180,6 +2197,26 @@ class Test(BundleJsonModel):
     comment: list[str] = Field(default_factory=list)
 
     def __init__(self, cell: CellInstance | None = None, /, **data: Any) -> None:
+        # Absorb the flat authoring/input shape (formerly TestInput).
+        if "cell_id" in data and "cell_instance_id" not in data:
+            data["cell_instance_id"] = data.pop("cell_id")
+        if "kind" in data and "test_type" not in data:
+            data["test_type"] = data.pop("kind")
+        if "instrument_name" in data and "instrument" not in data:
+            data["instrument"] = data.pop("instrument_name")
+        _protocol_name = data.pop("protocol_name", None)
+        _protocol_url = data.pop("protocol_url", None)
+        if (_protocol_name is not None or _protocol_url is not None) and "protocol" not in data:
+            data["protocol"] = {"name": _protocol_name, "url": _protocol_url}
+        if "notes" in data and "comment" not in data:
+            data["comment"] = data.pop("notes")
+        _flat_provenance = {
+            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
+            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+        }
+        if any(key in data for key in _flat_provenance) and "source" not in data:
+            data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
         if cell is not None and "cell" not in data and "cell_instance_id" not in data:
             data["cell"] = cell
         super().__init__(**data)
