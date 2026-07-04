@@ -1153,6 +1153,8 @@ class CellSpecification(BundleJsonModel):
 
     kind: str = "CellSpecification"
     id: str | None = None
+    # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
+    uid: str | None = Field(default=None, exclude=True, repr=False)
     name: str | None = None
     manufacturer: str = ""
     # Canonical IRI of the manufacturer's organization record. The schema types manufacturer as an
@@ -1213,6 +1215,26 @@ class CellSpecification(BundleJsonModel):
         return value
 
     def __init__(self, **data: Any) -> None:
+        # Absorb the flatter authoring/input shape (formerly CellSpecificationInput) so one model is
+        # both the source of truth and the thing importers/CLI/tests construct directly.
+        if "model_name" in data and "model" not in data:
+            data["model"] = data.pop("model_name")
+        if "notes" in data and "comment" not in data:
+            data["comment"] = data.pop("notes")
+        _manufacturer = data.get("manufacturer")
+        if isinstance(_manufacturer, Mapping):
+            data["manufacturer"] = _manufacturer.get("name", "") or ""
+            if _manufacturer.get("id") and not data.get("manufacturer_id"):
+                data["manufacturer_id"] = _manufacturer["id"]
+        # Flat provenance kwargs -> the nested source object.
+        _flat_provenance = {
+            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
+            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+        }
+        if any(key in data for key in _flat_provenance) and "source" not in data:
+            data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
+
         explicit_properties = data.get("properties")
         if explicit_properties is None:
             explicit_properties = {}
@@ -1220,6 +1242,11 @@ class CellSpecification(BundleJsonModel):
             explicit_properties = dict(explicit_properties)
         else:
             explicit_properties = dict(explicit_properties)
+        # `specs` is an input alias for `properties`.
+        _specs = data.pop("specs", None)
+        if isinstance(_specs, Mapping):
+            for _key, _value in _specs.items():
+                explicit_properties.setdefault(_key, _value)
 
         for field_name in CELL_TYPE_AUTHORING_PROPERTY_FIELDS:
             if field_name in data:
