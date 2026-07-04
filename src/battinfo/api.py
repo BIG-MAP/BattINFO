@@ -481,9 +481,16 @@ def _to_unix_time(value: object) -> int | None:
         if txt.isdigit():
             return int(txt)
         try:
-            return int(datetime.fromisoformat(txt.replace("Z", "+00:00")).timestamp())
+            parsed = datetime.fromisoformat(txt.replace("Z", "+00:00"))
         except ValueError:
             return None
+        # A bare date ("2022-01-15") or a time without an offset parses to a naive
+        # datetime; .timestamp() would then read it in the machine's local zone, making
+        # the resulting Unix time timezone-dependent (non-reproducible across machines).
+        # Anchor naive values to UTC so the same input always yields the same timestamp.
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return int(parsed.timestamp())
     return None
 
 
