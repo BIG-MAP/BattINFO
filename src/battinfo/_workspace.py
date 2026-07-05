@@ -1603,7 +1603,36 @@ class Workspace:
         target_root = _as_path(source_root) if source_root is not None else self.source_root
         finalized = self._finalize()
 
-        results = {
+        from battinfo._record_index import bulk_save_session  # noqa: PLC0415 — avoid import cycle
+
+        with bulk_save_session(target_root):
+            results = self._save_finalized(
+                finalized,
+                target_root=target_root,
+                mode=mode,
+                resolve_references=resolve_references,
+                validation_policy=validation_policy,
+            )
+
+        if build_index:
+            results["index"] = build_index_api(
+                source_root=target_root,
+                out_path=self.index_path,
+                validate=True,
+                validation_policy=validation_policy,
+            )
+        return results
+
+    def _save_finalized(
+        self,
+        finalized: dict[str, Any],
+        *,
+        target_root: Path,
+        mode: str,
+        resolve_references: bool,
+        validation_policy: str,
+    ) -> dict[str, Any]:
+        return {
             "cell_specs": [
                 save_cell_spec(
                     item,
@@ -1655,15 +1684,6 @@ class Workspace:
                 for item in finalized["datasets"]
             ],
         }
-
-        if build_index:
-            results["index"] = build_index_api(
-                source_root=target_root,
-                out_path=self.index_path,
-                validate=True,
-                validation_policy=validation_policy,
-            )
-        return results
 
     def save_descriptions(
         self,

@@ -9,6 +9,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`battinfo.bulk_save_session(source_root)`** — a context manager that makes bulk
+  ingests fast: the id→path map is scanned once per entity type instead of per save,
+  every save keeps it current (so records saved in the batch resolve as references for
+  later records), and the per-file fsync is skipped because a bulk batch is re-runnable.
+  Measured on the 400-record benchmark (`scripts/bench_bulk_save.py`): 18 → 385
+  records/s (21×); a 10k-record ingest completes in under half a minute.
+  `Workspace.save()` and `save_batch` (Python + CLI) use it automatically.
 - **Every emitted record's provenance block now carries `battinfo_version`** — the version
   of the battinfo library that wrote the record — so records are forensically attributable
   to a build. The stamp is applied at emission (model `to_record()` and the direct api.py

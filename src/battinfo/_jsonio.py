@@ -32,13 +32,19 @@ def read_record_json(path: Path) -> dict[str, Any]:
     return record_to_snake_aliases(read_json(path))
 
 
-def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None:
+def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8", durable: bool = True) -> None:
     """Atomically write ``text`` to ``path``, creating parent dirs as needed.
 
-    Writes to a temporary file in the same directory, flushes + ``fsync``s it,
-    then ``os.replace``s it into place (atomic on POSIX and Windows). An
-    interrupted write — Ctrl-C, crash, disk-full, or a cloud-sync race — therefore
-    leaves the *previous* file fully intact instead of a truncated or empty record.
+    Writes to a temporary file in the same directory, flushes (+ ``fsync``s it
+    when ``durable``), then ``os.replace``s it into place (atomic on POSIX and
+    Windows). An interrupted write — Ctrl-C, crash, disk-full, or a cloud-sync
+    race — therefore leaves the *previous* file fully intact instead of a
+    truncated or empty record.
+
+    ``durable=False`` skips the per-file ``fsync`` (the dominant cost of bulk
+    ingests — ~6 ms/file on NTFS). Callers may only pass it when the whole
+    batch is re-runnable, so a power loss is repaired by re-running the ingest
+    rather than by that fsync.
 
     Newline handling matches :meth:`pathlib.Path.write_text` (text mode, default
     translation), so the on-disk bytes are identical to the previous non-atomic
@@ -50,7 +56,8 @@ def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None
         with os.fdopen(fd, "w", encoding=encoding) as handle:
             handle.write(text)
             handle.flush()
-            os.fsync(handle.fileno())
+            if durable:
+                os.fsync(handle.fileno())
         os.replace(tmp_name, path)
     except BaseException:
         # Best-effort cleanup so an interrupted write never leaks a temp file or
@@ -68,6 +75,6 @@ def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None
         raise
 
 
-def write_json(path: Path, payload: Mapping[str, Any]) -> None:
+def write_json(path: Path, payload: Mapping[str, Any], *, durable: bool = True) -> None:
     """Atomically write ``payload`` as pretty-printed UTF-8 JSON, creating parent dirs."""
-    atomic_write_text(path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+    atomic_write_text(path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n", durable=durable)

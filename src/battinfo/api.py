@@ -19,6 +19,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
+from battinfo._record_index import active_record_cache, bulk_save_session
 from battinfo.bundle import (
     SCHEMA_VERSION,
     BatteryTestType,
@@ -2323,6 +2324,10 @@ def _candidate_types_for_namespace(namespace: str) -> list[str]:
 
 def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
     namespace, uid = _iri_tail(entity_id)
+    cache = active_record_cache(source_root)
+    if cache is not None:
+        found = cache.lookup(entity_id, _candidate_types_for_namespace(namespace))
+        return found[0] if found is not None else None
     for entity_type in _candidate_types_for_namespace(namespace):
         expected = _save_entity_path(entity_type, uid, source_root)
         if expected.exists():
@@ -2595,7 +2600,13 @@ def save_record(
     if dry_run:
         return payload
 
-    _write_json(target_path, doc)
+    cache = active_record_cache(source_root_path)
+    # Inside a bulk session the per-file fsync is skipped: the batch is
+    # re-runnable (identical re-saves are no-ops), so a power loss is repaired
+    # by re-running the ingest, not by 6 ms of fsync per record.
+    _write_json(target_path, doc, durable=cache is None)
+    if cache is not None:
+        cache.record_saved(entity_id, target_path, entity_type)
 
     if publish:
         publish_result = publish_record(
@@ -3223,38 +3234,40 @@ def save_batch(
     exists = 0
     dry_run_count = 0
 
-    for src_dir in source_dirs:
-        src_path = _as_path(src_dir)
-        if not src_path.exists():
-            continue
-        for path in sorted(src_path.glob(glob)):
-            processed += 1
-            try:
-                payload = save_record(
-                    path,
-                    source_root=source_root,
-                    mode=mode_normalized,
-                    duplicate_policy=duplicate_policy_normalized,
-                    resolve_references=resolve_references,
-                    publish=publish,
-                    publish_root=publish_root,
-                    build_jsonld=build_jsonld,
-                    build_html=build_html,
-                    validate=validate,
-                    validation_policy=validation_policy,
-                    dry_run=dry_run,
-                )
-                status = payload.get("status")
-                if status == "created":
-                    created += 1
-                elif status == "updated":
-                    updated += 1
-                elif status == "exists":
-                    exists += 1
-                elif status == "dry-run":
-                    dry_run_count += 1
-            except Exception as exc:  # noqa: BLE001
-                failures.append({"file": str(path), "error": str(exc)})
+    # One id->path scan for the whole batch instead of one per record (3.4).
+    with bulk_save_session(_as_path(source_root)):
+        for src_dir in source_dirs:
+            src_path = _as_path(src_dir)
+            if not src_path.exists():
+                continue
+            for path in sorted(src_path.glob(glob)):
+                processed += 1
+                try:
+                    payload = save_record(
+                        path,
+                        source_root=source_root,
+                        mode=mode_normalized,
+                        duplicate_policy=duplicate_policy_normalized,
+                        resolve_references=resolve_references,
+                        publish=publish,
+                        publish_root=publish_root,
+                        build_jsonld=build_jsonld,
+                        build_html=build_html,
+                        validate=validate,
+                        validation_policy=validation_policy,
+                        dry_run=dry_run,
+                    )
+                    status = payload.get("status")
+                    if status == "created":
+                        created += 1
+                    elif status == "updated":
+                        updated += 1
+                    elif status == "exists":
+                        exists += 1
+                    elif status == "dry-run":
+                        dry_run_count += 1
+                except Exception as exc:  # noqa: BLE001
+                    failures.append({"file": str(path), "error": str(exc)})
 
     if resolve_references and validate and not dry_run:
         link_report = build_index(
