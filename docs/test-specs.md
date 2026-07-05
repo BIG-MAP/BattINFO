@@ -20,7 +20,7 @@ kinds), enforced by `tests/test_test_contract.py::test_test_protocol_examples_co
 ```python
 import battinfo as bi
 
-bi.save_test_spec(bi.TestSpecInput(
+bi.save_test_spec(bi.TestSpec(
     name="Capacity Check — C/10 at 25 C",
     kind=bi.BatteryTestType.CAPACITY_CHECK,
     description="CC-CV charge then slow C/10 discharge.",
