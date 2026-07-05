@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import difflib
 import functools
 import html
@@ -19,7 +18,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test, TestSpec
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
@@ -138,36 +137,6 @@ def _citation_url_value(citation: object = None, citation_doi: object = None) ->
 # dict manufacturer, flat provenance kwargs, a transient uid), so one model is both the source of
 # truth and the thing callers construct. ``_record_from_cell_spec`` mints the IRI + applies save-time
 # provenance defaults. (The former ``CellDatasheetInput`` was likewise retired earlier.)
-
-
-class TestSpecInput(BaseModel):
-    """Typed input for saving a reusable canonical test-protocol resource."""
-
-    model_config = ConfigDict(extra="forbid")
-    __test__ = False
-
-    schema_version: str = "0.1.0"
-    id: str | None = None
-    uid: str | None = None
-    name: str
-    kind: TestKind
-    description: str | None = None
-    version: str | None = None
-    protocol_url: str | None = None
-    conditions: dict[str, Any] = Field(default_factory=dict)
-    experiment: list[str] = Field(default_factory=list)   # PyBaMM-style strings (authoring)
-    cycles: int | None = None
-    method: list[dict[str, Any]] = Field(default_factory=list)  # pre-built structured method
-    record: dict[str, Any] = Field(default_factory=dict)
-    safety: dict[str, Any] = Field(default_factory=dict)
-    artifacts: list[dict[str, Any]] = Field(default_factory=list)
-    source_type: Literal["manual", "lab", "simulation", "import", "other"] = "manual"
-    source_url: str | None = None
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
-    source_file: str | None = None
-    retrieved_at: int | str | None = None
-    workflow_version: str | None = None
-    notes: list[str] = Field(default_factory=list)
 
 
 def template_cell_spec(
@@ -340,7 +309,7 @@ def template_test_spec(
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
     """Build a starter canonical test-protocol document for save workflows."""
-    draft = TestSpecInput(
+    draft = TestSpec(
         uid=uid,
         name=name,
         kind=kind,
@@ -2465,78 +2434,23 @@ def _record_from_test(test: Test) -> dict[str, Any]:
     return finalized.to_record()
 
 
-def _record_from_test_protocol(draft: TestSpecInput) -> dict[str, Any]:
-    if draft.id is not None:
-        if not TEST_PROTOCOL_IRI_RE.fullmatch(draft.id):
+def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
+    if spec.id is not None:
+        if not TEST_PROTOCOL_IRI_RE.fullmatch(spec.id):
             raise ValueError("test protocol id must match https://w3id.org/battinfo/spec/{uid}.")
-        if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
-        entity_id = draft.id
-        _, dashed_uid = _iri_tail(entity_id)
+        entity_id = spec.id
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(spec.uid)}"
 
-    record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
-        "test_spec": {
-            "id": entity_id,
-            "short_id": dashed_uid.replace("-", "")[:6],
-            "identifier": f"test-protocol:{dashed_uid}",
-            "name": draft.name,
-            "kind": draft.kind,
-        },
-        "provenance": {
-            "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
-        },
-    }
-    if draft.description is not None:
-        record["test_spec"]["description"] = draft.description
-    if draft.version is not None:
-        record["test_spec"]["version"] = draft.version
-    if draft.protocol_url is not None:
-        record["test_spec"]["protocol_url"] = draft.protocol_url
-    if draft.conditions:
-        record["conditions"] = copy.deepcopy(draft.conditions)
-    if draft.record:
-        record["record"] = copy.deepcopy(draft.record)
-    if draft.safety:
-        record["safety"] = copy.deepcopy(draft.safety)
-    # Descriptive method: a pre-built structured `method` wins, else parse the
-    # PyBaMM-style `experiment` strings (the default human authoring interface).
-    from battinfo.bundle import _prune_empty  # noqa: PLC0415
-    from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment  # noqa: PLC0415
-    method_objs: list[Step] = []
-    if draft.method:
-        method_objs = [Step.model_validate(s) for s in draft.method]
-    elif draft.experiment:
-        method_objs = parse_experiment(list(draft.experiment), draft.cycles)
-    if method_objs:
-        record["method"] = [_prune_empty(s.model_dump(mode="json")) for s in method_objs]
-        # Carry authored conditions (e.g. temperature) into the facet rollup so the
-        # API save path matches TestSpec.facets() — otherwise facets.temperatures is dropped.
-        facet_conditions = {
-            key: Quantity(value=value["value"], unit=value["unit"])
-            for key, value in (draft.conditions or {}).items()
-            if isinstance(value, Mapping) and "value" in value and "unit" in value
-        }
-        record["facets"] = compute_facets(method_objs, facet_conditions)
-    if draft.artifacts:
-        record["artifacts"] = [copy.deepcopy(a) for a in draft.artifacts]
-    if draft.source_url is not None:
-        record["provenance"]["source_url"] = draft.source_url
-    citation = _citation_url_value(draft.citation)
-    if citation is not None:
-        record["provenance"]["citation"] = citation
-    if draft.source_file is not None:
-        record["provenance"]["source_file"] = draft.source_file
-    if draft.workflow_version is not None:
-        record["provenance"]["workflow_version"] = draft.workflow_version
-    if draft.notes:
-        record["notes"] = list(draft.notes)
-    return record_to_snake_aliases(record)
+    # The model already parses the PyBaMM-style experiment/steps authoring input into the
+    # canonical `method` and computes `facets` in to_record(); the builder only mints the id
+    # and applies save-time provenance defaults.
+    finalized = spec.model_copy(deep=True)
+    finalized.id = entity_id
+    if finalized.source.type is None:
+        finalized.source.type = "manual"
+    finalized.source.retrieved_at = _to_unix_time(finalized.source.retrieved_at) or _now_unix()
+    return finalized.to_record()
 
 
 def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None:
@@ -2915,7 +2829,7 @@ def save_test(
 
 
 def save_test_spec(
-    draft: TestSpecInput | dict[str, Any] | PathLike,
+    draft: TestSpec | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2948,21 +2862,6 @@ def save_test_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, TestSpec):
-        return save_record(
-            draft.to_record(),
-            source_root=source_root,
-            mode=mode,
-            duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references,
-            publish=publish,
-            publish_root=publish_root,
-            build_jsonld=build_jsonld,
-            build_html=build_html,
-            validate=validate,
-            validation_policy=validation_policy,
-            dry_run=dry_run,
-        )
     if isinstance(draft, Mapping) and isinstance(draft.get("test_spec"), Mapping):
         return save_record(
             dict(draft),
@@ -2978,8 +2877,8 @@ def save_test_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, TestSpecInput) else TestSpecInput.model_validate(draft)
-    record = _record_from_test_protocol(draft_model)
+    spec = draft if isinstance(draft, TestSpec) else TestSpec(**dict(draft))
+    record = _record_from_test_protocol(spec)
     return save_record(
         record,
         source_root=source_root,
@@ -5208,7 +5107,6 @@ __all__ = [
     "query_component_instances",
     "template_component_spec",
     "template_component_instance",
-    "TestSpecInput",
     "build_cell_spec_library_rdf",
     "build_index",
     "build_curated_cell_spec_submission",
@@ -5250,7 +5148,6 @@ __all__ = [
     "validate_staging_cell_specs",
     "validate_staging_dataset",
     "validate_staging_datasets",
-    "TestProtocolInput",
     "save_test_protocol",
     "template_test_protocol",
     "template_test_protocol_draft",
@@ -5260,7 +5157,6 @@ __all__ = [
 # Per-family component wrappers (create_electrode_spec, query_electrode_specs, …).
 __all__ += _COMPONENT_WRAPPER_NAMES
 
-TestProtocolInput = TestSpecInput  # backward compat alias
 save_test_protocol = save_test_spec  # backward compat alias
 template_test_protocol = template_test_spec  # backward compat alias
 template_test_protocol_draft = template_test_spec_draft  # backward compat alias

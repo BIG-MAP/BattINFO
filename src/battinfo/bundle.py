@@ -1986,6 +1986,8 @@ class TestSpec(BundleJsonModel):
     kind: str = "TestSpec"
     __test__ = False
     id: str | None = None
+    # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
+    uid: str | None = Field(default=None, exclude=True, repr=False)
     name: str | None = None
     test_type: BatteryTestType = Field(
         default=BatteryTestType.OTHER,
@@ -2003,6 +2005,26 @@ class TestSpec(BundleJsonModel):
     artifacts: list[Artifact] = Field(default_factory=list)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
     comment: list[str] = Field(default_factory=list)
+
+    def __init__(self, /, **data: Any) -> None:
+        # Absorb the flat authoring/input shape (formerly TestSpecInput). The discriminator
+        # field `kind` and test_type both alias "kind"; route it to test_type explicitly so
+        # the discriminator keeps its default. protocol_url/experiment/steps/cycles are
+        # authoring conveniences (experiment/steps/cycles are handled by _coerce_authoring).
+        if "kind" in data and "test_type" not in data:
+            data["test_type"] = data.pop("kind")
+        if "protocol_url" in data and "protocol" not in data:
+            data["protocol"] = {"url": data.pop("protocol_url")}
+        if "notes" in data and "comment" not in data:
+            data["comment"] = data.pop("notes")
+        _flat_provenance = {
+            "source_type": "type", "source_name": "name", "source_file": "file",
+            "source_url": "url", "citation": "citation", "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at", "workflow_version": "workflow_version",
+        }
+        if any(key in data for key in _flat_provenance) and "source" not in data:
+            data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
+        super().__init__(**data)
 
     @model_validator(mode="before")
     @classmethod
