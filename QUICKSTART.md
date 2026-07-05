@@ -2,6 +2,17 @@
 
 BattINFO turns battery metadata into machine-readable Linked Data. In five minutes you will create a semantically typed battery cell record, validate it, and see the EMMO-aligned JSON-LD that BattINFO produces automatically.
 
+## Which surface do I use?
+
+| You want to… | Use | Entry point |
+|---|---|---|
+| Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` then `ws.quickstart()` |
+| Create a single record in code and save/publish it | **Models + functions** | `CellSpecification(...)` + `battinfo.publish(...)` (this page) |
+| Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo.Workspace` — the lower-level engine the authoring workspace wraps |
+
+If in doubt, start with `battinfo.workspace(".")` — it wraps everything else. See
+[Workspace authoring](docs/workspace-authoring.md) for the guided tour.
+
 ---
 
 ## Prerequisites

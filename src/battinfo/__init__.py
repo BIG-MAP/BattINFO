@@ -201,7 +201,7 @@ from battinfo.validate import (
     validate_shacl,
     validate_shacl_report,
 )
-from battinfo.ws import validate_jsonld, workspace
+from battinfo.ws import AuthoringWorkspace, validate_jsonld, workspace
 from battinfo.zenodo import ZenodoClient, ZenodoError, patch_zenodo_urls, upload_zenodo_package
 
 BatteryCellSpecification = CellSpecification
@@ -361,6 +361,7 @@ __all__ = [
     "upload_zenodo_package",
     "LocalWorkspace",
     "Workspace",
+    "AuthoringWorkspace",
     "workspace",
     "validate_jsonld",
     "record_to_jsonld",

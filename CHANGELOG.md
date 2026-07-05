@@ -9,6 +9,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `battinfo.AuthoringWorkspace` is exported by name (previously reachable only via the
+  `battinfo.workspace(...)` factory); its docstring now points at the correct engine class.
+  A new [Workspace authoring](docs/workspace-authoring.md) doc page mirrors
+  `ws.quickstart()`, and QUICKSTART/README carry a "Which surface do I use?" table mapping
+  the three entry points (authoring workspace, models + `publish`, `battinfo.Workspace`
+  object-graph engine). The internal `WorkspaceManifest` in `workspace_state.py` is renamed
+  `WorkspaceStateManifest`, ending the name clash with `local_workspace.WorkspaceManifest`.
 - Every field of the five authoring models (`CellSpecification`, `CellInstance`, `Test`,
   `TestSpec`, `Dataset`) and `ProvenanceInfo` now carries a `Field(description=...)`,
   surfacing in `help()`, IDE hover, and `.model_json_schema()`. Descriptions note the flat

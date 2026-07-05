@@ -919,10 +919,12 @@ _BDF_CANONICAL_COLUMNS: list[tuple[str, str]] = [
 
 
 class AuthoringWorkspace:
-    """Simplified workspace for authoring BattINFO records.
+    """The blessed authoring surface: a simplified workspace for BattINFO records.
 
-    Wraps the lower-level :class:`battinfo.workspace.Workspace` with a
-    concise API designed for interactive / notebook use.
+    Create one with :func:`battinfo.workspace` and call :meth:`quickstart` for a
+    copy-pasteable end-to-end example. Wraps the lower-level object-graph engine
+    :class:`battinfo.Workspace` (defined in ``battinfo._workspace``) with a concise
+    API designed for interactive / notebook use.
     """
 
     def __init__(

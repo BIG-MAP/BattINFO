@@ -121,6 +121,18 @@ Or from the command line:
 battinfo --help
 ```
 
+For interactive, multi-record work, the authoring workspace is the blessed surface —
+it wraps everything else:
+
+```python
+import battinfo
+ws = battinfo.workspace(".")
+ws.quickstart()   # prints a copy-pasteable end-to-end example
+```
+
+The [quickstart's "Which surface do I use?" table](QUICKSTART.md#which-surface-do-i-use)
+maps the three entry points (workspace, models + `publish`, `battinfo.Workspace` engine).
+
 **→ Read the [full quickstart](QUICKSTART.md) and the [documentation index](docs/index.md).**
 
 ## Guide notebooks
