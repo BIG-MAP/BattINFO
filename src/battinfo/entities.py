@@ -15,9 +15,30 @@ copy-pasted across ``api.py``, ``validate/record.py``, ``validate/references.py`
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Optional
+
+UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
+
+
+def stable_uid(seed: str) -> str:
+    """Deterministic dashed 16-char uid derived from an identity seed.
+
+    The single minting primitive shared by the workspace finalizers and the
+    ``save_*`` builders: the same identity seed always mints the same uid, so a
+    re-run of an identical ingest lands on the existing record instead of
+    creating a duplicate corpus. The registry's dedup logic mirrors the same
+    volatile-key policy (see ``_workspace._VOLATILE_SEED_KEYS``).
+    """
+    value = int.from_bytes(hashlib.sha256(seed.encode("utf-8")).digest()[:16], "big")
+    chars: list[str] = []
+    for _ in range(16):
+        value, remainder = divmod(value, 32)
+        chars.append(UID_ALPHABET[remainder])
+    token = "".join(reversed(chars))
+    return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
 @dataclass(frozen=True)

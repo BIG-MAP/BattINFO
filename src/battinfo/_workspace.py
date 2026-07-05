@@ -47,7 +47,7 @@ from battinfo.bundle import (
     TestConformance,
     TestSpec,
 )
-from battinfo.entities import iri_namespace_map
+from battinfo.entities import iri_namespace_map, stable_uid
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -116,13 +116,7 @@ def _now_unix() -> int:
 
 
 def _stable_uid(seed: str) -> str:
-    value = int.from_bytes(hashlib.sha256(seed.encode("utf-8")).digest()[:16], "big")
-    chars: list[str] = []
-    for _ in range(16):
-        value, remainder = divmod(value, 32)
-        chars.append(UID_ALPHABET[remainder])
-    token = "".join(reversed(chars))
-    return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
+    return stable_uid(seed)
 
 
 # Derived from the entity registry (registered record types), plus extra

@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **`save_*` minting is now idempotent** (beta-hardening 3.3): a record saved without an
+  `id`/`uid` mints its IRI deterministically from its natural identity key, using the same
+  seeds as the workspace finalizers — so the api and workspace paths mint identical IRIs
+  for identical identities, and re-running an identical ingest is a no-op
+  (`status: exists`/`updated` with `content_changed: False`) instead of a duplicate corpus.
+  Natural keys: cell-spec = manufacturer::model::format::chemistry::size_code;
+  cell = cell_spec_id::serial::batch::name; test-spec = kind::name::version;
+  test = cell::kind::protocol::name; dataset = cell::test::locator::name. Records with no
+  distinguishing identity (e.g. a cell instance with no serial/batch/name) still mint
+  randomly — distinct anonymous records never silently dedup. Pass an explicit `uid=` to
+  reproduce the old always-random behaviour.
+
 ### Added
 
 - **`battinfo.bulk_save_session(source_root)`** — a context manager that makes bulk
