@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -292,6 +294,35 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
     assert loaded.distributions[0]["checksum"]["value"] == "a" * 64
     assert loaded.included_in_data_catalog["name"] == "Example Battery Catalog"
     assert loaded.included_in_data_catalog["same_as"] == "https://example.org/catalog/about"
+
+
+def test_dataset_without_access_url_raises_actionable_error() -> None:
+    """The schema requires access_url; fabricating an example.org placeholder published
+    fake data — serialization now fails with an error naming the field to set."""
+    dataset = Dataset(
+        id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+        name="No URL yet",
+        created_at=1771804803,
+        source=ProvenanceInfo(type="other", retrieved_at=1771805001),
+    )
+    with pytest.raises(ValueError, match="access_url"):
+        dataset.to_record()
+
+
+def test_dataset_records_never_fabricate_example_org_urls() -> None:
+    # A provenance source URL satisfies the access_url requirement, and the synthesized
+    # distribution reuses real URLs instead of an example.org/download placeholder.
+    dataset = Dataset(
+        id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+        name="Provenance-URL dataset",
+        data_format="text/csv",
+        created_at=1771804803,
+        source=ProvenanceInfo(type="measurement", url="https://data.lab.example.com/run42.csv", retrieved_at=1771805001),
+    )
+    record = dataset.to_record()
+    assert record["dataset"]["access_url"] == "https://data.lab.example.com/run42.csv"
+    assert record["dataset"]["distributions"][0]["content_url"] == "https://data.lab.example.com/run42.csv"
+    assert "example.org" not in json.dumps(record)
 
 
 def test_dataset_about_round_trip_is_a_fixed_point() -> None:

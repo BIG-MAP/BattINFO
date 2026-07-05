@@ -17,6 +17,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   consolidation. Reading a record preserves its stored version; only newly emitted records
   get the new stamp. Downstream consumers should accept `0.1.0`, `1.0.0`, and `0.2.0`.
 
+### Changed (stop fabricating provenance and URLs)
+
+- Records no longer invent `source_file: "manual.json"`: the optional provenance
+  `source_file` is now absent unless you (or a real source path) provided it. The CLI
+  `--source-file` options default to unset accordingly.
+- Serializing a dataset without any URL now raises an actionable error naming
+  `access_url` instead of emitting a fabricated `https://example.org/dataset/...`
+  placeholder (the schema requires `dcat:accessURL`; a provenance `source_url` also
+  satisfies it, and workspace/publication flows still derive it from the dataset path).
+  Synthesized distributions likewise reuse real URLs only. Flow-specific handling:
+  - the Zenodo package flow stamps the documented `https://zenodo.org/records/ZENODO_RECORD_ID`
+    placeholder that `patch_zenodo_urls()` rewrites after upload (the old example.org
+    fallback was never patched, publishing fake URLs in harvested bundles);
+  - the tolerant BDC importer falls back source_urls → download_urls → a truthful
+    `urn:battery-data-commons:record:{id}` catalog URN (with a warning);
+  - the Discovery .eln importer uses the dataset's real archive URL;
+  - `template_dataset()` exposes `access_url` as a visible replace-me example parameter.
+- `source_type` remains schema-required, so save paths still apply the documented
+  category defaults (cell spec: `datasheet`, instance/test/ws-dataset: `measurement`,
+  dataset dict-path: `other`, test spec: `manual`) when unset — these are deliberate,
+  documented defaults, no longer accompanied by a fake source file.
+
 ### Changed (breaking — authoring API)
 
 - The per-record-type input classes are retired: the pydantic models are now both the

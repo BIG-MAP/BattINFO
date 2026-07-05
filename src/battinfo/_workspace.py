@@ -748,7 +748,7 @@ class Workspace:
             comment=comment,
         )
         if specification.source.type is None:
-            specification.source.type = "manual"
+            specification.source.type = "manual"  # schema-required; documented category default
         if specification.source.retrieved_at is None:
             specification.source.retrieved_at = _now_unix()
         self.descriptions.append(specification)
@@ -1933,6 +1933,10 @@ class Workspace:
         return resolved_test, resolved_cell, resolved_cell_spec
 
     def _finalize_description(self, specification: CellSpecification) -> CellSpecification:
+        # source_type is schema-required, so an unprovided one takes the documented category
+        # default; source_file is optional and stays absent unless the author provided it — a
+        # fabricated placeholder ("manual.json") would masquerade as real provenance (applies
+        # to all _finalize_* below; retrieved_at genuinely IS "now" at ingest time).
         finalized = specification.model_copy(deep=True)
         if finalized.source.type is None:
             finalized.source.type = "manual"
@@ -1959,8 +1963,6 @@ class Workspace:
             finalized.name = f"{finalized.manufacturer} {finalized.model}"
         if finalized.source.type is None:
             finalized.source.type = "datasheet"
-        if finalized.source.file is None:
-            finalized.source.file = "manual.json"
         if finalized.source.retrieved_at is None:
             finalized.source.retrieved_at = _now_unix()
         return finalized
@@ -2009,8 +2011,6 @@ class Workspace:
             )
         if finalized.source.type is None:
             finalized.source.type = "manual"
-        if finalized.source.file is None:
-            finalized.source.file = "manual.json"
         if finalized.source.retrieved_at is None:
             finalized.source.retrieved_at = _now_unix()
         return finalized

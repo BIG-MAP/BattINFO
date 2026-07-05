@@ -880,6 +880,8 @@ def test_save_cli_flow_json(tmp_path: Path) -> None:
             "dataset",
             "--title",
             "MN1500 CLI Dataset",
+            "--access-url",
+            "https://data.example.com/mn1500-cli",
             "--source-type",
             "measurement",
             "--uid",

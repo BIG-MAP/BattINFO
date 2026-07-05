@@ -275,14 +275,19 @@ def template_dataset(
     uid: str | None = TEMPLATE_UID,
     related_cell_ids: list[str] | None = None,
     related_test_ids: list[str] | None = None,
+    access_url: str = "https://example.org/replace-with-your-dataset-url",
 ) -> dict[str, Any]:
-    """Build a starter canonical dataset document for save workflows."""
+    """Build a starter canonical dataset document for save workflows.
+
+    ``access_url`` is a visible example placeholder (like the template's title) — replace
+    it with the landing page or download URL where the data actually lives."""
     draft = Dataset(
         uid=uid,
         title=title,
         source_type=source_type,
         related_cell_ids=related_cell_ids or [TEMPLATE_CELL_ID],
         related_test_ids=related_test_ids or [],
+        access_url=access_url,
         notes=["Template-generated record. Fill in URL/license/distribution details before saving."],
     )
     return _record_from_dataset(draft)
@@ -794,11 +799,11 @@ def _staging_cell_spec_input(
                 if isinstance(product.get("datasheet_revision") or product.get("datasheet_revision"), str)
                 else None,
                 specs=dict(record_payload.get("properties") or {}),
-                source_type=str(provenance.get("source_type") or "datasheet") if isinstance(provenance, Mapping) else "datasheet",
+                source_type=str(provenance.get("source_type")) if isinstance(provenance, Mapping) and provenance.get("source_type") else None,
                 source_file=(
                     str(provenance.get("source_file"))
                     if isinstance(provenance, Mapping) and isinstance(provenance.get("source_file"), str)
-                    else source_path.name if source_path is not None else "manual.json"
+                    else source_path.name if source_path is not None else None
                 ),
                 source_url=provenance.get("source_url") if isinstance(provenance, Mapping) and isinstance(provenance.get("source_url"), str) else None,
                 citation=provenance.get("citation") if isinstance(provenance, Mapping) and isinstance(provenance.get("citation"), str) else None,
@@ -853,11 +858,11 @@ def _staging_cell_spec_input(
             year=parsed_year,
             datasheet_revision=payload.get("datasheet_revision") if isinstance(payload.get("datasheet_revision"), str) else None,
             specs=dict(specs),
-            source_type=str(payload.get("source_type", provenance.get("source_type")) or "datasheet"),
+            source_type=str(payload.get("source_type", provenance.get("source_type")) or "") or None,
             source_file=(
                 str(payload.get("source_file", provenance.get("source_file")))
                 if isinstance(payload.get("source_file", provenance.get("source_file")), str)
-                else source_path.name if source_path is not None else "manual.json"
+                else source_path.name if source_path is not None else None
             ),
             source_url=payload.get("source_url", provenance.get("source_url"))
             if isinstance(payload.get("source_url", provenance.get("source_url")), str)
@@ -1574,10 +1579,12 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
     if draft.get("specification_comment"):
         specification["comment"] = list(draft["specification_comment"])
 
+    # source_file/source_type are recorded only when provided — no fabricated placeholders.
     provenance: dict[str, Any] = {
-        "source_file": draft.get("source_file", "manual.json"),
         "retrieved_at": _resolved_retrieved_at(draft.get("retrieved_at")),
     }
+    if draft.get("source_file") is not None:
+        provenance["source_file"] = draft["source_file"]
     if draft.get("source_type"):
         provenance["source_type"] = draft["source_type"]
     if draft.get("source_name") is not None:
@@ -2386,13 +2393,14 @@ def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
         entity_id = spec.id
     else:
         entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(spec.uid)}"
-    # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the caller.
+    # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the
+    # caller. source_type is schema-required, so an unprovided one takes the documented
+    # category default; source_file is optional and is recorded only when the author provided
+    # it — a fabricated placeholder ("manual.json") would masquerade as real provenance.
     finalized = spec.model_copy(deep=True)
     finalized.id = entity_id
     if finalized.source.type is None:
         finalized.source.type = "datasheet"
-    if finalized.source.file is None:
-        finalized.source.file = "manual.json"
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
@@ -2419,7 +2427,7 @@ def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
         if value is not None:
             setattr(finalized, _time_field, _resolved_time(_time_field, value, 0))
     if finalized.source.type is None:
-        finalized.source.type = "measurement"
+        finalized.source.type = "measurement"  # schema-required; documented category default
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
@@ -2444,8 +2452,8 @@ def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
     finalized = dataset.model_copy(deep=True)
     finalized.id = entity_id
     # Save-time canonicalization: dates default to now and convert to Unix; provenance
-    # gets the dataset default source type and a retrieval timestamp. The model's
-    # to_record() handles the schema.org field mapping and distribution assembly.
+    # gets the schema-required source_type category default and a retrieval timestamp. The
+    # model's to_record() handles the schema.org field mapping and distribution assembly.
     created = _resolved_time("created_at", finalized.created_at, _now_unix())
     finalized.created_at = created
     finalized.modified_at = _resolved_time("modified_at", finalized.modified_at, created)
@@ -2480,7 +2488,7 @@ def _record_from_test(test: Test) -> dict[str, Any]:
         if value is not None:
             setattr(finalized, _time_field, _resolved_time(_time_field, value, 0))
     if finalized.source.type is None:
-        finalized.source.type = "measurement"
+        finalized.source.type = "measurement"  # schema-required; documented category default
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
@@ -2499,7 +2507,7 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
     finalized = spec.model_copy(deep=True)
     finalized.id = entity_id
     if finalized.source.type is None:
-        finalized.source.type = "manual"
+        finalized.source.type = "manual"  # schema-required; documented category default
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 

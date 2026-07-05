@@ -2191,6 +2191,7 @@ def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any
 def _record_sets_from_zenodo_record(
     record: ZenodoCellRecord,
     entry_files: list[list[Path]],
+    zenodo_record_url: str,
 ) -> tuple[dict[str, list[dict]], list[str]]:
     """Map a ``ZenodoCellRecord`` to the canonical ``record_sets`` the shared builder
     consumes, plus the list of staged data filenames.
@@ -2230,7 +2231,12 @@ def _record_sets_from_zenodo_record(
         test_record["test"]["dataset_ids"] = [entry.dataset.id]
         record_sets["test"].append(test_record)
 
-        dataset_record = entry.dataset.to_record()
+        # A dataset without an access URL lands at the (placeholder) Zenodo record URL,
+        # which patch_zenodo_urls() rewrites to the real record after upload.
+        dataset = entry.dataset
+        if dataset.access_url is None and dataset.source.url is None:
+            dataset = dataset.model_copy(update={"access_url": zenodo_record_url})
+        dataset_record = dataset.to_record()
         dists: list[dict] = []
         for f in entry_files[i]:
             fmt = mimetypes.guess_type(f.name)[0] or (
@@ -2260,7 +2266,7 @@ def _zenodo_publication_graph(
     path and the interactive authoring path emit identical graph structures."""
     from battinfo.ws import AuthoringWorkspace  # local import avoids an import cycle
 
-    record_sets, data_filenames = _record_sets_from_zenodo_record(record, entry_files)
+    record_sets, data_filenames = _record_sets_from_zenodo_record(record, entry_files, zenodo_record_url)
     record_id = zenodo_record_url.rstrip("/").split("/")[-1]
     return AuthoringWorkspace._assemble_zenodo_jsonld(
         record_sets,
@@ -2417,7 +2423,7 @@ def build_zenodo_package(
     all_data_files: list[Path] = [f for files in entry_files for f in files]
 
     bundle_path = staging / ZENODO_CELL_RECORD_FILENAME
-    record.to_path(bundle_path)
+    record.to_path(bundle_path, zenodo_record_url=zenodo_record_url)
 
     publish_payload = _zenodo_publication_graph(record, entry_files, zenodo_record_url)
     publish_path = staging / publish_filename

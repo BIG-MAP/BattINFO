@@ -39,7 +39,10 @@ JAN_2030 = 1893456000  # 2030-01-01T00:00:00Z
 
 
 def test_dataset_creator_orcid_survives_and_is_a_person() -> None:
-    dataset = Dataset("d.csv", creators=[{"name": "Jane Doe", "orcid": ORCID}], uid=UID)
+    dataset = Dataset(
+        "d.csv", creators=[{"name": "Jane Doe", "orcid": ORCID}], uid=UID,
+        access_url="https://data.example.com/d",
+    )
     record = _record_from_dataset(dataset)
     (creator,) = record["dataset"]["creators"]
     assert creator["orcid"] == ORCID
@@ -82,6 +85,7 @@ def test_dataset_flat_citation_with_explicit_source_goes_to_provenance() -> None
         citation="https://doi.org/10.1234/prov",
         source=ProvenanceInfo(type="repository"),
         uid=UID,
+        access_url="https://data.example.com/d",
     )
     assert dataset.citations == []
     assert dataset.source.citation == "https://doi.org/10.1234/prov"
@@ -146,7 +150,9 @@ def test_retrieved_at_iso_string_converts_on_every_builder() -> None:
     assert test_rec["provenance"]["retrieved_at"] == JAN_2024
     proto_rec = _record_from_test_protocol(TestSpec(name="P", retrieved_at="2024-01-01", uid=UID))
     assert proto_rec["provenance"]["retrieved_at"] == JAN_2024
-    ds_rec = _record_from_dataset(Dataset("d.csv", retrieved_at="2024-01-01", uid=UID))
+    ds_rec = _record_from_dataset(
+        Dataset("d.csv", retrieved_at="2024-01-01", uid=UID, access_url="https://data.example.com/d")
+    )
     assert ds_rec["provenance"]["retrieved_at"] == JAN_2024
 
 

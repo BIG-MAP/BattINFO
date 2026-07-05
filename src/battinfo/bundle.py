@@ -2797,11 +2797,17 @@ class Dataset(BundleJsonModel):
             dataset_obj["conditions_of_access"] = self.conditions_of_access
         if self.in_language is not None:
             dataset_obj["in_language"] = self.in_language
-        # access_url is required by the dataset schema; always emit it, falling back to
-        # the provenance URL and finally a stable placeholder derived from the id.
-        dataset_obj["access_url"] = (
-            self.access_url or self.source.url or f"https://example.org/dataset/{_id_tail(self.id)}"
-        )
+        # access_url is required by the dataset schema (dcat:accessURL). Falling back to a
+        # fabricated placeholder URL would publish fake data — fail with the fix instead.
+        access_url = self.access_url or self.source.url
+        if access_url is None:
+            raise ValueError(
+                "Dataset.access_url is required to serialize a dataset record: set "
+                "access_url= to the landing page or download URL where the data lives "
+                "(a provenance source_url also satisfies it; workspace and publication "
+                "flows derive it from the dataset path automatically)."
+            )
+        dataset_obj["access_url"] = access_url
         if self.created_at is not None:
             dataset_obj["created_at"] = self.created_at
         if self.modified_at is not None:
@@ -2837,10 +2843,8 @@ class Dataset(BundleJsonModel):
         elif self.download_url is not None or self.data_format is not None or self.checksum.value is not None:
             dist: dict[str, Any] = {
                 "type": "DataDownload",
-                "content_url": (
-                    self.download_url or self.access_url or self.source.url
-                    or f"https://example.org/dataset/{_id_tail(self.id)}/download"
-                ),
+                # Non-None: the access_url check above already required one of these.
+                "content_url": self.download_url or self.access_url or self.source.url,
                 "encoding_format": self.data_format or "application/octet-stream",
             }
             if self.checksum.value is not None:
@@ -3278,7 +3282,22 @@ class ZenodoCellRecord(BaseModel):
     cell_specification: CellSpecification | None = None
     datasets: list[ZenodoDatasetEntry]
 
-    def to_flat_json(self) -> dict[str, Any]:
+    def to_flat_json(self, *, zenodo_record_url: str | None = None) -> dict[str, Any]:
+        """Serialize for the Zenodo staging package.
+
+        A dataset without an access URL gets *zenodo_record_url* (default
+        ``https://zenodo.org/records/ZENODO_RECORD_ID``) — the flow's documented
+        placeholder token that ``patch_zenodo_urls()`` rewrites to the real record URL
+        after upload. That is where the data will actually live, unlike the retired
+        ``example.org`` fallback, which was never patched and published fake URLs.
+        """
+        placeholder_url = zenodo_record_url or "https://zenodo.org/records/ZENODO_RECORD_ID"
+
+        def _dataset_record(dataset: Dataset) -> dict[str, Any]:
+            if dataset.access_url is None and dataset.source.url is None:
+                dataset = dataset.model_copy(update={"access_url": placeholder_url})
+            return dataset.to_record()
+
         payload: dict[str, Any] = {
             "schema_version": self.schema_version,
             "kind": self.kind,
@@ -3290,15 +3309,15 @@ class ZenodoCellRecord(BaseModel):
             {
                 "cell_instances": [ci.to_record() for ci in entry.cell_instances],
                 "test": entry.test.to_record(),
-                "dataset": entry.dataset.to_record(),
+                "dataset": _dataset_record(entry.dataset),
             }
             for entry in self.datasets
         ]
         return payload
 
-    def to_path(self, path: PathLike) -> Path:
+    def to_path(self, path: PathLike, *, zenodo_record_url: str | None = None) -> Path:
         out_path = _as_path(path)
-        _write_json(out_path, self.to_flat_json())
+        _write_json(out_path, self.to_flat_json(zenodo_record_url=zenodo_record_url))
         return out_path
 
     @classmethod

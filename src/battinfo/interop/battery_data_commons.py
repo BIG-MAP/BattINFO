@@ -285,6 +285,16 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     title = _clean(record.get("title")) or _clean(overview.get("feature")) \
         or _clean(record.get("comment")) or f"Battery dataset {bdc_id}"
     licence = record.get("license") or {}
+    # access_url must reference something real: prefer the record's source URLs, then its
+    # download URLs; a record carrying no URL at all keeps a truthful catalog URN (the
+    # BDC record identity) rather than a fabricated placeholder URL.
+    access_url = _first(record.get("source_urls")) or _first(record.get("download_urls"))
+    if access_url is None:
+        access_url = f"urn:battery-data-commons:record:{bdc_id}"
+        warnings.append(
+            f"record {bdc_id} has no source or download URL; dataset access_url set to "
+            f"its catalog URN ({access_url})."
+        )
     dataset = _check(_record_from_dataset(Dataset(
         uid=_uid("bdc", "dataset", bdc_id),
         title=title,
@@ -293,7 +303,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
         keywords=categories,
         same_as=[str(u) for u in (record.get("source_urls") or []) if u],
         measurement_techniques=techniques,
-        access_url=_first(record.get("source_urls")),
+        access_url=access_url,
         distribution=[{"type": "DataDownload", "content_url": str(u),
                        "encoding_format": _encoding_format(str(u))}
                       for u in (record.get("download_urls") or []) if u],
