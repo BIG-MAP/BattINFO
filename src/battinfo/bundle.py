@@ -320,6 +320,56 @@ class ProtocolInfo(BaseModel):
     url: str | None = None
 
 
+def _provenance_from_record(provenance: Mapping[str, Any]) -> ProvenanceInfo:
+    """Read a record's provenance block back into ProvenanceInfo.
+
+    The inverse of ``_provenance_record`` — reads every field so
+    to_record→from_record round-trips are lossless for provenance."""
+    return ProvenanceInfo(
+        type=provenance.get("source_type"),
+        name=provenance.get("source_name"),
+        file=provenance.get("source_file"),
+        url=provenance.get("source_url"),
+        citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
+        retrieved_at=provenance.get("retrieved_at"),
+        workflow_version=provenance.get("workflow_version"),
+        file_hash=provenance.get("file_hash"),
+        curated_by=provenance.get("curated_by"),
+        comment=provenance.get("comment"),
+    )
+
+
+def _provenance_record(source: ProvenanceInfo) -> dict[str, Any]:
+    """Serialize a ProvenanceInfo into a record's provenance block.
+
+    Emits EVERY field the model accepts (None omitted) — the single serializer shared by
+    all record types, so a provenance value accepted at construction (source_name=,
+    file_hash=, ...) can never be silently dropped from the emitted record again."""
+    out: dict[str, Any] = {}
+    if source.type is not None:
+        out["source_type"] = source.type
+    if source.name is not None:
+        out["source_name"] = source.name
+    if source.file is not None:
+        out["source_file"] = source.file
+    if source.url is not None:
+        out["source_url"] = source.url
+    citation = _citation_url_value(source.citation)
+    if citation is not None:
+        out["citation"] = citation
+    if source.retrieved_at is not None:
+        out["retrieved_at"] = source.retrieved_at
+    if source.workflow_version is not None:
+        out["workflow_version"] = source.workflow_version
+    if source.file_hash is not None:
+        out["file_hash"] = source.file_hash
+    if source.curated_by is not None:
+        out["curated_by"] = source.curated_by
+    if source.comment is not None:
+        out["comment"] = source.comment
+    return out
+
+
 class ChecksumInfo(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -1247,7 +1297,7 @@ class CellSpecification(BundleJsonModel):
         _flat_provenance = {
             "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
             "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version",
+            "workflow_version": "workflow_version", "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
@@ -1261,6 +1311,12 @@ class CellSpecification(BundleJsonModel):
             explicit_properties = dict(explicit_properties)
         # `specs` is an input alias for `properties`.
         _specs = data.pop("specs", None)
+        if _specs is not None and not isinstance(_specs, Mapping):
+            raise TypeError(
+                "specs= must be a mapping of property name to value, e.g. "
+                "specs={'nominal_capacity': {'value': 2.5, 'unit': 'Ah'}}; "
+                f"got {type(_specs).__name__}."
+            )
         if isinstance(_specs, Mapping):
             for _key, _value in _specs.items():
                 explicit_properties.setdefault(_key, _value)
@@ -1394,17 +1450,7 @@ class CellSpecification(BundleJsonModel):
             bibliography=dict(record.get("bibliography", {}))
             if isinstance(record.get("bibliography"), Mapping)
             else {},
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                name=provenance.get("source_name"),
-                file=provenance.get("source_file"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-                workflow_version=provenance.get("workflow_version"),
-                file_hash=provenance.get("file_hash"),
-                comment=provenance.get("comment"),
-            ),
+            source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
 
@@ -1528,25 +1574,7 @@ class CellSpecification(BundleJsonModel):
             _ref_value = getattr(self, _ref)
             if _ref_value is not None:
                 record[_ref] = _ref_value  # top-level sibling of cell_spec, per the schema
-        if self.source.type is not None:
-            record["provenance"]["source_type"] = self.source.type
-        if self.source.name is not None:
-            record["provenance"]["source_name"] = self.source.name
-        if self.source.workflow_version is not None:
-            record["provenance"]["workflow_version"] = self.source.workflow_version
-        if self.source.comment is not None:
-            record["provenance"]["comment"] = self.source.comment
-        if self.source.file is not None:
-            record["provenance"]["source_file"] = self.source.file
-        if self.source.url is not None:
-            record["provenance"]["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            record["provenance"]["citation"] = citation
-        if self.source.retrieved_at is not None:
-            record["provenance"]["retrieved_at"] = self.source.retrieved_at
-        if self.source.file_hash is not None:
-            record["provenance"]["file_hash"] = self.source.file_hash
+        record["provenance"] = _provenance_record(self.source)
         if self.bibliography:
             record["bibliography"] = dict(self.bibliography)
         if self.comment:
@@ -1620,16 +1648,7 @@ class CellSpecification(BundleJsonModel):
             if specification.get("housing") is not None
             else _housing_from_coin_hardware(specification.get("coin_hardware")),
             specification_comment=[str(item) for item in specification_comment],
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                name=provenance.get("source_name"),
-                file=provenance.get("source_file"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-                workflow_version=provenance.get("workflow_version"),
-                comment=provenance.get("comment"),
-            ),
+            source=_provenance_from_record(provenance),
             comment=[str(item) for item in comment],
         )
 
@@ -1666,24 +1685,7 @@ class CellSpecification(BundleJsonModel):
         if self.specification_comment:
             specification["comment"] = list(self.specification_comment)
 
-        provenance: dict[str, Any] = {}
-        if self.source.type is not None:
-            provenance["source_type"] = self.source.type
-        if self.source.name is not None:
-            provenance["source_name"] = self.source.name
-        if self.source.file is not None:
-            provenance["source_file"] = self.source.file
-        if self.source.url is not None:
-            provenance["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            provenance["citation"] = citation
-        if self.source.retrieved_at is not None:
-            provenance["retrieved_at"] = self.source.retrieved_at
-        if self.source.workflow_version is not None:
-            provenance["workflow_version"] = self.source.workflow_version
-        if self.source.comment is not None:
-            provenance["comment"] = self.source.comment
+        provenance = _provenance_record(self.source)
 
         out = {
             "schema_version": self.schema_version,
@@ -1727,11 +1729,24 @@ class CellInstance(BundleJsonModel):
         _flat_provenance = {
             "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
             "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version",
+            "workflow_version": "workflow_version", "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
-        if cell_spec is not None and "cell_spec" not in data and "cell_spec_id" not in data:
+        if cell_spec is not None:
+            if "cell_spec" in data and data["cell_spec"] is not cell_spec:
+                raise ValueError(
+                    "Pass the cell spec either positionally or as cell_spec=, not both."
+                )
+            # A positional object used to be silently DISCARDED when cell_spec_id= was
+            # also given. Keep the object, but refuse a demonstrable identity conflict.
+            _kwarg_id = data.get("cell_spec_id")
+            if _kwarg_id is not None and cell_spec.id is not None and _kwarg_id != cell_spec.id:
+                raise ValueError(
+                    f"Conflicting cell spec references: the positional object has "
+                    f"id {cell_spec.id!r} but cell_spec_id={_kwarg_id!r} was also given. "
+                    "Pass one or the other."
+                )
             data["cell_spec"] = cell_spec
         super().__init__(**data)
 
@@ -1791,12 +1806,7 @@ class CellInstance(BundleJsonModel):
                 else None
             ),
             dataset_ids=[str(item) for item in dataset_ids],
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-            ),
+            source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
 
@@ -1824,15 +1834,7 @@ class CellInstance(BundleJsonModel):
             record["measured"] = self.measured
         if self.dataset_ids:
             record["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in self.dataset_ids]
-        if self.source.type is not None:
-            record["provenance"]["source_type"] = self.source.type
-        if self.source.url is not None:
-            record["provenance"]["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            record["provenance"]["citation"] = citation
-        if self.source.retrieved_at is not None:
-            record["provenance"]["retrieved_at"] = self.source.retrieved_at
+        record["provenance"] = _provenance_record(self.source)
         record["cell_instance"] = {key: value for key, value in record["cell_instance"].items() if value is not None}
         if self.conformance is not None:
             record["cell_instance"]["conformance"] = self.conformance.to_record()
@@ -2035,9 +2037,9 @@ class TestSpec(BundleJsonModel):
         if "notes" in data and "comment" not in data:
             data["comment"] = data.pop("notes")
         _flat_provenance = {
-            "source_type": "type", "source_name": "name", "source_file": "file",
-            "source_url": "url", "citation": "citation", "file_hash": "file_hash",
-            "retrieved_at": "retrieved_at", "workflow_version": "workflow_version",
+            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
+            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version", "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
@@ -2142,14 +2144,7 @@ class TestSpec(BundleJsonModel):
             safety=dict(safety) if isinstance(safety, Mapping) else {},
             conditions=dict(conditions),
             artifacts=[Artifact.from_record(a) for a in artifacts if isinstance(a, Mapping)],
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                file=provenance.get("source_file"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-                workflow_version=provenance.get("workflow_version"),
-            ),
+            source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
 
@@ -2188,19 +2183,7 @@ class TestSpec(BundleJsonModel):
             }
         if self.artifacts:
             record["artifacts"] = [a.to_record() for a in self.artifacts]
-        if self.source.type is not None:
-            record["provenance"]["source_type"] = self.source.type
-        if self.source.file is not None:
-            record["provenance"]["source_file"] = self.source.file
-        if self.source.url is not None:
-            record["provenance"]["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            record["provenance"]["citation"] = citation
-        if self.source.retrieved_at is not None:
-            record["provenance"]["retrieved_at"] = self.source.retrieved_at
-        if self.source.workflow_version is not None:
-            record["provenance"]["workflow_version"] = self.source.workflow_version
+        record["provenance"] = _provenance_record(self.source)
         if self.comment:
             record["notes"] = list(self.comment)
         return record
@@ -2252,11 +2235,22 @@ class Test(BundleJsonModel):
         _flat_provenance = {
             "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
             "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version",
+            "workflow_version": "workflow_version", "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
-        if cell is not None and "cell" not in data and "cell_instance_id" not in data:
+        if cell is not None:
+            if "cell" in data and data["cell"] is not cell:
+                raise ValueError("Pass the cell either positionally or as cell=, not both.")
+            # A positional object used to be silently DISCARDED when cell_id=/
+            # cell_instance_id= was also given. Keep the object, but refuse a
+            # demonstrable identity conflict.
+            _kwarg_id = data.get("cell_instance_id")
+            if _kwarg_id is not None and cell.id is not None and _kwarg_id != cell.id:
+                raise ValueError(
+                    f"Conflicting cell references: the positional object has id {cell.id!r} "
+                    f"but cell_id={_kwarg_id!r} was also given. Pass one or the other."
+                )
             data["cell"] = cell
         super().__init__(**data)
 
@@ -2351,14 +2345,7 @@ class Test(BundleJsonModel):
             dataset_ids=[str(item) for item in dataset_ids],
             conformance=conformance,
             artifacts=[Artifact.from_record(a) for a in artifacts if isinstance(a, Mapping)],
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                file=provenance.get("source_file"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-                workflow_version=provenance.get("workflow_version"),
-            ),
+            source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
 
@@ -2403,19 +2390,7 @@ class Test(BundleJsonModel):
             record["test"]["conformance"] = self.conformance.to_record()
         if self.artifacts:
             record["artifacts"] = [a.to_record() for a in self.artifacts]
-        if self.source.type is not None:
-            record["provenance"]["source_type"] = self.source.type
-        if self.source.file is not None:
-            record["provenance"]["source_file"] = self.source.file
-        if self.source.url is not None:
-            record["provenance"]["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            record["provenance"]["citation"] = citation
-        if self.source.retrieved_at is not None:
-            record["provenance"]["retrieved_at"] = self.source.retrieved_at
-        if self.source.workflow_version is not None:
-            record["provenance"]["workflow_version"] = self.source.workflow_version
+        record["provenance"] = _provenance_record(self.source)
         if self.comment:
             record["notes"] = list(self.comment)
         return record
@@ -2744,13 +2719,7 @@ class Dataset(BundleJsonModel):
             test_id=related_test_id,
             related_cell_ids=related_cell_ids,
             related_test_ids=related_test_ids,
-            source=ProvenanceInfo(
-                type=provenance.get("source_type"),
-                url=provenance.get("source_url"),
-                citation=_citation_url_value(provenance.get("citation"), provenance.get("citation_doi")),
-                retrieved_at=provenance.get("retrieved_at"),
-                curated_by=provenance.get("curated_by"),
-            ),
+            source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
 
@@ -2859,17 +2828,7 @@ class Dataset(BundleJsonModel):
             "dataset": dataset_obj,
             "provenance": {},
         }
-        if self.source.type is not None:
-            record["provenance"]["source_type"] = self.source.type
-        if self.source.url is not None:
-            record["provenance"]["source_url"] = self.source.url
-        citation = _citation_url_value(self.source.citation)
-        if citation is not None:
-            record["provenance"]["citation"] = citation
-        if self.source.retrieved_at is not None:
-            record["provenance"]["retrieved_at"] = self.source.retrieved_at
-        if self.source.curated_by is not None:
-            record["provenance"]["curated_by"] = self.source.curated_by
+        record["provenance"] = _provenance_record(self.source)
         if self.comment:
             record["notes"] = list(self.comment)
         return record_to_snake_aliases(record)

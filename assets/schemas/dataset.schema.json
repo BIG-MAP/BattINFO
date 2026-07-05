@@ -313,6 +313,13 @@
         },
         "workflow_version": {
           "type": "string"
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "comment": {
+          "type": "string"
         }
       }
     },

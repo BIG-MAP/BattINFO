@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (nothing accepted is silently dropped)
+
+- `specs=` must be a mapping of property name → value; a list or scalar now raises a
+  `TypeError` showing the expected shape (it used to be discarded without a word).
+- Provenance kwargs accepted at construction (`source_name=`, `file_hash=`, `curated_by=`,
+  `workflow_version=`, provenance `comment`) are now emitted by every record type's
+  serializer and read back by `from_record` — previously four of the five serializers
+  silently omitted them. All record schemas (assets + packaged copies) accept the full
+  provenance field set; each schema's `required` list is unchanged. **Registry note:** the
+  vendored schemas in battinfo-registry must be re-synced before records carrying the new
+  optional fields will pass its gate.
+- Passing a cell/cell-spec object positionally together with a conflicting `cell_id=`/
+  `cell_spec_id=` kwarg now raises naming both ids; with a matching id the object is kept
+  (it used to be silently discarded whenever the id kwarg was present).
+
 ### Changed (record format)
 
 - Every emitted record now carries `schema_version: "0.2.0"`, stamped from a single
