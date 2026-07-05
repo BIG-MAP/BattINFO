@@ -294,6 +294,40 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
     assert loaded.included_in_data_catalog["same_as"] == "https://example.org/catalog/about"
 
 
+def test_dataset_about_round_trip_is_a_fixed_point() -> None:
+    """to_record emits the primary cell/test id first; from_record reads the FULL about
+    list back, so primary + related references survive to_record→from_record→to_record."""
+    primary_cell = "https://w3id.org/battinfo/cell/69ca-scxq-6w58-e9tc"
+    related_cells = [
+        "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
+        "https://w3id.org/battinfo/cell/8a2d-4f6g-1h3j-5k7m",
+    ]
+    primary_test = "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
+    related_tests = ["https://w3id.org/battinfo/test/2b4c-6d8e-1f3g-5h7j"]
+    dataset = Dataset(
+        id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+        name="About round-trip dataset",
+        access_url="https://example.org/datasets/about-round-trip",
+        created_at=1771804803,
+        cell_instance_id=primary_cell,
+        related_cell_ids=related_cells,
+        test_id=primary_test,
+        related_test_ids=related_tests,
+        source=ProvenanceInfo(type="measurement", retrieved_at=1771805001),
+    )
+
+    record = dataset.to_record()
+    assert record["dataset"]["about"] == [primary_cell, *related_cells, primary_test, *related_tests]
+
+    loaded = Dataset.from_record(record)
+    assert loaded.cell_instance_id == primary_cell
+    assert loaded.related_cell_ids == related_cells
+    assert loaded.test_id == primary_test
+    assert loaded.related_test_ids == related_tests
+
+    assert loaded.to_record() == record
+
+
 def test_load_cell_specification_from_library_record() -> None:
     spec = load_cell_specification(ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json")
 

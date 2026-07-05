@@ -2658,14 +2658,28 @@ class Dataset(BundleJsonModel):
         if not isinstance(provenance, Mapping):
             provenance = {}
         about = dataset.get("about")
+        # to_record() emits the primary cell/test reference first (see there), so the
+        # first id of each kind is the primary and the rest are related — reading the
+        # FULL list back makes to_record→from_record→to_record a fixed point instead
+        # of silently dropping every reference after the first.
         related_cell_id = None
         related_test_id = None
+        related_cell_ids: list[str] = []
+        related_test_ids: list[str] = []
         if isinstance(about, list):
             for item in about:
-                if isinstance(item, str) and "/cell/" in item and related_cell_id is None:
-                    related_cell_id = item
-                if isinstance(item, str) and "/test/" in item and related_test_id is None:
-                    related_test_id = item
+                if not isinstance(item, str):
+                    continue
+                if "/cell/" in item:
+                    if related_cell_id is None:
+                        related_cell_id = item
+                    elif item not in related_cell_ids:
+                        related_cell_ids.append(item)
+                elif "/test/" in item:
+                    if related_test_id is None:
+                        related_test_id = item
+                    elif item not in related_test_ids:
+                        related_test_ids.append(item)
         distribution = dataset.get("distributions")
         checksum = ChecksumInfo()
         data_format = None
@@ -2720,6 +2734,8 @@ class Dataset(BundleJsonModel):
             checksum=checksum,
             cell_instance_id=related_cell_id,
             test_id=related_test_id,
+            related_cell_ids=related_cell_ids,
+            related_test_ids=related_test_ids,
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
                 url=provenance.get("source_url"),
@@ -2792,11 +2808,13 @@ class Dataset(BundleJsonModel):
             dataset_obj["temporal_coverage"] = self.temporal_coverage
         if self.spatial_coverage is not None:
             dataset_obj["spatial_coverage"] = self.spatial_coverage
+        # Primary references come FIRST so from_record() can recover the primary/related
+        # split from the flat `about` list (first cell id = primary, rest = related).
         about = list(dict.fromkeys([
-            *self.related_cell_ids,
             *([self.cell_instance_id] if self.cell_instance_id is not None else []),
-            *self.related_test_ids,
+            *self.related_cell_ids,
             *([self.test_id] if self.test_id is not None else []),
+            *self.related_test_ids,
         ]))
         if about:
             dataset_obj["about"] = about
