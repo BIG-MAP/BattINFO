@@ -73,6 +73,36 @@ jobs:
           name: coverage-xml
           path: coverage.xml
 
+  notebooks:
+    name: Guide notebooks execute
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install (locked)
+        run: uv sync --all-extras --frozen --python 3.12
+      - name: Execute guide notebooks (nbmake)
+        run: uv run --no-sync pytest --nbmake docs/guides/ -q
+
+  doc-snippets:
+    name: Doc snippets execute
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install (locked)
+        run: uv sync --all-extras --frozen --python 3.12
+      - name: Execute newcomer-path doc snippets
+        run: uv run --no-sync python .tools/quality/run_doc_snippets.py
+
   package:
     name: Build & verify distribution
     runs-on: ubuntu-latest
