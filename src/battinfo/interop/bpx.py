@@ -24,6 +24,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
+from battinfo.interop._common import load_json_source
+
 PathLike = str | Path
 
 # BPX "Parameterisation.Cell" key → (battinfo_spec_key, unit, scale_to_unit)
@@ -110,7 +112,7 @@ def _load_bpx(source: Mapping[str, Any] | str | Path) -> tuple[dict[str, Any], s
     if isinstance(source, Mapping):
         return dict(source), "bpx-parameter.json"
     path = Path(source)
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = load_json_source(path)
     return data, path.name
 
 

@@ -89,10 +89,17 @@ WIP is parked on `wip/docs-web` and needs reconciliation against these changes b
 
 ---
 
-## Phase 2 — Authoring experience (the non-coder succeeds unassisted)
+## Phase 2 — Authoring experience (the non-coder succeeds unassisted) — ✅ DONE (branch feat/phase2-authoring-ux, 2026-07-06)
 
 **Goal:** errors teach; nothing accepted is silently dropped; one obvious surface.
 **Size:** ~1 week. **Depends on:** P0 (error behavior changes build on the new call-site rules).
+
+Outcome notes: all five acceptance scenarios produce actionable messages. 2.1 extended the
+record schemas with the full optional provenance set — **battinfo-registry's vendored
+schemas need a re-sync** before records carrying source_name/file_hash/curated_by pass its
+gate (fold into 3.1). source_type turned out to be schema-required, so accepted-then-dropped
+was fixed by emitting everywhere (one shared serializer/reader pair). 2.4 renamed
+workspace_state.WorkspaceManifest → WorkspaceStateManifest.
 
 - **2.1 No silent drops** — raise (or warn + preserve) on: non-mapping `specs=`
   (bundle.py:1246); `source_name`/`file_hash` accepted then omitted from records (either emit

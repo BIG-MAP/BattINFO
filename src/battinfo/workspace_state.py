@@ -152,7 +152,7 @@ class WorkspaceArtifact(BaseModel):
     path: str
 
 
-class WorkspaceManifest(BaseModel):
+class WorkspaceStateManifest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     schema_version: str = WORKSPACE_STATE_SCHEMA_VERSION
@@ -489,7 +489,7 @@ class WorkspaceStateStore:
         root_path = _as_path(root)
         raw = _read_json(root_path / WORKSPACE_STATE_FILENAME)
         _assert_compatible_state_version(raw)
-        manifest = WorkspaceManifest.model_validate(raw)
+        manifest = WorkspaceStateManifest.model_validate(raw)
         store = cls(
             root_path,
             name=manifest.workspace_id,
@@ -557,8 +557,8 @@ class WorkspaceStateStore:
         if self.descriptions:
             raise ValueError("Workspace state currently supports cell types, cells, tests, and datasets, but not saved cell descriptions.")
 
-    def _manifest(self) -> WorkspaceManifest:
-        return WorkspaceManifest(
+    def _manifest(self) -> WorkspaceStateManifest:
+        return WorkspaceStateManifest(
             workspace_id=self.name,
             title=self.title or self.name,
             description=self.description,
@@ -568,14 +568,14 @@ class WorkspaceStateStore:
             comment=list(self.comment),
         )
 
-    def _persist(self) -> tuple[WorkspaceManifest, dict[str, list[dict[str, Any]]], dict[str, str | None]]:
+    def _persist(self) -> tuple[WorkspaceStateManifest, dict[str, list[dict[str, Any]]], dict[str, str | None]]:
         self._ensure_supported_state()
         records = self.render()
         manifest = self._manifest()
         artifact_map = self._write_workspace(manifest, records)
         return manifest, records, artifact_map
 
-    def _write_workspace(self, manifest: WorkspaceManifest, records: dict[str, list[dict[str, Any]]]) -> dict[str, str | None]:
+    def _write_workspace(self, manifest: WorkspaceStateManifest, records: dict[str, list[dict[str, Any]]]) -> dict[str, str | None]:
         record_groups = {
             "cell_specs": records["cell_specs"],
             "cells": records["cell_instances"],
@@ -992,7 +992,7 @@ class WorkspaceStateStore:
     def _submission_package_path(
         self,
         *,
-        manifest: WorkspaceManifest,
+        manifest: WorkspaceStateManifest,
         target: WorkspaceTarget | None,
         resource: SubmissionResource | None,
     ) -> Path:
@@ -1005,7 +1005,7 @@ class WorkspaceStateStore:
     def _registry_intake_path(
         self,
         *,
-        manifest: WorkspaceManifest,
+        manifest: WorkspaceStateManifest,
         target: WorkspaceTarget | None,
         resource: SubmissionResource | None,
     ) -> Path:
@@ -1099,7 +1099,7 @@ def workspace_build_submission_package(
 __all__ = [
     "WORKSPACE_STATE_FILENAME",
     "WORKSPACE_STATE_SCHEMA_VERSION",
-    "WorkspaceManifest",
+    "WorkspaceStateManifest",
     "WorkspaceStateStore",
     "WorkspaceArtifact",
     "WorkspacePaths",

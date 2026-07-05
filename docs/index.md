@@ -23,6 +23,7 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 
 | | |
 |---|---|
+| **[Workspace authoring](workspace-authoring.md)** | The blessed authoring surface: `battinfo.workspace(".")` end-to-end, and which surface to use when |
 | **[Python API](python-api.md)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
 | **[CLI spec](cli-spec.md)** | All CLI commands, options, and output formats |
 | **[Validation contract](validation-contract.md)** | Validation policies, machine-readable issue output |

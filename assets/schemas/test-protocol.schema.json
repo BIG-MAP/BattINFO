@@ -212,6 +212,19 @@
         },
         "workflow_version": {
           "type": "string"
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "curated_by": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
         }
       }
     },

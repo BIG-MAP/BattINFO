@@ -279,6 +279,9 @@
         },
         "comment": {
           "type": "string"
+        },
+        "curated_by": {
+          "type": "string"
         }
       }
     },

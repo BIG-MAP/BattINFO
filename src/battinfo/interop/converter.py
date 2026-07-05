@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 from battinfo.bundle import SCHEMA_VERSION, CellInstance, CellSpecification, ProvenanceInfo, Test, TestSpec
+from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
 
 if TYPE_CHECKING:
@@ -504,7 +505,7 @@ def _load_source(source: Mapping[str, Any] | str | Path) -> tuple[dict[str, Any]
     if isinstance(source, Mapping):
         return copy.deepcopy(dict(source)), "converter-export.jsonld"
     path = Path(source)
-    return json.loads(path.read_text(encoding="utf-8")), path.name
+    return load_json_source(path), path.name
 
 
 def _workflow_version(converter_version: str | None, schema_version: str | None) -> str | None:

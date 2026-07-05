@@ -7,6 +7,60 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `battinfo.AuthoringWorkspace` is exported by name (previously reachable only via the
+  `battinfo.workspace(...)` factory); its docstring now points at the correct engine class.
+  A new [Workspace authoring](docs/workspace-authoring.md) doc page mirrors
+  `ws.quickstart()`, and QUICKSTART/README carry a "Which surface do I use?" table mapping
+  the three entry points (authoring workspace, models + `publish`, `battinfo.Workspace`
+  object-graph engine). The internal `WorkspaceManifest` in `workspace_state.py` is renamed
+  `WorkspaceStateManifest`, ending the name clash with `local_workspace.WorkspaceManifest`.
+- Every field of the five authoring models (`CellSpecification`, `CellInstance`, `Test`,
+  `TestSpec`, `Dataset`) and `ProvenanceInfo` now carries a `Field(description=...)`,
+  surfacing in `help()`, IDE hover, and `.model_json_schema()`. Descriptions note the flat
+  authoring aliases (e.g. `title=` for `Dataset.name`, `kind=` for `test_type`). A test
+  gate keeps new fields from shipping undocumented.
+
+### Changed (interop sharp edges)
+
+- `import_discovery_eln` accepts real `.eln` exports (ZIP archives wrapping the crate),
+  not just an unpacked crate directory or a bare `ro-crate-metadata.json`.
+- Importer JSON parse/read errors now name the offending file (shared
+  `load_json_source` across the BDC, BPX, converter, discovery, and protocol importers).
+- The aurora-unicycler importer surfaces a present-but-unparseable numeric field as a
+  warning on the imported test spec instead of silently ignoring it.
+- Batch imports that produce zero records from a real source say so in the package
+  warnings instead of returning an empty result silently.
+
+### Changed (validation errors aggregate and teach)
+
+- Save/publish validation failures now report **every** error in one message instead of
+  only the first, so a record with three problems is fixed in one pass, not three.
+- Canonical record paths in error messages translate back to the authoring vocabulary
+  (`cell_spec.cell_format` → `format=`, missing `provenance.source_type` → `source_type=`).
+- Quantity-shape errors include a copy-pasteable example
+  (`{"nominal_capacity": {"value": 0.0, "unit": "ah"}}`) and point at
+  `battinfo properties show <name>` for the accepted units.
+- A misspelled keyword argument on any of the five record models now raises a `TypeError`
+  with a did-you-mean (`manufacture=` → "did you mean `manufacturer=`?") covering fields,
+  aliases, and all spec property names, instead of a bare pydantic extra-field error.
+
+### Changed (nothing accepted is silently dropped)
+
+- `specs=` must be a mapping of property name → value; a list or scalar now raises a
+  `TypeError` showing the expected shape (it used to be discarded without a word).
+- Provenance kwargs accepted at construction (`source_name=`, `file_hash=`, `curated_by=`,
+  `workflow_version=`, provenance `comment`) are now emitted by every record type's
+  serializer and read back by `from_record` — previously four of the five serializers
+  silently omitted them. All record schemas (assets + packaged copies) accept the full
+  provenance field set; each schema's `required` list is unchanged. **Registry note:** the
+  vendored schemas in battinfo-registry must be re-synced before records carrying the new
+  optional fields will pass its gate.
+- Passing a cell/cell-spec object positionally together with a conflicting `cell_id=`/
+  `cell_spec_id=` kwarg now raises naming both ids; with a matching id the object is kept
+  (it used to be silently discarded whenever the id kwarg was present).
+
 ### Changed (record format)
 
 - Every emitted record now carries `schema_version: "0.2.0"`, stamped from a single

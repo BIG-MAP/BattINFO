@@ -209,6 +209,32 @@
         },
         "retrieved_at": {
           "$ref": "#/$defs/UnixTime"
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "workflow_version": {
+          "type": "string"
+        },
+        "curated_by": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
         }
       }
     },
