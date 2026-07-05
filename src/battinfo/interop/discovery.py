@@ -34,6 +34,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import zipfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -51,6 +52,7 @@ from battinfo.api import (
     create_material_spec,
 )
 from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
+from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
 
 PathLike = str | Path
@@ -353,6 +355,12 @@ class _Builder:
         return cell
 
     def package(self) -> DiscoveryImportPackage:
+        if not self.cells:
+            # An empty result from a real source is worth a word: silence reads as
+            # "imported everything" when nothing matched.
+            self.warnings.append(
+                f"{self.source_file}: no cells found — 0 records imported."
+            )
         return DiscoveryImportPackage(
             source=self.source,
             material_specs=list(self._materials.values()),
@@ -419,12 +427,32 @@ def import_discovery_eln(
         Validate each produced record against its schema.
     """
     path = Path(source)
-    crate = path / "ro-crate-metadata.json" if path.is_dir() else path
-    graph = json.loads(crate.read_text(encoding="utf-8")).get("@graph", [])
+    if path.is_file() and zipfile.is_zipfile(path):
+        # A real `.eln` export is a ZIP archive wrapping the crate directory.
+        with zipfile.ZipFile(path) as archive:
+            candidates = [n for n in archive.namelist() if n.endswith("ro-crate-metadata.json")]
+            if not candidates:
+                raise ValueError(
+                    f"{path} contains no ro-crate-metadata.json — not an RO-Crate .eln archive."
+                )
+            candidates.sort(key=lambda n: n.count("/"))  # shallowest crate wins
+            try:
+                graph = json.loads(archive.read(candidates[0]).decode("utf-8")).get("@graph", [])
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"{path} ({candidates[0]}) is not valid JSON "
+                    f"(line {exc.lineno}, column {exc.colno}): {exc.msg}"
+                ) from exc
+        source_name = path.name
+    else:
+        crate = path / "ro-crate-metadata.json" if path.is_dir() else path
+        loaded = load_json_source(crate)
+        graph = loaded.get("@graph", []) if isinstance(loaded, Mapping) else []
+        source_name = crate.name
     index: dict[str, Mapping[str, Any]] = {
         n["@id"]: n for n in graph if isinstance(n, Mapping) and "@id" in n
     }
-    builder = _Builder("eln", crate.name, validate)
+    builder = _Builder("eln", source_name, validate)
 
     cells = [n for n in graph if isinstance(n, Mapping) and "CoinCell" in _node_types(n)]
     cells.sort(key=lambda n: n.get("@id", ""))

@@ -22,6 +22,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   authoring aliases (e.g. `title=` for `Dataset.name`, `kind=` for `test_type`). A test
   gate keeps new fields from shipping undocumented.
 
+### Changed (interop sharp edges)
+
+- `import_discovery_eln` accepts real `.eln` exports (ZIP archives wrapping the crate),
+  not just an unpacked crate directory or a bare `ro-crate-metadata.json`.
+- Importer JSON parse/read errors now name the offending file (shared
+  `load_json_source` across the BDC, BPX, converter, discovery, and protocol importers).
+- The aurora-unicycler importer surfaces a present-but-unparseable numeric field as a
+  warning on the imported test spec instead of silently ignoring it.
+- Batch imports that produce zero records from a real source say so in the package
+  warnings instead of returning an empty result silently.
+
 ### Changed (validation errors aggregate and teach)
 
 - Save/publish validation failures now report **every** error in one message instead of

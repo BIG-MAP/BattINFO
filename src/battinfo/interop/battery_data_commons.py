@@ -27,7 +27,6 @@ identifiers, not published registry entries.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -45,6 +44,7 @@ from battinfo.api import (
     create_material_spec,
 )
 from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
+from battinfo.interop._common import load_json_source
 
 PathLike = str | Path
 
@@ -336,17 +336,21 @@ def batch_import_bdc(source: PathLike, *, limit: int | None = None,
     for file in files:
         if limit is not None and len(imports) >= limit:
             break
-        record = json.loads(file.read_text(encoding="utf-8"))
+        record = load_json_source(file)
         if str(record.get("record_status", "active")) != "active":
             continue
         imp = import_bdc_record(record, validate=validate, _materials=materials)
         if imp is not None:
             imports.append(imp)
 
+    batch_warnings = [w for imp in imports for w in imp.warnings]
+    if not imports:
+        detail = f"{len(files)} file(s) matched" if files else "no bdc_*.json files found"
+        batch_warnings.append(f"{path}: 0 records imported ({detail}).")
     return BdcImportPackage(
         material_specs=list(materials.values()),
         imports=imports,
-        warnings=[w for imp in imports for w in imp.warnings],
+        warnings=batch_warnings,
     )
 
 

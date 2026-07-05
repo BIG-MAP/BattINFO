@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo.bundle import Artifact, ProvenanceInfo, TestSpec
+from battinfo.interop._common import load_json_source
 from battinfo.testmethod import (
     ExperimentSyntaxError,
     Quantity,
@@ -41,8 +42,9 @@ def _load(source: Any) -> Any:
     """Accept a parsed object, a JSON string, or a path to a JSON file."""
     if isinstance(source, (dict, list)):
         return source
-    text = Path(source).read_text(encoding="utf-8") if _looks_like_path(source) else str(source)
-    return json.loads(text)
+    if _looks_like_path(source):
+        return load_json_source(source)
+    return json.loads(str(source))
 
 
 def _looks_like_path(source: Any) -> bool:
@@ -91,16 +93,33 @@ def _provenance(source_file: str | None) -> ProvenanceInfo:
 _AURORA_CONFORMS = "https://github.com/EmpaEconversion/aurora-unicycler"
 
 
-def _aurora_leaf(s: dict) -> Step | None:
+def _num_field(s: dict, key: str, warnings: list[str]) -> float | None:
+    """Parse a numeric field of an aurora block; a PRESENT but unparseable value is
+    surfaced as a warning instead of being silently ignored."""
+    raw = s.get(key)
+    if raw is None:
+        return None
+    value = _num(raw)
+    if value is None:
+        context = f"step '{s['step']}': " if s.get("step") else ""
+        warnings.append(
+            f"aurora-unicycler: {context}{key}={raw!r} is not a finite number; ignored."
+        )
+    return value
+
+
+def _aurora_leaf(s: dict, warnings: list[str]) -> Step | None:
     kind = s.get("step")
     if kind == "open_circuit_voltage":
         st = Step(mode="rest", direction="rest")
-        if _num(s.get("until_time_s")) is not None:
-            st.duration = _q(_num(s["until_time_s"]), "s")
+        duration = _num_field(s, "until_time_s", warnings)
+        if duration is not None:
+            st.duration = _q(duration, "s")
         return st
 
     if kind == "constant_current":
-        rate, cur = _num(s.get("rate_C")), _num(s.get("current_mA"))
+        rate = _num_field(s, "rate_C", warnings)
+        cur = _num_field(s, "current_mA", warnings)
         signed = rate if rate is not None else cur
         direction = "discharge" if (signed is not None and signed < 0) else "charge"
         setpoints: dict[str, Quantity] = {}
@@ -110,28 +129,34 @@ def _aurora_leaf(s: dict) -> Step | None:
             setpoints["current"] = _q(abs(cur) / 1000.0, "A")
         st = Step(mode="cc", direction=direction, setpoints=setpoints)
         terms: list[Termination] = []
-        if _num(s.get("until_voltage_V")) is not None:
-            terms.append(Termination(quantity="voltage", value=_num(s["until_voltage_V"]), unit="V",
+        until_v = _num_field(s, "until_voltage_V", warnings)
+        if until_v is not None:
+            terms.append(Termination(quantity="voltage", value=until_v, unit="V",
                                      direction="above" if direction == "charge" else "below"))
-        if _num(s.get("until_time_s")) is not None:
-            st.duration = _q(_num(s["until_time_s"]), "s")
+        duration = _num_field(s, "until_time_s", warnings)
+        if duration is not None:
+            st.duration = _q(duration, "s")
         st.termination = terms
         return st
 
     if kind == "constant_voltage":
         setpoints = {}
-        if _num(s.get("voltage_V")) is not None:
-            setpoints["voltage"] = _q(_num(s["voltage_V"]), "V")
+        voltage = _num_field(s, "voltage_V", warnings)
+        if voltage is not None:
+            setpoints["voltage"] = _q(voltage, "V")
         st = Step(mode="cv", direction="hold", setpoints=setpoints)
         terms = []
-        if _num(s.get("until_rate_C")) is not None:
-            terms.append(Termination(quantity="c_rate", value=abs(_num(s["until_rate_C"])),
+        until_rate = _num_field(s, "until_rate_C", warnings)
+        if until_rate is not None:
+            terms.append(Termination(quantity="c_rate", value=abs(until_rate),
                                      unit="A/Ah", direction="below"))
-        if _num(s.get("until_current_mA")) is not None:
-            terms.append(Termination(quantity="current", value=abs(_num(s["until_current_mA"])) / 1000.0,
+        until_cur = _num_field(s, "until_current_mA", warnings)
+        if until_cur is not None:
+            terms.append(Termination(quantity="current", value=abs(until_cur) / 1000.0,
                                      unit="A", direction="below"))
-        if _num(s.get("until_time_s")) is not None:
-            st.duration = _q(_num(s["until_time_s"]), "s")
+        duration = _num_field(s, "until_time_s", warnings)
+        if duration is not None:
+            st.duration = _q(duration, "s")
         st.termination = terms
         return st
 
@@ -139,16 +164,18 @@ def _aurora_leaf(s: dict) -> Step | None:
         setpoints = {}
         for key, unit in (("start_frequency_Hz", "Hz"), ("end_frequency_Hz", "Hz"),
                           ("amplitude_V", "V"), ("amplitude_mA", "mA")):
-            if _num(s.get(key)) is not None:
-                setpoints[key.rsplit("_", 1)[0]] = _q(_num(s[key]), unit)
+            value = _num_field(s, key, warnings)
+            if value is not None:
+                setpoints[key.rsplit("_", 1)[0]] = _q(value, unit)
         return Step(mode="eis", direction="hold", setpoints=setpoints)
 
     if kind == "voltage_scan":
         setpoints = {}
         for key, unit in (("start_voltage_V", "V"), ("end_voltage_V", "V"),
                           ("scan_rate_mV_per_s", "mV/s")):
-            if _num(s.get(key)) is not None:
-                setpoints[key.rsplit("_", 1)[0] if key.endswith("_V") else key] = _q(_num(s[key]), unit)
+            value = _num_field(s, key, warnings)
+            if value is not None:
+                setpoints[key.rsplit("_", 1)[0] if key.endswith("_V") else key] = _q(value, unit)
         return Step(mode="scan", direction="charge", setpoints=setpoints)
 
     return None  # tag / loop / unknown handled by the caller
@@ -175,7 +202,7 @@ def _fold_aurora_method(method: list[dict]) -> tuple[list[Step], list[str]]:
             if body:
                 flat.append({"orig": i, "step": Step(mode="group", count=count, steps=body)})
             continue
-        st = _aurora_leaf(s)
+        st = _aurora_leaf(s, warnings)
         if st is not None:
             flat.append({"orig": i, "step": st})
         else:
@@ -191,14 +218,16 @@ def import_aurora_unicycler(source: Any, *, name: str | None = None, kind: str |
     steps, warnings = _fold_aurora_method(method)
 
     record: dict[str, Any] = {}
+    _record_block = doc.get("record") or {}
     for key in ("time_s", "voltage_V", "current_mA"):
-        v = _num((doc.get("record") or {}).get(key))
+        v = _num_field(_record_block, key, warnings)
         if v is not None:
             record[key] = v
     safety: dict[str, Any] = {}
+    _safety_block = doc.get("safety") or {}
     for key in ("max_voltage_V", "min_voltage_V", "max_current_mA", "min_current_mA",
                 "max_capacity_mAh", "delay_s"):
-        v = _num((doc.get("safety") or {}).get(key))
+        v = _num_field(_safety_block, key, warnings)
         if v is not None:
             safety[key] = v
 
