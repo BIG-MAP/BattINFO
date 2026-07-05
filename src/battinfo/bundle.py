@@ -543,10 +543,19 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     out: dict[str, Any] = {"name": name}
     if isinstance(node_type, str) and node_type in {"Person", "Organization"}:
         out["type"] = node_type
-    elif any(key in value for key in ("email", "schema:email", "affiliation", "schema:affiliation")):
+    elif any(
+        key in value
+        for key in (
+            "email", "schema:email", "affiliation", "schema:affiliation",
+            "orcid", "given_name", "schema:givenName", "family_name", "schema:familyName",
+        )
+    ):
         out["type"] = "Person"
     else:
         out["type"] = "Organization"
+    orcid = value.get("orcid")
+    if isinstance(orcid, str) and orcid.strip():
+        out["orcid"] = orcid
     email = value.get("email") or value.get("schema:email")
     if isinstance(email, str):
         out["email"] = email
@@ -2468,17 +2477,30 @@ class Dataset(BundleJsonModel):
             data["checksum"] = {"algorithm": _ck_alg, "value": _ck_val}
         if "notes" in data and "comment" not in data:
             data["comment"] = data.pop("notes")
-        # The dataset citations list aliases "citation"; the provenance citation is a
-        # different concept, so route a flat ``citation`` into source before the alias
-        # can capture it for the citations list.
+        # The dataset citations list aliases "citation"; a flat *string* ``citation`` is the
+        # provenance citation (matching the retired DatasetInput, where ``citation: str`` was
+        # provenance and the bibliography arrived as a list). Pop it before the alias can
+        # capture it — even when an explicit ``source`` is also given, in which case it merges
+        # into that source (an already-set source.citation wins).
+        _prov_citation = data.pop("citation") if isinstance(data.get("citation"), str) else None
         _flat_provenance = {
             "source_type": "type", "source_name": "name", "source_file": "file",
-            "source_url": "url", "citation": "citation", "file_hash": "file_hash",
+            "source_url": "url", "file_hash": "file_hash",
             "retrieved_at": "retrieved_at", "workflow_version": "workflow_version",
             "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
+        if _prov_citation is not None:
+            source = data.get("source")
+            if source is None:
+                data["source"] = {"citation": _prov_citation}
+            elif isinstance(source, Mapping):
+                merged = dict(source)
+                merged.setdefault("citation", _prov_citation)
+                data["source"] = merged
+            elif isinstance(source, ProvenanceInfo) and source.citation is None:
+                data["source"] = source.model_copy(update={"citation": _prov_citation})
         super().__init__(**data)
 
     @field_validator("identifier", mode="before")

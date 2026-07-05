@@ -30,6 +30,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Dataset `creators`/`funders`/`publisher` entries now preserve `orcid` and classify agents
+  carrying an ORCID or given/family name as `Person` (the retired hand-builder passed these
+  dicts through verbatim; the model's canonicalizer was silently dropping the ORCID and
+  defaulting people to `Organization`).
+- `CellInstance.expires_at` is converted to a Unix timestamp at save time, exactly like
+  `manufactured_at` (ISO strings previously reached stored records unconverted).
+- Provenance `retrieved_at` now accepts ISO datetime strings on every record builder (only the
+  test-spec builder converted them before), preserves epoch zero, and raises on an unparseable
+  value instead of silently substituting the current time.
+- A flat string `citation=` kwarg on `Dataset` is routed to provenance even when an explicit
+  `source=` is also given (it previously leaked into the bibliographic `citations` list); an
+  already-set `source.citation` wins. List/dict citation values remain bibliographic.
 - Timezone-naive timestamps (a bare ISO date such as `"2022-01-15"`, or a time with no offset)
   are now anchored to UTC before conversion. Saved record timestamps
   (`manufactured_at` / `started_at` / `ended_at` / `created_at`) were previously interpreted in

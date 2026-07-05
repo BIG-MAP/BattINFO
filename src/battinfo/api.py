@@ -413,6 +413,18 @@ def _to_unix_time(value: object) -> int | None:
     return None
 
 
+def _resolved_retrieved_at(value: object) -> int:
+    """Save-time canonicalization of provenance ``retrieved_at``: default a missing value to
+    now; convert a provided one to Unix seconds, raising (never silently substituting the
+    current time) when it cannot be parsed. Epoch zero is a valid timestamp."""
+    if value is None:
+        return _now_unix()
+    converted = _to_unix_time(value)
+    if converted is None:
+        raise ValueError("retrieved_at must be a Unix timestamp or ISO datetime string.")
+    return converted
+
+
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
 
@@ -2334,8 +2346,7 @@ def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
         finalized.source.type = "datasheet"
     if finalized.source.file is None:
         finalized.source.file = "manual.json"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2353,18 +2364,19 @@ def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
         entity_id = instance.id
     else:
         entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(instance.uid)}"
-    # Finalize a copy (mint the id, convert manufactured_at, apply save-time provenance defaults).
+    # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = instance.model_copy(deep=True)
     finalized.id = entity_id
-    if finalized.manufactured_at is not None:
-        converted = _to_unix_time(finalized.manufactured_at)
-        if converted is None:
-            raise ValueError("manufactured_at must be a Unix timestamp or ISO datetime string.")
-        finalized.manufactured_at = converted
+    for _time_field in ("manufactured_at", "expires_at"):
+        value = getattr(finalized, _time_field)
+        if value is not None:
+            converted = _to_unix_time(value)
+            if converted is None:
+                raise ValueError(f"{_time_field} must be a Unix timestamp or ISO datetime string.")
+            setattr(finalized, _time_field, converted)
     if finalized.source.type is None:
         finalized.source.type = "measurement"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2396,8 +2408,7 @@ def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
     finalized.published_at = _to_unix_time(finalized.published_at) or created
     if finalized.source.type is None:
         finalized.source.type = "other"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2429,8 +2440,7 @@ def _record_from_test(test: Test) -> dict[str, Any]:
             setattr(finalized, _time_field, converted)
     if finalized.source.type is None:
         finalized.source.type = "measurement"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2449,7 +2459,7 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
     finalized.id = entity_id
     if finalized.source.type is None:
         finalized.source.type = "manual"
-    finalized.source.retrieved_at = _to_unix_time(finalized.source.retrieved_at) or _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
