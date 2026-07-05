@@ -20,7 +20,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-_SCHEMA_VERSION = "0.1.0"
+from battinfo.bundle import SCHEMA_VERSION as _SCHEMA_VERSION
+
 PathLike = str | Path
 
 # BDF canonical column name → (variable_measured name, unit_text)

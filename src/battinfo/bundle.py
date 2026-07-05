@@ -15,6 +15,14 @@ from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
 
+# Single source of truth for the ``schema_version`` stamped into every record this
+# library emits (cell spec, cell instance, test, test spec, dataset, material, component).
+# History: records originally said "0.1.0"; the 2026-07 input-model consolidation
+# accidentally forked dataset records to "1.0.0". "0.2.0" deliberately supersedes both —
+# bump it here (and CHANGELOG the record-shape change) whenever the emitted record shape
+# changes.
+SCHEMA_VERSION = "0.2.0"
+
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
 CELL_SPEC_FILENAME = "cell-spec.json"
@@ -1130,7 +1138,7 @@ def _housing_from_coin_hardware(coin_hardware: Any) -> "Housing | None":
 class BundleJsonModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "1.0.0"
+    schema_version: str = SCHEMA_VERSION
     kind: str
 
     def to_json(self) -> dict[str, Any]:
@@ -3264,7 +3272,7 @@ class ZenodoCellRecord(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "1.0.0"
+    schema_version: str = SCHEMA_VERSION
     kind: str = "BattinfoCellRecord"
     cell_spec: CellSpecification
     cell_specification: CellSpecification | None = None

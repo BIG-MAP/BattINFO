@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
-from battinfo.bundle import CellInstance, CellSpecification, ProvenanceInfo, Test, TestSpec
+from battinfo.bundle import SCHEMA_VERSION, CellInstance, CellSpecification, ProvenanceInfo, Test, TestSpec
 from battinfo.interop.protocols import _num
 
 if TYPE_CHECKING:
@@ -227,7 +227,7 @@ def import_converter_jsonld(
     manufacturer: str | None = None,
     model: str | None = None,
     chemistry: str | None = None,
-    schema_version: str = "1.0.0",
+    schema_version: str = SCHEMA_VERSION,
 ) -> ConverterImportResult:
     return import_converter_jsonld_record(
         source,
@@ -246,7 +246,7 @@ def import_converter_jsonld_record(
     manufacturer: str | None = None,
     model: str | None = None,
     chemistry: str | None = None,
-    schema_version: str = "1.0.0",
+    schema_version: str = SCHEMA_VERSION,
     validate: bool = True,
 ) -> ConverterImportResult:
     raw_payload, source_file = _load_source(source)
@@ -437,7 +437,7 @@ def import_converter_package(
     manufacturer: str | None = None,
     model: str | None = None,
     chemistry: str | None = None,
-    schema_version: str = "1.0.0",
+    schema_version: str = SCHEMA_VERSION,
     validate: bool = True,
 ) -> ConverterImportPackage:
     imported = import_converter_jsonld_record(
@@ -1441,7 +1441,7 @@ def _extract_doi_from_url(url: str) -> str | None:
 def import_dataset_record(
     source: Mapping[str, Any] | str | Path,
     *,
-    schema_version: str = "1.0.0",
+    schema_version: str = SCHEMA_VERSION,
 ) -> dict[str, Any] | None:
     """Build a battinfo dataset record from the hasOutput block of a converter export.
 
@@ -1595,7 +1595,7 @@ def batch_import_converter_directory(
     directory: str | Path,
     *,
     glob: str = "**/*metadata*.json",
-    schema_version: str = "1.0.0",
+    schema_version: str = SCHEMA_VERSION,
     manufacturer: str | None = None,
     chemistry: str | None = None,
 ) -> list[BatchImportResult]:

@@ -19,7 +19,15 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test, TestSpec
+from battinfo.bundle import (
+    SCHEMA_VERSION,
+    BatteryTestType,
+    CellInstance,
+    CellSpecification,
+    Dataset,
+    Test,
+    TestSpec,
+)
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
@@ -1300,7 +1308,7 @@ def build_curated_cell_spec_submission(
         }
 
     return {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         "kind": "BattinfoSubmission",
         "submission_mode": "resource",
         "generated_at": generated_at,
@@ -2265,7 +2273,7 @@ def create_cell_instance(
     instance_id = f"https://w3id.org/battinfo/cell/{dashed_uid}"
 
     out: dict[str, Any] = {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         "cell_instance": {
             "id": instance_id,
             "cell_spec_id": resolved_cell_spec_id,
@@ -4033,7 +4041,7 @@ class MaterialSpecInput(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "0.1.0"
+    schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
     name: str
@@ -4061,7 +4069,7 @@ class MaterialInput(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "0.1.0"
+    schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
     material_spec_id: str
@@ -4491,7 +4499,7 @@ def _record_from_component_spec(
         spec["product_id"] = product_id
 
     record: dict[str, Any] = {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         f"{family}_spec": spec,
         "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
     }
@@ -4557,7 +4565,7 @@ def _record_from_component_instance(
         instance["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
 
     record: dict[str, Any] = {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         family: instance,
         "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
     }

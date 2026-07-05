@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (record format)
+
+- Every emitted record now carries `schema_version: "0.2.0"`, stamped from a single
+  `battinfo.bundle.SCHEMA_VERSION` constant used by the pydantic models, the dict-path
+  record builders, and the interop importers. This deliberately supersedes **both** prior
+  values: the original `"0.1.0"` (dict-path cell spec/material/component records) and the
+  `"1.0.0"` that model-path records had silently picked up during the input-model
+  consolidation. Reading a record preserves its stored version; only newly emitted records
+  get the new stamp. Downstream consumers should accept `0.1.0`, `1.0.0`, and `0.2.0`.
+
 ### Changed (breaking — authoring API)
 
 - The per-record-type input classes are retired: the pydantic models are now both the
