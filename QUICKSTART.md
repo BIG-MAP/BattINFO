@@ -80,7 +80,7 @@ print(jsonld["schema:size"])     # R18650
 
 BattINFO automatically stacks EMMO types based on the cell's format and chemistry. A cylindrical Li-ion cell is simultaneously `BatteryCell`, `CylindricalBattery`, and `LithiumIonBattery` — no manual annotation needed.
 
-The resolver JSON-LD is the lightweight document served at the cell's IRI. The full EMMO-aligned publication package — with `hasProperty` nodes for each quantitative specification — is produced by `workspace.build_publication_package()` (see [Guide 3](docs/guides/03-linked-records.md)).
+The resolver JSON-LD is the lightweight document served at the cell's IRI. The full EMMO-aligned publication package — with `hasProperty` nodes for each quantitative specification — is produced by `workspace.build_publication_package()` (see [Guide 3](docs/guides/03-linked-records.ipynb)).
 
 ---
 

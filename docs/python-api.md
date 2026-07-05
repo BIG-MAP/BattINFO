@@ -79,7 +79,13 @@ chain, call `build_publication_package(...)`, then reload with
 `load_publication_package(...)`.
 
 ```python
+from pathlib import Path
+
 from battinfo import CellInstance, CellSpecification, Dataset, Test, build_publication_package, load_publication_package
+
+dataset_dir = Path("data/cr2032-run")
+dataset_dir.mkdir(parents=True, exist_ok=True)
+(dataset_dir / "capacity.csv").write_text("cycle,capacity_ah\n1,0.225\n")
 
 cell_spec = CellSpecification(
     manufacturer="Energizer",
@@ -104,7 +110,7 @@ test = Test(
 )
 
 dataset = Dataset(
-    path="path/to/dataset-dir",
+    path=str(dataset_dir),
     cell=cell,
     test=test,
     name="Energizer CR2032 dataset",
@@ -117,7 +123,7 @@ report = build_publication_package(
     dataset=dataset,
 )
 
-bundle = load_publication_package("path/to/dataset-dir/battinfo.publish.jsonld")
+bundle = load_publication_package(dataset_dir / "battinfo.publish.jsonld")
 ```
 
 Notes:
@@ -145,7 +151,7 @@ from battinfo import Workspace
 workspace = Workspace(root=Path(".battinfo/demo"))
 cell_spec = workspace.cell_spec(...)
 cell = workspace.cell(cell_spec, ...)
-protocol = workspace.test_spec(name="1C Cycle Life at 25 C", kind="cycle_life", ...)
+protocol = workspace.test_spec(name="1C Cycle Life at 25 C", kind="cycling", ...)
 test = workspace.test(cell, protocol_ref=protocol, ...)
 dataset = workspace.dataset(cell, title="Cycle life dataset", test=test, path="data/cycle-life.csv")
 
@@ -222,8 +228,8 @@ from battinfo import Workspace
 
 workspace = Workspace(root=Path(".battinfo/manual-cell-specs"))
 
-cell_spec = workspace.load_cell_spec("cell-spec/A123__ANR26650M1-B.json")
-more_cell_specs = workspace.load_cell_specs(directory="cell-spec")
+cell_spec = workspace.load_cell_spec("examples/cell-spec/A123__ANR26650M1-B.json")
+more_cell_specs = workspace.load_cell_specs(directory="examples/cell-spec")
 ```
 
 If you want a starter draft file to fill in first, generate one with the API:
@@ -249,33 +255,42 @@ Draft inputs should omit canonical fields like `id`, `short_id`, and `identifier
 `Workspace.save()` canonizes those fields and fills default provenance if you did
 not provide it.
 
-## Reusable Test Protocols
+## Reusable Test Specs
 
 If you want to separate reusable procedures from executed test runs, use
-`TestProtocol` plus the existing `Test` record:
+`TestSpec` plus the existing `Test` record:
 
 ```python
 from battinfo import Workspace
 
-workspace = Workspace(root=".battinfo/test-protocol-demo")
+workspace = Workspace(root=".battinfo/test-spec-demo")
 
-protocol = workspace.test_protocol(
+protocol = workspace.test_spec(
     name="1C Cycle Life at 25 C",
-    kind="cycle_life",
+    kind="cycling",
     version="1.0",
     protocol_url="https://example.org/protocols/cycle-life-1c",
     conditions={"ambient_temperature": {"value": 25.0, "unit": "degC"}},
-    setpoints={"charge_rate": {"value": 1.0, "unit": "C"}},
+    experiment=[
+        "Charge at 1C until 4.2 V",
+        "Discharge at 1C until 2.5 V",
+    ],
 )
 
-cell = workspace.cell(workspace.cell_spec(...), serial_number="LAB-001")
+cell_spec = workspace.cell_spec(
+    manufacturer="Energizer",
+    model="CR2032",
+    format="coin",
+    chemistry="Li-primary",
+)
+cell = workspace.cell(cell_spec, serial_number="LAB-001")
 test = workspace.test(cell, protocol_ref=protocol, instrument="Biologic VSP-300")
 workspace.save()
 ```
 
-You can also hand-author reusable protocol JSON first with
-`template_test_protocol_draft(...)` or load canonical protocol records with
-`Workspace.load_test_protocol(...)`.
+You can also hand-author reusable test-spec JSON first with
+`template_test_spec_draft(...)` or load canonical test-spec records with
+`Workspace.load_test_spec(...)`.
 
 ## Query And Save
 
