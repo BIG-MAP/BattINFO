@@ -13,10 +13,11 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo import validate_record
 from battinfo.api import (
     _record_from_cell_instance,
+    _record_from_dataset,
     _record_from_test,
     _to_unix_time,
 )
-from battinfo.bundle import CellInstance, Test
+from battinfo.bundle import CellInstance, Dataset, Test
 
 _SPEC = "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r"
 _DS = "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
@@ -73,3 +74,53 @@ def test_test_routes_through_model_mapping_fields_and_validates() -> None:
     assert t["started_at"] == _to_unix_time("2022-02-01")  # ISO -> unix
     assert t["ended_at"] == _to_unix_time("2022-02-02")
     assert t["dataset_ids"] == [_DS]
+
+
+_CELL = "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+_TEST = "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
+_TEST2 = "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5"
+_DS_IRI = "https://w3id.org/battinfo/dataset/8c1h-8pk6-8034-vav6"
+
+
+def test_dataset_routes_through_model_and_validates() -> None:
+    # The flat authoring shape (title/format/checksum_*/source_*) is absorbed by the model
+    # and serialized via to_record(); the record must be schema-valid and carry the fields.
+    rec = _record_from_dataset(Dataset(
+        id=_DS_IRI, title="MN1500 dataset", format="application/x-hdf5",
+        download_url="https://x/d.h5", checksum_algorithm="sha256", checksum_value="abc",
+        related_cell_ids=[_CELL], related_test_ids=[_TEST], created_at="2022-03-01",
+        source_type="measurement", source_url="https://x/src",
+    ))
+    assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
+    ds = rec["dataset"]
+    assert ds["name"] == "MN1500 dataset"
+    assert ds["about"] == [_CELL, _TEST]
+    assert ds["created_at"] == _to_unix_time("2022-03-01")  # ISO -> unix
+    assert ds["distributions"][0]["encoding_format"] == "application/x-hdf5"
+    assert ds["distributions"][0]["checksum"] == {"algorithm": "sha256", "value": "abc"}
+    assert rec["provenance"]["source_type"] == "measurement"
+
+
+def test_dataset_relates_to_multiple_tests_losslessly() -> None:
+    # One dataset can relate to several tests; the model must carry all of them in `about`
+    # (the single cell_instance_id/test_id shape would have dropped the extras).
+    rec = _record_from_dataset(Dataset(
+        id=_DS_IRI, title="Multi", related_cell_ids=[_CELL], related_test_ids=[_TEST, _TEST2],
+        source_type="lab",
+    ))
+    assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
+    assert rec["dataset"]["about"] == [_CELL, _TEST, _TEST2]
+
+
+def test_dataset_always_emits_required_access_url() -> None:
+    # access_url is schema-required; the model fills it even when unset so an object-first
+    # dataset is valid on its own (previously only the DTO save path guaranteed this).
+    rec = _record_from_dataset(Dataset(id=_DS_IRI, title="Bare", source_type="other"))
+    assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
+    assert rec["dataset"]["access_url"]  # present and non-empty
+
+
+def test_dataset_mints_id_from_uid() -> None:
+    rec = _record_from_dataset(Dataset(uid="8c1h-8pk6-8034-vav6", title="X", source_type="other"))
+    assert rec["dataset"]["id"] == _DS_IRI
+    assert rec["dataset"]["short_id"] == "8c1h8p"

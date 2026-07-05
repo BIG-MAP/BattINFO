@@ -8,7 +8,6 @@ import typer
 
 from battinfo._jsonio import write_json as _write_json_file
 from battinfo.api import (
-    DatasetInput,
     TestSpecInput,
 )
 from battinfo.api import (
@@ -122,7 +121,7 @@ from battinfo.api import (
 from battinfo.api import (
     validate_staging_datasets as api_validate_staging_datasets,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Test
+from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
@@ -2023,13 +2022,13 @@ def save_dataset(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: DatasetInput | dict[str, Any] | Path = input_path
+            draft_obj: Dataset | dict[str, Any] | Path = input_path
         else:
             if not title:
                 raise ValueError("--title is required when --input is not provided.")
             if bool(checksum_algorithm) != bool(checksum_value):
                 raise ValueError("--checksum-algorithm and --checksum-value must be provided together.")
-            draft_obj = DatasetInput(
+            draft_obj = Dataset(
                 uid=uid,
                 title=title,
                 description=description,

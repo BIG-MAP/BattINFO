@@ -19,7 +19,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
@@ -138,56 +138,6 @@ def _citation_url_value(citation: object = None, citation_doi: object = None) ->
 # dict manufacturer, flat provenance kwargs, a transient uid), so one model is both the source of
 # truth and the thing callers construct. ``_record_from_cell_spec`` mints the IRI + applies save-time
 # provenance defaults. (The former ``CellDatasheetInput`` was likewise retired earlier.)
-
-
-class DatasetInput(BaseModel):
-    """Typed input for saving a new canonical dataset resource."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    schema_version: str = "0.1.0"
-    id: str | None = None
-    uid: str | None = None
-    title: str
-    description: str | None = None
-    license: str | None = None
-    identifier: Any | None = None
-    same_as: list[str] = Field(default_factory=list)
-    additional_type: list[str] = Field(default_factory=list)
-    version: str | None = None
-    keywords: list[str] = Field(default_factory=list)
-    creator: list[dict[str, Any]] = Field(default_factory=list)
-    publisher: dict[str, Any] | None = None
-    funder: list[dict[str, Any]] = Field(default_factory=list)
-    citation_list: list[dict[str, Any]] = Field(default_factory=list)
-    measurement_techniques: list[str] = Field(default_factory=list)
-    measurement_methods: list[str] = Field(default_factory=list)
-    variable_measured: list[dict[str, Any]] = Field(default_factory=list)
-    is_accessible_for_free: bool | None = None
-    conditions_of_access: str | None = None
-    in_language: str | None = None
-    format: str | None = None
-    access_url: str | None = None
-    download_url: str | None = None
-    created_at: str | None = None
-    modified_at: str | None = None
-    published_at: str | None = None
-    temporal_coverage: str | None = None
-    spatial_coverage: str | None = None
-    is_based_on: list[str] = Field(default_factory=list)
-    included_in_data_catalog: Any | None = None
-    main_entity: list[dict[str, Any]] = Field(default_factory=list)
-    distribution: list[dict[str, Any]] = Field(default_factory=list)
-    checksum_algorithm: Literal["sha256", "sha512", "md5", "other"] | None = None
-    checksum_value: str | None = None
-    related_cell_ids: list[str] = Field(default_factory=list)
-    related_test_ids: list[str] = Field(default_factory=list)
-    source_type: Literal["catalog", "measurement", "lab", "simulation", "external", "manual", "other"] = "other"
-    source_url: str | None = None
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
-    retrieved_at: int | None = None
-    curated_by: str | None = None
-    notes: list[str] = Field(default_factory=list)
 
 
 class TestSpecInput(BaseModel):
@@ -349,7 +299,7 @@ def template_dataset(
     related_test_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     """Build a starter canonical dataset document for save workflows."""
-    draft = DatasetInput(
+    draft = Dataset(
         uid=uid,
         title=title,
         source_type=source_type,
@@ -2449,128 +2399,37 @@ def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
     return finalized.to_record()
 
 
-def _record_from_dataset(draft: DatasetInput) -> dict[str, Any]:
-    if draft.id is not None:
-        if not DATASET_IRI_RE.fullmatch(draft.id):
+def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
+    if dataset.id is not None:
+        if not DATASET_IRI_RE.fullmatch(dataset.id):
             raise ValueError("dataset id must match https://w3id.org/battinfo/dataset/{uid}.")
-        if draft.uid is not None:
-            dashed = _normalized_dashed_uid(draft.uid)
-            _assert_id_matches_uid(draft.id, dashed)
-        entity_id = draft.id
-        _, dashed_uid = _iri_tail(entity_id)
+        entity_id = dataset.id
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/dataset/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/dataset/{_normalized_dashed_uid(dataset.uid)}"
 
-    for cell_id in draft.related_cell_ids:
+    related_cells = [*dataset.related_cell_ids, *([dataset.cell_instance_id] if dataset.cell_instance_id else [])]
+    for cell_id in related_cells:
         if not CELL_IRI_RE.fullmatch(cell_id):
             raise ValueError("related_cell_ids entries must match https://w3id.org/battinfo/cell/{uid}.")
-    for test_id in draft.related_test_ids:
+    related_tests = [*dataset.related_test_ids, *([dataset.test_id] if dataset.test_id else [])]
+    for test_id in related_tests:
         if not TEST_IRI_RE.fullmatch(test_id):
             raise ValueError("related_test_ids entries must match https://w3id.org/battinfo/test/{uid}.")
 
-    about_refs = list(dict.fromkeys([*draft.related_cell_ids, *draft.related_test_ids]))
-
-    dataset_obj: dict[str, Any] = {
-        "id": entity_id,
-        "short_id": dashed_uid.replace("-", "")[:6],
-        "identifier": draft.identifier if draft.identifier is not None else f"dataset:{dashed_uid}",
-        "name": draft.title,
-        "url": draft.access_url or draft.source_url or f"https://example.org/dataset/{dashed_uid}",
-    }
-    if draft.description is not None:
-        dataset_obj["description"] = draft.description
-    if draft.license is not None:
-        dataset_obj["license"] = draft.license
-    if draft.same_as:
-        dataset_obj["same_as"] = list(dict.fromkeys(draft.same_as))
-    if draft.additional_type:
-        dataset_obj["additional_type"] = list(dict.fromkeys(draft.additional_type))
-    if draft.version is not None:
-        dataset_obj["version"] = draft.version
-    if draft.keywords:
-        dataset_obj["keywords"] = list(dict.fromkeys(draft.keywords))
-    if draft.creator:
-        dataset_obj["creator"] = copy.deepcopy(draft.creator)
-    if draft.publisher is not None:
-        dataset_obj["publisher"] = copy.deepcopy(draft.publisher)
-    if draft.funder:
-        dataset_obj["funder"] = copy.deepcopy(draft.funder)
-    if draft.citation_list:
-        dataset_obj["citation"] = copy.deepcopy(draft.citation_list)
-    if draft.measurement_techniques:
-        dataset_obj["measurementTechnique"] = list(dict.fromkeys(draft.measurement_techniques))
-    if draft.measurement_methods:
-        dataset_obj["measurementMethod"] = list(dict.fromkeys(draft.measurement_methods))
-    if draft.variable_measured:
-        dataset_obj["variableMeasured"] = copy.deepcopy(draft.variable_measured)
-    if draft.is_accessible_for_free is not None:
-        dataset_obj["isAccessibleForFree"] = draft.is_accessible_for_free
-    if draft.conditions_of_access is not None:
-        dataset_obj["conditionsOfAccess"] = draft.conditions_of_access
-    if draft.in_language is not None:
-        dataset_obj["inLanguage"] = draft.in_language
-    if about_refs:
-        dataset_obj["about"] = about_refs
-    created_unix = _to_unix_time(draft.created_at) or _now_unix()
-    modified_unix = _to_unix_time(draft.modified_at) or created_unix
-    published_unix = _to_unix_time(draft.published_at) or created_unix
-    dataset_obj["dateCreated"] = created_unix
-    dataset_obj["dateModified"] = modified_unix
-    dataset_obj["datePublished"] = published_unix
-    if draft.temporal_coverage is not None:
-        dataset_obj["temporalCoverage"] = draft.temporal_coverage
-    if draft.spatial_coverage is not None:
-        dataset_obj["spatialCoverage"] = draft.spatial_coverage
-    if draft.is_based_on:
-        dataset_obj["isBasedOn"] = list(dict.fromkeys(draft.is_based_on))
-    if draft.included_in_data_catalog is not None:
-        dataset_obj["includedInDataCatalog"] = draft.included_in_data_catalog
-    if draft.main_entity:
-        dataset_obj["main_entity"] = copy.deepcopy(draft.main_entity)
-
-    if draft.distribution:
-        dataset_obj["distributions"] = copy.deepcopy(draft.distribution)
-    elif draft.download_url is not None or draft.format is not None or (draft.checksum_algorithm and draft.checksum_value):
-        distribution: dict[str, Any] = {
-            "type": "DataDownload",
-            "content_url": draft.download_url or draft.access_url or draft.source_url or f"https://example.org/dataset/{dashed_uid}/download",
-            "encoding_format": draft.format or "application/octet-stream",
-        }
-        if draft.checksum_algorithm and draft.checksum_value:
-            distribution["checksum"] = {"algorithm": draft.checksum_algorithm, "value": draft.checksum_value}
-        dataset_obj["distributions"] = [distribution]
-
-    if draft.checksum_algorithm and draft.checksum_value:
-        dataset_obj.setdefault("distributions", [
-            {
-                "type": "DataDownload",
-                "content_url": draft.access_url or draft.source_url or f"https://example.org/dataset/{dashed_uid}/download",
-                "encoding_format": draft.format or "application/octet-stream",
-            }
-        ])
-        first_dist = dataset_obj["distributions"][0]
-        if isinstance(first_dist, dict):
-            first_dist["checksum"] = {"algorithm": draft.checksum_algorithm, "value": draft.checksum_value}
-
-    record: dict[str, Any] = {
-        "schema_version": draft.schema_version,
-        "dataset": dataset_obj,
-        "provenance": {
-            "source_type": draft.source_type,
-            "retrieved_at": draft.retrieved_at or _now_unix(),
-        },
-    }
-    if draft.source_url is not None:
-        record["provenance"]["source_url"] = draft.source_url
-    citation = _citation_url_value(draft.citation)
-    if citation is not None:
-        record["provenance"]["citation"] = citation
-    if draft.curated_by is not None:
-        record["provenance"]["curated_by"] = draft.curated_by
-    if draft.notes:
-        record["notes"] = list(draft.notes)
-    return record_to_snake_aliases(record)
+    finalized = dataset.model_copy(deep=True)
+    finalized.id = entity_id
+    # Save-time canonicalization: dates default to now and convert to Unix; provenance
+    # gets the dataset default source type and a retrieval timestamp. The model's
+    # to_record() handles the schema.org field mapping and distribution assembly.
+    created = _to_unix_time(finalized.created_at) or _now_unix()
+    finalized.created_at = created
+    finalized.modified_at = _to_unix_time(finalized.modified_at) or created
+    finalized.published_at = _to_unix_time(finalized.published_at) or created
+    if finalized.source.type is None:
+        finalized.source.type = "other"
+    if finalized.source.retrieved_at is None:
+        finalized.source.retrieved_at = _now_unix()
+    return finalized.to_record()
 
 
 def _record_from_test(test: Test) -> dict[str, Any]:
@@ -2922,7 +2781,7 @@ def save_cell_instance(
 
 
 def save_dataset(
-    draft: DatasetInput | dict[str, Any] | PathLike,
+    draft: Dataset | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2955,21 +2814,6 @@ def save_dataset(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    if isinstance(draft, DatasetBundle):
-        return save_record(
-            draft.to_record(),
-            source_root=source_root,
-            mode=mode,
-            duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references,
-            publish=publish,
-            publish_root=publish_root,
-            build_jsonld=build_jsonld,
-            build_html=build_html,
-            validate=validate,
-            validation_policy=validation_policy,
-            dry_run=dry_run,
-        )
     if isinstance(draft, Mapping) and isinstance(draft.get("dataset"), Mapping):
         return save_record(
             dict(draft),
@@ -2985,8 +2829,8 @@ def save_dataset(
             validation_policy=validation_policy,
             dry_run=dry_run,
         )
-    draft_model = draft if isinstance(draft, DatasetInput) else DatasetInput.model_validate(draft)
-    record = _record_from_dataset(draft_model)
+    dataset = draft if isinstance(draft, DatasetBundle) else DatasetBundle(**dict(draft))
+    record = _record_from_dataset(dataset)
     return save_record(
         record,
         source_root=source_root,
@@ -5364,7 +5208,6 @@ __all__ = [
     "query_component_instances",
     "template_component_spec",
     "template_component_instance",
-    "DatasetInput",
     "TestSpecInput",
     "build_cell_spec_library_rdf",
     "build_index",

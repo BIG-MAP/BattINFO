@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
-    DatasetInput,
     TestProtocolInput,
     build_cell_spec_library_rdf,
     build_curated_cell_spec_submission,
@@ -46,7 +45,7 @@ from battinfo.api import (
     template_test_spec_draft,
     validate_staging_cell_spec,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Test
+from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
 from battinfo.validate import validate_references_report
 
 
@@ -858,7 +857,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     assert test_payload["status"] == "created"
 
     dataset_payload = save_dataset(
-        DatasetInput(
+        Dataset(
             uid="8c1h8pk68034vav6",
             title="Duracell MN1500 cycling",
             source_type="measurement",
@@ -1004,7 +1003,7 @@ def test_save_record_strict_policy_rejects_semantic_issue(tmp_path: Path) -> Non
 def test_save_cell_instance_rejects_reference_with_wrong_record_type(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     dataset_payload = save_dataset(
-        DatasetInput(
+        Dataset(
             uid="8c1h8pk68034vav6",
             title="Dataset only",
             source_type="measurement",
