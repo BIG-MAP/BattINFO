@@ -943,6 +943,11 @@ class AuthoringWorkspace:
         )
         self._registry_url = registry_url.rstrip("/") if registry_url else None
         _load_credentials(self._root / ".battinfo" / "credentials")
+        # Credentials established by login() in THIS instance. login() must not
+        # mutate os.environ (process-global state would leak one workspace's
+        # identity into every other workspace in the process); _credential()
+        # consults this first, then the environment.
+        self._session_credentials: dict[str, str] = {}
         # name -> CellInstance, keyed by short_id for test matching
         self._cells_by_short_id: dict[str, Any] = {}
         # in-memory search cache; populated lazily from registry API or local index
@@ -1031,6 +1036,16 @@ class AuthoringWorkspace:
             pass
         return path
 
+    def _credential(self, key: str, default: str | None = None) -> str | None:
+        """Look up a credential without relying on process-global state.
+
+        Precedence mirrors the old behaviour minus the env mutation: values set
+        by ``login()`` on THIS instance win, then the process environment
+        (externally exported, or loaded once from ``.battinfo/credentials`` at
+        init), then *default*.
+        """
+        return self._session_credentials.get(key) or os.environ.get(key) or default
+
     def login(self, api_key: str, *, registry_url: str | None = None) -> dict:
         """Log in with a registry API key and cache your workspace identity.
 
@@ -1074,13 +1089,15 @@ class AuthoringWorkspace:
         except Exception:
             profile = {}  # network/registry unavailable — degrade gracefully
 
-        wid = profile.get("workspace_id") or os.environ.get("BATTINFO_WORKSPACE_ID") or "battinfo-records"
-        pid = profile.get("publisher_id") or os.environ.get("BATTINFO_PUBLISHER_ID") or "battinfo-authoring"
+        wid = profile.get("workspace_id") or self._credential("BATTINFO_WORKSPACE_ID") or "battinfo-records"
+        pid = profile.get("publisher_id") or self._credential("BATTINFO_PUBLISHER_ID") or "battinfo-authoring"
         name = profile.get("display_name") or pid
 
-        os.environ["BATTINFO_API_KEY"] = api_key
-        os.environ["BATTINFO_WORKSPACE_ID"] = wid
-        os.environ["BATTINFO_PUBLISHER_ID"] = pid
+        self._session_credentials.update({
+            "BATTINFO_API_KEY": api_key,
+            "BATTINFO_WORKSPACE_ID": wid,
+            "BATTINFO_PUBLISHER_ID": pid,
+        })
         self._ensure_gitignore()
         path = self._set_credentials({
             "BATTINFO_API_KEY": api_key,
@@ -1101,7 +1118,7 @@ class AuthoringWorkspace:
         """Print the identity associated with the current API key."""
         import urllib.request
 
-        key = os.environ.get("BATTINFO_API_KEY")
+        key = self._credential("BATTINFO_API_KEY")
         if not key:
             print("Not logged in. Run ws.login(api_key='...').")
             return {}
@@ -1119,8 +1136,8 @@ class AuthoringWorkspace:
             print(f"  publisher:  {profile.get('publisher_id')}")
             return profile
         except Exception as exc:
-            wid = os.environ.get("BATTINFO_WORKSPACE_ID", "battinfo-records")
-            pid = os.environ.get("BATTINFO_PUBLISHER_ID", "battinfo-authoring")
+            wid = self._credential("BATTINFO_WORKSPACE_ID", "battinfo-records")
+            pid = self._credential("BATTINFO_PUBLISHER_ID", "battinfo-authoring")
             print(f"  (registry profile unavailable: {exc})")
             print(f"  workspace:  {wid}")
             print(f"  publisher:  {pid}")
@@ -2122,7 +2139,7 @@ class AuthoringWorkspace:
         import urllib.request
 
         url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
-        wid = workspace_id or os.environ.get("BATTINFO_WORKSPACE_ID")
+        wid = workspace_id or self._credential("BATTINFO_WORKSPACE_ID")
         if not url:
             raise RuntimeError("registry_url required. Pass it or set BATTINFO_REGISTRY_URL.")
         if not wid:
@@ -2681,7 +2698,8 @@ class AuthoringWorkspace:
         outcome list instead.  Returns a list of per-record outcome dicts (``ok``,
         ``status``, ``error``, ``iri`` …).  No git or filesystem dependency.
 
-        Credentials can be passed as arguments or set as environment variables:
+        Credentials can be passed as arguments, established with ``ws.login()``
+        (scoped to this workspace instance), or set as environment variables:
 
         * ``BATTINFO_REGISTRY_URL``
         * ``BATTINFO_API_KEY``
@@ -2722,9 +2740,9 @@ class AuthoringWorkspace:
         import datetime
 
         url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
-        key = api_key       or os.environ.get("BATTINFO_API_KEY")
-        wid = workspace_id  or os.environ.get("BATTINFO_WORKSPACE_ID")
-        pid = publisher_id  or os.environ.get("BATTINFO_PUBLISHER_ID")
+        key = api_key       or self._credential("BATTINFO_API_KEY")
+        wid = workspace_id  or self._credential("BATTINFO_WORKSPACE_ID")
+        pid = publisher_id  or self._credential("BATTINFO_PUBLISHER_ID")
         ver = source_version or datetime.date.today().isoformat()
 
         # The Zenodo DOI (passed, or stored from ws.zenodo()) is recorded as
@@ -3152,7 +3170,7 @@ class AuthoringWorkspace:
         import urllib.request
 
         url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
-        wid = workspace_id or os.environ.get("BATTINFO_WORKSPACE_ID")
+        wid = workspace_id or self._credential("BATTINFO_WORKSPACE_ID")
         if not url:
             raise RuntimeError("registry_url required. Pass it or set BATTINFO_REGISTRY_URL.")
         if not wid:
