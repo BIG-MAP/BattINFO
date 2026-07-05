@@ -35,7 +35,7 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 | | |
 |---|---|
 | **[Data federation](data-federation.md)** | Why battery data needs federation, how BattINFO is the backbone, and Battery Genome in practice |
-| **[Cell descriptor standard](cell-descriptor-standard.md)** | Normative cell descriptor specification |
+| **[Cell descriptor standard](internal/cell-descriptor-standard.md)** | Normative cell descriptor specification |
 | **[Ontology / profile architecture](ontology-profile-architecture.md)** | How BattINFO, EMMO, and schema.org compose |
 | **[Schemas](../assets/schemas/)** | JSON Schema (draft 2020-12) files for all record types |
 | **[Property mappings](../assets/mappings/domain-battery/)** | Curated property → EMMO IRI and unit → EMMO/QUDT IRI tables |
@@ -47,10 +47,10 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 | | |
 |---|---|
 | **[Instance / test / dataset workflow](instance-test-dataset-workflow.md)** | Detailed workflow reference for linked records |
-| **[Editorial cell-spec workflow](editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
+| **[Editorial cell-spec workflow](internal/editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
 | **[Ingest manifest contract](ingest-manifest-contract.md)** | Batch intake from a folder of raw data files |
-| **[Dataset registry intake spec](dataset-registry-intake-spec.md)** | Submission package format for registry intake |
-| **[Resolver deployment](resolver.md)** | Building and deploying static resolver artifacts |
+| **[Dataset registry intake spec](internal/dataset-registry-intake-spec.md)** | Submission package format for registry intake |
+| **[Resolver deployment](internal/resolver.md)** | Building and deploying static resolver artifacts |
 
 ---
 
@@ -68,5 +68,5 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 | | |
 |---|---|
 | **[Agent guide](../AGENTS.md)** | Machine-readable manifest for AI agents working on this repo |
-| **[Validation roadmap](validation-roadmap.md)** | Planned validation enhancements |
-| **[Converter compatibility](converter-compatibility.md)** | Compatibility notes for external format converters |
+| **[Validation roadmap](internal/validation-roadmap.md)** | Planned validation enhancements |
+| **[Converter compatibility](internal/converter-compatibility.md)** | Compatibility notes for external format converters |

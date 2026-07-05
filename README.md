@@ -163,7 +163,7 @@ Published records use:
 
 ## Project status
 
-> **Beta.** **938 tests** pass across Python 3.11 and 3.12 on Linux
+> **Beta.** **1,175 tests** pass across Python 3.11 and 3.12 on Linux
 > and Windows. Ontology dependency versions are pinned and verified.
 > See [`docs/scope.md`](docs/scope.md) for the full capability map.
 
