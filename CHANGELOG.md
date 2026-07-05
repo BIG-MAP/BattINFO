@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (validation errors aggregate and teach)
+
+- Save/publish validation failures now report **every** error in one message instead of
+  only the first, so a record with three problems is fixed in one pass, not three.
+- Canonical record paths in error messages translate back to the authoring vocabulary
+  (`cell_spec.cell_format` → `format=`, missing `provenance.source_type` → `source_type=`).
+- Quantity-shape errors include a copy-pasteable example
+  (`{"nominal_capacity": {"value": 0.0, "unit": "ah"}}`) and point at
+  `battinfo properties show <name>` for the accepted units.
+- A misspelled keyword argument on any of the five record models now raises a `TypeError`
+  with a did-you-mean (`manufacture=` → "did you mean `manufacturer=`?") covering fields,
+  aliases, and all spec property names, instead of a bare pydantic extra-field error.
+
 ### Changed (nothing accepted is silently dropped)
 
 - `specs=` must be a mapping of property name → value; a list or scalar now raises a

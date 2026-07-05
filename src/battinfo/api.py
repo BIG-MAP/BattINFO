@@ -40,6 +40,7 @@ from battinfo.entities import (
 )
 from battinfo.transform.json_to_jsonld import _descriptor_quantity_node as _jsonld_quantity_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
+from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
 from battinfo.validate.record import validate_record, validate_record_report
@@ -2182,11 +2183,7 @@ def _validate_schema(doc: dict[str, Any], schema_rel_path: str) -> None:
     report = validate_schema_data(doc, schema)
     if report.ok:
         return
-    first = report.errors[0]
-    location = first.path
-    if location:
-        raise ValueError(f"Schema validation failed at '{location}': {first.message}")
-    raise ValueError(f"Schema validation failed: {first.message}")
+    raise ValueError(format_report_errors(report, prefix="Schema validation failed"))
 
 
 def _validate_canonical_record(
@@ -2205,9 +2202,7 @@ def _validate_canonical_record(
         prefix = "Publication validation failed"
     else:
         prefix = "Validation failed"
-    if first.path:
-        raise ValueError(f"{prefix} at '{first.path}': {first.message}")
-    raise ValueError(f"{prefix}: {first.message}")
+    raise ValueError(format_report_errors(report, prefix=prefix))
 
 
 def _validate_publication_artifact(
@@ -2218,10 +2213,7 @@ def _validate_publication_artifact(
     report = validate_publication_report(doc, policy=policy)
     if report.ok:
         return
-    first = report.errors[0]
-    if first.path:
-        raise ValueError(f"Publication validation failed at '{first.path}': {first.message}")
-    raise ValueError(f"Publication validation failed: {first.message}")
+    raise ValueError(format_report_errors(report, prefix="Publication validation failed"))
 
 
 def create_cell_instance(
@@ -2516,7 +2508,7 @@ def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None
     report = validate_references_report(doc, source_root, allow_missing=True)
     if report.ok:
         return
-    raise ValueError(report.errors[0].message)
+    raise ValueError(format_report_errors(report, prefix="Reference validation failed"))
 
 
 def _record_content_differs(existing_path: PathLike, new_doc: Mapping[str, Any]) -> bool:

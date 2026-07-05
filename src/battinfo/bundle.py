@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import difflib
 import re
 from enum import StrEnum
 from pathlib import Path
@@ -318,6 +319,41 @@ class ProtocolInfo(BaseModel):
 
     name: str | None = None
     url: str | None = None
+
+
+# Flat provenance kwargs every record model absorbs into `source` (see the per-model
+# _flat_provenance maps); listed here so the unknown-kwarg check knows them as vocabulary.
+_FLAT_PROVENANCE_KEYS = (
+    "source_type", "source_name", "source_file", "source_url", "citation",
+    "file_hash", "retrieved_at", "workflow_version", "curated_by",
+)
+
+
+def _reject_unknown_kwargs(cls: type[BaseModel], data: Mapping[str, Any], *, extra_allowed: tuple[str, ...] = ()) -> None:
+    """Raise a teaching TypeError for kwargs that match no field or alias.
+
+    ``extra="forbid"`` would reject them anyway, but as a pydantic ValidationError that
+    names only the stray key. A typo like ``manufacture=`` deserves a did-you-mean.
+    Call AFTER the __init__ alias absorption, so only genuine strays remain in *data*."""
+    allowed: set[str] = set(extra_allowed)
+    for field_name, field_info in cls.model_fields.items():
+        allowed.add(field_name)
+        alias = field_info.validation_alias
+        if isinstance(alias, AliasChoices):
+            allowed.update(str(choice) for choice in alias.choices)
+        elif isinstance(alias, str):
+            allowed.add(alias)
+    unknown = [key for key in data if key not in allowed]
+    if not unknown:
+        return
+    parts = []
+    for key in unknown:
+        close = difflib.get_close_matches(key, sorted(allowed), n=1)
+        parts.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
+    raise TypeError(
+        f"Unknown field(s) for {cls.__name__}: " + ", ".join(parts)
+        + f". Run help(battinfo.{cls.__name__}) for the accepted fields."
+    )
 
 
 def _provenance_from_record(provenance: Mapping[str, Any]) -> ProvenanceInfo:
@@ -1336,6 +1372,11 @@ class CellSpecification(BundleJsonModel):
                 data["housing"] = migrated
 
         data["properties"] = explicit_properties
+        _reject_unknown_kwargs(
+            type(self), data,
+            extra_allowed=("specs", "notes", "coin_hardware",
+                           *CELL_TYPE_AUTHORING_PROPERTY_FIELDS, *_FLAT_PROVENANCE_KEYS),
+        )
         super().__init__(**data)
 
     @model_validator(mode="after")
@@ -1748,6 +1789,9 @@ class CellInstance(BundleJsonModel):
                     "Pass one or the other."
                 )
             data["cell_spec"] = cell_spec
+        _reject_unknown_kwargs(
+            type(self), data, extra_allowed=("notes", "dataset_id", *_FLAT_PROVENANCE_KEYS)
+        )
         super().__init__(**data)
 
     @model_validator(mode="after")
@@ -2043,6 +2087,11 @@ class TestSpec(BundleJsonModel):
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
+        _reject_unknown_kwargs(
+            type(self), data,
+            extra_allowed=("kind", "protocol_url", "notes", "experiment", "steps", "cycles",
+                           *_FLAT_PROVENANCE_KEYS),
+        )
         super().__init__(**data)
 
     @model_validator(mode="before")
@@ -2252,6 +2301,11 @@ class Test(BundleJsonModel):
                     f"but cell_id={_kwarg_id!r} was also given. Pass one or the other."
                 )
             data["cell"] = cell
+        _reject_unknown_kwargs(
+            type(self), data,
+            extra_allowed=("cell_id", "kind", "instrument_name", "protocol_name",
+                           "protocol_url", "notes", *_FLAT_PROVENANCE_KEYS),
+        )
         super().__init__(**data)
 
     @field_validator("protocol", mode="before")
@@ -2484,6 +2538,11 @@ class Dataset(BundleJsonModel):
                 data["source"] = merged
             elif isinstance(source, ProvenanceInfo) and source.citation is None:
                 data["source"] = source.model_copy(update={"citation": _prov_citation})
+        _reject_unknown_kwargs(
+            type(self), data,
+            extra_allowed=("title", "format", "citation_list", "checksum_algorithm",
+                           "checksum_value", "notes", "citation", "path", *_FLAT_PROVENANCE_KEYS),
+        )
         super().__init__(**data)
 
     @field_validator("identifier", mode="before")
