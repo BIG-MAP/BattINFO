@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Every field of the five authoring models (`CellSpecification`, `CellInstance`, `Test`,
+  `TestSpec`, `Dataset`) and `ProvenanceInfo` now carries a `Field(description=...)`,
+  surfacing in `help()`, IDE hover, and `.model_json_schema()`. Descriptions note the flat
+  authoring aliases (e.g. `title=` for `Dataset.name`, `kind=` for `test_type`). A test
+  gate keeps new fields from shipping undocumented.
+
 ### Changed (validation errors aggregate and teach)
 
 - Save/publish validation failures now report **every** error in one message instead of
