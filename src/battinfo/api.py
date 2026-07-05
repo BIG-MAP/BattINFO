@@ -4,10 +4,11 @@ import difflib
 import functools
 import html
 import json
+import math
 import re
 import secrets
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping, Sequence
 from urllib.error import HTTPError, URLError
@@ -389,16 +390,44 @@ def _now_unix() -> int:
 
 
 def _to_unix_time(value: object) -> int | None:
+    """Best-effort conversion to Unix seconds; ``None`` for anything unconvertible.
+
+    Never raises — call sites decide whether an unconvertible *present* value is an
+    error (see ``_resolved_time``).
+    """
+    if isinstance(value, bool):
+        # bool is an int subclass; True/False are never meaningful timestamps.
+        return None
     if isinstance(value, int):
         return value
     if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
         return int(value)
+    if isinstance(value, datetime):
+        # Anchor naive datetimes to UTC (same rationale as for strings below).
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return int(value.timestamp())
+    if isinstance(value, date):
+        return int(datetime(value.year, value.month, value.day, tzinfo=timezone.utc).timestamp())
     if isinstance(value, str):
         txt = value.strip()
         if not txt:
             return None
         if txt.isdigit():
-            return int(txt)
+            # Digit runs shorter than 9 chars are ambiguous: "20240101" reads as a
+            # calendar date, not epoch second 20,240,101. Require 9+ digits (i.e.
+            # timestamps from 1973 onward) for a bare digit string to count as Unix
+            # seconds; use an int, an ISO string, or a datetime for anything else.
+            # str.isdigit() also accepts non-ASCII digits ("²") that int() rejects,
+            # hence the try/except.
+            if len(txt) < 9:
+                return None
+            try:
+                return int(txt)
+            except ValueError:
+                return None
         try:
             parsed = datetime.fromisoformat(txt.replace("Z", "+00:00"))
         except ValueError:
@@ -413,16 +442,26 @@ def _to_unix_time(value: object) -> int | None:
     return None
 
 
+def _resolved_time(field_name: str, value: object, default: int) -> int:
+    """Save-time canonicalization of an optional timestamp field: an absent value takes
+    *default*; a present one converts to Unix seconds, raising (never silently substituting
+    the default) when it cannot be parsed. Epoch zero is a valid timestamp."""
+    if value is None:
+        return default
+    converted = _to_unix_time(value)
+    if converted is None:
+        raise ValueError(
+            f"{field_name} must be a Unix timestamp (int), ISO 8601 datetime string, "
+            f"or datetime/date object; got {value!r}."
+        )
+    return converted
+
+
 def _resolved_retrieved_at(value: object) -> int:
     """Save-time canonicalization of provenance ``retrieved_at``: default a missing value to
     now; convert a provided one to Unix seconds, raising (never silently substituting the
-    current time) when it cannot be parsed. Epoch zero is a valid timestamp."""
-    if value is None:
-        return _now_unix()
-    converted = _to_unix_time(value)
-    if converted is None:
-        raise ValueError("retrieved_at must be a Unix timestamp or ISO datetime string.")
-    return converted
+    current time) when it cannot be parsed."""
+    return _resolved_time("retrieved_at", value, _now_unix())
 
 
 def _as_path(path: PathLike) -> Path:
@@ -1529,7 +1568,7 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
 
     provenance: dict[str, Any] = {
         "source_file": draft.get("source_file", "manual.json"),
-        "retrieved_at": _to_unix_time(draft.get("retrieved_at")) or _now_unix(),
+        "retrieved_at": _resolved_retrieved_at(draft.get("retrieved_at")),
     }
     if draft.get("source_type"):
         provenance["source_type"] = draft["source_type"]
@@ -2370,10 +2409,7 @@ def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
     for _time_field in ("manufactured_at", "expires_at"):
         value = getattr(finalized, _time_field)
         if value is not None:
-            converted = _to_unix_time(value)
-            if converted is None:
-                raise ValueError(f"{_time_field} must be a Unix timestamp or ISO datetime string.")
-            setattr(finalized, _time_field, converted)
+            setattr(finalized, _time_field, _resolved_time(_time_field, value, 0))
     if finalized.source.type is None:
         finalized.source.type = "measurement"
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
@@ -2402,10 +2438,10 @@ def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
     # Save-time canonicalization: dates default to now and convert to Unix; provenance
     # gets the dataset default source type and a retrieval timestamp. The model's
     # to_record() handles the schema.org field mapping and distribution assembly.
-    created = _to_unix_time(finalized.created_at) or _now_unix()
+    created = _resolved_time("created_at", finalized.created_at, _now_unix())
     finalized.created_at = created
-    finalized.modified_at = _to_unix_time(finalized.modified_at) or created
-    finalized.published_at = _to_unix_time(finalized.published_at) or created
+    finalized.modified_at = _resolved_time("modified_at", finalized.modified_at, created)
+    finalized.published_at = _resolved_time("published_at", finalized.published_at, created)
     if finalized.source.type is None:
         finalized.source.type = "other"
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
@@ -2434,10 +2470,7 @@ def _record_from_test(test: Test) -> dict[str, Any]:
     for _time_field in ("started_at", "ended_at"):
         value = getattr(finalized, _time_field)
         if value is not None:
-            converted = _to_unix_time(value)
-            if converted is None:
-                raise ValueError(f"{_time_field} must be a Unix timestamp or ISO datetime string.")
-            setattr(finalized, _time_field, converted)
+            setattr(finalized, _time_field, _resolved_time(_time_field, value, 0))
     if finalized.source.type is None:
         finalized.source.type = "measurement"
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
@@ -4106,7 +4139,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         "material_spec": spec,
         "provenance": {
             "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
         },
     }
     if draft.source_url is not None:
@@ -4161,7 +4194,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
         "material": material,
         "provenance": {
             "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
         },
     }
     if draft.source_url is not None:
@@ -4460,7 +4493,7 @@ def _record_from_component_spec(
     record: dict[str, Any] = {
         "schema_version": "0.1.0",
         f"{family}_spec": spec,
-        "provenance": {"source_type": source_type, "retrieved_at": _to_unix_time(retrieved_at) or _now_unix()},
+        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
@@ -4526,7 +4559,7 @@ def _record_from_component_instance(
     record: dict[str, Any] = {
         "schema_version": "0.1.0",
         family: instance,
-        "provenance": {"source_type": source_type, "retrieved_at": _to_unix_time(retrieved_at) or _now_unix()},
+        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
