@@ -172,6 +172,87 @@ def test_login_rejects_empty_key(tmp_path: Path) -> None:
         ws.login(api_key="")
 
 
+# ── login() must not leak identity through process-global state (3.7) ─────────
+
+def test_login_does_not_mutate_process_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+    import urllib.request
+
+    monkeypatch.setattr(
+        urllib.request,
+        "urlopen",
+        _fake_urlopen_returning({"publisher_id": "alice-lab", "workspace_id": "alice-workspace"}),
+    )
+    ws = AuthoringWorkspace(root=tmp_path, registry_url="https://registry.example")
+    ws.login(api_key="key-abc")
+
+    for var in ("BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID"):
+        assert var not in os.environ, f"login() must not set {var} process-wide"
+    # ...but this instance sees its own identity.
+    assert ws._credential("BATTINFO_API_KEY") == "key-abc"
+    assert ws._credential("BATTINFO_WORKSPACE_ID") == "alice-workspace"
+
+
+def test_login_identity_is_instance_scoped(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import urllib.request
+
+    monkeypatch.setattr(
+        urllib.request,
+        "urlopen",
+        _fake_urlopen_returning({"publisher_id": "alice-lab", "workspace_id": "alice-workspace"}),
+    )
+    ws_a = AuthoringWorkspace(root=tmp_path / "a", registry_url="https://registry.example")
+    ws_a.login(api_key="key-abc")
+
+    ws_b = AuthoringWorkspace(root=tmp_path / "b", registry_url="https://registry.example")
+    assert ws_b._credential("BATTINFO_WORKSPACE_ID") is None, (
+        "a second workspace must not inherit another instance's login"
+    )
+    assert ws_b.whoami() == {}
+
+
+def test_credential_session_wins_over_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import urllib.request
+
+    monkeypatch.setenv("BATTINFO_WORKSPACE_ID", "env-workspace")
+    ws = AuthoringWorkspace(root=tmp_path, registry_url="https://registry.example")
+    assert ws._credential("BATTINFO_WORKSPACE_ID") == "env-workspace"  # env fallback
+
+    monkeypatch.setattr(
+        urllib.request,
+        "urlopen",
+        _fake_urlopen_returning({"publisher_id": "alice-lab", "workspace_id": "alice-workspace"}),
+    )
+    ws.login(api_key="key-abc")
+    assert ws._credential("BATTINFO_WORKSPACE_ID") == "alice-workspace"  # session wins
+
+
+def test_login_identity_survives_into_a_new_session_via_credentials_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import urllib.request
+
+    monkeypatch.setattr(
+        urllib.request,
+        "urlopen",
+        _fake_urlopen_returning({"publisher_id": "alice-lab", "workspace_id": "alice-workspace"}),
+    )
+    ws = AuthoringWorkspace(root=tmp_path, registry_url="https://registry.example")
+    ws.login(api_key="key-abc")
+
+    # A fresh instance on the same root (a "new session") loads the persisted
+    # .battinfo/credentials file — no env mutation required for continuity.
+    ws_next = AuthoringWorkspace(root=tmp_path, registry_url="https://registry.example")
+    assert ws_next._credential("BATTINFO_API_KEY") == "key-abc"
+    assert ws_next._credential("BATTINFO_WORKSPACE_ID") == "alice-workspace"
+
+
 # ── discovery helpers (T5.2/T5.3) — must not raise ─────────────────────────────
 
 def test_commands_runs(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
