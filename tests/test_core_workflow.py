@@ -8,7 +8,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
-    DatasetInput,
     build_index,
     publish_batch,
     save_cell_instance,
@@ -16,7 +15,7 @@ from battinfo.api import (
     save_dataset,
     save_test,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Test
+from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
 
 
 def test_core_workflow_end_to_end(tmp_path: Path) -> None:
@@ -60,7 +59,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
         validation_policy="strict",
     )
     dataset = save_dataset(
-        DatasetInput(
+        Dataset(
             uid="8c1h8pk68034vav6",
             title="MN1500 dataset",
             source_type="measurement",

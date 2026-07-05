@@ -2387,6 +2387,8 @@ class Dataset(BundleJsonModel):
 
     kind: str = "Dataset"
     id: str | None = None
+    # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
+    uid: str | None = Field(default=None, exclude=True, repr=False)
     identifier: Any = None
     name: str | None = None
     description: str | None = None
@@ -2421,6 +2423,8 @@ class Dataset(BundleJsonModel):
     checksum: ChecksumInfo = Field(default_factory=ChecksumInfo)
     cell_instance_id: str | None = None
     test_id: str | None = None
+    related_cell_ids: list[str] = Field(default_factory=list)
+    related_test_ids: list[str] = Field(default_factory=list)
     test: Test | None = Field(default=None, exclude=True, repr=False)
     cell: CellInstance | None = Field(default=None, exclude=True, repr=False)
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
@@ -2429,6 +2433,30 @@ class Dataset(BundleJsonModel):
     def __init__(self, path: str | Path | None = None, /, **data: Any) -> None:
         if path is not None and "dataset_path" not in data and "path" not in data:
             data["path"] = str(path)
+        # Absorb the flat authoring/input shape (formerly DatasetInput).
+        if "title" in data and "name" not in data:
+            data["name"] = data.pop("title")
+        if "format" in data and "data_format" not in data:
+            data["data_format"] = data.pop("format")
+        if "citation_list" in data and "citations" not in data:
+            data["citations"] = data.pop("citation_list")
+        _ck_alg = data.pop("checksum_algorithm", None)
+        _ck_val = data.pop("checksum_value", None)
+        if (_ck_alg is not None or _ck_val is not None) and "checksum" not in data:
+            data["checksum"] = {"algorithm": _ck_alg, "value": _ck_val}
+        if "notes" in data and "comment" not in data:
+            data["comment"] = data.pop("notes")
+        # The dataset citations list aliases "citation"; the provenance citation is a
+        # different concept, so route a flat ``citation`` into source before the alias
+        # can capture it for the citations list.
+        _flat_provenance = {
+            "source_type": "type", "source_name": "name", "source_file": "file",
+            "source_url": "url", "citation": "citation", "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at", "workflow_version": "workflow_version",
+            "curated_by": "curated_by",
+        }
+        if any(key in data for key in _flat_provenance) and "source" not in data:
+            data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
         super().__init__(**data)
 
     @field_validator("identifier", mode="before")
@@ -2701,8 +2729,11 @@ class Dataset(BundleJsonModel):
             dataset_obj["conditions_of_access"] = self.conditions_of_access
         if self.in_language is not None:
             dataset_obj["in_language"] = self.in_language
-        if self.access_url is not None:
-            dataset_obj["access_url"] = self.access_url
+        # access_url is required by the dataset schema; always emit it, falling back to
+        # the provenance URL and finally a stable placeholder derived from the id.
+        dataset_obj["access_url"] = (
+            self.access_url or self.source.url or f"https://example.org/dataset/{_id_tail(self.id)}"
+        )
         if self.created_at is not None:
             dataset_obj["created_at"] = self.created_at
         if self.modified_at is not None:
@@ -2717,11 +2748,12 @@ class Dataset(BundleJsonModel):
             dataset_obj["temporal_coverage"] = self.temporal_coverage
         if self.spatial_coverage is not None:
             dataset_obj["spatial_coverage"] = self.spatial_coverage
-        about: list[str] = []
-        if self.cell_instance_id is not None:
-            about.append(self.cell_instance_id)
-        if self.test_id is not None:
-            about.append(self.test_id)
+        about = list(dict.fromkeys([
+            *self.related_cell_ids,
+            *([self.cell_instance_id] if self.cell_instance_id is not None else []),
+            *self.related_test_ids,
+            *([self.test_id] if self.test_id is not None else []),
+        ]))
         if about:
             dataset_obj["about"] = about
         if self.is_based_on:
@@ -2733,13 +2765,14 @@ class Dataset(BundleJsonModel):
         if self.distributions:
             dataset_obj["distributions"] = copy.deepcopy(self.distributions)
         elif self.download_url is not None or self.data_format is not None or self.checksum.value is not None:
-            dist: dict[str, Any] = {}
-            if self.download_url is not None:
-                dist["content_url"] = self.download_url
-            elif self.access_url is not None:
-                dist["content_url"] = self.access_url
-            if self.data_format is not None:
-                dist["encoding_format"] = self.data_format
+            dist: dict[str, Any] = {
+                "type": "DataDownload",
+                "content_url": (
+                    self.download_url or self.access_url or self.source.url
+                    or f"https://example.org/dataset/{_id_tail(self.id)}/download"
+                ),
+                "encoding_format": self.data_format or "application/octet-stream",
+            }
             if self.checksum.value is not None:
                 dist["checksum"] = {
                     "algorithm": self.checksum.algorithm,

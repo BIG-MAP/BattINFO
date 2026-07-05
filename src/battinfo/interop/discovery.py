@@ -41,7 +41,6 @@ from typing import Any
 
 from battinfo.api import (
     UID_ALPHABET,
-    DatasetInput,
     _normalized_dashed_uid,
     _record_from_cell_instance,
     _record_from_cell_spec,
@@ -51,7 +50,7 @@ from battinfo.api import (
     create_component_spec,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
+from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
 from battinfo.interop.protocols import _num
 
 PathLike = str | Path
@@ -332,7 +331,7 @@ class _Builder:
             )))
             test_id = test["test"]["id"]
             if dataset_file is not None:
-                dataset = self._check(_record_from_dataset(DatasetInput(
+                dataset = self._check(_record_from_dataset(Dataset(
                     uid=_uid("discovery", "dataset", seed),
                     title=f"{model_name} cycling data",
                     source_type="measurement",
