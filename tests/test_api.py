@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import (
-    TestProtocolInput,
     build_cell_spec_library_rdf,
     build_curated_cell_spec_submission,
     build_index,
@@ -45,7 +44,7 @@ from battinfo.api import (
     template_test_spec_draft,
     validate_staging_cell_spec,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
 from battinfo.validate import validate_references_report
 
 
@@ -613,7 +612,7 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
         mode="upsert",
     )
     protocol = save_test_spec(
-        TestProtocolInput(
+        TestSpec(
             uid="8r2m4v6k9p3t7n5x",
             name="1C Cycle Life at 25 C",
             kind="cycling",

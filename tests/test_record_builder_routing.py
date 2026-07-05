@@ -15,9 +15,10 @@ from battinfo.api import (
     _record_from_cell_instance,
     _record_from_dataset,
     _record_from_test,
+    _record_from_test_protocol,
     _to_unix_time,
 )
-from battinfo.bundle import CellInstance, Dataset, Test
+from battinfo.bundle import CellInstance, Dataset, Test, TestSpec
 
 _SPEC = "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r"
 _DS = "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
@@ -124,3 +125,31 @@ def test_dataset_mints_id_from_uid() -> None:
     rec = _record_from_dataset(Dataset(uid="8c1h-8pk6-8034-vav6", title="X", source_type="other"))
     assert rec["dataset"]["id"] == _DS_IRI
     assert rec["dataset"]["short_id"] == "8c1h8p"
+
+
+_SPEC_IRI = "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+
+
+def test_test_spec_parses_experiment_into_method_and_facets() -> None:
+    # The PyBaMM-style experiment[] authoring input is parsed by the model into the canonical
+    # method[] and rolled up into facets — via the model, not a parallel hand-builder.
+    rec = _record_from_test_protocol(TestSpec(
+        id=_SPEC_IRI, name="CC cycling", kind="cycling",
+        experiment=["Discharge at C/10 until 2.5 V", "Charge at C/10 until 4.2 V"], cycles=3,
+        conditions={"temperature": {"value": 25, "unit": "degC"}},
+        source_type="manual",
+    ))
+    assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
+    assert rec["test_spec"]["kind"] == "cycling"
+    assert rec["method"], "experiment[] should parse into a non-empty method[]"
+    assert 0.1 in rec["facets"]["c_rates"]
+    assert rec["facets"]["voltage_window_V"] == [2.5, 4.2]
+    assert rec["provenance"]["source_type"] == "manual"
+
+
+def test_test_spec_defaults_provenance_and_mints_id() -> None:
+    rec = _record_from_test_protocol(TestSpec(uid="7d9k-2m4p-8t3x-6nq5", name="X", kind="other"))
+    assert rec["test_spec"]["id"] == _SPEC_IRI
+    assert rec["test_spec"]["short_id"] == "7d9k2m"
+    assert rec["provenance"]["source_type"] == "manual"  # dataset/test-spec default
+    assert isinstance(rec["provenance"]["retrieved_at"], int)  # defaulted to now

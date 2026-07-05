@@ -8,9 +8,6 @@ import typer
 
 from battinfo._jsonio import write_json as _write_json_file
 from battinfo.api import (
-    TestSpecInput,
-)
-from battinfo.api import (
     build_cell_spec_library_rdf as api_build_cell_spec_library_rdf,
 )
 from battinfo.api import (
@@ -121,7 +118,7 @@ from battinfo.api import (
 from battinfo.api import (
     validate_staging_datasets as api_validate_staging_datasets,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
@@ -2094,11 +2091,11 @@ def save_test_spec(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: TestSpecInput | dict[str, Any] | Path = input_path
+            draft_obj: TestSpec | dict[str, Any] | Path = input_path
         else:
             if not name:
                 raise ValueError("--name is required when --input is not provided.")
-            draft_obj = TestSpecInput(
+            draft_obj = TestSpec(
                 uid=uid,
                 name=name,
                 kind=kind,  # type: ignore[arg-type]
