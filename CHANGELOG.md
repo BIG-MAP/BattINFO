@@ -7,6 +7,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (breaking — authoring API)
+
+- The per-record-type input classes are retired: the pydantic models are now both the
+  canonical source of truth **and** the authoring input. Construct the model directly with the
+  same field names you passed before and hand it to the matching `save_*` function.
+  - `CellSpecificationInput` → `CellSpecification`
+  - `CellInstanceInput` → `CellInstance`
+  - `TestInput` → `Test`
+  - `DatasetInput` → `Dataset`
+  - `TestSpecInput` (and the `TestProtocolInput` alias) → `TestSpec`
+- Each model accepts the flat authoring shape directly (e.g. `model_name`, `notes`,
+  `source_type`, PyBaMM-style `experiment=[...]`) and normalizes it internally, so most call
+  sites change only the class name.
+
+### Added
+
+- A dataset can now relate to multiple cells and tests via `related_cell_ids` /
+  `related_test_ids` (previously a single cell/test reference silently dropped the extras).
+- Test-spec artifacts are validated as structured `Artifact` objects on save (previously passed
+  through unchecked), so a malformed artifact fails fast.
+
+### Fixed
+
+- Timezone-naive timestamps (a bare ISO date such as `"2022-01-15"`, or a time with no offset)
+  are now anchored to UTC before conversion. Saved record timestamps
+  (`manufactured_at` / `started_at` / `ended_at` / `created_at`) were previously interpreted in
+  the authoring machine's local timezone, making the same input non-reproducible across machines;
+  an explicit offset is still respected.
+- Datasets always emit the schema-required `access_url` (falling back to the provenance URL, then
+  a stable id-derived value), so a dataset built directly from the model can no longer serialize
+  into a schema-invalid record.
+
 ## [0.7.0] — 2026-06-19
 
 First publication of the `battinfo` **Python package** (library + CLI) to PyPI.
