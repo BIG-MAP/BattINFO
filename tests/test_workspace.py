@@ -211,8 +211,9 @@ def test_workspace_loads_cell_spec_from_authoring_json_and_canonizes_on_save(tmp
     assert record["properties"]["energy_density"] == {"value": 250.0, "unit": "Wh/L"}
     assert record["properties"]["specific_power"] == {"value": 900.0, "unit": "W/kg"}
     assert record["properties"]["power_density"] == {"value": 1700.0, "unit": "W/L"}
-    assert record["provenance"]["source_type"] == "datasheet"
-    assert record["provenance"]["source_file"] == "manual.json"
+    assert record["provenance"]["source_type"] == "datasheet"  # schema-required category default
+    # Optional source_file is absent, not the fabricated "manual.json" placeholder.
+    assert "source_file" not in record["provenance"]
     assert isinstance(record["provenance"]["retrieved_at"], int)
 
 

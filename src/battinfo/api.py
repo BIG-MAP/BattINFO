@@ -4,10 +4,11 @@ import difflib
 import functools
 import html
 import json
+import math
 import re
 import secrets
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping, Sequence
 from urllib.error import HTTPError, URLError
@@ -18,7 +19,15 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test, TestSpec
+from battinfo.bundle import (
+    SCHEMA_VERSION,
+    BatteryTestType,
+    CellInstance,
+    CellSpecification,
+    Dataset,
+    Test,
+    TestSpec,
+)
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
@@ -266,14 +275,19 @@ def template_dataset(
     uid: str | None = TEMPLATE_UID,
     related_cell_ids: list[str] | None = None,
     related_test_ids: list[str] | None = None,
+    access_url: str = "https://example.org/replace-with-your-dataset-url",
 ) -> dict[str, Any]:
-    """Build a starter canonical dataset document for save workflows."""
+    """Build a starter canonical dataset document for save workflows.
+
+    ``access_url`` is a visible example placeholder (like the template's title) — replace
+    it with the landing page or download URL where the data actually lives."""
     draft = Dataset(
         uid=uid,
         title=title,
         source_type=source_type,
         related_cell_ids=related_cell_ids or [TEMPLATE_CELL_ID],
         related_test_ids=related_test_ids or [],
+        access_url=access_url,
         notes=["Template-generated record. Fill in URL/license/distribution details before saving."],
     )
     return _record_from_dataset(draft)
@@ -389,16 +403,44 @@ def _now_unix() -> int:
 
 
 def _to_unix_time(value: object) -> int | None:
+    """Best-effort conversion to Unix seconds; ``None`` for anything unconvertible.
+
+    Never raises — call sites decide whether an unconvertible *present* value is an
+    error (see ``_resolved_time``).
+    """
+    if isinstance(value, bool):
+        # bool is an int subclass; True/False are never meaningful timestamps.
+        return None
     if isinstance(value, int):
         return value
     if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
         return int(value)
+    if isinstance(value, datetime):
+        # Anchor naive datetimes to UTC (same rationale as for strings below).
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return int(value.timestamp())
+    if isinstance(value, date):
+        return int(datetime(value.year, value.month, value.day, tzinfo=timezone.utc).timestamp())
     if isinstance(value, str):
         txt = value.strip()
         if not txt:
             return None
         if txt.isdigit():
-            return int(txt)
+            # Digit runs shorter than 9 chars are ambiguous: "20240101" reads as a
+            # calendar date, not epoch second 20,240,101. Require 9+ digits (i.e.
+            # timestamps from 1973 onward) for a bare digit string to count as Unix
+            # seconds; use an int, an ISO string, or a datetime for anything else.
+            # str.isdigit() also accepts non-ASCII digits ("²") that int() rejects,
+            # hence the try/except.
+            if len(txt) < 9:
+                return None
+            try:
+                return int(txt)
+            except ValueError:
+                return None
         try:
             parsed = datetime.fromisoformat(txt.replace("Z", "+00:00"))
         except ValueError:
@@ -411,6 +453,28 @@ def _to_unix_time(value: object) -> int | None:
             parsed = parsed.replace(tzinfo=timezone.utc)
         return int(parsed.timestamp())
     return None
+
+
+def _resolved_time(field_name: str, value: object, default: int) -> int:
+    """Save-time canonicalization of an optional timestamp field: an absent value takes
+    *default*; a present one converts to Unix seconds, raising (never silently substituting
+    the default) when it cannot be parsed. Epoch zero is a valid timestamp."""
+    if value is None:
+        return default
+    converted = _to_unix_time(value)
+    if converted is None:
+        raise ValueError(
+            f"{field_name} must be a Unix timestamp (int), ISO 8601 datetime string, "
+            f"or datetime/date object; got {value!r}."
+        )
+    return converted
+
+
+def _resolved_retrieved_at(value: object) -> int:
+    """Save-time canonicalization of provenance ``retrieved_at``: default a missing value to
+    now; convert a provided one to Unix seconds, raising (never silently substituting the
+    current time) when it cannot be parsed."""
+    return _resolved_time("retrieved_at", value, _now_unix())
 
 
 def _as_path(path: PathLike) -> Path:
@@ -735,11 +799,11 @@ def _staging_cell_spec_input(
                 if isinstance(product.get("datasheet_revision") or product.get("datasheet_revision"), str)
                 else None,
                 specs=dict(record_payload.get("properties") or {}),
-                source_type=str(provenance.get("source_type") or "datasheet") if isinstance(provenance, Mapping) else "datasheet",
+                source_type=str(provenance.get("source_type")) if isinstance(provenance, Mapping) and provenance.get("source_type") else None,
                 source_file=(
                     str(provenance.get("source_file"))
                     if isinstance(provenance, Mapping) and isinstance(provenance.get("source_file"), str)
-                    else source_path.name if source_path is not None else "manual.json"
+                    else source_path.name if source_path is not None else None
                 ),
                 source_url=provenance.get("source_url") if isinstance(provenance, Mapping) and isinstance(provenance.get("source_url"), str) else None,
                 citation=provenance.get("citation") if isinstance(provenance, Mapping) and isinstance(provenance.get("citation"), str) else None,
@@ -794,11 +858,11 @@ def _staging_cell_spec_input(
             year=parsed_year,
             datasheet_revision=payload.get("datasheet_revision") if isinstance(payload.get("datasheet_revision"), str) else None,
             specs=dict(specs),
-            source_type=str(payload.get("source_type", provenance.get("source_type")) or "datasheet"),
+            source_type=str(payload.get("source_type", provenance.get("source_type")) or "") or None,
             source_file=(
                 str(payload.get("source_file", provenance.get("source_file")))
                 if isinstance(payload.get("source_file", provenance.get("source_file")), str)
-                else source_path.name if source_path is not None else "manual.json"
+                else source_path.name if source_path is not None else None
             ),
             source_url=payload.get("source_url", provenance.get("source_url"))
             if isinstance(payload.get("source_url", provenance.get("source_url")), str)
@@ -1249,7 +1313,7 @@ def build_curated_cell_spec_submission(
         }
 
     return {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         "kind": "BattinfoSubmission",
         "submission_mode": "resource",
         "generated_at": generated_at,
@@ -1515,10 +1579,12 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
     if draft.get("specification_comment"):
         specification["comment"] = list(draft["specification_comment"])
 
+    # source_file/source_type are recorded only when provided — no fabricated placeholders.
     provenance: dict[str, Any] = {
-        "source_file": draft.get("source_file", "manual.json"),
-        "retrieved_at": _to_unix_time(draft.get("retrieved_at")) or _now_unix(),
+        "retrieved_at": _resolved_retrieved_at(draft.get("retrieved_at")),
     }
+    if draft.get("source_file") is not None:
+        provenance["source_file"] = draft["source_file"]
     if draft.get("source_type"):
         provenance["source_type"] = draft["source_type"]
     if draft.get("source_name") is not None:
@@ -2214,7 +2280,7 @@ def create_cell_instance(
     instance_id = f"https://w3id.org/battinfo/cell/{dashed_uid}"
 
     out: dict[str, Any] = {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         "cell_instance": {
             "id": instance_id,
             "cell_spec_id": resolved_cell_spec_id,
@@ -2327,15 +2393,15 @@ def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
         entity_id = spec.id
     else:
         entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(spec.uid)}"
-    # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the caller.
+    # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the
+    # caller. source_type is schema-required, so an unprovided one takes the documented
+    # category default; source_file is optional and is recorded only when the author provided
+    # it — a fabricated placeholder ("manual.json") would masquerade as real provenance.
     finalized = spec.model_copy(deep=True)
     finalized.id = entity_id
     if finalized.source.type is None:
         finalized.source.type = "datasheet"
-    if finalized.source.file is None:
-        finalized.source.file = "manual.json"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2353,18 +2419,16 @@ def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
         entity_id = instance.id
     else:
         entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(instance.uid)}"
-    # Finalize a copy (mint the id, convert manufactured_at, apply save-time provenance defaults).
+    # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = instance.model_copy(deep=True)
     finalized.id = entity_id
-    if finalized.manufactured_at is not None:
-        converted = _to_unix_time(finalized.manufactured_at)
-        if converted is None:
-            raise ValueError("manufactured_at must be a Unix timestamp or ISO datetime string.")
-        finalized.manufactured_at = converted
+    for _time_field in ("manufactured_at", "expires_at"):
+        value = getattr(finalized, _time_field)
+        if value is not None:
+            setattr(finalized, _time_field, _resolved_time(_time_field, value, 0))
     if finalized.source.type is None:
-        finalized.source.type = "measurement"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+        finalized.source.type = "measurement"  # schema-required; documented category default
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2388,16 +2452,15 @@ def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
     finalized = dataset.model_copy(deep=True)
     finalized.id = entity_id
     # Save-time canonicalization: dates default to now and convert to Unix; provenance
-    # gets the dataset default source type and a retrieval timestamp. The model's
-    # to_record() handles the schema.org field mapping and distribution assembly.
-    created = _to_unix_time(finalized.created_at) or _now_unix()
+    # gets the schema-required source_type category default and a retrieval timestamp. The
+    # model's to_record() handles the schema.org field mapping and distribution assembly.
+    created = _resolved_time("created_at", finalized.created_at, _now_unix())
     finalized.created_at = created
-    finalized.modified_at = _to_unix_time(finalized.modified_at) or created
-    finalized.published_at = _to_unix_time(finalized.published_at) or created
+    finalized.modified_at = _resolved_time("modified_at", finalized.modified_at, created)
+    finalized.published_at = _resolved_time("published_at", finalized.published_at, created)
     if finalized.source.type is None:
         finalized.source.type = "other"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2423,14 +2486,10 @@ def _record_from_test(test: Test) -> dict[str, Any]:
     for _time_field in ("started_at", "ended_at"):
         value = getattr(finalized, _time_field)
         if value is not None:
-            converted = _to_unix_time(value)
-            if converted is None:
-                raise ValueError(f"{_time_field} must be a Unix timestamp or ISO datetime string.")
-            setattr(finalized, _time_field, converted)
+            setattr(finalized, _time_field, _resolved_time(_time_field, value, 0))
     if finalized.source.type is None:
-        finalized.source.type = "measurement"
-    if finalized.source.retrieved_at is None:
-        finalized.source.retrieved_at = _now_unix()
+        finalized.source.type = "measurement"  # schema-required; documented category default
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -2448,8 +2507,8 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
     finalized = spec.model_copy(deep=True)
     finalized.id = entity_id
     if finalized.source.type is None:
-        finalized.source.type = "manual"
-    finalized.source.retrieved_at = _to_unix_time(finalized.source.retrieved_at) or _now_unix()
+        finalized.source.type = "manual"  # schema-required; documented category default
+    finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
     return finalized.to_record()
 
 
@@ -3990,7 +4049,7 @@ class MaterialSpecInput(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "0.1.0"
+    schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
     name: str
@@ -4018,7 +4077,7 @@ class MaterialInput(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "0.1.0"
+    schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
     material_spec_id: str
@@ -4096,7 +4155,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         "material_spec": spec,
         "provenance": {
             "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
         },
     }
     if draft.source_url is not None:
@@ -4151,7 +4210,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
         "material": material,
         "provenance": {
             "source_type": draft.source_type,
-            "retrieved_at": _to_unix_time(draft.retrieved_at) or _now_unix(),
+            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
         },
     }
     if draft.source_url is not None:
@@ -4448,9 +4507,9 @@ def _record_from_component_spec(
         spec["product_id"] = product_id
 
     record: dict[str, Any] = {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         f"{family}_spec": spec,
-        "provenance": {"source_type": source_type, "retrieved_at": _to_unix_time(retrieved_at) or _now_unix()},
+        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
@@ -4514,9 +4573,9 @@ def _record_from_component_instance(
         instance["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
 
     record: dict[str, Any] = {
-        "schema_version": "0.1.0",
+        "schema_version": SCHEMA_VERSION,
         family: instance,
-        "provenance": {"source_type": source_type, "retrieved_at": _to_unix_time(retrieved_at) or _now_unix()},
+        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url

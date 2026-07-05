@@ -7,6 +7,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (record format)
+
+- Every emitted record now carries `schema_version: "0.2.0"`, stamped from a single
+  `battinfo.bundle.SCHEMA_VERSION` constant used by the pydantic models, the dict-path
+  record builders, and the interop importers. This deliberately supersedes **both** prior
+  values: the original `"0.1.0"` (dict-path cell spec/material/component records) and the
+  `"1.0.0"` that model-path records had silently picked up during the input-model
+  consolidation. Reading a record preserves its stored version; only newly emitted records
+  get the new stamp. Downstream consumers should accept `0.1.0`, `1.0.0`, and `0.2.0`.
+
+### Changed (stop fabricating provenance and URLs)
+
+- Records no longer invent `source_file: "manual.json"`: the optional provenance
+  `source_file` is now absent unless you (or a real source path) provided it. The CLI
+  `--source-file` options default to unset accordingly.
+- Serializing a dataset without any URL now raises an actionable error naming
+  `access_url` instead of emitting a fabricated `https://example.org/dataset/...`
+  placeholder (the schema requires `dcat:accessURL`; a provenance `source_url` also
+  satisfies it, and workspace/publication flows still derive it from the dataset path).
+  Synthesized distributions likewise reuse real URLs only. Flow-specific handling:
+  - the Zenodo package flow stamps the documented `https://zenodo.org/records/ZENODO_RECORD_ID`
+    placeholder that `patch_zenodo_urls()` rewrites after upload (the old example.org
+    fallback was never patched, publishing fake URLs in harvested bundles);
+  - the tolerant BDC importer falls back source_urls → download_urls → a truthful
+    `urn:battery-data-commons:record:{id}` catalog URN (with a warning);
+  - the Discovery .eln importer uses the dataset's real archive URL;
+  - `template_dataset()` exposes `access_url` as a visible replace-me example parameter.
+- `source_type` remains schema-required, so save paths still apply the documented
+  category defaults (cell spec: `datasheet`, instance/test/ws-dataset: `measurement`,
+  dataset dict-path: `other`, test spec: `manual`) when unset — these are deliberate,
+  documented defaults, no longer accompanied by a fake source file.
+
 ### Changed (breaking — authoring API)
 
 - The per-record-type input classes are retired: the pydantic models are now both the
@@ -30,6 +62,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Dataset `creators`/`funders`/`publisher` entries now preserve `orcid` and classify agents
+  carrying an ORCID or given/family name as `Person` (the retired hand-builder passed these
+  dicts through verbatim; the model's canonicalizer was silently dropping the ORCID and
+  defaulting people to `Organization`).
+- `CellInstance.expires_at` is converted to a Unix timestamp at save time, exactly like
+  `manufactured_at` (ISO strings previously reached stored records unconverted).
+- Provenance `retrieved_at` now accepts ISO datetime strings on every record builder (only the
+  test-spec builder converted them before), preserves epoch zero, and raises on an unparseable
+  value instead of silently substituting the current time.
+- A flat string `citation=` kwarg on `Dataset` is routed to provenance even when an explicit
+  `source=` is also given (it previously leaked into the bibliographic `citations` list); an
+  already-set `source.citation` wins. List/dict citation values remain bibliographic.
 - Timezone-naive timestamps (a bare ISO date such as `"2022-01-15"`, or a time with no offset)
   are now anchored to UTC before conversion. Saved record timestamps
   (`manufactured_at` / `started_at` / `ended_at` / `created_at`) were previously interpreted in

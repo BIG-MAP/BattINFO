@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import PublishResult
+from battinfo.bundle import SCHEMA_VERSION
 from battinfo.cli import app
 
 
@@ -634,7 +635,7 @@ def test_init_defaults_to_battery_descriptor_scaffold(tmp_path: Path) -> None:
     scaffold_path = workspace_dir / "battinfo.json"
     assert scaffold_path.exists()
     scaffold = json.loads(scaffold_path.read_text(encoding="utf-8"))
-    assert scaffold["schema_version"] == "1.0.0"
+    assert scaffold["schema_version"] == SCHEMA_VERSION
     assert scaffold["cell_spec"]["id"] == "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
     assert scaffold["cell_spec"]["manufacturer"]["name"] == "ExampleManufacturer"
 
@@ -879,6 +880,8 @@ def test_save_cli_flow_json(tmp_path: Path) -> None:
             "dataset",
             "--title",
             "MN1500 CLI Dataset",
+            "--access-url",
+            "https://data.example.com/mn1500-cli",
             "--source-type",
             "measurement",
             "--uid",

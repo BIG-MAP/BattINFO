@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd
 
+from battinfo.bundle import SCHEMA_VERSION
 from battinfo.interop.battdat import (
     BattdatImportResult,
     _extract_timestamps,
@@ -144,7 +145,7 @@ def test_from_battdat_dataframe_produces_test_record() -> None:
     df = _make_cycling_df()
     result = from_battdat(df, cell_id=CELL_ID)
     assert isinstance(result, BattdatImportResult)
-    assert result.test_record["schema_version"] == "0.1.0"
+    assert result.test_record["schema_version"] == SCHEMA_VERSION
     test = result.test_record["test"]
     assert test["cell_id"] == CELL_ID
     assert test["kind"] == "cycling"

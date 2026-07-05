@@ -7,6 +7,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -107,22 +109,24 @@ def test_dataset_relates_to_multiple_tests_losslessly() -> None:
     # (the single cell_instance_id/test_id shape would have dropped the extras).
     rec = _record_from_dataset(Dataset(
         id=_DS_IRI, title="Multi", related_cell_ids=[_CELL], related_test_ids=[_TEST, _TEST2],
-        source_type="lab",
+        source_type="lab", access_url="https://example.org/datasets/multi",
     ))
     assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
     assert rec["dataset"]["about"] == [_CELL, _TEST, _TEST2]
 
 
-def test_dataset_always_emits_required_access_url() -> None:
-    # access_url is schema-required; the model fills it even when unset so an object-first
-    # dataset is valid on its own (previously only the DTO save path guaranteed this).
-    rec = _record_from_dataset(Dataset(id=_DS_IRI, title="Bare", source_type="other"))
-    assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
-    assert rec["dataset"]["access_url"]  # present and non-empty
+def test_dataset_without_access_url_fails_with_the_fix() -> None:
+    # access_url is schema-required; fabricating an example.org placeholder would publish
+    # fake data, so serialization fails with an error naming the field to set.
+    with pytest.raises(ValueError, match="access_url"):
+        _record_from_dataset(Dataset(id=_DS_IRI, title="Bare", source_type="other"))
 
 
 def test_dataset_mints_id_from_uid() -> None:
-    rec = _record_from_dataset(Dataset(uid="8c1h-8pk6-8034-vav6", title="X", source_type="other"))
+    rec = _record_from_dataset(Dataset(
+        uid="8c1h-8pk6-8034-vav6", title="X", source_type="other",
+        access_url="https://example.org/datasets/x",
+    ))
     assert rec["dataset"]["id"] == _DS_IRI
     assert rec["dataset"]["short_id"] == "8c1h8p"
 
@@ -151,5 +155,5 @@ def test_test_spec_defaults_provenance_and_mints_id() -> None:
     rec = _record_from_test_protocol(TestSpec(uid="7d9k-2m4p-8t3x-6nq5", name="X", kind="other"))
     assert rec["test_spec"]["id"] == _SPEC_IRI
     assert rec["test_spec"]["short_id"] == "7d9k2m"
-    assert rec["provenance"]["source_type"] == "manual"  # dataset/test-spec default
+    assert rec["provenance"]["source_type"] == "manual"  # schema-required category default
     assert isinstance(rec["provenance"]["retrieved_at"], int)  # defaulted to now

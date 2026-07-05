@@ -63,6 +63,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
             uid="8c1h8pk68034vav6",
             title="MN1500 dataset",
             source_type="measurement",
+            access_url="https://data.example.com/mn1500",
             format="application/x-hdf5",
             related_cell_ids=[cell_instance["id"]],
             related_test_ids=[test["id"]],

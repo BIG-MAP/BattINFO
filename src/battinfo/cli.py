@@ -118,7 +118,7 @@ from battinfo.api import (
 from battinfo.api import (
     validate_staging_datasets as api_validate_staging_datasets,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
+from battinfo.bundle import SCHEMA_VERSION, CellInstance, CellSpecification, Dataset, Test, TestSpec
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
@@ -275,7 +275,7 @@ def _load_cell_spec_input(path: Path) -> CellSpecification:
 def _init_example_document(profile: str) -> dict[str, Any]:
     if profile == "cell-spec":
         return {
-            "schema_version": "1.0.0",
+            "schema_version": SCHEMA_VERSION,
             "cell_spec": {
                 "id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
                 "name": "ExampleManufacturer MODEL-001",
@@ -1339,7 +1339,7 @@ def library_save_cell_spec(
     size_code: str | None = typer.Option(None, help="Optional size code."),
     source_type: str = typer.Option("datasheet", help="Source type label."),
     source_name: str | None = typer.Option(None, help="Optional source name."),
-    source_file: str = typer.Option("manual.json", help="Source file label for provenance."),
+    source_file: str | None = typer.Option(None, help="Source file label for provenance (recorded only when given)."),
     source_url: str | None = typer.Option(None, help="Optional source URL."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
     property_path: Path | None = typer.Option(
@@ -1854,7 +1854,7 @@ def save_cell_spec(
     size_code: str | None = typer.Option(None, help="Optional size code."),
     country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin."),
     year: int | None = typer.Option(None, help="Optional model or release year."),
-    source_file: str = typer.Option("manual.json", help="Source file label for provenance."),
+    source_file: str | None = typer.Option(None, help="Source file label for provenance (recorded only when given)."),
     source_url: str | None = typer.Option(None, help="Optional source URL."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
     specs_path: Path | None = typer.Option(

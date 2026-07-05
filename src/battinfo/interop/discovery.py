@@ -335,6 +335,7 @@ class _Builder:
                     uid=_uid("discovery", "dataset", seed),
                     title=f"{model_name} cycling data",
                     source_type="measurement",
+                    access_url=dataset_file,
                     related_cell_ids=[cell_uid],
                     related_test_ids=[test_id],
                     distribution=[{

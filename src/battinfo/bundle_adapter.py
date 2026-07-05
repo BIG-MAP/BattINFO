@@ -285,8 +285,10 @@ def schema_cell_spec_to_record_dict(ct_gen: "GenCellSpecification") -> dict[str,
         product["size_code"] = ct_gen.ct_size_code
     if ct_gen.ct_iec_code is not None:
         product["iec_code"] = ct_gen.ct_iec_code
+    from battinfo.bundle import SCHEMA_VERSION  # noqa: PLC0415
+
     return {
-        "schema_version": "1.0.0",
+        "schema_version": SCHEMA_VERSION,
         "cell_spec": product,
         "properties": specset_to_specs(ct_gen.ct_specs),
         "provenance": {},

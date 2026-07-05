@@ -15,6 +15,14 @@ from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
 
+# Single source of truth for the ``schema_version`` stamped into every record this
+# library emits (cell spec, cell instance, test, test spec, dataset, material, component).
+# History: records originally said "0.1.0"; the 2026-07 input-model consolidation
+# accidentally forked dataset records to "1.0.0". "0.2.0" deliberately supersedes both —
+# bump it here (and CHANGELOG the record-shape change) whenever the emitted record shape
+# changes.
+SCHEMA_VERSION = "0.2.0"
+
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
 CELL_SPEC_FILENAME = "cell-spec.json"
@@ -543,10 +551,19 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     out: dict[str, Any] = {"name": name}
     if isinstance(node_type, str) and node_type in {"Person", "Organization"}:
         out["type"] = node_type
-    elif any(key in value for key in ("email", "schema:email", "affiliation", "schema:affiliation")):
+    elif any(
+        key in value
+        for key in (
+            "email", "schema:email", "affiliation", "schema:affiliation",
+            "orcid", "given_name", "schema:givenName", "family_name", "schema:familyName",
+        )
+    ):
         out["type"] = "Person"
     else:
         out["type"] = "Organization"
+    orcid = value.get("orcid")
+    if isinstance(orcid, str) and orcid.strip():
+        out["orcid"] = orcid
     email = value.get("email") or value.get("schema:email")
     if isinstance(email, str):
         out["email"] = email
@@ -1121,7 +1138,7 @@ def _housing_from_coin_hardware(coin_hardware: Any) -> "Housing | None":
 class BundleJsonModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "1.0.0"
+    schema_version: str = SCHEMA_VERSION
     kind: str
 
     def to_json(self) -> dict[str, Any]:
@@ -2468,17 +2485,30 @@ class Dataset(BundleJsonModel):
             data["checksum"] = {"algorithm": _ck_alg, "value": _ck_val}
         if "notes" in data and "comment" not in data:
             data["comment"] = data.pop("notes")
-        # The dataset citations list aliases "citation"; the provenance citation is a
-        # different concept, so route a flat ``citation`` into source before the alias
-        # can capture it for the citations list.
+        # The dataset citations list aliases "citation"; a flat *string* ``citation`` is the
+        # provenance citation (matching the retired DatasetInput, where ``citation: str`` was
+        # provenance and the bibliography arrived as a list). Pop it before the alias can
+        # capture it — even when an explicit ``source`` is also given, in which case it merges
+        # into that source (an already-set source.citation wins).
+        _prov_citation = data.pop("citation") if isinstance(data.get("citation"), str) else None
         _flat_provenance = {
             "source_type": "type", "source_name": "name", "source_file": "file",
-            "source_url": "url", "citation": "citation", "file_hash": "file_hash",
+            "source_url": "url", "file_hash": "file_hash",
             "retrieved_at": "retrieved_at", "workflow_version": "workflow_version",
             "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
+        if _prov_citation is not None:
+            source = data.get("source")
+            if source is None:
+                data["source"] = {"citation": _prov_citation}
+            elif isinstance(source, Mapping):
+                merged = dict(source)
+                merged.setdefault("citation", _prov_citation)
+                data["source"] = merged
+            elif isinstance(source, ProvenanceInfo) and source.citation is None:
+                data["source"] = source.model_copy(update={"citation": _prov_citation})
         super().__init__(**data)
 
     @field_validator("identifier", mode="before")
@@ -2636,14 +2666,28 @@ class Dataset(BundleJsonModel):
         if not isinstance(provenance, Mapping):
             provenance = {}
         about = dataset.get("about")
+        # to_record() emits the primary cell/test reference first (see there), so the
+        # first id of each kind is the primary and the rest are related — reading the
+        # FULL list back makes to_record→from_record→to_record a fixed point instead
+        # of silently dropping every reference after the first.
         related_cell_id = None
         related_test_id = None
+        related_cell_ids: list[str] = []
+        related_test_ids: list[str] = []
         if isinstance(about, list):
             for item in about:
-                if isinstance(item, str) and "/cell/" in item and related_cell_id is None:
-                    related_cell_id = item
-                if isinstance(item, str) and "/test/" in item and related_test_id is None:
-                    related_test_id = item
+                if not isinstance(item, str):
+                    continue
+                if "/cell/" in item:
+                    if related_cell_id is None:
+                        related_cell_id = item
+                    elif item not in related_cell_ids:
+                        related_cell_ids.append(item)
+                elif "/test/" in item:
+                    if related_test_id is None:
+                        related_test_id = item
+                    elif item not in related_test_ids:
+                        related_test_ids.append(item)
         distribution = dataset.get("distributions")
         checksum = ChecksumInfo()
         data_format = None
@@ -2698,6 +2742,8 @@ class Dataset(BundleJsonModel):
             checksum=checksum,
             cell_instance_id=related_cell_id,
             test_id=related_test_id,
+            related_cell_ids=related_cell_ids,
+            related_test_ids=related_test_ids,
             source=ProvenanceInfo(
                 type=provenance.get("source_type"),
                 url=provenance.get("source_url"),
@@ -2751,11 +2797,17 @@ class Dataset(BundleJsonModel):
             dataset_obj["conditions_of_access"] = self.conditions_of_access
         if self.in_language is not None:
             dataset_obj["in_language"] = self.in_language
-        # access_url is required by the dataset schema; always emit it, falling back to
-        # the provenance URL and finally a stable placeholder derived from the id.
-        dataset_obj["access_url"] = (
-            self.access_url or self.source.url or f"https://example.org/dataset/{_id_tail(self.id)}"
-        )
+        # access_url is required by the dataset schema (dcat:accessURL). Falling back to a
+        # fabricated placeholder URL would publish fake data — fail with the fix instead.
+        access_url = self.access_url or self.source.url
+        if access_url is None:
+            raise ValueError(
+                "Dataset.access_url is required to serialize a dataset record: set "
+                "access_url= to the landing page or download URL where the data lives "
+                "(a provenance source_url also satisfies it; workspace and publication "
+                "flows derive it from the dataset path automatically)."
+            )
+        dataset_obj["access_url"] = access_url
         if self.created_at is not None:
             dataset_obj["created_at"] = self.created_at
         if self.modified_at is not None:
@@ -2770,11 +2822,13 @@ class Dataset(BundleJsonModel):
             dataset_obj["temporal_coverage"] = self.temporal_coverage
         if self.spatial_coverage is not None:
             dataset_obj["spatial_coverage"] = self.spatial_coverage
+        # Primary references come FIRST so from_record() can recover the primary/related
+        # split from the flat `about` list (first cell id = primary, rest = related).
         about = list(dict.fromkeys([
-            *self.related_cell_ids,
             *([self.cell_instance_id] if self.cell_instance_id is not None else []),
-            *self.related_test_ids,
+            *self.related_cell_ids,
             *([self.test_id] if self.test_id is not None else []),
+            *self.related_test_ids,
         ]))
         if about:
             dataset_obj["about"] = about
@@ -2789,10 +2843,8 @@ class Dataset(BundleJsonModel):
         elif self.download_url is not None or self.data_format is not None or self.checksum.value is not None:
             dist: dict[str, Any] = {
                 "type": "DataDownload",
-                "content_url": (
-                    self.download_url or self.access_url or self.source.url
-                    or f"https://example.org/dataset/{_id_tail(self.id)}/download"
-                ),
+                # Non-None: the access_url check above already required one of these.
+                "content_url": self.download_url or self.access_url or self.source.url,
                 "encoding_format": self.data_format or "application/octet-stream",
             }
             if self.checksum.value is not None:
@@ -3224,13 +3276,28 @@ class ZenodoCellRecord(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "1.0.0"
+    schema_version: str = SCHEMA_VERSION
     kind: str = "BattinfoCellRecord"
     cell_spec: CellSpecification
     cell_specification: CellSpecification | None = None
     datasets: list[ZenodoDatasetEntry]
 
-    def to_flat_json(self) -> dict[str, Any]:
+    def to_flat_json(self, *, zenodo_record_url: str | None = None) -> dict[str, Any]:
+        """Serialize for the Zenodo staging package.
+
+        A dataset without an access URL gets *zenodo_record_url* (default
+        ``https://zenodo.org/records/ZENODO_RECORD_ID``) — the flow's documented
+        placeholder token that ``patch_zenodo_urls()`` rewrites to the real record URL
+        after upload. That is where the data will actually live, unlike the retired
+        ``example.org`` fallback, which was never patched and published fake URLs.
+        """
+        placeholder_url = zenodo_record_url or "https://zenodo.org/records/ZENODO_RECORD_ID"
+
+        def _dataset_record(dataset: Dataset) -> dict[str, Any]:
+            if dataset.access_url is None and dataset.source.url is None:
+                dataset = dataset.model_copy(update={"access_url": placeholder_url})
+            return dataset.to_record()
+
         payload: dict[str, Any] = {
             "schema_version": self.schema_version,
             "kind": self.kind,
@@ -3242,15 +3309,15 @@ class ZenodoCellRecord(BaseModel):
             {
                 "cell_instances": [ci.to_record() for ci in entry.cell_instances],
                 "test": entry.test.to_record(),
-                "dataset": entry.dataset.to_record(),
+                "dataset": _dataset_record(entry.dataset),
             }
             for entry in self.datasets
         ]
         return payload
 
-    def to_path(self, path: PathLike) -> Path:
+    def to_path(self, path: PathLike, *, zenodo_record_url: str | None = None) -> Path:
         out_path = _as_path(path)
-        _write_json(out_path, self.to_flat_json())
+        _write_json(out_path, self.to_flat_json(zenodo_record_url=zenodo_record_url))
         return out_path
 
     @classmethod
