@@ -312,6 +312,7 @@ class ProvenanceInfo(BaseModel):
     file_hash: str | None = Field(default=None, description="SHA-256 hex digest (64 chars) of the source file.")
     curated_by: str | None = Field(default=None, description="ORCID or name of the person who curated this record.")
     comment: str | None = Field(default=None, description="Free-text provenance note.")
+    battinfo_version: str | None = Field(default=None, description="Version of the battinfo library that wrote the record; stamped automatically at emission so records are forensically attributable to a build. Set explicitly only to reproduce another build's output.")
 
 
 class ProtocolInfo(BaseModel):
@@ -372,6 +373,7 @@ def _provenance_from_record(provenance: Mapping[str, Any]) -> ProvenanceInfo:
         file_hash=provenance.get("file_hash"),
         curated_by=provenance.get("curated_by"),
         comment=provenance.get("comment"),
+        battinfo_version=provenance.get("battinfo_version"),
     )
 
 
@@ -403,7 +405,26 @@ def _provenance_record(source: ProvenanceInfo) -> dict[str, Any]:
         out["curated_by"] = source.curated_by
     if source.comment is not None:
         out["comment"] = source.comment
+    out["battinfo_version"] = source.battinfo_version or _battinfo_version()
     return out
+
+
+def _battinfo_version() -> str:
+    from battinfo import __version__  # noqa: PLC0415 — local: battinfo/__init__ imports this module
+
+    return __version__
+
+
+def stamp_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
+    """Stamp the writing library's version into a record's provenance block.
+
+    Every emission path calls this (directly, or via ``_provenance_record``) so
+    a malformed record can always be traced to the battinfo build that wrote
+    it. An existing value is preserved — re-saving another build's record must
+    not falsify its origin."""
+    if not provenance.get("battinfo_version"):
+        provenance["battinfo_version"] = _battinfo_version()
+    return provenance
 
 
 class ChecksumInfo(BaseModel):

@@ -9,6 +9,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Every emitted record's provenance block now carries `battinfo_version`** — the version
+  of the battinfo library that wrote the record — so records are forensically attributable
+  to a build. The stamp is applied at emission (model `to_record()` and the direct api.py
+  record builders); an explicitly set value is preserved, so re-serialising another build's
+  record does not falsify its origin. All record schemas (packaged and `assets/` sources,
+  plus the cell-spec profile fragment) allow the new optional field. Downstream note: the
+  registry's vendored schemas need a re-vendor + pin bump when this ships.
 - `battinfo.AuthoringWorkspace` is exported by name (previously reachable only via the
   `battinfo.workspace(...)` factory); its docstring now points at the correct engine class.
   A new [Workspace authoring](docs/workspace-authoring.md) doc page mirrors

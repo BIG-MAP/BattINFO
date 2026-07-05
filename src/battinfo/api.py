@@ -27,6 +27,7 @@ from battinfo.bundle import (
     Dataset,
     Test,
     TestSpec,
+    stamp_provenance,
 )
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
@@ -2278,10 +2279,10 @@ def create_cell_instance(
             "cell_spec_id": resolved_cell_spec_id,
             "short_id": dashed_uid.replace("-", "")[:6],
         },
-        "provenance": {
+        "provenance": stamp_provenance({
             "source_type": source_type,
             "retrieved_at": _now_unix(),
-        },
+        }),
     }
     if serial_number:
         out["cell_instance"]["serial_number"] = serial_number
@@ -4145,10 +4146,10 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "material_spec": spec,
-        "provenance": {
+        "provenance": stamp_provenance({
             "source_type": draft.source_type,
             "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        },
+        }),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -4200,10 +4201,10 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "material": material,
-        "provenance": {
+        "provenance": stamp_provenance({
             "source_type": draft.source_type,
             "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        },
+        }),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -4501,7 +4502,7 @@ def _record_from_component_spec(
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         f"{family}_spec": spec,
-        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
+        "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
@@ -4567,7 +4568,7 @@ def _record_from_component_instance(
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         family: instance,
-        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
+        "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url

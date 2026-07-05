@@ -159,6 +159,10 @@
         },
         "comment": {
           "type": "string"
+        },
+        "battinfo_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
         }
       }
     },
