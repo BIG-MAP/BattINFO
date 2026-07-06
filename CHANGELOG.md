@@ -23,6 +23,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`ws.submit()` is resumable** (beta-hardening 3.5): every outcome is journaled to
+  `.battinfo/submit-journal.jsonl` as it happens, and a record whose identical payload
+  already succeeded in a previous run is skipped (`status: skipped_journal`) instead of
+  re-POSTed — resuming an interrupted bulk submission re-sends only what is missing.
+  Failed records are journaled but retried on resume; changed content re-submits.
+  `ws.submit(resume=False)` bypasses the journal. (Transient-failure retry with
+  exponential backoff already ships in `submit_publication_package`; HTTP connection
+  pooling is deliberately deferred — stdlib-only HTTP, and the planned registry bulk
+  endpoint is the right fix for per-request overhead.)
 - **`battinfo.bulk_save_session(source_root)`** — a context manager that makes bulk
   ingests fast: the id→path map is scanned once per entity type instead of per save,
   every save keeps it current (so records saved in the batch resolve as references for

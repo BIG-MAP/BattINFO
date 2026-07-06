@@ -2681,8 +2681,16 @@ class AuthoringWorkspace:
         publication_mode: str = STAGED_PUBLICATION_MODE,
         allow_partial: bool = False,
         submit_all: bool = False,
+        resume: bool = True,
     ) -> list[dict]:
         """Submit workspace records to the battinfo registry (staged for review).
+
+        Resumable: outcomes are journaled to ``.battinfo/submit-journal.jsonl``
+        as they happen, and a record whose identical payload already succeeded
+        in a previous run is skipped (``status: skipped_journal``) instead of
+        re-POSTed — resuming an interrupted bulk submission re-sends only what
+        is missing. Pass ``resume=False`` to bypass the journal and re-send
+        everything (the registry dedups identical re-submissions server-side).
 
         POSTs saved records to the registry API.  By default submissions are
         STAGED (``publication_mode="staged-publication"``): they enter the
@@ -2774,6 +2782,8 @@ class AuthoringWorkspace:
         if not examples.exists():
             print("  No records found — run ws.save() first.")
             return []
+
+        journal = _SubmitJournal(self._root / ".battinfo" / "submit-journal.jsonl") if resume else None
 
         # ── Validate the `only` filter (fail loud on an unknown token) ──────────
         _ALIASES: dict[str, str] = {
@@ -2974,9 +2984,9 @@ class AuthoringWorkspace:
                 raw, wid=wid, pid=pid, ver=ver,
                 source_local_id=source_local_id, title=title,
             )
-            outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode,
-                                       validation=validations[src]))
+            outcomes.append(_journaled_submit(journal, payload, url, key, title,
+                                              source_local_id=source_local_id, publication_mode=publication_mode,
+                                              validation=validations[src]))
 
         # ── Cell instances ────────────────────────────────────────────────────
         cell_spec_dir = examples / "cell-spec"
@@ -3021,9 +3031,9 @@ class AuthoringWorkspace:
                 related_resources=related,
                 preview=preview,
             )
-            outcomes.append(_do_submit(payload, url, key, label,
-                                       source_local_id=source_local_id, publication_mode=publication_mode,
-                                       validation=validations[src]))
+            outcomes.append(_journaled_submit(journal, payload, url, key, label,
+                                              source_local_id=source_local_id, publication_mode=publication_mode,
+                                              validation=validations[src]))
 
         # ── Test specs (protocols) ────────────────────────────────────────────
         # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
@@ -3052,9 +3062,9 @@ class AuthoringWorkspace:
                 source_local_id=source_local_id, title=title,
                 related_resources=related,
             )
-            outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode,
-                                       validation=validations[src]))
+            outcomes.append(_journaled_submit(journal, payload, url, key, title,
+                                              source_local_id=source_local_id, publication_mode=publication_mode,
+                                              validation=validations[src]))
 
         # ── Tests ─────────────────────────────────────────────────────────────
         for src in _selected("test"):
@@ -3081,9 +3091,9 @@ class AuthoringWorkspace:
                 source_local_id=source_local_id, title=title,
                 related_resources=related,
             )
-            outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode,
-                                       validation=validations[src]))
+            outcomes.append(_journaled_submit(journal, payload, url, key, title,
+                                              source_local_id=source_local_id, publication_mode=publication_mode,
+                                              validation=validations[src]))
 
         # ── Datasets ──────────────────────────────────────────────────────────
         for src in _selected("dataset"):
@@ -3126,17 +3136,19 @@ class AuthoringWorkspace:
                 related_resources=related,
                 preview=preview,
             )
-            outcomes.append(_do_submit(payload, url, key, title,
-                                       source_local_id=source_local_id, publication_mode=publication_mode,
-                                       validation=validations[src]))
+            outcomes.append(_journaled_submit(journal, payload, url, key, title,
+                                              source_local_id=source_local_id, publication_mode=publication_mode,
+                                              validation=validations[src]))
 
         if outcomes:
             self._search_cache = None
             live = [o for o in outcomes if o.get("status") == "published"]
             staged = [o for o in outcomes if o.get("status") == "validated"]
+            skipped = [o for o in outcomes if o.get("status") == "skipped_journal"]
             failed = [o for o in outcomes if not o.get("ok")]
             print(f"\nAttempted {len(outcomes)} record(s) to {url}: "
-                  f"{len(live)} live, {len(staged)} staged for review, {len(failed)} failed")
+                  f"{len(live)} live, {len(staged)} staged for review, {len(failed)} failed"
+                  + (f", {len(skipped)} already submitted (journal)" if skipped else ""))
             if live:
                 print("  Live records are on the platform. Run ws.status() to see them.")
             if staged:
@@ -6380,6 +6392,102 @@ def _lift_funding_to_provenance(payload: dict) -> None:
 _DISPLAY_STATUSES = frozenset(
     {"validated", "published", "staged_unanchored", "ok", "unknown", "failed", "rejected", "error"}
 )
+
+# Envelope fields that vary across authoring re-runs without changing what is
+# being submitted; stripped before hashing a payload for the submit journal.
+_JOURNAL_VOLATILE_KEYS = frozenset({"generated_at"})
+
+
+def _journal_payload_hash(payload: dict) -> str:
+    import hashlib  # noqa: PLC0415
+
+    def strip(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {k: strip(v) for k, v in value.items() if k not in _JOURNAL_VOLATILE_KEYS}
+        if isinstance(value, list):
+            return [strip(v) for v in value]
+        return value
+
+    canonical = json.dumps(strip(dict(payload)), sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+class _SubmitJournal:
+    """Append-only outcome journal making ``ws.submit()`` resumable (3.5).
+
+    Every submission outcome is appended to ``.battinfo/submit-journal.jsonl``
+    as it happens. On a later run, a record whose *identical* payload (envelope
+    timestamps excluded) already succeeded is skipped locally instead of being
+    re-POSTed — so resuming an interrupted bulk submission re-sends only what
+    is missing. The registry would dedup identical re-submissions anyway; the
+    journal saves the round-trips. Changed content (or a new
+    ``source_version``, e.g. a next-day run) hashes differently and is
+    submitted normally. ``ws.submit(resume=False)`` bypasses the journal.
+    """
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self._succeeded: dict[tuple[str, str], dict] = {}
+        if path.exists():
+            for line in path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except ValueError:
+                    continue  # a torn final line from a crash must not poison the journal
+                if entry.get("ok") and entry.get("source_local_id") and entry.get("payload_hash"):
+                    self._succeeded[(entry["source_local_id"], entry["payload_hash"])] = entry
+
+    def previous_success(self, source_local_id: str, payload_hash: str) -> dict | None:
+        return self._succeeded.get((source_local_id, payload_hash))
+
+    def record(self, outcome: dict, payload_hash: str) -> None:
+        import datetime as _dt  # noqa: PLC0415
+
+        entry = {
+            "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+            "source_local_id": outcome.get("source_local_id", ""),
+            "title": outcome.get("title", ""),
+            "ok": bool(outcome.get("ok")),
+            "status": outcome.get("status", ""),
+            "iri": outcome.get("iri", ""),
+            "payload_hash": payload_hash,
+        }
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        if entry["ok"]:
+            self._succeeded[(entry["source_local_id"], entry["payload_hash"])] = entry
+
+
+def _journaled_submit(
+    journal: "_SubmitJournal | None",
+    payload: dict,
+    url: str,
+    key: str,
+    title: str,
+    *,
+    source_local_id: str = "",
+    publication_mode: str = STAGED_PUBLICATION_MODE,
+    validation: dict[str, Any] | None = None,
+) -> dict:
+    """Run one submission through the resume journal (no journal → plain submit)."""
+    if journal is None:
+        return _do_submit(payload, url, key, title, source_local_id=source_local_id,
+                          publication_mode=publication_mode, validation=validation)
+    payload_hash = _journal_payload_hash(payload)
+    previous = journal.previous_success(source_local_id, payload_hash) if source_local_id else None
+    if previous is not None:
+        print(f"  {title}  [already submitted — skipped; pass resume=False to re-send]")
+        return {"title": title, "source_local_id": source_local_id, "ok": True,
+                "status": "skipped_journal", "iri": previous.get("iri", ""), "error": None,
+                "result": None, "version_bumped": None}
+    outcome = _do_submit(payload, url, key, title, source_local_id=source_local_id,
+                         publication_mode=publication_mode, validation=validation)
+    journal.record(outcome, payload_hash)
+    return outcome
 
 
 def _do_submit(
