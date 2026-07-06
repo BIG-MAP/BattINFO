@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
+import { Constellation } from "@/components/constellation";
 import { ProofStrip } from "@/components/proof-strip";
 import { SectionHeading } from "@/components/section-heading";
 import { standards } from "@/lib/site";
 import {
   audiences,
   features,
-  payoffs,
   pipeline,
   principles,
   provenanceChain,
   recordModel,
 } from "@/lib/content";
-import { installSnippet, publishJourneySnippet, quickstartPython } from "@/lib/examples";
+import { installSnippet, publishJourneySnippet } from "@/lib/examples";
 
 export default function HomePage() {
   return (
@@ -27,13 +27,14 @@ export default function HomePage() {
                 Open standard · Beta
               </span>
               <h1 className="mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-                Your battery data —{" "}
-                <span className="text-brand-600">citable, machine-readable, findable</span>
+                The language machines use to{" "}
+                <span className="text-brand-600">understand batteries</span>
               </h1>
               <p className="mt-5 max-w-prose text-lg text-ink-muted">
-                Turn a folder of cycler exports into validated, linked records
-                with a DOI on Zenodo and a place in the Battery Genome registry
-                — in about fifteen minutes, without learning RDF.
+                BattINFO extends the open EMMO ontology to make battery data
+                machine-readable and reusable across tools and teams — and turns
+                a folder of cycler exports into citable, findable records in
+                about fifteen minutes.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
@@ -55,14 +56,7 @@ export default function HomePage() {
             </div>
 
             <div className="lg:pl-6">
-              <CodeBlock label="the whole journey" code={publishJourneySnippet} />
-              <p className="mt-3 text-sm text-ink-muted">
-                This is the real recipe — the same one <code>ws.quickstart()</code>{" "}
-                prints, kept in sync by the test suite.{" "}
-                <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
-                  See every step explained →
-                </Link>
-              </p>
+              <Constellation />
             </div>
           </div>
         </div>
@@ -94,19 +88,28 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What publishing buys you — now, for your lab, for the field */}
+      {/* Quickstart — near the top, because it is the quickstart */}
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <SectionHeading
-          kicker="Why bother"
-          title="One afternoon of publishing keeps paying off."
-        />
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          {payoffs.map((p) => (
-            <div key={p.horizon} className="prose-card">
-              <h3 className="text-lg font-semibold text-ink">{p.horizon}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{p.body}</p>
+        <div className="grid gap-10 lg:grid-cols-2">
+          <div>
+            <SectionHeading
+              kicker="Quickstart"
+              title="From cycler files to a citable dataset."
+            />
+            <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
+              This is the real recipe — the same one <code>ws.quickstart()</code>{" "}
+              prints, kept in sync by the test suite.{" "}
+              <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
+                Every step explained →
+              </Link>
+            </p>
+            <div className="mt-6">
+              <CodeBlock label="install" code={installSnippet} />
             </div>
-          ))}
+          </div>
+          <div className="lg:pt-16">
+            <CodeBlock label="the whole journey" code={publishJourneySnippet} />
+          </div>
         </div>
       </section>
 
@@ -147,29 +150,6 @@ export default function HomePage() {
                 <p className="mt-2 text-sm leading-relaxed text-ink-muted">{f.body}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Quickstart */}
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <SectionHeading
-              kicker="Quickstart"
-              title="Publish your first record in minutes."
-            />
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
-              Install the Python package, describe a cell, and publish it. You get
-              back a persistent IRI and a valid JSON-LD document aligned to the
-              battery ontology.
-            </p>
-            <div className="mt-6">
-              <CodeBlock label="install" code={installSnippet} />
-            </div>
-          </div>
-          <div className="lg:pt-16">
-            <CodeBlock label="python" code={quickstartPython} />
           </div>
         </div>
       </section>

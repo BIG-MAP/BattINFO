@@ -392,9 +392,9 @@ export const curatedUnits: { symbol: string; label: string; qname: string; iri: 
   },
   {
     "symbol": "°C",
-    "label": "CelsiusTemperature",
-    "qname": "emmo:CelsiusTemperature",
-    "iri": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+    "label": "DegreeCelsius",
+    "qname": "emmo:DegreeCelsius",
+    "iri": "https://w3id.org/emmo#DegreeCelsius"
   },
   {
     "symbol": "A",
@@ -422,9 +422,9 @@ export const curatedUnits: { symbol: string; label: string; qname: string; iri: 
   },
   {
     "symbol": "degC",
-    "label": "CelsiusTemperature",
-    "qname": "emmo:CelsiusTemperature",
-    "iri": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+    "label": "DegreeCelsius",
+    "qname": "emmo:DegreeCelsius",
+    "iri": "https://w3id.org/emmo#DegreeCelsius"
   },
   {
     "symbol": "g",
@@ -555,8 +555,8 @@ export const curatedUnits: { symbol: string; label: string; qname: string; iri: 
   {
     "symbol": "W/kg",
     "label": "WattPerKilogram",
-    "qname": "qudt:W-PER-KiloGM",
-    "iri": "http://qudt.org/vocab/unit/W-PER-KiloGM"
+    "qname": "emmo:WattPerKilogram",
+    "iri": "https://w3id.org/emmo#WattPerKilogram"
   },
   {
     "symbol": "W/L",

@@ -1,0 +1,221 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "battery": "https://w3id.org/emmo/domain/battery#",
+    "electrochemistry": "https://w3id.org/emmo/domain/electrochemistry#",
+    "emmo": "https://w3id.org/emmo#",
+    "battinfo": "https://w3id.org/battinfo/",
+    "schema": "https://schema.org/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dqv": "http://www.w3.org/ns/dqv#",
+    "oa": "http://www.w3.org/ns/oa#",
+    "earl": "http://www.w3.org/ns/earl#",
+    "spdx": "http://spdx.org/rdf/terms#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
+    "CylindricalBattery": "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
+    "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    "PouchCell": "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
+    "CoinCell": "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
+    "LithiumIonBattery": "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
+    "LithiumMetalBattery": "battery:battery_ada13509_4eed_4e40_a7b1_4cc488144154",
+    "SodiumIonBattery": "battery:battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
+    "AlkalineZincManganeseDioxideBattery": "battery:battery_b572826a_b4e4_4986_b57d_f7b945061f8b",
+    "AlkalineCell": "battery:battery_50b911f7_c903_4700_9764_c308d8a95470",
+    "PrimaryBattery": "battery:battery_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69",
+    "SecondaryBattery": "battery:battery_efc38420_ecbb_42e4_bb3f_208e7c417098",
+    "BatteryTest": "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+    "name": "schema:name",
+    "model": "schema:model",
+    "manufacturer": "schema:manufacturer",
+    "hasProperty": {
+      "@id": "emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204",
+      "@type": "@id"
+    },
+    "hasNumericalPart": {
+      "@id": "emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0",
+      "@type": "@id"
+    },
+    "hasNumberValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+    "hasNumericalValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+    "hasMeasurementUnit": {
+      "@id": "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
+      "@type": "@id"
+    },
+    "isDescriptionFor": {
+      "@id": "emmo:EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3",
+      "@type": "@id"
+    },
+    "hasDescription": {
+      "@id": "emmo:EMMO_c58c799e_cc6c_4310_a3f1_78da70705b2a",
+      "@type": "@id"
+    },
+    "hasTestObject": {
+      "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+      "@type": "@id"
+    },
+    "hasTestEquipment": {
+      "@id": "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
+      "@type": "@id"
+    },
+    "hasOutput": {
+      "@id": "emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840",
+      "@type": "@id"
+    },
+    "id": "schema:productID",
+    "nominal_capacity": "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
+    "minimum_capacity": "electrochemistry:electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5",
+    "rated_capacity": "electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26",
+    "typical_capacity": "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
+    "nominal_voltage": "electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6",
+    "charging_voltage": "electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87",
+    "discharging_cutoff_voltage": "electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
+    "charging_cutoff_voltage": "electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88",
+    "upper_voltage_limit": "electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88",
+    "maximum_continuous_charging_current": "electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+    "nominal_continuous_charging_current": "electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+    "maximum_pulse_charging_current": "electrochemistry:electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da",
+    "maximum_continuous_discharging_current": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+    "nominal_continuous_discharging_current": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+    "maximum_pulse_discharging_current": "electrochemistry:electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b",
+    "nominal_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+    "typical_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+    "rated_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+    "certified_usable_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+    "power_capability": "battinfo:powerCapability",
+    "maximum_power": "battinfo:maximumPower",
+    "specific_energy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
+    "energy_density": "electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
+    "specific_power": "battinfo:specificPower",
+    "power_density": "battinfo:powerDensity",
+    "power_energy_ratio": "battinfo:powerEnergyRatio",
+    "internal_resistance": "electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
+    "dc_internal_resistance": "electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3",
+    "ac_internal_resistance": "electrochemistry:electrochemistry_964cd426_f3cf_4a52_8c5d_0490cf48edb5",
+    "impedance": "emmo:EMMO_79a02de5_b884_4eab_bc18_f67997d597a2",
+    "round_trip_energy_efficiency": "battinfo:roundTripEnergyEfficiency",
+    "round_trip_energy_efficiency_50pct": "battinfo:roundTripEnergyEfficiency50Pct",
+    "initial_coulombic_efficiency": "electrochemistry:electrochemistry_469b9516_a96d_4aa2_b8e5_05ae982e2084",
+    "mass": "emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405",
+    "diameter": "emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6",
+    "height": "emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba",
+    "width": "emmo:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0",
+    "length": "emmo:EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac",
+    "thickness": "emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656",
+    "volume": "emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed",
+    "maximum_charging_temperature": "electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260",
+    "minimum_charging_temperature": "electrochemistry:electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49",
+    "maximum_discharging_temperature": "electrochemistry:electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d",
+    "minimum_discharging_temperature": "electrochemistry:electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b",
+    "maximum_storage_temperature": "electrochemistry:electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7",
+    "minimum_storage_temperature": "electrochemistry:electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302",
+    "operating_temperature_min": "battinfo:operatingTemperatureMin",
+    "operating_temperature_max": "battinfo:operatingTemperatureMax",
+    "cycle_life": "electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937",
+    "cycle_life_c_rate": "battinfo:cycleLifeCRate",
+    "calendar_life": "electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df",
+    "capacity_fade": "battinfo:capacityFade",
+    "capacity_threshold_exhaustion": "battinfo:capacityThresholdExhaustion",
+    "charging_time": "battinfo:chargingTime",
+    "self_discharge_rate": "electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e",
+    "state_of_health": "electrochemistry:electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce",
+    "source_type": "battinfo:sourceType",
+    "source_url": "battinfo:sourceURL",
+    "source_file": "battinfo:sourceFile",
+    "citation": "dcterms:bibliographicCitation",
+    "citation_doi": "battinfo:citationDOI",
+    "retrieved_at": "battinfo:retrievedAt",
+    "workflow_version": "battinfo:workflowVersion",
+    "curated_by": "dcterms:contributor",
+    "protocol_name": "schema:name",
+    "protocol_url": "schema:url",
+    "V": "emmo:Volt",
+    "mV": "emmo:MilliVolt",
+    "kV": "emmo:KiloVolt",
+    "Ah": "emmo:AmpereHour",
+    "mAh": "emmo:MilliAmpereHour",
+    "A": "emmo:Ampere",
+    "mA": "emmo:MilliAmpere",
+    "W": "emmo:Watt",
+    "kW": "emmo:KiloWatt",
+    "Wh": "emmo:WattHour",
+    "kWh": "emmo:KiloWattHour",
+    "MWh": "emmo:MegaWattHour",
+    "Ohm": "emmo:Ohm",
+    "mOhm": "emmo:MilliOhm",
+    "mohm": "emmo:MilliOhm",
+    "degC": "emmo:EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+    "K": "emmo:Kelvin",
+    "g": "emmo:Gram",
+    "kg": "emmo:Kilogram",
+    "mg": "emmo:MilliGram",
+    "mm": "emmo:MilliMetre",
+    "cm": "emmo:CentiMetre",
+    "m": "emmo:Metre",
+    "L": "emmo:Litre",
+    "mL": "emmo:MilliLitre",
+    "cm3": "emmo:CubicCentiMetre",
+    "h": "emmo:Hour",
+    "min": "emmo:Minute",
+    "s": "emmo:Second",
+    "C": "emmo:CoulombUnit",
+    "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+    "%": "emmo:Percent",
+    "license": {
+      "@id": "dcterms:license",
+      "@type": "@id"
+    },
+    "created_at": {
+      "@id": "dcterms:created",
+      "@type": "xsd:integer"
+    },
+    "modified_at": {
+      "@id": "dcterms:modified",
+      "@type": "xsd:integer"
+    }
+  },
+  "@type": "http://www.w3.org/ns/dcat#Dataset",
+  "@id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+  "dcterms:title": "Cell cycling run for BattINFO cell 3m6k9t",
+  "dcterms:license": {
+    "@id": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "dcat:accessURL": {
+    "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+  },
+  "dcterms:created": 1771718400,
+  "dcterms:subject": [
+    {
+      "@id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
+    }
+  ],
+  "dcat:distribution": [
+    {
+      "@type": "dcat:Distribution",
+      "dcat:downloadURL": {
+        "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x/raw.h5"
+      },
+      "dcat:mediaType": "application/x-hdf5",
+      "spdx:checksum": {
+        "@type": "spdx:Checksum",
+        "spdx:checksumAlgorithm": "spdx:checksumAlgorithm_sha256",
+        "spdx:checksumValue": "8fbf34bd0f8a0caef6f5ce6cc1f8e6a2d8f0123982fc624d6f7f3f7e27b95a89"
+      }
+    }
+  ],
+  "battinfo:provenance": {
+    "battinfo:sourceType": "measurement",
+    "battinfo:sourceFile": "dataset-1f8r-6v2k-9p4m-3t7x.json",
+    "battinfo:sourceURL": {
+      "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+    },
+    "dcterms:bibliographicCitation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
+  }
+}

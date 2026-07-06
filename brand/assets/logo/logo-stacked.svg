@@ -10,5 +10,5 @@
     <circle cx="65" cy="74" r="7.5" fill="#12A394"></circle>
     <circle cx="33" cy="65" r="7.5" fill="#12A394"></circle>
   </g>
-  <text class="wm" x="130" y="200" text-anchor="middle"><tspan fill="#102A43">Batt</tspan><tspan fill="#12A394">INFO</tspan></text>
+  <text class="wm" font-family="Plus Jakarta Sans, Segoe UI, system-ui, sans-serif" font-size="64" font-weight="800" letter-spacing="-1.5" x="130" y="200" text-anchor="middle"><tspan fill="#102A43">Batt</tspan><tspan fill="#12A394">INFO</tspan></text>
 </svg>

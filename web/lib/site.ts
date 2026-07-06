@@ -49,29 +49,24 @@ export const primaryNav = [
 // own world" signal that the best semantic standards lead with.
 export const standards = [
   {
-    name: "EMMO domain-battery",
+    name: "EMMO",
     role: "Normative semantics",
     href: "https://github.com/emmo-repo/domain-battery",
   },
   {
-    name: "JSON-LD 1.1",
+    name: "JSON-LD",
     role: "Linked Data serialization",
     href: "https://www.w3.org/TR/json-ld11/",
   },
   {
-    name: "JSON Schema 2020-12",
+    name: "JSON Schema",
     role: "Structural contract",
     href: "https://json-schema.org/",
   },
   {
-    name: "QUDT / EMMO units",
-    role: "Quantities & units",
-    href: "https://qudt.org/",
-  },
-  {
-    name: "w3id.org",
-    role: "Persistent identifiers",
-    href: "https://w3id.org/",
+    name: "Pydantic",
+    role: "Typed authoring models",
+    href: "https://docs.pydantic.dev/",
   },
   {
     name: "schema.org",

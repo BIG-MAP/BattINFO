@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import record_to_jsonld  # noqa: E402
 
+NL = chr(10)
 OUT = ROOT / "web" / "lib" / "jsonld.generated.ts"
 
 # Curated flagship pairs: one product spec, one measurement activity, one data
@@ -90,9 +91,25 @@ def render(entries: list[dict]) -> str:
     return banner + body
 
 
+PUBLIC_DIR = ROOT / "web" / "public" / "jsonld"
+
+
+def render_public(entries: list) -> dict:
+    """Raw JSON-LD documents served at /jsonld/<slug>.jsonld — permalinks the
+    W3C JSON-LD Playground can fetch (CORS headers set in web/vercel.json)."""
+    return {
+        entry["slug"] + ".jsonld": json.dumps(entry["jsonld"], indent=2, ensure_ascii=False) + NL
+        for entry in entries
+    }
+
+
 def main() -> int:
-    OUT.write_text(render(build_entries()), encoding="utf-8", newline="\n")
-    print(f"Wrote {OUT}")
+    entries = build_entries()
+    OUT.write_text(render(entries), encoding="utf-8", newline=NL)
+    PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    for name, text in render_public(entries).items():
+        (PUBLIC_DIR / name).write_text(text, encoding="utf-8", newline=NL)
+    print(f"Wrote {OUT} + {len(entries)} public jsonld files")
     return 0
 
 
