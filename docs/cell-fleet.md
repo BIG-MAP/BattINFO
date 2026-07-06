@@ -25,14 +25,14 @@ when a basis/inline node is also present, the `@id` is merged onto it.
 ```python
 import battinfo as bi
 
-rec = bi.save_cell_spec(bi.CellSpecification(
+rec = bi.save_cell_spec(bi.CellSpec(
     model_name="COIN-NMC811-D", manufacturer="EMPA", format="coin", chemistry="Li-ion",
     positive_electrode_spec_id=NMC811_CATHODE_IRI,
     negative_electrode_spec_id=GRAPHITE_ANODE_IRI,
     electrolyte_spec_id=ORGANIC_ELECTROLYTE_IRI,
     separator_spec_id=CELGARD_IRI,
     housing_spec_id=COIN_HOUSING_IRI,
-    specs={"nominal_capacity": {"value": 0.0038, "unit": "Ah"}, "nominal_voltage": {"value": 3.8, "unit": "V"}},
+    properties={"nominal_capacity": {"value": 0.0038, "unit": "Ah"}, "nominal_voltage": {"value": 3.8, "unit": "V"}},
 ), source_root="examples")
 ```
 

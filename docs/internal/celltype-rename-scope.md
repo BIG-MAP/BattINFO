@@ -1,8 +1,8 @@
-# Scope: rename/merge `CellType` → `CellSpecification`
+# Scope: rename/merge `CellType` → `CellSpec`
 
 ## TL;DR
 
-`CellType` and `CellSpecification` are **two coexisting full Pydantic models**
+`CellType` and `CellSpec` are **two coexisting full Pydantic models**
 ([bundle.py:979](../src/battinfo/bundle.py) and [:1150](../src/battinfo/bundle.py))
 that represent the same entity (a `BatteryCellSpecification`). So this is a **model
 merge + identifier rename**, not a mechanical find-replace. It touches code, schemas,
@@ -24,16 +24,16 @@ Plus non-code surfaces: `schema/cell-type.yaml`, `assets/schemas/cell-type.schem
 
 ## The rename has five distinct layers (each a separate decision)
 
-1. **Python model & API (in-repo).** Merge `CellType` into `CellSpecification`:
-   - reconcile fields — `CellType.nominal_properties` vs `CellSpecification.properties`;
+1. **Python model & API (in-repo).** Merge `CellType` into `CellSpec`:
+   - reconcile fields — `CellType.nominal_properties` vs `CellSpec.properties`;
      `CellType.cell_specification_id` (back-ref) becomes self; both have manufacturer/
      model/format/chemistry/size_code/product_type/source but `CellType` adds
-     `country_of_origin`/`year`, `CellSpecification` adds `specification_comment`;
+     `country_of_origin`/`year`, `CellSpec` adds `specification_comment`;
    - the `CellType.__init__` that absorbs ~40 spec kwargs into `nominal_properties`
      (per CLAUDE.md) must move onto the merged class;
    - rename API methods: `ws.cell_type()`, `Workspace.cell_type()`, `derive_cell_type`,
      `build_publication_package` params, etc.;
-   - `CellInstance.cell_type` / `cell_type_id` → `cell_specification` / `cell_specification_id`;
+   - `Cell.cell_type` / `cell_type_id` → `cell_specification` / `cell_specification_id`;
    - `BattinfoBundle.cell_type` and `ZenodoCellRecord.cell_type` → `cell_specification`
      (the bundle already carries a separate `cell_specification` — these merge).
    - `bundle_generated.py` (LinkML-generated) — regenerate from the schema after the
@@ -70,7 +70,7 @@ Plus non-code surfaces: `schema/cell-type.yaml`, `assets/schemas/cell-type.schem
   `type_id`), the `cell-type` profile token, and remaining `/cell-type/` IRI references
   change, or stay as compatibility shims. This gates everything else.
 - **Phase 1 — merge the models (in-repo, no on-disk change).** Make `CellType` a
-  deprecated alias of a merged `CellSpecification` (re-export `CellType = CellSpecification`
+  deprecated alias of a merged `CellSpec` (re-export `CellType = CellSpec`
   with a `DeprecationWarning`), unify fields, keep `from_record`/`to_record` reading the
   existing on-disk keys. Update internal call sites incrementally. Largest code diff;
   back-compat preserved via the alias.
@@ -108,10 +108,10 @@ Plus non-code surfaces: `schema/cell-type.yaml`, `assets/schemas/cell-type.schem
 ## Execution status (2026-06-15)
 
 - **Phase 1 — model merge: DONE, suite green.** `CellType` merged into one
-  `CellSpecification` (union of authoring API + datasheet structure; `properties`
+  `CellSpec` (union of authoring API + datasheet structure; `properties`
   canonical; transient `nominal_properties` bridge + transient `CellType` alias).
   `Workspace.add` dispatch and `_append_unique` reconciled for the collapsed type.
-- **Phase 2 — `CellType`→`CellSpecification` symbol rename: DONE, suite green.** All
+- **Phase 2 — `CellType`→`CellSpec` symbol rename: DONE, suite green.** All
   application-layer + test references renamed (the LinkML-generated `bundle_generated`
   `CellType` and the `CellType as Gen…` adapter imports were correctly preserved).
 
@@ -131,7 +131,7 @@ index/query/registry say `cell_type`).
 **Recommendation:** fold the `cell_type`→`cell_spec` identifier rename INTO the
 coordinated Phase-4/5 migration (records + index + query API + registry DB + the three
 downstream repos), done as one lockstep change — not as an in-repo-only Phase 3. The
-cleanly-separable in-repo work (the model merge + the `CellSpecification` class symbol)
+cleanly-separable in-repo work (the model merge + the `CellSpec` class symbol)
 is complete. The transient `CellType` alias and `nominal_properties` bridge remain until
 that coordinated migration removes them.
 
@@ -140,13 +140,13 @@ that coordinated migration removes them.
 1. **Depth:** all the way through (Phases 1–5).
 2. **Back-compat:** hard-break, no permanent aliases (a *transient* alias is used only
    during the refactor to keep the suite green between phases, removed at the end).
-3. **Target term:** `cell_spec` / `CellSpecification`.
+3. **Target term:** `cell_spec` / `CellSpec`.
 
 ## Concrete merge design (Phase 1)
 
-The two models become **one** `CellSpecification` that is the union:
+The two models become **one** `CellSpec` that is the union:
 
-- **Canonical class:** `CellSpecification` absorbs `CellType`'s authoring surface — the
+- **Canonical class:** `CellSpec` absorbs `CellType`'s authoring surface — the
   kwarg-absorbing `__init__`, the `_mapping_property` descriptors + `specs` proxy, the
   `_populate_name` validator, and `id`/`name` being optional — **and keeps its own**
   datasheet structure (`positive_electrode`/`negative_electrode`/`electrolyte`/
@@ -162,8 +162,8 @@ The two models become **one** `CellSpecification` that is the union:
   `to_library_record`/`from_library_record` (`specification`/`property`, the datasheet
   library format). Phase 4 decides whether/how these on-disk keys rename — **this is the
   one that touches the live registry** (records carry `product`/`type_id`).
-- `kind` discriminator and `default_filename` become the `CellSpecification` values.
-- Transient `CellType = CellSpecification` alias added, removed in Phase 5.
+- `kind` discriminator and `default_filename` become the `CellSpec` values.
+- Transient `CellType = CellSpec` alias added, removed in Phase 5.
 
 ### The gating sub-decision (affects the registry contract)
 
@@ -182,7 +182,7 @@ done. This avoids a flag-day break of the live registry.
 2. **Back-compat:** keep `CellType` as a deprecated alias and accept old record keys, or
    hard-break (you noted legacy graphs can be remade — does that extend to record files
    and the registry)?
-3. **Target name:** `CellSpecification` everywhere, and what user-facing/API term —
+3. **Target name:** `CellSpec` everywhere, and what user-facing/API term —
    `cell_specification`, `cell_spec`, or `spec` (the canonical display term is "cell
    spec" per the nomenclature decision)?
 4. **Record-key/profile rename:** rename `product`/`type_id`/`cell-type` profile, or

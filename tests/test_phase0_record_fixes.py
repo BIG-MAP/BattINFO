@@ -18,8 +18,8 @@ from battinfo.api import (
     _record_from_test_protocol,
 )
 from battinfo.bundle import (
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     ProvenanceInfo,
     Test,
@@ -121,7 +121,7 @@ def test_explicit_source_citation_wins_over_flat_kwarg() -> None:
 
 
 def test_expires_at_converts_like_manufactured_at() -> None:
-    instance = CellInstance(
+    instance = Cell(
         cell_spec_id=SPEC_IRI, manufactured_at="2024-01-01", expires_at="2030-01-01", uid=UID
     )
     record = _record_from_cell_instance(instance)
@@ -130,18 +130,18 @@ def test_expires_at_converts_like_manufactured_at() -> None:
 
 
 def test_expires_at_garbage_raises() -> None:
-    instance = CellInstance(cell_spec_id=SPEC_IRI, expires_at="not a date", uid=UID)
+    instance = Cell(cell_spec_id=SPEC_IRI, expires_at="not a date", uid=UID)
     with pytest.raises(ValueError, match="expires_at"):
         _record_from_cell_instance(instance)
 
 
 def test_retrieved_at_iso_string_converts_on_every_builder() -> None:
     spec_rec = _record_from_cell_spec(
-        CellSpecification(manufacturer="ACME", model="X1", retrieved_at="2024-01-01", uid=UID)
+        CellSpec(manufacturer="ACME", model="X1", retrieved_at="2024-01-01", uid=UID)
     )
     assert spec_rec["provenance"]["retrieved_at"] == JAN_2024
     inst_rec = _record_from_cell_instance(
-        CellInstance(cell_spec_id=SPEC_IRI, retrieved_at="2024-01-01", uid=UID)
+        Cell(cell_spec_id=SPEC_IRI, retrieved_at="2024-01-01", uid=UID)
     )
     assert inst_rec["provenance"]["retrieved_at"] == JAN_2024
     test_rec = _record_from_test(
@@ -162,11 +162,11 @@ def test_retrieved_at_epoch_zero_is_preserved() -> None:
 
 
 def test_retrieved_at_garbage_raises_instead_of_becoming_now() -> None:
-    spec = CellSpecification(manufacturer="ACME", model="X1", retrieved_at="not a date", uid=UID)
+    spec = CellSpec(manufacturer="ACME", model="X1", retrieved_at="not a date", uid=UID)
     with pytest.raises(ValueError, match="retrieved_at"):
         _record_from_cell_spec(spec)
 
 
 def test_retrieved_at_absent_still_defaults_to_now() -> None:
-    record = _record_from_cell_spec(CellSpecification(manufacturer="ACME", model="X1", uid=UID))
+    record = _record_from_cell_spec(CellSpec(manufacturer="ACME", model="X1", uid=UID))
     assert isinstance(record["provenance"]["retrieved_at"], int)

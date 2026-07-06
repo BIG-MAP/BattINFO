@@ -15,8 +15,8 @@ from battinfo._jsonio import write_json as _write_json
 from battinfo._workspace import Workspace
 from battinfo.bundle import (
     BattinfoBundle,
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     ChecksumInfo,
     Dataset,
     ProtocolInfo,
@@ -560,8 +560,8 @@ class LocalWorkspace:
 
     def capture(
         self,
-        cell_design: CellSpecification,
-        cell: CellInstance,
+        cell_design: CellSpec,
+        cell: Cell,
         test: Test,
         dataset: Dataset,
         *,
@@ -641,8 +641,8 @@ class LocalWorkspace:
         title: str,
         registry: RegistryTarget | Mapping[str, Any],
         publisher_id: str | None = None,
-        cell_design: CellSpecification,
-        cell: CellInstance,
+        cell_design: CellSpec,
+        cell: Cell,
         test: Test,
         dataset: Dataset,
         description: str | None = None,
@@ -834,7 +834,7 @@ class LocalWorkspace:
         dataset_path = None
         if distribution.path is not None:
             dataset_path = str((self.root / distribution.path).resolve())
-        cell_design = CellSpecification(
+        cell_design = CellSpec(
             id=cell_doc.cell_spec.id,
             manufacturer=cell_doc.cell_spec.manufacturer,
             model=cell_doc.cell_spec.model,
@@ -848,7 +848,7 @@ class LocalWorkspace:
             source=cell_doc.cell_spec.provenance.model_copy(deep=True),
             comment=list(cell_doc.cell_spec.comment),
         )
-        cell = CellInstance(
+        cell = Cell(
             id=cell_doc.cell.id,
             name=cell_doc.cell.name,
             cell_spec=cell_design,
@@ -977,8 +977,8 @@ class LocalWorkspace:
             raise ValueError("Submission bundle must include a cell_spec record, either as a resource or nested in the cell resource.")
         return BattinfoBundle(
             bundle_name=bundle_name,
-            cell_spec=CellSpecification.from_record(dict(cell_spec_record)),
-            cell_instance=CellInstance.from_record(cell_payload["cell"]),
+            cell_spec=CellSpec.from_record(dict(cell_spec_record)),
+            cell_instance=Cell.from_record(cell_payload["cell"]),
             test=Test.from_record(test_payload["test"]),
             dataset=Dataset.from_record(dataset_payload["dataset"]),
         )
@@ -1249,7 +1249,7 @@ class LocalWorkspace:
             if checksum_algorithm == "sha256":
                 checksum_value = _sha256(distribution_path)
 
-        cell_spec = CellSpecification(
+        cell_spec = CellSpec(
             id=cell_doc.cell_spec.id,
             manufacturer=cell_doc.cell_spec.manufacturer,
             model=cell_doc.cell_spec.model,
@@ -1263,7 +1263,7 @@ class LocalWorkspace:
             source=cell_doc.cell_spec.provenance.model_copy(deep=True),
             comment=list(cell_doc.cell_spec.comment),
         )
-        cell = CellInstance(
+        cell = Cell(
             id=cell_doc.cell.id,
             name=cell_doc.cell.name,
             cell_spec=cell_spec,

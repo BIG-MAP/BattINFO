@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from battinfo._workspace import Workspace
 from battinfo.api import build_curated_cell_spec_submission, submit_publication_package
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellSpec
 from battinfo.config import resolve_destination_config
 from battinfo.publication import publish as _legacy_publish
 
@@ -57,17 +57,17 @@ def publish(obj: Any = None, destination: str | None = None, **kwargs: Any) -> P
         raise TypeError("publish() requires a BattINFO object or the legacy publication-package keyword arguments.")
 
     resolved_destination = destination or "local"
-    if isinstance(obj, CellSpecification):
+    if isinstance(obj, CellSpec):
         return _publish_cell_spec(obj, destination=resolved_destination, **kwargs)
 
     raise TypeError(
-        "publish(obj, destination=...) currently supports CellSpecification objects. "
+        "publish(obj, destination=...) currently supports CellSpec objects. "
         "Use the legacy keyword form for dataset publication packages."
     )
 
 
 def _publish_cell_spec(
-    cell_spec: CellSpecification,
+    cell_spec: CellSpec,
     *,
     destination: str,
     root: PathLike | None = None,
@@ -98,7 +98,7 @@ def _publish_cell_spec(
     workspace.save(validation_policy=validation_policy)
 
     if not isinstance(cell_spec.id, str) or not cell_spec.id:
-        raise RuntimeError("CellSpecification did not receive a canonical id during save().")
+        raise RuntimeError("CellSpec did not receive a canonical id during save().")
 
     canonical_id = cell_spec.id.rsplit("/", 1)[-1]
     record_path = workspace.source_root / "cell-spec" / f"cell-spec-{canonical_id}.json"
@@ -197,7 +197,7 @@ def _looks_like_legacy_publication_call(obj: Any, destination: str | None, kwarg
     return any(key in kwargs for key in legacy_keys)
 
 
-def _cell_spec_slug(cell_spec: CellSpecification) -> str:
+def _cell_spec_slug(cell_spec: CellSpec) -> str:
     parts = [cell_spec.manufacturer or "cell", cell_spec.model or "type"]
     value = "-".join(parts).strip().lower()
     slug = re.sub(r"[^a-z0-9]+", "-", value).strip("-")

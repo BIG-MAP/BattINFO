@@ -12,9 +12,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo import (  # noqa: E402
     BattinfoBundle,
     BillOfMaterials,
+    Cell,
     CellConstruction,
-    CellInstance,
-    CellSpecification,
+    CellSpec,
     Coating,
     CurrentCollector,
     Dataset,
@@ -38,7 +38,7 @@ from battinfo.bundle import ProtocolInfo, ProvenanceInfo  # noqa: E402
 
 
 def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
-    specification = CellSpecification(
+    specification = CellSpec(
         id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
         manufacturer="Energizer",
         model="CR2032",
@@ -57,7 +57,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
         ),
         comment=["Example bundle specification."],
     )
-    cell_spec = CellSpecification(
+    cell_spec = CellSpec(
         id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
         name="Energizer CR2032",
         manufacturer="Energizer",
@@ -87,7 +87,7 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
             retrieved_at=1771804800,
         ),
     )
-    cell_instance = CellInstance(
+    cell_instance = Cell(
         id="https://w3id.org/battinfo/cell/69ca-scxq-6w58-e9tc",
         name="energizer-cr2032-202602-dtjrga",
         cell_spec_id=cell_spec.id,
@@ -387,7 +387,7 @@ def test_derive_cell_spec_from_library_record_mapping() -> None:
 
 
 def test_cell_specification_accepts_nested_objects() -> None:
-    spec = CellSpecification(
+    spec = CellSpec(
         id="https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw",
         manufacturer="A123",
         model="ANR26650M1-B",
@@ -445,7 +445,7 @@ def test_cell_specification_accepts_nested_objects() -> None:
 
 
 def test_cell_specification_accepts_human_first_helper_objects() -> None:
-    spec = CellSpecification(
+    spec = CellSpec(
         id="https://w3id.org/battinfo/cell/4f2m-8k7p-1t9x-6q3r",
         manufacturer="ExampleLab",
         model="POUCH-ML-NMC-042",

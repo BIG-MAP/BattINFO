@@ -159,6 +159,7 @@ $ battinfo query [OPTIONS] COMMAND [ARGS]...
 * `cell-instance`: Query canonical cell instances.
 * `dataset`: Query canonical dataset records.
 * `test-protocol`: Query canonical test protocols.
+* `test-spec`: Query canonical test protocols.
 * `tests`: Query canonical tests.
 
 ### `battinfo query cell-spec`
@@ -243,6 +244,27 @@ Query canonical test protocols.
 
 ```console
 $ battinfo query test-protocol [OPTIONS]
+```
+
+**Options**:
+
+* `--id TEXT`: Filter by canonical test-protocol IRI.
+* `--kind TEXT`: Filter by protocol kind.
+* `--name-contains TEXT`: Case-insensitive substring filter on protocol name.
+* `--source-type TEXT`: Filter by source type.
+* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
+* `--format TEXT`: Output format: table|json.  [default: table]
+* `--help`: Show this message and exit.
+
+### `battinfo query test-spec`
+
+Query canonical test protocols.
+
+**Usage**:
+
+```console
+$ battinfo query test-spec [OPTIONS]
 ```
 
 **Options**:
@@ -501,6 +523,7 @@ $ battinfo save [OPTIONS] COMMAND [ARGS]...
 * `cell-instance`: Save a cell-instance using either --input...
 * `dataset`: Save a dataset using either --input JSON...
 * `test-protocol`: Save a reusable test protocol using either...
+* `test-spec`: Save a reusable test protocol using either...
 * `test`: Save a test using either --input JSON or...
 
 ### `battinfo save record`
@@ -691,6 +714,38 @@ $ battinfo save test-protocol [OPTIONS]
 * `--format TEXT`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
+### `battinfo save test-spec`
+
+Save a reusable test protocol using either --input JSON or inline draft fields.
+
+**Usage**:
+
+```console
+$ battinfo save test-spec [OPTIONS]
+```
+
+**Options**:
+
+* `--input FILE`: Draft or canonical JSON.
+* `--name TEXT`: Protocol name (required when --input omitted).
+* `--kind TEXT`: Test kind.  [default: other]
+* `--description TEXT`: Optional protocol description.
+* `--version TEXT`: Optional protocol version.
+* `--protocol-url TEXT`: Optional protocol URL.
+* `--source-type TEXT`: Source type: manual|lab|simulation|other.  [default: manual]
+* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
+* `--source-root PATH`: Save source root.  [default: examples]
+* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
+* `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--validate / --no-validate`: Validate record before saving.  [default: validate]
+* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--dry-run`: Preview save without writing files.
+* `--format TEXT`: Output format: table|json.  [default: json]
+* `--help`: Show this message and exit.
+
 ### `battinfo save test`
 
 Save a test using either --input JSON or inline draft fields.
@@ -748,6 +803,7 @@ $ battinfo template [OPTIONS] COMMAND [ARGS]...
 * `cell-instance`: Generate a starter template for a...
 * `dataset`: Generate a starter template for a dataset...
 * `test-protocol`: Generate a starter template for a reusable...
+* `test-spec`: Generate a starter template for a reusable...
 * `test`: Generate a starter template for a test...
 
 ### `battinfo template cell-spec`
@@ -848,6 +904,26 @@ Generate a starter template for a reusable test-protocol record.
 
 ```console
 $ battinfo template test-protocol [OPTIONS]
+```
+
+**Options**:
+
+* `--name TEXT`: Human-readable protocol name.  [default: Example Test Protocol]
+* `--kind TEXT`: Test kind.  [default: other]
+* `--source-type TEXT`: Source type: manual|lab|simulation|other.  [default: manual]
+* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
+* `--out PATH`: Optional output JSON path.
+* `--format TEXT`: Output format: table|json.  [default: json]
+* `--help`: Show this message and exit.
+
+### `battinfo template test-spec`
+
+Generate a starter template for a reusable test-protocol record.
+
+**Usage**:
+
+```console
+$ battinfo template test-spec [OPTIONS]
 ```
 
 **Options**:

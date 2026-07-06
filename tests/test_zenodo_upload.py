@@ -18,8 +18,8 @@ sys.path.insert(0, str(ROOT / "src"))
 import pytest
 
 from battinfo import (
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     Test,
     ZenodoCellRecord,
@@ -119,7 +119,7 @@ CREATORS = [{"name": "Clark, Simon", "affiliation": "SINTEF"}]
 
 
 def _make_record(n: int = 2) -> ZenodoCellRecord:
-    ct = CellSpecification(
+    ct = CellSpec(
         id=CELL_TYPE_ID,
         name="Energizer CR2032",
         manufacturer="Energizer",
@@ -137,7 +137,7 @@ def _make_record(n: int = 2) -> ZenodoCellRecord:
         ci_id = f"https://w3id.org/battinfo/cell/ci-{idx}"
         test_id = f"https://w3id.org/battinfo/test/t-{idx}"
         ds_id = f"https://w3id.org/battinfo/dataset/d-{idx}"
-        ci = CellInstance(id=ci_id, name=f"sn-{idx}", cell_spec_id=CELL_TYPE_ID,
+        ci = Cell(id=ci_id, name=f"sn-{idx}", cell_spec_id=CELL_TYPE_ID,
                           serial_number=f"sn-{idx}", source=ProvenanceInfo(type="measurement"))
         test = Test(id=test_id, name=f"test {idx}", test_kind="capacity_check",
                     cell_instance_id=ci_id, source=ProvenanceInfo(type="measurement"))

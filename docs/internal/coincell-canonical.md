@@ -52,7 +52,7 @@ BatteryCell (CoinCell)
 └─ hasConstituent / hasComponent → Spring, Spacer
 ```
 
-The BattINFO bundle mirrors this with `CellSpecification` → `positive_electrode`
+The BattINFO bundle mirrors this with `CellSpec` → `positive_electrode`
 /`negative_electrode` (`Electrode`→`Coating`/`CurrentCollector`), `electrolyte`
 (`Electrolyte`→`SolventMixture`/`Salt`/`additive[]`), `separator`, and a `housing`
 model (`Case`/`Cap`/`Terminal`/`Seal`/`HardwarePart`; coin case/spring/spacer are

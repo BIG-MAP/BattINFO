@@ -29,7 +29,7 @@ is limited to: the pydantic sub-models, the JSON-LD **relations** (`hasTerminal`
 
 ### 3.1 Housing (generalises `coin_hardware` to all formats)
 
-New `Housing` model on `CellSpecification` (field `housing`). `coin_hardware` is retained
+New `Housing` model on `CellSpec` (field `housing`). `coin_hardware` is retained
 and **mapped into `housing` on load** for back-compat (see §7 migration).
 
 ```python
@@ -150,7 +150,7 @@ The swelling cascade (thickness after calendering/baking/wetting/@SOC/@cycle) an
 impedance decomposition (electrode/CC/terminal/module/pack) are **state- and cycle-dependent
 functions**, not static design facts. Recommendation: model them as **measurement outputs**
 (a thickness-vs-SOC / thickness-vs-cycle series, an impedance breakdown table) attached to a
-`Test`/`Dataset`, not as `CellSpecification` properties. Tracked as a separate initiative;
+`Test`/`Dataset`, not as `CellSpec` properties. Tracked as a separate initiative;
 out of scope here.
 
 ## 7. Implementation plan
@@ -169,7 +169,7 @@ out of scope here.
   loading-side/`ceramic_coating`; add the missing EMMO terms (§4) and wire the stub co-types.
 - **E5 — Authoring + validation.** `housing()`, `terminal()`, `tab=`, construction stack
   kwargs; then build a scraper for `Cell_Design_Tool*.xlsx` (analogous to the Discovery
-  scraper) as the end-to-end proof, producing one prismatic `CellSpecification` + instances.
+  scraper) as the end-to-end proof, producing one prismatic `CellSpec` + instances.
 
 ## 8. Open decisions
 

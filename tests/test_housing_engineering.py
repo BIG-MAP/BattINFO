@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo import CellSpecification  # noqa: E402
+from battinfo import CellSpec  # noqa: E402
 from battinfo.authoring import (  # noqa: E402
     bom,
     case,
@@ -31,7 +31,7 @@ from battinfo.authoring import (  # noqa: E402
 from battinfo.transform.json_to_jsonld import to_jsonld  # noqa: E402
 
 
-def _battery_node(spec: CellSpecification) -> dict:
+def _battery_node(spec: CellSpec) -> dict:
     """Export a spec to validated domain-battery JSON-LD and return the battery node."""
     spec_dict = spec.to_json()
     if "properties" in spec_dict and "property" not in spec_dict:
@@ -85,7 +85,7 @@ def _prismatic_spec(housing_model=None, construction_model=None):
 
 def test_housing_round_trips_through_library_record() -> None:
     spec = _prismatic_spec(housing_model=_prismatic_housing())
-    restored = CellSpecification.from_library_record(spec.to_library_record())
+    restored = CellSpec.from_library_record(spec.to_library_record())
 
     assert restored.housing is not None
     assert restored.housing.case.material == "Aluminium"
@@ -143,7 +143,7 @@ def test_electrode_tab_round_trips_and_emits() -> None:
             tab=tab(material="Aluminium", width={"value": 50, "unit": "mm"}, thickness={"value": 0.65, "unit": "mm"}),
         ),
     )
-    restored = CellSpecification.from_library_record(spec.to_library_record())
+    restored = CellSpec.from_library_record(spec.to_library_record())
     assert restored.positive_electrode.tab.material == "Aluminium"
     assert restored.positive_electrode.tab.property["width"]["value"] == 50
 
@@ -225,7 +225,7 @@ def test_legacy_coin_hardware_record_loads_into_housing() -> None:
         },
         "provenance": {},
     }
-    spec = CellSpecification.from_library_record(record)
+    spec = CellSpec.from_library_record(record)
     assert spec.housing is not None
     assert spec.housing.case.material == "Stainless steel"
     # On re-serialization the on-disk key is `housing`, not the retired `coin_hardware`.

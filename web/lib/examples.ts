@@ -36,10 +36,10 @@ export const heroSnippet = `{
   "nominal_voltage":  { "value": 3.3, "unit": "V" }
 }`;
 
-export const quickstartPython = `from battinfo import CellSpecification, publish
+export const quickstartPython = `from battinfo import CellSpec, publish
 
 result = publish(
-    CellSpecification(
+    CellSpec(
         manufacturer="A123",
         model="ANR26650M1-B",
         cell_format="cylindrical",

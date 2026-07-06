@@ -42,7 +42,7 @@ on-disk folder, its IRI namespace. Adding a record type means adding one entry
 there — every dispatch table in the package derives from it.
 
 **2. The pydantic models are the single source of truth.** There is no
-separate "input DTO" layer: `CellSpecification`, `CellInstance`, `Test`,
+separate "input DTO" layer: `CellSpec`, `Cell`, `Test`,
 `TestSpec`, and `Dataset` (in `src/battinfo/bundle.py`) are simultaneously
 
 - the **authoring input** — construct them with flat datasheet-style kwargs

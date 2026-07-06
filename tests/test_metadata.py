@@ -9,7 +9,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo import (  # noqa: E402
     BatteryTestType,
     Cell,
-    CellSpecification,
+    CellSpec,
     Dataset,
     TableColumn,
     TableSchema,
@@ -84,7 +84,7 @@ def test_infer_variable_measured_from_columns_and_metadata() -> None:
 
 
 def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
-    cell_spec = CellSpecification(
+    cell_spec = CellSpec(
         manufacturer="A123",
         model="ANR26650M1-B",
         format="cylindrical",

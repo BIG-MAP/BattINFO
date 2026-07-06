@@ -14,15 +14,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.bundle import (
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     ProvenanceInfo,
     Test,
     TestSpec,
 )
 
-MODELS = [CellSpecification, CellInstance, Test, TestSpec, Dataset, ProvenanceInfo]
+MODELS = [CellSpec, Cell, Test, TestSpec, Dataset, ProvenanceInfo]
 
 # Structural fields shared via BundleJsonModel — not part of the authoring vocabulary.
 STRUCTURAL = {"kind", "schema_version"}

@@ -28,7 +28,7 @@ from battinfo.authoring import (
 from battinfo.bundle import (
     BillOfMaterials,
     CellConstruction,
-    CellSpecification,
+    CellSpec,
     Electrode,
     Electrolyte,
     MaterialComponent,
@@ -368,7 +368,7 @@ _CELL_ID = "https://w3id.org/battinfo/cell/1234-5678-abcd-efgh"
 
 
 class TestCellDescription:
-    def _minimal(self) -> CellSpecification:
+    def _minimal(self) -> CellSpec:
         return cell_description(
             id=_CELL_ID,
             manufacturer="Acme",
@@ -379,7 +379,7 @@ class TestCellDescription:
 
     def test_returns_cell_specification(self):
         spec = self._minimal()
-        assert isinstance(spec, CellSpecification)
+        assert isinstance(spec, CellSpec)
 
     def test_required_fields_set(self):
         spec = self._minimal()

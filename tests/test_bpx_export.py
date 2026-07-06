@@ -102,9 +102,9 @@ def test_cell_instance_reference_in_header(a123_record):
 
 
 def test_accepts_cellspecification_object():
-    from battinfo import CellSpecification
+    from battinfo import CellSpec
 
-    ct = CellSpecification.from_record(json.loads(A123.read_text(encoding="utf-8")))
+    ct = CellSpec.from_record(json.loads(A123.read_text(encoding="utf-8")))
     result = to_bpx(ct)
     assert result.bpx["Parameterisation"]["Cell"]["Nominal cell capacity [A.h]"] == pytest.approx(2.5)
 

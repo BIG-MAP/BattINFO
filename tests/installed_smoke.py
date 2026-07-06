@@ -38,14 +38,14 @@ def main() -> None:
         raw_file.parent.mkdir(parents=True, exist_ok=True)
         raw_file.write_text("time,voltage\n0,3.0\n", encoding="utf-8")
 
-        cell_spec = battinfo.CellSpecification(
+        cell_spec = battinfo.CellSpec(
             manufacturer="Energizer",
             model="CR2032",
             format="coin",
             chemistry="Li-primary",
             size_code="R2032",
         )
-        cell = battinfo.CellInstance(cell_spec=cell_spec, serial_number="energizer-cr2032-001")
+        cell = battinfo.Cell(cell_spec=cell_spec, serial_number="energizer-cr2032-001")
         test = battinfo.Test(
             cell=cell,
             kind="capacity_check",

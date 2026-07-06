@@ -7,7 +7,7 @@ BattINFO turns battery metadata into machine-readable Linked Data. In five minut
 | You want to… | Use | Entry point |
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` then `ws.quickstart()` |
-| Create a single record in code and save/publish it | **Models + functions** | `CellSpecification(...)` + `battinfo.publish(...)` (this page) |
+| Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` (this page) |
 | Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo.Workspace` — the lower-level engine the authoring workspace wraps |
 
 If in doubt, start with `battinfo.workspace(".")` — it wraps everything else. See
@@ -31,9 +31,9 @@ pip install battinfo
 A **cell spec** is a product specification — the datasheet-level description of a battery model. Create one in three lines:
 
 ```python
-from battinfo import CellSpecification, publish
+from battinfo import CellSpec, publish
 
-cell_spec = CellSpecification(
+cell_spec = CellSpec(
     manufacturer="Panasonic",
     model="NCR18650B",
     format="cylindrical",

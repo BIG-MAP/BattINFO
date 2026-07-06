@@ -81,10 +81,10 @@ from battinfo.bundle import (
     BattinfoBundle,
     BillOfMaterials,
     Case,
+    Cell,
     CellConstruction,
-    CellInstance,
     CellProductType,
-    CellSpecification,
+    CellSpec,
     ChecksumInfo,
     Coating,
     Conformance,
@@ -205,9 +205,8 @@ from battinfo.validate import (
 from battinfo.ws import AuthoringWorkspace, validate_jsonld, workspace
 from battinfo.zenodo import ZenodoClient, ZenodoError, patch_zenodo_urls, upload_zenodo_package
 
-BatteryCellSpecification = CellSpecification
-BatteryCell = CellInstance
-Cell = CellInstance
+BatteryCellSpecification = CellSpec  # legacy alias
+BatteryCell = Cell  # legacy alias
 
 __all__ = [
     "__version__",
@@ -221,8 +220,7 @@ __all__ = [
     "CellConstruction",
     "ChecksumInfo",
     "Coating",
-    "CellSpecification",
-    "CellInstance",
+    "CellSpec",
     "CurrentCollector",
     "Dataset",
     "Electrode",
@@ -432,8 +430,11 @@ __version__ = "0.7.0"
 # The consolidation retired the per-record-type *Input DTOs; the models are the
 # authoring input. Downstream pinners get a migration message, not an ImportError.
 _DEPRECATED_ALIASES: dict[str, tuple[str, object]] = {
-    "CellSpecificationInput": ("CellSpecification", CellSpecification),
-    "CellInstanceInput": ("CellInstance", CellInstance),
+    # Pre-0.8 long-form class names (renamed to the consistent short scheme).
+    "CellSpecification": ("CellSpec", CellSpec),
+    "CellInstance": ("Cell", Cell),
+    "CellSpecificationInput": ("CellSpec", CellSpec),
+    "CellInstanceInput": ("Cell", Cell),
     "TestInput": ("Test", Test),
     "DatasetInput": ("Dataset", Dataset),
     "TestSpecInput": ("TestSpec", TestSpec),

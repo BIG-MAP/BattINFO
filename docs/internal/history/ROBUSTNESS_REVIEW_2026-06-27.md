@@ -33,7 +33,7 @@ Flagged by: Authoring->record->submit (AC-01), Test-suite (TS-06). Verdict: **co
 Flagged by: Authoring->record->submit (AC-02). Verdict: **confirmed**, repro run.
 
 `src/battinfo/_workspace.py:146-172, 1945-1956` | **high** |
-- Repro (run): two `CellInstance`s, identical identity, distinct measured mass [10,20]. Order [10,20] -> `{10:.../cell/dnqz, 20:.../cell/5gg0}`; order [20,10] -> `{20:.../cell/dnqz, 10:.../cell/5gg0}`. Same physical cell (mass=20) gets a different IRI across runs; IRIs swap.
+- Repro (run): two `Cell`s, identical identity, distinct measured mass [10,20]. Order [10,20] -> `{10:.../cell/dnqz, 20:.../cell/5gg0}`; order [20,10] -> `{20:.../cell/dnqz, 10:.../cell/5gg0}`. Same physical cell (mass=20) gets a different IRI across runs; IRIs swap.
 - Root cause: `_disambiguate_entity_ids` re-mints colliding entities with `_entity_iri(type, f'{current}::{ordinal}')` where `ordinal` is iteration order, not content. On re-save (upsert) the mass=20 cell's new content lands on the mass=10 cell's prior IRI file — wrong record clobbered, prior IRI orphaned.
 - Proposed fix: seed the collision re-mint from a hash of the entity's distinguishing/canonical content (the finalized objects retain `.measured`), not `f'{id}::{ordinal}'`.
 - Proposed test: `tests/test_workspace.py::test_disambiguation_is_order_independent` — finalize the same two content-distinct, identity-colliding cells in both orders; assert each cell's IRI (keyed by content) is identical across orderings.

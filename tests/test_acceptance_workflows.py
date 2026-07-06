@@ -17,9 +17,9 @@ sys.path.insert(0, str(ROOT / "src"))
 
 # ── Golden path 1: the quickstart product surface (author -> publish -> inspect) ──
 def test_quickstart_product_publish(tmp_path: Path) -> None:
-    from battinfo import CellSpecification, publish
+    from battinfo import CellSpec, publish
 
-    cell_spec = CellSpecification(
+    cell_spec = CellSpec(
         manufacturer="Panasonic", model="NCR18650B", format="cylindrical", chemistry="Li-ion",
         size_code="R18650",
         nominal_capacity={"value": 3.4, "unit": "Ah"},

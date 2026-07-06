@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._workspace import Workspace
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import Cell, CellSpec, Dataset, Test
 from battinfo.local_workspace import (
     BattinfoSubmission,
     SubmissionDistribution,
@@ -26,7 +26,7 @@ from battinfo.local_workspace import (
 from battinfo.validate.record import validate_record
 
 PathLike = str | Path
-WorkspaceTarget = CellSpecification | CellInstance | Test | Dataset
+WorkspaceTarget = CellSpec | Cell | Test | Dataset
 WORKSPACE_STATE_SCHEMA_VERSION = "0.1.0"
 WORKSPACE_STATE_FILENAME = "battinfo-authoring-workspace.json"
 
@@ -211,11 +211,11 @@ class WorkspaceStateStore:
         return self.workspace.root
 
     @property
-    def cell_specs(self) -> list[CellSpecification]:
+    def cell_specs(self) -> list[CellSpec]:
         return self.workspace.cell_specs
 
     @property
-    def cells(self) -> list[CellInstance]:
+    def cells(self) -> list[Cell]:
         return self.workspace.cells
 
     @property
@@ -227,20 +227,20 @@ class WorkspaceStateStore:
         return self.workspace.datasets
 
     @property
-    def descriptions(self) -> list[CellSpecification]:
+    def descriptions(self) -> list[CellSpec]:
         return self.workspace.descriptions
 
     def add(self, *objects: Any) -> "WorkspaceStateStore":
         self.workspace.add(*objects)
         return self
 
-    def describe_cell(self, **kwargs: Any) -> CellSpecification:
+    def describe_cell(self, **kwargs: Any) -> CellSpec:
         return self.workspace.describe_cell(**kwargs)
 
-    def cell_spec(self, **kwargs: Any) -> CellSpecification:
+    def cell_spec(self, **kwargs: Any) -> CellSpec:
         return self.workspace.cell_spec(**kwargs)
 
-    def cell(self, *args: Any, **kwargs: Any) -> CellInstance:
+    def cell(self, *args: Any, **kwargs: Any) -> Cell:
         return self.workspace.cell(*args, **kwargs)
 
     def test(self, *args: Any, **kwargs: Any) -> Test:
@@ -513,13 +513,13 @@ class WorkspaceStateStore:
         dataset_records = cls._load_records(root_path / paths.datasets)
         artifact_map = {entry.dataset_id: root_path / entry.path for entry in manifest.dataset_artifacts}
 
-        cell_specs = [CellSpecification.from_record(record) for record in cell_spec_records]
+        cell_specs = [CellSpec.from_record(record) for record in cell_spec_records]
         cell_spec_by_id = {item.id: item for item in cell_specs if item.id is not None}
 
-        cells: list[CellInstance] = []
-        cell_by_id: dict[str, CellInstance] = {}
+        cells: list[Cell] = []
+        cell_by_id: dict[str, Cell] = {}
         for record in cell_records:
-            cell = CellInstance.from_record(record)
+            cell = Cell.from_record(record)
             if cell.cell_spec_id is not None:
                 cell.cell_spec = cell_spec_by_id.get(cell.cell_spec_id)
             cells.append(cell)
@@ -782,7 +782,7 @@ class WorkspaceStateStore:
             source_local_id=self._source_local_id("cell_spec", record),
             title=self._cell_spec_title(record),
             semantic_payload={
-                "@type": "CellSpecification",
+                "@type": "CellSpec",
                 "battinfo_records": {"cell_spec": record},
             },
         )
@@ -964,10 +964,10 @@ class WorkspaceStateStore:
         cell_local_ids: dict[str, str],
         test_local_ids: dict[str, str],
     ) -> SubmissionResource:
-        if isinstance(target, CellSpecification):
+        if isinstance(target, CellSpec):
             record = self._find_record("cell_specs", target.id, cell_spec_by_id.values())
             return self._cell_spec_resource(record)
-        if isinstance(target, CellInstance):
+        if isinstance(target, Cell):
             record = self._find_record("cells", target.id, cell_records)
             return self._cell_resource(record, cell_spec_by_id)
         if isinstance(target, Test):
@@ -976,7 +976,7 @@ class WorkspaceStateStore:
         if isinstance(target, Dataset):
             record = self._find_record("dataset", target.id, dataset_records)
             return self._dataset_resource(record, artifact_map, cell_titles, test_titles, cell_local_ids, test_local_ids)
-        raise TypeError("Workspace.bundle_workspace() target must be a CellSpecification, CellInstance, Test, or Dataset.")
+        raise TypeError("Workspace.bundle_workspace() target must be a CellSpec, Cell, Test, or Dataset.")
 
     def _resource_artifacts(
         self,

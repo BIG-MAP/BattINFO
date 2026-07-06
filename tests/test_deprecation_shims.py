@@ -17,8 +17,8 @@ sys.path.insert(0, str(ROOT / "src"))
 import battinfo  # noqa: E402
 
 ALIASES = {
-    "CellSpecificationInput": battinfo.CellSpecification,
-    "CellInstanceInput": battinfo.CellInstance,
+    "CellSpecificationInput": battinfo.CellSpec,
+    "CellInstanceInput": battinfo.Cell,
     "TestInput": battinfo.Test,
     "DatasetInput": battinfo.Dataset,
     "TestSpecInput": battinfo.TestSpec,

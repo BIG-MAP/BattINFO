@@ -34,9 +34,9 @@ The fastest path is the ``publish`` shortcut:
 
 .. code-block:: python
 
-   from battinfo import CellSpecification, publish
+   from battinfo import CellSpec, publish
 
-   cell_spec = CellSpecification(
+   cell_spec = CellSpec(
        manufacturer="Energizer",
        model="CR2032",
        format="coin",
@@ -117,7 +117,7 @@ What to read next
 
         :octicon:`code;1em;sd-text-info`  Python API reference
         ^^^^^^^^^^^^^^^^^^^^^^
-        Full surface documentation for ``Workspace``, ``CellSpecification``, ingest helpers, and publishing utilities.
+        Full surface documentation for ``Workspace``, ``CellSpec``, ingest helpers, and publishing utilities.
 
     .. grid-item-card::
         :link: ../ontology-profile-architecture.html

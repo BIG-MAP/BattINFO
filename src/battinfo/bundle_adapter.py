@@ -11,13 +11,13 @@ Public API
 ----------
 specs_to_specset(props)         dict[str, Any] → SpecSet
 specset_to_specs(ss)            SpecSet        → dict[str, Any]
-cell_spec_to_schema(ct)         CellSpecification       → generated CellSpecification
-cell_instance_to_schema(ci)     CellInstance   → generated CellInstance
+cell_spec_to_schema(ct)         CellSpec       → generated CellSpec
+cell_instance_to_schema(ci)     Cell   → generated Cell
 test_to_schema(t)               Test           → generated Test
 test_spec_to_schema(ts)         TestSpec       → generated TestSpec
 bundle_to_schema(obj)           any bundle obj → corresponding generated obj
 
-schema_cell_spec_to_record_dict(ct_gen) → record dict accepted by CellSpecification.from_record()
+schema_cell_spec_to_record_dict(ct_gen) → record dict accepted by CellSpec.from_record()
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Mapping
 
 if TYPE_CHECKING:
-    from battinfo.bundle import CellInstance, CellSpecification, Test, TestSpec
+    from battinfo.bundle import Cell, CellSpec, Test, TestSpec
     from battinfo.bundle_generated import (
         CellInstance as GenCellInstance,
     )
@@ -132,8 +132,8 @@ def specset_to_specs(specset: "SpecSet | None") -> dict[str, Any]:
 # ── bundle.py → generated ─────────────────────────────────────────────────────
 
 
-def cell_spec_to_schema(ct: "CellSpecification") -> "GenCellSpecification":
-    """Convert a bundle.py CellSpecification to a generated CellSpecification with EMMO IRI annotations."""
+def cell_spec_to_schema(ct: "CellSpec") -> "GenCellSpecification":
+    """Convert a bundle.py CellSpec to a generated CellSpec with EMMO IRI annotations."""
     from battinfo.bundle_generated import (  # noqa: PLC0415
         CellSpecification as GenCellSpecification,
     )
@@ -159,8 +159,8 @@ def cell_spec_to_schema(ct: "CellSpecification") -> "GenCellSpecification":
     )
 
 
-def cell_instance_to_schema(ci: "CellInstance") -> "GenCellInstance":
-    """Convert a bundle.py CellInstance to a generated CellInstance."""
+def cell_instance_to_schema(ci: "Cell") -> "GenCellInstance":
+    """Convert a bundle.py Cell to a generated Cell."""
     from battinfo.bundle_generated import CellInstance as GenCellInstance  # noqa: PLC0415
     return GenCellInstance(
         ci_id=ci.id or "urn:staging:unknown",
@@ -232,14 +232,14 @@ def bundle_to_schema(obj: Any) -> Any:
     Raises TypeError for unknown types.
     """
     from battinfo.bundle import (  # noqa: PLC0415
-        CellInstance,
-        CellSpecification,
+        Cell,
+        CellSpec,
         Test,
         TestSpec,
     )
-    if isinstance(obj, CellSpecification):
+    if isinstance(obj, CellSpec):
         return cell_spec_to_schema(obj)
-    if isinstance(obj, CellInstance):
+    if isinstance(obj, Cell):
         return cell_instance_to_schema(obj)
     if isinstance(obj, Test):
         return test_to_schema(obj)
@@ -252,7 +252,7 @@ def bundle_to_schema(obj: Any) -> Any:
 
 
 def schema_cell_spec_to_record_dict(ct_gen: "GenCellSpecification") -> dict[str, Any]:
-    """Convert a generated CellSpecification to the record dict accepted by CellSpecification.from_record().
+    """Convert a generated CellSpec to the record dict accepted by CellSpec.from_record().
 
     Useful when reading JSON-LD output back into the application layer.
     """

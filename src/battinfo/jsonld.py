@@ -300,7 +300,7 @@ def cell_instance_to_jsonld(record: dict) -> dict:
 
     node: dict = {
         "@context": _CONTEXT_INLINE,
-        "@type":    "https://w3id.org/battinfo/CellInstance",
+        "@type":    "https://w3id.org/battinfo/Cell",
         "@id":      ci.get("id", ""),
         "schema:serialNumber": ci.get("serial_number"),
     }

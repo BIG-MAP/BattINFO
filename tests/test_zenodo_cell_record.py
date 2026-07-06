@@ -11,8 +11,8 @@ import pytest
 
 from battinfo import (
     BattinfoBundle,
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     Test,
     ZenodoCellRecord,
@@ -36,8 +36,8 @@ DATASET_ID = "https://w3id.org/battinfo/dataset/gj1y-pn2n-t5pm-gs9c"
 DATASET_ID_2 = "https://w3id.org/battinfo/dataset/eeee-ffff-gggg-hhhh"
 
 
-def _make_cell_spec() -> CellSpecification:
-    return CellSpecification(
+def _make_cell_spec() -> CellSpec:
+    return CellSpec(
         id=CELL_SPEC_ID,
         manufacturer="Energizer",
         model="CR2032",
@@ -50,8 +50,8 @@ def _make_cell_spec() -> CellSpecification:
     )
 
 
-def _make_cell_spec() -> CellSpecification:
-    return CellSpecification(
+def _make_cell_spec() -> CellSpec:
+    return CellSpec(
         id=CELL_TYPE_ID,
         name="Energizer CR2032",
         manufacturer="Energizer",
@@ -66,8 +66,8 @@ def _make_cell_spec() -> CellSpecification:
 def _make_cell_instance(
     instance_id: str = CELL_INSTANCE_ID,
     serial: str = "sn-001",
-) -> CellInstance:
-    return CellInstance(
+) -> Cell:
+    return Cell(
         id=instance_id,
         name=serial,
         cell_spec_id=CELL_TYPE_ID,
@@ -79,7 +79,7 @@ def _make_cell_instance(
 def _make_dataset_entry(
     test_id: str = TEST_ID,
     dataset_id: str = DATASET_ID,
-    cell_instances: list[CellInstance] | None = None,
+    cell_instances: list[Cell] | None = None,
 ) -> ZenodoDatasetEntry:
     test = Test(
         id=test_id,

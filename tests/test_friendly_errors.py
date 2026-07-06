@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import _validate_canonical_record
-from battinfo.bundle import CellSpecification, Dataset, Test
+from battinfo.bundle import CellSpec, Dataset, Test
 
 SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-aaaa-aaaa-aaaa"
 
@@ -78,12 +78,12 @@ def test_required_error_path_names_the_missing_field() -> None:
 
 def test_kwarg_typo_gets_a_did_you_mean() -> None:
     with pytest.raises(TypeError, match=r"manufacture=.*did you mean manufacturer=\?"):
-        CellSpecification(manufacture="Acme", model_name="X", chemistry="LFP", format="cylindrical")
+        CellSpec(manufacture="Acme", model_name="X", chemistry="LFP", format="cylindrical")
 
 
 def test_spec_property_typo_gets_a_did_you_mean() -> None:
     with pytest.raises(TypeError, match=r"did you mean nominal_capacity=\?"):
-        CellSpecification(
+        CellSpec(
             manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
             nominal_capacit={"value": 2.0, "unit": "Ah"},
         )

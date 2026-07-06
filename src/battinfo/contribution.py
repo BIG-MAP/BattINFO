@@ -1040,23 +1040,23 @@ def _test_kind_from_path(path: Path, subdir_name: str = "") -> str:
 
 
 def _load_cell_spec_for_batch(cell_spec_iri: str) -> tuple[Any, Any]:
-    """Return (CellSpecification, CellSpecification | None) for a cell-spec IRI.
+    """Return (CellSpec, CellSpec | None) for a cell-spec IRI.
 
     Searches the packaged library first, then the local workspace library.
-    Falls back to a minimal CellSpecification carrying only the IRI.
+    Falls back to a minimal CellSpec carrying only the IRI.
     """
     from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
-    from battinfo.bundle import CellSpecification
+    from battinfo.bundle import CellSpec
     from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
 
     packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
     for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
         results = query_library_cell_specs(id=cell_spec_iri, directory=directory)
         if results:
-            spec = CellSpecification.from_library_record(results[0]["record"])
-            ct = CellSpecification.from_cell_specification(spec, id=cell_spec_iri)
+            spec = CellSpec.from_library_record(results[0]["record"])
+            ct = CellSpec.from_cell_specification(spec, id=cell_spec_iri)
             return ct, spec
-    return CellSpecification(id=cell_spec_iri), None
+    return CellSpec(id=cell_spec_iri), None
 
 
 def package_batch(
@@ -1091,7 +1091,7 @@ def package_batch(
         ``cell_count``, ``entry_count``.
     """
     from battinfo.bundle import (
-        CellInstance,
+        Cell,
         Dataset,
         ProvenanceInfo,
         Test,
@@ -1141,7 +1141,7 @@ def package_batch(
             (cell_dir / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
         ) or {}
 
-        raw_ci = CellInstance(
+        raw_ci = Cell(
             id=cell_manifest.get("cell_iri") or None,
             cell_spec_id=cell_spec.id,
             name=cell_manifest.get("cell_name"),

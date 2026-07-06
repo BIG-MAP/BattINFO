@@ -1265,7 +1265,7 @@ class BundleJsonModel(BaseModel):
         return out_path
 
 
-class CellSpecification(BundleJsonModel):
+class CellSpec(BundleJsonModel):
     # NOTE: This is the merged cell-specification model. It absorbs the former
     # ``CellType`` (authoring API: kwarg-absorbing __init__, _mapping_property
     # descriptors, optional id/name) AND the former datasheet specification model
@@ -1275,7 +1275,7 @@ class CellSpecification(BundleJsonModel):
     # record (``specification``/``property``) formats.
     default_filename: ClassVar[str] = CELL_SPEC_FILENAME
 
-    kind: str = "CellSpecification"
+    kind: str = "CellSpec"
     id: str | None = Field(default=None, description="Canonical IRI for this cell-spec record (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.")
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
@@ -1298,7 +1298,7 @@ class CellSpecification(BundleJsonModel):
     datasheet_revision: str | None = Field(default=None, description="Revision label of the source datasheet this spec was taken from.")
     cell_specification_id: str | None = Field(default=None, description="IRI of a linked library specification record carrying the detailed datasheet structure.")
     properties: dict[str, Any] = Field(default_factory=dict, description="Quantitative spec properties as name -> {value, unit} quantity objects (authoring alias: specs=; run 'battinfo properties list' for valid names).")
-    # Datasheet structure (merged from the former CellSpecification).
+    # Datasheet structure (merged from the former CellSpec).
     construction: dict[str, Any] = Field(default_factory=dict, description="As-designed construction details (assembly type, layering, stack geometry).")
     positive_electrode: Electrode | None = Field(default=None, description="Inline positive-electrode datasheet structure (coating, current collector, composition).")
     negative_electrode: Electrode | None = Field(default=None, description="Inline negative-electrode datasheet structure (coating, current collector, composition).")
@@ -1517,7 +1517,7 @@ class CellSpecification(BundleJsonModel):
     @classmethod
     def from_cell_specification(
         cls,
-        specification: CellSpecification,
+        specification: CellSpec,
         *,
         id: str | None = None,
         name: str | None = None,
@@ -1542,7 +1542,7 @@ class CellSpecification(BundleJsonModel):
                 citation=_citation_url_value(specification.source.citation),
                 retrieved_at=specification.source.retrieved_at,
             ),
-            comment=["Generated from the linked CellSpecification."],
+            comment=["Generated from the linked CellSpec."],
         )
 
     # ── Draft vs. publish-ready ──────────────────────────────────────────────────
@@ -1576,24 +1576,24 @@ class CellSpecification(BundleJsonModel):
         """True when every field required to publish is set (never raises — for a GUI/CLI check)."""
         return not self.publish_readiness_problems()
 
-    def finalize(self) -> "CellSpecification":
+    def finalize(self) -> "CellSpec":
         """Assert publish-readiness and return self, so ``spec.finalize().to_record()`` reads cleanly.
 
         Raises listing every still-missing field at once. A draft is valid to hold and to persist via
         ``model_dump``; ``finalize()`` is the gate it must pass to become a published record."""
         problems = self.publish_readiness_problems()
         if problems:
-            raise ValueError("CellSpecification is not publish-ready; set: " + ", ".join(problems))
+            raise ValueError("CellSpec is not publish-ready; set: " + ", ".join(problems))
         return self
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
             raise ValueError(
-                "CellSpecification has no id yet (it is still a draft). Mint one via publish() or "
+                "CellSpec has no id yet (it is still a draft). Mint one via publish() or "
                 "build_publication_package(); call finalize() to check everything needed to publish."
             )
         if self.name is None:
-            raise ValueError("CellSpecification.name is required before serialization.")
+            raise ValueError("CellSpec.name is required before serialization.")
         record: dict[str, Any] = {
             "schema_version": self.schema_version,
             "cell_spec": {
@@ -1659,7 +1659,7 @@ class CellSpecification(BundleJsonModel):
             record["specification_comment"] = list(self.specification_comment)
         return record_to_snake_aliases(record)
 
-    # ── Datasheet "library" record format (merged from the former CellSpecification) ──
+    # ── Datasheet "library" record format (merged from the former CellSpec) ──
     @classmethod
     def from_path(cls, path: PathLike) -> Self:
         payload = _read_json(_as_path(path))
@@ -1758,16 +1758,16 @@ class CellSpecification(BundleJsonModel):
 
 
 
-class CellInstance(BundleJsonModel):
+class Cell(BundleJsonModel):
     default_filename: ClassVar[str] = CELL_INSTANCE_FILENAME
 
-    kind: str = "CellInstance"
+    kind: str = "Cell"
     id: str | None = Field(default=None, description="Canonical IRI for this physical cell (https://w3id.org/battinfo/cell/{uid}); minted at save time when omitted.")
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
     name: str | None = Field(default=None, description="Display name; defaults to the serial number or batch id.")
     cell_spec_id: str | None = Field(default=None, description="IRI of the cell spec this physical cell instantiates (required at save).")
-    cell_spec: CellSpecification | None = Field(default=None, exclude=True, repr=False, description="Linked cell-spec object (alternative to cell_spec_id; may also be passed positionally).")
+    cell_spec: CellSpec | None = Field(default=None, exclude=True, repr=False, description="Linked cell-spec object (alternative to cell_spec_id; may also be passed positionally).")
     serial_number: str | None = Field(default=None, description="Manufacturer or lab serial number of this individual cell.")
     batch_id: str | None = Field(default=None, description="Production or delivery batch identifier.")
     grade: str | None = Field(default=None, description="Sorting/binning grade assigned to this cell (e.g. 'A', 'B').")
@@ -1779,7 +1779,7 @@ class CellInstance(BundleJsonModel):
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
     comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
-    def __init__(self, cell_spec: CellSpecification | None = None, /, **data: Any) -> None:
+    def __init__(self, cell_spec: CellSpec | None = None, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly CellInstanceInput).
         if "notes" in data and "comment" not in data:
             data["comment"] = data.pop("notes")
@@ -1875,9 +1875,9 @@ class CellInstance(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("CellInstance.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
+            raise ValueError("Cell.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
         if self.cell_spec_id is None:
-            raise ValueError("CellInstance.cell_spec_id is required before serialization.")
+            raise ValueError("Cell.cell_spec_id is required before serialization.")
         record: dict[str, Any] = {
             "schema_version": self.schema_version,
             "cell_instance": {
@@ -2275,7 +2275,7 @@ class Test(BundleJsonModel):
     protocol_id: str | None = Field(default=None, description="IRI of the test spec this execution followed.")
     protocol_entity: TestSpec | None = Field(default=None, exclude=True, repr=False, description="Linked test-spec object (alternative to protocol_id).")
     cell_instance_id: str | None = Field(default=None, description="IRI of the physical cell under test (authoring alias: cell_id=; required at save).")
-    cell: CellInstance | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id; may also be passed positionally).")
+    cell: Cell | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id; may also be passed positionally).")
     description: str | None = Field(default=None, description="Free-text description of this execution.")
     status: str | None = Field(default=None, description="Execution status (e.g. 'running', 'completed', 'aborted').")
     protocol: ProtocolInfo = Field(default_factory=ProtocolInfo, description="Name and optional URL of the protocol followed (authoring aliases: protocol_name=, protocol_url=).")
@@ -2288,7 +2288,7 @@ class Test(BundleJsonModel):
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
     comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
-    def __init__(self, cell: CellInstance | None = None, /, **data: Any) -> None:
+    def __init__(self, cell: Cell | None = None, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly TestInput).
         if "cell_id" in data and "cell_instance_id" not in data:
             data["cell_instance_id"] = data.pop("cell_id")
@@ -2515,7 +2515,7 @@ class Dataset(BundleJsonModel):
     related_cell_ids: list[str] = Field(default_factory=list, description="IRIs of additional related cells beyond the primary one.")
     related_test_ids: list[str] = Field(default_factory=list, description="IRIs of additional related tests beyond the primary one.")
     test: Test | None = Field(default=None, exclude=True, repr=False, description="Linked test object (alternative to test_id).")
-    cell: CellInstance | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id).")
+    cell: Cell | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id).")
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, curated_by=, ...).")
     comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
@@ -2919,9 +2919,9 @@ class BattinfoBundle(BundleJsonModel):
 
     kind: str = "BattinfoBundle"
     bundle_name: str | None = None
-    cell_specification: CellSpecification | None = None
-    cell_spec: CellSpecification
-    cell_instance: CellInstance
+    cell_specification: CellSpec | None = None
+    cell_spec: CellSpec
+    cell_instance: Cell
     test: Test
     dataset: Dataset
     comment: list[str] = Field(default_factory=list)
@@ -2964,13 +2964,13 @@ class BattinfoBundle(BundleJsonModel):
         if isinstance(cell_specification_file, str):
             spec_path = root / cell_specification_file
             if spec_path.exists():
-                cell_specification = CellSpecification.from_path(spec_path)
+                cell_specification = CellSpec.from_path(spec_path)
         return cls(
             schema_version=str(manifest.get("schema_version", "1.0.0")),
             bundle_name=manifest.get("bundle_name"),
             cell_specification=cell_specification,
-            cell_spec=CellSpecification.from_path(root / str(manifest.get("cell_spec_file", CELL_SPEC_FILENAME))),
-            cell_instance=CellInstance.from_path(root / str(manifest.get("cell_instance_file", CELL_INSTANCE_FILENAME))),
+            cell_spec=CellSpec.from_path(root / str(manifest.get("cell_spec_file", CELL_SPEC_FILENAME))),
+            cell_instance=Cell.from_path(root / str(manifest.get("cell_instance_file", CELL_INSTANCE_FILENAME))),
             test=Test.from_path(root / str(manifest.get("test_file", TEST_FILENAME))),
             dataset=Dataset.from_path(root / str(manifest.get("dataset_file", DATASET_FILENAME))),
             comment=[str(item) for item in manifest.get("comment", [])] if isinstance(manifest.get("comment"), list) else [],
@@ -3118,7 +3118,7 @@ class BattinfoBundle(BundleJsonModel):
             if "PrismaticBattery" in subclass_ids or _node_has_type(cell_instance_node, "PrismaticBattery") or "PrismaticBattery" in is_desc_types
             else "unknown"
         )
-        cell_spec = CellSpecification(
+        cell_spec = CellSpec(
             id=str(cell_spec_node["@id"]),
             name=str(cell_spec_node.get("schema:name") or f"{manufacturer} {cell_spec_node.get('schema:model') or 'unknown'}"),
             manufacturer=str(manufacturer or "unknown"),
@@ -3158,7 +3158,7 @@ class BattinfoBundle(BundleJsonModel):
                 if isinstance(spec_manufacturer_obj, Mapping)
                 else spec_manufacturer_obj
             )
-            cell_specification = CellSpecification(
+            cell_specification = CellSpec(
                 id=str(cell_specification_node["@id"]),
                 manufacturer=str(spec_manufacturer or manufacturer or "unknown"),
                 model=str(cell_specification_node.get("schema:model") or cell_spec.model),
@@ -3181,7 +3181,7 @@ class BattinfoBundle(BundleJsonModel):
                     comment=source_obj.get("schema:description"),
                 ),
             )
-        cell_instance = CellInstance(
+        cell_instance = Cell(
             id=str(cell_instance_node["@id"]),
             name=str(cell_instance_node.get("schema:name") or cell_instance_node["@id"]),
             cell_spec_id=str(cell_spec_id or cell_spec.id),
@@ -3292,13 +3292,13 @@ class ZenodoDatasetEntry(BaseModel):
     """One test/dataset entry within a ZenodoCellRecord.
 
     cell_instances is empty when the contributing cells are not individually
-    tracked (aggregate records), or contains one or more CellInstance records
+    tracked (aggregate records), or contains one or more Cell records
     when per-cell provenance is available.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    cell_instances: list[CellInstance] = Field(default_factory=list)
+    cell_instances: list[Cell] = Field(default_factory=list)
     test: Test
     dataset: Dataset
 
@@ -3310,15 +3310,15 @@ class ZenodoCellRecord(BaseModel):
     Serialises to / from battinfo.bundle.json — the file that battery-genome's
     Zenodo harvester ingests.  One record covers one manufacturer × cell model
     and may contain multiple (test, dataset) entries, each optionally annotated
-    with one or more CellInstance records.
+    with one or more Cell records.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     schema_version: str = SCHEMA_VERSION
     kind: str = "BattinfoCellRecord"
-    cell_spec: CellSpecification
-    cell_specification: CellSpecification | None = None
+    cell_spec: CellSpec
+    cell_specification: CellSpec | None = None
     datasets: list[ZenodoDatasetEntry]
 
     def to_flat_json(self, *, zenodo_record_url: str | None = None) -> dict[str, Any]:
@@ -3369,12 +3369,12 @@ class ZenodoCellRecord(BaseModel):
         if not isinstance(datasets_raw, list):
             raise ValueError("ZenodoCellRecord must contain a 'datasets' list.")
 
-        cell_specification: CellSpecification | None = None
+        cell_specification: CellSpec | None = None
         spec_raw = data.get("cell_specification")
         if isinstance(spec_raw, Mapping):
-            cell_specification = CellSpecification.from_library_record(spec_raw)
+            cell_specification = CellSpec.from_library_record(spec_raw)
 
-        cell_spec = CellSpecification.from_record(
+        cell_spec = CellSpec.from_record(
             cell_spec_raw,
             cell_specification_id=cell_specification.id if cell_specification is not None else None,
         )
@@ -3393,7 +3393,7 @@ class ZenodoCellRecord(BaseModel):
             if not isinstance(ci_raws, list):
                 raise ValueError(f"datasets[{i}].cell_instances must be a list.")
             entries.append(ZenodoDatasetEntry(
-                cell_instances=[CellInstance.from_record(ci) for ci in ci_raws if isinstance(ci, Mapping)],
+                cell_instances=[Cell.from_record(ci) for ci in ci_raws if isinstance(ci, Mapping)],
                 test=Test.from_record(test_raw),
                 dataset=Dataset.from_record(ds_raw),
             ))
@@ -3415,7 +3415,7 @@ class ZenodoCellRecord(BaseModel):
         cls,
         bundles: list[BattinfoBundle],
         *,
-        cell_specification: CellSpecification | None = None,
+        cell_specification: CellSpec | None = None,
     ) -> "ZenodoCellRecord":
         """Build a ZenodoCellRecord from one or more single-dataset BattinfoBundles.
 
@@ -3441,8 +3441,8 @@ class ZenodoCellRecord(BaseModel):
         )
 
 
-def load_cell_specification(path: PathLike) -> CellSpecification:
-    return CellSpecification.from_path(path)
+def load_cell_specification(path: PathLike) -> CellSpec:
+    return CellSpec.from_path(path)
 
 
 TestProtocol = TestSpec  # backward compat alias
@@ -3456,9 +3456,9 @@ __all__ = [
     "CELL_SPECIFICATION_FILENAME",
     "CELL_SPEC_FILENAME",
     "Coating",
-    "CellInstance",
-    "CellSpecification",
-    "CellSpecification",
+    "Cell",
+    "CellSpec",
+    "CellSpec",
     "ChecksumInfo",
     "CurrentCollector",
     "DATASET_FILENAME",
@@ -3488,3 +3488,10 @@ __all__ = [
     "ZenodoCellRecord",
     "ZenodoDatasetEntry",
 ]
+
+
+# Pre-0.8 long-form names — plain aliases for direct bundle importers; the
+# package-level names warn via battinfo.__getattr__ and are swept per the
+# deprecation policy in CONTRIBUTING.md.
+CellSpecification = CellSpec
+CellInstance = Cell

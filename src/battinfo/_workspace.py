@@ -37,8 +37,8 @@ from battinfo.api import (
 )
 from battinfo.authoring import cell_description as build_cell_description
 from battinfo.bundle import (
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     ChecksumInfo,
     Dataset,
     ProtocolInfo,
@@ -312,9 +312,9 @@ class Workspace:
         self.version = version
         self.comment = list(comment or [])
 
-        self.descriptions: list[CellSpecification] = []
-        self.cell_specs: list[CellSpecification] = []
-        self.cells: list[CellInstance] = []
+        self.descriptions: list[CellSpec] = []
+        self.cell_specs: list[CellSpec] = []
+        self.cells: list[Cell] = []
         self.test_specs: list[TestSpec] = []
         self.tests: list[Test] = []
         self.datasets: list[Dataset] = []
@@ -337,7 +337,7 @@ class Workspace:
 
     def bundle_workspace(
         self,
-        target: CellSpecification | CellInstance | Test | Dataset | None = None,
+        target: CellSpec | Cell | Test | Dataset | None = None,
         *,
         name: str | None = None,
         title: str | None = None,
@@ -364,15 +364,15 @@ class Workspace:
     def add(self, *objects: Any) -> "Workspace":
         """Add one or more authoring objects to the workspace by type."""
         def _add(obj: Any) -> None:
-            # The authoring model and the datasheet model are now one CellSpecification
+            # The authoring model and the datasheet model are now one CellSpec
             # (a BatteryCellSpecification); add() routes it to the canonical cell-spec
             # collection. The datasheet-library workflow uses the dedicated
             # add_description/save_descriptions methods.
-            if isinstance(obj, CellSpecification):
+            if isinstance(obj, CellSpec):
                 _append_unique(self.cell_specs, obj)
             elif isinstance(obj, TestSpec):
                 _append_unique(self.test_specs, obj)
-            elif isinstance(obj, CellInstance):
+            elif isinstance(obj, Cell):
                 if obj.cell_spec is not None:
                     _add(obj.cell_spec)
                 _append_unique(self.cells, obj)
@@ -390,7 +390,7 @@ class Workspace:
                 _append_unique(self.datasets, obj)
             else:
                 raise TypeError(
-                    "Workspace.add() supports CellSpecification, CellSpecification, TestSpec, Cell/CellInstance, Test, and Dataset objects."
+                    "Workspace.add() supports CellSpec, CellSpec, TestSpec, Cell/Cell, Test, and Dataset objects."
                 )
         for obj in objects:
             _add(obj)
@@ -398,11 +398,11 @@ class Workspace:
 
     def load_cell_spec(
         self,
-        source: CellSpecification | dict[str, Any] | PathLike,
+        source: CellSpec | dict[str, Any] | PathLike,
         *,
         validate: bool = True,
         validation_policy: str = "strict",
-    ) -> CellSpecification:
+    ) -> CellSpec:
         """Load one cell-spec JSON source into the workspace.
 
         The source can be either a canonical BattINFO `cell-spec` record with a
@@ -411,7 +411,7 @@ class Workspace:
         Draft inputs are canonized later when the workspace renders or saves.
         """
 
-        if isinstance(source, CellSpecification):
+        if isinstance(source, CellSpec):
             cell_spec = source.model_copy(deep=True)
         else:
             payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
@@ -426,7 +426,7 @@ class Workspace:
                     report = validate_record_report(payload, policy=validation_policy)
                     if not report.ok:
                         raise ValueError(f"cell-spec validation failed: {'; '.join(report.render_errors())}")
-                cell_spec = CellSpecification.from_record(payload)
+                cell_spec = CellSpec.from_record(payload)
             else:
                 cell_spec = self._cell_spec_from_authoring_payload(payload)
 
@@ -435,15 +435,15 @@ class Workspace:
 
     def load_cell_specs(
         self,
-        *sources: CellSpecification | dict[str, Any] | PathLike,
+        *sources: CellSpec | dict[str, Any] | PathLike,
         directory: PathLike | None = None,
         glob: str = "*.json",
         validate: bool = True,
         validation_policy: str = "strict",
-    ) -> list[CellSpecification]:
+    ) -> list[CellSpec]:
         """Load multiple cell-spec JSON sources into the workspace."""
 
-        inputs: list[CellSpecification | dict[str, Any] | PathLike] = list(sources)
+        inputs: list[CellSpec | dict[str, Any] | PathLike] = list(sources)
         if directory is not None:
             directory_path = _as_path(directory)
             if not directory_path.exists() or not directory_path.is_dir():
@@ -519,7 +519,7 @@ class Workspace:
             for item in inputs
         ]
 
-    def _cell_spec_from_authoring_payload(self, payload: dict[str, Any]) -> CellSpecification:
+    def _cell_spec_from_authoring_payload(self, payload: dict[str, Any]) -> CellSpec:
         model = payload.get("model")
         if model is None:
             model = payload.get("model_name")
@@ -566,7 +566,7 @@ class Workspace:
         year = payload.get("year")
         name = payload.get("name")
 
-        return CellSpecification(
+        return CellSpec(
             name=name if isinstance(name, str) and name.strip() else None,
             manufacturer=manufacturer,
             model=model,
@@ -708,7 +708,7 @@ class Workspace:
         source: ProvenanceInfo | None = None,
         specification_comment: str | list[str] | None = None,
         comment: str | list[str] | None = None,
-    ) -> CellSpecification:
+    ) -> CellSpec:
         specification = build_cell_description(
             id=_entity_iri(
                 "cell-spec",
@@ -756,7 +756,8 @@ class Workspace:
         format: str,
         chemistry: str,
         product_type: str | None = None,
-        specs: Any = None,
+        properties: Any = None,
+        specs: Any = None,   # quiet alias for properties=
         size_code: str | None = None,
         iec_code: str | None = None,
         country_of_origin: str | None = None,
@@ -771,10 +772,10 @@ class Workspace:
         citation: str | None = None,
         retrieved_at: int | str | None = None,
         comment: list[str] | None = None,
-    ) -> CellSpecification:
+    ) -> CellSpec:
         from battinfo.bundle import CellProductType
         resolved_pt = CellProductType(product_type) if product_type is not None else None
-        cell_spec = CellSpecification(
+        cell_spec = CellSpec(
             manufacturer=manufacturer,
             model=model,
             format=format,
@@ -788,7 +789,7 @@ class Workspace:
             positive_electrode_basis=positive_electrode_basis,
             negative_electrode_basis=negative_electrode_basis,
             datasheet_revision=datasheet_revision,
-            properties=_mapping_value(specs),
+            properties=_mapping_value(properties if properties is not None else specs),
             source=ProvenanceInfo(
                 type=source_type,
                 file=source_file,
@@ -803,7 +804,7 @@ class Workspace:
 
     def cell(
         self,
-        cell_spec: CellSpecification,
+        cell_spec: CellSpec,
         *,
         name: str | None = None,
         serial_number: str | None = None,
@@ -818,11 +819,11 @@ class Workspace:
         citation: str | None = None,
         retrieved_at: int | str | None = None,
         comment: list[str] | None = None,
-    ) -> CellInstance:
+    ) -> Cell:
         from battinfo.bundle import Conformance as _Conformance
         if isinstance(conformance, dict):
             conformance = _Conformance.from_record(conformance)
-        cell = CellInstance(
+        cell = Cell(
             cell_spec=cell_spec,
             name=name,
             serial_number=serial_number,
@@ -907,7 +908,7 @@ class Workspace:
 
     def test(
         self,
-        cell: CellInstance,
+        cell: Cell,
         *,
         type: str | None = None,
         kind: str | None = None,   # backward-compat alias for type
@@ -965,7 +966,7 @@ class Workspace:
 
     def record_test(
         self,
-        cell: CellInstance,
+        cell: Cell,
         *,
         type: str | None = None,
         kind: str | None = None,   # backward-compat alias for type
@@ -1048,7 +1049,7 @@ class Workspace:
 
     def dataset(
         self,
-        cell: CellInstance,
+        cell: Cell,
         *,
         title: str,
         description: str | None = None,
@@ -1151,7 +1152,7 @@ class Workspace:
 
     def from_battdat(
         self,
-        cell: CellInstance,
+        cell: Cell,
         path: PathLike,
         *,
         kind: str | None = None,
@@ -1254,12 +1255,12 @@ class Workspace:
         source_type: str = "simulation",
         source_file: str | None = None,
         comment: list[str] | None = None,
-    ) -> CellSpecification:
-        """Create a CellSpecification from a BPX battery parameter file.
+    ) -> CellSpec:
+        """Create a CellSpec from a BPX battery parameter file.
 
         Reads *path* and maps the BPX ``Parameterisation.Cell`` parameters
         that have direct BattINFO spec equivalents (capacity, voltage limits,
-        mass, dimensions) to a BattINFO CellSpecification.  Physics parameters are
+        mass, dimensions) to a BattINFO CellSpec.  Physics parameters are
         silently skipped.
 
         Parameters
@@ -1311,9 +1312,9 @@ class Workspace:
         dataset: Dataset,
         *,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
-        cell_specification: CellSpecification | dict[str, Any] | PathLike | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
+        cell_specification: CellSpec | dict[str, Any] | PathLike | None = None,
         datasheet_path: PathLike | None = None,
         publication_root: PathLike | None = None,
         publish_filename: str = DEFAULT_PUBLISH_FILENAME,
@@ -1344,9 +1345,9 @@ class Workspace:
         dataset: Dataset,
         *,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
-        cell_specification: CellSpecification | dict[str, Any] | PathLike | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
+        cell_specification: CellSpec | dict[str, Any] | PathLike | None = None,
         datasheet_path: PathLike | None = None,
         publication_root: PathLike | None = None,
         publish_filename: str = DEFAULT_PUBLISH_FILENAME,
@@ -1397,8 +1398,8 @@ class Workspace:
         registry: Any,
         root: PathLike | None = None,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1438,8 +1439,8 @@ class Workspace:
         registry: Any,
         root: PathLike | None = None,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1496,8 +1497,8 @@ class Workspace:
         registry: Any,
         root: PathLike | None = None,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1539,8 +1540,8 @@ class Workspace:
         registry: Any,
         root: PathLike | None = None,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
         workspace_id: str | None = None,
         publisher_id: str | None = None,
         version: str | None = None,
@@ -1899,7 +1900,7 @@ class Workspace:
             return self.tests[0]
         return None
 
-    def _resolve_dataset_cell(self, dataset: Dataset) -> CellInstance | None:
+    def _resolve_dataset_cell(self, dataset: Dataset) -> Cell | None:
         if dataset.cell_instance_id is not None:
             for candidate in self.cells:
                 if candidate.id == dataset.cell_instance_id:
@@ -1912,7 +1913,7 @@ class Workspace:
             return self.cells[0]
         return None
 
-    def _resolve_dataset_cell_spec(self, dataset: Dataset, cell: CellInstance) -> CellSpecification | None:
+    def _resolve_dataset_cell_spec(self, dataset: Dataset, cell: Cell) -> CellSpec | None:
         if cell.cell_spec is not None:
             return cell.cell_spec
         if dataset.cell_instance_id is not None:
@@ -1928,10 +1929,10 @@ class Workspace:
         dataset: Dataset,
         *,
         test: Test | None = None,
-        cell: CellInstance | None = None,
-        cell_spec: CellSpecification | None = None,
+        cell: Cell | None = None,
+        cell_spec: CellSpec | None = None,
         action: str,
-    ) -> tuple[Test, CellInstance, CellSpecification]:
+    ) -> tuple[Test, Cell, CellSpec]:
         resolved_test = test or dataset.test or self._resolve_dataset_test(dataset)
         if resolved_test is None:
             raise ValueError(f"Workspace.{action}() requires a Test or a Dataset linked to a Test.")
@@ -1942,11 +1943,11 @@ class Workspace:
 
         resolved_cell_spec = cell_spec or resolved_cell.cell_spec or self._resolve_dataset_cell_spec(dataset, resolved_cell)
         if resolved_cell_spec is None:
-            raise ValueError(f"Workspace.{action}() requires a CellSpecification or a linked Cell with cell_spec set.")
+            raise ValueError(f"Workspace.{action}() requires a CellSpec or a linked Cell with cell_spec set.")
 
         return resolved_test, resolved_cell, resolved_cell_spec
 
-    def _finalize_description(self, specification: CellSpecification) -> CellSpecification:
+    def _finalize_description(self, specification: CellSpec) -> CellSpec:
         # source_type is schema-required, so an unprovided one takes the documented category
         # default; source_file is optional and stays absent unless the author provided it — a
         # fabricated placeholder ("manual.json") would masquerade as real provenance (applies
@@ -1958,7 +1959,7 @@ class Workspace:
             finalized.source.retrieved_at = _now_unix()
         return finalized
 
-    def _finalize_cell_spec(self, cell_spec: CellSpecification) -> CellSpecification:
+    def _finalize_cell_spec(self, cell_spec: CellSpec) -> CellSpec:
         finalized = cell_spec.model_copy(deep=True)
         if finalized.id is None:
             finalized.id = _entity_iri(
@@ -1981,7 +1982,7 @@ class Workspace:
             finalized.source.retrieved_at = _now_unix()
         return finalized
 
-    def _finalize_cell(self, cell: CellInstance, cell_spec_map: dict[int, CellSpecification]) -> CellInstance:
+    def _finalize_cell(self, cell: Cell, cell_spec_map: dict[int, CellSpec]) -> Cell:
         finalized = cell.model_copy(deep=True, update={"cell_spec": None})
         linked_type = cell_spec_map.get(id(cell.cell_spec)) if cell.cell_spec is not None else None
         if finalized.cell_spec_id is None and linked_type is not None:
@@ -2032,7 +2033,7 @@ class Workspace:
     def _finalize_test(
         self,
         test: Test,
-        cell_map: dict[int, CellInstance],
+        cell_map: dict[int, Cell],
         test_spec_map: dict[int, TestSpec],
     ) -> Test:
         finalized = test.model_copy(deep=True, update={"cell": None, "protocol_entity": None})
@@ -2071,7 +2072,7 @@ class Workspace:
     def _finalize_dataset(
         self,
         dataset: Dataset,
-        cell_map: dict[int, CellInstance],
+        cell_map: dict[int, Cell],
         test_map: dict[int, Test],
     ) -> Dataset:
         finalized = dataset.model_copy(deep=True, update={"cell": None, "test": None})

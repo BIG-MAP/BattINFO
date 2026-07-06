@@ -22,9 +22,9 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
 
       .. code-block:: python
 
-         from battinfo import CellSpecification, publish
+         from battinfo import CellSpec, publish
 
-         spec = CellSpecification(
+         spec = CellSpec(
              manufacturer="A123",
              model="ANR26650M1-B",
              cell_format="cylindrical",

@@ -71,7 +71,7 @@ Outcome notes: `cycle_life` resolved by standardizing docs on `kind="cycling"` (
 addition); all five guide notebooks execute under nbmake in CI. The pre-Phase-1 docs/web
 WIP is parked on `wip/docs-web` and needs reconciliation against these changes before it lands.
 
-- **1.1 Guide notebooks** — update all five (`CellType`→`CellSpecification`,
+- **1.1 Guide notebooks** — update all five (`CellType`→`CellSpec`,
   `workspace.cell_type`→`.cell_spec`, `query_cell_types`→`query_cell_specs`,
   `TestProtocol`→`TestSpec`), re-execute, commit executed outputs.
 - **1.2 CI guard** — `pytest --nbmake docs/guides/` job so the funnel can't rot again.
