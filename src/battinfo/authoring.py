@@ -302,7 +302,7 @@ def electrolyte_recipe(
     *,
     family: str,
     solvents: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
-    salt: str | Salt | None = None,
+    salt: str | Salt | MaterialComponent | None = None,
     salt_concentration: dict[str, Any] | None = None,
     additives: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
     properties: PropertySet | None = None,
@@ -316,9 +316,12 @@ def electrolyte_recipe(
             ``"solid"``, ``"gel"``, ``"hybrid"``, or ``"unknown"``.
         solvents: Solvent component(s) — name string(s) or :class:`MaterialComponent`
             objects.  Use :func:`material` to attach volume-fraction properties.
-        salt: Salt name string or pre-built :class:`Salt` object.
-        salt_concentration: Concentration quantity dict, e.g.
-            ``{"value": 1.0, "unit": "mol/L"}``.  Only used when ``salt`` is a string.
+        salt: The salt, in the SAME form as a solvent entry — a
+            :func:`material` component carrying its properties inline, e.g.
+            ``salt=material("LiPF6", concentration={"value": 1.0, "unit": "mol/L"})``
+            — or a bare name string, or a pre-built :class:`Salt`.
+        salt_concentration: Concentration quantity dict; only used when ``salt``
+            is a bare string (the ``material(...)`` form carries it inline).
         additives: Optional electrolyte additive(s).
         properties: Bulk electrolyte properties (ionic conductivity, viscosity, etc.).
         solvent_comment: Free-text note about the solvent mixture.
@@ -326,6 +329,24 @@ def electrolyte_recipe(
     """
     if isinstance(salt, Salt):
         salt_obj = salt
+    elif isinstance(salt, MaterialComponent):
+        # Salts are materials like any other component; accept the same
+        # material(...) form as solvents. molecular_formula has no home on a
+        # salt record (use cation=/anion= on Salt) — refuse rather than drop.
+        if salt.molecular_formula is not None:
+            raise ValueError(
+                "salt components do not carry molecular_formula — build a "
+                "Salt(name=..., cation=..., anion=...) instead."
+            )
+        salt_obj = Salt(
+            name=salt.name,
+            material_spec_id=salt.material_spec_id,
+            manufacturer=salt.manufacturer,
+            supplier=salt.supplier,
+            product_id=salt.product_id,
+            property=salt.property,
+            comment=salt.comment,
+        )
     elif isinstance(salt, str):
         salt_properties = PropertySet()
         if salt_concentration is not None:

@@ -1263,6 +1263,70 @@ def _curated_cell_spec_title(record: Mapping[str, Any]) -> str:
     return str(product.get("name") or f"{manufacturer or 'Battery'} {product.get('model') or 'Cell'}").strip()
 
 
+def build_submission_envelope(
+    *,
+    resource_type: str,
+    records: Mapping[str, Mapping[str, Any]],
+    rdf_type: str | None,
+    workspace_id: str,
+    publisher_id: str,
+    source_version: str,
+    source_local_id: str,
+    title: str,
+    publication_mode: str,
+    source_system: str,
+    workflow_name: str,
+    related_resources: Sequence[dict[str, Any]] | None = None,
+    distributions: Sequence[dict[str, Any]] | None = None,
+    preview: dict[str, Any] | None = None,
+    workspace: dict[str, Any] | None = None,
+    validation: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """The ONE submission-envelope builder (beta-hardening 4.3).
+
+    Every path that talks to the registry — the authoring workspace, the
+    curated editorial pipeline, and anything future — builds its envelope
+    here, so the shape can never fork again. Callers differ only in the
+    fields that SHOULD differ: publication mode, provenance system/workflow,
+    the embedded records, and the validation verdict.
+    """
+    generated_at = _now_iso()
+    semantic_payload: dict[str, Any] = {}
+    if rdf_type:
+        semantic_payload["@type"] = rdf_type
+    semantic_payload["battinfo_records"] = {k: dict(v) for k, v in records.items()}
+    if preview:
+        semantic_payload["preview"] = preview
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "kind": "BattinfoSubmission",
+        "submission_mode": "resource",
+        "generated_at": generated_at,
+        "workspace_id": workspace_id,
+        "publisher_id": publisher_id,
+        "source_version": source_version,
+        "title": title,
+        "publication_intent": {"mode": publication_mode},
+        "provenance": {
+            "source_system": source_system,
+            "workflow_name": workflow_name,
+            "generated_at": generated_at,
+        },
+        "release": {"version": source_version},
+        "workspace": workspace,
+        "resource": {
+            "resource_type": resource_type,
+            "source_local_id": source_local_id,
+            "title": title,
+            "semantic_payload": semantic_payload,
+            "related_resources": list(related_resources or []),
+            "distributions": list(distributions or []),
+        },
+        "artifacts": [],
+        "validation": validation or {"ok": True, "errors": [], "policy": "default"},
+    }
+
+
 def _curated_cell_spec_submission_resource(
     *,
     record: Mapping[str, Any],
@@ -1305,7 +1369,6 @@ def build_curated_cell_spec_submission(
         raise ValueError(f"curated cell-spec validation failed: {'; '.join(validation.errors)}")
 
     resolved_title = title or _curated_cell_spec_title(record)
-    generated_at = _now_iso()
     workspace: dict[str, Any] | None = None
     if source_path is not None:
         workspace = {
@@ -1315,35 +1378,25 @@ def build_curated_cell_spec_submission(
             }
         }
 
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "kind": "BattinfoSubmission",
-        "submission_mode": "resource",
-        "generated_at": generated_at,
-        "workspace_id": workspace_id,
-        "publisher_id": publisher_id,
-        "source_version": source_version,
-        "title": resolved_title,
-        "publication_intent": {"mode": publication_mode},
-        "provenance": {
-            "source_system": source_system,
-            "workflow_name": workflow_name,
-            "generated_at": generated_at,
-        },
-        "release": {"version": source_version},
-        "workspace": workspace,
-        "resource": _curated_cell_spec_submission_resource(
-            record=record,
-            source_local_id=resolved_source_local_id,
-            title=resolved_title,
-        ),
-        "artifacts": [],
-        "validation": {
+    return build_submission_envelope(
+        resource_type="cell_spec",
+        records={"cell_spec": record},
+        rdf_type="CellSpec",
+        workspace_id=workspace_id,
+        publisher_id=publisher_id,
+        source_version=source_version,
+        source_local_id=resolved_source_local_id,
+        title=resolved_title,
+        publication_mode=publication_mode,
+        source_system=source_system,
+        workflow_name=workflow_name,
+        workspace=workspace,
+        validation={
             "ok": validation.ok,
             "errors": list(validation.errors),
             "policy": validation.policy,
         },
-    }
+    )
 
 
 class RegistryError(RuntimeError):
