@@ -16,6 +16,13 @@ export const site = {
   reference: "https://github.com/BIG-MAP/BattINFO/tree/main/docs",
   github: "https://github.com/BIG-MAP/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
+  genome: "https://www.battery-genome.org",
+  ciBadge: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main",
+  ciRuns: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml",
+  pypiBadge: "https://img.shields.io/pypi/v/battinfo?label=PyPI&color=0e7c86",
+  // Zenodo concept DOI — set when the 0.8 release is archived (D.1); the proof
+  // strip renders the badge only when non-empty.
+  doi: "",
   emmo: "https://github.com/emmo-repo/domain-battery",
   emmoElectrochem: "https://github.com/emmo-repo/domain-electrochemistry",
   license: "Apache-2.0",
@@ -27,12 +34,14 @@ export const site = {
   },
 } as const;
 
+// Publish first: the primary action a visitor with data should see.
 export const primaryNav = [
-  { label: "Federation", href: "/federation" },
-  { label: "Docs", href: "/docs" },
-  { label: "Examples", href: "/examples" },
+  { label: "Publish", href: "/publish" },
   { label: "Validate", href: "/validate" },
   { label: "Convert", href: "/convert" },
+  { label: "Examples", href: "/examples" },
+  { label: "Why", href: "/federation" },
+  { label: "Docs", href: "/docs" },
 ] as const;
 
 // Standards this project builds on or aligns with — the "we did not invent our
@@ -74,6 +83,7 @@ export const footerNav = [
   {
     heading: "Get started",
     links: [
+      { label: "Publish your data", href: "/publish" },
       { label: "Documentation", href: "/docs" },
       { label: "Quickstart", href: "/docs#quickstart" },
       { label: "Examples", href: "/examples" },

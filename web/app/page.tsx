@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
+import { ProofStrip } from "@/components/proof-strip";
 import { SectionHeading } from "@/components/section-heading";
-import { site, standards } from "@/lib/site";
+import { standards } from "@/lib/site";
 import {
   audiences,
   features,
+  payoffs,
   pipeline,
   principles,
   provenanceChain,
   recordModel,
 } from "@/lib/content";
-import { heroSnippet, installSnippet, quickstartPython } from "@/lib/examples";
+import { installSnippet, publishJourneySnippet, quickstartPython } from "@/lib/examples";
 
 export default function HomePage() {
   return (
@@ -25,33 +27,41 @@ export default function HomePage() {
                 Open standard · Beta
               </span>
               <h1 className="mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-                The data layer for{" "}
-                <span className="text-brand-600">battery technology</span>
+                Your battery data —{" "}
+                <span className="text-brand-600">citable, machine-readable, findable</span>
               </h1>
               <p className="mt-5 max-w-prose text-lg text-ink-muted">
-                {site.description}
+                Turn a folder of cycler exports into validated, linked records
+                with a DOI on Zenodo and a place in the Battery Genome registry
+                — in about fifteen minutes, without learning RDF.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href="/docs"
+                  href="/publish"
                   className="rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
                 >
-                  Get started
+                  Publish your data
                 </Link>
                 <Link
-                  href="/convert"
+                  href="/validate"
                   className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
                 >
-                  Try the converter
+                  Validate a record
                 </Link>
+              </div>
+              <div className="mt-8">
+                <ProofStrip />
               </div>
             </div>
 
             <div className="lg:pl-6">
-              <CodeBlock label="describe a cell" code={heroSnippet} />
+              <CodeBlock label="the whole journey" code={publishJourneySnippet} />
               <p className="mt-3 text-sm text-ink-muted">
-                You write plain, readable JSON. BattINFO handles the ontology,
-                identifiers, and Linked Data for you.
+                This is the real recipe — the same one <code>ws.quickstart()</code>{" "}
+                prints, kept in sync by the test suite.{" "}
+                <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
+                  See every step explained →
+                </Link>
               </p>
             </div>
           </div>
@@ -84,8 +94,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it works — the four-verb pipeline */}
+      {/* What publishing buys you — now, for your lab, for the field */}
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <SectionHeading
+          kicker="Why bother"
+          title="One afternoon of publishing keeps paying off."
+        />
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {payoffs.map((p) => (
+            <div key={p.horizon} className="prose-card">
+              <h3 className="text-lg font-semibold text-ink">{p.horizon}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{p.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works — the four-verb pipeline */}
+      <section className="border-t border-slate-200 mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <SectionHeading
           kicker="How it works"
           title="From datasheet to machine-readable Linked Data — in four steps."
@@ -220,15 +246,15 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
           <h2 className="text-2xl font-semibold tracking-tight text-white">Build on the battery genome.</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-brand-100">
-            BattINFO is open infrastructure. Read the docs, validate a record, or
-            convert your data to Linked Data in the browser.
+            BattINFO is open infrastructure. Publish your data, validate a
+            record in the browser, or read the docs.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Link href="/docs" className="rounded-lg bg-white px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
-              Read the docs
+            <Link href="/publish" className="rounded-lg bg-white px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+              Publish your data
             </Link>
-            <Link href="/convert" className="rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-              Convert a record
+            <Link href="/docs" className="rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+              Read the docs
             </Link>
           </div>
         </div>
