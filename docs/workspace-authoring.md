@@ -53,19 +53,19 @@ Every verb is a method on the returned `AuthoringWorkspace` (also importable as
 | You want to… | Use | Entry point |
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` — this page |
-| Create a single record in code and save/publish it | **Models + functions** | `CellSpecification(...)` + `battinfo.publish(...)` — see the [Python API](python-api.md) |
+| Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` — see the [Python API](python-api.md) |
 | Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo.Workspace` |
 
 ## The layers underneath
 
 - **`battinfo.Workspace`** (in `battinfo._workspace`) is the object-graph engine: it
-  holds linked `CellSpecification` / `CellInstance` / `Test` / `Dataset` objects,
+  holds linked `CellSpec` / `Cell` / `Test` / `Dataset` objects,
   finalizes ids and provenance, and writes the canonical records. The authoring
   workspace delegates to it; script against it directly when you are building
   pipelines rather than working interactively.
-- **The record models** (`CellSpecification`, `CellInstance`, `Test`, `TestSpec`,
+- **The record models** (`CellSpec`, `Cell`, `Test`, `TestSpec`,
   `Dataset`) are both the canonical source of truth and the authoring input — every
-  field carries a description (`help(battinfo.CellSpecification)`), and misspelled
+  field carries a description (`help(battinfo.CellSpec)`), and misspelled
   arguments get a did-you-mean.
 - **`battinfo.publish(...)`** takes a single model (or a linked graph of them) and
   writes/publishes the canonical records without a workspace.

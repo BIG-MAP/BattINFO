@@ -5,7 +5,7 @@ sweep). This note records why, and the plan to finish it later.
 
 ## Where things stand (already true)
 
-The "one model" goal is met. `CellSpecification` (`bundle.py`) is the single source of truth for a
+The "one model" goal is met. `CellSpec` (`bundle.py`) is the single source of truth for a
 cell specification. It serializes into two envelopes:
 
 - **Canonical** (`cell_spec` key) — `to_record()` / `from_record()`. Schema-validated, IRI-minted,
@@ -43,7 +43,7 @@ defaults (`source_type`, etc.) that `_record_from_cell_spec` applies on the cano
 library docs' canonical projections fail schema on `provenance.source_type`. Making them valid means
 adding provenance-defaulting to the library path — which is part of the deferred collapse, not a
 one-liner. Folded into the post-beta plan below. For beta the library subsystem is unchanged and
-`CellSpecification` remains the documented single source of truth.
+`CellSpec` remains the documented single source of truth.
 
 ## Post-beta plan (one unified effort: envelope collapse + shared JSON-LD core)
 

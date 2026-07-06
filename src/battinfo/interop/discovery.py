@@ -51,7 +51,7 @@ from battinfo.api import (
     create_component_spec,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import BatteryTestType, Cell, CellSpec, Dataset, Test
 from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
 
@@ -291,7 +291,7 @@ class _Builder:
                  test_name: str | None = None, test_description: str | None = None,
                  dataset_file: str | None = None) -> DiscoveryCell:
         seed = refcode or cell_id
-        cell_spec = self._check(_record_from_cell_spec(CellSpecification(
+        cell_spec = self._check(_record_from_cell_spec(CellSpec(
             uid=_uid("discovery", "cell-spec", seed),
             model_name=model_name,
             manufacturer={"type": "Organization", "name": manufacturer},
@@ -309,7 +309,7 @@ class _Builder:
         )))
         cell_spec_id = cell_spec["cell_spec"]["id"]
 
-        cell_instance = self._check(_record_from_cell_instance(CellInstance(
+        cell_instance = self._check(_record_from_cell_instance(Cell(
             uid=_uid("discovery", "cell-instance", seed),
             cell_spec_id=cell_spec_id,
             serial_number=cell_id,

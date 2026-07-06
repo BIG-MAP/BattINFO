@@ -10,8 +10,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import (
     BattinfoBundle,
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     Test,
     load_publication,
@@ -194,7 +194,7 @@ def test_publish_dataset_metadata_with_cell_spec_only(tmp_path: Path) -> None:
     raw.parent.mkdir(parents=True)
     raw.write_text("time,voltage\n0,3.7\n", encoding="utf-8")
 
-    cell_spec = CellSpecification(
+    cell_spec = CellSpec(
         id="https://w3id.org/battinfo/spec/1234-5678-9abc-def0",
         name="ExampleCell 21700-A",
         manufacturer="ExampleCell",
@@ -241,7 +241,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     raw.parent.mkdir(parents=True)
     raw.write_text("time,voltage\n0,3.0\n", encoding="utf-8")
 
-    cell_spec = CellSpecification(
+    cell_spec = CellSpec(
         manufacturer="Energizer",
         model="CR2032",
         format="coin",
@@ -249,7 +249,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
         size_code="R2032",
         properties={"nominal_voltage": {"value": 3.0, "unit": "V"}},
     )
-    cell = CellInstance(
+    cell = Cell(
         cell_spec=cell_spec,
         serial_number="energizer-cr2032-202602-dtjrga",
     )

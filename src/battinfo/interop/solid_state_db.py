@@ -49,7 +49,7 @@ from battinfo.api import (
     _record_from_test,
     _validate_canonical_record,
 )
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Test
+from battinfo.bundle import BatteryTestType, Cell, CellSpec, Test
 
 PathLike = str | Path
 
@@ -277,7 +277,7 @@ def from_solid_state_db_row(
         notes.append(f"reported in {journal} ({_clean(row.get('Publication_date')) or 'n.d.'})")
 
     cell_uid = _uid_from_seed(seed, "cell-spec")
-    cell_spec = _record_from_cell_spec(CellSpecification(
+    cell_spec = _record_from_cell_spec(CellSpec(
         uid=cell_uid,
         model_name=model_name,
         manufacturer={"type": "Organization", "name": manufacturer},
@@ -292,7 +292,7 @@ def from_solid_state_db_row(
     ))
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
-    cell_instance = _record_from_cell_instance(CellInstance(
+    cell_instance = _record_from_cell_instance(Cell(
         uid=_uid_from_seed(seed, "cell-instance"),
         cell_spec_id=cell_spec_id,
         source_type="lab",

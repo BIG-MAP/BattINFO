@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import template_material_spec
-from battinfo.bundle import SCHEMA_VERSION, CellSpecification, Dataset, ProvenanceInfo
+from battinfo.bundle import SCHEMA_VERSION, CellSpec, Dataset, ProvenanceInfo
 
 
 def test_schema_version_value() -> None:
@@ -22,7 +22,7 @@ def test_schema_version_value() -> None:
 
 
 def test_bundle_models_default_to_the_constant() -> None:
-    spec = CellSpecification(manufacturer="Acme", model_name="X1", chemistry="LFP", format="cylindrical")
+    spec = CellSpec(manufacturer="Acme", model_name="X1", chemistry="LFP", format="cylindrical")
     assert spec.schema_version == SCHEMA_VERSION
 
 

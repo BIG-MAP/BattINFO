@@ -43,7 +43,7 @@ from battinfo.api import (
     _validate_canonical_record,
     create_material_spec,
 )
-from battinfo.bundle import BatteryTestType, CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import BatteryTestType, Cell, CellSpec, Dataset, Test
 from battinfo.interop._common import load_json_source
 
 PathLike = str | Path
@@ -239,7 +239,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     if source_meta.get("owner"):
         notes.append(f"dataset owner: {source_meta['owner']}")
 
-    cell_spec = _check(_record_from_cell_spec(CellSpecification(
+    cell_spec = _check(_record_from_cell_spec(CellSpec(
         uid=_uid("bdc", "cell-spec", bdc_id),
         model_name=_clean(overview.get("battery_model")) or bdc_id,
         manufacturer={"type": "Organization", "name": _clean(overview.get("manufacturer")) or "Unknown"},
@@ -257,7 +257,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     )))
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
-    cell_instance = _check(_record_from_cell_instance(CellInstance(
+    cell_instance = _check(_record_from_cell_instance(Cell(
         uid=_uid("bdc", "cell-instance", bdc_id),
         cell_spec_id=cell_spec_id,
         serial_number=bdc_id,

@@ -43,7 +43,7 @@ export default function FederationPage() {
   return (
     <>
       {/* Hero */}
-      <section className="border-b border-slate-200 bg-gradient-to-b from-brand-50/60 to-white">
+      <section className="border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
             <span className="h-1.5 w-1.5 rounded-full bg-volt-500" />
@@ -102,7 +102,7 @@ export default function FederationPage() {
       </section>
 
       {/* BattINFO as the backbone */}
-      <section className="border-y border-slate-200 bg-slate-50">
+      <section className="border-y border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <SectionHeading
             kicker="The backbone"
@@ -195,7 +195,7 @@ export default function FederationPage() {
       </section>
 
       {/* CTA */}
-      <section className="border-t border-slate-200 bg-brand-950">
+      <section className="border-t border-border bg-brand-950">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
             Join the federation.

@@ -26,15 +26,15 @@ function FormatTable({
   caption: string;
 }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-left text-sm">
-        <thead className="bg-slate-50 text-xs uppercase tracking-wider text-ink-faint">
+        <thead className="bg-paper text-xs uppercase tracking-wider text-ink-faint">
           <tr>
             <th className="px-4 py-3 w-28">Extension</th>
             <th className="px-4 py-3">{caption}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-border">
           {rows.map((row) => (
             <tr key={row.ext + row.source} className="bg-white">
               <td className="px-4 py-2.5 font-mono text-xs text-ink">{row.ext}</td>
@@ -101,7 +101,7 @@ export default function ConvertPage() {
         </div>
       </section>
 
-      <section className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+      <section className="mt-14 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold text-ink">What you get back</h2>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-ink-muted">
           <span className="font-mono text-xs">bdf/*.bdf.csv</span> — cycle, step,

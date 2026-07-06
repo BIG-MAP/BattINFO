@@ -1,6 +1,6 @@
 """Phase 1a: the canonical record serialization must be LOSSLESS.
 
-Previously CellSpecification.to_record() dropped the entire datasheet structure (electrodes,
+Previously CellSpec.to_record() dropped the entire datasheet structure (electrodes,
 electrolyte, separator, housing, construction) — the "electrode-drop" data-loss bug: authoring a
 rich cell spec and saving it silently discarded the structure on disk. These tests pin that
 to_record()/from_record() now round-trip the full structure and that the emitted record still
@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import validate_record
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellSpec
 
 _STRUCTURE = ("positive_electrode", "negative_electrode", "electrolyte", "separator", "housing")
 _DETAILED = sorted((ROOT / "src/battinfo/data/examples/cell-spec/research").glob("*detailed*.json"))
@@ -25,7 +25,7 @@ _DETAILED = sorted((ROOT / "src/battinfo/data/examples/cell-spec/research").glob
 
 @pytest.mark.parametrize("path", _DETAILED, ids=lambda p: p.name)
 def test_canonical_roundtrip_is_lossless_and_valid(path: Path) -> None:
-    spec = CellSpecification.from_path(path)  # auto-detects canonical vs library
+    spec = CellSpec.from_path(path)  # auto-detects canonical vs library
     rec1 = spec.to_record()
 
     # Every structure component the spec carries must survive serialization (not be dropped).
@@ -40,7 +40,7 @@ def test_canonical_roundtrip_is_lossless_and_valid(path: Path) -> None:
     assert report.ok, f"{path.name}: {[i.message for i in report.errors][:3]}"
 
     # from_record → to_record is idempotent (no drift, no loss) at the record level.
-    rec2 = CellSpecification.from_record(rec1).to_record()
+    rec2 = CellSpec.from_record(rec1).to_record()
     assert rec1 == rec2, f"{path.name}: canonical round-trip is not idempotent"
 
 
@@ -56,7 +56,7 @@ def test_detailed_fixtures_actually_carry_structure() -> None:
 def test_inline_component_schema_reconciled_with_model() -> None:
     # The inline datasheet structure is strictly validated. Pins the component-schema reconciliation:
     # a material component carrying molecular_formula, and a current_collector with no name, are both
-    # valid — the CellSpecification models allow them, and the schemas now match the models.
+    # valid — the CellSpec models allow them, and the schemas now match the models.
     base = json.loads(
         next(p for p in _DETAILED if "cell_spec" in json.loads(p.read_text(encoding="utf-8"))).read_text(
             encoding="utf-8"
@@ -74,9 +74,9 @@ def test_manufacturer_id_provenance_and_component_refs_round_trip() -> None:
     # PR A: complete the model. Three fields the canonical record supports but the model used to drop
     # on save — the manufacturer organization id, the extra provenance fields the converter populates,
     # and the standalone component-spec references — must now survive to_record/from_record losslessly.
-    from battinfo.bundle import CellSpecification, ProvenanceInfo
+    from battinfo.bundle import CellSpec, ProvenanceInfo
 
-    spec = CellSpecification(
+    spec = CellSpec(
         id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
         name="Acme X", manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
         size_code="R2032",
@@ -100,7 +100,7 @@ def test_manufacturer_id_provenance_and_component_refs_round_trip() -> None:
 
     assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
 
-    back = CellSpecification.from_record(rec)
+    back = CellSpec.from_record(rec)
     assert back.manufacturer_id == spec.manufacturer_id
     assert back.positive_electrode_spec_id == spec.positive_electrode_spec_id
     assert back.electrolyte_spec_id == spec.electrolyte_spec_id
@@ -114,13 +114,13 @@ def test_electrode_drop_regression() -> None:
     rich = next(
         p for p in _DETAILED if "positive_electrode" in json.loads(p.read_text(encoding="utf-8"))
     )
-    spec = CellSpecification.from_path(rich)
+    spec = CellSpec.from_path(rich)
     assert spec.positive_electrode is not None and spec.electrolyte is not None  # fixture sanity
 
     rec = spec.to_record()
     assert "positive_electrode" in rec and "electrolyte" in rec  # not dropped on save
 
-    reloaded = CellSpecification.from_record(rec)
+    reloaded = CellSpec.from_record(rec)
     assert reloaded.positive_electrode is not None  # not dropped on load
     # byte-lossless on the electrode subtree
     src = json.loads(rich.read_text(encoding="utf-8"))

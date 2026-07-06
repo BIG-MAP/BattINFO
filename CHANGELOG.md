@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (breaking-with-shims — naming)
+
+- **The record classes use one consistent short scheme:** `CellSpec`, `Cell`,
+  `TestSpec`, `Test`, `Dataset`. `CellSpecification` and `CellInstance` remain
+  importable everywhere they worked before — as silent aliases from `battinfo.bundle`
+  and as one-release `DeprecationWarning` shims at the package level. The JSON record
+  keys (`cell_spec`, `cell_instance`), IRIs, and schemas are unchanged: this renames
+  the Python surface, not the data contract.
+- `properties=` is the taught keyword for spec properties everywhere (docs, guides,
+  workspace engine); `specs=` stays accepted as a quiet alias.
+- CLI: `test-spec` is the command name (`battinfo query|save|template test-spec`);
+  `test-protocol` still works as a hidden alias for one release.
+- Committed guide-notebook outputs are scrubbed of machine-local paths
+  (`scripts/execute_guides.py` executes + scrubs; a hygiene test keeps it that way).
+
 ### Added
 
 - **Generated reference documentation** that cannot rot: the full CLI reference is

@@ -53,23 +53,23 @@ export default function PropertiesPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search properties and units — try “capacity”, “Wh”, or “impedance”…"
-        className="mt-8 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+        className="mt-8 w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
       />
 
       <section className="mt-10">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">
           Properties ({properties.length})
         </h2>
-        <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase tracking-wider text-ink-faint">
+            <thead className="bg-paper text-xs uppercase tracking-wider text-ink-faint">
               <tr>
                 <th className="px-4 py-3">You write</th>
                 <th className="px-4 py-3">EMMO class</th>
                 <th className="px-4 py-3">IRI</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {properties.map((p) => (
                 <tr key={p.key} className="bg-white">
                   <td className="px-4 py-2.5 font-mono text-xs text-ink">{p.key}</td>
@@ -95,16 +95,16 @@ export default function PropertiesPage() {
         <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">
           Units ({units.length})
         </h2>
-        <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase tracking-wider text-ink-faint">
+            <thead className="bg-paper text-xs uppercase tracking-wider text-ink-faint">
               <tr>
                 <th className="px-4 py-3">You write</th>
                 <th className="px-4 py-3">EMMO unit</th>
                 <th className="px-4 py-3">IRI</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {units.map((u) => (
                 <tr key={u.symbol} className="bg-white">
                   <td className="px-4 py-2.5 font-mono text-xs text-ink">{u.symbol}</td>
@@ -126,7 +126,7 @@ export default function PropertiesPage() {
         </div>
       </section>
 
-      <section className="mt-12 rounded-2xl border border-slate-200 bg-white p-6">
+      <section className="mt-12 rounded-2xl border border-border bg-white p-6">
         <h2 className="text-lg font-semibold text-ink">Use them in a record</h2>
         <p className="mt-2 max-w-prose text-sm text-ink-muted">
           Any property above can go straight into a cell spec —{" "}

@@ -44,7 +44,7 @@ from battinfo.api import (
     template_test_spec_draft,
     validate_staging_cell_spec,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
+from battinfo.bundle import Cell, CellSpec, Dataset, Test, TestSpec
 from battinfo.validate import validate_references_report
 
 
@@ -592,7 +592,7 @@ def test_promote_staging_cell_spec_preserves_double_hyphen_record_id(tmp_path: P
 
 def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> None:
     cell_spec = save_cell_spec(
-        CellSpecification(
+        CellSpec(
             uid="7d9k2m4p8t3x6nq5",
             manufacturer="A123",
             model_name="ANR26650M1-B",
@@ -604,7 +604,7 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
         mode="upsert",
     )
     cell = save_cell_instance(
-        CellInstance(
+        Cell(
             uid="3m6k9t2p7x4h9nq8",
             cell_spec_id=cell_spec["id"],
         ),
@@ -803,7 +803,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
 
     cell_spec_payload = save_cell_spec(
-        CellSpecification(
+        CellSpec(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",
@@ -817,7 +817,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     assert cell_spec_payload["id"].startswith("https://w3id.org/battinfo/spec/")
 
     exists_payload = save_cell_spec(
-        CellSpecification(
+        CellSpec(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",
@@ -831,7 +831,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
     assert exists_payload["status"] == "exists"
 
     cell_instance_payload = save_cell_instance(
-        CellInstance(
+        Cell(
             uid="1f8r6v2k9p4m3t7x",
             cell_spec_id=cell_spec_payload["id"],
             serial_number="LAB-001",
@@ -911,7 +911,7 @@ def test_save_record_accepts_canonical_records_and_paths(tmp_path: Path) -> None
 def test_save_cell_instance_missing_reference_is_deferred_until_set_validation(tmp_path: Path) -> None:
     source_root = tmp_path / "examples"
     payload = save_cell_instance(
-        CellInstance(
+        Cell(
             uid="eysh4h5sk4bxzkgg",
             cell_spec_id="https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq",
             dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",

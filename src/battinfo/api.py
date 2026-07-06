@@ -23,8 +23,8 @@ from battinfo._record_index import active_record_cache, bulk_save_session
 from battinfo.bundle import (
     SCHEMA_VERSION,
     BatteryTestType,
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     Test,
     TestSpec,
@@ -144,7 +144,7 @@ def _citation_url_value(citation: object = None, citation_doi: object = None) ->
     return None
 
 
-# NOTE: the former ``CellSpecificationInput`` DTO has been retired — the ``CellSpecification`` model
+# NOTE: the former ``CellSpecificationInput`` DTO has been retired — the ``CellSpec`` model
 # (battinfo.bundle) now absorbs the flat authoring input shape directly (model_name/specs/notes, a
 # dict manufacturer, flat provenance kwargs, a transient uid), so one model is both the source of
 # truth and the thing callers construct. ``_record_from_cell_spec`` mints the IRI + applies save-time
@@ -164,7 +164,7 @@ def template_cell_spec(
     source_file: str = "template-cell-spec.json",
 ) -> dict[str, Any]:
     """Build a starter canonical cell-spec document for save workflows."""
-    draft = CellSpecification(
+    draft = CellSpec(
         uid=uid,
         model_name=model_name,
         manufacturer=manufacturer,
@@ -262,7 +262,7 @@ def template_cell_instance(
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
     """Build a starter canonical cell-instance document for save workflows."""
-    draft = CellInstance(
+    draft = Cell(
         uid=uid,
         cell_spec_id=cell_spec_id,
         source_type=source_type,
@@ -694,7 +694,7 @@ def _editorial_date_token(value: object) -> str | None:
 
 def _staging_cell_spec_identity(
     source: dict[str, Any] | PathLike,
-    draft: CellSpecification,
+    draft: CellSpec,
 ) -> dict[str, Any]:
     if isinstance(source, (str, Path)):
         payload = _load_json(_as_path(source))
@@ -761,7 +761,7 @@ def _staging_cell_spec_input(
     source: dict[str, Any] | PathLike,
     *,
     uid: str | None = None,
-) -> tuple[CellSpecification, Path | None]:
+) -> tuple[CellSpec, Path | None]:
     source_path: Path | None = None
     if isinstance(source, (str, Path)):
         source_path = _as_path(source)
@@ -780,7 +780,7 @@ def _staging_cell_spec_input(
         manufacturer_obj = product.get("manufacturer")
         manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
         return (
-            CellSpecification(
+            CellSpec(
                 schema_version=str(record_payload.get("schema_version") or "0.1.0"),
                 id=product.get("id") if isinstance(product.get("id"), str) else None,
                 uid=uid,
@@ -843,7 +843,7 @@ def _staging_cell_spec_input(
     retrieved_at = payload.get("retrieved_at", provenance.get("retrieved_at"))
 
     return (
-        CellSpecification(
+        CellSpec(
             uid=uid,
             manufacturer=manufacturer.strip(),
             model_name=str(model_name).strip(),
@@ -1274,7 +1274,7 @@ def _curated_cell_spec_submission_resource(
         "source_local_id": source_local_id,
         "title": title,
         "semantic_payload": {
-            "@type": "CellSpecification",
+            "@type": "CellSpec",
             "battinfo_records": {"cell_spec": dict(record)},
         },
         "related_resources": [],
@@ -1552,7 +1552,7 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
 
     Accepts the full specification surface (manufacturer/model/identity + construction,
     property, and the electrode/electrolyte/separator/housing structure). Detailed specs
-    are normally authored via ``cell_description()`` and saved as a ``CellSpecification``
+    are normally authored via ``cell_description()`` and saved as a ``CellSpec``
     bundle; this is the dict/CLI entry point for the same library record.
     """
     draft_id = draft.get("id")
@@ -2376,7 +2376,7 @@ _COMPONENT_SPEC_REF_NAMESPACES = {
 }
 
 
-def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
+def _record_from_cell_spec(spec: CellSpec) -> dict[str, Any]:
     # Validate component-spec reference IRIs at the input boundary.
     for field_name, namespace in _COMPONENT_SPEC_REF_NAMESPACES.items():
         value = getattr(spec, field_name)
@@ -2478,7 +2478,7 @@ def _identity_minted_uid(entity_kind: str, entity: Any) -> str:
     return stable_uid(seed)
 
 
-def _mint_cell_spec_record(spec: CellSpecification) -> dict[str, Any]:
+def _mint_cell_spec_record(spec: CellSpec) -> dict[str, Any]:
     if spec.id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(spec.id):
             raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -2500,7 +2500,7 @@ def _mint_cell_spec_record(spec: CellSpecification) -> dict[str, Any]:
     return finalized.to_record()
 
 
-def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
+def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
     if instance.cell_spec_id is None or not CELL_SPEC_IRI_RE.fullmatch(instance.cell_spec_id):
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     for dataset_id in instance.dataset_ids:
@@ -2746,7 +2746,7 @@ def save_record(
 
 
 def save_cell_spec(
-    draft: CellSpecification | dict[str, Any] | PathLike,
+    draft: CellSpec | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2767,7 +2767,7 @@ def save_cell_spec(
     re-save is a no-op; a revised datasheet updates the record in place under
     ``mode="upsert"``. See ``save_record`` for the full minting policy.
     """
-    from battinfo.bundle import CellSpecification as CellSpecificationBundle
+    from battinfo.bundle import CellSpec as CellSpecificationBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
@@ -2819,7 +2819,7 @@ def save_cell_spec(
 
 
 def save_cell_instance(
-    draft: CellInstance | dict[str, Any] | PathLike,
+    draft: Cell | dict[str, Any] | PathLike,
     *,
     source_root: PathLike = DEFAULT_REGISTRATION_SOURCE_ROOT,
     mode: str = REGISTER_MODE_CREATE_ONLY,
@@ -2840,7 +2840,7 @@ def save_cell_instance(
     serial, batch, or name mint randomly so distinct anonymous cells never
     dedup. See ``save_record`` for the full minting policy.
     """
-    from battinfo.bundle import CellInstance as CellInstanceBundle
+    from battinfo.bundle import Cell as CellInstanceBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))
@@ -3191,7 +3191,7 @@ def build_cell_spec_library_rdf(
 
 
 def save_library_cell_spec(
-    draft: "CellSpecification | dict[str, Any] | PathLike",
+    draft: "CellSpec | dict[str, Any] | PathLike",
     *,
     library_root: PathLike = DEFAULT_LIBRARY_CELL_TYPES_DIR,
     package_root: PathLike = DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR,
@@ -3208,7 +3208,7 @@ def save_library_cell_spec(
     dry_run: bool = False,
 ) -> dict[str, Any]:
     """Save a reusable cell specification into the curated library."""
-    from battinfo.bundle import CellSpecification as CellSpecificationBundle
+    from battinfo.bundle import CellSpec as CellSpecificationBundle
 
     if isinstance(draft, (str, Path)):
         loaded = _load_json(_as_path(draft))

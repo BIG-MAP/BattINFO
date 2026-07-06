@@ -12,7 +12,7 @@ from battinfo import (
     BatteryCellSpecification,
     BatteryTestType,
     Cell,
-    CellSpecification,
+    CellSpec,
     Dataset,
     Test,
     Workspace,
@@ -493,7 +493,7 @@ def test_workspace_add_supports_object_style_authoring_and_dataset_infers_cell_f
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text("cycle,capacity_ah\n0,2.50\n1,2.48\n", encoding="utf-8")
 
-    cell_spec = CellSpecification()
+    cell_spec = CellSpec()
     cell_spec.manufacturer = "A123"
     cell_spec.model = "ANR26650M1-B"
     cell_spec.format = "cylindrical"

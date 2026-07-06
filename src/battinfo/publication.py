@@ -19,8 +19,8 @@ from battinfo._jsonio import write_json as _write_json
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
-    CellInstance,
-    CellSpecification,
+    Cell,
+    CellSpec,
     Dataset,
     ProtocolInfo,
     ProvenanceInfo,
@@ -1182,7 +1182,7 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
     return _without_none(node)
 
 
-def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_spec: CellSpecification) -> dict[str, Any]:
+def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_spec: CellSpec) -> dict[str, Any]:
     inst = cell_instance_record["cell_instance"]
     type_list = ["BatteryCell", "schema:IndividualProduct"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_spec.format)
@@ -1265,7 +1265,7 @@ def _cell_spec_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
     return node
 
 
-def _cell_spec_jsonld_node(cell_spec: CellSpecification, *, cell_specification: CellSpecification | None = None) -> dict[str, Any]:
+def _cell_spec_jsonld_node(cell_spec: CellSpec, *, cell_specification: CellSpec | None = None) -> dict[str, Any]:
     physical_types: list[str] = ["BatteryCell"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_spec.format)
     if subclass_term is not None:
@@ -1314,7 +1314,7 @@ def _cell_spec_jsonld_node(cell_spec: CellSpecification, *, cell_specification: 
     return _without_none(node)
 
 
-def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, cell_spec: CellSpecification) -> dict[str, Any]:
+def _cell_specification_jsonld_node(cell_specification: CellSpec, *, cell_spec: CellSpec) -> dict[str, Any]:
     descriptions = list(cell_specification.specification_comment) + [
         comment for comment in cell_specification.comment if comment not in cell_specification.specification_comment
     ]
@@ -1355,8 +1355,8 @@ def _cell_specification_jsonld_node(cell_specification: CellSpecification, *, ce
 
 def _publication_graph(
     *,
-    cell_spec: CellSpecification,
-    cell_specification: CellSpecification | None,
+    cell_spec: CellSpec,
+    cell_specification: CellSpec | None,
     cell_instance_record: dict[str, Any],
     test_record: dict[str, Any],
     dataset_record: dict[str, Any],
@@ -1499,11 +1499,11 @@ def _publication_graph(
 
 
 def _normalize_cell_specification(
-    source: CellSpecification | Mapping[str, Any] | PathLike,
+    source: CellSpec | Mapping[str, Any] | PathLike,
     *,
     datasheet_path: Path | None = None,
-) -> CellSpecification:
-    if isinstance(source, CellSpecification):
+) -> CellSpec:
+    if isinstance(source, CellSpec):
         spec = source.model_copy(deep=True)
     else:
         payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
@@ -1511,12 +1511,12 @@ def _normalize_cell_specification(
             result = validate_json(payload, profile="cell-spec")
             if not result.ok:
                 raise ValueError(f"cell specification validation failed: {'; '.join(result.errors)}")
-            spec = CellSpecification.from_library_record(payload)
+            spec = CellSpec.from_library_record(payload)
         elif isinstance(payload.get("specification"), Mapping):
             # Internal specification-format record — bypass cell-spec schema validation.
-            spec = CellSpecification.from_library_record(payload)
+            spec = CellSpec.from_library_record(payload)
         else:
-            spec = CellSpecification.from_json(payload)
+            spec = CellSpec.from_json(payload)
     if datasheet_path is not None:
         spec.source = spec.source.model_copy(
             update={
@@ -1531,17 +1531,17 @@ def _normalize_cell_specification(
     return spec
 
 
-def _normalize_cell_spec(source: CellSpecification | Mapping[str, Any] | PathLike) -> CellSpecification:
-    if isinstance(source, CellSpecification):
+def _normalize_cell_spec(source: CellSpec | Mapping[str, Any] | PathLike) -> CellSpec:
+    if isinstance(source, CellSpec):
         return source.model_copy(deep=True)
     payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
     if isinstance(payload.get("cell_spec"), Mapping):
-        return CellSpecification.from_record(payload)
-    return CellSpecification.from_json(payload)
+        return CellSpec.from_record(payload)
+    return CellSpec.from_json(payload)
 
 
-def _build_cell_spec_from_specification(cell_specification: CellSpecification) -> CellSpecification:
-    return CellSpecification(
+def _build_cell_spec_from_specification(cell_specification: CellSpec) -> CellSpec:
+    return CellSpec(
         id=_cell_spec_iri(cell_specification.id),
         name=f"{cell_specification.manufacturer} {cell_specification.model}",
         manufacturer=cell_specification.manufacturer,
@@ -1563,15 +1563,15 @@ def _build_cell_spec_from_specification(cell_specification: CellSpecification) -
             workflow_version=cell_specification.source.workflow_version,
             comment=cell_specification.source.comment,
         ),
-        comment=["Generated from the linked CellSpecification for publication packaging."],
+        comment=["Generated from the linked CellSpec for publication packaging."],
     )
 
 
 def derive_cell_spec(
-    source: CellSpecification | Mapping[str, Any] | PathLike,
+    source: CellSpec | Mapping[str, Any] | PathLike,
     *,
     datasheet_path: PathLike | None = None,
-) -> CellSpecification:
+) -> CellSpec:
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
     normalized = _normalize_cell_specification(source, datasheet_path=datasheet)
     return _finalize_cell_spec(
@@ -1581,10 +1581,10 @@ def derive_cell_spec(
 
 
 def _finalize_cell_spec(
-    cell_spec: CellSpecification,
+    cell_spec: CellSpec,
     *,
-    cell_specification: CellSpecification | None = None,
-) -> CellSpecification:
+    cell_specification: CellSpec | None = None,
+) -> CellSpec:
     finalized = cell_spec.model_copy(deep=True)
     if finalized.id is None:
         finalized.id = (
@@ -1613,12 +1613,12 @@ def _finalize_cell_spec(
 
 
 def _finalize_cell_instance(
-    cell_instance: CellInstance,
+    cell_instance: Cell,
     *,
-    cell_spec: CellSpecification,
+    cell_spec: CellSpec,
     dataset_dir: Path,
     dataset_id: str | None = None,
-) -> CellInstance:
+) -> Cell:
     finalized = cell_instance.model_copy(deep=True, update={"cell_spec": None})
     if finalized.cell_spec_id is None:
         finalized.cell_spec_id = cell_spec.id
@@ -1651,7 +1651,7 @@ def _finalize_cell_instance(
 def _finalize_test(
     test: Test,
     *,
-    cell_instance: CellInstance,
+    cell_instance: Cell,
     dataset_dir: Path,
     dataset_id: str | None = None,
 ) -> Test:
@@ -1688,7 +1688,7 @@ def _finalize_test(
 def _finalize_dataset(
     dataset: Dataset,
     *,
-    cell_instance: CellInstance,
+    cell_instance: Cell,
     test: Test,
     dataset_dir: Path,
 ) -> Dataset:
@@ -1729,11 +1729,11 @@ def _finalize_dataset(
 
 def _finalize_publication_bundle(
     *,
-    cell_spec: CellSpecification,
-    cell_instance: CellInstance,
+    cell_spec: CellSpec,
+    cell_instance: Cell,
     test: Test,
     dataset: Dataset,
-    cell_specification: CellSpecification | None = None,
+    cell_specification: CellSpec | None = None,
 ) -> tuple[BattinfoBundle, Path]:
     dataset_dir = _resolve_dataset_dir(dataset)
     finalized_cell_spec = _finalize_cell_spec(cell_spec, cell_specification=cell_specification)
@@ -1772,11 +1772,11 @@ def _finalize_publication_bundle(
 
 def publish(
     *,
-    cell_spec: CellSpecification,
-    cell_instance: CellInstance,
+    cell_spec: CellSpec,
+    cell_instance: Cell,
     test: Test,
     dataset: Dataset,
-    cell_specification: CellSpecification | Mapping[str, Any] | PathLike | None = None,
+    cell_specification: CellSpec | Mapping[str, Any] | PathLike | None = None,
     datasheet_path: PathLike | None = None,
     publish_filename: str = DEFAULT_PUBLISH_FILENAME,
     html_filename: str = "index.html",
@@ -1898,11 +1898,11 @@ def publish(
 
 def build_publication_package(
     *,
-    cell_spec: CellSpecification,
-    cell_instance: CellInstance,
+    cell_spec: CellSpec,
+    cell_instance: Cell,
     test: Test,
     dataset: Dataset,
-    cell_specification: CellSpecification | Mapping[str, Any] | PathLike | None = None,
+    cell_specification: CellSpec | Mapping[str, Any] | PathLike | None = None,
     datasheet_path: PathLike | None = None,
     publish_filename: str = DEFAULT_PUBLISH_FILENAME,
     html_filename: str = "index.html",
@@ -1945,8 +1945,8 @@ def publish_dataset_metadata(
     *,
     dataset_dirs: list[PathLike],
     staging_root: PathLike,
-    cell_spec: CellSpecification | Mapping[str, Any] | PathLike | None = None,
-    cell_specification: CellSpecification | Mapping[str, Any] | PathLike | None = None,
+    cell_spec: CellSpec | Mapping[str, Any] | PathLike | None = None,
+    cell_specification: CellSpec | Mapping[str, Any] | PathLike | None = None,
     datasheet_path: PathLike | None = None,
     test_kind: str = "other",
     protocol_name: str | None = None,
@@ -2032,7 +2032,7 @@ def publish_dataset_metadata(
 
         retrieved_at = _now_unix()
         source = ProvenanceInfo(type="measurement", url=dataset_dir.resolve().as_uri(), retrieved_at=retrieved_at)
-        cell_instance = CellInstance(
+        cell_instance = Cell(
             name=instance_name,
             cell_spec=normalized_cell_spec,
             serial_number=serial_number,

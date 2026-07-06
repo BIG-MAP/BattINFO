@@ -11,12 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 publish_module = importlib.import_module("battinfo._publish")
-from battinfo import CellSpecification, PublishResult, publish
+from battinfo import CellSpec, PublishResult, publish
 from battinfo.api import publish_record, save_record
 
 
-def _sample_cell_spec() -> CellSpecification:
-    return CellSpecification(
+def _sample_cell_spec() -> CellSpec:
+    return CellSpec(
         manufacturer="Google",
         model="G20M7",
         format="pouch",

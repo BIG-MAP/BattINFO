@@ -6,7 +6,7 @@ from battinfo.bundle import (
     BillOfMaterials,
     Case,
     CellConstruction,
-    CellSpecification,
+    CellSpec,
     Coating,
     CurrentCollector,
     CurrentCollectorTab,
@@ -497,7 +497,7 @@ def cell_description(
     source: ProvenanceInfo | None = None,
     specification_comment: str | list[str] | None = None,
     comment: str | list[str] | None = None,
-) -> CellSpecification:
+) -> CellSpec:
     """Build a complete cell descriptor specification.
 
     This is the primary authoring entry point for detailed cell descriptions.
@@ -537,7 +537,7 @@ def cell_description(
         else list(specification_comment or [])
     )
     comments = [comment] if isinstance(comment, str) else list(comment or [])
-    return CellSpecification(
+    return CellSpec(
         id=id,
         manufacturer=manufacturer,
         model=model,

@@ -1,7 +1,7 @@
 # Runbook: coordinated `cell_type`/`cell-type` → `cell_spec`/`cell-spec` migration
 
 Status prerequisite: **Phases 1–2 are already done** in BattINFO (the two models are
-merged into one `CellSpecification`; the class symbol is renamed; suite green). This
+merged into one `CellSpec`; the class symbol is renamed; suite green). This
 runbook covers the remaining **lockstep token rename** across the on-disk format, the
 index/query API, the four repos, and the live registry DB — plus removing the transient
 `CellType` alias and `nominal_properties` bridge at the end.
@@ -17,7 +17,7 @@ half-state. Renaming **both sides together** makes a near-blanket sweep correct.
 
 | Surface | Old | New |
 |---|---|---|
-| Python class | `CellType` (alias) | `CellSpecification` (already canonical) |
+| Python class | `CellType` (alias) | `CellSpec` (already canonical) |
 | Python ident / var / param | `cell_type` | `cell_spec` |
 | Collections / index keys | `cell_types`, `cell_type_count` | `cell_specs`, `cell_spec_count` |
 | Field / FK / query kwarg | `cell_type_id`, `cell_type_iri` | `cell_spec_id`, `cell_spec_iri` |
@@ -27,12 +27,12 @@ half-state. Renaming **both sides together** makes a near-blanket sweep correct.
 | Record wrapper key | `"product"` | `"cell_spec"` |
 | Record specs key | `"specs"` | `"properties"` |
 | Cell-instance FK key | `"type_id"` | `"cell_spec_id"` |
-| `kind` discriminator | `"CellType"` | `"CellSpecification"` |
+| `kind` discriminator | `"CellType"` | `"CellSpec"` |
 | Compact identifier | `cell-type:{uid}` | `cell-spec:{uid}` |
 | Validation profile | `"cell-type"` | `"cell-spec"` |
 | Filenames | `cell-type.json`, `cell-type.schema.json`, `cell-type.shapes.ttl`, `cell-type.jsonld`, `cell-type.index.json` | `cell-spec.*` equivalents |
 | Directories | `examples/cell-type/`, `data/library/cell-type/`, `.battinfo/library/cell-type/` | `…/cell-spec/` |
-| LinkML schema | `schema/cell-type.yaml`, class `CellType` | `schema/cell-spec.yaml`, class `CellSpecification` |
+| LinkML schema | `schema/cell-type.yaml`, class `CellType` | `schema/cell-spec.yaml`, class `CellSpec` |
 
 **MUST NOT change** (leave exactly as-is):
 - The canonical IRI **path** `https://w3id.org/battinfo/spec/{uid}` — already migrated to
@@ -70,7 +70,7 @@ half-state. Renaming **both sides together** makes a near-blanket sweep correct.
 
 ### Step 1 — BattINFO: LinkML schema + regenerate
 1. `git mv schema/cell-type.yaml schema/cell-spec.yaml`; rename the LinkML class
-   `CellType`→`CellSpecification` and slots (`type_id`→`cell_spec_id`, etc.); update
+   `CellType`→`CellSpec` and slots (`type_id`→`cell_spec_id`, etc.); update
    `schema/battinfo.yaml` imports.
 2. Regenerate: `make gen-context`, `make gen-schema`, and `gen-pydantic --meta full`
    (review `bundle_generated.py`). Sync packaged copies (`assets/` ↔
@@ -88,7 +88,7 @@ imports and EMMO IRIs:
 3. Kebab/string tokens: `"cell-type"`→`"cell-spec"`, `cell-type:`→`cell-spec:`,
    `/cell-type/`→`/cell-spec/`, and the record keys `"product"`→`"cell_spec"`,
    `"specs"`→`"properties"`, `"type_id"`→`"cell_spec_id"`, `kind "CellType"`→
-   `"CellSpecification"`.
+   `"CellSpec"`.
 4. `git mv` the directories/filenames (`examples/cell-type/`→`examples/cell-spec/`, the
    two `cell-type.schema.json`, `cell-type.shapes.ttl`, library dirs, etc.) and update
    `default_filename`, `EXAMPLES_ROOT` constants, and any path globs.
@@ -98,7 +98,7 @@ imports and EMMO IRIs:
    readers, accept the **old** keys (`product`/`specs`/`type_id`/`cell-type:`) as
    fallbacks so existing records still load during re-ingest. Mark `# DEPRECATED: remove
    after registry migration`.
-7. Remove the transient `CellType = CellSpecification` alias and its `__init__` export;
+7. Remove the transient `CellType = CellSpec` alias and its `__init__` export;
    rename `CellTypeInput`/`CellTypeBundle`/`BatteryCellType`.
 8. Regenerate the LR03 preview; run the full suite + the gold-standard/SHACL validators.
 

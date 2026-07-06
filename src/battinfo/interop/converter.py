@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
-from battinfo.bundle import SCHEMA_VERSION, CellInstance, CellSpecification, ProvenanceInfo, Test, TestSpec
+from battinfo.bundle import SCHEMA_VERSION, Cell, CellSpec, ProvenanceInfo, Test, TestSpec
 from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
 
@@ -140,7 +140,7 @@ PROPERTY_TYPE_MAP = {
 
 @dataclass(slots=True)
 class ConverterImportResult:
-    specification: CellSpecification
+    specification: CellSpec
     record: dict[str, Any]
     warnings: list[str]
     test_specs: list[dict[str, Any]] = field(default_factory=list)
@@ -149,9 +149,9 @@ class ConverterImportResult:
 
 @dataclass(slots=True)
 class ConverterImportPackage:
-    specification: CellSpecification
-    cell_spec: CellSpecification
-    cell_instance: CellInstance | None
+    specification: CellSpec
+    cell_spec: CellSpec
+    cell_instance: Cell | None
     test_specs: list[TestSpec] = field(default_factory=list)
     tests: list[Test] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -364,7 +364,7 @@ def import_converter_jsonld_record(
             fragments.append(f"coin-schema={converter_schema_version}")
         source_comment = f"{source_comment} {'; '.join(fragments)}"
 
-    specification = CellSpecification(
+    specification = CellSpec(
         schema_version=schema_version,
         id=spec_id,
         manufacturer=imported_manufacturer,
@@ -412,7 +412,7 @@ def import_converter_jsonld_record(
         warnings=warnings,
     )
 
-    result_specification = CellSpecification.from_library_record(record)
+    result_specification = CellSpec.from_library_record(record)
     if validate:
         # Match the other interop importers: schema-validate the emitted cell-spec so a malformed
         # import fails loudly here, not silently downstream. `to_record()` is the canonical
@@ -451,19 +451,19 @@ def import_converter_package(
         validate=validate,
     )
     specification = imported.specification
-    cell_spec = CellSpecification.from_cell_specification(specification)
+    cell_spec = CellSpec.from_cell_specification(specification)
     if cell_spec.source.type not in {"datasheet", "label", "catalog", "manual", "other"}:
         cell_spec.source.type = "other"
         existing = list(cell_spec.comment)
         existing.append("Source type normalized from converter-jsonld during converter package import.")
         cell_spec.comment = existing
 
-    cell_instance: CellInstance | None = None
+    cell_instance: Cell | None = None
     instances = imported.record.get("instances")
     if isinstance(instances, list) and instances:
         first = instances[0]
         if isinstance(first, Mapping):
-            cell_instance = CellInstance(
+            cell_instance = Cell(
                 schema_version=schema_version,
                 id=first.get("id"),
                 name=first.get("name"),

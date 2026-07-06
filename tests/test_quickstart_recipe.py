@@ -35,7 +35,7 @@ def ws(tmp_path: Path) -> AuthoringWorkspace:
     )
     # Offline search falls back to a local battinfo-records clone; fabricate a
     # one-record clone so the search->add seam runs with zero network.
-    record = battinfo.CellSpecification(
+    record = battinfo.CellSpec(
         id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         manufacturer="Molicel",
         model="INR21700-P45B",
@@ -107,7 +107,7 @@ def test_add_with_string_spec_teaches_the_fix(ws: AuthoringWorkspace) -> None:
 
 
 def test_add_still_accepts_a_cell_specification(ws: AuthoringWorkspace) -> None:
-    spec = battinfo.CellSpecification(
+    spec = battinfo.CellSpec(
         manufacturer="Acme", model="QS-1", format="coin", chemistry="Li-ion"
     )
     cells = ws.add("cell", spec=spec, serial_numbers=["ACME-1"])
@@ -139,9 +139,9 @@ def test_user_facing_prints_are_console_safe() -> None:
 
 
 def test_new_spec_passed_to_add_joins_the_save_set(ws: AuthoringWorkspace, tmp_path: Path) -> None:
-    # A CellSpecification without an id handed to add() must be saved and
+    # A CellSpec without an id handed to add() must be saved and
     # minted with the instances — not left as an orphan that fails at save.
-    spec = battinfo.CellSpecification(
+    spec = battinfo.CellSpec(
         manufacturer="Molicel", model="INR21700-P45B", format="cylindrical", chemistry="Li-ion"
     )
     cells = ws.add("cell", spec=spec, serial_numbers=["NEW-1"])

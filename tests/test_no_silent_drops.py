@@ -24,7 +24,7 @@ from battinfo.api import (
     _record_from_test,
     _record_from_test_protocol,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test, TestSpec
+from battinfo.bundle import Cell, CellSpec, Dataset, Test, TestSpec
 
 UID = "ffffffffffffffff"
 SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-aaaa-aaaa-aaaa"
@@ -41,14 +41,14 @@ PROVENANCE_KWARGS = dict(
 
 def test_specs_non_mapping_raises_with_the_fix() -> None:
     with pytest.raises(TypeError, match="specs= must be a mapping"):
-        CellSpecification(
+        CellSpec(
             manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
             specs=[("nominal_capacity", 2.5)],
         )
 
 
 def test_specs_mapping_still_accepted() -> None:
-    spec = CellSpecification(
+    spec = CellSpec(
         manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
         specs={"nominal_capacity": {"value": 2.5, "unit": "Ah"}},
     )
@@ -70,18 +70,18 @@ def _assert_provenance_survives(record: dict, model_cls, prov_key: str = "proven
 
 
 def test_cell_spec_provenance_round_trip() -> None:
-    record = _record_from_cell_spec(CellSpecification(
+    record = _record_from_cell_spec(CellSpec(
         manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
         uid=UID, **PROVENANCE_KWARGS,
     ))
-    _assert_provenance_survives(record, CellSpecification)
+    _assert_provenance_survives(record, CellSpec)
 
 
 def test_cell_instance_provenance_round_trip() -> None:
-    record = _record_from_cell_instance(CellInstance(
+    record = _record_from_cell_instance(Cell(
         uid=UID, cell_spec_id=SPEC_IRI, **PROVENANCE_KWARGS,
     ))
-    _assert_provenance_survives(record, CellInstance)
+    _assert_provenance_survives(record, Cell)
 
 
 def test_test_provenance_round_trip() -> None:
@@ -99,33 +99,33 @@ def test_test_spec_provenance_round_trip() -> None:
 
 
 def test_cell_instance_conflicting_spec_references_raise() -> None:
-    spec = CellSpecification(
+    spec = CellSpec(
         id=SPEC_IRI, manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
     )
     other = "https://w3id.org/battinfo/spec/cccc-cccc-cccc-cccc"
     with pytest.raises(ValueError, match="Conflicting cell spec references"):
-        CellInstance(spec, cell_spec_id=other)
+        Cell(spec, cell_spec_id=other)
 
 
 def test_cell_instance_positional_spec_with_matching_id_is_kept() -> None:
-    spec = CellSpecification(
+    spec = CellSpec(
         id=SPEC_IRI, manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
     )
     # Previously the positional object was silently discarded whenever cell_spec_id= was given.
-    instance = CellInstance(spec, cell_spec_id=SPEC_IRI)
+    instance = Cell(spec, cell_spec_id=SPEC_IRI)
     assert instance.cell_spec is spec
     assert instance.cell_spec_id == SPEC_IRI
 
 
 def test_test_conflicting_cell_references_raise() -> None:
-    cell = CellInstance(id=CELL_IRI, cell_spec_id=SPEC_IRI)
+    cell = Cell(id=CELL_IRI, cell_spec_id=SPEC_IRI)
     other = "https://w3id.org/battinfo/cell/dddd-dddd-dddd-dddd"
     with pytest.raises(ValueError, match="Conflicting cell references"):
         Test(cell, cell_id=other, name="T", kind="cycling")
 
 
 def test_test_positional_cell_with_matching_id_is_kept() -> None:
-    cell = CellInstance(id=CELL_IRI, cell_spec_id=SPEC_IRI)
+    cell = Cell(id=CELL_IRI, cell_spec_id=SPEC_IRI)
     test = Test(cell, cell_id=CELL_IRI, name="T", kind="cycling")
     assert test.cell is cell
     assert test.cell_instance_id == CELL_IRI

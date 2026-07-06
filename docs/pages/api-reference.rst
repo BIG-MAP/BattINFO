@@ -13,10 +13,10 @@ The five record models are both the canonical source of truth and the
 authoring input: construct them with the flat field names you know from the
 datasheet and hand them to ``publish`` or the matching ``save_*`` function.
 
-.. autopydantic_model:: battinfo.CellSpecification
+.. autopydantic_model:: battinfo.CellSpec
    :members: false
 
-.. autopydantic_model:: battinfo.CellInstance
+.. autopydantic_model:: battinfo.Cell
    :members: false
 
 .. autopydantic_model:: battinfo.TestSpec

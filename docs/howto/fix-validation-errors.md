@@ -9,7 +9,7 @@ message you get and the line that resolves it.
 import battinfo
 
 try:
-    battinfo.CellSpecification(manufacture="Acme", model="X", format="coin", chemistry="Li-ion")
+    battinfo.CellSpec(manufacture="Acme", model="X", format="coin", chemistry="Li-ion")
 except TypeError as exc:
     print(exc)  # Unknown field(s), with a did-you-mean for manufacturer=
 ```
@@ -17,7 +17,7 @@ except TypeError as exc:
 **2. A bare-number quantity** — quantities are objects, units are never implicit:
 
 ```python
-spec = battinfo.CellSpecification(
+spec = battinfo.CellSpec(
     manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
     nominal_capacity={"value": 2.5, "unit": "Ah"},   # not nominal_capacity=2.5
 )
@@ -37,7 +37,7 @@ except Exception as exc:
 
 ```python
 try:
-    battinfo.CellSpecification(
+    battinfo.CellSpec(
         manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
         specs=[("nominal_voltage", 3.0)],
     )

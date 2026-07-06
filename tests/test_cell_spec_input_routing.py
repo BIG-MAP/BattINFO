@@ -1,5 +1,5 @@
 """PR B (step A): the cell-spec save path builds its canonical record THROUGH the one
-model (CellSpecification.to_record), not a parallel hand-assembled dict. These pin that the routed
+model (CellSpec.to_record), not a parallel hand-assembled dict. These pin that the routed
 builder preserves everything the input carries — including product_type, which the old hand-builder
 silently dropped — and still derives the id/short_id/identifier the same way."""
 from __future__ import annotations
@@ -12,11 +12,11 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import validate_record
 from battinfo.api import _record_from_cell_spec
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellSpec
 
 
 def test_routed_builder_preserves_all_fields_and_validates() -> None:
-    rec = _record_from_cell_spec(CellSpecification(
+    rec = _record_from_cell_spec(CellSpec(
         uid="1c4m-7p9q-2k6t-8v3r", model_name="CR2032",
         manufacturer={"name": "Energizer", "id": "https://w3id.org/battinfo/organization/1111-2222-3333-4444"},
         format="coin", chemistry="Li-primary", product_type="commercial", size_code="R2032",
@@ -32,7 +32,7 @@ def test_routed_builder_preserves_all_fields_and_validates() -> None:
 
 
 def test_routed_builder_mints_id_short_id_and_identifier_from_uid() -> None:
-    rec = _record_from_cell_spec(CellSpecification(
+    rec = _record_from_cell_spec(CellSpec(
         uid="1c4m-7p9q-2k6t-8v3r", model_name="X", manufacturer="Acme", format="coin", chemistry="Li-ion",
     ))
     cs = rec["cell_spec"]

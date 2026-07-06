@@ -74,7 +74,7 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 - **Write plain JSON or Python** — get validated, EMMO-aligned JSON-LD.
 - **Interoperable by construction** — records share one ontology, one context, and one identifier scheme.
-- **Provenance built in** — a `CellSpecification → CellInstance → Test → Dataset` chain links every measurement back to the cell that produced it.
+- **Provenance built in** — a `CellSpec → Cell → Test → Dataset` chain links every measurement back to the cell that produced it.
 - **Standards-ready** — Battery Pass-compatible output, pinned per release.
 
 ## Installation
@@ -98,10 +98,10 @@ uv sync --all-extras   # creates .venv and installs from uv.lock
 ## Quickstart
 
 ```python
-from battinfo import CellSpecification, publish
+from battinfo import CellSpec, publish
 
 result = publish(
-    CellSpecification(
+    CellSpec(
         manufacturer="Panasonic",
         model="NCR18650B",
         format="cylindrical",
@@ -156,7 +156,7 @@ repo root with the `.venv` kernel.
 - Produces **Battery Pass-compatible JSON-LD** (pinned to v1.2.0).
 - Provides profiles, examples, and mapping rules for all common battery record types.
 - Supports a reusable cell-spec library, curated once as BattINFO descriptors and published as generated RDF/JSON-LD.
-- Publishes dataset metadata with a core `CellSpecification → CellInstance → Test → Dataset` provenance chain.
+- Publishes dataset metadata with a core `CellSpec → Cell → Test → Dataset` provenance chain.
 
 ## Semantic foundation
 

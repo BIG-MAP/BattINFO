@@ -15,7 +15,7 @@ from battinfo.api import (
     save_dataset,
     save_test,
 )
-from battinfo.bundle import CellInstance, CellSpecification, Dataset, Test
+from battinfo.bundle import Cell, CellSpec, Dataset, Test
 
 
 def test_core_workflow_end_to_end(tmp_path: Path) -> None:
@@ -24,7 +24,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
     index_path = tmp_path / ".battinfo" / "index.json"
 
     cell_spec = save_cell_spec(
-        CellSpecification(
+        CellSpec(
             uid="3m6k9t2p7x4h9nq8",
             model_name="MN1500",
             manufacturer="Duracell",
@@ -36,7 +36,7 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
         validation_policy="strict",
     )
     cell_instance = save_cell_instance(
-        CellInstance(
+        Cell(
             uid="1f8r6v2k9p4m3t7x",
             cell_spec_id=cell_spec["id"],
             serial_number="SN-001",

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function PublishPage() {
   return (
     <>
-      <section className="border-b border-slate-200 bg-gradient-to-b from-brand-50/60 to-white">
+      <section className="border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
         <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <SectionHeading
             kicker="The procedure"
@@ -33,7 +33,7 @@ export default function PublishPage() {
             validated records with permanent identifiers, a DOI you can put in a
             paper, and data the whole field can find and read.
           </p>
-          <div className="mt-6 rounded-lg border border-slate-200 bg-white px-4 py-3">
+          <div className="mt-6 rounded-lg border border-border bg-white px-4 py-3">
             <p className="font-mono text-sm text-brand-700">
               raw files → BDF tables → {provenanceChain} → JSON-LD → DOI + registry
             </p>
@@ -53,7 +53,7 @@ export default function PublishPage() {
                   {i + 1}
                 </span>
                 <h2 className="text-xl font-semibold text-ink">{stage.stage}</h2>
-                <code className="ml-1 hidden rounded bg-slate-100 px-2 py-0.5 text-xs text-brand-700 sm:inline">
+                <code className="ml-1 hidden rounded bg-tint px-2 py-0.5 text-xs text-brand-700 sm:inline">
                   {stage.verb}
                 </code>
               </div>
@@ -77,7 +77,7 @@ export default function PublishPage() {
         </ol>
       </section>
 
-      <section className="border-t border-slate-200 bg-slate-50">
+      <section className="border-t border-border bg-surface">
         <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
           <SectionHeading kicker="Before you publish" title="Check your record here, in the browser." />
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
@@ -94,7 +94,7 @@ export default function PublishPage() {
             </Link>
             <Link
               href="/examples"
-              className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
+              className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
             >
               See a worked example
             </Link>
@@ -115,7 +115,7 @@ export default function PublishPage() {
             href={site.reference}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
+            className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
           >
             Developer reference →
           </a>
@@ -123,7 +123,7 @@ export default function PublishPage() {
             href={site.genome}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
+            className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
           >
             See published data on Battery Genome →
           </a>

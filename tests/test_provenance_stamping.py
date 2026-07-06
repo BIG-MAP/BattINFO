@@ -15,11 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 import battinfo  # noqa: E402
-from battinfo.bundle import CellSpecification, stamp_provenance  # noqa: E402
+from battinfo.bundle import CellSpec, stamp_provenance  # noqa: E402
 
 
-def _spec() -> CellSpecification:
-    return CellSpecification(
+def _spec() -> CellSpec:
+    return CellSpec(
         id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         manufacturer="Energizer",
         model="CR2032",
@@ -37,13 +37,13 @@ def test_to_record_stamps_current_version() -> None:
 def test_explicit_version_is_preserved_through_round_trip() -> None:
     record = _spec().to_record()
     record["provenance"]["battinfo_version"] = "0.0.1"
-    reread = CellSpecification.from_record(record)
+    reread = CellSpec.from_record(record)
     assert reread.to_record()["provenance"]["battinfo_version"] == "0.0.1"
 
 
 def test_round_trip_is_a_fixed_point() -> None:
     first = _spec().to_record()
-    second = CellSpecification.from_record(first).to_record()
+    second = CellSpec.from_record(first).to_record()
     assert first["provenance"] == second["provenance"]
 
 

@@ -15,8 +15,8 @@ SPEC COVERAGE (report only) — which SpecSet schema fields lack a direct
   failure, since schema can legitimately contain EU-regulation fields that
   aren't in the authoring API yet.
 
-ADAPTER ROUNDTRIP (fail) — CellSpecification → generated CellSpecification → record dict →
-  CellSpecification must preserve identity for all non-None fields.
+ADAPTER ROUNDTRIP (fail) — CellSpec → generated CellSpec → record dict →
+  CellSpec must preserve identity for all non-None fields.
 """
 
 from __future__ import annotations
@@ -163,10 +163,10 @@ def test_bundle_authoring_fields_report_schema_gaps() -> None:
 # ── ADAPTER ROUNDTRIP ─────────────────────────────────────────────────────────
 
 def test_adapter_cell_spec_to_schema_basic() -> None:
-    from battinfo.bundle import CellSpecification
+    from battinfo.bundle import CellSpec
     from battinfo.bundle_adapter import cell_spec_to_schema
 
-    ct = CellSpecification(
+    ct = CellSpec(
         manufacturer="Panasonic",
         model="NCR18650B",
         format="cylindrical",
@@ -185,10 +185,10 @@ def test_adapter_cell_spec_to_schema_basic() -> None:
 
 
 def test_adapter_cell_spec_roundtrip() -> None:
-    from battinfo.bundle import CellSpecification
+    from battinfo.bundle import CellSpec
     from battinfo.bundle_adapter import cell_spec_to_schema, schema_cell_spec_to_record_dict
 
-    ct = CellSpecification(
+    ct = CellSpec(
         id="https://w3id.org/battinfo/spec/abc123",
         manufacturer="Samsung SDI",
         model="INR21700-50E",
@@ -200,7 +200,7 @@ def test_adapter_cell_spec_roundtrip() -> None:
     )
     gen = cell_spec_to_schema(ct)
     record = schema_cell_spec_to_record_dict(gen)
-    ct2 = CellSpecification.from_record(record)
+    ct2 = CellSpec.from_record(record)
 
     assert ct2.manufacturer == ct.manufacturer
     assert ct2.model == ct.model
@@ -211,12 +211,12 @@ def test_adapter_cell_spec_roundtrip() -> None:
 
 
 def test_adapter_spec_value_coercion_in_cell_spec() -> None:
-    """SpecValue objects passed to CellSpecification should be coerced to dicts."""
-    from battinfo.bundle import CellSpecification
+    """SpecValue objects passed to CellSpec should be coerced to dicts."""
+    from battinfo.bundle import CellSpec
     from battinfo.bundle_generated import SpecValue
 
     sv = SpecValue(sv_value=2.5, sv_unit="Ah")
-    ct = CellSpecification(
+    ct = CellSpec(
         manufacturer="A123",
         model="ANR26650M1B",
         format="cylindrical",
@@ -231,10 +231,10 @@ def test_adapter_spec_value_coercion_in_cell_spec() -> None:
 
 def test_adapter_spec_value_via_mapping_property() -> None:
     """Setting a _mapping_property with a SpecValue should coerce to dict."""
-    from battinfo.bundle import CellSpecification
+    from battinfo.bundle import CellSpec
     from battinfo.bundle_generated import SpecValue
 
-    ct = CellSpecification(manufacturer="A123", model="X", format="cylindrical", chemistry="li-ion")
+    ct = CellSpec(manufacturer="A123", model="X", format="cylindrical", chemistry="li-ion")
     ct.nominal_capacity = SpecValue(sv_value=3.0, sv_unit="Ah")
     assert ct.nominal_capacity == {"value": 3.0, "unit": "Ah"}
 
@@ -259,10 +259,10 @@ def test_adapter_specset_roundtrip() -> None:
 
 
 def test_adapter_bundle_to_schema_dispatcher() -> None:
-    from battinfo.bundle import CellInstance, CellSpecification, Test, TestSpec
+    from battinfo.bundle import Cell, CellSpec, Test, TestSpec
     from battinfo.bundle_adapter import bundle_to_schema
     from battinfo.bundle_generated import (
-        CellInstance as GenCI,
+        CellInstance as GenCI,  # generated layer keeps the LinkML names
     )
     from battinfo.bundle_generated import (
         CellSpecification as GenCT,
@@ -274,10 +274,10 @@ def test_adapter_bundle_to_schema_dispatcher() -> None:
         TestSpec as GenTS,
     )
 
-    ct = CellSpecification(manufacturer="X", model="Y", format="pouch", chemistry="nmc")
+    ct = CellSpec(manufacturer="X", model="Y", format="pouch", chemistry="nmc")
     assert isinstance(bundle_to_schema(ct), GenCT)
 
-    ci = CellInstance(
+    ci = Cell(
         cell_spec_id="https://w3id.org/battinfo/spec/abc",
         serial_number="SN-001",
     )

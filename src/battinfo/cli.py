@@ -119,7 +119,7 @@ from battinfo.api import (
 from battinfo.api import (
     validate_staging_datasets as api_validate_staging_datasets,
 )
-from battinfo.bundle import SCHEMA_VERSION, CellInstance, CellSpecification, Dataset, Test, TestSpec
+from battinfo.bundle import SCHEMA_VERSION, Cell, CellSpec, Dataset, Test, TestSpec
 from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
@@ -265,11 +265,11 @@ def _render_notebook_recovery(payload: dict[str, Any]) -> None:
             typer.echo(f"- {path}")
 
 
-def _load_cell_spec_input(path: Path) -> CellSpecification:
+def _load_cell_spec_input(path: Path) -> CellSpec:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(payload.get("cell_spec"), dict):
-        return CellSpecification.from_record(payload)
-    return CellSpecification(**payload)
+        return CellSpec.from_record(payload)
+    return CellSpec(**payload)
 
 
 def _init_example_document(profile: str) -> dict[str, Any]:
@@ -1110,7 +1110,8 @@ def template_dataset(
     _emit_table([payload], ["status", "resource", "id", "path"])
 
 
-@template_app.command("test-protocol")
+@template_app.command("test-spec")
+@template_app.command("test-protocol", hidden=True)  # pre-0.8 name
 def template_test_spec(
     name: str = typer.Option("Example Test Protocol", help="Human-readable protocol name."),
     kind: str = typer.Option("other", help="Test kind."),
@@ -1611,7 +1612,8 @@ def query_datasets(
     _emit_table(rows, ["id", "title", "format", "license", "source_type", "access_url"])
 
 
-@query_app.command("test-protocol")
+@query_app.command("test-spec")
+@query_app.command("test-protocol", hidden=True)  # pre-0.8 name
 def query_test_specs(
     id: str | None = typer.Option(None, help="Filter by canonical test-protocol IRI."),
     kind: str | None = typer.Option(None, help="Filter by protocol kind."),
@@ -1877,7 +1879,7 @@ def save_cell_spec(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: CellSpecification | dict[str, Any] | Path = input_path
+            draft_obj: CellSpec | dict[str, Any] | Path = input_path
         else:
             if not manufacturer or not model_name:
                 raise ValueError("--manufacturer and --model-name are required when --input is not provided.")
@@ -1887,7 +1889,7 @@ def save_cell_spec(
                 if not isinstance(loaded_specs, dict):
                     raise ValueError("--specs must point to a JSON object.")
                 specs = loaded_specs
-            draft_obj = CellSpecification(
+            draft_obj = CellSpec(
                 uid=uid,
                 model_name=model_name,
                 manufacturer=manufacturer,
@@ -1951,11 +1953,11 @@ def save_cell_instance(
     policy_name = _check_validation_policy(validation_policy)
     try:
         if input_path is not None:
-            draft_obj: CellInstance | dict[str, Any] | Path = input_path
+            draft_obj: Cell | dict[str, Any] | Path = input_path
         else:
             if not cell_spec_id:
                 raise ValueError("--cell-spec-id is required when --input is not provided.")
-            draft_obj = CellInstance(
+            draft_obj = Cell(
                 uid=uid,
                 cell_spec_id=cell_spec_id,
                 serial_number=serial_number,
@@ -2059,7 +2061,8 @@ def save_dataset(
     _emit_table([payload], ["status", "entity_type", "id", "path", "mode", "published"])
 
 
-@save_app.command("test-protocol")
+@save_app.command("test-spec")
+@save_app.command("test-protocol", hidden=True)  # pre-0.8 name
 def save_test_spec(
     input_path: Path | None = typer.Option(
         None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical JSON."
@@ -2598,7 +2601,7 @@ def publish_cell_spec(
                 raise typer.BadParameter(
                     "Provide --input or all of --manufacturer, --model, --cell-format, and --chemistry."
                 )
-            cell_spec = CellSpecification(
+            cell_spec = CellSpec(
                 manufacturer=manufacturer.strip(),
                 model=model.strip(),
                 format=cell_format.strip(),

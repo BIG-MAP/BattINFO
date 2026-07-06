@@ -1,4 +1,4 @@
-"""Step B (foundation): the CellSpecification model accepts the flat authoring/input shape directly
+"""Step B (foundation): the CellSpec model accepts the flat authoring/input shape directly
 (the fields the separate CellSpecificationInput DTO used to carry), so one model can be both the
 source of truth and the thing importers/CLI/tests construct. This is what makes retiring the DTO
 possible; the retirement + caller repoint follows."""
@@ -10,11 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo.bundle import CellSpecification
+from battinfo.bundle import CellSpec
 
 
 def test_model_absorbs_flat_authoring_input() -> None:
-    spec = CellSpecification(
+    spec = CellSpec(
         uid="1c4m-7p9q-2k6t-8v3r",
         model_name="CR2032",  # -> model
         manufacturer={"type": "Organization", "name": "Energizer",
@@ -35,7 +35,7 @@ def test_model_absorbs_flat_authoring_input() -> None:
 
 
 def test_uid_is_transient_and_not_serialized() -> None:
-    spec = CellSpecification(uid="1c4m-7p9q-2k6t-8v3r", manufacturer="A", model="M",
+    spec = CellSpec(uid="1c4m-7p9q-2k6t-8v3r", manufacturer="A", model="M",
                              format="coin", chemistry="Li-ion")
     assert spec.uid == "1c4m-7p9q-2k6t-8v3r"
     assert "uid" not in spec.model_dump()  # excluded from serialization

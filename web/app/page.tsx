@@ -18,7 +18,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-b from-brand-50/60 to-white">
+      <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
@@ -44,7 +44,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/validate"
-                  className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
+                  className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
                 >
                   Validate a record
                 </Link>
@@ -69,7 +69,7 @@ export default function HomePage() {
       </section>
 
       {/* Standards strip — "we build on accepted foundations" */}
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-border bg-white">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <p className="text-center text-xs font-semibold uppercase tracking-wider text-ink-faint">
             Built on open, accepted standards
@@ -111,7 +111,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works — the four-verb pipeline */}
-      <section className="border-t border-slate-200 mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <section className="border-t border-border mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <SectionHeading
           kicker="How it works"
           title="From datasheet to machine-readable Linked Data — in four steps."
@@ -134,7 +134,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="border-y border-slate-200 bg-slate-50">
+      <section className="border-y border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <SectionHeading
             kicker="What BattINFO does"
@@ -175,7 +175,7 @@ export default function HomePage() {
       </section>
 
       {/* Record model */}
-      <section className="border-y border-slate-200 bg-slate-50">
+      <section className="border-y border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <SectionHeading
             kicker="One coherent model"
@@ -221,7 +221,7 @@ export default function HomePage() {
       </section>
 
       {/* Principles */}
-      <section className="border-y border-slate-200 bg-slate-50">
+      <section className="border-y border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <SectionHeading
             kicker="Principles"
@@ -242,7 +242,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="border-t border-slate-200 bg-brand-950">
+      <section className="border-t border-border bg-brand-950">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
           <h2 className="text-2xl font-semibold tracking-tight text-white">Build on the battery genome.</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-brand-100">

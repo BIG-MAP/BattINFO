@@ -948,7 +948,7 @@ class AuthoringWorkspace:
         # identity into every other workspace in the process); _credential()
         # consults this first, then the environment.
         self._session_credentials: dict[str, str] = {}
-        # name -> CellInstance, keyed by short_id for test matching
+        # name -> Cell, keyed by short_id for test matching
         self._cells_by_short_id: dict[str, Any] = {}
         # in-memory search cache; populated lazily from registry API or local index
         self._search_cache: list[dict] | None = None
@@ -1968,7 +1968,7 @@ class AuthoringWorkspace:
             ws.add("test", type="capacity_check", cell="FAC-001",
                    data="data/FAC-001.csv", instrument="Maccor 4200")
 
-        ``cell`` accepts a serial, IRI, ``CellInstance``, or search result, and is
+        ``cell`` accepts a serial, IRI, ``Cell``, or search result, and is
         resolved in this session, locally, then in the registry (referenced if it
         already exists).  ``data`` is a path or list of paths.  ``type`` is the test
         type (``"cycling"``, ``"capacity_check"``, …); ``kind`` is accepted as an alias.
@@ -2267,7 +2267,7 @@ class AuthoringWorkspace:
             ws.save()
             ws.submit()
         """
-        from battinfo.bundle import CellInstance
+        from battinfo.bundle import Cell
 
         ci_dir = self._records_root / "examples" / "cell-instance"
         if not ci_dir.exists():
@@ -2279,7 +2279,7 @@ class AuthoringWorkspace:
             try:
                 raw = json.loads(src.read_text(encoding="utf-8"))
                 ci = raw.get("cell_instance", {})
-                cell = CellInstance(
+                cell = Cell(
                     id=ci.get("id"),
                     cell_spec_id=ci.get("cell_spec_id"),
                     name=ci.get("name"),
@@ -2509,11 +2509,11 @@ class AuthoringWorkspace:
                 dataset_node = node
 
         # ── 5. Import cell specs ───────────────────────────────────────────────
-        spec_objects: dict[str, Any] = {}   # IRI → CellSpecification
+        spec_objects: dict[str, Any] = {}   # IRI → CellSpec
         for iri, node in sorted(spec_nodes_by_iri.items()):
             # Skip typed stubs for externally-defined specs (no descriptive body):
             # they only assert @type + a pointer to where the real spec lives, so
-            # there is nothing to reconstruct a CellSpecification from — and doing so would
+            # there is nothing to reconstruct a CellSpec from — and doing so would
             # mint an empty spec that shadows the authoritative remote one.
             if not node.get("hasProperty") and not node.get("isDescriptionFor"):
                 continue
@@ -4652,9 +4652,9 @@ class AuthoringWorkspace:
         # NOT across runs (those are distinct measurements on different cells).
         #
         # Provenance chain: Distribution ──wasGeneratedBy──> BatteryTest (processed)
-        #                   BatteryTest  ──hasTestObject──>  CellInstance
+        #                   BatteryTest  ──hasTestObject──>  Cell
         #                   BatteryTest  ──prov:used──>      TestSpec (plan)
-        #                   CellInstance ──hasDescription──> CellSpec
+        #                   Cell ──hasDescription──> CellSpec
         # A "raw"-role distribution is the test's INPUT (prov:used), not output, so
         # it is not tagged wasGeneratedBy; it carries a description for provenance.
         dataset_member_nodes: list[dict] = []
@@ -5593,8 +5593,8 @@ class AuthoringWorkspace:
         The cell is added to the matching index but NOT to the save set, so it is
         never re-saved or re-submitted — downstream tests just record its IRI.
         """
-        from battinfo.bundle import CellInstance  # noqa: PLC0415
-        cell = CellInstance(
+        from battinfo.bundle import Cell  # noqa: PLC0415
+        cell = Cell(
             id=result.get("id"),
             cell_spec_id=result.get("cell_spec_id"),
             name=result.get("name"),
@@ -5610,15 +5610,15 @@ class AuthoringWorkspace:
         return cell
 
     def _reference_spec(self, result: dict) -> Any:
-        """Build a referenced CellSpecification reusing its existing IRI (NOT queued to publish)."""
-        from battinfo.bundle import CellSpecification, ProvenanceInfo  # noqa: PLC0415
+        """Build a referenced CellSpec reusing its existing IRI (NOT queued to publish)."""
+        from battinfo.bundle import CellSpec, ProvenanceInfo  # noqa: PLC0415
         record = self._fetch_cell_spec_record(result) if result.get("source") == "api" else result.get("_record", {})
         product = record.get("cell_spec", {}) or {}
         specs_raw = record.get("properties", {}) or {}
         specs = {k: v for k, v in specs_raw.items() if isinstance(v, dict) and v.get("value") is not None}
         mfr = product.get("manufacturer") or {}
         mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
-        ct = CellSpecification(
+        ct = CellSpec(
             manufacturer=mfr_name or result.get("manufacturer", ""),
             model=product.get("model", "") or result.get("model", ""),
             format=product.get("cell_format") or product.get("format") or "",
@@ -5651,7 +5651,7 @@ class AuthoringWorkspace:
         return (payload.get("battinfo_records") or {}).get("cell_spec") or payload
 
     def _coerce_cell_spec_arg(self, spec: Any) -> Any:
-        """Accept a ``ws.search()`` hit, a ``CellSpecification``, or an authoring dict for ``spec=``.
+        """Accept a ``ws.search()`` hit, a ``CellSpec``, or an authoring dict for ``spec=``.
 
         Search hits carry index metadata (``_canonical_id``, ``type``, ``source``),
         not authoring fields — feeding one straight into the model trips the
@@ -5659,13 +5659,13 @@ class AuthoringWorkspace:
         existing IRI, never re-published); pass everything else to the model,
         whose validation errors teach.
         """
-        from battinfo.bundle import CellSpecification  # noqa: PLC0415
+        from battinfo.bundle import CellSpec  # noqa: PLC0415
 
         if isinstance(spec, dict):
             if "_canonical_id" in spec or "type" in spec:
                 return self._reference_spec(dict(spec))
-            spec = CellSpecification(**spec)  # authoring dict — model errors teach
-        if isinstance(spec, CellSpecification):
+            spec = CellSpec(**spec)  # authoring dict — model errors teach
+        if isinstance(spec, CellSpec):
             # A NEW spec (no id yet) must join the save set, or the instances
             # would reference a spec that never gets saved and fail at save
             # time with an obscure error. IRI is minted at ws.save().
@@ -5674,7 +5674,7 @@ class AuthoringWorkspace:
             return spec
         if isinstance(spec, str):
             raise TypeError(
-                f"spec= takes a ws.search() hit or a battinfo.CellSpecification, not the string {spec!r}. "
+                f"spec= takes a ws.search() hit or a battinfo.CellSpec, not the string {spec!r}. "
                 f"Try: spec = ws.search({spec!r})[0]"
             )
         return spec
@@ -5977,11 +5977,11 @@ class AuthoringWorkspace:
     def _resolve_cell(self, ref: Any) -> Any:
         """Resolve a cell reference: this session, then local index, then the registry.
 
-        Accepts a ``CellInstance``, a search result, a serial / short ID, or an IRI.
+        Accepts a ``Cell``, a search result, a serial / short ID, or an IRI.
         An instance found only in the registry is referenced (not re-published).
         """
-        from battinfo.bundle import CellInstance  # noqa: PLC0415
-        if isinstance(ref, CellInstance):
+        from battinfo.bundle import Cell  # noqa: PLC0415
+        if isinstance(ref, Cell):
             return ref
         if isinstance(ref, dict):  # a search result
             return self.load(ref)
@@ -6001,7 +6001,7 @@ class AuthoringWorkspace:
                 f"Could not resolve cell {ref!r} in this session, locally, or the registry. "
                 "Create it with ws.add('cell', ...), or check the serial."
             )
-        raise TypeError("cell= must be a serial, IRI, CellInstance, or search result.")
+        raise TypeError("cell= must be a serial, IRI, Cell, or search result.")
 
     def _add_tests_by_filename(
         self,
@@ -6221,7 +6221,7 @@ def _cell_spec_submission_payload(
             "source_local_id": source_local_id,
             "title": title,
             "semantic_payload": {
-                "@type": "CellSpecification",
+                "@type": "CellSpec",
                 "battinfo_records": {"cell_spec": record},
             },
             "related_resources": related_resources or [],
@@ -6272,7 +6272,7 @@ def _cell_instance_submission_payload(
             })
 
     semantic_payload: dict = {
-        "@type": "CellInstance",
+        "@type": "Cell",
         "battinfo_records": {
             "cell": record,
             **({"cell_spec": spec_record} if spec_record else {}),
