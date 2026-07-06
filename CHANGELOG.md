@@ -9,6 +9,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Generated reference documentation** that cannot rot: the full CLI reference is
+  generated from the typer app (`docs/pages/cli-reference.md`), the schema reference
+  from the canonical JSON Schemas, and a curated API reference renders the pydantic
+  models' field descriptions via autodoc-pydantic — each with a freshness test that
+  fails when the committed page drifts from the code. Plus a new
+  [infrastructure contract](docs/pages/contract.md) page for downstream builders.
+- **Versioned documentation deploys**: pushes to main publish to `dev/`, release tags
+  to `vX.Y.Z/` + `stable/` on GitHub Pages, with a version switcher in the theme and
+  a root redirect (enable Pages from the gh-pages branch to activate).
+
 - **Guide 06 — "Publish your first dataset"**: the end-to-end tutorial from a raw
   Neware CSV (a truncated sample now ships in `docs/guides/data/`) to validated,
   linked records and the guarded publish step — every cell executes in CI. Plus a

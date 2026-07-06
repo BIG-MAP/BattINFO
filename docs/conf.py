@@ -14,6 +14,7 @@ extensions = [
     "nbsphinx",
     "sphinx_design",
     "sphinx.ext.autodoc",
+    "sphinxcontrib.autodoc_pydantic",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
@@ -55,7 +56,20 @@ highlight_language = "python3"
 
 html_theme = "pydata_sphinx_theme"
 
+# Versioned docs: the workflow sets DOCS_VERSION ("dev" on main, "vX.Y.Z" on
+# tags); the switcher JSON is regenerated at deploy time from the published
+# version directories on gh-pages.
+import os as _os
+
+_docs_version = _os.environ.get("DOCS_VERSION", "dev")
+
 html_theme_options = {
+    "switcher": {
+        "json_url": "https://big-map.github.io/BattINFO/switcher.json",
+        "version_match": _docs_version,
+    },
+    "check_switcher": False,  # the URL 404s until the first Pages deploy
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "logo": {
         # Lockups from the canonical brand pack (../brand), copied via html_static_path.
         "image_light": "_static/assets/logo/logo-horizontal.svg",
@@ -93,3 +107,14 @@ nbsphinx_execute = "never"
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
 }
+
+
+# autodoc-pydantic — render Field(description=...) as field docs, hide the noise
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_model_show_validator_summary = False
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_field_show_constraints = False
+autodoc_pydantic_model_member_order = "bysource"
+autodoc_pydantic_model_undoc_members = False
