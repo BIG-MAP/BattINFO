@@ -50,7 +50,12 @@ const config: Config = {
           DEFAULT: "#102a43", // Ink — primary text, headers
           muted: "#5a6570", // Muted — secondary text, captions
           faint: "#8a877e", // tertiary labels / eyebrows
+          deep: "#0a1b2c", // Ink active — dark code surfaces
         },
+        // Semantic states from brand/tokens.css — all AA-verified on white.
+        error: { DEFAULT: "#c8372d", tint: "#fbe7e4" },
+        warning: { DEFAULT: "#946007", tint: "#fbf0da" },
+        info: { DEFAULT: "#2563b8", tint: "#e5eefa" },
         // Brand neutrals & surfaces (from brand/tokens.css).
         paper: "#f3f2ee", // page background
         surface: "#ffffff", // cards

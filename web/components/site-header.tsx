@@ -3,15 +3,12 @@ import { primaryNav, site } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 font-mono text-sm font-bold text-white">
-            Bi
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-ink">
-            Batt<span className="text-brand-600">INFO</span>
-          </span>
+        <Link href="/" className="flex items-center">
+          {/* Canonical horizontal lockup from the brand pack (brand/assets/logo). */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-horizontal.svg" alt="BattINFO" className="h-7 w-auto" />
         </Link>
 
         <nav className="flex items-center gap-1 sm:gap-2">
@@ -19,7 +16,7 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-slate-100 hover:text-ink"
+              className="rounded-md px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-tint hover:text-ink"
             >
               {item.label}
             </Link>

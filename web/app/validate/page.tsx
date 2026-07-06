@@ -29,10 +29,10 @@ const BROKEN_SAMPLE = JSON.stringify(
 function IssueRow({ issue }: { issue: Issue }) {
   const isError = issue.severity === "error";
   return (
-    <li className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
+    <li className="flex items-start gap-3 rounded-lg border border-border bg-white p-3">
       <span
         className={`mt-0.5 rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase ${
-          isError ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+          isError ? "bg-error-tint text-error" : "bg-warning-tint text-warning"
         }`}
       >
         {issue.severity}
@@ -83,7 +83,7 @@ export default function ValidatePage() {
             domain-battery {site.versions.domainBattery} · {site.versions.schema}
           </span>
         </div>
-        <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-ink-muted">
+        <p className="mt-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-ink-muted">
           This is the structural layer. The Python package additionally runs
           semantic rules, SHACL shapes, and referential-integrity checks that
           need your full record set — run those locally before publishing.
@@ -131,7 +131,7 @@ export default function ValidatePage() {
             }}
             onDragOver={(e) => e.preventDefault()}
             spellCheck={false}
-            className="h-[28rem] w-full resize-none rounded-xl border border-slate-300 bg-slate-950 p-4 font-mono text-sm text-slate-100 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="h-[28rem] w-full resize-none rounded-xl border border-border bg-ink-deep p-4 font-mono text-sm text-paper focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           />
           <button
             onClick={() => run()}
@@ -144,17 +144,17 @@ export default function ValidatePage() {
         <div>
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-ink-faint">Result</h2>
           {!result ? (
-            <div className="flex h-[28rem] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-sm text-ink-faint">
+            <div className="flex h-[28rem] items-center justify-center rounded-xl border border-dashed border-border bg-surface text-sm text-ink-faint">
               Run validation to see results.
             </div>
           ) : (
             <div className="space-y-4">
               <div
                 className={`rounded-xl border p-4 ${
-                  result.ok ? "border-volt-200 bg-volt-50" : "border-red-200 bg-red-50"
+                  result.ok ? "border-volt-200 bg-volt-50" : "border-error/30 bg-error-tint"
                 }`}
               >
-                <p className={`text-sm font-semibold ${result.ok ? "text-volt-700" : "text-red-700"}`}>
+                <p className={`text-sm font-semibold ${result.ok ? "text-volt-700" : "text-error"}`}>
                   {result.ok ? "Valid against the canonical schema" : "Validation failed"}
                 </p>
                 <p className="mt-1 text-xs text-ink-muted">
@@ -170,7 +170,7 @@ export default function ValidatePage() {
 
               {errors.length > 0 && (
                 <div>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-red-600">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-error">
                     Errors
                   </h3>
                   <ul className="space-y-2">
@@ -182,7 +182,7 @@ export default function ValidatePage() {
               )}
               {warnings.length > 0 && (
                 <div>
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-600">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-warning">
                     Warnings
                   </h3>
                   <ul className="space-y-2">
@@ -198,14 +198,14 @@ export default function ValidatePage() {
       </div>
 
       {/* Reproduce canonically */}
-      <section className="mt-12 rounded-2xl border border-slate-200 bg-white p-6">
+      <section className="mt-12 rounded-2xl border border-border bg-white p-6">
         <h2 className="text-lg font-semibold text-ink">The full verdict, locally</h2>
         <p className="mt-2 max-w-prose text-sm text-ink-muted">
           For the authoritative check — schema, references, semantics, and
           publication policies — run the same record through the CLI:
         </p>
-        <pre className="mt-4 overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm">
-          <code className="font-mono text-slate-100">{`battinfo validate my-record.json --policy strict --format json`}</code>
+        <pre className="mt-4 overflow-x-auto rounded-lg bg-ink-deep p-4 text-sm">
+          <code className="font-mono text-paper">{`battinfo validate my-record.json --policy strict --format json`}</code>
         </pre>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
           <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">

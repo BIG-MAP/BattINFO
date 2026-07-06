@@ -167,7 +167,7 @@ export default function DocsPage() {
               href={s.href}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 transition hover:border-brand-300"
+              className="flex items-center justify-between rounded-lg border border-border bg-white px-4 py-3 transition hover:border-brand-300"
             >
               <span className="text-sm font-semibold text-ink">{s.name}</span>
               <span className="text-xs text-ink-faint">{s.role}</span>
@@ -177,7 +177,7 @@ export default function DocsPage() {
       </section>
 
       {/* Relationship to EMMO */}
-      <section className="mt-20 rounded-2xl border border-slate-200 bg-slate-50 p-8">
+      <section className="mt-20 rounded-2xl border border-border bg-surface p-8">
         <SectionHeading kicker="Scope" title="BattINFO and the ontology" />
         <div className="mt-4 max-w-prose space-y-3 text-sm leading-relaxed text-ink-muted">
           <p>
