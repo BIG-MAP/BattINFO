@@ -114,12 +114,9 @@ class BattdatImportResult:
 
 def _read_df(source: Any, warnings: list[str]) -> tuple[Any, Path | None]:
     """Return (DataFrame, source_path_or_None).  Tries bdf.read then pandas fallback."""
-    try:
-        import pandas as pd  # noqa: PLC0415
-    except ImportError as exc:
-        raise ImportError(
-            "from_battdat() requires pandas: pip install pandas"
-        ) from exc
+    from battinfo._util import require_extra  # noqa: PLC0415
+
+    pd = require_extra("pandas", "tabular", "from_battdat() reads tabular cycler data")
 
     if isinstance(source, pd.DataFrame):
         return source, None

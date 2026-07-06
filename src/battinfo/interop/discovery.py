@@ -26,7 +26,7 @@ item id, so shared electrodes/electrolytes dedupe to one spec and re-import is
 idempotent. These are staging identifiers, not published registry entries.
 
 The `.eln` reader needs only the crate's `ro-crate-metadata.json`; the `.xlsx`
-reader needs openpyxl (a BattINFO dependency).
+reader needs openpyxl (installed with the ``battinfo[tabular]`` extra).
 """
 
 from __future__ import annotations
@@ -547,7 +547,9 @@ def import_discovery_xlsx(
     has no separable electrode entities); electrodes are carried as cell-spec
     basis names.
     """
-    import openpyxl  # noqa: PLC0415
+    from battinfo._util import require_extra  # noqa: PLC0415
+
+    openpyxl = require_extra("openpyxl", "tabular", "import_discovery_xlsx() reads Excel workbooks")
 
     path = Path(source)
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)

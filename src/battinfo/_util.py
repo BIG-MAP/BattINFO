@@ -15,6 +15,30 @@ from pathlib import Path
 
 PathLike = str | Path
 
+
+def require_extra(module_name: str, extra: str, feature: str):
+    """Import and return *module_name*, or raise a teaching ImportError naming the fix.
+
+    Single home for the optional-dependency error message so the wording cannot
+    drift between call sites::
+
+        pd = require_extra("pandas", "tabular", "convert_csv() reads tabular data files")
+
+    On failure raises::
+
+        ImportError: convert_csv() reads tabular data files and needs the
+        [tabular] extra: pip install battinfo[tabular]
+    """
+    import importlib
+
+    try:
+        return importlib.import_module(module_name)
+    except ImportError as exc:
+        raise ImportError(
+            f"{feature} and needs the [{extra}] extra: pip install battinfo[{extra}]"
+        ) from exc
+
+
 _DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
 _DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 

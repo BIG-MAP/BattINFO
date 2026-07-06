@@ -9,10 +9,8 @@ import shutil
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 from urllib.parse import unquote, urlparse
-
-from rdflib import Dataset as RdfDataset
 
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
@@ -45,7 +43,7 @@ def _is_within(path: Path, root: Path) -> bool:
 
 
 def plan_artifact_inclusion(
-    records: list[Mapping[str, Any]],
+    records: Sequence[Mapping[str, Any]],
     workspace_root: Path,
 ) -> tuple[list[Path], list[str]]:
     """Decide which actionable-artifact files travel with a publication.
@@ -187,6 +185,8 @@ DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
 
 def _triple_count(payload: Mapping[str, Any]) -> int:
+    from rdflib import Dataset as RdfDataset  # noqa: PLC0415 - deferred so `import battinfo` stays fast
+
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
         dataset = RdfDataset()

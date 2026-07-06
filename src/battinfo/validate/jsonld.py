@@ -8,13 +8,6 @@ from importlib import resources
 from typing import Any
 from urllib.request import Request, urlopen
 
-from rdflib import Dataset
-
-try:
-    from pyld import jsonld as pyld_jsonld
-except ImportError:  # pragma: no cover - exercised only when the dependency is missing at runtime.
-    pyld_jsonld = None
-
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -23,6 +16,19 @@ from battinfo.validate.core import (
     ValidationResult,
     get_validation_policy,
 )
+
+
+@lru_cache(maxsize=1)
+def _pyld_module() -> Any:
+    """Return the ``pyld.jsonld`` module, or ``None`` if pyld is not installed.
+
+    Imported lazily (pyld drags in ``requests``, ~0.4 s) so that
+    ``import battinfo`` stays fast; the cost is paid on first validation."""
+    try:
+        from pyld import jsonld as pyld_jsonld  # noqa: PLC0415
+    except ImportError:  # pragma: no cover - exercised only when the dependency is missing at runtime.
+        return None
+    return pyld_jsonld
 
 # Canonical URL for the EMMO domain-battery JSON-LD context.  A bundled copy lives at
 # src/battinfo/data/context/domain-battery.context.json and is served as a local
@@ -302,6 +308,8 @@ def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]
     # Dataset.contexts, ConjunctiveGraph) used by its own JSON-LD parser and nquads
     # serializer.  These are rdflib-internal calls, not our code; suppress them so
     # they don't surface as false parse errors when callers run with -W error.
+    from rdflib import Dataset  # noqa: PLC0415 - deferred so `import battinfo` stays fast
+
     try:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
@@ -341,6 +349,7 @@ def _parse_materialization_issues(data: dict[str, Any]) -> list[ValidationIssue]
 
 @lru_cache(maxsize=1)
 def _pyld_base_document_loader() -> Any:
+    pyld_jsonld = _pyld_module()
     if pyld_jsonld is None:
         return None
     try:
@@ -435,6 +444,7 @@ def _inline_local_contexts(node: Any) -> Any:
 
 
 def _urdna2015_issues(data: dict[str, Any]) -> list[ValidationIssue]:
+    pyld_jsonld = _pyld_module()
     if pyld_jsonld is None:
         return [
             ValidationIssue(

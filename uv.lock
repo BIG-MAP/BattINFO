@@ -291,14 +291,10 @@ name = "battinfo"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
-    { name = "openpyxl" },
-    { name = "pandas" },
-    { name = "pyarrow" },
     { name = "pydantic" },
     { name = "pyld" },
     { name = "rdflib" },
     { name = "rich" },
-    { name = "rocrate" },
     { name = "typer" },
 ]
 
@@ -311,11 +307,15 @@ dev = [
     { name = "mypy" },
     { name = "nbformat" },
     { name = "nbmake" },
+    { name = "openpyxl" },
+    { name = "pandas" },
+    { name = "pyarrow" },
     { name = "pyshacl" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-socket" },
     { name = "pytest-timeout" },
+    { name = "rocrate" },
     { name = "ruff" },
     { name = "setuptools" },
     { name = "twine" },
@@ -336,14 +336,24 @@ processing = [
     { name = "matplotlib" },
     { name = "plotly" },
 ]
+publish = [
+    { name = "rocrate" },
+]
 storage = [
     { name = "boto3" },
+]
+tabular = [
+    { name = "openpyxl" },
+    { name = "pandas" },
+    { name = "pyarrow" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "autodoc-pydantic", marker = "extra == 'docs'", specifier = ">=2.2" },
     { name = "batterydf", marker = "extra == 'processing'", specifier = ">=0.1" },
+    { name = "battinfo", extras = ["publish"], marker = "extra == 'dev'" },
+    { name = "battinfo", extras = ["tabular"], marker = "extra == 'dev'" },
     { name = "boto3", marker = "extra == 'storage'", specifier = ">=1.34" },
     { name = "build", marker = "extra == 'dev'", specifier = ">=1.2" },
     { name = "datamodel-code-generator", marker = "extra == 'dev'", specifier = ">=0.25" },
@@ -357,10 +367,10 @@ requires-dist = [
     { name = "nbformat", marker = "extra == 'dev'", specifier = ">=5.9" },
     { name = "nbmake", marker = "extra == 'dev'", specifier = ">=1.5" },
     { name = "nbsphinx", marker = "extra == 'docs'", specifier = ">=0.9" },
-    { name = "openpyxl", specifier = ">=3.1" },
-    { name = "pandas", specifier = ">=2.2" },
+    { name = "openpyxl", marker = "extra == 'tabular'", specifier = ">=3.1" },
+    { name = "pandas", marker = "extra == 'tabular'", specifier = ">=2.2" },
     { name = "plotly", marker = "extra == 'processing'", specifier = ">=5.20" },
-    { name = "pyarrow", specifier = ">=15.0" },
+    { name = "pyarrow", marker = "extra == 'tabular'", specifier = ">=15.0" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "pydata-sphinx-theme", marker = "extra == 'docs'", specifier = ">=0.15" },
     { name = "pyld", specifier = ">=2.0.4" },
@@ -371,7 +381,7 @@ requires-dist = [
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
     { name = "rdflib", specifier = ">=7.0" },
     { name = "rich", specifier = ">=13.7" },
-    { name = "rocrate", specifier = ">=0.9" },
+    { name = "rocrate", marker = "extra == 'publish'", specifier = ">=0.9" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "setuptools", marker = "extra == 'dev'", specifier = ">=77" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=7.3" },
@@ -380,7 +390,7 @@ requires-dist = [
     { name = "typer", specifier = ">=0.12" },
     { name = "wheel", marker = "extra == 'dev'" },
 ]
-provides-extras = ["storage", "processing", "dev", "docs"]
+provides-extras = ["tabular", "publish", "storage", "processing", "dev", "docs"]
 
 [[package]]
 name = "beautifulsoup4"

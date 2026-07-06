@@ -16,6 +16,7 @@ Usage::
 """
 from __future__ import annotations
 
+import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope annotations
 import difflib
 import json
 import os
@@ -1469,7 +1470,7 @@ class AuthoringWorkspace:
                 stamped += 1
         return stamped
 
-    def convert(self, pattern: str | None = None, fmt: str = "csv") -> list[Path]:
+    def convert(self, pattern: str | None = None, fmt: str = "csv") -> builtins.list[Path]:
         """Convert raw cycler files to BDF (Battery Data Format).
 
         With no ``pattern``, auto-detects supported instrument files in the
@@ -1594,7 +1595,7 @@ class AuthoringWorkspace:
               "instrument software, then ws.convert('*.csv') or "
               "ws.convert_csv(path, hints={...}).")
 
-    def bdf_columns(self) -> list[str]:
+    def bdf_columns(self) -> builtins.list[str]:
         """Print the canonical BDF column names (the targets for convert_csv hints)."""
         print("Canonical BDF columns -- map your CSV headers to these:")
         for name, desc in _BDF_CANONICAL_COLUMNS:
@@ -1640,10 +1641,9 @@ class AuthoringWorkspace:
         """
         if fmt not in ("parquet", "csv"):
             raise ValueError(f"fmt must be 'parquet' or 'csv' (got {fmt!r})")
-        try:
-            import pandas as pd
-        except ImportError:
-            raise ImportError("pandas is required for convert_csv().  Run: pip install batterydf")
+        from battinfo._util import require_extra
+
+        pd = require_extra("pandas", "tabular", "convert_csv() reads tabular data files")
 
         src = Path(path)
         if not src.is_absolute():
@@ -1754,10 +1754,10 @@ class AuthoringWorkspace:
         *,
         type: str = "cell-spec",
         serial: str | None = None,
-        serials: list[str] | None = None,
+        serials: builtins.list[str] | None = None,
         batch: str | None = None,
         threshold: float = 0.75,
-    ) -> list[dict]:
+    ) -> builtins.list[dict]:
         """Search the registry for resources of a given ``type``.
 
         One verb for every resource type; ``type`` selects which:
@@ -1920,7 +1920,7 @@ class AuthoringWorkspace:
         print(f"  wrote: {out_path.name}")
         return out_path
 
-    def load(self, source: str | Path | dict | list) -> Any:
+    def load(self, source: str | Path | dict | builtins.list) -> Any:
         """Bring a record into the workspace — author a new one, or reference an existing one.
 
         - A **draft file** (``.cell-spec.json`` / ``.test-spec.json``) is authored as a
@@ -1949,7 +1949,7 @@ class AuthoringWorkspace:
             return self._load_test_spec(source)
         return self._load_from_file(source)
 
-    def add(self, record_type: str, **kwargs) -> list:
+    def add(self, record_type: str, **kwargs) -> builtins.list:
         """Add records to the workspace.
 
         **Cells** (``"cell"``)::
@@ -2023,21 +2023,21 @@ class AuthoringWorkspace:
         # Build id -> human name from the finalized in-memory objects so the
         # confirmation shows what was written, not just counts.
         name_by_id: dict[str, str] = {}
-        for obj in self._ws.cell_specs:
-            if getattr(obj, "id", None):
-                name_by_id[obj.id] = obj.name or getattr(obj, "model", None) or "cell spec"
-        for obj in self._ws.cells:
-            if getattr(obj, "id", None):
-                name_by_id[obj.id] = getattr(obj, "serial_number", None) or obj.name or "cell"
-        for obj in self._ws.test_specs:
-            if getattr(obj, "id", None):
-                name_by_id[obj.id] = obj.name or "test spec"
-        for obj in self._ws.tests:
-            if getattr(obj, "id", None):
-                name_by_id[obj.id] = obj.name or "test"
-        for obj in self._ws.datasets:
-            if getattr(obj, "id", None):
-                name_by_id[obj.id] = obj.name or "dataset"
+        for spec_obj in self._ws.cell_specs:
+            if spec_obj.id:
+                name_by_id[spec_obj.id] = spec_obj.name or getattr(spec_obj, "model", None) or "cell spec"
+        for cell_obj in self._ws.cells:
+            if cell_obj.id:
+                name_by_id[cell_obj.id] = getattr(cell_obj, "serial_number", None) or cell_obj.name or "cell"
+        for tspec_obj in self._ws.test_specs:
+            if tspec_obj.id:
+                name_by_id[tspec_obj.id] = tspec_obj.name or "test spec"
+        for test_obj in self._ws.tests:
+            if test_obj.id:
+                name_by_id[test_obj.id] = test_obj.name or "test"
+        for ds_obj in self._ws.datasets:
+            if ds_obj.id:
+                name_by_id[ds_obj.id] = ds_obj.name or "dataset"
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
         print(f"Saved {total} record(s) under {self._records_root}:")
@@ -2074,10 +2074,10 @@ class AuthoringWorkspace:
         zenodo: bool = False,
         sandbox: bool = False,
         doi: str | None = None,
-        only: str | list[str] | None = None,
+        only: str | builtins.list[str] | None = None,
         publication_mode: str = STAGED_PUBLICATION_MODE,
         allow_partial: bool = False,
-    ) -> list[dict]:
+    ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
         The common path — save and submit to the registry's review queue::
@@ -2127,7 +2127,7 @@ class AuthoringWorkspace:
         self,
         registry_url: str | None = None,
         workspace_id: str | None = None,
-    ) -> list[dict]:
+    ) -> builtins.list[dict]:
         """Show this workspace's submissions and their live status on the registry.
 
         Groups by status (published first), so you can see at a glance what is
@@ -2303,7 +2303,7 @@ class AuthoringWorkspace:
         print(f"  Loaded {count} cell instance(s) into matching index.")
         return count
 
-    def _registry_resources(self, resource_type: str, q: str | None = None) -> list[dict]:
+    def _registry_resources(self, resource_type: str, q: str | None = None) -> builtins.list[dict]:
         """GET /resources?resource_type=... [&q=...] — raw summaries, [] if unreachable."""
         import urllib.parse
         import urllib.request
@@ -2326,9 +2326,9 @@ class AuthoringWorkspace:
     def _query_registry_cells(
         self,
         *,
-        serials: list[str] | None = None,
+        serials: builtins.list[str] | None = None,
         batch_id: str | None = None,
-    ) -> list[dict]:
+    ) -> builtins.list[dict]:
         """Resolve published cell instances by serial/short-ID or batch.
 
         Returns one dict per match: id (canonical IRI), serial_number, batch_id,
@@ -2584,10 +2584,10 @@ class AuthoringWorkspace:
         for test_iri, tnode in sorted(test_nodes_by_iri.items()):
             # prov:used may now be a list (cell + spec); hasTestObject is preferred.
             cell_iri = _first_id(tnode.get("hasTestObject")) or _first_id(tnode.get("prov:used"))
-            cell = self._ws.cells[-1] if not cell_iri else next(
+            test_cell = self._ws.cells[-1] if not cell_iri else next(
                 (c for c in self._ws.cells if c.id == cell_iri), None
             )
-            if cell is None:
+            if test_cell is None:
                 print(f"  WARNING: no cell found for test {test_iri} -- skipping")
                 continue
 
@@ -2620,9 +2620,9 @@ class AuthoringWorkspace:
                 fname  = dist.get("schema:name", dl_url.split("/")[-1])
 
                 self._ws.record_test(
-                    cell,
+                    test_cell,
                     kind=_import_test_kind_from_technique(protocol),
-                    name=f"{cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
+                    name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
                     protocol=protocol,
                     instrument=instrument,
                     status="completed",
@@ -2670,7 +2670,7 @@ class AuthoringWorkspace:
 
     def submit(
         self,
-        only: str | list[str] | None = None,
+        only: str | builtins.list[str] | None = None,
         registry_url: str | None = None,
         api_key: str | None = None,
         workspace_id: str | None = None,
@@ -2683,7 +2683,7 @@ class AuthoringWorkspace:
         allow_partial: bool = False,
         submit_all: bool = False,
         resume: bool = True,
-    ) -> list[dict]:
+    ) -> builtins.list[dict]:
         """Submit workspace records to the battinfo registry (staged for review).
 
         Resumable: outcomes are journaled to ``.battinfo/submit-journal.jsonl``
@@ -3168,7 +3168,7 @@ class AuthoringWorkspace:
         self,
         registry_url: str | None = None,
         workspace_id: str | None = None,
-    ) -> list[dict]:
+    ) -> builtins.list[dict]:
         """List submissions staged for review (status ``validated``).
 
         Most submissions publish immediately, so this is usually empty — it only
@@ -3259,7 +3259,7 @@ class AuthoringWorkspace:
         print(f"  approved: {result.get('title')}  [{result.get('status')}]  {result.get('canonical_iri', '')}")
         return result
 
-    def process(self, *, max_points: int = 4000) -> list[Path]:
+    def process(self, *, max_points: int = 4000) -> builtins.list[Path]:
         """Generate a curve preview (interactive + static) for each saved dataset.
 
         For every dataset record, reads its processed BDF file (parquet or csv) and
@@ -3339,7 +3339,7 @@ class AuthoringWorkspace:
         bucket: str | None = None,
         public: bool = True,
         dry_run: bool = False,
-    ) -> list[str]:
+    ) -> builtins.list[str]:
         """Upload dataset files to R2 and update ``access_url`` in saved records.
 
         Reads credentials from environment variables (or ``.battinfo/credentials``):
@@ -3519,10 +3519,10 @@ class AuthoringWorkspace:
         community: str | None = "battery-knowledge-base",
         title: str | None = None,
         description: str | None = None,
-        creators: list[dict] | None = None,
-        contributors: list[dict] | None = None,
+        creators: builtins.list[dict] | None = None,
+        contributors: builtins.list[dict] | None = None,
         license: str = "cc-by-4.0",
-        keywords: list[str] | None = None,
+        keywords: builtins.list[str] | None = None,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
 
@@ -3746,17 +3746,21 @@ class AuthoringWorkspace:
         bool
             ``True`` if valid.  Prints any issues found.
 
-        Requires ``pip install rocrate``.
+        Requires the ``rocrate`` library (``pip install battinfo[publish]``).
 
         Example::
 
             ws.preview_rocrate()
             ws.validate_rocrate()
         """
+        from battinfo._util import require_extra
+
         try:
-            from rocrate.rocrate import ROCrate  # type: ignore[import]
-        except ImportError:
-            print("  rocrate not installed -- run: pip install rocrate")
+            ROCrate = require_extra(
+                "rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata"
+            ).ROCrate
+        except ImportError as exc:
+            print(f"  {exc}")
             print("  Alternatively validate at: https://www.researchobject.org/ro-crate/")
             return False
 
@@ -3795,8 +3799,8 @@ class AuthoringWorkspace:
         output: str | Path | None = None,
         title: str = "Battery dataset",
         description: str = "Battery dataset published via BattINFO.",
-        creators: list[dict] | None = None,
-        contributors: list[dict] | None = None,
+        creators: builtins.list[dict] | None = None,
+        contributors: builtins.list[dict] | None = None,
         license: str = "cc-by-4.0",
     ) -> Path:
         """Generate ``ro-crate-metadata.json`` locally for review.
@@ -3843,10 +3847,10 @@ class AuthoringWorkspace:
         *,
         title: str = "",
         description: str = "",
-        creators: list[dict] | None = None,
-        contributors: list[dict] | None = None,
+        creators: builtins.list[dict] | None = None,
+        contributors: builtins.list[dict] | None = None,
         license: str = "",
-        keywords: list[str] | None = None,
+        keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
     ) -> Path:
@@ -3956,7 +3960,7 @@ class AuthoringWorkspace:
                 + "; ".join(i.message for i in errors[:5])
             )
 
-    def _bundle_data_files(self, tmpdir: Path, examples: Path) -> list[str]:
+    def _bundle_data_files(self, tmpdir: Path, examples: Path) -> builtins.list[str]:
         """Copy data files into *tmpdir*, zipping by test kind when >90 files."""
         import shutil
         import zipfile
@@ -4057,19 +4061,19 @@ class AuthoringWorkspace:
 
     @staticmethod
     def _assemble_zenodo_jsonld(
-        record_sets: dict[str, list[dict]],
+        record_sets: dict[str, builtins.list[dict]],
         *,
         zenodo_record_id: int,
         prereserved_doi: str,
         record_url: str,
-        data_filenames: list[str],
+        data_filenames: builtins.list[str],
         title: str = "",
         description: str = "",
-        creators: list[dict] | None = None,
-        contributors: list[dict] | None = None,
+        creators: builtins.list[dict] | None = None,
+        contributors: builtins.list[dict] | None = None,
         license: str = "",
         files_base_url: str | None = None,
-        keywords: list[str] | None = None,
+        keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
     ) -> dict:
@@ -4217,9 +4221,9 @@ class AuthoringWorkspace:
                 unit_iri, _ulabel = ul
                 node["hasMeasurementUnit"] = {"@id": _compact_iri(unit_iri)}
             elif unit_symbol:
-                unit_iri = _UNIT_MAP.get(unit_symbol)
-                if unit_iri:
-                    node["hasMeasurementUnit"] = {"@id": _compact_iri(unit_iri)}
+                mapped_iri = _UNIT_MAP.get(unit_symbol)
+                if mapped_iri:
+                    node["hasMeasurementUnit"] = {"@id": _compact_iri(mapped_iri)}
             return node
 
         def _resolve_unit_iri(unit_symbol: str) -> str | None:
@@ -4278,7 +4282,7 @@ class AuthoringWorkspace:
                 gnode["hasTask"] = [_method_step_node(s) for s in (step.get("steps") or [])]
                 return gnode
 
-            node: dict = {"@type": step_emmo_class(mode, step.get("direction")) or "ElectrochemicalProcess"}
+            node: dict = {"@type": step_emmo_class(str(mode or ""), step.get("direction")) or "ElectrochemicalProcess"}
             if step.get("description"):
                 node["rdfs:label"] = step["description"]
             controls: list = []
@@ -4292,7 +4296,7 @@ class AuthoringWorkspace:
             for term in (step.get("termination") or []):
                 if not isinstance(term, dict):
                     continue
-                tcls = termination_emmo_class(term.get("quantity"), term.get("direction"))
+                tcls = termination_emmo_class(str(term.get("quantity") or ""), term.get("direction"))
                 if tcls and term.get("value") is not None:
                     terminations.append(_typed_quantity_node(tcls, term["value"], term.get("unit", "")))
             duration = step.get("duration")
@@ -5025,13 +5029,13 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         record_url: str,
-        data_filenames: list[str],
+        data_filenames: builtins.list[str],
         title: str = "",
         description: str = "",
-        creators: list[dict] | None = None,
-        contributors: list[dict] | None = None,
+        creators: builtins.list[dict] | None = None,
+        contributors: builtins.list[dict] | None = None,
         license: str = "",
-        keywords: list[str] | None = None,
+        keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
     ) -> dict:
@@ -5060,12 +5064,12 @@ class AuthoringWorkspace:
     def _build_rocrate(
         self,
         tmpdir: Path,
-        data_filenames: list[str],
+        data_filenames: builtins.list[str],
         *,
         title: str,
         description: str,
-        creators: list[dict],
-        contributors: list[dict],
+        creators: builtins.list[dict],
+        contributors: builtins.list[dict],
         license: str,
         zenodo_record_id: int,
         prereserved_doi: str,
@@ -5179,11 +5183,11 @@ class AuthoringWorkspace:
         *,
         title: str | None,
         description: str | None,
-        creators: list[dict],
-        contributors: list[dict] | None = None,
+        creators: builtins.list[dict],
+        contributors: builtins.list[dict] | None = None,
         license: str,
         community: str | None,
-        extra_keywords: list[str] | None,
+        extra_keywords: builtins.list[str] | None,
     ) -> dict:
         ct_dir = self._records_root / "examples" / "cell-spec"
         specs: list[dict] = []
@@ -5321,7 +5325,7 @@ class AuthoringWorkspace:
         self,
         fmt: str = "json-ld",
         output_dir: str | Path | None = None,
-    ) -> list[Path]:
+    ) -> builtins.list[Path]:
         """Export all workspace records as RDF.
 
         Converts each record to JSON-LD, loads it into an RDF graph, then
@@ -5414,7 +5418,7 @@ class AuthoringWorkspace:
 
     # ── Internal helpers ────────────────────────────────────────────────────────
 
-    def _search_records(self, terms: list[str], threshold: float = 0.75) -> list[dict]:
+    def _search_records(self, terms: builtins.list[str], threshold: float = 0.75) -> builtins.list[dict]:
         cache = self._get_search_cache()
         scored: list[tuple[float, dict]] = []
         for entry in cache:
@@ -5450,7 +5454,7 @@ class AuthoringWorkspace:
 
     _INDEX_FILE = ".search-index.json"
 
-    def _get_search_cache(self) -> list[dict]:
+    def _get_search_cache(self) -> builtins.list[dict]:
         """Return the search index: registry API first, local clone as fallback."""
         if self._search_cache is not None:
             return self._search_cache
@@ -5466,7 +5470,7 @@ class AuthoringWorkspace:
             self._search_cache = []
         return self._search_cache
 
-    def _build_api_cache(self) -> list[dict]:
+    def _build_api_cache(self) -> builtins.list[dict]:
         """Fetch all published cell-spec summaries from the registry API."""
         import urllib.request
         url = f"{self._registry_url}/resources?resource_type=cell_spec"
@@ -5502,8 +5506,10 @@ class AuthoringWorkspace:
             })
         return entries
 
-    def _load_or_build_index(self) -> list[dict]:
+    def _load_or_build_index(self) -> builtins.list[dict]:
         """Load the persisted index if it matches current record count; rebuild otherwise."""
+        # Callers guard on self._records_repo (see search()); loud failure otherwise.
+        assert self._records_repo is not None, "a records repo is required to build the cell-spec index"
         curated = self._records_repo / "records" / "cell-spec"
         staging = self._records_repo / "records" / "_staging" / "cell-spec"
         index_path = self._records_repo / self._INDEX_FILE
@@ -5685,14 +5691,14 @@ class AuthoringWorkspace:
         spec: Any,
         from_file: str | Path | None = None,
         match: str | None = None,
-        iris: list[str] | None = None,
-        names: list[str] | None = None,
-        serial_numbers: list[str] | None = None,
+        iris: builtins.list[str] | None = None,
+        names: builtins.list[str] | None = None,
+        serial_numbers: builtins.list[str] | None = None,
         grade: str | None = None,
         production_date: int | str | None = None,
         expiration_date: int | str | None = None,
         conformance: Any = None,
-    ) -> list:
+    ) -> builtins.list:
         """Create cell instances.
 
         * ``names`` — human labels (e.g. lab batch IDs); the primary identifier.
@@ -5715,6 +5721,7 @@ class AuthoringWorkspace:
                 items = {k: v for k, v in items.items() if match.lower() in k.lower()}
             entries = [(label, None, iri) for label, iri in items.items()]
         else:
+            pairs: list[tuple[str | None, str | None]]
             if names is not None and serial_numbers is not None:
                 if len(names) != len(serial_numbers):
                     raise ValueError(
@@ -5802,10 +5809,10 @@ class AuthoringWorkspace:
             if iri is not None:
                 cell.id = iri
             # Index by both the name and the serial (and their short IDs) for matching.
-            for label in (name, serial):
-                if label:
-                    self._cells_by_short_id[label] = cell
-                    sid = _short_id(label)
+            for cell_key in (name, serial):
+                if cell_key:
+                    self._cells_by_short_id[cell_key] = cell
+                    sid = _short_id(cell_key)
                     if sid:
                         self._cells_by_short_id[sid] = cell
             cells.append(cell)
@@ -5837,9 +5844,9 @@ class AuthoringWorkspace:
         type: str | None = None,
         *,
         cell: Any = None,
-        data: "str | Path | list[str | Path] | None" = None,
-        raw: "str | Path | list[str | Path] | None" = None,
-        datasets: "str | list[str | Path] | None" = None,
+        data: "str | Path | builtins.list[str | Path] | None" = None,
+        raw: "str | Path | builtins.list[str | Path] | None" = None,
+        datasets: "str | builtins.list[str | Path] | None" = None,
         kind: str | None = None,                 # backward-compat alias for type
         spec: Any = None,
         protocol: Any = None,                    # backward-compat alias for spec
@@ -5849,7 +5856,7 @@ class AuthoringWorkspace:
         license: str | None = None,
         description: str | None = None,
         status: str = "completed",
-    ) -> list:
+    ) -> builtins.list:
         """Create a test (+ dataset(s)).
 
         Explicit (preferred): ``cell=<serial|IRI|object>`` and ``data=<path|list>``.
@@ -5964,7 +5971,7 @@ class AuthoringWorkspace:
             "for an explicit test, or datasets='glob' to match files to loaded cells."
         )
 
-    def _as_data_paths(self, data: Any) -> list[Path]:
+    def _as_data_paths(self, data: Any) -> builtins.list[Path]:
         """Normalise a data= value (path, str, or list) to a list of absolute Paths."""
         if data is None:
             return []
@@ -5991,8 +5998,9 @@ class AuthoringWorkspace:
             if s.startswith("http"):  # an IRI
                 return self._reference_cell({"id": s, "type": "cell"})
             hit = self._cells_by_short_id.get(s)
-            if hit is None and _short_id(s):
-                hit = self._cells_by_short_id.get(_short_id(s))
+            sid = _short_id(s)
+            if hit is None and sid:
+                hit = self._cells_by_short_id.get(sid)
             if hit is not None:
                 return hit
             found = self._query_registry_cells(serials=[s])
@@ -6007,7 +6015,7 @@ class AuthoringWorkspace:
     def _add_tests_by_filename(
         self,
         test_type: str,
-        datasets: "str | list[str | Path]",
+        datasets: "str | builtins.list[str | Path]",
         protocol_name: str | None,
         protocol_url: str | None,
         protocol_ref: Any,
@@ -6015,7 +6023,7 @@ class AuthoringWorkspace:
         license: str | None,
         description: str | None,
         status: str,
-    ) -> list:
+    ) -> builtins.list:
         """Batch helper: match a glob of data files to loaded cells by short ID."""
         if isinstance(datasets, str):
             matched_files = sorted(self._root.glob(datasets))
@@ -6491,7 +6499,8 @@ def _do_submit(
     for attempt in range(2):
         try:
             result = submit_publication_package(payload, registry_base_url=url, api_key=key)
-            response = result.get("response") if isinstance(result.get("response"), dict) else {}
+            raw_response = result.get("response")
+            response = raw_response if isinstance(raw_response, dict) else {}
             status = response.get("status", "unknown")
             resources = response.get("resources") or []
             iri = resources[0].get("canonical_iri", "") if resources else ""
