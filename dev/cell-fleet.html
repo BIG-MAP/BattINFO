@@ -393,6 +393,7 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="how-battinfo-is-built.html">How BattINFO is built</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">Instance, Test, Dataset Workflow</a></li>
@@ -500,14 +501,14 @@ JSON-LD emits reference nodes (<code class="docutils literal notranslate"><span 
 when a basis/inline node is also present, the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> is merged onto it.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
 
-<span class="n">rec</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">save_cell_spec</span><span class="p">(</span><span class="n">bi</span><span class="o">.</span><span class="n">CellSpecification</span><span class="p">(</span>
+<span class="n">rec</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">save_cell_spec</span><span class="p">(</span><span class="n">bi</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;COIN-NMC811-D&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;EMPA&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="n">positive_electrode_spec_id</span><span class="o">=</span><span class="n">NMC811_CATHODE_IRI</span><span class="p">,</span>
     <span class="n">negative_electrode_spec_id</span><span class="o">=</span><span class="n">GRAPHITE_ANODE_IRI</span><span class="p">,</span>
     <span class="n">electrolyte_spec_id</span><span class="o">=</span><span class="n">ORGANIC_ELECTROLYTE_IRI</span><span class="p">,</span>
     <span class="n">separator_spec_id</span><span class="o">=</span><span class="n">CELGARD_IRI</span><span class="p">,</span>
     <span class="n">housing_spec_id</span><span class="o">=</span><span class="n">COIN_HOUSING_IRI</span><span class="p">,</span>
-    <span class="n">specs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.0038</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span> <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.8</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">}},</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.0038</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span> <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.8</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">}},</span>
 <span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>
 </pre></div>
 </div>

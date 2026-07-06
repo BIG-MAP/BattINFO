@@ -482,15 +482,15 @@
 <span class="k">else</span><span class="p">:</span>
     <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repo root: </span><span class="si">{</span><span class="n">REPO</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running from the repo root.&quot;</span><span class="p">)</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpecification</span><span class="p">,</span> <span class="n">publish</span><span class="p">,</span> <span class="n">Workspace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span><span class="p">,</span> <span class="n">Workspace</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish_record</span>
 
 <span class="n">WORKSPACE</span> <span class="o">=</span> <span class="n">REPO</span> <span class="o">/</span> <span class="s1">&#39;.battinfo/notebooks/guide-04&#39;</span>
 <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpecification</span><span class="p">(</span>
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
@@ -498,7 +498,7 @@
     <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
     <span class="n">negative_electrode_basis</span><span class="o">=</span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
     <span class="n">size_code</span><span class="o">=</span><span class="s2">&quot;R26650&quot;</span><span class="p">,</span>
-    <span class="n">specs</span><span class="o">=</span><span class="p">{</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span>   <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span>  <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
         <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span>    <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span>  <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
         <span class="s2">&quot;rated_energy&quot;</span><span class="p">:</span>       <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">8.25</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Wh&quot;</span><span class="p">},</span>
@@ -527,7 +527,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Repo root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-funnel
+Running from the repo root.
 Ready. IRI: https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd
 </pre></div></div>
 </div>
@@ -901,68 +901,68 @@ Triple count: 62
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-  N138b540997dd48b598f982aac947f370  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N138b540997dd48b598f982aac947f370  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  26.0
-  N1b2179f28aa347258329821a7ce97134  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N1b2179f28aa347258329821a7ce97134  →  type  →  electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
-  N1b2179f28aa347258329821a7ce97134  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N2b25aee0d33d44bd8fe01518d32594b0
-  N1b2179f28aa347258329821a7ce97134  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliOhm
-  N2800dda69ef646dda76574c1938c8de7  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N2800dda69ef646dda76574c1938c8de7  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  76.0
-  N2b25aee0d33d44bd8fe01518d32594b0  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N2b25aee0d33d44bd8fe01518d32594b0  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  6.0
-  N3be654fcceea4ba5ab017008f2aa2a87  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N3be654fcceea4ba5ab017008f2aa2a87  →  type  →  EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
-  N3be654fcceea4ba5ab017008f2aa2a87  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N2800dda69ef646dda76574c1938c8de7
-  N3be654fcceea4ba5ab017008f2aa2a87  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Gram
-  N3f488ee170cd41099dd1c127702bd62a  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N3f488ee170cd41099dd1c127702bd62a  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  65.0
-  N4e8c206b1d24438686c9833c35b02c1e  →  type  →  EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
-  N4e8c206b1d24438686c9833c35b02c1e  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N4e8c206b1d24438686c9833c35b02c1e  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N3f488ee170cd41099dd1c127702bd62a
-  N4e8c206b1d24438686c9833c35b02c1e  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
-  N5501318bab0c4ecd86979628beadfe31  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N5501318bab0c4ecd86979628beadfe31  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  8.25
-  N6a4fbd1fbf1b46b4863003949a914d9f  →  type  →  Organization
-  N6a4fbd1fbf1b46b4863003949a914d9f  →  name  →  A123 Systems
-  N7667b0dc02ed4747bbd86402769f47a6  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N7667b0dc02ed4747bbd86402769f47a6  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  2.5
-  N8a84a9c241f543b886cce1b0adec4984  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N8a84a9c241f543b886cce1b0adec4984  →  type  →  electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937
-  N8a84a9c241f543b886cce1b0adec4984  →  value  →  &gt;1000
-  N8a84a9c241f543b886cce1b0adec4984  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978
-  Nc2f6efc9706f41ff82dc1b34bdc309a2  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  Nc2f6efc9706f41ff82dc1b34bdc309a2  →  type  →  electrochemistry_639b844a_e801_436b_985d_28926129ead6
-  Nc2f6efc9706f41ff82dc1b34bdc309a2  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Nd916198e87c247ab9d20fec77937a12f
-  Nc2f6efc9706f41ff82dc1b34bdc309a2  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Volt
-  Ncad3b1b484914bcd840e8070dfa2e246  →  type  →  EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
-  Ncad3b1b484914bcd840e8070dfa2e246  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  Ncad3b1b484914bcd840e8070dfa2e246  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N138b540997dd48b598f982aac947f370
-  Ncad3b1b484914bcd840e8070dfa2e246  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
-  Ncf8714767d2d4d249196304756752197  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  Ncf8714767d2d4d249196304756752197  →  type  →  electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
-  Ncf8714767d2d4d249196304756752197  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N7667b0dc02ed4747bbd86402769f47a6
-  Ncf8714767d2d4d249196304756752197  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  AmpereHour
-  Nd916198e87c247ab9d20fec77937a12f  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  Nd916198e87c247ab9d20fec77937a12f  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  3.3
-  Nffc9a2c2ea0543e0bdfbddf4786c3f13  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  Nffc9a2c2ea0543e0bdfbddf4786c3f13  →  type  →  electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
-  Nffc9a2c2ea0543e0bdfbddf4786c3f13  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N5501318bab0c4ecd86979628beadfe31
-  Nffc9a2c2ea0543e0bdfbddf4786c3f13  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  WattHour
+  N1d3e1e9c7f124e6fb970956779aaf50a  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N1d3e1e9c7f124e6fb970956779aaf50a  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  76.0
+  N3462097cbee64177b0a774a5fbe26dbc  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N3462097cbee64177b0a774a5fbe26dbc  →  type  →  electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+  N3462097cbee64177b0a774a5fbe26dbc  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N7742f700df934ae5b5c455f4cb59ad69
+  N3462097cbee64177b0a774a5fbe26dbc  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  WattHour
+  N38eac6c93bd24d57b0b7cc3a311e072c  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N38eac6c93bd24d57b0b7cc3a311e072c  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  2.5
+  N4017de0fdb5746e9bba3a37a50d3adfa  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N4017de0fdb5746e9bba3a37a50d3adfa  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  3.3
+  N4fc85383ee2c427096ff71b4b9c3be0f  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N4fc85383ee2c427096ff71b4b9c3be0f  →  type  →  electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937
+  N4fc85383ee2c427096ff71b4b9c3be0f  →  value  →  &gt;1000
+  N4fc85383ee2c427096ff71b4b9c3be0f  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978
+  N59d1b51113b94e67b7e854a2b3e31d59  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N59d1b51113b94e67b7e854a2b3e31d59  →  type  →  electrochemistry_639b844a_e801_436b_985d_28926129ead6
+  N59d1b51113b94e67b7e854a2b3e31d59  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N4017de0fdb5746e9bba3a37a50d3adfa
+  N59d1b51113b94e67b7e854a2b3e31d59  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Volt
+  N662170ea88794178be978ed0c04a4203  →  type  →  EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
+  N662170ea88794178be978ed0c04a4203  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N662170ea88794178be978ed0c04a4203  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N7490722fb7ce4c408b10c103476c2920
+  N662170ea88794178be978ed0c04a4203  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
+  N72d63abe691c46738ae43e6f80c95d30  →  type  →  EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
+  N72d63abe691c46738ae43e6f80c95d30  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N72d63abe691c46738ae43e6f80c95d30  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N85703d1cd50548ada56c0bf072be6bc3
+  N72d63abe691c46738ae43e6f80c95d30  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
+  N7490722fb7ce4c408b10c103476c2920  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N7490722fb7ce4c408b10c103476c2920  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  65.0
+  N7742f700df934ae5b5c455f4cb59ad69  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N7742f700df934ae5b5c455f4cb59ad69  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  8.25
+  N85703d1cd50548ada56c0bf072be6bc3  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N85703d1cd50548ada56c0bf072be6bc3  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  26.0
+  N8fb8bf41565a47ada3ecc495cc006e54  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N8fb8bf41565a47ada3ecc495cc006e54  →  type  →  EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+  N8fb8bf41565a47ada3ecc495cc006e54  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N1d3e1e9c7f124e6fb970956779aaf50a
+  N8fb8bf41565a47ada3ecc495cc006e54  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Gram
+  Na2e070ae2c3f49888e4c6ffa1bc0498c  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  Na2e070ae2c3f49888e4c6ffa1bc0498c  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  6.0
+  Nac9ed68bb617479e8ac93b18e3aeec28  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  Nac9ed68bb617479e8ac93b18e3aeec28  →  type  →  electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+  Nac9ed68bb617479e8ac93b18e3aeec28  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Na2e070ae2c3f49888e4c6ffa1bc0498c
+  Nac9ed68bb617479e8ac93b18e3aeec28  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliOhm
+  Nb46ae90a1af64e0f9eec363ade23d2f0  →  type  →  Organization
+  Nb46ae90a1af64e0f9eec363ade23d2f0  →  name  →  A123 Systems
+  Nca4c488c619b40acb7c4616118adbf4b  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  Nca4c488c619b40acb7c4616118adbf4b  →  type  →  electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+  Nca4c488c619b40acb7c4616118adbf4b  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N38eac6c93bd24d57b0b7cc3a311e072c
+  Nca4c488c619b40acb7c4616118adbf4b  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  AmpereHour
   wckm-y5a4-he0k-2scd  →  type  →  CreativeWork
   wckm-y5a4-he0k-2scd  →  type  →  battery_1cfbba6c_8824_4932_a23e_2141483acef7
   wckm-y5a4-he0k-2scd  →  identifier  →  wckm-y5a4-he0k-2scd
-  wckm-y5a4-he0k-2scd  →  manufacturer  →  N6a4fbd1fbf1b46b4863003949a914d9f
+  wckm-y5a4-he0k-2scd  →  manufacturer  →  Nb46ae90a1af64e0f9eec363ade23d2f0
   wckm-y5a4-he0k-2scd  →  name  →  A123 Systems ANR26650M1-B
   wckm-y5a4-he0k-2scd  →  size  →  R26650
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N1b2179f28aa347258329821a7ce97134
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N3be654fcceea4ba5ab017008f2aa2a87
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N4e8c206b1d24438686c9833c35b02c1e
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N8a84a9c241f543b886cce1b0adec4984
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nc2f6efc9706f41ff82dc1b34bdc309a2
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Ncad3b1b484914bcd840e8070dfa2e246
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Ncf8714767d2d4d249196304756752197
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nffc9a2c2ea0543e0bdfbddf4786c3f13
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N3462097cbee64177b0a774a5fbe26dbc
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N4fc85383ee2c427096ff71b4b9c3be0f
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N59d1b51113b94e67b7e854a2b3e31d59
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N662170ea88794178be978ed0c04a4203
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N72d63abe691c46738ae43e6f80c95d30
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N8fb8bf41565a47ada3ecc495cc006e54
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nac9ed68bb617479e8ac93b18e3aeec28
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nca4c488c619b40acb7c4616118adbf4b
 </pre></div></div>
 </div>
 </section>
@@ -977,7 +977,7 @@ Triple count: 62
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span> <span class="n">negative_electrode_basis</span><span class="o">=</span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
-    <span class="n">specs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">}},</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">}},</span>
 <span class="p">)</span>
 <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">ct</span><span class="p">,</span> <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;a123-demo-multi-001&quot;</span><span class="p">)</span>
 <span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>

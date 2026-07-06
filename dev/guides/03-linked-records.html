@@ -464,7 +464,7 @@
                   
   <section id="Guide-3-—-Linked-records:-instance,-test,-dataset,-and-publishing">
 <h1>Guide 3 — Linked records: instance, test, dataset, and publishing<a class="headerlink" href="#Guide-3-—-Linked-records:-instance,-test,-dataset,-and-publishing" title="Link to this heading">#</a></h1>
-<p>This guide builds the full provenance chain — CellSpecification → CellInstance → TestSpec → Test → Dataset — using the <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> API, validates it, and publishes it.</p>
+<p>This guide builds the full provenance chain — CellSpec → Cell → TestSpec → Test → Dataset — using the <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> API, validates it, and publishes it.</p>
 <p><strong>Estimated time:</strong> 30 minutes <strong>Prerequisites:</strong> <a class="reference internal" href="02-first-cell-type.html"><span class="doc">Guide 2 — First cell spec</span></a></p>
 <p>Everything writes under <code class="docutils literal notranslate"><span class="pre">.battinfo/notebooks/guide-03</span></code>.</p>
 <div class="nbinput docutils container">
@@ -483,11 +483,11 @@
 <span class="k">else</span><span class="p">:</span>
     <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repo root: </span><span class="si">{</span><span class="n">REPO</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running from the repo root.&quot;</span><span class="p">)</span>
 
 <span class="n">WORKSPACE</span> <span class="o">=</span> <span class="n">REPO</span> <span class="o">/</span> <span class="s1">&#39;.battinfo/notebooks/guide-03&#39;</span>
 <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workspace:&#39;</span><span class="p">,</span> <span class="n">WORKSPACE</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace:&quot;</span><span class="p">,</span> <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">REPO</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -496,8 +496,8 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Repo root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-funnel
-Workspace: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-funnel\.battinfo\notebooks\guide-03
+Running from the repo root.
+Workspace: .battinfo\notebooks\guide-03
 </pre></div></div>
 </div>
 <section id="The-Workspace">
@@ -519,7 +519,7 @@ Workspace: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-f
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Workspace root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-funnel\.battinfo\notebooks\guide-03
+Workspace root: &lt;repo&gt;\.battinfo\notebooks\guide-03
 </pre></div></div>
 </div>
 </section>
@@ -536,7 +536,7 @@ Workspace root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-d
     <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="s2">&quot;NMC&quot;</span><span class="p">,</span>
     <span class="n">negative_electrode_basis</span><span class="o">=</span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
-    <span class="n">specs</span><span class="o">=</span><span class="p">{</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>  <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
         <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span>  <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.6</span><span class="p">,</span>  <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
         <span class="s2">&quot;rated_energy&quot;</span><span class="p">:</span>     <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">18.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Wh&quot;</span><span class="p">},</span>
@@ -807,12 +807,12 @@ Cell spec IRI:      https://w3id.org/battinfo/spec/me0t-k16f-eh5y-rq0k
 Cell instance IRI:  https://w3id.org/battinfo/cell/7nq8-4h5y-febz-zbgf
 Test spec IRI:      https://w3id.org/battinfo/spec/m6v9-nnpe-krwk-f652
 Test IRI:           https://w3id.org/battinfo/test/v8gg-g6as-hync-2wb9
-Dataset IRI:        https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6
+Dataset IRI:        https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6
 
 Records written:
   examples\cell-instance\cell-7nq8-4h5y-febz-zbgf.json
   examples\cell-spec\cell-spec-me0t-k16f-eh5y-rq0k.json
-  examples\dataset\dataset-8d4r-85ra-2bqm-d0m6.json
+  examples\dataset\dataset-96kd-vyes-9dp1-6cx6.json
   examples\test\test-v8gg-g6as-hync-2wb9.json
   examples\test-protocol\test-protocol-m6v9-nnpe-krwk-f652.json
 </pre></div></div>
@@ -843,7 +843,7 @@ Records written:
 <div class="highlight"><pre>
 Resolver JSON-LD files written (5):
   resolver\cell\7nq8-4h5y-febz-zbgf\index.jsonld
-  resolver\dataset\8d4r-85ra-2bqm-d0m6\index.jsonld
+  resolver\dataset\96kd-vyes-9dp1-6cx6\index.jsonld
   resolver\spec\m6v9-nnpe-krwk-f652\index.jsonld
   resolver\spec\me0t-k16f-eh5y-rq0k\index.jsonld
   resolver\test\v8gg-g6as-hync-2wb9\index.jsonld
@@ -907,7 +907,7 @@ ok: True | errors: 0 | warnings: 0
 Package: publication\sdi-a001-cycle-life\battinfo.publish.jsonld
 Nodes in @graph: 5
   [&#39;dcat:Catalog&#39;, &#39;schema:DataCatalog&#39;, &#39;schema:Dataset&#39;]  —  sdi-a001-cycle-life
-  [&#39;dcat:Dataset&#39;, &#39;schema:Dataset&#39;]  —  8d4r-85ra-2bqm-d0m6
+  [&#39;dcat:Dataset&#39;, &#39;schema:Dataset&#39;]  —  96kd-vyes-9dp1-6cx6
   [&#39;BatteryCellSpecification&#39;, &#39;schema:CreativeWork&#39;]  —  me0t-k16f-eh5y-rq0k
   [&#39;BatteryCell&#39;, &#39;CylindricalBattery&#39;, &#39;LithiumIonBattery&#39;]  —  7nq8-4h5y-febz-zbgf
   [&#39;BatteryTest&#39;, &#39;schema:Action&#39;, &#39;prov:Activity&#39;]  —  v8gg-g6as-hync-2wb9
@@ -1235,16 +1235,16 @@ Nodes in @graph: 5
         &#34;schema:DataCatalog&#34;,
         &#34;schema:Dataset&#34;
       ],
-      &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;,
-      &#34;schema:url&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;,
+      &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;,
+      &#34;schema:url&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;,
       &#34;dcat:dataset&#34;: [
         {
-          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
         }
       ],
       &#34;schema:hasPart&#34;: [
         {
-          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
         }
       ],
       &#34;rdfs:seeAlso&#34;: {
@@ -1253,40 +1253,40 @@ Nodes in @graph: 5
       &#34;schema:distribution&#34;: [
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/vnd.battinfo.dataset-directory&#34;,
           &#34;schema:name&#34;: &#34;sdi-a001-cycle-life&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           }
         },
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/json&#34;,
           &#34;schema:name&#34;: &#34;datacite-metadata.json&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           },
-          &#34;schema:sha256&#34;: &#34;ac26d4566f59e4017e7735cefb07c79961883aad09db4187c29ad2b8ac983bd3&#34;
+          &#34;schema:sha256&#34;: &#34;71ec2531c00a52b7ef4afd301c550a12ae690363d61ba94441f37166c2850a60&#34;
         },
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/json&#34;,
           &#34;schema:name&#34;: &#34;ro-crate-metadata.json&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           },
-          &#34;schema:sha256&#34;: &#34;8d34d4560192f68d74026f73619c649235b6ab7199f7a8d0629a11c1ee7f52e4&#34;
+          &#34;schema:sha256&#34;: &#34;3a4998201bf15f4414843be26e226440c36731f22d0c1bf973090c625684b86a&#34;
         },
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/vnd.ms-excel&#34;,
           &#34;schema:name&#34;: &#34;sdi-a001-cycle-life.csv&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           },
           &#34;schema:sha256&#34;: &#34;96969df113b96d2eb06ec66053d03351116ac55828caea0a13441e0e0e5a3bd6&#34;
         }
@@ -1322,19 +1322,19 @@ Nodes in @graph: 5
         &#34;dcat:Dataset&#34;,
         &#34;schema:Dataset&#34;
       ],
-      &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;,
+      &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;,
       &#34;schema:name&#34;: &#34;INR21700-50E A001 cycle-life dataset&#34;,
       &#34;dcat:distribution&#34;: [
         {
           &#34;@type&#34;: &#34;dcat:Distribution&#34;,
-          &#34;dcat:downloadURL&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
+          &#34;dcat:downloadURL&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
           &#34;dcat:mediaType&#34;: {
             &#34;@id&#34;: &#34;https://www.iana.org/assignments/media-types/application/vnd.battinfo.dataset-directory&#34;
           },
           &#34;schema:name&#34;: &#34;sdi-a001-cycle-life&#34;,
-          &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
+          &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
           &#34;prov:wasDerivedFrom&#34;: {
-            &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;
+            &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;
           },
           &#34;prov:wasGeneratedBy&#34;: {
             &#34;@id&#34;: &#34;https://w3id.org/battinfo/test/v8gg-g6as-hync-2wb9&#34;
@@ -1342,44 +1342,44 @@ Nodes in @graph: 5
         },
         {
           &#34;@type&#34;: &#34;dcat:Distribution&#34;,
-          &#34;dcat:downloadURL&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
+          &#34;dcat:downloadURL&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
           &#34;dcat:mediaType&#34;: {
             &#34;@id&#34;: &#34;https://www.iana.org/assignments/media-types/application/json&#34;
           },
           &#34;schema:name&#34;: &#34;datacite-metadata.json&#34;,
-          &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
+          &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
           &#34;spdx:checksum&#34;: {
             &#34;@type&#34;: &#34;spdx:Checksum&#34;,
             &#34;spdx:checksumAlgorithm&#34;: {
               &#34;@id&#34;: &#34;spdx:checksumAlgorithm_sha256&#34;
             },
-            &#34;spdx:checksumValue&#34;: &#34;ac26d4566f59e4017e7735cefb07c79961883aad09db4187c29ad2b8ac983bd3&#34;
+            &#34;spdx:checksumValue&#34;: &#34;71ec2531c00a52b7ef4afd301c550a12ae690363d61ba94441f37166c2850a60&#34;
           }
         },
         {
           &#34;@type&#34;: &#34;dcat:Distribution&#34;,
-          &#34;dcat:downloadURL&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
+          &#34;dcat:downloadURL&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
           &#34;dcat:mediaType&#34;: {
             &#34;@id&#34;: &#34;https://www.iana.org/assignments/media-types/application/json&#34;
           },
           &#34;schema:name&#34;: &#34;ro-crate-metadata.json&#34;,
-          &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
+          &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
           &#34;spdx:checksum&#34;: {
             &#34;@type&#34;: &#34;spdx:Checksum&#34;,
             &#34;spdx:checksumAlgorithm&#34;: {
               &#34;@id&#34;: &#34;spdx:checksumAlgorithm_sha256&#34;
             },
-            &#34;spdx:checksumValue&#34;: &#34;8d34d4560192f68d74026f73619c649235b6ab7199f7a8d0629a11c1ee7f52e4&#34;
+            &#34;spdx:checksumValue&#34;: &#34;3a4998201bf15f4414843be26e226440c36731f22d0c1bf973090c625684b86a&#34;
           }
         },
         {
           &#34;@type&#34;: &#34;dcat:Distribution&#34;,
-          &#34;dcat:downloadURL&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
+          &#34;dcat:downloadURL&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
           &#34;dcat:mediaType&#34;: {
             &#34;@id&#34;: &#34;https://www.iana.org/assignments/media-types/application/vnd.ms-excel&#34;
           },
           &#34;schema:name&#34;: &#34;sdi-a001-cycle-life.csv&#34;,
-          &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
+          &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
           &#34;spdx:checksum&#34;: {
             &#34;@type&#34;: &#34;spdx:Checksum&#34;,
             &#34;spdx:checksumAlgorithm&#34;: {
@@ -1392,46 +1392,46 @@ Nodes in @graph: 5
       &#34;schema:distribution&#34;: [
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/vnd.battinfo.dataset-directory&#34;,
           &#34;schema:name&#34;: &#34;sdi-a001-cycle-life&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           }
         },
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/datacite-metadata.json&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/json&#34;,
           &#34;schema:name&#34;: &#34;datacite-metadata.json&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           },
-          &#34;schema:sha256&#34;: &#34;ac26d4566f59e4017e7735cefb07c79961883aad09db4187c29ad2b8ac983bd3&#34;
+          &#34;schema:sha256&#34;: &#34;71ec2531c00a52b7ef4afd301c550a12ae690363d61ba94441f37166c2850a60&#34;
         },
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/ro-crate-metadata.json&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/json&#34;,
           &#34;schema:name&#34;: &#34;ro-crate-metadata.json&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           },
-          &#34;schema:sha256&#34;: &#34;8d34d4560192f68d74026f73619c649235b6ab7199f7a8d0629a11c1ee7f52e4&#34;
+          &#34;schema:sha256&#34;: &#34;3a4998201bf15f4414843be26e226440c36731f22d0c1bf973090c625684b86a&#34;
         },
         {
           &#34;@type&#34;: &#34;schema:DataDownload&#34;,
-          &#34;schema:contentUrl&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
+          &#34;schema:contentUrl&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life/sdi-a001-cycle-life.csv&#34;,
           &#34;schema:encodingFormat&#34;: &#34;application/vnd.ms-excel&#34;,
           &#34;schema:name&#34;: &#34;sdi-a001-cycle-life.csv&#34;,
           &#34;schema:isPartOf&#34;: {
-            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+            &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
           },
           &#34;schema:sha256&#34;: &#34;96969df113b96d2eb06ec66053d03351116ac55828caea0a13441e0e0e5a3bd6&#34;
         }
       ],
       &#34;dcterms:isPartOf&#34;: {
-        &#34;@id&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;
+        &#34;@id&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;
       },
       &#34;schema:about&#34;: [
         {
@@ -1440,10 +1440,10 @@ Nodes in @graph: 5
       ],
       &#34;schema:description&#34;: &#34;Voltage, current, and temperature time-series, 500 cycles.&#34;,
       &#34;schema:license&#34;: &#34;CC-BY-4.0&#34;,
-      &#34;schema:dateCreated&#34;: &#34;2026-07-05T20:36:52Z&#34;,
-      &#34;schema:dateModified&#34;: &#34;2026-07-05T20:36:52Z&#34;,
-      &#34;schema:url&#34;: &#34;file:///C:/Users/simonc/Documents/Github-local/battery-genome/BattINFO-docs-funnel/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;,
-      &#34;schema:datePublished&#34;: 1783283812
+      &#34;schema:dateCreated&#34;: &#34;2026-07-06T20:02:52Z&#34;,
+      &#34;schema:dateModified&#34;: &#34;2026-07-06T20:02:52Z&#34;,
+      &#34;schema:url&#34;: &#34;file:///&lt;repo&gt;/.battinfo/notebooks/guide-03/publication/sdi-a001-cycle-life&#34;,
+      &#34;schema:datePublished&#34;: 1783368172
     },
     {
       &#34;@type&#34;: [
@@ -1550,12 +1550,12 @@ Nodes in @graph: 5
       },
       &#34;hasOutput&#34;: [
         {
-          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
         }
       ],
       &#34;prov:generated&#34;: [
         {
-          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/8d4r-85ra-2bqm-d0m6&#34;
+          &#34;@id&#34;: &#34;https://w3id.org/battinfo/dataset/96kd-vyes-9dp1-6cx6&#34;
         }
       ]
     }

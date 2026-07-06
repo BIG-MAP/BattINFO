@@ -81,13 +81,13 @@ chain, call `build_publication_package(...)`, then reload with
 ```python
 from pathlib import Path
 
-from battinfo import CellInstance, CellSpecification, Dataset, Test, build_publication_package, load_publication_package
+from battinfo import Cell, CellSpec, Dataset, Test, build_publication_package, load_publication_package
 
 dataset_dir = Path("data/cr2032-run")
 dataset_dir.mkdir(parents=True, exist_ok=True)
 (dataset_dir / "capacity.csv").write_text("cycle,capacity_ah\n1,0.225\n")
 
-cell_spec = CellSpecification(
+cell_spec = CellSpec(
     manufacturer="Energizer",
     model="CR2032",
     format="coin",
@@ -96,7 +96,7 @@ cell_spec = CellSpecification(
     nominal_voltage={"value": 3.0, "unit": "V"},
 )
 
-cell = CellInstance(
+cell = Cell(
     cell_spec=cell_spec,
     serial_number="energizer-cr2032-202602-dtjrga",
 )
@@ -132,7 +132,7 @@ Notes:
 - `ro-crate-metadata.json` is emitted alongside it for RO-Crate alignment.
 - `datacite-metadata.json` is emitted alongside it for DataCite-aligned deposit metadata.
 - `battinfo.dcat.jsonld` is available as an optional export.
-- `CellSpecification` is optional provenance support, not required core bundle content.
+- `CellSpec` is optional provenance support, not required core bundle content.
 - `emit_bundle_dir=True` writes the optional debug JSON files under `dataset_dir/battinfo/`.
 - `publish_dataset_metadata(...)` is the generic helper for low-plumbing workflows.
 - `publish_cr2032_dataset_metadata(...)` is kept as a CR2032 convenience wrapper.
@@ -191,9 +191,9 @@ Terminology note:
 Cell-spec publish shortcut:
 
 ```python
-from battinfo import CellSpecification, publish
+from battinfo import CellSpec, publish
 
-cell_spec = CellSpecification(
+cell_spec = CellSpec(
     manufacturer="Google",
     model="G20M7",
     format="pouch",

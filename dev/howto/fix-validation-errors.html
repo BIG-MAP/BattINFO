@@ -461,13 +461,13 @@ message you get and the line that resolves it.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpecification</span><span class="p">(</span><span class="n">manufacture</span><span class="o">=</span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">)</span>
+    <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span><span class="n">manufacture</span><span class="o">=</span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>  <span class="c1"># Unknown field(s), with a did-you-mean for manufacturer=</span>
 </pre></div>
 </div>
 <p><strong>2. A bare-number quantity</strong> — quantities are objects, units are never implicit:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpecification</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="n">nominal_capacity</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>   <span class="c1"># not nominal_capacity=2.5</span>
 <span class="p">)</span>
@@ -483,7 +483,7 @@ message you get and the line that resolves it.</p>
 </div>
 <p><strong>4. <code class="docutils literal notranslate"><span class="pre">specs=</span></code> as a list</strong> — it is a mapping of property name to value:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
-    <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpecification</span><span class="p">(</span>
+    <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
         <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
         <span class="n">specs</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;nominal_voltage&quot;</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)],</span>
     <span class="p">)</span>

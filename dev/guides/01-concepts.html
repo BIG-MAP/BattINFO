@@ -483,7 +483,7 @@
 <span class="k">else</span><span class="p">:</span>
     <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repo root: </span><span class="si">{</span><span class="n">REPO</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running from the repo root.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -492,16 +492,16 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Repo root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-funnel
+Running from the repo root.
 </pre></div></div>
 </div>
 <section id="The-data-model">
 <h2>The data model<a class="headerlink" href="#The-data-model" title="Link to this heading">#</a></h2>
 <p>Every battery experiment generates four kinds of record. BattINFO formalises them as a provenance chain:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>CellSpecification  ─────────────────────────────────
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>CellSpec  ─────────────────────────────────
   │  &quot;Panasonic NCR18650B is a cylindrical Li-ion cell, 3.4 Ah&quot;
   │
-  └─► CellInstance  ───────────────────────────────
+  └─► Cell  ───────────────────────────────
         │  &quot;This specific cell, serial number LAB-001&quot;
         │
         └─► Test  ──────────────────────────────
@@ -665,8 +665,8 @@ Repo root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-f
 </section>
 <section id="Record-types">
 <h2>Record types<a class="headerlink" href="#Record-types" title="Link to this heading">#</a></h2>
-<section id="CellSpecification-—-the-specification">
-<h3>CellSpecification — the specification<a class="headerlink" href="#CellSpecification-—-the-specification" title="Link to this heading">#</a></h3>
+<section id="CellSpec-—-the-specification">
+<h3>CellSpec — the specification<a class="headerlink" href="#CellSpec-—-the-specification" title="Link to this heading">#</a></h3>
 <p>A cell spec is a <strong>product specification</strong>: datasheet-level information about a battery model, not a physical item.</p>
 <p>In RDF it carries two parallel type assertions:</p>
 <ul class="simple">
@@ -675,8 +675,8 @@ Repo root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-f
 </ul>
 <p>The physical EMMO classes for format and chemistry (<code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIonBattery</span></code>, …) are placed on an <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code> anonymous node — not on the specification itself — because the specification is an information entity, not a physical cell.</p>
 </section>
-<section id="CellInstance-—-the-physical-item">
-<h3>CellInstance — the physical item<a class="headerlink" href="#CellInstance-—-the-physical-item" title="Link to this heading">#</a></h3>
+<section id="Cell-—-the-physical-item">
+<h3>Cell — the physical item<a class="headerlink" href="#Cell-—-the-physical-item" title="Link to this heading">#</a></h3>
 <p>A cell instance is a <strong>specific physical cell</strong> with a serial number. It always links to a cell spec.</p>
 <p>In RDF it carries both <code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code> (EMMO scientific type) and <code class="docutils literal notranslate"><span class="pre">schema:IndividualProduct</span></code> (schema.org type for a uniquely identifiable product item). The link back to the cell-spec record uses both <code class="docutils literal notranslate"><span class="pre">hasDescription</span></code> (EMMO) and <code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> (schema.org) for full dual-vocabulary alignment.</p>
 </section>
@@ -728,9 +728,9 @@ UID: 7d9k-2m4p-8t3x-6nq5
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpecification</span><span class="p">,</span> <span class="n">publish</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
 
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpecification</span><span class="p">(</span>
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
@@ -982,8 +982,8 @@ ok: True | errors: 0 | warnings: 0
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-data-model">The data model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#A-real-record">A real record</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Record-types">Record types</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#CellSpecification-—-the-specification">CellSpecification — the specification</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#CellInstance-—-the-physical-item">CellInstance — the physical item</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#CellSpec-—-the-specification">CellSpec — the specification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Cell-—-the-physical-item">Cell — the physical item</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#TestSpec-and-Test">TestSpec and Test</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Dataset">Dataset</a></li>
 </ul>

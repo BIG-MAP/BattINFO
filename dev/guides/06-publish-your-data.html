@@ -502,7 +502,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 <span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">WORKSPACE</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace ready:&quot;</span><span class="p">,</span> <span class="n">WORKSPACE</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace ready:&quot;</span><span class="p">,</span> <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">REPO</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -511,7 +511,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Workspace ready: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-phase3\.battinfo\notebooks\guide-06
+Workspace ready: .battinfo\notebooks\guide-06
 </pre></div></div>
 </div>
 <section id="Stage-1-—-Convert">
@@ -536,7 +536,7 @@ Workspace ready: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-
 <div class="highlight"><pre>
   neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB)
 
-Converted 1 file(s) -&gt; C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-phase3\.battinfo\notebooks\guide-06\bdf
+Converted 1 file(s) -&gt; &lt;repo&gt;\.battinfo\notebooks\guide-06\bdf
 
 BDF columns: test_time_second,voltage_volt,current_ampere,step_index,unix_time_second
 </pre></div></div>
@@ -555,7 +555,7 @@ BDF columns: test_time_second,voltage_volt,current_ampere,step_index,unix_time_s
     <span class="n">spec</span> <span class="o">=</span> <span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>           <span class="c1"># found in the registry — reuse its identity</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="c1"># Offline / unregistered: describe the product yourself.</span>
-    <span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpecification</span><span class="p">(</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
         <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Molicel&quot;</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="s2">&quot;INR21700-P45B&quot;</span><span class="p">,</span>
         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
@@ -627,7 +627,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Saved 4 record(s) under C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-phase3\.battinfo\notebooks\guide-06\.battinfo\records:
+Saved 4 record(s) under &lt;repo&gt;\.battinfo\notebooks\guide-06\.battinfo\records:
   cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\examples\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
   cell        S1                                   [created]  .battinfo\records\examples\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
   test        S1 cycling                           [created]  .battinfo\records\examples\test\test-9f4c-mxny-yhym-2zh4.json
@@ -669,7 +669,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1783343967,
+  &#34;retrieved_at&#34;: 1783368199,
   &#34;battinfo_version&#34;: &#34;0.7.0&#34;
 }
 </pre></div></div>

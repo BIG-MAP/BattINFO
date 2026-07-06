@@ -606,6 +606,7 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">cell-instance</span></code>: Query canonical cell instances.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code>: Query canonical dataset records.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>: Query canonical test protocols.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test-spec</span></code>: Query canonical test protocols.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests</span></code>: Query canonical tests.</p></li>
 </ul>
 <section id="battinfo-query-cell-spec">
@@ -681,6 +682,25 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <p>Query canonical test protocols.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>query<span class="w"> </span>test-protocol<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Options</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--id</span> <span class="pre">TEXT</span></code>: Filter by canonical test-protocol IRI.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--kind</span> <span class="pre">TEXT</span></code>: Filter by protocol kind.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--name-contains</span> <span class="pre">TEXT</span></code>: Case-insensitive substring filter on protocol name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--source-type</span> <span class="pre">TEXT</span></code>: Filter by source type.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--limit</span> <span class="pre">INTEGER</span> <span class="pre">RANGE</span></code>: Maximum rows.  [default: 50; x&gt;=1]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--offset</span> <span class="pre">INTEGER</span> <span class="pre">RANGE</span></code>: Start offset.  [default: 0; x&gt;=0]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">TEXT</span></code>: Output format: table|json.  [default: table]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
+</ul>
+</section>
+<section id="battinfo-query-test-spec">
+<h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">test-spec</span></code><a class="headerlink" href="#battinfo-query-test-spec" title="Link to this heading">#</a></h3>
+<p>Query canonical test protocols.</p>
+<p><strong>Usage</strong>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>query<span class="w"> </span>test-spec<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>
 </div>
 <p><strong>Options</strong>:</p>
@@ -918,6 +938,7 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">cell-instance</span></code>: Save a cell-instance using either –input…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code>: Save a dataset using either –input JSON…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>: Save a reusable test protocol using either…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test-spec</span></code>: Save a reusable test protocol using either…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Save a test using either –input JSON or…</p></li>
 </ul>
 <section id="battinfo-save-record">
@@ -1096,6 +1117,36 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
 </section>
+<section id="battinfo-save-test-spec">
+<h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">test-spec</span></code><a class="headerlink" href="#battinfo-save-test-spec" title="Link to this heading">#</a></h3>
+<p>Save a reusable test protocol using either –input JSON or inline draft fields.</p>
+<p><strong>Usage</strong>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>save<span class="w"> </span>test-spec<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Options</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--input</span> <span class="pre">FILE</span></code>: Draft or canonical JSON.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">TEXT</span></code>: Protocol name (required when –input omitted).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--kind</span> <span class="pre">TEXT</span></code>: Test kind.  [default: other]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--description</span> <span class="pre">TEXT</span></code>: Optional protocol description.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--version</span> <span class="pre">TEXT</span></code>: Optional protocol version.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--protocol-url</span> <span class="pre">TEXT</span></code>: Optional protocol URL.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--source-type</span> <span class="pre">TEXT</span></code>: Source type: manual|lab|simulation|other.  [default: manual]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--uid</span> <span class="pre">TEXT</span></code>: Optional 16-char UID (dashed or undashed).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--source-root</span> <span class="pre">PATH</span></code>: Save source root.  [default: examples]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--mode</span> <span class="pre">TEXT</span></code>: Save mode: create_only|upsert.  [default: create_only]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--duplicate-policy</span> <span class="pre">TEXT</span></code>: Duplicate handling: error|return_existing.  [default: error]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--resolve-references</span> <span class="pre">/</span> <span class="pre">--no-resolve-references</span></code>: Resolve linked IDs against source_root.  [default: resolve-references]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--publish</span> <span class="pre">/</span> <span class="pre">--no-publish</span></code>: Publish resolver artifacts after saving.  [default: no-publish]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--publish-root</span> <span class="pre">PATH</span></code>: Resolver artifact root.  [default: .battinfo/resolver-site]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--validate</span> <span class="pre">/</span> <span class="pre">--no-validate</span></code>: Validate record before saving.  [default: validate]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--validation-policy</span> <span class="pre">TEXT</span></code>: Validation policy: default|strict|publisher|ingest.  [default: default]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--dry-run</span></code>: Preview save without writing files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">TEXT</span></code>: Output format: table|json.  [default: json]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
+</ul>
+</section>
 <section id="battinfo-save-test">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">test</span></code><a class="headerlink" href="#battinfo-save-test" title="Link to this heading">#</a></h3>
 <p>Save a test using either –input JSON or inline draft fields.</p>
@@ -1149,6 +1200,7 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">cell-instance</span></code>: Generate a starter template for a…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code>: Generate a starter template for a dataset…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>: Generate a starter template for a reusable…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test-spec</span></code>: Generate a starter template for a reusable…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Generate a starter template for a test…</p></li>
 </ul>
 <section id="battinfo-template-cell-spec">
@@ -1238,6 +1290,24 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <p>Generate a starter template for a reusable test-protocol record.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>template<span class="w"> </span>test-protocol<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Options</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">TEXT</span></code>: Human-readable protocol name.  [default: Example Test Protocol]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--kind</span> <span class="pre">TEXT</span></code>: Test kind.  [default: other]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--source-type</span> <span class="pre">TEXT</span></code>: Source type: manual|lab|simulation|other.  [default: manual]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--uid</span> <span class="pre">TEXT</span></code>: Optional 16-char UID.  [default: 0000000000000000]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--out</span> <span class="pre">PATH</span></code>: Optional output JSON path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">TEXT</span></code>: Output format: table|json.  [default: json]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
+</ul>
+</section>
+<section id="battinfo-template-test-spec">
+<h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">template</span> <span class="pre">test-spec</span></code><a class="headerlink" href="#battinfo-template-test-spec" title="Link to this heading">#</a></h3>
+<p>Generate a starter template for a reusable test-protocol record.</p>
+<p><strong>Usage</strong>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>template<span class="w"> </span>test-spec<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>
 </div>
 <p><strong>Options</strong>:</p>
@@ -2446,6 +2516,7 @@ battinfo config set community battinfo-reference</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-query-cell-instance"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">cell-instance</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-query-dataset"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">dataset</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-query-test-protocol"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">test-protocol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-query-test-spec"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">test-spec</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-query-tests"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">tests</span></code></a></li>
 </ul>
 </li>
@@ -2471,6 +2542,7 @@ battinfo config set community battinfo-reference</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-save-cell-instance"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">cell-instance</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-save-dataset"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">dataset</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-save-test-protocol"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">test-protocol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-save-test-spec"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">test-spec</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-save-test"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">test</span></code></a></li>
 </ul>
 </li>
@@ -2480,6 +2552,7 @@ battinfo config set community battinfo-reference</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-template-cell-instance"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">template</span> <span class="pre">cell-instance</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-template-dataset"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">template</span> <span class="pre">dataset</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-template-test-protocol"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">template</span> <span class="pre">test-protocol</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-template-test-spec"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">template</span> <span class="pre">test-spec</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo-template-test"><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">template</span> <span class="pre">test</span></code></a></li>
 </ul>
 </li>

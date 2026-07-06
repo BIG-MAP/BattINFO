@@ -558,13 +558,13 @@ chain, call <code class="docutils literal notranslate"><span class="pre">build_p
 <code class="docutils literal notranslate"><span class="pre">load_publication_package(...)</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellInstance</span><span class="p">,</span> <span class="n">CellSpecification</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Test</span><span class="p">,</span> <span class="n">build_publication_package</span><span class="p">,</span> <span class="n">load_publication_package</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Test</span><span class="p">,</span> <span class="n">build_publication_package</span><span class="p">,</span> <span class="n">load_publication_package</span>
 
 <span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/cr2032-run&quot;</span><span class="p">)</span>
 <span class="n">dataset_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;capacity.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;cycle,capacity_ah</span><span class="se">\n</span><span class="s2">1,0.225</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpecification</span><span class="p">(</span>
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
@@ -573,7 +573,7 @@ chain, call <code class="docutils literal notranslate"><span class="pre">build_p
     <span class="n">nominal_voltage</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
 <span class="p">)</span>
 
-<span class="n">cell</span> <span class="o">=</span> <span class="n">CellInstance</span><span class="p">(</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span>
     <span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span>
     <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;energizer-cr2032-202602-dtjrga&quot;</span><span class="p">,</span>
 <span class="p">)</span>
@@ -609,7 +609,7 @@ chain, call <code class="docutils literal notranslate"><span class="pre">build_p
 <li><p><code class="docutils literal notranslate"><span class="pre">ro-crate-metadata.json</span></code> is emitted alongside it for RO-Crate alignment.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">datacite-metadata.json</span></code> is emitted alongside it for DataCite-aligned deposit metadata.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo.dcat.jsonld</span></code> is available as an optional export.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CellSpecification</span></code> is optional provenance support, not required core bundle content.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> is optional provenance support, not required core bundle content.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">emit_bundle_dir=True</span></code> writes the optional debug JSON files under <code class="docutils literal notranslate"><span class="pre">dataset_dir/battinfo/</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">publish_dataset_metadata(...)</span></code> is the generic helper for low-plumbing workflows.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">publish_cr2032_dataset_metadata(...)</span></code> is kept as a CR2032 convenience wrapper.</p></li>
@@ -664,9 +664,9 @@ truth or when you are driving the <code class="docutils literal notranslate"><sp
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo-registry</span></code> now uses <code class="docutils literal notranslate"><span class="pre">workspace_id</span></code> as well, so the publication boundary is vocabulary-aligned end to end.</p></li>
 </ul>
 <p>Cell-spec publish shortcut:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpecification</span><span class="p">,</span> <span class="n">publish</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
 
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpecification</span><span class="p">(</span>
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;G20M7&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pouch&quot;</span><span class="p">,</span>

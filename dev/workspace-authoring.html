@@ -525,7 +525,7 @@ and publish, without touching the lower layers.</p>
 </tr>
 <tr class="row-odd"><td><p>Create a single record in code and save/publish it</p></td>
 <td><p><strong>Models + functions</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">CellSpecification(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> — see the <a class="reference internal" href="python-api.html"><span class="std std-doc">Python API</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> — see the <a class="reference internal" href="python-api.html"><span class="std std-doc">Python API</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p>Build or script the full object graph programmatically (ingest pipelines, batch tooling)</p></td>
 <td><p><strong>Object-graph engine</strong></p></td>
@@ -539,13 +539,13 @@ and publish, without touching the lower layers.</p>
 <h2>The layers underneath<a class="headerlink" href="#the-layers-underneath" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.Workspace</span></code></strong> (in <code class="docutils literal notranslate"><span class="pre">battinfo._workspace</span></code>) is the object-graph engine: it
-holds linked <code class="docutils literal notranslate"><span class="pre">CellSpecification</span></code> / <code class="docutils literal notranslate"><span class="pre">CellInstance</span></code> / <code class="docutils literal notranslate"><span class="pre">Test</span></code> / <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> objects,
+holds linked <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> / <code class="docutils literal notranslate"><span class="pre">Cell</span></code> / <code class="docutils literal notranslate"><span class="pre">Test</span></code> / <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> objects,
 finalizes ids and provenance, and writes the canonical records. The authoring
 workspace delegates to it; script against it directly when you are building
 pipelines rather than working interactively.</p></li>
-<li><p><strong>The record models</strong> (<code class="docutils literal notranslate"><span class="pre">CellSpecification</span></code>, <code class="docutils literal notranslate"><span class="pre">CellInstance</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>,
+<li><p><strong>The record models</strong> (<code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>) are both the canonical source of truth and the authoring input — every
-field carries a description (<code class="docutils literal notranslate"><span class="pre">help(battinfo.CellSpecification)</span></code>), and misspelled
+field carries a description (<code class="docutils literal notranslate"><span class="pre">help(battinfo.CellSpec)</span></code>), and misspelled
 arguments get a did-you-mean.</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code></strong> takes a single model (or a linked graph of them) and
 writes/publishes the canonical records without a workspace.</p></li>
