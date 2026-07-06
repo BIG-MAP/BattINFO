@@ -39,6 +39,7 @@ export const primaryNav = [
   { label: "Publish", href: "/publish" },
   { label: "Validate", href: "/validate" },
   { label: "Convert", href: "/convert" },
+  { label: "Properties", href: "/properties" },
   { label: "Examples", href: "/examples" },
   { label: "Why", href: "/federation" },
   { label: "Docs", href: "/docs" },
@@ -93,7 +94,8 @@ export const footerNav = [
     heading: "Tools",
     links: [
       { label: "Validate a record", href: "/validate" },
-      { label: "Convert to JSON-LD", href: "/convert" },
+      { label: "Convert cycler data", href: "/convert" },
+      { label: "Properties & units", href: "/properties" },
     ],
   },
   {

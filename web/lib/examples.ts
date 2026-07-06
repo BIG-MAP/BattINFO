@@ -9,63 +9,6 @@
 
 export { cellSpecInput, cellSpecCanonical } from "./examples.generated";
 
-// Sample for the client-demo Validate/Convert tools. These tools' simplified
-// in-browser logic (lib/validate.ts, lib/convert.ts) still expects the
-// pre-migration `product`/`specs` shape, so their sample must match that shape
-// or the demos break. FOLLOW-UP: migrate validate.ts + convert.ts to the
-// canonical `cell_spec`/`properties` shape, then point them at cellSpecInput
-// and delete this. See docs/CONTENT-MODEL.md §4.
-export const toolDemoInput = {
-  schema_version: "0.1.0",
-  product: {
-    name: "A123 ANR26650M1-B",
-    model: "ANR26650M1-B",
-    manufacturer: { type: "Organization", name: "A123" },
-    category: "battery cell",
-    cell_format: "cylindrical",
-    chemistry: "Li-ion",
-    positive_electrode_basis: "LFP",
-    size_code: "R26650",
-  },
-  specs: {
-    nominal_capacity: { value: 2.5, unit: "Ah" },
-    nominal_voltage: { value: 3.3, unit: "V" },
-    mass: { value: 76.0, unit: "g" },
-    diameter: { value: 26.0, unit: "mm" },
-    height: { value: 65.0, unit: "mm" },
-  },
-};
-
-// Representative of the JSON-LD that BattINFO emits — EMMO domain-battery
-// aligned, with @type stacking and the canonical quantity pattern. Illustrative
-// (abbreviated); the canonical transform lives in the Python package. This stays
-// a curated teaser until the Python transform can emit canonical JSON-LD into
-// examples/** (then it joins the sync).
-export const cellSpecJsonLd = {
-  "@context": "https://w3id.org/battinfo/context/domain-battery.jsonld",
-  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-  "@type": [
-    "BatteryCell",
-    "CylindricalBattery",
-    "LithiumIonBattery",
-    "LithiumIronPhosphateBattery",
-  ],
-  "skos:prefLabel": "A123 ANR26650M1-B",
-  manufacturer: { "@type": "Organization", name: "A123" },
-  hasProperty: [
-    {
-      "@type": ["NominalCapacity", "ConventionalProperty"],
-      hasNumericalPart: { "@type": "Real", hasNumericalValue: 2.5 },
-      hasMeasurementUnit: "https://w3id.org/emmo#AmpereHour",
-    },
-    {
-      "@type": ["NominalVoltage", "ConventionalProperty"],
-      hasNumericalPart: { "@type": "Real", hasNumericalValue: 3.3 },
-      hasMeasurementUnit: "https://w3id.org/emmo#Volt",
-    },
-  ],
-};
-
 // The hero: the data-first publishing journey, condensed from ws.quickstart().
 // DO NOT EDIT the ws.* calls freely — tests/test_web_snippets.py asserts every
 // ws.<verb> here appears (in order) in the recipe ws.quickstart() prints, so
