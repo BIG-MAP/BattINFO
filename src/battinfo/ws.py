@@ -1273,7 +1273,7 @@ class AuthoringWorkspace:
         if ref.id:
             print(f"  id:       {ref.id}")
         if not ref.name and not ref.acronym:
-            print("  (descriptive metadata not resolved — offline, or grant not in")
+            print("  (descriptive metadata not resolved -- offline, or grant not in")
             print('   OpenAIRE; set it by hand e.g. ws.project(name="...", funder="..."),')
             print("   or retry with ws.project(refresh=True))")
         print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
@@ -1556,7 +1556,7 @@ class AuthoringWorkspace:
                 _bdf_io.save(df, out)
             except Exception as exc:  # one bad file must not abort the batch
                 failed.append((src.name, str(exc)))
-                print(f"  FAILED: {src.name} — {exc}")
+                print(f"  FAILED: {src.name} -- {exc}")
                 continue
             print(f"  {src.name}  ->  {out.name}  ({out.stat().st_size / 1e6:.1f} MB)")
             written.append(out)
@@ -1564,10 +1564,10 @@ class AuthoringWorkspace:
             # provenance when the test is published (see ws.add('test', ...)).
             self._record_conversion(src, out)
 
-        print(f"\nConverted {len(written)} file(s) → {bdf_dir}"
+        print(f"\nConverted {len(written)} file(s) -> {bdf_dir}"
               + (f"  ({len(failed)} failed)" if failed else ""))
         if failed:
-            print("  Failed files may be an unsupported variant — try exporting a CSV "
+            print("  Failed files may be an unsupported variant -- try exporting a CSV "
                   "and ws.convert('*.csv'), or ws.convert_csv(path, hints={...}).")
         return written
 
@@ -1595,7 +1595,7 @@ class AuthoringWorkspace:
 
     def bdf_columns(self) -> list[str]:
         """Print the canonical BDF column names (the targets for convert_csv hints)."""
-        print("Canonical BDF columns — map your CSV headers to these:")
+        print("Canonical BDF columns -- map your CSV headers to these:")
         for name, desc in _BDF_CANONICAL_COLUMNS:
             print(f"  {name:30} {desc}")
         return [n for n, _ in _BDF_CANONICAL_COLUMNS]
@@ -2224,7 +2224,7 @@ class AuthoringWorkspace:
                 summary[subdir] = items
 
         if not summary:
-            print("  Workspace is empty — run ws.save() first.")
+            print("  Workspace is empty -- run ws.save() first.")
             return summary
 
         total = sum(len(v) for v in summary.values())
@@ -2297,7 +2297,7 @@ class AuthoringWorkspace:
                     self._cells_by_short_id[stored_sid] = cell
                 count += 1
             except Exception as exc:
-                print(f"  WARNING: could not load {src.name} — {exc}")
+                print(f"  WARNING: could not load {src.name} -- {exc}")
 
         print(f"  Loaded {count} cell instance(s) into matching index.")
         return count
@@ -2547,7 +2547,7 @@ class AuthoringWorkspace:
             spec_iri = (node.get("dcterms:conformsTo") or {}).get("@id", "")
             spec_obj  = spec_objects.get(spec_iri)
             if spec_obj is None:
-                print(f"  WARNING: no spec found for cell {iri} — skipping")
+                print(f"  WARNING: no spec found for cell {iri} -- skipping")
                 continue
 
             cell = self._ws.cell(
@@ -2587,7 +2587,7 @@ class AuthoringWorkspace:
                 (c for c in self._ws.cells if c.id == cell_iri), None
             )
             if cell is None:
-                print(f"  WARNING: no cell found for test {test_iri} — skipping")
+                print(f"  WARNING: no cell found for test {test_iri} -- skipping")
                 continue
 
             protocol  = tnode.get("schema:measurementTechnique", "")
@@ -2780,7 +2780,7 @@ class AuthoringWorkspace:
 
         examples = self._records_root / "examples"
         if not examples.exists():
-            print("  No records found — run ws.save() first.")
+            print("  No records found -- run ws.save() first.")
             return []
 
         journal = _SubmitJournal(self._root / ".battinfo" / "submit-journal.jsonl") if resume else None
@@ -2854,13 +2854,13 @@ class AuthoringWorkspace:
                 try:
                     rec = json.loads(f.read_text(encoding="utf-8"))
                 except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
-                    print(f"  ERROR: {f.name} — unreadable/corrupt ({exc})")
+                    print(f"  ERROR: {f.name} -- unreadable/corrupt ({exc})")
                     prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
                                       "status": "unreadable", "error": str(exc), "iri": "", "result": None})
                     continue
                 if not isinstance(rec, dict):
                     error = "not a JSON object record"
-                    print(f"  ERROR: {f.name} — {error}")
+                    print(f"  ERROR: {f.name} -- {error}")
                     prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
                                       "status": "invalid", "error": error, "iri": "", "result": None})
                     continue
@@ -2868,13 +2868,13 @@ class AuthoringWorkspace:
                     result = validate_record(rec, policy="publisher")
                 except (ValueError, TypeError) as exc:  # unrecognised / non-object record
                     error = f"not a recognised record ({exc})"
-                    print(f"  ERROR: {f.name} — {error}")
+                    print(f"  ERROR: {f.name} -- {error}")
                     prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
                                       "status": "invalid", "error": error, "iri": "", "result": None})
                     continue
                 if not result.ok:
                     error = "; ".join(result.errors)
-                    print(f"  ERROR: {f.name} — failed validation: {error}")
+                    print(f"  ERROR: {f.name} -- failed validation: {error}")
                     prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
                                       "status": "invalid", "error": error, "iri": "", "result": None})
                     continue
@@ -3155,7 +3155,7 @@ class AuthoringWorkspace:
                 print("  Staged records await a registry admin's approval "
                       "(ws.pending() to list, ws.approve(<id>) to promote).")
             if failed:
-                print(f"  {len(failed)} record(s) did NOT publish — see the ERROR lines above.")
+                print(f"  {len(failed)} record(s) did NOT publish -- see the ERROR lines above.")
                 if not allow_partial:
                     raise SubmitError(
                         f"{len(failed)} of {len(outcomes)} record(s) failed to submit.",
@@ -3283,7 +3283,7 @@ class AuthoringWorkspace:
 
         ds_dir = self._records_root / "examples" / "dataset"
         if not ds_dir.exists():
-            print("  No dataset records — run ws.save() first.")
+            print("  No dataset records -- run ws.save() first.")
             return []
 
         written: list[Path] = []
@@ -3414,7 +3414,7 @@ class AuthoringWorkspace:
 
         ds_dir = self._records_root / "examples" / "dataset"
         if not ds_dir.exists():
-            print("  No dataset records — run ws.save() first.")
+            print("  No dataset records -- run ws.save() first.")
             return []
 
         urls: list[str] = []
@@ -3449,7 +3449,7 @@ class AuthoringWorkspace:
                 public_url = f"{public_base}/{r2_key}" if public_base else f"s3://{bucket_name}/{r2_key}"
 
                 if dry_run:
-                    print(f"  [dry-run] would upload {local_file.name} → {r2_key}")
+                    print(f"  [dry-run] would upload {local_file.name} -> {r2_key}")
                 else:
                     # Check if already uploaded with matching checksum
                     already_uploaded = False
@@ -3596,7 +3596,7 @@ class AuthoringWorkspace:
         )
         if _version_warning:
             warnings.warn(_version_warning, stacklevel=2)
-            print(f"  ⚠️  {_version_warning}")
+            print(f"  WARNING: {_version_warning}")
 
         examples = self._records_root / "examples"
         if not examples.exists():
@@ -3713,7 +3713,7 @@ class AuthoringWorkspace:
         else:
             print(f"  Draft (not published): {draft_url}")
             print(f"  Pre-reserved DOI: {doi}")
-            print("  Review it, then click \"Publish\" on Zenodo — or re-run with publish=True.")
+            print("  Review it, then click \"Publish\" on Zenodo -- or re-run with publish=True.")
 
         self._save_zenodo_state({
             "record_id": str(zenodo_record_id),
@@ -3755,7 +3755,7 @@ class AuthoringWorkspace:
         try:
             from rocrate.rocrate import ROCrate  # type: ignore[import]
         except ImportError:
-            print("  rocrate not installed — run: pip install rocrate")
+            print("  rocrate not installed -- run: pip install rocrate")
             print("  Alternatively validate at: https://www.researchobject.org/ro-crate/")
             return False
 
@@ -3916,7 +3916,7 @@ class AuthoringWorkspace:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
                 print(f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) "
-                      "— address before publishing:")
+                      "-- address before publishing:")
                 for i in errors:
                     print(f"    ERROR   {i.message}")
                 for i in warnings:
@@ -3997,7 +3997,7 @@ class AuthoringWorkspace:
                             # deposit would be published incomplete (a distribution pointing at a
                             # file that was never uploaded). Warn now; block publish later (R-7).
                             missing.append(str(lp))
-                            print(f"  ⚠️  data file for a distribution is missing (not uploaded): {lp}")
+                            print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
                 except Exception:
                     continue
         # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
@@ -4028,7 +4028,7 @@ class AuthoringWorkspace:
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
         self._artifact_warnings = artifact_warnings
         for warning in artifact_warnings:
-            print(f"  ⚠️  {warning}")
+            print(f"  WARNING: {warning}")
         for lp in artifact_files:
             if lp.name not in seen:
                 seen.add(lp.name)
@@ -4050,7 +4050,7 @@ class AuthoringWorkspace:
                     for lp in sorted(paths):
                         zf.write(lp, lp.name)
                 filenames.append(zip_name)
-                print(f"  Bundled {len(paths)} files → {zip_name}")
+                print(f"  Bundled {len(paths)} files -> {zip_name}")
 
         return filenames
 
@@ -5367,7 +5367,7 @@ class AuthoringWorkspace:
 
         records_root = self._records_root / "examples"
         if not records_root.exists():
-            print("  No records found — run ws.save() first.")
+            print("  No records found -- run ws.save() first.")
             return []
 
         out_root = Path(output_dir).resolve() if output_dir else None
@@ -5405,7 +5405,7 @@ class AuthoringWorkspace:
                                        encoding="utf-8")
                     written.append(dst)
                 except Exception as exc:
-                    print(f"  WARNING: {src.name} — {exc}")
+                    print(f"  WARNING: {src.name} -- {exc}")
 
         print(f"Exported {len(written)} file(s) [{fmt}] to "
               f"{out_root or records_root}")
@@ -5650,6 +5650,30 @@ class AuthoringWorkspace:
         payload = data.get("semantic_payload") or {}
         return (payload.get("battinfo_records") or {}).get("cell_spec") or payload
 
+    def _coerce_cell_spec_arg(self, spec: Any) -> Any:
+        """Accept a ``ws.search()`` hit, a ``CellSpecification``, or an authoring dict for ``spec=``.
+
+        Search hits carry index metadata (``_canonical_id``, ``type``, ``source``),
+        not authoring fields — feeding one straight into the model trips the
+        unknown-kwarg check. Resolve hits through ``_reference_spec`` (reusing the
+        existing IRI, never re-published); pass everything else to the model,
+        whose validation errors teach.
+        """
+        from battinfo.bundle import CellSpecification  # noqa: PLC0415
+
+        if isinstance(spec, CellSpecification):
+            return spec
+        if isinstance(spec, dict):
+            if "_canonical_id" in spec or "type" in spec:
+                return self._reference_spec(dict(spec))
+            return spec
+        if isinstance(spec, str):
+            raise TypeError(
+                f"spec= takes a ws.search() hit or a battinfo.CellSpecification, not the string {spec!r}. "
+                f"Try: spec = ws.search({spec!r})[0]"
+            )
+        return spec
+
     def _add_cell_instances(
         self,
         spec: Any,
@@ -5671,6 +5695,7 @@ class AuthoringWorkspace:
         * ``iris`` — pre-allocated IRIs to reuse instead of minting (parallel, equal length).
         * ``from_file`` — JSON file mapping ``{name: pre-allocated-IRI}``.
         """
+        spec = self._coerce_cell_spec_arg(spec)
         # Build (name, serial, iri) entries.
         entries: list[tuple[str | None, str | None, str | None]] = []
 
@@ -5723,7 +5748,7 @@ class AuthoringWorkspace:
                 seen.add(label)
                 deduped.append((n, s, iri))
             if already:
-                print(f"  WARNING: {len(already)} already in workspace — skipping: {already[:5]}"
+                print(f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
                       + (" ..." if len(already) > 5 else ""))
             entries = deduped
 
@@ -6480,7 +6505,7 @@ def _journaled_submit(
     payload_hash = _journal_payload_hash(payload)
     previous = journal.previous_success(source_local_id, payload_hash) if source_local_id else None
     if previous is not None:
-        print(f"  {title}  [already submitted — skipped; pass resume=False to re-send]")
+        print(f"  {title}  [already submitted -- skipped; pass resume=False to re-send]")
         return {"title": title, "source_local_id": source_local_id, "ok": True,
                 "status": "skipped_journal", "iri": previous.get("iri", ""), "error": None,
                 "result": None, "version_bumped": None}
@@ -6550,9 +6575,9 @@ def _do_submit(
                 payload["source_version"] = bumped_version
                 if "resource" in payload:
                     payload["resource"]["source_version"] = bumped_version  # type: ignore[index]
-                print(f"  {title}  [conflict — retrying as version {bumped_version}]")
+                print(f"  {title}  [conflict -- retrying as version {bumped_version}]")
                 continue
-            print(f"  ERROR: {title} — {exc}")
+            print(f"  ERROR: {title} -- {exc}")
             return {"title": title, "source_local_id": source_local_id, "ok": False,
                     "status": "error", "iri": "", "error": str(exc), "result": None,
                     "version_bumped": bumped_version}

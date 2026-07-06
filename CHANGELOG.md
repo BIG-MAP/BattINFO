@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The `ws.quickstart()` recipe runs again end to end.** `ws.add("cell", spec=<search
+  hit>)` crashed with "Unknown field(s): _canonical_id=, type=" — a search hit carries
+  index metadata, not authoring fields, and the stricter unknown-kwarg check (correctly)
+  refused it. Hits are now resolved through the referenced-spec path, reusing the
+  existing IRI; a plain-string `spec=` gets a one-line fix-it error
+  (`spec = ws.search(...)[0]`). A new offline test executes the whole taught sequence
+  (convert → search → add cell → add test → save) in CI so this seam cannot rot.
+- **`ws` no longer crashes legacy Windows consoles.** User-facing prints carried `→` and
+  `⚠️`, which raise `UnicodeEncodeError` on cp1252/cp437 stdout — `ws.convert()` died
+  *after* a successful conversion. All printed strings are ASCII now, and a test forbids
+  non-ASCII in ws.py print calls.
+
 ### Changed
 
 - **`save_*` minting is now idempotent** (beta-hardening 3.3): a record saved without an
