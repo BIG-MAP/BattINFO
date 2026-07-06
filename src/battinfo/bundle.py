@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import difflib
-import re
 from enum import StrEnum
 from pathlib import Path
 from typing import Any, ClassVar, Mapping, Self
@@ -11,6 +10,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
 from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
+from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
@@ -64,10 +64,6 @@ class CellProductType(StrEnum):
     COMMERCIAL = "commercial"
     RESEARCH = "research"
     PROTOTYPE = "prototype"
-
-
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
 
 
 def _short_id(entity_id: str) -> str:
@@ -233,41 +229,6 @@ def _extract_property_item(node: Mapping[str, Any]) -> tuple[str, dict[str, Any]
     if value is None or unit is None:
         return None
     return key, {"value": value, "unit": unit}
-
-
-_DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
-_DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
-
-
-def _citation_doi_from_url(value: Any) -> str | None:
-    if not isinstance(value, str):
-        return None
-    match = _DOI_URL_RE.match(value.strip())
-    if match is None:
-        return None
-    return match.group(1)
-
-
-def _citation_url_value(citation: Any = None, citation_doi: Any = None) -> str | None:
-    if isinstance(citation, str):
-        normalized = citation.strip()
-        if not normalized:
-            return None
-        extracted = _citation_doi_from_url(normalized)
-        if extracted is not None:
-            return f"https://doi.org/{extracted}"
-        if _DOI_LITERAL_RE.fullmatch(normalized):
-            return f"https://doi.org/{normalized}"
-        return normalized
-    if isinstance(citation_doi, str):
-        normalized = citation_doi.strip()
-        if not normalized:
-            return None
-        extracted = _citation_doi_from_url(normalized)
-        if extracted is not None:
-            return f"https://doi.org/{extracted}"
-        return f"https://doi.org/{normalized}"
-    return None
 
 
 def _citation_doi_value(citation: Any = None, citation_doi: Any = None) -> str | None:

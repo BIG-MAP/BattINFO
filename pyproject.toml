@@ -146,6 +146,10 @@ ignore = [
 # intentional so they can run without an editable install.
 "tests/*.py" = ["E402"]
 ".tools/**/*.py" = ["E402"]
+# The api facade re-exports the entire pre-split battinfo/api.py surface
+# (public names plus the underscore helpers other modules and tests reach for),
+# so "unused" imports there are the whole point.
+"src/battinfo/api/__init__.py" = ["F401"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -166,6 +170,9 @@ module = [
   "battinfo.authoring",
   "battinfo.interop.protocols",
   "battinfo.api",
+  # api was split into a package (facade + submodules); the overrides cover the
+  # same code that was excluded when it was the monolithic battinfo/api.py.
+  "battinfo.api.*",
   "battinfo._workspace",
   "battinfo.transform.json_to_jsonld",
   "battinfo.interop.bpx",

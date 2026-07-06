@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import mimetypes
 import shutil
 from collections.abc import Sequence
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
@@ -14,6 +12,7 @@ if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
 
 from battinfo._jsonio import read_record_json as _load_json
+from battinfo._util import _as_path, _now_unix, _sha256
 from battinfo.api import (
     build_cell_spec_library_rdf,
     query_cell_instances,
@@ -111,10 +110,6 @@ def q(
     )
 
 
-def _now_unix() -> int:
-    return int(datetime.now(timezone.utc).timestamp())
-
-
 def _stable_uid(seed: str) -> str:
     return stable_uid(seed)
 
@@ -210,10 +205,6 @@ def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str) -> None:
         seen.add(current)
 
 
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
-
-
 def _path_from_file_uri(uri: str) -> Path | None:
     parsed = urlparse(uri)
     if parsed.scheme != "file":
@@ -224,14 +215,6 @@ def _path_from_file_uri(uri: str) -> Path | None:
     if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
         path_text = path_text[1:]
     return Path(path_text)
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _guess_media_type(value: str | None) -> str | None:

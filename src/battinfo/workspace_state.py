@@ -4,7 +4,6 @@ import mimetypes
 import os
 import shutil
 import tempfile
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -13,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
+from battinfo._util import _as_path, _now_iso, _sha256
 from battinfo._workspace import Workspace
 from battinfo.bundle import Cell, CellSpec, Dataset, Test
 from battinfo.local_workspace import (
@@ -57,14 +57,6 @@ def _assert_compatible_state_version(raw: object) -> None:
         )
 
 
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
-
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
 def _relative_to(root: Path, path: Path) -> str:
     try:
         return path.relative_to(root).as_posix()
@@ -102,16 +94,6 @@ def _guess_media_type(path: str | None) -> str | None:
         return None
     guessed, _ = mimetypes.guess_type(path)
     return guessed
-
-
-def _sha256(path: Path) -> str:
-    import hashlib
-
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _path_from_file_uri(uri: str) -> Path | None:

@@ -25,7 +25,7 @@
     "workflow_api": "src/battinfo/ws.py",
     "authoring_api": "src/battinfo/authoring.py",
     "public_exports": "src/battinfo/__init__.py",
-    "low_level_api": "src/battinfo/api.py"
+    "low_level_api": "src/battinfo/api/__init__.py"
   },
   "scope": {
     "supported_cases": [
