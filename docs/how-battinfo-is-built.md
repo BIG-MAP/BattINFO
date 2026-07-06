@@ -56,17 +56,18 @@ If you know pydantic, you already know the core of BattINFO.
 
 ## The layers, top to bottom
 
-### Authoring surfaces — three doors into the same house
+### One workspace, plus the record classes for scripting
 
-| Surface | Module | For |
+| You are… | Use | Module |
 |---|---|---|
-| `battinfo.workspace(".")` → `ws.convert() / search / add / save / publish` | `ws.py` | People with **data files** — the blessed, data-first path (`ws.quickstart()` prints the recipe) |
-| Models + `battinfo.publish(...)` | `bundle.py`, `_publish.py` | People authoring **spec records** directly in Python |
-| `battinfo.Workspace` | `_workspace.py` | The object-graph engine underneath: build linked spec/cell/test/dataset objects, then `save()` mints IRIs and writes everything |
+| Working with **data files** (the usual case) | `ws = battinfo.workspace(".")` → `convert / search / add / save / publish` (`ws.quickstart()` prints the recipe) | `ws.py` |
+| **Scripting records** directly — building a cell spec in code, batch-generating records | The record classes (`CellSpec`, `Test`, …) + `battinfo.publish(...)` or the `save_*` functions | `bundle.py`, `api.py` |
 
-The friendly `AuthoringWorkspace` (door 1) delegates to the engine (door 3);
+Both run on the same internal object-graph engine (`_workspace.py`), which
+finalizes links and mints IRIs at save time — an implementation detail, not a
+third surface (the old top-level `Workspace` export is deprecated). The
 `save_*`/`query_*` functions in `api.py` are the record-file-level operations
-all of them share.
+everything shares.
 
 ### Records on disk — the actual product
 

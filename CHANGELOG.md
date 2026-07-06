@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (curated namespace — one workspace)
+
+- **The top level is now a curated ~34-name surface** (`battinfo.__all__`): the record
+  models, `workspace()`, publish/save/query/validate, and `record_to_jsonld`. The other
+  ~160 names remain importable from the top level for one release with a
+  `DeprecationWarning` pointing at their home module (`battinfo.api`,
+  `battinfo.interop`, `battinfo.metadata`, …); a guard test keeps the curated list from
+  growing by accident.
+- **There is one workspace.** `battinfo.workspace()` is the workspace; the object-graph
+  engine is an internal (`battinfo._workspace`) and the top-level `Workspace` name is
+  deprecated with a pointer. Legacy aliases (`TestProtocol`, `BatteryCell`,
+  `BatteryCellSpecification`) moved to warning shims.
+
+
 ### Changed (breaking-with-shims — naming)
 
 - **The record classes use one consistent short scheme:** `CellSpec`, `Cell`,
