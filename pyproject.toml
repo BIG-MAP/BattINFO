@@ -82,6 +82,7 @@ dev = [
   "mypy>=1.11"
 ]
 docs = [
+  "autodoc-pydantic>=2.2",  # renders pydantic Field(description=...) in the API reference
   "sphinx>=7.3",
   "pydata-sphinx-theme>=0.15",
   "myst-parser>=3.0",
