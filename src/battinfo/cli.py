@@ -7,6 +7,7 @@ from typing import Any
 import typer
 
 from battinfo._jsonio import write_json as _write_json_file
+from battinfo._publish import publish as publish_object
 from battinfo.api import (
     build_cell_spec_library_rdf as api_build_cell_spec_library_rdf,
 )
@@ -123,7 +124,6 @@ from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.local_workspace import LocalWorkspace
-from battinfo.publish import publish as publish_object
 from battinfo.runtime import recover_notebook_runtime
 from battinfo.storage import build_uploader_from_env
 from battinfo.validate import get_validation_policy

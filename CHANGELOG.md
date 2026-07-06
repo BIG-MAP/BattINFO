@@ -21,6 +21,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   randomly — distinct anonymous records never silently dedup. Pass an explicit `uid=` to
   reproduce the old always-random behaviour.
 
+### Deprecated
+
+- The retired `*Input` names import again as **deprecation shims** for one release:
+  `CellSpecificationInput`, `CellInstanceInput`, `TestInput`, `DatasetInput`,
+  `TestSpecInput`, `TestProtocolInput` resolve to their models with a
+  `DeprecationWarning` naming the replacement (PEP 562), so downstream pinners get a
+  migration message instead of an `ImportError`. The legacy keyword form
+  `publish(cell_spec=..., ...)` also warns — call `publish_publication_package(...)`
+  explicitly. The deprecation policy is now written down in CONTRIBUTING.md, and
+  RELEASING.md gains a "sweep expiring deprecations" step.
+- The `battinfo.publish` **submodule** moved to `battinfo._publish`, ending the
+  function/module shadowing where importing the submodule silently rebound the
+  `battinfo.publish` attribute from the function to the module. The documented
+  surface (`from battinfo import publish`, `PublishResult`) is unchanged.
+
 ### Added
 
 - **`ws.submit()` is resumable** (beta-hardening 3.5): every outcome is journaled to
