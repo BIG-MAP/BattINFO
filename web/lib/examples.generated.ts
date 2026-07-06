@@ -13,7 +13,8 @@ export const cellSpecCanonical = {
     "model": "ANR26650M1-B",
     "manufacturer": {
       "type": "Organization",
-      "name": "A123"
+      "name": "A123",
+      "id": "https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd"
     },
     "brand": {
       "type": "Brand",
@@ -193,7 +194,8 @@ export const cellSpecInput = {
     "model": "ANR26650M1-B",
     "manufacturer": {
       "type": "Organization",
-      "name": "A123"
+      "name": "A123",
+      "id": "https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd"
     },
     "category": "battery cell",
     "cell_format": "cylindrical",

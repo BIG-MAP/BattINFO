@@ -83,3 +83,25 @@ def test_quickstart_recipe_itself_mentions_the_payoffs(quickstart: str) -> None:
     # deliver both mentions, or the promise is marketing-only.
     assert "zenodo" in quickstart.lower()
     assert "publish" in quickstart.lower()
+
+
+def test_web_validator_discriminators_match_the_entity_registry() -> None:
+    """The browser validator's record-type map must mirror battinfo.entities.
+
+    A new record type added to ENTITY_KINDS without updating web/lib/validate.ts
+    would silently fail closed in the browser for a record the library accepts.
+    """
+    from battinfo.entities import ENTITY_KINDS
+
+    source = (WEB / "validate.ts").read_text(encoding="utf-8")
+    match = re.search(r"export const DISCRIMINATORS[^=]*= \{(.*?)\};", source, re.DOTALL)
+    assert match, "DISCRIMINATORS not found in web/lib/validate.ts"
+    web_map = dict(re.findall(r'(\w+):\s*"([^"]+)"', match.group(1)))
+
+    expected = {kind.record_key: kind.schema_file for kind in ENTITY_KINDS}
+    expected["organization"] = "organization.schema.json"  # not an ENTITY_KIND yet
+
+    assert web_map == expected, (
+        "web/lib/validate.ts DISCRIMINATORS drifted from battinfo.entities.ENTITY_KINDS: "
+        f"web-only={set(web_map) - set(expected)}, missing={set(expected) - set(web_map)}"
+    )

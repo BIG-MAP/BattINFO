@@ -9,6 +9,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Organization schema field `sameAs` renamed to `same_as`** — the one property the
+  snake_case migration missed. The alias layer and the JSON-LD emitter already treated
+  `same_as` as canonical; the schema (and two camelCase example records) now agree.
+  Downstream note: the registry's vendored schemas need a re-vendor + pin bump.
 - **The `ws.quickstart()` recipe runs again end to end.** `ws.add("cell", spec=<search
   hit>)` crashed with "Unknown field(s): _canonical_id=, type=" — a search hit carries
   index metadata, not authoring fields, and the stricter unknown-kwarg check (correctly)
