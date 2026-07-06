@@ -5661,11 +5661,16 @@ class AuthoringWorkspace:
         """
         from battinfo.bundle import CellSpecification  # noqa: PLC0415
 
-        if isinstance(spec, CellSpecification):
-            return spec
         if isinstance(spec, dict):
             if "_canonical_id" in spec or "type" in spec:
                 return self._reference_spec(dict(spec))
+            spec = CellSpecification(**spec)  # authoring dict — model errors teach
+        if isinstance(spec, CellSpecification):
+            # A NEW spec (no id yet) must join the save set, or the instances
+            # would reference a spec that never gets saved and fail at save
+            # time with an obscure error. IRI is minted at ws.save().
+            if spec.id is None and spec not in self._ws.cell_specs:
+                self._ws.cell_specs.append(spec)
             return spec
         if isinstance(spec, str):
             raise TypeError(

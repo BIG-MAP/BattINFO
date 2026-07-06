@@ -4,6 +4,7 @@
 
    pages/getting-started
    pages/guides
+   pages/howto
    pages/reference
    pages/concepts
 
