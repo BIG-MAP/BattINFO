@@ -390,3 +390,79 @@ def test_submit_fails_closed_on_non_object_record(
     with pytest.raises(SubmitError):
         ws.submit(**_CREDS)
     assert fake.calls == 0
+
+
+# ── Resumable submit journal (3.5) ────────────────────────────────────────────
+
+def test_successful_submit_writes_the_journal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = _saved_ws(tmp_path, n=2)
+    _patch_registry(monkeypatch, lambda p: _result("validated"))
+    outcomes = ws.submit(**_CREDS)
+    assert len(outcomes) == 2
+    journal = tmp_path / ".battinfo" / "submit-journal.jsonl"
+    assert journal.exists()
+    lines = [ln for ln in journal.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    assert len(lines) == 2
+
+    import json as _json
+    entries = [_json.loads(ln) for ln in lines]
+    assert all(e["ok"] and e["payload_hash"] and e["source_local_id"] for e in entries)
+
+
+def test_rerun_skips_already_submitted_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = _saved_ws(tmp_path, n=2)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+    assert fake.calls == 2
+
+    again = ws.submit(**_CREDS)
+    assert fake.calls == 2, "identical re-run must not re-POST anything"
+    assert [o["status"] for o in again] == ["skipped_journal", "skipped_journal"]
+    assert all(o["ok"] for o in again)
+
+
+def test_resume_false_bypasses_the_journal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = _saved_ws(tmp_path)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+    ws.submit(**_CREDS, resume=False)
+    assert fake.calls == 2
+
+
+def test_failed_outcomes_are_journaled_but_retried_on_resume(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _saved_ws(tmp_path, n=2)
+    state = {"count": 0}
+
+    def half(payload):
+        state["count"] += 1
+        if state["count"] == 2:
+            raise RuntimeError("boom")
+        return _result("validated")
+
+    _patch_registry(monkeypatch, half)
+    outcomes = ws.submit(**_CREDS, allow_partial=True)
+    assert sum(1 for o in outcomes if o["ok"]) == 1
+
+    # Resume: the successful record is skipped, the failed one is re-sent.
+    _patch_registry(monkeypatch, lambda p: _result("validated"))
+    resumed = ws.submit(**_CREDS)
+    statuses = sorted(o["status"] for o in resumed)
+    assert statuses == ["skipped_journal", "validated"]
+
+
+def test_changed_content_is_resubmitted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = _saved_ws(tmp_path)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+
+    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    import json as _json
+    doc = _json.loads(spec_file.read_text(encoding="utf-8"))
+    doc["cell_spec"]["model"] = "X0-revised"
+    spec_file.write_text(_json.dumps(doc), encoding="utf-8")
+
+    outcomes = ws.submit(**_CREDS)
+    assert fake.calls == 2, "changed content must be re-submitted"
+    assert outcomes[0]["status"] == "validated"

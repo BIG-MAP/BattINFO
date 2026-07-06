@@ -19,6 +19,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
+from battinfo._record_index import active_record_cache, bulk_save_session
 from battinfo.bundle import (
     SCHEMA_VERSION,
     BatteryTestType,
@@ -27,6 +28,7 @@ from battinfo.bundle import (
     Dataset,
     Test,
     TestSpec,
+    stamp_provenance,
 )
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
@@ -2278,10 +2280,10 @@ def create_cell_instance(
             "cell_spec_id": resolved_cell_spec_id,
             "short_id": dashed_uid.replace("-", "")[:6],
         },
-        "provenance": {
+        "provenance": stamp_provenance({
             "source_type": source_type,
             "retrieved_at": _now_unix(),
-        },
+        }),
     }
     if serial_number:
         out["cell_instance"]["serial_number"] = serial_number
@@ -2322,6 +2324,10 @@ def _candidate_types_for_namespace(namespace: str) -> list[str]:
 
 def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
     namespace, uid = _iri_tail(entity_id)
+    cache = active_record_cache(source_root)
+    if cache is not None:
+        found = cache.lookup(entity_id, _candidate_types_for_namespace(namespace))
+        return found[0] if found is not None else None
     for entity_type in _candidate_types_for_namespace(namespace):
         expected = _save_entity_path(entity_type, uid, source_root)
         if expected.exists():
@@ -2377,6 +2383,102 @@ def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
         if value is not None and not _component_iri_re(namespace).fullmatch(value):
             raise ValueError(f"{field_name} must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
     # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
+    return _mint_cell_spec_record(spec)
+
+
+def _seed_part(value: str | None, fallback: str = "") -> str:
+    text = (value or "").strip()
+    return text or fallback
+
+
+def _identity_minted_uid(entity_kind: str, entity: Any) -> str:
+    """Mint a deterministic uid from the record's natural identity (3.3).
+
+    Seeds mirror the ``Workspace._finalize_*`` minting exactly, so a record
+    authored through the workspace and the same record saved through ``save_*``
+    land on the same IRI — and re-running an identical ingest is a no-op
+    (``status: exists`` / ``updated`` with ``content_changed: False``) instead
+    of a duplicate corpus.
+
+    Natural keys per record type:
+    - cell-spec:      manufacturer :: model :: format :: chemistry :: size_code
+    - cell:           cell_spec_id :: serial_number :: batch_id :: name
+    - test-protocol:  test_kind :: name :: version
+    - test:           cell_instance_id :: test_kind :: protocol name :: name
+    - dataset:        cell_instance_id :: test_id :: access/download/path :: name
+
+    A record with NO distinguishing identity at all (e.g. a cell instance with
+    no serial, batch, or name) falls back to a random uid — two anonymous but
+    physically distinct records must never silently dedup into one.
+    """
+    from battinfo.entities import stable_uid  # noqa: PLC0415 — keep entities import-light at module load
+
+    if entity_kind == "cell-spec":
+        if not (_seed_part(entity.manufacturer) or _seed_part(entity.model)):
+            return _normalized_dashed_uid(None)
+        seed = "::".join(
+            [
+                _seed_part(entity.manufacturer, "unknown-manufacturer"),
+                _seed_part(entity.model, "unknown-model"),
+                _seed_part(entity.format, "unknown-format"),
+                _seed_part(entity.chemistry, "unknown-chemistry"),
+                entity.size_code or "",
+            ]
+        )
+    elif entity_kind == "cell":
+        name = entity.name or entity.serial_number or entity.batch_id
+        if not _seed_part(name):
+            return _normalized_dashed_uid(None)
+        seed = "::".join(
+            [
+                _seed_part(entity.cell_spec_id, "unknown-cell-spec"),
+                entity.serial_number or "",
+                entity.batch_id or "",
+                _seed_part(name, "cell"),
+            ]
+        )
+    elif entity_kind == "test-protocol":
+        if not (_seed_part(entity.name) or _seed_part(entity.version)):
+            return _normalized_dashed_uid(None)
+        seed = "::".join(
+            [
+                _seed_part(getattr(entity, "test_kind", None), "other"),
+                _seed_part(entity.name, "test-protocol"),
+                entity.version or "",
+            ]
+        )
+    elif entity_kind == "test":
+        protocol = getattr(entity, "protocol", None)
+        protocol_name = (getattr(protocol, "name", None) if protocol is not None else None) or "test"
+        name = entity.name or protocol_name
+        if not (_seed_part(entity.name) or _seed_part(getattr(protocol, "name", None) if protocol else None)):
+            return _normalized_dashed_uid(None)
+        seed = "::".join(
+            [
+                _seed_part(entity.cell_instance_id, "unknown-cell"),
+                _seed_part(getattr(entity, "test_kind", None), "other"),
+                protocol_name,
+                _seed_part(name, "test"),
+            ]
+        )
+    elif entity_kind == "dataset":
+        locator = entity.access_url or entity.download_url or entity.dataset_path or ""
+        if not (_seed_part(entity.name) or _seed_part(locator) or _seed_part(entity.test_id)):
+            return _normalized_dashed_uid(None)
+        seed = "::".join(
+            [
+                _seed_part(entity.cell_instance_id, "unknown-cell"),
+                entity.test_id or "",
+                locator,
+                _seed_part(entity.name or entity.dataset_path or entity.access_url, "dataset"),
+            ]
+        )
+    else:  # pragma: no cover — programming error, not user input
+        raise ValueError(f"No identity-minting policy for entity kind {entity_kind!r}.")
+    return stable_uid(seed)
+
+
+def _mint_cell_spec_record(spec: CellSpecification) -> dict[str, Any]:
     if spec.id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(spec.id):
             raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -2384,7 +2486,8 @@ def _record_from_cell_spec(spec: CellSpecification) -> dict[str, Any]:
             _assert_id_matches_uid(spec.id, _normalized_dashed_uid(spec.uid))
         entity_id = spec.id
     else:
-        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(spec.uid)}"
+        dashed = _normalized_dashed_uid(spec.uid) if spec.uid is not None else _identity_minted_uid("cell-spec", spec)
+        entity_id = f"https://w3id.org/battinfo/spec/{dashed}"
     # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the
     # caller. source_type is schema-required, so an unprovided one takes the documented
     # category default; source_file is optional and is recorded only when the author provided
@@ -2410,7 +2513,12 @@ def _record_from_cell_instance(instance: CellInstance) -> dict[str, Any]:
             _assert_id_matches_uid(instance.id, _normalized_dashed_uid(instance.uid))
         entity_id = instance.id
     else:
-        entity_id = f"https://w3id.org/battinfo/cell/{_normalized_dashed_uid(instance.uid)}"
+        dashed = (
+            _normalized_dashed_uid(instance.uid)
+            if instance.uid is not None
+            else _identity_minted_uid("cell", instance)
+        )
+        entity_id = f"https://w3id.org/battinfo/cell/{dashed}"
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = instance.model_copy(deep=True)
     finalized.id = entity_id
@@ -2430,7 +2538,12 @@ def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
             raise ValueError("dataset id must match https://w3id.org/battinfo/dataset/{uid}.")
         entity_id = dataset.id
     else:
-        entity_id = f"https://w3id.org/battinfo/dataset/{_normalized_dashed_uid(dataset.uid)}"
+        dashed = (
+            _normalized_dashed_uid(dataset.uid)
+            if dataset.uid is not None
+            else _identity_minted_uid("dataset", dataset)
+        )
+        entity_id = f"https://w3id.org/battinfo/dataset/{dashed}"
 
     related_cells = [*dataset.related_cell_ids, *([dataset.cell_instance_id] if dataset.cell_instance_id else [])]
     for cell_id in related_cells:
@@ -2471,7 +2584,8 @@ def _record_from_test(test: Test) -> dict[str, Any]:
             _assert_id_matches_uid(test.id, _normalized_dashed_uid(test.uid))
         entity_id = test.id
     else:
-        entity_id = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(test.uid)}"
+        dashed = _normalized_dashed_uid(test.uid) if test.uid is not None else _identity_minted_uid("test", test)
+        entity_id = f"https://w3id.org/battinfo/test/{dashed}"
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = test.model_copy(deep=True)
     finalized.id = entity_id
@@ -2491,7 +2605,12 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
             raise ValueError("test protocol id must match https://w3id.org/battinfo/spec/{uid}.")
         entity_id = spec.id
     else:
-        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(spec.uid)}"
+        dashed = (
+            _normalized_dashed_uid(spec.uid)
+            if spec.uid is not None
+            else _identity_minted_uid("test-protocol", spec)
+        )
+        entity_id = f"https://w3id.org/battinfo/spec/{dashed}"
 
     # The model already parses the PyBaMM-style experiment/steps authoring input into the
     # canonical `method` and computes `facets` in to_record(); the builder only mints the id
@@ -2541,7 +2660,16 @@ def save_record(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Save one canonical BattINFO resource into local source storage and optional resolver artifacts."""
+    """Save one canonical BattINFO resource into local source storage and optional resolver artifacts.
+
+    Minting policy: records that arrive without an ``id``/``uid`` are minted
+    deterministically from their natural identity key (see
+    ``_identity_minted_uid``), so re-running an identical ingest lands on the
+    existing records — use ``mode="upsert"`` (no-op re-save reports
+    ``content_changed: False``) or ``duplicate_policy="return_existing"``
+    for idempotent pipelines. Records with no distinguishing identity fall
+    back to a random uid and never silently dedup.
+    """
     mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
     source_root_path = _as_path(source_root)
@@ -2594,7 +2722,13 @@ def save_record(
     if dry_run:
         return payload
 
-    _write_json(target_path, doc)
+    cache = active_record_cache(source_root_path)
+    # Inside a bulk session the per-file fsync is skipped: the batch is
+    # re-runnable (identical re-saves are no-ops), so a power loss is repaired
+    # by re-running the ingest, not by 6 ms of fsync per record.
+    _write_json(target_path, doc, durable=cache is None)
+    if cache is not None:
+        cache.record_saved(entity_id, target_path, entity_type)
 
     if publish:
         publish_result = publish_record(
@@ -2626,7 +2760,13 @@ def save_cell_spec(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Save a cell-spec from either draft payload or canonical record."""
+    """Save a cell-spec from either draft payload or canonical record.
+
+    Drafts without ``id``/``uid`` mint deterministically from the natural key
+    (manufacturer :: model :: format :: chemistry :: size_code) — an identical
+    re-save is a no-op; a revised datasheet updates the record in place under
+    ``mode="upsert"``. See ``save_record`` for the full minting policy.
+    """
     from battinfo.bundle import CellSpecification as CellSpecificationBundle
 
     if isinstance(draft, (str, Path)):
@@ -2693,7 +2833,13 @@ def save_cell_instance(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Save a cell-instance from either draft payload or canonical record."""
+    """Save a cell-instance from either draft payload or canonical record.
+
+    Drafts without ``id``/``uid`` mint deterministically from the natural key
+    (cell_spec_id :: serial_number :: batch_id :: name); instances with no
+    serial, batch, or name mint randomly so distinct anonymous cells never
+    dedup. See ``save_record`` for the full minting policy.
+    """
     from battinfo.bundle import CellInstance as CellInstanceBundle
 
     if isinstance(draft, (str, Path)):
@@ -3222,38 +3368,40 @@ def save_batch(
     exists = 0
     dry_run_count = 0
 
-    for src_dir in source_dirs:
-        src_path = _as_path(src_dir)
-        if not src_path.exists():
-            continue
-        for path in sorted(src_path.glob(glob)):
-            processed += 1
-            try:
-                payload = save_record(
-                    path,
-                    source_root=source_root,
-                    mode=mode_normalized,
-                    duplicate_policy=duplicate_policy_normalized,
-                    resolve_references=resolve_references,
-                    publish=publish,
-                    publish_root=publish_root,
-                    build_jsonld=build_jsonld,
-                    build_html=build_html,
-                    validate=validate,
-                    validation_policy=validation_policy,
-                    dry_run=dry_run,
-                )
-                status = payload.get("status")
-                if status == "created":
-                    created += 1
-                elif status == "updated":
-                    updated += 1
-                elif status == "exists":
-                    exists += 1
-                elif status == "dry-run":
-                    dry_run_count += 1
-            except Exception as exc:  # noqa: BLE001
-                failures.append({"file": str(path), "error": str(exc)})
+    # One id->path scan for the whole batch instead of one per record (3.4).
+    with bulk_save_session(_as_path(source_root)):
+        for src_dir in source_dirs:
+            src_path = _as_path(src_dir)
+            if not src_path.exists():
+                continue
+            for path in sorted(src_path.glob(glob)):
+                processed += 1
+                try:
+                    payload = save_record(
+                        path,
+                        source_root=source_root,
+                        mode=mode_normalized,
+                        duplicate_policy=duplicate_policy_normalized,
+                        resolve_references=resolve_references,
+                        publish=publish,
+                        publish_root=publish_root,
+                        build_jsonld=build_jsonld,
+                        build_html=build_html,
+                        validate=validate,
+                        validation_policy=validation_policy,
+                        dry_run=dry_run,
+                    )
+                    status = payload.get("status")
+                    if status == "created":
+                        created += 1
+                    elif status == "updated":
+                        updated += 1
+                    elif status == "exists":
+                        exists += 1
+                    elif status == "dry-run":
+                        dry_run_count += 1
+                except Exception as exc:  # noqa: BLE001
+                    failures.append({"file": str(path), "error": str(exc)})
 
     if resolve_references and validate and not dry_run:
         link_report = build_index(
@@ -4145,10 +4293,10 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "material_spec": spec,
-        "provenance": {
+        "provenance": stamp_provenance({
             "source_type": draft.source_type,
             "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        },
+        }),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -4200,10 +4348,10 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "material": material,
-        "provenance": {
+        "provenance": stamp_provenance({
             "source_type": draft.source_type,
             "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        },
+        }),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -4501,7 +4649,7 @@ def _record_from_component_spec(
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         f"{family}_spec": spec,
-        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
+        "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
@@ -4567,7 +4715,7 @@ def _record_from_component_instance(
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         family: instance,
-        "provenance": {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)},
+        "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url

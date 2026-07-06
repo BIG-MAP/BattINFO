@@ -60,7 +60,7 @@ def main() -> None:
             name="Installed smoke dataset",
         )
 
-        publish_result = battinfo.publish(cell_spec=cell_spec, cell_instance=cell, test=test, dataset=dataset)
+        publish_result = battinfo.publish_publication_package(cell_spec=cell_spec, cell_instance=cell, test=test, dataset=dataset)
         publication_payload = json.loads(Path(publish_result["publish_path"]).read_text(encoding="utf-8"))
         graph = publication_payload["@graph"]
         cell_spec_node = next(node for node in graph if node.get("@id") == publish_result["cell_spec_id"])

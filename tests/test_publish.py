@@ -10,7 +10,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-publish_module = importlib.import_module("battinfo.publish")
+publish_module = importlib.import_module("battinfo._publish")
 from battinfo import CellSpecification, PublishResult, publish
 from battinfo.api import publish_record, save_record
 

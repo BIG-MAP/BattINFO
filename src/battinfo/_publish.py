@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -42,6 +43,14 @@ def publish(obj: Any = None, destination: str | None = None, **kwargs: Any) -> P
     """
 
     if _looks_like_legacy_publication_call(obj, destination, kwargs):
+        warnings.warn(
+            "Calling battinfo.publish(cell_spec=..., cell_instance=..., test=..., dataset=...) "
+            "relies on implicit keyword sniffing; call battinfo.publish_publication_package(...) "
+            "(the same operation, explicitly) instead. The implicit dispatch will be removed "
+            "one release after 0.8.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return _legacy_publish(**kwargs)
 
     if obj is None:

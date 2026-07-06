@@ -82,7 +82,12 @@ def _candidate_types(namespace: str) -> list[str]:
 
 
 def _find_record(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
+    from battinfo._record_index import active_record_cache  # noqa: PLC0415 — avoid import cycle
+
     namespace, uid = _iri_tail(entity_id)
+    cache = active_record_cache(source_root)
+    if cache is not None:
+        return cache.lookup(entity_id, _candidate_types(namespace))
     for entity_type in _candidate_types(namespace):
         expected = _save_entity_path(entity_type, uid, source_root)
         if expected.exists():

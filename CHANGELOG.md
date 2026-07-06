@@ -7,8 +7,60 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **`save_*` minting is now idempotent** (beta-hardening 3.3): a record saved without an
+  `id`/`uid` mints its IRI deterministically from its natural identity key, using the same
+  seeds as the workspace finalizers — so the api and workspace paths mint identical IRIs
+  for identical identities, and re-running an identical ingest is a no-op
+  (`status: exists`/`updated` with `content_changed: False`) instead of a duplicate corpus.
+  Natural keys: cell-spec = manufacturer::model::format::chemistry::size_code;
+  cell = cell_spec_id::serial::batch::name; test-spec = kind::name::version;
+  test = cell::kind::protocol::name; dataset = cell::test::locator::name. Records with no
+  distinguishing identity (e.g. a cell instance with no serial/batch/name) still mint
+  randomly — distinct anonymous records never silently dedup. Pass an explicit `uid=` to
+  reproduce the old always-random behaviour.
+
+### Deprecated
+
+- The retired `*Input` names import again as **deprecation shims** for one release:
+  `CellSpecificationInput`, `CellInstanceInput`, `TestInput`, `DatasetInput`,
+  `TestSpecInput`, `TestProtocolInput` resolve to their models with a
+  `DeprecationWarning` naming the replacement (PEP 562), so downstream pinners get a
+  migration message instead of an `ImportError`. The legacy keyword form
+  `publish(cell_spec=..., ...)` also warns — call `publish_publication_package(...)`
+  explicitly. The deprecation policy is now written down in CONTRIBUTING.md, and
+  RELEASING.md gains a "sweep expiring deprecations" step.
+- The `battinfo.publish` **submodule** moved to `battinfo._publish`, ending the
+  function/module shadowing where importing the submodule silently rebound the
+  `battinfo.publish` attribute from the function to the module. The documented
+  surface (`from battinfo import publish`, `PublishResult`) is unchanged.
+
 ### Added
 
+- **`ws.submit()` is resumable** (beta-hardening 3.5): every outcome is journaled to
+  `.battinfo/submit-journal.jsonl` as it happens, and a record whose identical payload
+  already succeeded in a previous run is skipped (`status: skipped_journal`) instead of
+  re-POSTed — resuming an interrupted bulk submission re-sends only what is missing.
+  Failed records are journaled but retried on resume; changed content re-submits.
+  `ws.submit(resume=False)` bypasses the journal. (Transient-failure retry with
+  exponential backoff already ships in `submit_publication_package`; HTTP connection
+  pooling is deliberately deferred — stdlib-only HTTP, and the planned registry bulk
+  endpoint is the right fix for per-request overhead.)
+- **`battinfo.bulk_save_session(source_root)`** — a context manager that makes bulk
+  ingests fast: the id→path map is scanned once per entity type instead of per save,
+  every save keeps it current (so records saved in the batch resolve as references for
+  later records), and the per-file fsync is skipped because a bulk batch is re-runnable.
+  Measured on the 400-record benchmark (`scripts/bench_bulk_save.py`): 18 → 385
+  records/s (21×); a 10k-record ingest completes in under half a minute.
+  `Workspace.save()` and `save_batch` (Python + CLI) use it automatically.
+- **Every emitted record's provenance block now carries `battinfo_version`** — the version
+  of the battinfo library that wrote the record — so records are forensically attributable
+  to a build. The stamp is applied at emission (model `to_record()` and the direct api.py
+  record builders); an explicitly set value is preserved, so re-serialising another build's
+  record does not falsify its origin. All record schemas (packaged and `assets/` sources,
+  plus the cell-spec profile fragment) allow the new optional field. Downstream note: the
+  registry's vendored schemas need a re-vendor + pin bump when this ships.
 - `battinfo.AuthoringWorkspace` is exported by name (previously reachable only via the
   `battinfo.workspace(...)` factory); its docstring now points at the correct engine class.
   A new [Workspace authoring](docs/workspace-authoring.md) doc page mirrors

@@ -66,6 +66,24 @@ uv run python .tools/quality/run_verification.py
 - All published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI,
   governed by [`IDENTIFIER_POLICY.md`](IDENTIFIER_POLICY.md).
 
+## Deprecation policy
+
+Public API removals go through one release of deprecation, never straight to
+`ImportError`/`TypeError`:
+
+1. **Deprecate** — the old name keeps working but emits a `DeprecationWarning`
+   naming the replacement and the removal release. Import shims live in
+   `battinfo/__init__.py` (`_DEPRECATED_ALIASES`, PEP 562 `__getattr__`);
+   behavioural shims warn at the call site.
+2. **Document** — the deprecation is listed in `CHANGELOG.md` under the release
+   that introduces it, with the migration in one sentence.
+3. **Remove** — in the **next** minor release after the one that shipped the
+   warning. Removal is a `CHANGELOG` "Removed" entry; the release notes link
+   the migration.
+
+Records on disk are never invalidated by an API deprecation: canonical record
+compatibility is governed by `schema_version`, not by the Python surface.
+
 ## Pull request checklist
 
 - [ ] The quality gate above passes locally.

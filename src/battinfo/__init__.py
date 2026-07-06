@@ -1,3 +1,4 @@
+from battinfo._publish import PublishResult, publish
 from battinfo._workspace import Workspace, q, quantity
 from battinfo.api import (
     MaterialInput,
@@ -5,6 +6,7 @@ from battinfo.api import (
     build_cell_spec_library_rdf,
     build_curated_cell_spec_submission,
     build_index,
+    bulk_save_session,
     create_cell_instance,
     create_component_instance,
     create_component_spec,
@@ -189,7 +191,6 @@ from battinfo.publication import (
 from battinfo.publication import (
     publish as publish_publication_package,
 )
-from battinfo.publish import PublishResult, publish
 from battinfo.runtime import recover_notebook_runtime
 from battinfo.validate import (
     ValidationIssue,
@@ -279,6 +280,7 @@ __all__ = [
     "MaterialInput",
     "build_cell_spec_library_rdf",
     "build_index",
+    "bulk_save_session",
     "build_curated_cell_spec_submission",
     "create_cell_instance",
     "create_material_spec",
@@ -424,3 +426,33 @@ __all__ += list(_api._COMPONENT_WRAPPER_NAMES)
 del _api, _name
 
 __version__ = "0.7.0"
+
+
+# ── Deprecated import shims (kept one release; see CONTRIBUTING.md "Deprecation policy") ──
+# The consolidation retired the per-record-type *Input DTOs; the models are the
+# authoring input. Downstream pinners get a migration message, not an ImportError.
+_DEPRECATED_ALIASES: dict[str, tuple[str, object]] = {
+    "CellSpecificationInput": ("CellSpecification", CellSpecification),
+    "CellInstanceInput": ("CellInstance", CellInstance),
+    "TestInput": ("Test", Test),
+    "DatasetInput": ("Dataset", Dataset),
+    "TestSpecInput": ("TestSpec", TestSpec),
+    "TestProtocolInput": ("TestSpec", TestSpec),
+}
+
+
+def __getattr__(name: str) -> object:
+    """PEP 562: retired names resolve with a DeprecationWarning for one release."""
+    if name in _DEPRECATED_ALIASES:
+        replacement, target = _DEPRECATED_ALIASES[name]
+        import warnings
+
+        warnings.warn(
+            f"battinfo.{name} was retired in the model consolidation; use "
+            f"battinfo.{replacement} — the model accepts the same authoring field names. "
+            f"This alias will be removed one release after 0.8.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return target
+    raise AttributeError(f"module 'battinfo' has no attribute {name!r}")
