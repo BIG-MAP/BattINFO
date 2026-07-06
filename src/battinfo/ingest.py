@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo._jsonio import write_json as _write_json
+from battinfo._util import _as_path
 from battinfo._workspace import Workspace
 from battinfo.api import submit_publication_package
 from battinfo.validate.schema import build_validator, schema_for_rel_path
@@ -39,10 +40,6 @@ DATASET_TITLE_LABELS = {
 }
 DATE_RE = re.compile(r"(?P<date>\d{4}-\d{2}-\d{2})")
 TEMP_RE = re.compile(r"(\d+(?:[.,]\d+)?deg[CF])", re.IGNORECASE)
-
-
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
 
 
 def _slugify(text: str) -> str:

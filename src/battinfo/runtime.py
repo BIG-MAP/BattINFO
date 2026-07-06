@@ -5,11 +5,9 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from battinfo._util import _as_path
+
 PathLike = str | Path
-
-
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
 
 
 def _normalize_path(path: str | None) -> str | None:

@@ -8,6 +8,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from battinfo._util import _citation_doi_from_url
 from battinfo.entities import COMPONENT_FAMILIES
 from battinfo.validate.jsonld import validate_jsonld
 
@@ -128,15 +129,6 @@ DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 def _snake_to_camel(value: str) -> str:
     head, *tail = value.split("_")
     return head + "".join(part[:1].upper() + part[1:] for part in tail)
-
-
-def _citation_doi_from_url(value: Any) -> str | None:
-    if not isinstance(value, str):
-        return None
-    match = DOI_URL_RE.match(value.strip())
-    if match is None:
-        return None
-    return match.group(1)
 
 
 def _citation_url_value(provenance: dict[str, Any] | None) -> str | None:

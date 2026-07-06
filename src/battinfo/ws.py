@@ -26,6 +26,7 @@ from typing import Any
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
+from battinfo._util import _now_iso
 from battinfo.entities import record_set_dirs
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
@@ -6182,11 +6183,6 @@ def _guess_format(path: Path) -> str | None:
     if name.endswith(".ndax") or name.endswith(".nda"):
         return "application/x-neware-ndax"
     return None
-
-
-def _now_iso() -> str:
-    import datetime
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
 def _authoring_envelope(**kwargs) -> dict:

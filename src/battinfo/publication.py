@@ -14,8 +14,10 @@ from urllib.parse import unquote, urlparse
 
 from rdflib import Dataset as RdfDataset
 
+from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
+from battinfo._util import _as_path, _citation_doi_from_url, _now_iso, _now_unix, _sha256
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -158,43 +160,6 @@ OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
 RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
-_INSTRUMENT_EMMO_MAP: dict[str, str] = {
-    "maccor": "BatteryCycler",
-    "arbin": "BatteryCycler",
-    "neware": "BatteryCycler",
-    "landt": "BatteryCycler",
-    "basytec": "BatteryCycler",
-    "novonix": "BatteryCycler",
-    "digatron": "BatteryCycler",
-    "biologic": "Potentiostat",
-    "vmp": "Potentiostat",
-    "mpg": "Potentiostat",
-    "sp-": "Potentiostat",
-    "hcp": "Potentiostat",
-    "gamry": "Potentiostat",
-    "autolab": "Potentiostat",
-    "zahner": "Potentiostat",
-    "ivium": "Potentiostat",
-    "metrohm": "Potentiostat",
-    "solartron": "Potentiostat",
-    "galvanostat": "Galvanostat",
-    "potentiostat": "Potentiostat",
-    "cycler": "BatteryCycler",
-}
-
-
-def _instrument_emmo_type(name: str) -> str:
-    lower = (name or "").lower()
-    for keyword, emmo_class in _INSTRUMENT_EMMO_MAP.items():
-        if keyword in lower:
-            return emmo_class
-    return "MeasuringInstrument"
-
-
-def _instrument_node(name: str) -> dict[str, Any]:
-    return {"@type": _instrument_emmo_type(name), "schema:name": name}
-
-
 PROPERTY_TYPE_MAP = {
     "diameter": "Diameter",
     "height": "Height",
@@ -221,10 +186,6 @@ DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE
 DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
 
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
-
-
 def _triple_count(payload: Mapping[str, Any]) -> int:
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning, module="rdflib")
@@ -235,22 +196,6 @@ def _triple_count(payload: Mapping[str, Any]) -> int:
 
 def _tail_id(entity_id: str) -> str:
     return entity_id.rstrip("/").split("/")[-1]
-
-
-def _now_unix() -> int:
-    return int(datetime.now(timezone.utc).timestamp())
-
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _stable_uid(seed: str) -> str:
@@ -301,15 +246,6 @@ def _with_default(value: str | None, fallback: str) -> str:
 
 def _without_none(payload: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if value is not None}
-
-
-def _citation_doi_from_url(value: Any) -> str | None:
-    if not isinstance(value, str):
-        return None
-    match = DOI_URL_RE.match(value.strip())
-    if match is None:
-        return None
-    return match.group(1)
 
 
 def _citation_url_value(source: ProvenanceInfo) -> str | None:

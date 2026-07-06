@@ -15,11 +15,11 @@ Install the BDF library with::
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from battinfo._util import _sha256
 from battinfo.bundle import SCHEMA_VERSION as _SCHEMA_VERSION
 
 PathLike = str | Path
@@ -201,14 +201,6 @@ def _to_variable_measured(df: Any) -> list[dict[str, Any]]:
                 result.append(item)
 
     return result
-
-
-def _sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as fh:
-        for chunk in iter(lambda: fh.read(65536), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def _infer_technique(kind: str | None) -> list[str]:

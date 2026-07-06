@@ -54,7 +54,7 @@ Avoid starting from:
 - human-first workflow API: `src/battinfo/workspace.py`
 - authoring helpers for detailed cell descriptions: `src/battinfo/authoring.py`
 - typed bundle models: `src/battinfo/bundle.py`
-- CLI and low-level registration/query API: `src/battinfo/cli.py`, `src/battinfo/api.py`
+- CLI and low-level registration/query API: `src/battinfo/cli.py`, `src/battinfo/api/` (facade in `__init__.py`)
 - acceptance tests: `tests/test_core_workflow.py`, `tests/test_descriptor_matrix.py`, `tests/test_scope_acceptance.py`
 
 ## Safe Write Locations

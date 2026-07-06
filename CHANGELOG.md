@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (internal structure — no API change)
+
+- **`battinfo.api` is now a package** split along its natural seams (templates,
+  staging/submission, registry client, record store, resolver, components, index)
+  behind a facade that re-exports the entire previous surface — every
+  `from battinfo.api import X` that worked before still works. Shared helpers that
+  had been copy-pasted across up to 8 modules (`_as_path`, `_now_iso`, `_sha256`,
+  citation/DOI parsing) now live in `battinfo._util`, and the EMMO instrument map
+  duplicated between api and publication has one home (`battinfo._emmo_instruments`).
+  Cold import dropped from ~2.8 s to ~0.9 s as a side effect.
+
+
 ### Changed (curated namespace — one workspace)
 
 - **The top level is now a curated ~34-name surface** (`battinfo.__all__`): the record

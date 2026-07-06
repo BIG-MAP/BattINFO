@@ -4,7 +4,7 @@ import json
 import mimetypes
 import shutil
 import tempfile
-from datetime import date, datetime, timezone
+from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -12,6 +12,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
+from battinfo._util import _as_path, _now_iso, _sha256
 from battinfo._workspace import Workspace
 from battinfo.bundle import (
     BattinfoBundle,
@@ -41,14 +42,6 @@ DEFAULT_LEGACY_REGISTRY_INTAKE_FILENAME = "registry-intake.json"
 DEFAULT_SCAFFOLD_WORKSPACE_ID = "digibatt-cr2032-release"
 
 
-def _as_path(path: PathLike) -> Path:
-    return path if isinstance(path, Path) else Path(path)
-
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
 def _guess_media_type(path: str | None) -> str | None:
     if not path:
         return None
@@ -71,16 +64,6 @@ def _citation_url_from_doi(doi: str | None) -> str | None:
         if not normalized:
             return None
     return f"https://doi.org/{normalized}"
-
-
-def _sha256(path: Path) -> str:
-    import hashlib
-
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _relative_to(root: Path, path: Path) -> str:
