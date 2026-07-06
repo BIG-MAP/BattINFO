@@ -49,14 +49,13 @@ Query and validate
 
 .. autofunction:: battinfo.record_to_jsonld
 
-Workspaces
-----------
+The workspace
+-------------
 
 .. autoclass:: battinfo.AuthoringWorkspace
    :no-members:
 
-.. autoclass:: battinfo.Workspace
-   :no-members:
-
-Every method of the authoring workspace is documented in
-:doc:`../workspace-authoring`; run ``ws.commands()`` for the live cheat sheet.
+Every method is documented in :doc:`../workspace-authoring`; run
+``ws.commands()`` for the live cheat sheet. (The internal object-graph engine
+in ``battinfo._workspace`` is an implementation detail — the deprecated
+top-level ``Workspace`` name points you back here.)
