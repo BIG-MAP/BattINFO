@@ -6,10 +6,17 @@ from typing import Any, Mapping, Sequence
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
-try:  # pragma: no cover - optional dependency
-    import pandas as pd  # type: ignore
-except Exception:  # pragma: no cover
-    pd = None  # type: ignore
+
+def _optional_pandas() -> Any:
+    """Return pandas if importable, else None (numeric-dtype filtering is then skipped).
+
+    Imported lazily: pandas ships with the [tabular] extra and this module must
+    import (and mostly work) without it."""
+    try:  # pragma: no cover - optional dependency
+        import pandas as pd  # type: ignore  # noqa: PLC0415
+    except Exception:  # pragma: no cover
+        return None
+    return pd
 
 
 class TableColumn(BaseModel):
@@ -385,6 +392,7 @@ def infer_variable_measured(
         resolved_metadata = _coerce_table_schema_metadata(table_schema)
     out: list[dict[str, Any]] = []
 
+    pd = _optional_pandas() if numeric_only else None
     for column in resolved_columns:
         column_label = str(column)
         if numeric_only and pd is not None and hasattr(data, "__getitem__"):

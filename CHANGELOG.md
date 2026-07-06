@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed (installation — heavy dependencies became extras)
+
+- **`pip install battinfo` is lean now**: core depends only on pydantic, typer, rich,
+  jsonschema, rdflib, and pyld. Tabular file reading (pandas/pyarrow/openpyxl) moved to
+  the **`[tabular]`** extra and RO-Crate output (rocrate) to **`[publish]`** —
+  `pip install battinfo[tabular,publish]` restores everything. Features that need a
+  missing extra raise a teaching error naming the exact install command; graceful
+  optional uses (metadata enrichment) keep degrading gracefully.
+- Cold import is ~0.5 s (from ~2.9 s pre-split): pyld/requests, rdflib, and jsonschema
+  now load on first use, not at import.
+- `battinfo.ws` is fully type-checked — the long-standing mypy exclusion (146 errors,
+  mostly the `list` method shadowing the builtin in annotations) is burned down and
+  removed.
+
+
 ### Changed (internal structure — no API change)
 
 - **`battinfo.api` is now a package** split along its natural seams (templates,

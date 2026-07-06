@@ -4,14 +4,15 @@ import json
 from datetime import datetime
 from functools import lru_cache
 from importlib import resources
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
-from jsonschema import Draft202012Validator, FormatChecker
-from jsonschema.exceptions import ValidationError
-from referencing import Registry, Resource
-
 from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPolicy, ValidationReport
+
+if TYPE_CHECKING:  # jsonschema/referencing are imported lazily so `import battinfo` stays fast
+    from jsonschema import Draft202012Validator
+    from jsonschema.exceptions import ValidationError
+    from referencing import Registry
 
 PROFILE_TO_SCHEMA = {
     "base": "battinfo.base.schema.json",
@@ -35,10 +36,18 @@ PROFILE_TO_SCHEMA = {
     "housing": "housing.schema.json",
 }
 
-FORMAT_CHECKER = FormatChecker()
+
+@lru_cache(maxsize=1)
+def _format_checker() -> Any:
+    """Build the shared FormatChecker on first use (jsonschema imported lazily)."""
+    from jsonschema import FormatChecker  # noqa: PLC0415
+
+    checker = FormatChecker()
+    checker.checks("date-time")(_check_date_time_format)
+    checker.checks("uri")(_check_uri_format)
+    return checker
 
 
-@FORMAT_CHECKER.checks("date-time")
 def _check_date_time_format(value: object) -> bool:
     if not isinstance(value, str) or not value:
         return True
@@ -50,7 +59,6 @@ def _check_date_time_format(value: object) -> bool:
     return parsed.tzinfo is not None
 
 
-@FORMAT_CHECKER.checks("uri")
 def _check_uri_format(value: object) -> bool:
     if not isinstance(value, str) or not value:
         return True
@@ -61,7 +69,9 @@ def _check_uri_format(value: object) -> bool:
 
 
 @lru_cache(maxsize=1)
-def schema_registry() -> Registry:
+def schema_registry() -> "Registry":
+    from referencing import Registry, Resource  # noqa: PLC0415
+
     schema_root = resources.files("battinfo").joinpath("data", "schemas")
     resources_by_id: list[tuple[str, Resource]] = []
     for schema_path in schema_root.rglob("*.json"):
@@ -88,8 +98,10 @@ def schema_for_rel_path(rel_path: str) -> dict[str, Any]:
         return json.load(handle)
 
 
-def build_validator(schema: dict[str, Any]) -> Draft202012Validator:
-    return Draft202012Validator(schema, registry=schema_registry(), format_checker=FORMAT_CHECKER)
+def build_validator(schema: dict[str, Any]) -> "Draft202012Validator":
+    from jsonschema import Draft202012Validator  # noqa: PLC0415
+
+    return Draft202012Validator(schema, registry=schema_registry(), format_checker=_format_checker())
 
 
 def _render_path(error: ValidationError) -> str:

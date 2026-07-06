@@ -46,15 +46,22 @@ dependencies = [
   "typer>=0.12",
   "rich>=13.7",
   "jsonschema>=4.21",
-  "pandas>=2.2",
-  "pyarrow>=15.0",
-  "openpyxl>=3.1",
   "rdflib>=7.0",
   "pyld>=2.0.4",
-  "rocrate>=0.9"
 ]
 
 [project.optional-dependencies]
+# Tabular data handling (CSV/Parquet/XLSX readers). Feature code imports these
+# lazily and raises a teaching ImportError naming this extra when missing.
+tabular = [
+  "pandas>=2.2",
+  "pyarrow>=15.0",
+  "openpyxl>=3.1",
+]
+# RO-Crate validation for the publish pipeline.
+publish = [
+  "rocrate>=0.9",
+]
 storage = [
   "boto3>=1.34"
 ]
@@ -64,6 +71,8 @@ processing = [
   "plotly>=5.20",
 ]
 dev = [
+  "battinfo[tabular]",  # the suite exercises the tabular + publish feature paths,
+  "battinfo[publish]",  # so CI (--all-extras) installs both optional groups
   "build>=1.2",
   "setuptools>=77",   # build backend, needed in-env for `build --no-isolation` (verification gate)
   "wheel",
@@ -157,15 +166,15 @@ files = ["src/battinfo"]
 ignore_missing_imports = true   # third-party libs (rdflib, pyld, rocrate, …) ship no stubs
 warn_redundant_casts = true
 warn_unused_ignores = false
-# Incremental adoption: the package ships py.typed, so types are gated. 31/50 modules
+# Incremental adoption: the package ships py.typed, so types are gated. Most modules
 # are already clean and ARE checked — new type errors in them (or any new module) fail CI.
 # The modules below carry pre-existing type debt and are excluded pending burn-down.
-# Burn-down priority: battinfo.ws (146 of the 212 errors, almost all from the AuthoringWorkspace
-# `list` method shadowing builtin `list` in annotations) is the highest-value single fix.
+# (battinfo.ws was burned down and removed from the override 2026-07-07: the
+# AuthoringWorkspace `list` method shadows builtin `list` in class-scope annotations,
+# so annotations inside that class must spell it `builtins.list`.)
 
 [[tool.mypy.overrides]]
 module = [
-  "battinfo.ws",
   "battinfo.publication",
   "battinfo.authoring",
   "battinfo.interop.protocols",

@@ -173,7 +173,9 @@ def test_validate_jsonld_report_falls_back_when_requests_loader_is_unavailable(m
     def _broken_requests_loader(*, timeout: int = 10):
         raise ModuleNotFoundError("No module named 'requests'")
 
-    monkeypatch.setattr(validate_jsonld_module.pyld_jsonld, "requests_document_loader", _broken_requests_loader)
+    # pyld is imported lazily now; patch the real pyld.jsonld module (the same
+    # object validate_jsonld_module._pyld_module() returns).
+    monkeypatch.setattr(validate_jsonld_module._pyld_module(), "requests_document_loader", _broken_requests_loader)
     monkeypatch.setattr(
         validate_jsonld_module,
         "urlopen",
