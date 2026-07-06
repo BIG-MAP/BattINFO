@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import importlib.util
-import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -28,19 +26,13 @@ def test_schema_reference_matches_the_schemas() -> None:
     )
 
 
-def test_cli_reference_matches_the_typer_app(tmp_path: Path) -> None:
-    out = tmp_path / "cli.md"
-    subprocess.run(
-        [sys.executable, "-m", "typer", "battinfo.cli", "utils", "docs", "--name", "battinfo",
-         "--output", str(out)],
-        check=True,
-        cwd=ROOT,
-        capture_output=True,
-        env={**os.environ, "PYTHONUTF8": "1"},  # typer writes with the locale encoding otherwise
-    )
-    expected = out.read_text(encoding="utf-8").replace("\r\n", "\n")
-    actual = (ROOT / "docs" / "pages" / "cli-reference.md").read_text(encoding="utf-8").replace("\r\n", "\n")
+def test_cli_reference_matches_the_typer_app() -> None:
+    # gen_cli_reference normalises path separators, so the committed page is
+    # byte-identical no matter which platform generated or checks it.
+    gen = _load("gen_cli_reference")
+    expected = gen.build()
+    actual = gen.OUT.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected, (
         "docs/pages/cli-reference.md drifts from the CLI — regenerate with "
-        "`python -m typer battinfo.cli utils docs --name battinfo --output docs/pages/cli-reference.md`"
+        "`uv run python scripts/gen_cli_reference.py`"
     )

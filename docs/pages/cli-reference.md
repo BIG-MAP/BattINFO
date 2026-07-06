@@ -394,7 +394,7 @@ $ battinfo publish record [OPTIONS]
 **Options**:
 
 * `--input FILE`: [required]
-* `--target-root PATH`: Output artifact root directory.  [default: .battinfo\resolver-site]
+* `--target-root PATH`: Output artifact root directory.  [default: .battinfo/resolver-site]
 * `--build-jsonld / --no-build-jsonld`: Generate JSON-LD output.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Generate HTML output.  [default: build-html]
 * `--validate / --no-validate`: Validate records before publishing.  [default: validate]
@@ -415,7 +415,7 @@ $ battinfo publish batch [OPTIONS]
 **Options**:
 
 * `--source-dir DIRECTORY`: One or more source directories. If omitted, API defaults are used.
-* `--target-root PATH`: Output artifact root directory.  [default: .battinfo\resolver-site]
+* `--target-root PATH`: Output artifact root directory.  [default: .battinfo/resolver-site]
 * `--glob TEXT`: File glob for batch inputs.  [default: *.json]
 * `--build-jsonld / --no-build-jsonld`: Generate JSON-LD output.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Generate HTML output.  [default: build-html]
@@ -456,7 +456,7 @@ $ battinfo index build [OPTIONS]
 **Options**:
 
 * `--source-root DIRECTORY`: Root directory containing cell-spec, cell-instances, and dataset subdirectories.  [default: examples]
-* `--out PATH`: Output index JSON path.  [default: .battinfo\index.json]
+* `--out PATH`: Output index JSON path.  [default: .battinfo/index.json]
 * `--glob TEXT`: File glob to include in index build.  [default: *.json]
 * `--validate / --no-validate`: Validate records while indexing.  [default: no-validate]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
@@ -475,7 +475,7 @@ $ battinfo index stats [OPTIONS]
 
 **Options**:
 
-* `--index FILE`: Path to index JSON built by `battinfo index build`.  [default: .battinfo\index.json]
+* `--index FILE`: Path to index JSON built by `battinfo index build`.  [default: .battinfo/index.json]
 * `--format TEXT`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
@@ -521,7 +521,7 @@ $ battinfo save record [OPTIONS]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Best-effort reference checks at save time; full link integrity is enforced by batch/index validation.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--build-jsonld / --no-build-jsonld`: Publish JSON-LD artifact.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Publish HTML artifact.  [default: build-html]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
@@ -549,7 +549,7 @@ $ battinfo save batch [OPTIONS]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Allow deferred writes, then validate the resulting source tree as a set.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--build-jsonld / --no-build-jsonld`: Publish JSON-LD artifact.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Publish HTML artifact.  [default: build-html]
 * `--validate / --no-validate`: Validate records before saving.  [default: validate]
@@ -586,7 +586,7 @@ $ battinfo save cell-spec [OPTIONS]
 * `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
@@ -616,7 +616,7 @@ $ battinfo save cell-instance [OPTIONS]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
@@ -652,7 +652,7 @@ $ battinfo save dataset [OPTIONS]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
@@ -684,7 +684,7 @@ $ battinfo save test-protocol [OPTIONS]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
@@ -720,7 +720,7 @@ $ battinfo save test [OPTIONS]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo\resolver-site]
+* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
@@ -915,10 +915,10 @@ $ battinfo library build-rdf [OPTIONS]
 
 **Options**:
 
-* `--input-dir DIRECTORY`: Directory containing reusable library cell-specification JSON files.  [default: .battinfo\library\cell-spec]
-* `--output-jsonld-dir PATH`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo\library-rdf\cell-spec]
-* `--aggregate-jsonld PATH`: Path for the aggregated library JSON-LD file.  [default: .battinfo\library\cell-spec.jsonld]
-* `--manifest-json PATH`: Path for the generated library manifest JSON.  [default: .battinfo\library-rdf\cell-spec.index.json]
+* `--input-dir DIRECTORY`: Directory containing reusable library cell-specification JSON files.  [default: .battinfo/library/cell-spec]
+* `--output-jsonld-dir PATH`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
+* `--aggregate-jsonld PATH`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
+* `--manifest-json PATH`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
 * `--glob TEXT`: File glob used to select library cell specifications.  [default: *.json]
 * `--clean-output`: Remove existing JSON-LD outputs before writing.
 * `--format TEXT`: Output format: table|json.  [default: json]
@@ -966,7 +966,7 @@ $ battinfo library query cell-spec [OPTIONS]
 * `--nominal-capacity-max FLOAT`: Filter maximum nominal capacity.
 * `--nominal-voltage-min FLOAT`: Filter minimum nominal voltage.
 * `--nominal-voltage-max FLOAT`: Filter maximum nominal voltage.
-* `--library-dir PATH`: Reusable library cell-specification directory.  [default: .battinfo\library\cell-spec]
+* `--library-dir PATH`: Reusable library cell-specification directory.  [default: .battinfo/library/cell-spec]
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -1016,16 +1016,16 @@ $ battinfo library save cell-spec [OPTIONS]
 * `--source-url TEXT`: Optional source URL.
 * `--uid TEXT`: Optional 16-char UID (dashed or undashed).
 * `--property FILE`: Optional JSON object for cell-specification specification.property.
-* `--library-dir PATH`: Reusable library cell-specification directory.  [default: .battinfo\library\cell-spec]
-* `--packaged-dir PATH`: Packaged reusable library cell-specification directory.  [default: src\battinfo\data\library\cell-spec]
+* `--library-dir PATH`: Reusable library cell-specification directory.  [default: .battinfo/library/cell-spec]
+* `--packaged-dir PATH`: Packaged reusable library cell-specification directory.  [default: src/battinfo/data/library/cell-spec]
 * `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
 * `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
 * `--validate / --no-validate`: Validate cell specification before saving.  [default: validate]
 * `--sync-packaged-copy / --no-sync-packaged-copy`: Sync the saved cell specification into package data.  [default: sync-packaged-copy]
 * `--build-rdf / --no-build-rdf`: Build JSON-LD library artifacts after saving.  [default: no-build-rdf]
-* `--output-jsonld-dir PATH`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo\library-rdf\cell-spec]
-* `--aggregate-jsonld PATH`: Path for the aggregated library JSON-LD file.  [default: .battinfo\library\cell-spec.jsonld]
-* `--manifest-json PATH`: Path for the generated library manifest JSON.  [default: .battinfo\library-rdf\cell-spec.index.json]
+* `--output-jsonld-dir PATH`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
+* `--aggregate-jsonld PATH`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
+* `--manifest-json PATH`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
 * `--clean-output`: Clean existing JSON-LD outputs before rebuilding.
 * `--dry-run`: Preview save without writing files.
 * `--format TEXT`: Output format: table|json.  [default: json]
@@ -1147,7 +1147,7 @@ $ battinfo editorial promote-staging-cell-spec [OPTIONS]
 **Options**:
 
 * `--input FILE`: Staging JSON draft.  [required]
-* `--curated-root PATH`: Curated cell-spec root.  [default: records\cell-spec]
+* `--curated-root PATH`: Curated cell-spec root.  [default: records/cell-spec]
 * `--record-id TEXT`: Override the curated record id.
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
@@ -1167,7 +1167,7 @@ $ battinfo editorial promote-staging-cell-spec-batch [OPTIONS]
 **Options**:
 
 * `--input-dir DIRECTORY`: Directory of staging JSON drafts.  [required]
-* `--curated-root PATH`: Curated cell-spec root.  [default: records\cell-spec]
+* `--curated-root PATH`: Curated cell-spec root.  [default: records/cell-spec]
 * `--glob TEXT`: Glob for staging drafts.  [default: *.json]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
@@ -1222,7 +1222,7 @@ $ battinfo editorial promote-staging-dataset [OPTIONS]
 **Options**:
 
 * `--input FILE`: Staging dataset JSON record.  [required]
-* `--curated-root PATH`: Curated dataset root.  [default: records\dataset]
+* `--curated-root PATH`: Curated dataset root.  [default: records/dataset]
 * `--record-id TEXT`: Override the curated record id.
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
@@ -1242,7 +1242,7 @@ $ battinfo editorial promote-staging-dataset-batch [OPTIONS]
 **Options**:
 
 * `--input-dir DIRECTORY`: Directory of staging dataset records.  [required]
-* `--curated-root PATH`: Curated dataset root.  [default: records\dataset]
+* `--curated-root PATH`: Curated dataset root.  [default: records/dataset]
 * `--glob TEXT`: Glob for staging records.  [default: *.json]
 * `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
@@ -1453,7 +1453,7 @@ $ battinfo demo setup [OPTIONS] [ROOT]
 
 **Arguments**:
 
-* `[ROOT]`: [default: .battinfo\demo-e2e]
+* `[ROOT]`: [default: .battinfo/demo-e2e]
 
 **Options**:
 
@@ -1476,7 +1476,7 @@ $ battinfo demo verify [OPTIONS] [ROOT]
 
 **Arguments**:
 
-* `[ROOT]`: [default: .battinfo\demo-e2e]
+* `[ROOT]`: [default: .battinfo/demo-e2e]
 
 **Options**:
 
