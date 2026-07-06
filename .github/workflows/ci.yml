@@ -103,6 +103,35 @@ jobs:
       - name: Execute newcomer-path doc snippets
         run: uv run --no-sync python .tools/quality/run_doc_snippets.py
 
+  web:
+    # The website's validator runs the REAL canonical schemas; this job keeps
+    # that honest: vendored schemas + examples must be in sync with the repo,
+    # the browser validator must agree with the Python stack on the whole
+    # examples corpus, and the site must build.
+    name: Website (sync, agreement, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install (locked)
+        run: npm ci
+      - name: Vendored examples are in sync
+        run: npm run sync:examples && git diff --exit-code lib/examples.generated.ts
+      - name: Vendored schemas are in sync
+        run: npm run sync:schemas -- --check
+      - name: Browser validator agrees with the canonical corpus
+        run: npm run check:agreement
+      - name: Build
+        run: npm run build
+
   package:
     name: Build & verify distribution
     runs-on: ubuntu-latest
