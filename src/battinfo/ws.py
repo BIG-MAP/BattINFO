@@ -6189,6 +6189,19 @@ def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+def _authoring_envelope(**kwargs) -> dict:
+    """All authoring-workspace submissions share ONE envelope core (api.py, 4.3);
+    only the staged mode and authoring provenance identify this path."""
+    from battinfo.api import build_submission_envelope  # noqa: PLC0415
+
+    return build_submission_envelope(
+        publication_mode=STAGED_PUBLICATION_MODE,
+        source_system="battinfo-authoring",
+        workflow_name="authoring-workspace-submission",
+        **kwargs,
+    )
+
+
 def _cell_spec_submission_payload(
     record: dict,
     *,
@@ -6199,37 +6212,17 @@ def _cell_spec_submission_payload(
     title: str,
     related_resources: list[dict] | None = None,
 ) -> dict:
-    return {
-        "schema_version": "0.1.0",
-        "kind": "BattinfoSubmission",
-        "submission_mode": "resource",
-        "generated_at": _now_iso(),
-        "workspace_id": wid,
-        "publisher_id": pid,
-        "source_version": ver,
-        "title": title,
-        "publication_intent": {"mode": STAGED_PUBLICATION_MODE},
-        "provenance": {
-            "source_system": "battinfo-authoring",
-            "workflow_name": "authoring-workspace-submission",
-            "generated_at": _now_iso(),
-        },
-        "release": {"version": ver},
-        "workspace": None,
-        "resource": {
-            "resource_type": "cell_spec",
-            "source_local_id": source_local_id,
-            "title": title,
-            "semantic_payload": {
-                "@type": "CellSpec",
-                "battinfo_records": {"cell_spec": record},
-            },
-            "related_resources": related_resources or [],
-            "distributions": [],
-        },
-        "artifacts": [],
-        "validation": {"ok": True, "errors": [], "policy": "default"},
-    }
+    return _authoring_envelope(
+        resource_type="cell_spec",
+        records={"cell_spec": record},
+        rdf_type="CellSpec",
+        workspace_id=wid,
+        publisher_id=pid,
+        source_version=ver,
+        source_local_id=source_local_id,
+        title=title,
+        related_resources=related_resources,
+    )
 
 
 def _find_spec_record(cell_spec_dir: Path, cell_spec_id: str) -> dict | None:
@@ -6271,44 +6264,18 @@ def _cell_instance_submission_payload(
                 "canonical_iri": cell_spec_id,
             })
 
-    semantic_payload: dict = {
-        "@type": "Cell",
-        "battinfo_records": {
-            "cell": record,
-            **({"cell_spec": spec_record} if spec_record else {}),
-        },
-    }
-    if preview:
-        semantic_payload["preview"] = preview
-
-    return {
-        "schema_version": "0.1.0",
-        "kind": "BattinfoSubmission",
-        "submission_mode": "resource",
-        "generated_at": _now_iso(),
-        "workspace_id": wid,
-        "publisher_id": pid,
-        "source_version": ver,
-        "title": title,
-        "publication_intent": {"mode": STAGED_PUBLICATION_MODE},
-        "provenance": {
-            "source_system": "battinfo-authoring",
-            "workflow_name": "authoring-workspace-submission",
-            "generated_at": _now_iso(),
-        },
-        "release": {"version": ver},
-        "workspace": None,
-        "resource": {
-            "resource_type": "cell",
-            "source_local_id": source_local_id,
-            "title": title,
-            "semantic_payload": semantic_payload,
-            "related_resources": related,
-            "distributions": [],
-        },
-        "artifacts": [],
-        "validation": {"ok": True, "errors": [], "policy": "default"},
-    }
+    return _authoring_envelope(
+        resource_type="cell",
+        records={"cell": record, **({"cell_spec": spec_record} if spec_record else {})},
+        rdf_type="Cell",
+        workspace_id=wid,
+        publisher_id=pid,
+        source_version=ver,
+        source_local_id=source_local_id,
+        title=title,
+        related_resources=related,
+        preview=preview,
+    )
 
 
 def _build_dataset_distributions(ds: dict) -> tuple[list[dict], list[dict]]:
@@ -6366,40 +6333,19 @@ def _simple_submission_payload(
                 "resource_type": "cell",
                 "canonical_iri": related_cell_id,
             })
-    semantic_payload: dict = {
-        "@type": rdf_type,
-        "battinfo_records": {record_key: record},
-    }
-    if preview:
-        semantic_payload["preview"] = preview
-    return {
-        "schema_version": "0.1.0",
-        "kind": "BattinfoSubmission",
-        "submission_mode": "resource",
-        "generated_at": _now_iso(),
-        "workspace_id": wid,
-        "publisher_id": pid,
-        "source_version": ver,
-        "title": title,
-        "publication_intent": {"mode": STAGED_PUBLICATION_MODE},
-        "provenance": {
-            "source_system": "battinfo-authoring",
-            "workflow_name": "authoring-workspace-submission",
-            "generated_at": _now_iso(),
-        },
-        "release": {"version": ver},
-        "workspace": None,
-        "resource": {
-            "resource_type": resource_type,
-            "source_local_id": source_local_id,
-            "title": title,
-            "semantic_payload": semantic_payload,
-            "related_resources": related,
-            "distributions": distributions or [],
-        },
-        "artifacts": [],
-        "validation": {"ok": True, "errors": [], "policy": "default"},
-    }
+    return _authoring_envelope(
+        resource_type=resource_type,
+        records={record_key: record},
+        rdf_type=rdf_type,
+        workspace_id=wid,
+        publisher_id=pid,
+        source_version=ver,
+        source_local_id=source_local_id,
+        title=title,
+        related_resources=related,
+        distributions=distributions,
+        preview=preview,
+    )
 
 
 def _lift_funding_to_provenance(payload: dict) -> None:

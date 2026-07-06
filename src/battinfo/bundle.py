@@ -1050,6 +1050,7 @@ class Salt(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
+    material_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone material-spec for the salt — the same MaterialSpec -> Material link every other component material carries.")
     cation: str | None = None
     anion: str | None = None
     manufacturer: str | None = None
