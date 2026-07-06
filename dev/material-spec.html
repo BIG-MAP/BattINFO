@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Material Spec &amp; Material Instance &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/tokens.css?v=84b34183" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=b3415309" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'material-spec';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="_static/favicon.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Component Specs (electrode / electrolyte / separator / current-collector / housing)" href="component-specs.html" />
+    <link rel="prev" title="Cell Fleet &amp; the cell→component reference seam" href="cell-fleet.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/guides.html">
+    Guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/guides.html">
+    Guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">Instance, Test, Dataset Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-type-library.html">Cell-Spec Library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cell Fleet &amp; the cell→component reference seam</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Material Spec &amp; Material Instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component-specs.html">Component Specs (electrode / electrolyte / separator / current-collector / housing)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test Specs (test-protocol) &amp; full enum coverage</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="pages/concepts.html" class="nav-link">Concepts</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Material Spec &amp; Material Instance</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="material-spec-material-instance">
+<h1>Material Spec &amp; Material Instance<a class="headerlink" href="#material-spec-material-instance" title="Link to this heading">#</a></h1>
+<p>BattINFO models every entity as a <strong>spec + instance</strong> pair: a <em>spec</em> is the reusable,
+datasheet-like type description; an <em>instance</em> is a physical realization of that spec.
+This page documents the first standalone material family — <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> (the type)
+and <code class="docutils literal notranslate"><span class="pre">material</span></code> (a physical lot/batch) — and the entity registry that makes adding such
+families uniform.</p>
+<section id="the-entity-registry">
+<h2>The entity registry<a class="headerlink" href="#the-entity-registry" title="Link to this heading">#</a></h2>
+<p>All record types are declared once in <a class="reference download internal" download="" href="_downloads/d0c8f38f0b8744261b6cd223acb3644c/entities.py"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">src/battinfo/entities.py</span></code></span></a>
+as <code class="docutils literal notranslate"><span class="pre">EntityKind</span></code> entries (top-level JSON key, schema file, on-disk subdirectory, IRI
+namespace, and the instance→spec link field). Dispatch, validation, IRI minting, the
+record-set directory list, and <code class="docutils literal notranslate"><span class="pre">build_index</span></code> all derive from this registry, so a new
+spec/instance family is a single registry entry plus its schema and examples — not a
+copy-paste across <code class="docutils literal notranslate"><span class="pre">api.py</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.py</span></code>, and the validators.</p>
+</section>
+<section id="records">
+<h2>Records<a class="headerlink" href="#records" title="Link to this heading">#</a></h2>
+<section id="material-spec">
+<h3><code class="docutils literal notranslate"><span class="pre">material-spec</span></code><a class="headerlink" href="#material-spec" title="Link to this heading">#</a></h3>
+<p>A reusable material specification. Top-level key <code class="docutils literal notranslate"><span class="pre">material_spec</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
+<td><p>✓</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/material-spec/{uid}</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>✓</p></td>
+<td><p>Material grade, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;LFP&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Graphite&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;NMC811&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">material_class</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">active_material</span></code>, <code class="docutils literal notranslate"><span class="pre">binder</span></code>, <code class="docutils literal notranslate"><span class="pre">conductive_additive</span></code>, <code class="docutils literal notranslate"><span class="pre">current_collector</span></code>, <code class="docutils literal notranslate"><span class="pre">separator_material</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_salt</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_solvent</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_additive</span></code>, <code class="docutils literal notranslate"><span class="pre">metal_electrode</span></code>, <code class="docutils literal notranslate"><span class="pre">coating</span></code>, <code class="docutils literal notranslate"><span class="pre">other</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrode_polarity</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">positive</span></code> / <code class="docutils literal notranslate"><span class="pre">negative</span></code> / <code class="docutils literal notranslate"><span class="pre">none</span></code> (for active materials)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">formula</span></code></p></td>
+<td><p></p></td>
+<td><p>Idealized composition, e.g. <code class="docutils literal notranslate"><span class="pre">LiFePO4</span></code>, <code class="docutils literal notranslate"><span class="pre">C</span></code>, <code class="docutils literal notranslate"><span class="pre">Zn</span></code>, <code class="docutils literal notranslate"><span class="pre">(C2H2F2)n</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chemistry_family</span></code></p></td>
+<td><p></p></td>
+<td><p>Coarse family label, e.g. <code class="docutils literal notranslate"><span class="pre">olivine</span></code>, <code class="docutils literal notranslate"><span class="pre">layered-oxide</span></code>, <code class="docutils literal notranslate"><span class="pre">spinel</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code> / <code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<td><p></p></td>
+<td><p>Organization reference — a plain name string <strong>or</strong> an <code class="docutils literal notranslate"><span class="pre">{type:</span> <span class="pre">Organization,</span> <span class="pre">name,</span> <span class="pre">id}</span></code> object whose <code class="docutils literal notranslate"><span class="pre">id</span></code> links to an <code class="docutils literal notranslate"><span class="pre">organization</span></code> record</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<td><p></p></td>
+<td><p>Manufacturer / supplier grade identifier</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">composition</span></code></p></td>
+<td><p></p></td>
+<td><p>Structured derivation: <code class="docutils literal notranslate"><span class="pre">base_material_id</span></code>, <code class="docutils literal notranslate"><span class="pre">coatings[]</span></code>, <code class="docutils literal notranslate"><span class="pre">dopants[]</span></code>, <code class="docutils literal notranslate"><span class="pre">constituents[]</span></code> (see below)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<td><p></p></td>
+<td><p>Curated quantity map (snake_case keys → <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code>), e.g. <code class="docutils literal notranslate"><span class="pre">specific_capacity</span></code>, <code class="docutils literal notranslate"><span class="pre">true_density</span></code>, <code class="docutils literal notranslate"><span class="pre">particle_size_d50</span></code>. Each quantity may carry <code class="docutils literal notranslate"><span class="pre">co_type</span></code> + <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (see below)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="properties-with-conditions">
+<h3>Properties with conditions<a class="headerlink" href="#properties-with-conditions" title="Link to this heading">#</a></h3>
+<p>A quantity is rarely meaningful without the conditions it was measured under. Any
+quantity (here and in cell/test records) may carry an optional <code class="docutils literal notranslate"><span class="pre">co_type</span></code>
+(<code class="docutils literal notranslate"><span class="pre">Measured</span></code> / <code class="docutils literal notranslate"><span class="pre">Conventional</span></code> / <code class="docutils literal notranslate"><span class="pre">Rated</span></code> / <code class="docutils literal notranslate"><span class="pre">Nominal</span></code>) and a <code class="docutils literal notranslate"><span class="pre">conditions</span></code> map — each
+condition is itself a quantity (<code class="docutils literal notranslate"><span class="pre">discharge_c_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">lower_voltage_limit</span></code>,
+<code class="docutils literal notranslate"><span class="pre">upper_voltage_limit</span></code>, <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code>, …):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;specific_capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">160</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mAh/g&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;co_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Measured&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;conditions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;discharge_c_rate&quot;</span><span class="p">:</span><span class="w">   </span><span class="p">{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;lower_voltage_limit&quot;</span><span class="p">:{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;upper_voltage_limit&quot;</span><span class="p">:{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.65</span><span class="p">,</span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;temperature&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degC&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="nt">&quot;value_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li metal&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;n/a&quot;</span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In JSON-LD this emits a typed EMMO property (<code class="docutils literal notranslate"><span class="pre">[SpecificCapacity,</span> <span class="pre">MeasuredProperty]</span></code>)
+with each condition as a <code class="docutils literal notranslate"><span class="pre">hasMeasurementParameter</span></code>. Plausibility bounds and unit
+compatibility are checked for known material keys during semantic validation.</p>
+</section>
+<section id="structured-composition">
+<h3>Structured composition<a class="headerlink" href="#structured-composition" title="Link to this heading">#</a></h3>
+<p>For derived/blended grades, <code class="docutils literal notranslate"><span class="pre">composition</span></code> references other material-specs by IRI:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;composition&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;base_material_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/material-spec/&lt;NMC811&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;coatings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/material-spec/&lt;Al2O3&gt;&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Al2O3&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;thickness&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nm&quot;</span><span class="p">}}}],</span>
+<span class="w">  </span><span class="nt">&quot;dopants&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;element&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Al&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">}}],</span>
+<span class="w">  </span><span class="nt">&quot;constituents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>All <code class="docutils literal notranslate"><span class="pre">*_material_id</span></code> references are existence-checked against material-spec records.</p>
+</section>
+<section id="material">
+<h3><code class="docutils literal notranslate"><span class="pre">material</span></code><a class="headerlink" href="#material" title="Link to this heading">#</a></h3>
+<p>A physical lot/batch realizing a spec. Top-level key <code class="docutils literal notranslate"><span class="pre">material</span></code>. Links to its spec via
+<code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code>; carries lot facts (<code class="docutils literal notranslate"><span class="pre">lot_id</span></code>, <code class="docutils literal notranslate"><span class="pre">supplier</span></code>, <code class="docutils literal notranslate"><span class="pre">received_date</span></code>, measured
+<code class="docutils literal notranslate"><span class="pre">property</span></code>) and a <code class="docutils literal notranslate"><span class="pre">datasets[]</span></code> array linking the lot to its characterization data
+(XRD/SEM/ICP/PSD), each <code class="docutils literal notranslate"><span class="pre">{id,</span> <span class="pre">role}</span></code> existence-checked against <code class="docutils literal notranslate"><span class="pre">dataset</span></code> records.</p>
+</section>
+</section>
+<section id="bridge-embedded-standalone">
+<h2>Bridge: embedded ↔ standalone<a class="headerlink" href="#bridge-embedded-standalone" title="Link to this heading">#</a></h2>
+<p>Cell-specs still embed materials inline (<code class="docutils literal notranslate"><span class="pre">positive_electrode.coating.component</span></code>,
+<code class="docutils literal notranslate"><span class="pre">electrolyte.salt</span></code>, …). To dedup a material across many cells, lift the embedded holder
+to a standalone spec and reference it by IRI:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">specs</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">extract_material_specs</span><span class="p">(</span><span class="n">cell_spec_record</span><span class="p">)</span>   <span class="c1"># one material-spec per unique material</span>
+<span class="n">spec</span>  <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">material_spec_from_component</span><span class="p">(</span><span class="n">holder</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">)</span>
+<span class="n">holder</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">link_component_to_spec</span><span class="p">(</span><span class="n">holder</span><span class="p">,</span> <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>  <span class="c1"># holder now carries material_spec_id</span>
+</pre></div>
+</div>
+<p>The embedded <code class="docutils literal notranslate"><span class="pre">material-component</span></code> holder gained an optional <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code> field for
+this reference. Rewiring the full cell-spec fleet onto references is Phase 3.</p>
+</section>
+<section id="worked-example-python-api">
+<h2>Worked example (Python API)<a class="headerlink" href="#worked-example-python-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">create_material_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
+    <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span>
+    <span class="n">electrode_polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
+    <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;LiFePO4&quot;</span><span class="p">,</span>
+    <span class="n">chemistry_family</span><span class="o">=</span><span class="s2">&quot;olivine&quot;</span><span class="p">,</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Canrud&quot;</span><span class="p">,</span>
+    <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;specific_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">160</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mAh/g&quot;</span><span class="p">}},</span>
+<span class="p">)</span>
+<span class="n">bi</span><span class="o">.</span><span class="n">save_material_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>
+
+<span class="n">lot</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">create_material</span><span class="p">(</span>
+    <span class="n">material_spec_id</span><span class="o">=</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+    <span class="n">lot_id</span><span class="o">=</span><span class="s2">&quot;CANRUD-LFP-2026-03&quot;</span><span class="p">,</span>
+    <span class="n">supplier</span><span class="o">=</span><span class="s2">&quot;Canrud&quot;</span><span class="p">,</span>
+    <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;mass&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">19.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg&quot;</span><span class="p">}},</span>
+<span class="p">)</span>
+<span class="n">bi</span><span class="o">.</span><span class="n">save_material</span><span class="p">(</span><span class="n">lot</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>  <span class="c1"># resolves the material_spec_id reference</span>
+
+<span class="n">bi</span><span class="o">.</span><span class="n">query_material_specs</span><span class="p">(</span><span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
+<p>Canonical examples live in <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/tree/main/examples/material-spec"><code class="docutils literal notranslate"><span class="pre">examples/material-spec/</span></code></a> and
+<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/tree/main/examples/material"><code class="docutils literal notranslate"><span class="pre">examples/material/</span></code></a> (the single source of truth, mirrored into
+the wheel by <code class="docutils literal notranslate"><span class="pre">scripts/sync_examples.py</span></code>). Coverage spans graphite, LFP, NMC811, NMC622,
+LCO, LMFP, LNMO, zinc, carbon black, PVDF, and the KOH / LiPF6 / EC / EMC electrolyte
+constituents. The Li-ion cathode/anode actives and electrolyte salts/solvents are
+grounded in the DIGIBAT Discovery-Benchmark coin-cell corpus; LNMO, zinc, and KOH are
+synthetic reference examples.</p>
+<blockquote>
+<div><p>Electrolyte <em>formulations</em> (e.g. “7M KOH in H₂O”, “1M LiPF₆ EC:EMC 3:7”) are modelled
+by the forthcoming <code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code> family, which assembles these material-spec
+constituents. See the spec/instance roadmap for the remaining component families
+(electrode, electrolyte, separator, current-collector, housing).</p>
+</div></blockquote>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="cell-fleet.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Cell Fleet &amp; the cell→component reference seam</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="component-specs.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Component Specs (electrode / electrolyte / separator / current-collector / housing)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-entity-registry">The entity registry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records">Records</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#material-spec"><code class="docutils literal notranslate"><span class="pre">material-spec</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-with-conditions">Properties with conditions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#structured-composition">Structured composition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#material"><code class="docutils literal notranslate"><span class="pre">material</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bridge-embedded-standalone">Bridge: embedded ↔ standalone</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#worked-example-python-api">Worked example (Python API)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

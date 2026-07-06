@@ -1,0 +1,57 @@
+/* ── Brand tokens → pydata theme ─────────────────────────────────────────
+   Brand values come from /brand/tokens.css (loaded first via html_css_files).
+   Here we only MAP those --bi-* tokens onto pydata-sphinx-theme variables —
+   never re-declare hex values. Edit the palette in brand/tokens.css.        */
+html[data-theme="light"] {
+    --pst-color-primary:        var(--bi-teal-700);
+    --pst-color-link:           var(--bi-teal-700);
+    --pst-color-link-hover:     var(--bi-ink-hover);
+    --pst-color-inline-code:    var(--bi-teal-700);
+    --pst-color-background:     var(--bi-paper);
+    --pst-color-on-background:  var(--bi-surface);
+    --pst-color-text-base:      var(--bi-ink);
+    --pst-color-text-muted:     var(--bi-muted);
+    --pst-color-border:         var(--bi-border);
+    --pst-color-success:        var(--bi-success);
+    --pst-color-warning:        var(--bi-warning);
+    --pst-color-danger:         var(--bi-error);
+    --pst-color-info:           var(--bi-info);
+}
+
+:root {
+    --pst-font-family-base: var(--bi-font);
+    --pst-font-family-monospace: var(--bi-font-mono);
+}
+
+/* ── Landing page hero ───────────────────────────────────────────────── */
+.bd-main .bd-content h1:first-of-type {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+/* ── Card grid spacing ───────────────────────────────────────────────── */
+.sd-card {
+    border-radius: 6px;
+}
+
+/* ── Code blocks ─────────────────────────────────────────────────────── */
+.highlight pre {
+    border-radius: 4px;
+}
+
+/* ── Table formatting ────────────────────────────────────────────────── */
+td, th {
+    vertical-align: top;
+}
+
+/* ── Dark mode iframe fix (e.g. JSON-LD Playground embeds) ───────────── */
+html[data-theme="dark"] iframe[src*="json-ld.org/playground"] {
+    filter: invert(0.9);
+}
+
+/* ── Sidebar logo text ───────────────────────────────────────────────── */
+.navbar-brand span {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}

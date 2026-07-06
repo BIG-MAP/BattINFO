@@ -1,0 +1,1040 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Guide 1 — Concepts &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=84b34183" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b3415309" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guides/01-concepts';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Guide 2 — Describing a cell: from materials to published record" href="02-first-cell-type.html" />
+    <link rel="prev" title="Guides" href="../pages/guides.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Guide 1 — Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell: from materials to published record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: instance, test, dataset, and publishing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-semantic-layer.html">Guide 4 — The semantic layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-descriptors.html">Guide 5 — Cell descriptors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">06 — Publish your first dataset</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Guides</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guide 1 — Concepts</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Guide-1-—-Concepts">
+<h1>Guide 1 — Concepts<a class="headerlink" href="#Guide-1-—-Concepts" title="Link to this heading">#</a></h1>
+<p>BattINFO is the implementation layer for the <a class="reference external" href="https://github.com/emmo-repo/domain-battery">EMMO domain-battery ontology</a>. It gives you JSON schemas, a Python library, and a CLI for authoring, validating, and publishing battery metadata as machine-readable Linked Data.</p>
+<p>This guide explains the data model, record types, and the semantic layer.</p>
+<p><strong>Estimated time:</strong> 10 minutes</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">_here</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">_here</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
+<span class="k">elif</span> <span class="p">(</span><span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repo root: </span><span class="si">{</span><span class="n">REPO</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Repo root: C:\Users\simonc\Documents\Github-local\battery-genome\BattINFO-docs-funnel
+</pre></div></div>
+</div>
+<section id="The-data-model">
+<h2>The data model<a class="headerlink" href="#The-data-model" title="Link to this heading">#</a></h2>
+<p>Every battery experiment generates four kinds of record. BattINFO formalises them as a provenance chain:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>CellSpecification  ─────────────────────────────────
+  │  &quot;Panasonic NCR18650B is a cylindrical Li-ion cell, 3.4 Ah&quot;
+  │
+  └─► CellInstance  ───────────────────────────────
+        │  &quot;This specific cell, serial number LAB-001&quot;
+        │
+        └─► Test  ──────────────────────────────
+              │  &quot;1C cycle-life test at 25 °C on LAB-001&quot;
+              │
+              └─► Dataset  ──────────────────
+                    &quot;The voltage/current time-series&quot;
+</pre></div>
+</div>
+<p>Each record has a permanent, opaque IRI under <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/</span></code>. The chain is machine-readable — a downstream tool can follow links from a dataset all the way back to the cell specification.</p>
+</section>
+<section id="A-real-record">
+<h2>A real record<a class="headerlink" href="#A-real-record" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the canonical A123 cell-spec record that ships with the repo</span>
+<span class="n">a123</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;examples/cell-spec/A123__ANR26650M1-B.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Top-level structure</span>
+<span class="nb">list</span><span class="p">(</span><span class="n">a123</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;schema_version&#39;, &#39;cell_spec&#39;, &#39;properties&#39;, &#39;provenance&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The product identity block</span>
+<span class="n">a123</span><span class="p">[</span><span class="s2">&quot;cell_spec&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;id&#39;: &#39;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&#39;,
+ &#39;short_id&#39;: &#39;7d9k2m&#39;,
+ &#39;identifier&#39;: &#39;cell-spec:7d9k-2m4p-8t3x-6nq5&#39;,
+ &#39;name&#39;: &#39;A123 ANR26650M1-B&#39;,
+ &#39;model&#39;: &#39;ANR26650M1-B&#39;,
+ &#39;manufacturer&#39;: {&#39;type&#39;: &#39;Organization&#39;,
+  &#39;name&#39;: &#39;A123&#39;,
+  &#39;id&#39;: &#39;https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd&#39;},
+ &#39;brand&#39;: {&#39;type&#39;: &#39;Brand&#39;, &#39;name&#39;: &#39;A123&#39;},
+ &#39;category&#39;: &#39;battery cell&#39;,
+ &#39;cell_format&#39;: &#39;cylindrical&#39;,
+ &#39;chemistry&#39;: &#39;Li-ion&#39;,
+ &#39;positive_electrode_basis&#39;: &#39;LFP&#39;,
+ &#39;negative_electrode_basis&#39;: &#39;unknown&#39;,
+ &#39;size_code&#39;: &#39;R26650&#39;,
+ &#39;iec_code&#39;: &#39;IFpR26650&#39;,
+ &#39;country_of_origin&#39;: &#39;United States&#39;,
+ &#39;year&#39;: 2012}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quantitative specifications</span>
+<span class="n">a123</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;nominal_capacity&#39;: {&#39;value&#39;: 2.5,
+  &#39;unit&#39;: &#39;Ah&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Cell Capacity (nominal/minimum) (0.5C Rate) 2.5/2.4 Ah&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;minimum_capacity&#39;: {&#39;value&#39;: 2.4,
+  &#39;unit&#39;: &#39;Ah&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Cell Capacity (nominal/minimum) (0.5C Rate) 2.5/2.4 Ah&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;nominal_voltage&#39;: {&#39;value&#39;: 3.3,
+  &#39;unit&#39;: &#39;V&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Voltage (nominal) 3.3V&#39;, &#39;page&#39;: 1, &#39;confidence&#39;: 0.8}},
+ &#39;internal_resistance&#39;: {&#39;value&#39;: 6.0,
+  &#39;unit&#39;: &#39;mΩ&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Internal Impedance (1kHz AC typical) 6mΩ&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;mass&#39;: {&#39;value&#39;: 76.0,
+  &#39;unit&#39;: &#39;g&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Cell Weight 76g&#39;, &#39;page&#39;: 1, &#39;confidence&#39;: 0.8}},
+ &#39;diameter&#39;: {&#39;value&#39;: 26.0,
+  &#39;unit&#39;: &#39;mm&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Cell Dimensions 26 x 65 mm&#39;, &#39;page&#39;: 1, &#39;confidence&#39;: 0.8}},
+ &#39;height&#39;: {&#39;value&#39;: 65.0,
+  &#39;unit&#39;: &#39;mm&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Cell Dimensions 26 x 65 mm&#39;, &#39;page&#39;: 1, &#39;confidence&#39;: 0.8}},
+ &#39;pulse_charging_current&#39;: {&#39;value&#39;: 10.0,
+  &#39;unit&#39;: &#39;A&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;nominal_continuous_charging_current&#39;: {&#39;value&#39;: 2.5,
+  &#39;unit&#39;: &#39;A&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;maximum_continuous_charging_current&#39;: {&#39;value&#39;: 2.5,
+  &#39;unit&#39;: &#39;A&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;maximum_continuous_discharging_current&#39;: {&#39;value&#39;: 50.0,
+  &#39;unit&#39;: &#39;A&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Maximum Continuous Discharge 50A&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;minimum_discharging_temperature&#39;: {&#39;value&#39;: -30,
+  &#39;unit&#39;: &#39;°C&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Operating Temperature -30°C to 55°C&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;maximum_discharging_temperature&#39;: {&#39;value&#39;: 55,
+  &#39;unit&#39;: &#39;°C&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Operating Temperature -30°C to 55°C&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;minimum_storage_temperature&#39;: {&#39;value&#39;: -40,
+  &#39;unit&#39;: &#39;°C&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Storage Temperature -40°C to 60°C&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;maximum_storage_temperature&#39;: {&#39;value&#39;: 60,
+  &#39;unit&#39;: &#39;°C&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Storage Temperature -40°C to 60°C&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;cycle_life&#39;: {&#39;value_text&#39;: &#39;&gt;1000&#39;,
+  &#39;unit&#39;: &#39;count&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Cycle Life at 20A Discharge, 100% DOD &gt;1,000 cycles&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.7}}}
+</pre></div></div>
+</div>
+</section>
+<section id="Record-types">
+<h2>Record types<a class="headerlink" href="#Record-types" title="Link to this heading">#</a></h2>
+<section id="CellSpecification-—-the-specification">
+<h3>CellSpecification — the specification<a class="headerlink" href="#CellSpecification-—-the-specification" title="Link to this heading">#</a></h3>
+<p>A cell spec is a <strong>product specification</strong>: datasheet-level information about a battery model, not a physical item.</p>
+<p>In RDF it carries two parallel type assertions:</p>
+<ul class="simple">
+<li><p><strong>EMMO</strong>: <code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code> (subclass of <code class="docutils literal notranslate"><span class="pre">emmo:Description</span></code> — an information entity describing a class of cells)</p></li>
+<li><p><strong>schema.org</strong>: <code class="docutils literal notranslate"><span class="pre">schema:CreativeWork</span></code> (the specification document as a creative artifact)</p></li>
+</ul>
+<p>The physical EMMO classes for format and chemistry (<code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIonBattery</span></code>, …) are placed on an <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code> anonymous node — not on the specification itself — because the specification is an information entity, not a physical cell.</p>
+</section>
+<section id="CellInstance-—-the-physical-item">
+<h3>CellInstance — the physical item<a class="headerlink" href="#CellInstance-—-the-physical-item" title="Link to this heading">#</a></h3>
+<p>A cell instance is a <strong>specific physical cell</strong> with a serial number. It always links to a cell spec.</p>
+<p>In RDF it carries both <code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code> (EMMO scientific type) and <code class="docutils literal notranslate"><span class="pre">schema:IndividualProduct</span></code> (schema.org type for a uniquely identifiable product item). The link back to the cell-spec record uses both <code class="docutils literal notranslate"><span class="pre">hasDescription</span></code> (EMMO) and <code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> (schema.org) for full dual-vocabulary alignment.</p>
+</section>
+<section id="TestSpec-and-Test">
+<h3>TestSpec and Test<a class="headerlink" href="#TestSpec-and-Test" title="Link to this heading">#</a></h3>
+<p>A <strong>test spec</strong> is a reusable procedure definition. A <strong>test</strong> is one execution of a test spec on one cell instance. In RDF: <code class="docutils literal notranslate"><span class="pre">BatteryTest</span></code>.</p>
+</section>
+<section id="Dataset">
+<h3>Dataset<a class="headerlink" href="#Dataset" title="Link to this heading">#</a></h3>
+<p>A dataset links measured data files to the cell instance and test that produced them. In RDF: <code class="docutils literal notranslate"><span class="pre">schema:Dataset</span></code>.</p>
+</section>
+</section>
+<section id="Identifiers-and-IRIs">
+<h2>Identifiers and IRIs<a class="headerlink" href="#Identifiers-and-IRIs" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Every BattINFO record has a stable, opaque IRI</span>
+<span class="n">iri</span> <span class="o">=</span> <span class="n">a123</span><span class="p">[</span><span class="s2">&quot;cell_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IRI:&quot;</span><span class="p">,</span> <span class="n">iri</span><span class="p">)</span>
+
+<span class="c1"># The 16-character Crockford Base32 UID</span>
+<span class="n">uid</span> <span class="o">=</span> <span class="n">iri</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;UID:&quot;</span><span class="p">,</span> <span class="n">uid</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+IRI: https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5
+UID: 7d9k-2m4p-8t3x-6nq5
+</pre></div></div>
+</div>
+<p>IRIs are:</p>
+<ul class="simple">
+<li><p><strong>Opaque</strong> — carry no embedded meaning</p></li>
+<li><p><strong>Stable</strong> — never change once minted</p></li>
+<li><p><strong>Deterministic</strong> — the same record inputs always produce the same IRI</p></li>
+</ul>
+<p>This makes them safe to cite in papers, reference in databases, and dereference over HTTP.</p>
+</section>
+<section id="The-semantic-layer-—-JSON-LD">
+<h2>The semantic layer — JSON-LD<a class="headerlink" href="#The-semantic-layer-—-JSON-LD" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpecification</span><span class="p">,</span> <span class="n">publish</span>
+
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpecification</span><span class="p">(</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+    <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
+    <span class="n">negative_electrode_basis</span><span class="o">=</span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span>  <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-01&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IRI:&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">canonical_iri</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish_record</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">publish_record</span><span class="p">(</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">[</span><span class="s2">&quot;canonical_record_path&quot;</span><span class="p">],</span>
+    <span class="n">target_root</span><span class="o">=</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-01-jsonld&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">jsonld</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">],</span> <span class="s2">&quot;index.jsonld&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># EMMO @type stacking from format + chemistry + electrode basis</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;@type:&quot;</span><span class="p">,</span> <span class="n">jsonld</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:CreativeWork&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Each quantitative spec becomes a ConventionalProperty node</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Properties:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">jsonld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+    <span class="n">class_name</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">]</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalValue&quot;</span><span class="p">)</span>
+    <span class="n">unit</span>  <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Properties:
+  NominalCapacity: None  [AmpereHour]
+  NominalVoltage: None  [Volt]
+</pre></div></div>
+</div>
+<section id="Exported-JSON-LD-file">
+<h3>Exported JSON-LD file<a class="headerlink" href="#Exported-JSON-LD-file" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">publish_record()</span></code> writes <code class="docutils literal notranslate"><span class="pre">index.jsonld</span></code>, <code class="docutils literal notranslate"><span class="pre">index.json</span></code>, and <code class="docutils literal notranslate"><span class="pre">index.html</span></code> to the resolver artifact directory. The JSON-LD file below is the one that would be served when a consumer dereferences the cell-spec IRI.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jsonld_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="s2">&quot;index.jsonld&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON-LD exported to: </span><span class="si">{</span><span class="n">jsonld_file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">jsonld</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+JSON-LD exported to: .battinfo\notebooks\guide-01-jsonld\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
+
+{
+  &#34;@context&#34;: [
+    &#34;https://w3id.org/emmo/domain/battery/context&#34;,
+    {
+      &#34;schema&#34;: &#34;https://schema.org/&#34;,
+      &#34;csvw&#34;: &#34;http://www.w3.org/ns/csvw#&#34;
+    }
+  ],
+  &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e&#34;,
+  &#34;@type&#34;: [
+    &#34;BatteryCellSpecification&#34;,
+    &#34;schema:CreativeWork&#34;
+  ],
+  &#34;schema:identifier&#34;: &#34;e4t5-w9re-mpq6-8g7e&#34;,
+  &#34;schema:name&#34;: &#34;A123 Systems ANR26650M1-B&#34;,
+  &#34;schema:manufacturer&#34;: {
+    &#34;@type&#34;: &#34;schema:Organization&#34;,
+    &#34;schema:name&#34;: &#34;A123 Systems&#34;
+  },
+  &#34;hasProperty&#34;: [
+    {
+      &#34;@type&#34;: [
+        &#34;NominalCapacity&#34;,
+        &#34;ConventionalProperty&#34;
+      ],
+      &#34;hasNumericalPart&#34;: {
+        &#34;@type&#34;: &#34;RealData&#34;,
+        &#34;hasNumberValue&#34;: 2.5
+      },
+      &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#AmpereHour&#34;
+    },
+    {
+      &#34;@type&#34;: [
+        &#34;NominalVoltage&#34;,
+        &#34;ConventionalProperty&#34;
+      ],
+      &#34;hasNumericalPart&#34;: {
+        &#34;@type&#34;: &#34;RealData&#34;,
+        &#34;hasNumberValue&#34;: 3.3
+      },
+      &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#Volt&#34;
+    }
+  ]
+}
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Validation-layers">
+<h2>Validation layers<a class="headerlink" href="#Validation-layers" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Layer</p></th>
+<th class="head"><p>What it checks</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>JSON Schema</p></td>
+<td><p>Field names, types, required fields, value constraints</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pydantic</p></td>
+<td><p>Python-level type coercion and cross-field rules</p></td>
+</tr>
+<tr class="row-even"><td><p>JSON-LD</p></td>
+<td><p>RDF parsability, URDNA2015 normalisability, no undefined type terms</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.validate.record</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_record_report</span>
+
+<span class="n">record_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">[</span><span class="s2">&quot;canonical_record_path&quot;</span><span class="p">])</span>
+<span class="n">record_doc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">record_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">validate_record_report</span><span class="p">(</span>
+    <span class="n">record_doc</span><span class="p">,</span>
+    <span class="n">source_root</span><span class="o">=</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-01&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ok:&quot;</span><span class="p">,</span> <span class="n">report</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="s2">&quot;| errors:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;| warnings:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+ok: True | errors: 0 | warnings: 0
+</pre></div></div>
+</div>
+</section>
+<section id="Next">
+<h2>Next<a class="headerlink" href="#Next" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="02-first-cell-type.html"><span class="doc">Guide 2 — First cell spec</span></a>: full authoring workflow from materials to published record</p></li>
+<li><p><a class="reference internal" href="03-linked-records.html"><span class="doc">Guide 3 — Linked records</span></a>: build the complete provenance chain and publish</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../pages/guides.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Guides</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="02-first-cell-type.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Guide 2 — Describing a cell: from materials to published record</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-data-model">The data model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#A-real-record">A real record</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Record-types">Record types</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#CellSpecification-—-the-specification">CellSpecification — the specification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#CellInstance-—-the-physical-item">CellInstance — the physical item</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#TestSpec-and-Test">TestSpec and Test</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Dataset">Dataset</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Identifiers-and-IRIs">Identifiers and IRIs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-semantic-layer-—-JSON-LD">The semantic layer — JSON-LD</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Exported-JSON-LD-file">Exported JSON-LD file</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Validation-layers">Validation layers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Next">Next</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

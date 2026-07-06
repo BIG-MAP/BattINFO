@@ -1,0 +1,636 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "67cd196b",
+   "metadata": {},
+   "source": [
+    "# Guide 1 — Concepts\n",
+    "\n",
+    "BattINFO is the implementation layer for the [EMMO domain-battery ontology](https://github.com/emmo-repo/domain-battery).\n",
+    "It gives you JSON schemas, a Python library, and a CLI for authoring, validating, and publishing battery metadata as machine-readable Linked Data.\n",
+    "\n",
+    "This guide explains the data model, record types, and the semantic layer.\n",
+    "\n",
+    "**Estimated time:** 10 minutes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "d1bde660",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:32.165860Z",
+     "iopub.status.busy": "2026-07-05T20:36:32.165860Z",
+     "iopub.status.idle": "2026-07-05T20:36:32.185483Z",
+     "shell.execute_reply": "2026-07-05T20:36:32.181945Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Repo root: C:\\Users\\simonc\\Documents\\Github-local\\battery-genome\\BattINFO-docs-funnel\n"
+     ]
+    }
+   ],
+   "source": [
+    "import os, json, warnings\n",
+    "from pathlib import Path\n",
+    "\n",
+    "_here = Path.cwd()\n",
+    "if (_here / \"src\" / \"battinfo\").exists():\n",
+    "    REPO = _here\n",
+    "elif (_here.parent.parent / \"src\" / \"battinfo\").exists():\n",
+    "    REPO = _here.parent.parent\n",
+    "    os.chdir(REPO)\n",
+    "else:\n",
+    "    REPO = _here\n",
+    "\n",
+    "print(f\"Repo root: {REPO}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c77d3fbf",
+   "metadata": {},
+   "source": [
+    "## The data model\n",
+    "\n",
+    "Every battery experiment generates four kinds of record. BattINFO formalises them as a provenance chain:\n",
+    "\n",
+    "```\n",
+    "CellSpecification  ─────────────────────────────────\n",
+    "  │  \"Panasonic NCR18650B is a cylindrical Li-ion cell, 3.4 Ah\"\n",
+    "  │\n",
+    "  └─► CellInstance  ───────────────────────────────\n",
+    "        │  \"This specific cell, serial number LAB-001\"\n",
+    "        │\n",
+    "        └─► Test  ──────────────────────────────\n",
+    "              │  \"1C cycle-life test at 25 °C on LAB-001\"\n",
+    "              │\n",
+    "              └─► Dataset  ──────────────────\n",
+    "                    \"The voltage/current time-series\"\n",
+    "```\n",
+    "\n",
+    "Each record has a permanent, opaque IRI under `https://w3id.org/battinfo/`. The chain is machine-readable — a downstream tool can follow links from a dataset all the way back to the cell specification."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2149470b",
+   "metadata": {},
+   "source": [
+    "## A real record"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "af9f7f36",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:32.189514Z",
+     "iopub.status.busy": "2026-07-05T20:36:32.189514Z",
+     "iopub.status.idle": "2026-07-05T20:36:32.196753Z",
+     "shell.execute_reply": "2026-07-05T20:36:32.196753Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['schema_version', 'cell_spec', 'properties', 'provenance']"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Load the canonical A123 cell-spec record that ships with the repo\n",
+    "a123 = json.loads(\n",
+    "    (REPO / \"examples/cell-spec/A123__ANR26650M1-B.json\").read_text(encoding=\"utf-8\")\n",
+    ")\n",
+    "\n",
+    "# Top-level structure\n",
+    "list(a123.keys())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "2876af4e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:32.198759Z",
+     "iopub.status.busy": "2026-07-05T20:36:32.198759Z",
+     "iopub.status.idle": "2026-07-05T20:36:32.206417Z",
+     "shell.execute_reply": "2026-07-05T20:36:32.206417Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'id': 'https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5',\n",
+       " 'short_id': '7d9k2m',\n",
+       " 'identifier': 'cell-spec:7d9k-2m4p-8t3x-6nq5',\n",
+       " 'name': 'A123 ANR26650M1-B',\n",
+       " 'model': 'ANR26650M1-B',\n",
+       " 'manufacturer': {'type': 'Organization',\n",
+       "  'name': 'A123',\n",
+       "  'id': 'https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd'},\n",
+       " 'brand': {'type': 'Brand', 'name': 'A123'},\n",
+       " 'category': 'battery cell',\n",
+       " 'cell_format': 'cylindrical',\n",
+       " 'chemistry': 'Li-ion',\n",
+       " 'positive_electrode_basis': 'LFP',\n",
+       " 'negative_electrode_basis': 'unknown',\n",
+       " 'size_code': 'R26650',\n",
+       " 'iec_code': 'IFpR26650',\n",
+       " 'country_of_origin': 'United States',\n",
+       " 'year': 2012}"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# The product identity block\n",
+    "a123[\"cell_spec\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "8d47a257",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:32.206417Z",
+     "iopub.status.busy": "2026-07-05T20:36:32.206417Z",
+     "iopub.status.idle": "2026-07-05T20:36:32.221764Z",
+     "shell.execute_reply": "2026-07-05T20:36:32.218746Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'nominal_capacity': {'value': 2.5,\n",
+       "  'unit': 'Ah',\n",
+       "  'raw': {'text': 'Cell Capacity (nominal/minimum) (0.5C Rate) 2.5/2.4 Ah',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'minimum_capacity': {'value': 2.4,\n",
+       "  'unit': 'Ah',\n",
+       "  'raw': {'text': 'Cell Capacity (nominal/minimum) (0.5C Rate) 2.5/2.4 Ah',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'nominal_voltage': {'value': 3.3,\n",
+       "  'unit': 'V',\n",
+       "  'raw': {'text': 'Voltage (nominal) 3.3V', 'page': 1, 'confidence': 0.8}},\n",
+       " 'internal_resistance': {'value': 6.0,\n",
+       "  'unit': 'mΩ',\n",
+       "  'raw': {'text': 'Internal Impedance (1kHz AC typical) 6mΩ',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'mass': {'value': 76.0,\n",
+       "  'unit': 'g',\n",
+       "  'raw': {'text': 'Cell Weight 76g', 'page': 1, 'confidence': 0.8}},\n",
+       " 'diameter': {'value': 26.0,\n",
+       "  'unit': 'mm',\n",
+       "  'raw': {'text': 'Cell Dimensions 26 x 65 mm', 'page': 1, 'confidence': 0.8}},\n",
+       " 'height': {'value': 65.0,\n",
+       "  'unit': 'mm',\n",
+       "  'raw': {'text': 'Cell Dimensions 26 x 65 mm', 'page': 1, 'confidence': 0.8}},\n",
+       " 'pulse_charging_current': {'value': 10.0,\n",
+       "  'unit': 'A',\n",
+       "  'raw': {'text': 'Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'nominal_continuous_charging_current': {'value': 2.5,\n",
+       "  'unit': 'A',\n",
+       "  'raw': {'text': 'Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'maximum_continuous_charging_current': {'value': 2.5,\n",
+       "  'unit': 'A',\n",
+       "  'raw': {'text': 'Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'maximum_continuous_discharging_current': {'value': 50.0,\n",
+       "  'unit': 'A',\n",
+       "  'raw': {'text': 'Maximum Continuous Discharge 50A',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'minimum_discharging_temperature': {'value': -30,\n",
+       "  'unit': '°C',\n",
+       "  'raw': {'text': 'Operating Temperature -30°C to 55°C',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'maximum_discharging_temperature': {'value': 55,\n",
+       "  'unit': '°C',\n",
+       "  'raw': {'text': 'Operating Temperature -30°C to 55°C',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'minimum_storage_temperature': {'value': -40,\n",
+       "  'unit': '°C',\n",
+       "  'raw': {'text': 'Storage Temperature -40°C to 60°C',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'maximum_storage_temperature': {'value': 60,\n",
+       "  'unit': '°C',\n",
+       "  'raw': {'text': 'Storage Temperature -40°C to 60°C',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'cycle_life': {'value_text': '>1000',\n",
+       "  'unit': 'count',\n",
+       "  'raw': {'text': 'Cycle Life at 20A Discharge, 100% DOD >1,000 cycles',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.7}}}"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Quantitative specifications\n",
+    "a123[\"properties\"]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8a16d171",
+   "metadata": {},
+   "source": [
+    "## Record types\n",
+    "\n",
+    "### CellSpecification — the specification\n",
+    "\n",
+    "A cell spec is a **product specification**: datasheet-level information about a battery model, not a physical item.\n",
+    "\n",
+    "In RDF it carries two parallel type assertions:\n",
+    "- **EMMO**: `BatteryCellSpecification` (subclass of `emmo:Description` — an information entity describing a class of cells)\n",
+    "- **schema.org**: `schema:CreativeWork` (the specification document as a creative artifact)\n",
+    "\n",
+    "The physical EMMO classes for format and chemistry (`BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`, ...) are placed on an `isDescriptionFor` anonymous node — not on the specification itself — because the specification is an information entity, not a physical cell.\n",
+    "\n",
+    "### CellInstance — the physical item\n",
+    "\n",
+    "A cell instance is a **specific physical cell** with a serial number. It always links to a cell spec.\n",
+    "\n",
+    "In RDF it carries both `BatteryCell` (EMMO scientific type) and `schema:IndividualProduct` (schema.org type for a uniquely identifiable product item). The link back to the cell-spec record uses both `hasDescription` (EMMO) and `schema:isVariantOf` (schema.org) for full dual-vocabulary alignment.\n",
+    "\n",
+    "### TestSpec and Test\n",
+    "\n",
+    "A **test spec** is a reusable procedure definition. A **test** is one execution of a test spec on one cell instance. In RDF: `BatteryTest`.\n",
+    "\n",
+    "### Dataset\n",
+    "\n",
+    "A dataset links measured data files to the cell instance and test that produced them. In RDF: `schema:Dataset`."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "320df105",
+   "metadata": {},
+   "source": [
+    "## Identifiers and IRIs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "e85e0b8a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:32.226761Z",
+     "iopub.status.busy": "2026-07-05T20:36:32.226761Z",
+     "iopub.status.idle": "2026-07-05T20:36:32.232536Z",
+     "shell.execute_reply": "2026-07-05T20:36:32.231009Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "IRI: https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\n",
+      "UID: 7d9k-2m4p-8t3x-6nq5\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Every BattINFO record has a stable, opaque IRI\n",
+    "iri = a123[\"cell_spec\"][\"id\"]\n",
+    "print(\"IRI:\", iri)\n",
+    "\n",
+    "# The 16-character Crockford Base32 UID\n",
+    "uid = iri.split(\"/\")[-1]\n",
+    "print(\"UID:\", uid)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "52994e19",
+   "metadata": {},
+   "source": [
+    "IRIs are:\n",
+    "- **Opaque** — carry no embedded meaning\n",
+    "- **Stable** — never change once minted\n",
+    "- **Deterministic** — the same record inputs always produce the same IRI\n",
+    "\n",
+    "This makes them safe to cite in papers, reference in databases, and dereference over HTTP."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "67c599c2",
+   "metadata": {},
+   "source": [
+    "## The semantic layer — JSON-LD"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "e670cfbb",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:32.236513Z",
+     "iopub.status.busy": "2026-07-05T20:36:32.236513Z",
+     "iopub.status.idle": "2026-07-05T20:36:34.134105Z",
+     "shell.execute_reply": "2026-07-05T20:36:34.131538Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e\n"
+     ]
+    }
+   ],
+   "source": [
+    "from battinfo import CellSpecification, publish\n",
+    "\n",
+    "cell_spec = CellSpecification(\n",
+    "    manufacturer=\"A123 Systems\",\n",
+    "    model=\"ANR26650M1-B\",\n",
+    "    format=\"cylindrical\",\n",
+    "    chemistry=\"Li-ion\",\n",
+    "    positive_electrode_basis=\"LFP\",\n",
+    "    negative_electrode_basis=\"graphite\",\n",
+    "    properties={\n",
+    "        \"nominal_capacity\": {\"value\": 2.5, \"unit\": \"Ah\"},\n",
+    "        \"nominal_voltage\":  {\"value\": 3.3, \"unit\": \"V\"},\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "result = publish(cell_spec, destination=\"local\", root=REPO / \".battinfo/notebooks/guide-01\")\n",
+    "print(\"IRI:\", result.canonical_iri)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "0f9bd621",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:34.134105Z",
+     "iopub.status.busy": "2026-07-05T20:36:34.134105Z",
+     "iopub.status.idle": "2026-07-05T20:36:34.284700Z",
+     "shell.execute_reply": "2026-07-05T20:36:34.284700Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "@type: ['BatteryCellSpecification', 'schema:CreativeWork']\n"
+     ]
+    }
+   ],
+   "source": [
+    "from battinfo.api import publish_record\n",
+    "\n",
+    "output = publish_record(\n",
+    "    result.debug_paths[\"canonical_record_path\"],\n",
+    "    target_root=REPO / \".battinfo/notebooks/guide-01-jsonld\",\n",
+    ")\n",
+    "jsonld = json.loads(\n",
+    "    Path(output[\"output_dir\"], \"index.jsonld\").read_text(encoding=\"utf-8\")\n",
+    ")\n",
+    "\n",
+    "# EMMO @type stacking from format + chemistry + electrode basis\n",
+    "print(\"@type:\", jsonld[\"@type\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "50971f8b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:34.288149Z",
+     "iopub.status.busy": "2026-07-05T20:36:34.284700Z",
+     "iopub.status.idle": "2026-07-05T20:36:34.293025Z",
+     "shell.execute_reply": "2026-07-05T20:36:34.293025Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Properties:\n",
+      "  NominalCapacity: None  [AmpereHour]\n",
+      "  NominalVoltage: None  [Volt]\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Each quantitative spec becomes a ConventionalProperty node\n",
+    "print(\"Properties:\")\n",
+    "for prop in jsonld.get(\"hasProperty\", []):\n",
+    "    class_name = prop[\"@type\"][0] if isinstance(prop[\"@type\"], list) else prop[\"@type\"]\n",
+    "    value = prop.get(\"hasNumericalPart\", {}).get(\"hasNumericalValue\")\n",
+    "    unit  = prop.get(\"hasMeasurementUnit\", \"\").split(\"#\")[-1]\n",
+    "    print(f\"  {class_name}: {value}  [{unit}]\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a3d324c3",
+   "metadata": {},
+   "source": [
+    "### Exported JSON-LD file\n",
+    "\n",
+    "`publish_record()` writes `index.jsonld`, `index.json`, and `index.html` to the resolver artifact directory. The JSON-LD file below is the one that would be served when a consumer dereferences the cell-spec IRI."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "4bb41daf",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:34.293025Z",
+     "iopub.status.busy": "2026-07-05T20:36:34.293025Z",
+     "iopub.status.idle": "2026-07-05T20:36:34.301807Z",
+     "shell.execute_reply": "2026-07-05T20:36:34.301807Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "JSON-LD exported to: .battinfo\\notebooks\\guide-01-jsonld\\spec\\e4t5-w9re-mpq6-8g7e\\index.jsonld\n",
+      "\n",
+      "{\n",
+      "  \"@context\": [\n",
+      "    \"https://w3id.org/emmo/domain/battery/context\",\n",
+      "    {\n",
+      "      \"schema\": \"https://schema.org/\",\n",
+      "      \"csvw\": \"http://www.w3.org/ns/csvw#\"\n",
+      "    }\n",
+      "  ],\n",
+      "  \"@id\": \"https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e\",\n",
+      "  \"@type\": [\n",
+      "    \"BatteryCellSpecification\",\n",
+      "    \"schema:CreativeWork\"\n",
+      "  ],\n",
+      "  \"schema:identifier\": \"e4t5-w9re-mpq6-8g7e\",\n",
+      "  \"schema:name\": \"A123 Systems ANR26650M1-B\",\n",
+      "  \"schema:manufacturer\": {\n",
+      "    \"@type\": \"schema:Organization\",\n",
+      "    \"schema:name\": \"A123 Systems\"\n",
+      "  },\n",
+      "  \"hasProperty\": [\n",
+      "    {\n",
+      "      \"@type\": [\n",
+      "        \"NominalCapacity\",\n",
+      "        \"ConventionalProperty\"\n",
+      "      ],\n",
+      "      \"hasNumericalPart\": {\n",
+      "        \"@type\": \"RealData\",\n",
+      "        \"hasNumberValue\": 2.5\n",
+      "      },\n",
+      "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#AmpereHour\"\n",
+      "    },\n",
+      "    {\n",
+      "      \"@type\": [\n",
+      "        \"NominalVoltage\",\n",
+      "        \"ConventionalProperty\"\n",
+      "      ],\n",
+      "      \"hasNumericalPart\": {\n",
+      "        \"@type\": \"RealData\",\n",
+      "        \"hasNumberValue\": 3.3\n",
+      "      },\n",
+      "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#Volt\"\n",
+      "    }\n",
+      "  ]\n",
+      "}\n"
+     ]
+    }
+   ],
+   "source": [
+    "jsonld_file = Path(output[\"output_dir\"]) / \"index.jsonld\"\n",
+    "print(f\"JSON-LD exported to: {jsonld_file.relative_to(REPO)}\")\n",
+    "print()\n",
+    "print(json.dumps(jsonld, indent=2))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "162e5cb6",
+   "metadata": {},
+   "source": [
+    "## Validation layers\n",
+    "\n",
+    "| Layer | What it checks |\n",
+    "|---|---|\n",
+    "| JSON Schema | Field names, types, required fields, value constraints |\n",
+    "| Pydantic | Python-level type coercion and cross-field rules |\n",
+    "| JSON-LD | RDF parsability, URDNA2015 normalisability, no undefined type terms |"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "bfc0b477",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T20:36:34.301807Z",
+     "iopub.status.busy": "2026-07-05T20:36:34.301807Z",
+     "iopub.status.idle": "2026-07-05T20:36:34.322921Z",
+     "shell.execute_reply": "2026-07-05T20:36:34.322921Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ok: True | errors: 0 | warnings: 0\n"
+     ]
+    }
+   ],
+   "source": [
+    "from battinfo.validate.record import validate_record_report\n",
+    "\n",
+    "record_path = Path(result.debug_paths[\"canonical_record_path\"])\n",
+    "record_doc = json.loads(record_path.read_text(encoding=\"utf-8\"))\n",
+    "\n",
+    "report = validate_record_report(\n",
+    "    record_doc,\n",
+    "    source_root=REPO / \".battinfo/notebooks/guide-01\",\n",
+    ")\n",
+    "print(\"ok:\", report.ok, \"| errors:\", len(report.errors), \"| warnings:\", len(report.warnings))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "847beabb",
+   "metadata": {},
+   "source": [
+    "## Next\n",
+    "\n",
+    "- **[Guide 2 — First cell spec](02-first-cell-type.ipynb)**: full authoring workflow from materials to published record\n",
+    "- **[Guide 3 — Linked records](03-linked-records.ipynb)**: build the complete provenance chain and publish"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
