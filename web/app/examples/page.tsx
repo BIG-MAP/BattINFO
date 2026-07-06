@@ -61,6 +61,25 @@ export default function ExamplesPage() {
 
             <p className="mt-3 max-w-prose text-sm text-ink-muted">{entry.highlight}</p>
 
+            <div className="mt-3 flex flex-wrap gap-4 text-xs font-semibold">
+              <a
+                href={`https://json-ld.org/playground/#startTab=tab-expanded&json-ld=${encodeURIComponent(`${site.url}/jsonld/${entry.slug}.jsonld`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-brand-600 hover:text-brand-700"
+              >
+                Open in the JSON-LD Playground →
+              </a>
+              <a
+                href={`/jsonld/${entry.slug}.jsonld`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-ink-faint hover:text-ink"
+              >
+                Raw JSON-LD
+              </a>
+            </div>
+
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               <div>
                 <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-ink-faint">

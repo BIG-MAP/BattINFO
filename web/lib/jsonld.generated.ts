@@ -483,7 +483,7 @@ export const jsonldGallery: {
           "hasNumberValue": -30
         },
         "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          "@id": "https://w3id.org/emmo#DegreeCelsius"
         }
       },
       "electrochemistry:electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d": {
@@ -491,7 +491,7 @@ export const jsonldGallery: {
           "hasNumberValue": 55
         },
         "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          "@id": "https://w3id.org/emmo#DegreeCelsius"
         }
       },
       "electrochemistry:electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302": {
@@ -499,7 +499,7 @@ export const jsonldGallery: {
           "hasNumberValue": -40
         },
         "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          "@id": "https://w3id.org/emmo#DegreeCelsius"
         }
       },
       "electrochemistry:electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7": {
@@ -507,7 +507,7 @@ export const jsonldGallery: {
           "hasNumberValue": 60
         },
         "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          "@id": "https://w3id.org/emmo#DegreeCelsius"
         }
       },
       "battinfo:provenance": {

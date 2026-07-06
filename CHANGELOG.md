@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Unit mappings corrected at the source** (`unit_map.curated.json` + packaged copy):
+  `°C`/`degC` now map to the unit `emmo:DegreeCelsius` (they pointed at the *quantity*
+  `CelsiusTemperature`), and `W/kg` to `emmo:WattPerKilogram` (was a QUDT fallback).
+  `W/L` and the percent symbols are unchanged pending ontology confirmation —
+  `WattPerLitre` and a bare `Percent` unit do not exist in the bundled EMMO context.
+- **The brand wordmark renders at its intended size**: the logo lockups' `<text>` carried
+  a `.wm` class that was never defined anywhere, so "BattINFO" fell back to browser-default
+  16 px inside a 470×112 canvas. The lockups now carry explicit type attributes; docs and
+  website copies updated.
+
+
 ### Changed (installation — heavy dependencies became extras)
 
 - **`pip install battinfo` is lean now**: core depends only on pydantic, typer, rich,

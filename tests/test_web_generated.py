@@ -37,3 +37,13 @@ def test_gallery_shows_type_stacking() -> None:
         "the flagship cell-spec JSON-LD should stack multiple EMMO types — "
         f"got {types!r}"
     )
+
+
+def test_public_jsonld_files_match_the_transform() -> None:
+    entries = gen.build_entries()
+    for name, expected in gen.render_public(entries).items():
+        raw = (gen.PUBLIC_DIR / name).read_text(encoding="utf-8")
+        actual = raw.replace(chr(13) + chr(10), chr(10))
+        assert actual == expected, (
+            f"web/public/jsonld/{name} drifts — run scripts/gen_web_jsonld.py"
+        )
