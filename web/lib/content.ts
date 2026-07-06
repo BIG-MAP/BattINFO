@@ -117,6 +117,28 @@ ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])`,
   },
 ] as const;
 
+// What ws.convert() actually supports — the honest capability matrix.
+// tests/test_web_snippets.py asserts every extension listed here appears in
+// the library's own convert() guidance, so this table cannot overpromise.
+export const converterMatrix = {
+  autoDetected: [
+    { ext: ".ndax", source: "NEWARE" },
+    { ext: ".nda", source: "NEWARE (legacy)" },
+    { ext: ".mpt", source: "Biologic (EC-Lab text export)" },
+    { ext: ".xlsx", source: "Excel" },
+    { ext: ".mat", source: "MATLAB" },
+  ],
+  explicitPattern: [
+    { ext: ".csv", source: "Digatron / Landt / Novonix / generic CSV" },
+    { ext: ".txt", source: "Basytec / Landt text" },
+  ],
+  exportCsvFirst: [
+    { ext: ".res", source: "Arbin" },
+    { ext: ".mpr", source: "Biologic binary" },
+    { ext: "raw", source: "Maccor" },
+  ],
+} as const;
+
 // What publishing buys you — now, for your lab, for the field. Homepage cards.
 export const payoffs = [
   {

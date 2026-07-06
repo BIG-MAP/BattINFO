@@ -85,6 +85,27 @@ def test_quickstart_recipe_itself_mentions_the_payoffs(quickstart: str) -> None:
     assert "publish" in quickstart.lower()
 
 
+def test_convert_page_matrix_matches_the_library_guidance(tmp_path: Path) -> None:
+    """Every format the /convert capability matrix lists must appear in the
+    library's own convert() guidance — the web page cannot overpromise."""
+    ws = battinfo.workspace(root=tmp_path)
+    buffer = io.StringIO()
+    with redirect_stdout(buffer):
+        ws.convert()  # empty workspace -> prints the full capability guidance
+    guidance = buffer.getvalue()
+
+    content = (WEB / "content.ts").read_text(encoding="utf-8")
+    match = re.search(r"export const converterMatrix = \{(.*?)\} as const;", content, re.DOTALL)
+    assert match, "converterMatrix not found in content.ts"
+    extensions = re.findall(r'ext:\s*"([^"]+)"', match.group(1))
+    assert extensions, "converterMatrix lists no extensions"
+    missing = [ext for ext in extensions if ext not in guidance]
+    assert not missing, (
+        f"/convert lists {missing} but ws.convert()'s guidance does not mention them — "
+        "update web/lib/content.ts converterMatrix or the library guidance"
+    )
+
+
 def test_web_validator_discriminators_match_the_entity_registry() -> None:
     """The browser validator's record-type map must mirror battinfo.entities.
 
