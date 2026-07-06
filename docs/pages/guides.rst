@@ -12,3 +12,4 @@ publishing linked records as Linked Data. Run them locally or read them here.
    ../guides/03-linked-records
    ../guides/04-semantic-layer
    ../guides/05-descriptors
+   ../guides/06-publish-your-data

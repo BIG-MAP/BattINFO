@@ -135,3 +135,4 @@ The guide notebooks in `docs/guides/` continue the walkthrough interactively. Op
 | [03 — Linked records](docs/guides/03-linked-records.ipynb) | Cell instance → test → dataset provenance chain |
 | [04 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD, EMMO alignment, validation, and RDF queries |
 | [05 — Descriptors](docs/guides/05-descriptors.ipynb) | Deep cell descriptors: electrodes, electrolyte, separator |
+| [06 — Publish your data](docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |

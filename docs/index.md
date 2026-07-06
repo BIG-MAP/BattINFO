@@ -14,6 +14,7 @@ BattINFO is the implementation layer for the EMMO domain-battery ontology — pr
 | **[03 — Linked records](guides/03-linked-records.ipynb)** | Cell instance → test → dataset → registry submission |
 | **[04 — Semantic layer](guides/04-semantic-layer.ipynb)** | JSON-LD anatomy, EMMO type stacking, RDF validation, SPARQL |
 | **[05 — Descriptors](guides/05-descriptors.ipynb)** | Research-grade descriptors: electrode composition, electrolyte, separator |
+| **[06 — Publish your data](guides/06-publish-your-data.ipynb)** | The end-to-end tutorial: raw cycler CSV → validated records → DOI + registry |
 
 Open notebooks from the repo root with the `.venv` kernel selected.
 
@@ -47,6 +48,7 @@ Open notebooks from the repo root with the `.venv` kernel selected.
 
 | | |
 |---|---|
+| **[How-to guides](howto/bulk-ingest.md)** | Task recipes: bulk ingest, fixing validation errors, resuming submissions, funding/ORCID |
 | **[Instance / test / dataset workflow](instance-test-dataset-workflow.md)** | Detailed workflow reference for linked records |
 | **[Editorial cell-spec workflow](internal/editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
 | **[Ingest manifest contract](ingest-manifest-contract.md)** | Batch intake from a folder of raw data files |

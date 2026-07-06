@@ -7,7 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Guide 06 — "Publish your first dataset"**: the end-to-end tutorial from a raw
+  Neware CSV (a truncated sample now ships in `docs/guides/data/`) to validated,
+  linked records and the guarded publish step — every cell executes in CI. Plus a
+  new how-to gallery (`docs/howto/`): bulk ingest, fixing the five classic
+  validation errors, resuming an interrupted submission, funding/ORCID tagging;
+  the runnable pages execute under the doc-snippet CI harness.
+
 ### Fixed
+
+- **A new `CellSpecification` passed to `ws.add("cell", spec=...)` now joins the
+  save set** — previously it was left as an orphan: the instances referenced a spec
+  that never got saved, and `ws.save()` failed with an obscure cell_spec_id error.
+  Its IRI is minted at save like any authored spec.
 
 - **Organization schema field `sameAs` renamed to `same_as`** — the one property the
   snake_case migration missed. The alias layer and the JSON-LD emitter already treated
