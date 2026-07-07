@@ -437,6 +437,22 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
         return None
 
 
+def _file_uri_to_path(url: str) -> Path:
+    """Convert a file:// URI (or plain path string) to a local Path.
+
+    The old inline ``.replace("file:///", "")`` pattern silently turned POSIX
+    URIs into RELATIVE paths (file:///tmp/x -> tmp/x), so downstream
+    existence checks failed on Linux while passing on Windows (/C:/... keeps
+    its drive). urllib handles both platforms and percent-encoding.
+    """
+    if url.startswith("file:"):
+        from urllib.parse import urlparse
+        from urllib.request import url2pathname
+
+        return Path(url2pathname(urlparse(url).path))
+    return Path(url)
+
+
 def _typed_date(value: "str | int | float") -> dict:
     """Wrap a date value as a typed JSON-LD value so consumers can parse it.
 
@@ -3372,7 +3388,7 @@ class AuthoringWorkspace:
 
             processed = next((d for d in dists if d.get("role") == "processed"), None)
             src_url = (processed or {}).get("content_url") or ds.get("access_url") or ""
-            local = Path(src_url.replace("file:///", "").replace("file://", ""))
+            local = _file_uri_to_path(src_url)
             if not local.is_absolute():
                 local = self._root / local
             if not local.exists():
@@ -3439,7 +3455,7 @@ class AuthoringWorkspace:
             changed = False
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = Path(local_url.replace("file:///", "").replace("file://", ""))
+                local_file = _file_uri_to_path(local_url)
                 if not local_file.is_absolute():
                     local_file = self._root / local_file
                 name = local_file.name
@@ -3566,7 +3582,7 @@ class AuthoringWorkspace:
             primary_url: str | None = None
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = Path(local_url.replace("file:///", "").replace("file://", ""))
+                local_file = _file_uri_to_path(local_url)
                 if not local_file.is_absolute():
                     local_file = self._root / local_file
 
@@ -4134,7 +4150,7 @@ class AuthoringWorkspace:
                         url = dist.get("content_url") or ""
                         if not url.startswith("file://"):
                             continue
-                        lp = Path(url.replace("file:///", "").replace("file://", ""))
+                        lp = _file_uri_to_path(url)
                         if lp.exists():
                             collected.append((lp, kind))
                         else:
@@ -4767,7 +4783,7 @@ class AuthoringWorkspace:
                     dists = []
                     for dist in (ds.get("distributions") or []):
                         url   = dist.get("content_url") or ""
-                        fname = Path(url.replace("file:///", "").replace("file://", "")).name
+                        fname = _file_uri_to_path(url).name
                         cs    = dist.get("checksum", {})
                         dists.append({
                             "filename":     fname,
