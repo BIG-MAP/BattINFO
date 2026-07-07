@@ -62,7 +62,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="06 — Publish your first dataset" href="06-publish-your-data.html" />
+    <link rel="next" title="Guide 6 — Publish your first dataset" href="06-publish-your-data.html" />
     <link rel="prev" title="Guide 4 — The semantic layer" href="04-semantic-layer.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -163,7 +163,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -308,7 +308,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -397,11 +397,11 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="01-concepts.html">Guide 1 — Concepts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell: from materials to published record</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: instance, test, dataset, and publishing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: cells, tests, and datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04-semantic-layer.html">Guide 4 — The semantic layer</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Guide 5 — Cell descriptors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">06 — Publish your first dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">Guide 6 — Publish your first dataset</a></li>
 </ul>
 </div>
 </nav></div>
@@ -443,7 +443,7 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Guides</a></li>
+    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Tutorials</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guide 5 — Cell descriptors</span></li>
   </ul>
@@ -466,39 +466,20 @@
 <h1>Guide 5 — Cell descriptors<a class="headerlink" href="#Guide-5-—-Cell-descriptors" title="Link to this heading">#</a></h1>
 <p>Cell descriptors go beyond datasheet-level specifications. They capture electrode composition, electrolyte formulation, separator properties, and cell construction — the detail needed for research-grade records and curated cell libraries.</p>
 <p><strong>Estimated time:</strong> 40 minutes <strong>Prerequisites:</strong> <a class="reference internal" href="02-first-cell-type.html"><span class="doc">Guide 2 — Describing a cell</span></a></p>
-<p>Everything writes under <code class="docutils literal notranslate"><span class="pre">.battinfo/notebooks/guide-05</span></code>.</p>
-<div class="nbinput docutils container">
+<p>Everything writes under <code class="docutils literal notranslate"><span class="pre">_scratch/guide-05/</span></code>.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">_here</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">_here</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-<span class="k">elif</span> <span class="p">(</span><span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running from the repo root.&quot;</span><span class="p">)</span>
-
-<span class="n">WORKSPACE</span> <span class="o">=</span> <span class="n">REPO</span> <span class="o">/</span> <span class="s1">&#39;.battinfo/notebooks/guide-05&#39;</span>
-<span class="n">WORKSPACE</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace:&quot;</span><span class="p">,</span> <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">REPO</span><span class="p">))</span>
+<span class="c1"># This notebook runs from its own folder (docs/guides). Everything it</span>
+<span class="c1"># writes lands in a throwaway scratch folder next to it.</span>
+<span class="n">SCRATCH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;_scratch/guide-05&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="n">SCRATCH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Running from the repo root.
-Workspace: .battinfo\notebooks\guide-05
-</pre></div></div>
 </div>
 <section id="Step-1:-Individual-materials">
 <h2>Step 1: Individual materials<a class="headerlink" href="#Step-1:-Individual-materials" title="Link to this heading">#</a></h2>
@@ -609,10 +590,11 @@ Negative density: {&#39;value&#39;: 1.55, &#39;unit&#39;: &#39;g/cm3&#39;}
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.authoring</span><span class="w"> </span><span class="kn">import</span> <span class="n">electrolyte_recipe</span><span class="p">,</span> <span class="n">material</span> <span class="k">as</span> <span class="n">mat</span>
 
+<span class="c1"># Salts are materials like any other constituent: the same material(...) form</span>
+<span class="c1"># as solvents, with the concentration carried inline.</span>
 <span class="n">lp30</span> <span class="o">=</span> <span class="n">electrolyte_recipe</span><span class="p">(</span>
     <span class="n">family</span><span class="o">=</span><span class="s2">&quot;organic&quot;</span><span class="p">,</span>
-    <span class="n">salt</span><span class="o">=</span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
-    <span class="n">salt_concentration</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mol/L&quot;</span><span class="p">},</span>
+    <span class="n">salt</span><span class="o">=</span><span class="n">mat</span><span class="p">(</span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span> <span class="n">concentration</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mol/L&quot;</span><span class="p">}),</span>
     <span class="n">solvents</span><span class="o">=</span><span class="p">[</span>
         <span class="n">mat</span><span class="p">(</span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>  <span class="n">volume_fraction</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;%&quot;</span><span class="p">}),</span>
         <span class="n">mat</span><span class="p">(</span><span class="s2">&quot;DMC&quot;</span><span class="p">,</span> <span class="n">volume_fraction</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;%&quot;</span><span class="p">}),</span>
@@ -683,7 +665,7 @@ Porosity: {&#39;value&#39;: 41, &#39;unit&#39;: &#39;%&#39;}
 
 <span class="n">build</span> <span class="o">=</span> <span class="n">construction</span><span class="p">(</span>
     <span class="n">assembly_type</span><span class="o">=</span><span class="s2">&quot;wound&quot;</span><span class="p">,</span>
-    <span class="n">layering</span><span class="o">=</span><span class="s2">&quot;jelly-roll&quot;</span><span class="p">,</span>
+    <span class="n">layering</span><span class="o">=</span><span class="s2">&quot;single_layer&quot;</span><span class="p">,</span>
     <span class="n">layer_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Single jelly-roll, wound on 4 mm mandrel&quot;</span><span class="p">,</span>
 <span class="p">)</span>
@@ -697,7 +679,7 @@ Porosity: {&#39;value&#39;: 41, &#39;unit&#39;: &#39;%&#39;}
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Assembly: wound / jelly-roll
+Assembly: wound / single_layer
 </pre></div></div>
 </div>
 </section>
@@ -780,19 +762,59 @@ Model: ANR26650M1-B
 </pre></div></div>
 </div>
 </section>
-<section id="Step-9:-Serialise-the-descriptor">
-<h2>Step 9: Serialise the descriptor<a class="headerlink" href="#Step-9:-Serialise-the-descriptor" title="Link to this heading">#</a></h2>
+<section id="Step-9:-Materials-as-first-class-records">
+<h2>Step 9: Materials as first-class records<a class="headerlink" href="#Step-9:-Materials-as-first-class-records" title="Link to this heading">#</a></h2>
+<p>Every material embedded above can also stand alone. <code class="docutils literal notranslate"><span class="pre">extract_material_specs</span></code> walks the descriptor — electrode coatings, electrolyte, separator — and lifts each distinct material into a standalone <strong>material-spec</strong> record with a deterministic IRI (the same material always mints the same IRI, so specs deduplicate across cells). Components then reference their spec via <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code> — the same spec-and-instance pattern cells use:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.materials</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_material_specs</span>
+
+<span class="n">material_specs</span> <span class="o">=</span> <span class="n">extract_material_specs</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">material_specs</span><span class="p">)</span><span class="si">}</span><span class="s2"> standalone material spec(s):&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">material_specs</span><span class="p">:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">14s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;material_class&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">:</span><span class="s2">22s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+14 standalone material spec(s):
+  LFP            active_material        https://w3id.org/battinfo/material-spec/s6y8-5mne-94gx-e5ve
+  PVDF           binder                 https://w3id.org/battinfo/material-spec/fm9p-sqkk-tbx3-rr66
+  Carbon black   conductive_additive    https://w3id.org/battinfo/material-spec/xz03-r714-wpa0-bwpb
+  Aluminium foil current_collector      https://w3id.org/battinfo/material-spec/92ny-p3qm-6j9n-vrym
+  Graphite       active_material        https://w3id.org/battinfo/material-spec/sm7b-n4y5-2hrk-dv6h
+  CMC            binder                 https://w3id.org/battinfo/material-spec/t4wz-ff8s-6vp6-af48
+  SBR            binder                 https://w3id.org/battinfo/material-spec/7p3d-2e22-7yae-spyb
+  Copper foil    current_collector      https://w3id.org/battinfo/material-spec/ftdw-5z5h-mbn7-x13m
+  LiPF6          electrolyte_salt       https://w3id.org/battinfo/material-spec/xcv1-hpy1-b0bw-z5s2
+  EC             electrolyte_solvent    https://w3id.org/battinfo/material-spec/z6sr-a9yw-gryf-3q55
+  DMC            electrolyte_solvent    https://w3id.org/battinfo/material-spec/va82-gnpn-v0bt-3qed
+  VC             electrolyte_additive   https://w3id.org/battinfo/material-spec/nbz6-pn8h-4458-dh91
+  FEC            electrolyte_additive   https://w3id.org/battinfo/material-spec/t59c-yz22-48as-tdkx
+  Polypropylene  separator_material     https://w3id.org/battinfo/material-spec/n24p-ymxz-gj1j-q6pb
+</pre></div></div>
+</div>
+</section>
+<section id="Step-10:-Serialise-the-descriptor">
+<h2>Step 10: Serialise the descriptor<a class="headerlink" href="#Step-10:-Serialise-the-descriptor" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write the descriptor to disk for inspection and downstream use.</span>
-<span class="n">desc_dir</span> <span class="o">=</span> <span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;descriptors&quot;</span>
+<span class="n">desc_dir</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;descriptors&quot;</span>
 <span class="n">desc_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">desc_path</span> <span class="o">=</span> <span class="n">desc_dir</span> <span class="o">/</span> <span class="s2">&quot;a123-anr26650m1-b.descriptor.json&quot;</span>
 <span class="n">spec_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span> <span class="s2">&quot;specification&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_json</span><span class="p">()}</span>
 <span class="n">desc_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">spec_dict</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Written:&quot;</span><span class="p">,</span> <span class="n">desc_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">WORKSPACE</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Written:&quot;</span><span class="p">,</span> <span class="n">desc_path</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Top-level keys:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">8</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -802,15 +824,15 @@ Model: ANR26650M1-B
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Written: descriptors\a123-anr26650m1-b.descriptor.json
+Written: &lt;repo&gt;\docs\guides\_scratch\guide-05\descriptors\a123-anr26650m1-b.descriptor.json
 Top-level keys: [&#39;schema_version&#39;, &#39;specification&#39;]
 </pre></div></div>
 </div>
 </section>
-<section id="Step-10:-Map-to-domain-battery-JSON-LD">
-<h2>Step 10: Map to domain-battery JSON-LD<a class="headerlink" href="#Step-10:-Map-to-domain-battery-JSON-LD" title="Link to this heading">#</a></h2>
+<section id="Step-11:-Map-to-domain-battery-JSON-LD">
+<h2>Step 11: Map to domain-battery JSON-LD<a class="headerlink" href="#Step-11:-Map-to-domain-battery-JSON-LD" title="Link to this heading">#</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.transform.json_to_jsonld</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_jsonld</span>
@@ -840,16 +862,16 @@ Negative electrode @type: GraphiteElectrode
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Export the domain-battery JSON-LD to disk</span>
-<span class="n">desc_jsonld_path</span> <span class="o">=</span> <span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;descriptors&quot;</span> <span class="o">/</span> <span class="s2">&quot;a123-anr26650m1-b.domain-battery.jsonld&quot;</span>
+<span class="n">desc_jsonld_path</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;descriptors&quot;</span> <span class="o">/</span> <span class="s2">&quot;a123-anr26650m1-b.domain-battery.jsonld&quot;</span>
 <span class="n">desc_jsonld_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
     <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">desc_jsonld</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Domain-battery JSON-LD exported to: </span><span class="si">{</span><span class="n">desc_jsonld_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">WORKSPACE</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Domain-battery JSON-LD exported to: </span><span class="si">{</span><span class="n">desc_jsonld_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">desc_jsonld</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
@@ -860,7 +882,7 @@ Negative electrode @type: GraphiteElectrode
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Domain-battery JSON-LD exported to: descriptors\a123-anr26650m1-b.domain-battery.jsonld
+Domain-battery JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-05\descriptors\a123-anr26650m1-b.domain-battery.jsonld
 
 {
   &#34;@context&#34;: [
@@ -1265,7 +1287,7 @@ Domain-battery JSON-LD exported to: descriptors\a123-anr26650m1-b.domain-battery
           &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
           &#34;schema:propertyID&#34;: &#34;construction.layering&#34;,
           &#34;schema:name&#34;: &#34;Layering&#34;,
-          &#34;schema:value&#34;: &#34;jelly-roll&#34;
+          &#34;schema:value&#34;: &#34;single_layer&#34;
         },
         {
           &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
@@ -1291,10 +1313,10 @@ Domain-battery JSON-LD exported to: descriptors\a123-anr26650m1-b.domain-battery
 </pre></div></div>
 </div>
 </section>
-<section id="Step-11:-Validate-the-descriptor-JSON-LD">
-<h2>Step 11: Validate the descriptor JSON-LD<a class="headerlink" href="#Step-11:-Validate-the-descriptor-JSON-LD" title="Link to this heading">#</a></h2>
+<section id="Step-12:-Validate-the-descriptor-JSON-LD">
+<h2>Step 12: Validate the descriptor JSON-LD<a class="headerlink" href="#Step-12:-Validate-the-descriptor-JSON-LD" title="Link to this heading">#</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.validate.jsonld</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_jsonld_report</span>
@@ -1316,24 +1338,21 @@ ok: True | errors: 0 | warnings: 0
 </pre></div></div>
 </div>
 </section>
-<section id="Step-12:-Publish">
-<h2>Step 12: Publish<a class="headerlink" href="#Step-12:-Publish" title="Link to this heading">#</a></h2>
+<section id="Step-13:-Publish">
+<h2>Step 13: Publish<a class="headerlink" href="#Step-13:-Publish" title="Link to this heading">#</a></h2>
+<p>The descriptor <strong>is</strong> the cell-spec record — publish it directly and the composition travels with it (note the <code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code> key in the saved record, and that the IRI set in Step 8 is preserved):</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish_record</span>
 
-<span class="n">ct</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
-    <span class="n">manufacturer</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">manufacturer</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">chemistry</span><span class="p">,</span>
-    <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">positive_electrode_basis</span><span class="p">,</span>
-    <span class="n">negative_electrode_basis</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">negative_electrode_basis</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">pub</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;published&quot;</span><span class="p">)</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">pub</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">[</span><span class="s2">&quot;canonical_record_path&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 
-<span class="n">pub</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">ct</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;published&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IRI:&quot;</span><span class="p">,</span> <span class="n">pub</span><span class="o">.</span><span class="n">canonical_iri</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IRI:         &quot;</span><span class="p">,</span> <span class="n">pub</span><span class="o">.</span><span class="n">canonical_iri</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Record keys: &quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 </pre></div>
 </div>
 </div>
@@ -1342,28 +1361,23 @@ ok: True | errors: 0 | warnings: 0
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
+IRI:          https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5
+Record keys:  [&#39;schema_version&#39;, &#39;cell_spec&#39;, &#39;properties&#39;, &#39;provenance&#39;, &#39;notes&#39;, &#39;construction&#39;, &#39;positive_electrode&#39;, &#39;negative_electrode&#39;, &#39;electrolyte&#39;, &#39;separator&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">publish_record</span><span class="p">(</span>
     <span class="n">pub</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">[</span><span class="s2">&quot;canonical_record_path&quot;</span><span class="p">],</span>
-    <span class="n">target_root</span><span class="o">=</span><span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;resolver&quot;</span><span class="p">,</span>
+    <span class="n">target_root</span><span class="o">=</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;resolver&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">jsonld_out</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
     <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">],</span> <span class="s2">&quot;index.jsonld&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;@type:&quot;</span><span class="p">,</span> <span class="n">jsonld_out</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Properties:&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">jsonld_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">]</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalValue&quot;</span><span class="p">,</span> <span class="s2">&quot;—&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1373,8 +1387,6 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 @type: [&#39;BatteryCellSpecification&#39;, &#39;schema:CreativeWork&#39;]
-
-Properties:
 </pre></div></div>
 </div>
 </section>
@@ -1408,7 +1420,7 @@ Properties:
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">06 — Publish your first dataset</p>
+        <p class="prev-next-title">Guide 6 — Publish your first dataset</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1439,10 +1451,11 @@ Properties:
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-6:-Construction">Step 6: Construction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-7:-Provenance">Step 7: Provenance</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-8:-Cell-description">Step 8: Cell description</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-9:-Serialise-the-descriptor">Step 9: Serialise the descriptor</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-10:-Map-to-domain-battery-JSON-LD">Step 10: Map to domain-battery JSON-LD</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-11:-Validate-the-descriptor-JSON-LD">Step 11: Validate the descriptor JSON-LD</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-12:-Publish">Step 12: Publish</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-9:-Materials-as-first-class-records">Step 9: Materials as first-class records</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-10:-Serialise-the-descriptor">Step 10: Serialise the descriptor</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-11:-Map-to-domain-battery-JSON-LD">Step 11: Map to domain-battery JSON-LD</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-12:-Validate-the-descriptor-JSON-LD">Step 12: Validate the descriptor JSON-LD</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-13:-Publish">Step 13: Publish</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Next">Next</a></li>
 </ul>
   </nav></div>

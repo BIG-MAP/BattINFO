@@ -59,7 +59,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Guides" href="guides.html" />
+    <link rel="next" title="Tutorials" href="guides.html" />
     <link rel="prev" title="BattINFO" href="../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -160,7 +160,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -305,7 +305,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -453,7 +453,7 @@
 <p>BattINFO is the semantic data layer for battery science. It gives you:</p>
 <ul class="simple">
 <li><p>A Python library and CLI for authoring, validating, and publishing canonical battery metadata</p></li>
-<li><p>JSON Schema validation for cell specs, cell instances, tests, and datasets</p></li>
+<li><p>JSON Schema validation for cell specs, cells, test specs, tests, and datasets</p></li>
 <li><p>Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology</p></li>
 <li><p>A reusable cell-spec library backed by canonical records in <code class="docutils literal notranslate"><span class="pre">battinfo-records</span></code></p></li>
 </ul>
@@ -463,6 +463,13 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>battinfo
 </pre></div>
 </div>
+<p>Optional extras add features as you need them (each missing dependency raises
+an error naming the extra to install):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing]&quot;</span><span class="w">   </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span><span class="w">      </span><span class="c1"># CSV/Parquet/XLSX readers</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish]&quot;</span><span class="w">      </span><span class="c1"># RO-Crate validation for publishing</span>
+</pre></div>
+</div>
 <p>Or install from source for the latest development version:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BIG-MAP/BattINFO.git
 <span class="nb">cd</span><span class="w"> </span>BattINFO
@@ -470,51 +477,55 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </pre></div>
 </div>
 </section>
-<section id="your-first-cell-spec-record">
-<h2>Your first cell-spec record<a class="headerlink" href="#your-first-cell-spec-record" title="Link to this heading">#</a></h2>
-<p>The fastest path is the <code class="docutils literal notranslate"><span class="pre">publish</span></code> shortcut:</p>
+<section id="if-you-have-data-the-workspace">
+<h2>If you have data: the workspace<a class="headerlink" href="#if-you-have-data-the-workspace" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">workspace</span></code> is the one object for the whole journey — convert raw cycler
+files, register the cells you tested, link tests and data, save validated
+records, publish. <code class="docutils literal notranslate"><span class="pre">ws.quickstart()</span></code> prints the full recipe in your terminal;
+the offline-safe core is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>                                  <span class="c1"># raw cycler files → tidy BDF tables</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>                     <span class="c1"># or reuse the registry&#39;s identity:</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Molicel&quot;</span><span class="p">,</span>                   <span class="c1">#   spec = ws.search(&quot;molicel p45b&quot;)[0]</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;INR21700-P45B&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S1&quot;</span><span class="p">])</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;bdf/S1.bdf.csv&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>                                     <span class="c1"># validated records, stable IRIs</span>
+<span class="c1"># ws.login(api_key=&quot;...&quot;)                     # then: ws.publish() for the registry</span>
+<span class="c1">#                                             # (zenodo=True mints a citable DOI)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../guides/06-publish-your-data.html"><span class="doc">Tutorial 6 — Publish your first dataset</span></a>
+walks this exact flow against a sample Neware CSV.</p>
+</section>
+<section id="if-you-are-describing-a-product-models">
+<h2>If you are describing a product: models<a class="headerlink" href="#if-you-are-describing-a-product-models" title="Link to this heading">#</a></h2>
+<p>For a standalone cell-spec record — a datasheet as data — use the <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>
+model and the <code class="docutils literal notranslate"><span class="pre">publish</span></code> shortcut:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
 
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
     <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.235</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">}},</span>
 <span class="p">)</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">canonical_iri</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This validates the record, assigns it a stable BattINFO IRI, and writes the canonical JSON file to <code class="docutils literal notranslate"><span class="pre">.battinfo/</span></code>.</p>
-</section>
-<section id="linking-a-cell-instance-test-and-dataset">
-<h2>Linking a cell instance, test, and dataset<a class="headerlink" href="#linking-a-cell-instance-test-and-dataset" title="Link to this heading">#</a></h2>
-<p>Use <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> to build a fully linked chain of records:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Workspace</span>
-
-<span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.battinfo/demo&quot;</span><span class="p">))</span>
-
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cell_spec</span><span class="p">(</span>
-    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
-    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">cell</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;LAB-001&quot;</span><span class="p">)</span>
-
-<span class="n">protocol</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">test_spec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Constant current discharge&quot;</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">protocol_ref</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;Landt CT2001A&quot;</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;CR2032 baseline&quot;</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;data/run1.csv&quot;</span><span class="p">)</span>
-
-<span class="n">workspace</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>All records are saved to <code class="docutils literal notranslate"><span class="pre">.battinfo/demo/</span></code> with cross-references validated automatically.</p>
+<p>This validates the record, assigns it a stable BattINFO IRI, and writes the
+canonical JSON file to <code class="docutils literal notranslate"><span class="pre">.battinfo/</span></code>.</p>
 </section>
 <section id="cli-quick-reference">
 <h2>CLI quick reference<a class="headerlink" href="#cli-quick-reference" title="Link to this heading">#</a></h2>
@@ -525,11 +536,11 @@ battinfo<span class="w"> </span>validate<span class="w"> </span>examples/cell-sp
 <span class="c1"># Query all registered cell specs</span>
 battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec
 
-<span class="c1"># Save a cell instance from a draft file</span>
+<span class="c1"># Save a cell record from a draft file</span>
 battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span class="w"> </span>--input<span class="w"> </span>draft.json<span class="w"> </span>--source-root<span class="w"> </span>examples
 </pre></div>
 </div>
-<p>See the <a class="reference internal" href="../cli-spec.html"><span class="doc">BattINFO CLI Specification (Scope)</span></a> page for the full CLI reference.</p>
+<p>See the <a class="reference internal" href="cli-reference.html"><span class="doc">CLI reference</span></a> for every command.</p>
 </section>
 <section id="what-to-read-next">
 <h2>What to read next<a class="headerlink" href="#what-to-read-next" title="Link to this heading">#</a></h2>
@@ -538,32 +549,32 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-book sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"></path></svg>  Guide notebooks</p>
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-book sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"></path></svg>  Tutorials</p>
 </div>
 <div class="sd-card-body docutils">
-<p class="sd-card-text">Work through the five guide notebooks covering concepts, authoring, linking, and the semantic layer.</p>
+<p class="sd-card-text">Six notebooks, one story — concepts, authoring, linked records, the semantic layer, and publishing.</p>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference external" href="../guides/01-concepts.html"><span>../guides/01-concepts.html</span></a></div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="guides.html"><span>guides.html</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg>  Python API reference</p>
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg>  Python API overview</p>
 </div>
 <div class="sd-card-body docutils">
-<p class="sd-card-text">Full surface documentation for <code class="docutils literal notranslate"><span class="pre">Workspace</span></code>, <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, ingest helpers, and publishing utilities.</p>
+<p class="sd-card-text">How the Python surface is organized: models, the workspace, and the <code class="docutils literal notranslate"><span class="pre">api</span></code> module.</p>
 </div>
 <a class="sd-stretched-link sd-hide-link-text reference external" href="../python-api.html"><span>../python-api.html</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-gear sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path></svg>  Concepts</p>
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-gear sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path></svg>  How BattINFO is built</p>
 </div>
 <div class="sd-card-body docutils">
-<p class="sd-card-text">How BattINFO relates to domain-battery, EMMO, and the Linked Data stack.</p>
+<p class="sd-card-text">The orientation roadmap: layers, data flow, and where each module fits.</p>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference external" href="../ontology-profile-architecture.html"><span>../ontology-profile-architecture.html</span></a></div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="../how-battinfo-is-built.html"><span>../how-battinfo-is-built.html</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
@@ -604,7 +615,7 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Guides</p>
+        <p class="prev-next-title">Tutorials</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -628,8 +639,8 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#your-first-cell-spec-record">Your first cell-spec record</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linking-a-cell-instance-test-and-dataset">Linking a cell instance, test, and dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-data-the-workspace">If you have data: the workspace</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-are-describing-a-product-models">If you are describing a product: models</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-quick-reference">CLI quick reference</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-to-read-next">What to read next</a></li>
 </ul>

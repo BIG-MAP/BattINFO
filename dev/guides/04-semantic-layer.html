@@ -63,7 +63,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Guide 5 — Cell descriptors" href="05-descriptors.html" />
-    <link rel="prev" title="Guide 3 — Linked records: instance, test, dataset, and publishing" href="03-linked-records.html" />
+    <link rel="prev" title="Guide 3 — Linked records: cells, tests, and datasets" href="03-linked-records.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -163,7 +163,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -308,7 +308,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -397,11 +397,11 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="01-concepts.html">Guide 1 — Concepts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell: from materials to published record</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: instance, test, dataset, and publishing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: cells, tests, and datasets</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Guide 4 — The semantic layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="05-descriptors.html">Guide 5 — Cell descriptors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">06 — Publish your first dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">Guide 6 — Publish your first dataset</a></li>
 </ul>
 </div>
 </nav></div>
@@ -443,7 +443,7 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Guides</a></li>
+    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Tutorials</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guide 4 — The semantic layer</span></li>
   </ul>
@@ -470,25 +470,15 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">_here</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">_here</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-<span class="k">elif</span> <span class="p">(</span><span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
+<span class="n">SCRATCH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;_scratch/guide-04&quot;</span><span class="p">)</span>
+<span class="n">SCRATCH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running from the repo root.&quot;</span><span class="p">)</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span><span class="p">,</span> <span class="n">Workspace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish_record</span>
-
-<span class="n">WORKSPACE</span> <span class="o">=</span> <span class="n">REPO</span> <span class="o">/</span> <span class="s1">&#39;.battinfo/notebooks/guide-04&#39;</span>
-<span class="n">WORKSPACE</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span>
@@ -510,10 +500,10 @@
     <span class="p">},</span>
 <span class="p">)</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">WORKSPACE</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">SCRATCH</span><span class="p">)</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">publish_record</span><span class="p">(</span>
     <span class="n">result</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">[</span><span class="s2">&quot;canonical_record_path&quot;</span><span class="p">],</span>
-    <span class="n">target_root</span><span class="o">=</span><span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;resolver&quot;</span><span class="p">,</span>
+    <span class="n">target_root</span><span class="o">=</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;resolver&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">jsonld_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">],</span> <span class="s2">&quot;index.jsonld&quot;</span><span class="p">)</span>
@@ -527,7 +517,6 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Running from the repo root.
 Ready. IRI: https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd
 </pre></div></div>
 </div>
@@ -784,7 +773,7 @@ isDescriptionFor @type: [&#39;BatteryCell&#39;, &#39;CylindricalBattery&#39;, &#
 <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">jsonld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
     <span class="n">types</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">]</span>
     <span class="n">class_name</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">types</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalValue&quot;</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumberValue&quot;</span><span class="p">)</span>
     <span class="n">unit</span>  <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 </pre></div>
@@ -796,13 +785,13 @@ isDescriptionFor @type: [&#39;BatteryCell&#39;, &#39;CylindricalBattery&#39;, &#
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Quantitative properties:
-  NominalCapacity: None  (AmpereHour)
-  NominalVoltage: None  (Volt)
-  NominalEnergy: None  (WattHour)
-  Mass: None  (Gram)
-  Diameter: None  (MilliMetre)
-  Height: None  (MilliMetre)
-  InternalResistance: None  (MilliOhm)
+  NominalCapacity: 2.5  (AmpereHour)
+  NominalVoltage: 3.3  (Volt)
+  NominalEnergy: 8.25  (WattHour)
+  Mass: 76.0  (Gram)
+  Diameter: 26.0  (MilliMetre)
+  Height: 65.0  (MilliMetre)
+  InternalResistance: 6.0  (MilliOhm)
   CycleLife: None  (EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978)
 </pre></div></div>
 </div>
@@ -901,68 +890,68 @@ Triple count: 62
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-  N1d3e1e9c7f124e6fb970956779aaf50a  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N1d3e1e9c7f124e6fb970956779aaf50a  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  76.0
-  N3462097cbee64177b0a774a5fbe26dbc  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N3462097cbee64177b0a774a5fbe26dbc  →  type  →  electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
-  N3462097cbee64177b0a774a5fbe26dbc  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N7742f700df934ae5b5c455f4cb59ad69
-  N3462097cbee64177b0a774a5fbe26dbc  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  WattHour
-  N38eac6c93bd24d57b0b7cc3a311e072c  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N38eac6c93bd24d57b0b7cc3a311e072c  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  2.5
-  N4017de0fdb5746e9bba3a37a50d3adfa  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N4017de0fdb5746e9bba3a37a50d3adfa  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  3.3
-  N4fc85383ee2c427096ff71b4b9c3be0f  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N4fc85383ee2c427096ff71b4b9c3be0f  →  type  →  electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937
-  N4fc85383ee2c427096ff71b4b9c3be0f  →  value  →  &gt;1000
-  N4fc85383ee2c427096ff71b4b9c3be0f  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978
-  N59d1b51113b94e67b7e854a2b3e31d59  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N59d1b51113b94e67b7e854a2b3e31d59  →  type  →  electrochemistry_639b844a_e801_436b_985d_28926129ead6
-  N59d1b51113b94e67b7e854a2b3e31d59  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N4017de0fdb5746e9bba3a37a50d3adfa
-  N59d1b51113b94e67b7e854a2b3e31d59  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Volt
-  N662170ea88794178be978ed0c04a4203  →  type  →  EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
-  N662170ea88794178be978ed0c04a4203  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N662170ea88794178be978ed0c04a4203  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N7490722fb7ce4c408b10c103476c2920
-  N662170ea88794178be978ed0c04a4203  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
-  N72d63abe691c46738ae43e6f80c95d30  →  type  →  EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
-  N72d63abe691c46738ae43e6f80c95d30  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N72d63abe691c46738ae43e6f80c95d30  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N85703d1cd50548ada56c0bf072be6bc3
-  N72d63abe691c46738ae43e6f80c95d30  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
-  N7490722fb7ce4c408b10c103476c2920  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N7490722fb7ce4c408b10c103476c2920  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  65.0
-  N7742f700df934ae5b5c455f4cb59ad69  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N7742f700df934ae5b5c455f4cb59ad69  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  8.25
-  N85703d1cd50548ada56c0bf072be6bc3  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  N85703d1cd50548ada56c0bf072be6bc3  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  26.0
-  N8fb8bf41565a47ada3ecc495cc006e54  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  N8fb8bf41565a47ada3ecc495cc006e54  →  type  →  EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
-  N8fb8bf41565a47ada3ecc495cc006e54  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N1d3e1e9c7f124e6fb970956779aaf50a
-  N8fb8bf41565a47ada3ecc495cc006e54  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Gram
-  Na2e070ae2c3f49888e4c6ffa1bc0498c  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
-  Na2e070ae2c3f49888e4c6ffa1bc0498c  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  6.0
-  Nac9ed68bb617479e8ac93b18e3aeec28  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  Nac9ed68bb617479e8ac93b18e3aeec28  →  type  →  electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
-  Nac9ed68bb617479e8ac93b18e3aeec28  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Na2e070ae2c3f49888e4c6ffa1bc0498c
-  Nac9ed68bb617479e8ac93b18e3aeec28  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliOhm
-  Nb46ae90a1af64e0f9eec363ade23d2f0  →  type  →  Organization
-  Nb46ae90a1af64e0f9eec363ade23d2f0  →  name  →  A123 Systems
-  Nca4c488c619b40acb7c4616118adbf4b  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
-  Nca4c488c619b40acb7c4616118adbf4b  →  type  →  electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
-  Nca4c488c619b40acb7c4616118adbf4b  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N38eac6c93bd24d57b0b7cc3a311e072c
-  Nca4c488c619b40acb7c4616118adbf4b  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  AmpereHour
+  N0525a14af0004e1f96fa91977385f77c  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N0525a14af0004e1f96fa91977385f77c  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  3.3
+  N174e0cfccaff4d80979012ba155693f4  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N174e0cfccaff4d80979012ba155693f4  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  76.0
+  N1b18ce350ca541098835287c5deee1ab  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N1b18ce350ca541098835287c5deee1ab  →  type  →  electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d
+  N1b18ce350ca541098835287c5deee1ab  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N4b4fb6e0dc444465a90c7713fe8255d7
+  N1b18ce350ca541098835287c5deee1ab  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliOhm
+  N2804906720a94571ae9fbd8b809a316f  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N2804906720a94571ae9fbd8b809a316f  →  type  →  electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+  N2804906720a94571ae9fbd8b809a316f  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Ndbdf5fdaa6834cb7add4e2e873283d4e
+  N2804906720a94571ae9fbd8b809a316f  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  AmpereHour
+  N2a0214b12a4c4b22ad5f805850d45d85  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N2a0214b12a4c4b22ad5f805850d45d85  →  type  →  electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+  N2a0214b12a4c4b22ad5f805850d45d85  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N3548a07986974e458efd5e2e1cb7b095
+  N2a0214b12a4c4b22ad5f805850d45d85  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  WattHour
+  N3548a07986974e458efd5e2e1cb7b095  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N3548a07986974e458efd5e2e1cb7b095  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  8.25
+  N3eebbe98573f4b3e86c3fb7c10ea45c0  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N3eebbe98573f4b3e86c3fb7c10ea45c0  →  type  →  electrochemistry_639b844a_e801_436b_985d_28926129ead6
+  N3eebbe98573f4b3e86c3fb7c10ea45c0  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N0525a14af0004e1f96fa91977385f77c
+  N3eebbe98573f4b3e86c3fb7c10ea45c0  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Volt
+  N4b4fb6e0dc444465a90c7713fe8255d7  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N4b4fb6e0dc444465a90c7713fe8255d7  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  6.0
+  N5861f8d4f2854c709527d26c25bbca8b  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  N5861f8d4f2854c709527d26c25bbca8b  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  65.0
+  N6edeff87c41841bc86d41aed8cadc7ba  →  type  →  EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6
+  N6edeff87c41841bc86d41aed8cadc7ba  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  N6edeff87c41841bc86d41aed8cadc7ba  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Na79989b6b4d84b34a3dab214986f1b83
+  N6edeff87c41841bc86d41aed8cadc7ba  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
+  N7b3b4683456e45cbbb7652878358beb2  →  type  →  Organization
+  N7b3b4683456e45cbbb7652878358beb2  →  name  →  A123 Systems
+  Na79989b6b4d84b34a3dab214986f1b83  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  Na79989b6b4d84b34a3dab214986f1b83  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  26.0
+  Nc6d0a1808fe542bc8eb26f19041e5cf8  →  type  →  EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba
+  Nc6d0a1808fe542bc8eb26f19041e5cf8  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  Nc6d0a1808fe542bc8eb26f19041e5cf8  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N5861f8d4f2854c709527d26c25bbca8b
+  Nc6d0a1808fe542bc8eb26f19041e5cf8  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre
+  Ndbdf5fdaa6834cb7add4e2e873283d4e  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486
+  Ndbdf5fdaa6834cb7add4e2e873283d4e  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  2.5
+  Ne11b669bf35748db9762292f9eb8e57e  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  Ne11b669bf35748db9762292f9eb8e57e  →  type  →  electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937
+  Ne11b669bf35748db9762292f9eb8e57e  →  value  →  &gt;1000
+  Ne11b669bf35748db9762292f9eb8e57e  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978
+  Nf5b55083f8b6464da059e8491f9048db  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456
+  Nf5b55083f8b6464da059e8491f9048db  →  type  →  EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405
+  Nf5b55083f8b6464da059e8491f9048db  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N174e0cfccaff4d80979012ba155693f4
+  Nf5b55083f8b6464da059e8491f9048db  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Gram
   wckm-y5a4-he0k-2scd  →  type  →  CreativeWork
   wckm-y5a4-he0k-2scd  →  type  →  battery_1cfbba6c_8824_4932_a23e_2141483acef7
   wckm-y5a4-he0k-2scd  →  identifier  →  wckm-y5a4-he0k-2scd
-  wckm-y5a4-he0k-2scd  →  manufacturer  →  Nb46ae90a1af64e0f9eec363ade23d2f0
+  wckm-y5a4-he0k-2scd  →  manufacturer  →  N7b3b4683456e45cbbb7652878358beb2
   wckm-y5a4-he0k-2scd  →  name  →  A123 Systems ANR26650M1-B
   wckm-y5a4-he0k-2scd  →  size  →  R26650
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N3462097cbee64177b0a774a5fbe26dbc
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N4fc85383ee2c427096ff71b4b9c3be0f
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N59d1b51113b94e67b7e854a2b3e31d59
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N662170ea88794178be978ed0c04a4203
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N72d63abe691c46738ae43e6f80c95d30
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N8fb8bf41565a47ada3ecc495cc006e54
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nac9ed68bb617479e8ac93b18e3aeec28
-  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nca4c488c619b40acb7c4616118adbf4b
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N1b18ce350ca541098835287c5deee1ab
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N2804906720a94571ae9fbd8b809a316f
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N2a0214b12a4c4b22ad5f805850d45d85
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N3eebbe98573f4b3e86c3fb7c10ea45c0
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N6edeff87c41841bc86d41aed8cadc7ba
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nc6d0a1808fe542bc8eb26f19041e5cf8
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Ne11b669bf35748db9762292f9eb8e57e
+  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nf5b55083f8b6464da059e8491f9048db
 </pre></div></div>
 </div>
 </section>
@@ -972,21 +961,24 @@ Triple count: 62
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;multi&quot;</span><span class="p">)</span>
-<span class="n">ct</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">cell_spec</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;multi&quot;</span><span class="p">)</span>
+<span class="n">multi_spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span> <span class="n">negative_electrode_basis</span><span class="o">=</span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
     <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">}},</span>
 <span class="p">)</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">ct</span><span class="p">,</span> <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;a123-demo-multi-001&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">multi_spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a123-demo-multi-001&quot;</span><span class="p">])</span>
 <span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-<span class="c1"># Publish each record as a resolver artifact</span>
+<span class="c1"># Publish each saved record as a resolver artifact</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">publish_record</span> <span class="k">as</span> <span class="n">_publish_one</span>
 
-<span class="n">multi_resolver</span> <span class="o">=</span> <span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;multi-resolver&quot;</span>
-<span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;multi&quot;</span> <span class="o">/</span> <span class="s2">&quot;examples&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
+<span class="n">multi_records</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;multi&quot;</span> <span class="o">/</span> <span class="s2">&quot;.battinfo&quot;</span> <span class="o">/</span> <span class="s2">&quot;records&quot;</span> <span class="o">/</span> <span class="s2">&quot;examples&quot;</span>
+<span class="n">multi_resolver</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;multi-resolver&quot;</span>
+<span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">multi_records</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
     <span class="n">_publish_one</span><span class="p">(</span><span class="n">record_file</span><span class="p">,</span> <span class="n">target_root</span><span class="o">=</span><span class="n">multi_resolver</span><span class="p">)</span>
 
 <span class="n">jsonld_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">multi_resolver</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;index.jsonld&quot;</span><span class="p">))</span>
@@ -1005,6 +997,12 @@ Triple count: 62
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+  cell: a123-demo-multi-001  (IRI auto-assigned)
+Saved 2 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-04\multi\.battinfo\records:
+  cell spec   A123 Systems ANR26650M1-B            [updated]  .battinfo\records\examples\cell-spec\cell-spec-e4t5-w9re-mpq6-8g7e.json
+  cell        a123-demo-multi-001                  [updated]  .battinfo\records\examples\cell-instance\cell-aaqe-rvbd-c0b6-p1k3.json
+
+  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
 Combined graph: 20 triples from 2 files
 </pre></div></div>
 </div>
@@ -1036,7 +1034,8 @@ Combined graph: 20 triples from 2 files
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prop_map</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
-    <span class="p">(</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;assets/mappings/domain-battery/property_map.curated.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="c1"># Repo files sit two levels up from this notebook.</span>
+    <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../assets/mappings/domain-battery/property_map.curated.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property map version: </span><span class="si">{</span><span class="n">prop_map</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Curated entries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_map</span><span class="p">[</span><span class="s1">&#39;mappings&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1091,7 +1090,7 @@ Curated entries: 63
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Guide 3 — Linked records: instance, test, dataset, and publishing</p>
+        <p class="prev-next-title">Guide 3 — Linked records: cells, tests, and datasets</p>
       </div>
     </a>
     <a class="right-next"

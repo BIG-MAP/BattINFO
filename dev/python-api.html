@@ -160,7 +160,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -305,7 +305,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -464,6 +464,9 @@
                   
   <section id="battinfo-python-api">
 <h1>BattINFO Python API<a class="headerlink" href="#battinfo-python-api" title="Link to this heading">#</a></h1>
+<p>How the Python surface is organized. For the full symbol-by-symbol reference,
+see the <a class="reference internal" href="pages/api-reference.html"><span class="std std-doc">generated API reference</span></a>; for the layered
+architecture, see <a class="reference internal" href="how-battinfo-is-built.html"><span class="std std-doc">How BattINFO is built</span></a>.</p>
 <section id="where-to-start">
 <h2>Where to start<a class="headerlink" href="#where-to-start" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -473,197 +476,68 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Publish a cell spec or build a linked cell→test→dataset chain from Python objects</p></td>
-<td><p><a class="reference internal" href="#workspace-release-export"><span class="std std-ref">Workspace</span></a> — the primary authoring surface</p></td>
+<tr class="row-even"><td><p>Turn lab data into published, linked records</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> — the one object for the whole journey</p></td>
 </tr>
-<tr class="row-odd"><td><p>Turn an existing folder of photos and CSV files into a linked BattINFO submission</p></td>
-<td><p><a class="reference internal" href="#ingest-first-intake"><span class="std std-ref">Ingest helpers</span></a> — one-command folder intake</p></td>
+<tr class="row-odd"><td><p>Describe a battery product (a datasheet as data)</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> model + the <code class="docutils literal notranslate"><span class="pre">publish</span></code> shortcut</p></td>
 </tr>
-<tr class="row-even"><td><p>Load, query, or save canonical records from disk</p></td>
-<td><p><a class="reference internal" href="#query-and-save"><span class="std std-ref">battinfo.api helpers</span></a></p></td>
+<tr class="row-even"><td><p>Author research-grade composition (materials, electrodes, electrolyte)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.authoring</span></code> — see <a class="reference internal" href="guides/05-descriptors.html"><span class="std std-doc">Tutorial 5</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p>Author records as JSON files and drive the workflow from the CLI</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">LocalWorkspace</span></code> — disk-first submission scaffold behind <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">workspace</span> <span class="pre">...</span></code></p></td>
+<tr class="row-odd"><td><p>Load, query, save, or resolver-publish canonical records</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> helpers</p></td>
+</tr>
+<tr class="row-even"><td><p>Turn a folder of photos and CSVs into a linked submission</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code> — one-command folder intake</p></td>
+</tr>
+<tr class="row-odd"><td><p>Drive everything from the shell</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">battinfo</span></code> CLI — see the <a class="reference internal" href="pages/cli-reference.html"><span class="std std-doc">CLI reference</span></a></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>If you are new here, start with <code class="docutils literal notranslate"><span class="pre">Workspace</span></code>. The <a class="reference internal" href="guides/01-concepts.html"><span class="std std-doc">guide notebooks</span></a>
-walk through the full authoring flow end to end.</p>
-<p>Scope:</p>
-<ul class="simple">
-<li><p>core: <code class="docutils literal notranslate"><span class="pre">Workspace</span></code>, publication, canonical record save/query/publish/index helpers, and the guide notebooks</p></li>
-<li><p>preview: reusable cell-spec library workflows beyond the guide walkthrough fixtures</p></li>
-</ul>
+<p>If you are new here, start with the <a class="reference internal" href="pages/guides.html"><span class="std std-doc">tutorials</span></a> — six
+notebooks that walk the whole story end to end.</p>
+<p>The curated top-level namespace (<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">battinfo</span></code>) exposes the models, the
+workspace, publishing, and validation — everything else lives in its home
+module (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo.authoring</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo.materials</span></code>, …) and
+is documented there.</p>
 </section>
-<section id="install">
-<h2>Install<a class="headerlink" href="#install" title="Link to this heading">#</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<section id="the-workspace">
+<h2>The workspace<a class="headerlink" href="#the-workspace" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(root)</span></code> is the data-first surface: convert raw cycler
+files, register cells, link tests and data, save validated records with
+stable IRIs, and publish — to the registry review queue and, with
+<code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code>, to a citable DOI.</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>                              <span class="c1"># raw cycler files → tidy BDF tables</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;samsung inr21700 50e&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>   <span class="c1"># reuse the registry&#39;s identity</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="s2">&quot;S2&quot;</span><span class="p">])</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;bdf/S1.bdf.csv&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="s2">&quot;My cycling campaign, 2026&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">ws.quickstart()</span></code> prints the full recipe, including login and funding
+attribution (<code class="docutils literal notranslate"><span class="pre">ws.project(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.contributor(...)</span></code>).
+<a class="reference internal" href="guides/03-linked-records.html"><span class="std std-doc">Tutorial 3</span></a> builds the chain step by step;
+<a class="reference internal" href="guides/06-publish-your-data.html"><span class="std std-doc">Tutorial 6</span></a> runs it from a raw cycler
+export.</p>
+<p>Drafts and templates: <code class="docutils literal notranslate"><span class="pre">ws.template(&quot;cell-spec&quot;,</span> <span class="pre">...)</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ws.template(&quot;test-spec&quot;,</span> <span class="pre">...)</span></code> write skeleton draft files; <code class="docutils literal notranslate"><span class="pre">ws.load(path)</span></code>
+authors them into the session. <code class="docutils literal notranslate"><span class="pre">ws.load(ws.search(...)[0])</span></code> references an
+existing registry record instead (reused, never re-published).</p>
 </section>
-<section id="ingest-first-intake">
-<h2>Ingest-First Intake<a class="headerlink" href="#ingest-first-intake" title="Link to this heading">#</a></h2>
-<p>Use the ingest helpers when you want one-command registration for a typed
-resource instance plus its evidence files.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_ingest_workspace</span><span class="p">,</span> <span class="n">publish_ingest_workspace</span><span class="p">,</span> <span class="n">write_ingest_manifest</span>
-
-<span class="n">write_ingest_manifest</span><span class="p">(</span>
-    <span class="sa">r</span><span class="s2">&quot;D:\cell_phone\novonix\google--g20m7--2025--15qnrp&quot;</span><span class="p">,</span>
-    <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
-    <span class="n">type_record</span><span class="o">=</span><span class="s2">&quot;battinfo-records/records/cell-spec/google--g20m7--2025/record.json&quot;</span><span class="p">,</span>
-    <span class="n">resource_iri</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q&quot;</span><span class="p">,</span>
-    <span class="n">publisher_id</span><span class="o">=</span><span class="s2">&quot;demo-lab&quot;</span><span class="p">,</span>
-    <span class="n">license</span><span class="o">=</span><span class="s2">&quot;CC-BY-4.0&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">build</span> <span class="o">=</span> <span class="n">build_ingest_workspace</span><span class="p">(</span>
-    <span class="sa">r</span><span class="s2">&quot;D:\cell_phone\novonix\google--g20m7--2025--15qnrp&quot;</span><span class="p">,</span>
-    <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
-    <span class="n">workspace_id</span><span class="o">=</span><span class="s2">&quot;google-g20m7-instance-demo&quot;</span><span class="p">,</span>
-    <span class="n">source_version</span><span class="o">=</span><span class="s2">&quot;demo-2026-04-09&quot;</span><span class="p">,</span>
-    <span class="n">artifact_base_url</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8040&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">published</span> <span class="o">=</span> <span class="n">publish_ingest_workspace</span><span class="p">(</span>
-    <span class="sa">r</span><span class="s2">&quot;D:\cell_phone\novonix\google--g20m7--2025--15qnrp&quot;</span><span class="p">,</span>
-    <span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
-    <span class="n">workspace_id</span><span class="o">=</span><span class="s2">&quot;google-g20m7-instance-demo&quot;</span><span class="p">,</span>
-    <span class="n">source_version</span><span class="o">=</span><span class="s2">&quot;demo-2026-04-09&quot;</span><span class="p">,</span>
-    <span class="n">registry_base_url</span><span class="o">=</span><span class="s2">&quot;https://registry.example.org&quot;</span><span class="p">,</span>
-    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-    <span class="n">platform_base_url</span><span class="o">=</span><span class="s2">&quot;https://www.battery-genome.org&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>Behavior today:</p>
-<ul class="simple">
-<li><p>the folder-local <code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code> manifest carries stable ingest metadata</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">resource_type=&quot;cell-instance&quot;</span></code> is the currently implemented typed ingest subject</p></li>
-<li><p>one photo becomes one standalone photo dataset</p></li>
-<li><p>one CSV becomes one <code class="docutils literal notranslate"><span class="pre">Test</span></code> plus one <code class="docutils literal notranslate"><span class="pre">Dataset</span></code></p></li>
-<li><p>the first photo dataset becomes the Battery Genome hero image for the cell page</p></li>
-<li><p>the returned payload includes the canonical cell id plus registry/platform URLs</p></li>
-</ul>
-<p>Contract note:</p>
-<ul class="simple">
-<li><p>the manifest shape is defined by <code class="docutils literal notranslate"><span class="pre">docs/ingest-manifest-contract.md</span></code></p></li>
-<li><p>runtime validation uses <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code></p></li>
-</ul>
-</section>
-<section id="publication-package">
-<h2>Publication Package<a class="headerlink" href="#publication-package" title="Link to this heading">#</a></h2>
-<p>The stable publication path is Schema.org JSON-LD first. Build the core object
-chain, call <code class="docutils literal notranslate"><span class="pre">build_publication_package(...)</span></code>, then reload with
-<code class="docutils literal notranslate"><span class="pre">load_publication_package(...)</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Test</span><span class="p">,</span> <span class="n">build_publication_package</span><span class="p">,</span> <span class="n">load_publication_package</span>
-
-<span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/cr2032-run&quot;</span><span class="p">)</span>
-<span class="n">dataset_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;capacity.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;cycle,capacity_ah</span><span class="se">\n</span><span class="s2">1,0.225</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
-    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
-    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">,</span>
-    <span class="n">size_code</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
-    <span class="n">nominal_voltage</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
-<span class="p">)</span>
-
-<span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span>
-    <span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span>
-    <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;energizer-cr2032-202602-dtjrga&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">test</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span>
-    <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span>
-    <span class="n">protocol</span><span class="o">=</span><span class="s2">&quot;constant current discharging&quot;</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;short Landt cycler&quot;</span><span class="p">,</span>
-    <span class="n">status</span><span class="o">=</span><span class="s2">&quot;completed&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
-    <span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">),</span>
-    <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span>
-    <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Energizer CR2032 dataset&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">report</span> <span class="o">=</span> <span class="n">build_publication_package</span><span class="p">(</span>
-    <span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span>
-    <span class="n">cell_instance</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span>
-    <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span>
-    <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">bundle</span> <span class="o">=</span> <span class="n">load_publication_package</span><span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;battinfo.publish.jsonld&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Notes:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.publish.jsonld</span></code> remains the foundational Schema.org JSON-LD artifact.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ro-crate-metadata.json</span></code> is emitted alongside it for RO-Crate alignment.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">datacite-metadata.json</span></code> is emitted alongside it for DataCite-aligned deposit metadata.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.dcat.jsonld</span></code> is available as an optional export.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> is optional provenance support, not required core bundle content.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">emit_bundle_dir=True</span></code> writes the optional debug JSON files under <code class="docutils literal notranslate"><span class="pre">dataset_dir/battinfo/</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">publish_dataset_metadata(...)</span></code> is the generic helper for low-plumbing workflows.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">publish_cr2032_dataset_metadata(...)</span></code> is kept as a CR2032 convenience wrapper.</p></li>
-</ul>
-</section>
-<section id="workspace-release-export">
-<h2>Workspace Release Export<a class="headerlink" href="#workspace-release-export" title="Link to this heading">#</a></h2>
-<p>Use <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> directly when you want the primary BattINFO authoring surface and
-also need a disk-backed submission workspace or a registry-ready submission
-package without instantiating <code class="docutils literal notranslate"><span class="pre">LocalWorkspace</span></code> yourself.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Workspace</span>
-
-<span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.battinfo/demo&quot;</span><span class="p">))</span>
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cell_spec</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="n">cell</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-<span class="n">protocol</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">test_spec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;1C Cycle Life at 25 C&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">protocol_ref</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Cycle life dataset&quot;</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;data/cycle-life.csv&quot;</span><span class="p">)</span>
-
-<span class="n">workspace</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-<span class="n">workspace</span><span class="o">.</span><span class="n">build_publication_package</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-
-<span class="n">release</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">export_submission_workspace</span><span class="p">(</span>
-    <span class="n">dataset</span><span class="p">,</span>
-    <span class="n">registry</span><span class="o">=</span><span class="s2">&quot;digibatt/hello-world&quot;</span><span class="p">,</span>
-    <span class="n">publisher_id</span><span class="o">=</span><span class="s2">&quot;demo-lab&quot;</span><span class="p">,</span>
-    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">submission</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">build_submission_package</span><span class="p">(</span>
-    <span class="n">dataset</span><span class="p">,</span>
-    <span class="n">registry</span><span class="o">=</span><span class="s2">&quot;digibatt/hello-world&quot;</span><span class="p">,</span>
-    <span class="n">publisher_id</span><span class="o">=</span><span class="s2">&quot;demo-lab&quot;</span><span class="p">,</span>
-    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-    <span class="n">root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.battinfo/demo-release&quot;</span><span class="p">),</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>Use <code class="docutils literal notranslate"><span class="pre">LocalWorkspace</span></code> directly only when the disk workspace itself is your source of
-truth or when you are driving the <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">workspace</span> <span class="pre">...</span></code> CLI.</p>
-<p>Submission note:</p>
-<ul class="simple">
-<li><p>BattINFO-generated submission packages are now transport envelopes around canonical BattINFO records.</p></li>
-<li><p>The package still carries workflow and release fields such as <code class="docutils literal notranslate"><span class="pre">workspace_id</span></code>, <code class="docutils literal notranslate"><span class="pre">publisher_id</span></code>, <code class="docutils literal notranslate"><span class="pre">source_version</span></code>, and <code class="docutils literal notranslate"><span class="pre">publication_intent</span></code>.</p></li>
-<li><p>BattINFO no longer duplicates lightweight display metadata inside the submission <code class="docutils literal notranslate"><span class="pre">semantic_payload</span></code>; <code class="docutils literal notranslate"><span class="pre">battinfo-registry</span></code> derives normalized page metadata from <code class="docutils literal notranslate"><span class="pre">battinfo_records</span></code>.</p></li>
-</ul>
-<p>Terminology note:</p>
-<ul class="simple">
-<li><p>The BattINFO authoring surface uses <code class="docutils literal notranslate"><span class="pre">workspace_id</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">battinfo-registry</span></code> now uses <code class="docutils literal notranslate"><span class="pre">workspace_id</span></code> as well, so the publication boundary is vocabulary-aligned end to end.</p></li>
-</ul>
-<p>Cell-spec publish shortcut:</p>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, and <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> are the record types as
+pydantic models — the single source of truth for authoring and for what is on
+disk. For a standalone cell-spec record, <code class="docutils literal notranslate"><span class="pre">publish</span></code> is the shortcut:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
 
 <span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
@@ -688,105 +562,58 @@ truth or when you are driving the <code class="docutils literal notranslate"><sp
 <li><p><code class="docutils literal notranslate"><span class="pre">destination=&quot;local&quot;</span></code> writes the canonical BattINFO record and returns its path in <code class="docutils literal notranslate"><span class="pre">debug_paths</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">destination=&quot;registry&quot;</span></code> also generates the submission package and submits it to <code class="docutils literal notranslate"><span class="pre">battinfo-registry</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">destination=&quot;battery-genome&quot;</span></code> additionally returns the expected Battery Genome page URL when <code class="docutils literal notranslate"><span class="pre">platform_base_url</span></code> is configured.</p></li>
-<li><p>The existing package-oriented dataset publication helper remains available via <code class="docutils literal notranslate"><span class="pre">publish(cell_spec=...,</span> <span class="pre">cell_instance=...,</span> <span class="pre">test=...,</span> <span class="pre">dataset=...)</span></code>.</p></li>
 </ul>
 </section>
-<section id="load-cell-specs-from-json">
-<h2>Load Cell Specs From JSON<a class="headerlink" href="#load-cell-specs-from-json" title="Link to this heading">#</a></h2>
-<p>If you want to manually define cell specs as JSON first, load them directly into
-<code class="docutils literal notranslate"><span class="pre">Workspace</span></code>:</p>
+<section id="publication-package-models-path">
+<h2>Publication package (models path)<a class="headerlink" href="#publication-package-models-path" title="Link to this heading">#</a></h2>
+<p>When you hold the four core objects in Python and want the local publication
+artifacts without a workspace, build the package directly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Workspace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Test</span><span class="p">,</span> <span class="n">build_publication_package</span><span class="p">,</span> <span class="n">load_publication_package</span>
 
-<span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.battinfo/manual-cell-specs&quot;</span><span class="p">))</span>
+<span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/cr2032-run&quot;</span><span class="p">)</span>
+<span class="n">dataset_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;capacity.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;cycle,capacity_ah</span><span class="se">\n</span><span class="s2">1,0.225</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">load_cell_spec</span><span class="p">(</span><span class="s2">&quot;examples/cell-spec/A123__ANR26650M1-B.json&quot;</span><span class="p">)</span>
-<span class="n">more_cell_specs</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">load_cell_specs</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">&quot;examples/cell-spec&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>If you want a starter draft file to fill in first, generate one with the API:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">template_cell_spec_draft</span>
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span><span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;energizer-cr2032-202602-dtjrga&quot;</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="s2">&quot;constant current discharging&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;completed&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">),</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Energizer CR2032 dataset&quot;</span><span class="p">)</span>
 
-<span class="n">draft</span> <span class="o">=</span> <span class="n">template_cell_spec_draft</span><span class="p">(</span>
-    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123&quot;</span><span class="p">,</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
-    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
-    <span class="n">iec_code</span><span class="o">=</span><span class="s2">&quot;IFpR26650&quot;</span><span class="p">,</span>
+<span class="n">report</span> <span class="o">=</span> <span class="n">build_publication_package</span><span class="p">(</span>
+    <span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">cell_instance</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="n">bundle</span> <span class="o">=</span> <span class="n">load_publication_package</span><span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;battinfo.publish.jsonld&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>These helpers accept either:</p>
+<p>Notes:</p>
 <ul class="simple">
-<li><p>a simple authoring draft with fields like <code class="docutils literal notranslate"><span class="pre">manufacturer</span></code>, <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span></code>, <code class="docutils literal notranslate"><span class="pre">chemistry</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">specs</span></code></p></li>
-<li><p>a canonical BattINFO <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code> record with a top-level <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code> object</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.publish.jsonld</span></code> is the foundational Schema.org JSON-LD artifact.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ro-crate-metadata.json</span></code> and <code class="docutils literal notranslate"><span class="pre">datacite-metadata.json</span></code> are emitted alongside it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.dcat.jsonld</span></code> is available as an optional export.</p></li>
 </ul>
-<p>Draft inputs should omit canonical fields like <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">short_id</span></code>, and <code class="docutils literal notranslate"><span class="pre">identifier</span></code>.
-<code class="docutils literal notranslate"><span class="pre">Workspace.save()</span></code> canonizes those fields and fills default provenance if you did
-not provide it.</p>
 </section>
-<section id="reusable-test-specs">
-<h2>Reusable Test Specs<a class="headerlink" href="#reusable-test-specs" title="Link to this heading">#</a></h2>
-<p>If you want to separate reusable procedures from executed test runs, use
-<code class="docutils literal notranslate"><span class="pre">TestSpec</span></code> plus the existing <code class="docutils literal notranslate"><span class="pre">Test</span></code> record:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Workspace</span>
-
-<span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;.battinfo/test-spec-demo&quot;</span><span class="p">)</span>
-
-<span class="n">protocol</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">test_spec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1C Cycle Life at 25 C&quot;</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span>
-    <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-    <span class="n">protocol_url</span><span class="o">=</span><span class="s2">&quot;https://example.org/protocols/cycle-life-1c&quot;</span><span class="p">,</span>
-    <span class="n">conditions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;degC&quot;</span><span class="p">}},</span>
-    <span class="n">experiment</span><span class="o">=</span><span class="p">[</span>
-        <span class="s2">&quot;Charge at 1C until 4.2 V&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Discharge at 1C until 2.5 V&quot;</span><span class="p">,</span>
-    <span class="p">],</span>
-<span class="p">)</span>
-
-<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cell_spec</span><span class="p">(</span>
-    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
-    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
-    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">cell</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;LAB-001&quot;</span><span class="p">)</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">protocol_ref</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;Biologic VSP-300&quot;</span><span class="p">)</span>
-<span class="n">workspace</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>You can also hand-author reusable test-spec JSON first with
-<code class="docutils literal notranslate"><span class="pre">template_test_spec_draft(...)</span></code> or load canonical test-spec records with
-<code class="docutils literal notranslate"><span class="pre">Workspace.load_test_spec(...)</span></code>.</p>
-</section>
-<section id="query-and-save">
-<h2>Query And Save<a class="headerlink" href="#query-and-save" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> helpers remain useful for canonical record workflows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_cell_specs</span><span class="p">,</span> <span class="n">save_cell_instance</span><span class="p">,</span> <span class="n">template_cell_instance</span>
+<section id="query-and-save-battinfo-api">
+<h2>Query and save (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)<a class="headerlink" href="#query-and-save-battinfo-api" title="Link to this heading">#</a></h2>
+<p>Canonical-record helpers for scripted workflows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_cell_specs</span><span class="p">,</span> <span class="n">save_cell_instance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">template_cell_instance</span>
 
 <span class="n">rows</span> <span class="o">=</span> <span class="n">query_cell_specs</span><span class="p">(</span><span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
 <span class="n">draft</span> <span class="o">=</span> <span class="n">template_cell_instance</span><span class="p">(</span><span class="n">cell_spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/3m6k-9t2p-7x4h-9nq8&quot;</span><span class="p">)</span>
 <span class="n">draft</span><span class="p">[</span><span class="s2">&quot;cell_instance&quot;</span><span class="p">][</span><span class="s2">&quot;serial_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;LAB-001&quot;</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">save_cell_instance</span><span class="p">(</span>
-    <span class="n">draft</span><span class="p">,</span>
-    <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span>
-    <span class="n">resolve_references</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">save_cell_instance</span><span class="p">(</span><span class="n">draft</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">resolve_references</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Migration note:</p>
-<ul class="simple">
-<li><p>local canonical record writes now use <code class="docutils literal notranslate"><span class="pre">save*</span></code></p></li>
-<li><p>local <code class="docutils literal notranslate"><span class="pre">register*</span></code> names were removed and reserved for future registry communication</p></li>
-</ul>
+<p>Draft inputs omit canonical fields like <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">short_id</span></code>, and <code class="docutils literal notranslate"><span class="pre">identifier</span></code> —
+saving canonizes them and fills default provenance.</p>
 </section>
-<section id="index-and-resolver-publishing">
-<h2>Index And Resolver Publishing<a class="headerlink" href="#index-and-resolver-publishing" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_index</span><span class="p">,</span> <span class="n">index_stats</span><span class="p">,</span> <span class="n">publish_record</span>
+<section id="index-and-resolver-publishing-battinfo-api">
+<h2>Index and resolver publishing (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)<a class="headerlink" href="#index-and-resolver-publishing-battinfo-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_index</span><span class="p">,</span> <span class="n">index_stats</span><span class="p">,</span> <span class="n">publish_record</span>
 
 <span class="n">publish_record</span><span class="p">(</span>
     <span class="s2">&quot;examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json&quot;</span><span class="p">,</span>
@@ -798,20 +625,36 @@ not provide it.</p>
 </pre></div>
 </div>
 </section>
+<section id="ingest-first-intake-battinfo-ingest">
+<h2>Ingest-first intake (<code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code>)<a class="headerlink" href="#ingest-first-intake-battinfo-ingest" title="Link to this heading">#</a></h2>
+<p>One-command registration for a typed resource instance plus its evidence
+files (photos become photo datasets; CSVs become a <code class="docutils literal notranslate"><span class="pre">Test</span></code> plus a <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.ingest</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_ingest_workspace</span><span class="p">,</span> <span class="n">publish_ingest_workspace</span><span class="p">,</span> <span class="n">write_ingest_manifest</span>
+</pre></div>
+</div>
+<p>The folder-local <code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code> manifest carries stable ingest
+metadata; its shape is defined by
+<a class="reference internal" href="ingest-manifest-contract.html"><span class="std std-doc">the ingest manifest contract</span></a> and validated
+against <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code>.
+<code class="docutils literal notranslate"><span class="pre">resource_type=&quot;cell-instance&quot;</span></code> is the currently implemented subject.</p>
+</section>
+<section id="advanced-the-internal-engine">
+<h2>Advanced: the internal engine<a class="headerlink" href="#advanced-the-internal-engine" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> and the models are facades over an internal
+authoring engine (<code class="docutils literal notranslate"><span class="pre">battinfo._workspace.Workspace</span></code>) that also powers
+submission-package export and release workflows. New code should not build on
+the engine directly — its surface is large, uncurated, and free to change;
+everything the tutorials and this page show goes through the stable facades.
+If you maintain older code that imports <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> from <code class="docutils literal notranslate"><span class="pre">battinfo</span></code>, you will
+see a deprecation message pointing at the replacement for each call.</p>
+</section>
 <section id="guidance">
 <h2>Guidance<a class="headerlink" href="#guidance" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">build_publication_package(...)</span></code> for local publication-package generation.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">publish(...)</span></code> as the compatibility alias for the same operation.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">Workspace.export_submission_workspace(...)</span></code> or <code class="docutils literal notranslate"><span class="pre">Workspace.build_submission_package(...)</span></code> for registry-ready submission handoff from Python workflows.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">setup_demo_environment(...)</span></code> to scaffold a repeatable demo workspace and submission package from Python-authored objects.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">run_demo_pipeline(...)</span></code> to publish the demo through a registry and optionally verify the Battery Genome <code class="docutils literal notranslate"><span class="pre">/registry/...</span></code> page.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">Workspace.export_release(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">Workspace.build_release(...)</span></code> as compatibility aliases.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">load_publication_package(...)</span></code> to reconstruct Python objects from the publication package.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">load_publication(...)</span></code> as the compatibility alias for the same operation.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">BattinfoBundle.to_directory(...)</span></code> only for optional debug inspection bundles.</p></li>
+<li><p>Prefer <code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> for anything that ends in publishing.</p></li>
 <li><p>Prefer opaque BattINFO IRIs under <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/</span></code>.</p></li>
-<li><p>For validation policy and machine-readable issue output, see <code class="docutils literal notranslate"><span class="pre">docs/validation-contract.md</span></code>.</p></li>
+<li><p>For validation policy and machine-readable issue output, see <a class="reference internal" href="validation-contract.html"><span class="std std-doc">the validation contract</span></a>.</p></li>
+<li><p>For submission-envelope internals, see <a class="reference internal" href="pages/contract.html"><span class="std std-doc">the contract explanation page</span></a>.</p></li>
 </ul>
 </section>
 </section>
@@ -864,14 +707,13 @@ not provide it.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-to-start">Where to start</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install">Install</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ingest-first-intake">Ingest-First Intake</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#publication-package">Publication Package</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workspace-release-export">Workspace Release Export</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-cell-specs-from-json">Load Cell Specs From JSON</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reusable-test-specs">Reusable Test Specs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-and-save">Query And Save</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index-and-resolver-publishing">Index And Resolver Publishing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-workspace">The workspace</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#models">Models</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#publication-package-models-path">Publication package (models path)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-and-save-battinfo-api">Query and save (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index-and-resolver-publishing-battinfo-api">Index and resolver publishing (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ingest-first-intake-battinfo-ingest">Ingest-first intake (<code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-the-internal-engine">Advanced: the internal engine</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guidance">Guidance</a></li>
 </ul>
   </nav></div>

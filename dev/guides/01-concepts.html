@@ -62,8 +62,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Guide 2 — Describing a cell: from materials to published record" href="02-first-cell-type.html" />
-    <link rel="prev" title="Guides" href="../pages/guides.html" />
+    <link rel="next" title="Guide 2 — Describing a cell" href="02-first-cell-type.html" />
+    <link rel="prev" title="Tutorials" href="../pages/guides.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -163,7 +163,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -308,7 +308,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -397,11 +397,11 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Guide 1 — Concepts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell: from materials to published record</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: instance, test, dataset, and publishing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: cells, tests, and datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04-semantic-layer.html">Guide 4 — The semantic layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="05-descriptors.html">Guide 5 — Cell descriptors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">06 — Publish your first dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-publish-your-data.html">Guide 6 — Publish your first dataset</a></li>
 </ul>
 </div>
 </nav></div>
@@ -443,7 +443,7 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Guides</a></li>
+    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Tutorials</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guide 1 — Concepts</span></li>
   </ul>
@@ -466,34 +466,21 @@
 <h1>Guide 1 — Concepts<a class="headerlink" href="#Guide-1-—-Concepts" title="Link to this heading">#</a></h1>
 <p>BattINFO is the implementation layer for the <a class="reference external" href="https://github.com/emmo-repo/domain-battery">EMMO domain-battery ontology</a>. It gives you JSON schemas, a Python library, and a CLI for authoring, validating, and publishing battery metadata as machine-readable Linked Data.</p>
 <p>This guide explains the data model, record types, and the semantic layer.</p>
+<p><em>Already have cycler data on disk? Jump straight to</em> <a class="reference internal" href="06-publish-your-data.html"><span class="doc">Guide 6 — Publish your first dataset</span></a> <em>and come back here for the concepts.</em></p>
 <p><strong>Estimated time:</strong> 10 minutes</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">_here</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">_here</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-<span class="k">elif</span> <span class="p">(</span><span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running from the repo root.&quot;</span><span class="p">)</span>
+<span class="c1"># This notebook runs from its own folder (docs/guides). Everything it</span>
+<span class="c1"># writes lands in a throwaway scratch folder next to it.</span>
+<span class="n">SCRATCH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;_scratch/guide-01&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="n">SCRATCH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Running from the repo root.
-</pre></div></div>
 </div>
 <section id="The-data-model">
 <h2>The data model<a class="headerlink" href="#The-data-model" title="Link to this heading">#</a></h2>
@@ -521,7 +508,8 @@ Running from the repo root.
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the canonical A123 cell-spec record that ships with the repo</span>
 <span class="n">a123</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
-    <span class="p">(</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;examples/cell-spec/A123__ANR26650M1-B.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="c1"># Repo files sit two levels up from this notebook.</span>
+    <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../examples/cell-spec/A123__ANR26650M1-B.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="c1"># Top-level structure</span>
@@ -743,7 +731,7 @@ UID: 7d9k-2m4p-8t3x-6nq5
     <span class="p">},</span>
 <span class="p">)</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-01&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">SCRATCH</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IRI:&quot;</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">canonical_iri</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -764,7 +752,7 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
 
 <span class="n">output</span> <span class="o">=</span> <span class="n">publish_record</span><span class="p">(</span>
     <span class="n">result</span><span class="o">.</span><span class="n">debug_paths</span><span class="p">[</span><span class="s2">&quot;canonical_record_path&quot;</span><span class="p">],</span>
-    <span class="n">target_root</span><span class="o">=</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-01-jsonld&quot;</span><span class="p">,</span>
+    <span class="n">target_root</span><span class="o">=</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;resolver&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">jsonld</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
     <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">],</span> <span class="s2">&quot;index.jsonld&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
@@ -791,7 +779,7 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Properties:&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">jsonld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
     <span class="n">class_name</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">]</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalValue&quot;</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumberValue&quot;</span><span class="p">)</span>
     <span class="n">unit</span>  <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 </pre></div>
@@ -803,8 +791,8 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Properties:
-  NominalCapacity: None  [AmpereHour]
-  NominalVoltage: None  [Volt]
+  NominalCapacity: 2.5  [AmpereHour]
+  NominalVoltage: 3.3  [Volt]
 </pre></div></div>
 </div>
 <section id="Exported-JSON-LD-file">
@@ -815,7 +803,7 @@ Properties:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jsonld_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="s2">&quot;index.jsonld&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON-LD exported to: </span><span class="si">{</span><span class="n">jsonld_file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON-LD exported to: </span><span class="si">{</span><span class="n">jsonld_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">jsonld</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
@@ -826,7 +814,7 @@ Properties:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSON-LD exported to: .battinfo\notebooks\guide-01-jsonld\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
+JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
 
 {
   &#34;@context&#34;: [
@@ -908,7 +896,7 @@ JSON-LD exported to: .battinfo\notebooks\guide-01-jsonld\spec\e4t5-w9re-mpq6-8g7
 
 <span class="n">report</span> <span class="o">=</span> <span class="n">validate_record_report</span><span class="p">(</span>
     <span class="n">record_doc</span><span class="p">,</span>
-    <span class="n">source_root</span><span class="o">=</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-01&quot;</span><span class="p">,</span>
+    <span class="n">source_root</span><span class="o">=</span><span class="n">SCRATCH</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ok:&quot;</span><span class="p">,</span> <span class="n">report</span><span class="o">.</span><span class="n">ok</span><span class="p">,</span> <span class="s2">&quot;| errors:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="p">),</span> <span class="s2">&quot;| warnings:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="p">))</span>
 </pre></div>
@@ -926,7 +914,7 @@ ok: True | errors: 0 | warnings: 0
 <section id="Next">
 <h2>Next<a class="headerlink" href="#Next" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="02-first-cell-type.html"><span class="doc">Guide 2 — First cell spec</span></a>: full authoring workflow from materials to published record</p></li>
+<li><p><a class="reference internal" href="02-first-cell-type.html"><span class="doc">Guide 2 — Describing a cell</span></a>: author and publish a cell spec</p></li>
 <li><p><a class="reference internal" href="03-linked-records.html"><span class="doc">Guide 3 — Linked records</span></a>: build the complete provenance chain and publish</p></li>
 </ul>
 </section>
@@ -948,7 +936,7 @@ ok: True | errors: 0 | warnings: 0
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Guides</p>
+        <p class="prev-next-title">Tutorials</p>
       </div>
     </a>
     <a class="right-next"
@@ -956,7 +944,7 @@ ok: True | errors: 0 | warnings: 0
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Guide 2 — Describing a cell: from materials to published record</p>
+        <p class="prev-next-title">Guide 2 — Describing a cell</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

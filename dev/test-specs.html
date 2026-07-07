@@ -159,7 +159,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -304,7 +304,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -515,6 +515,100 @@ mode/direction/setpoints/termination); <code class="docutils literal notranslate
 Python enum (<code class="docutils literal notranslate"><span class="pre">bundle.py</span></code>); the coverage test guards against drift.</p>
 </div></blockquote>
 </section>
+<section id="semantic-depth-of-a-test-protocol">
+<h2>Semantic depth of a test protocol<a class="headerlink" href="#semantic-depth-of-a-test-protocol" title="Link to this heading">#</a></h2>
+<p>The current representation types the protocol at the class level and carries a free-text
+<code class="docutils literal notranslate"><span class="pre">description</span></code>. EMMO domain-electrochemistry has richer terms that allow a more explicit,
+machine-replicable representation — here is what is available and when to use it.</p>
+<section id="what-the-ontology-provides">
+<h3>What the ontology provides<a class="headerlink" href="#what-the-ontology-provides" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>EMMO term</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCycling</span></code></p></td>
+<td><p>The complete CC-CV cycle-life protocol</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCharging</span></code></p></td>
+<td><p>A single CC-CV charge step</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentDischarging</span></code></p></td>
+<td><p>A single CC discharge step</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Resting</span></code></p></td>
+<td><p>A rest / OCV hold step</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ElectrochemicalTestingProcedure</span></code></p></td>
+<td><p>General electrochemical test container</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SerialWorkflow</span></code> / <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code></p></td>
+<td><p>Structural containers for step sequences</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hasNext</span></code> / <code class="docutils literal notranslate"><span class="pre">precedes</span></code> / <code class="docutils literal notranslate"><span class="pre">follows</span></code></p></td>
+<td><p>Step-to-step sequencing predicates</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">StepDuration</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSignalCurrent</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSignalVoltage</span></code></p></td>
+<td><p>Per-step parameters</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A 1C CC-CV cycle-life protocol could therefore be expressed as an <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code>
+containing a <code class="docutils literal notranslate"><span class="pre">SerialWorkflow</span></code> whose steps are:
+<code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCharging</span></code> → <code class="docutils literal notranslate"><span class="pre">Resting</span></code> → <code class="docutils literal notranslate"><span class="pre">ConstantCurrentDischarging</span></code> →
+<code class="docutils literal notranslate"><span class="pre">Resting</span></code>, each step carrying typed parameters for C-rate, voltage limit, cut-off
+current, rest duration, and temperature.</p>
+</section>
+<section id="pros-of-explicit-step-decomposition">
+<h3>Pros of explicit step decomposition<a class="headerlink" href="#pros-of-explicit-step-decomposition" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Machine-replicable</strong>: the test can be reproduced from the JSON-LD alone without
+parsing free text.</p></li>
+<li><p><strong>SPARQL-queryable at step level</strong>: structured queries like <em>“find all datasets charged
+to 4.2 V at 1C CC-CV”</em> become precise rather than text-search-based.</p></li>
+<li><p><strong>Parameter validation</strong>: step parameters (C-rate, voltage limits, temperatures) can
+be range-checked against cell specs and standards (IEC 62660, EUCAR) automatically.</p></li>
+<li><p><strong>Stable protocol identity</strong>: the semantic structure survives even if the free-text
+description is incomplete or updated.</p></li>
+</ul>
+</section>
+<section id="cons-and-practical-limits">
+<h3>Cons and practical limits<a class="headerlink" href="#cons-and-practical-limits" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Authoring burden</strong>: a four-step cycle becomes a graph of ~10 typed nodes. No
+researcher will author this by hand, so tooling is a prerequisite.</p></li>
+<li><p><strong>EMMO coverage gaps</strong>: GITT, interspersed EIS, multi-rate formation sequences, and
+temperature ramps do not yet have first-class EMMO step types. Mixed typed/free-text
+nodes undermine the value of the graph.</p></li>
+<li><p><strong>Cycler-file redundancy and false precision</strong>: the ground-truth protocol is usually
+the binary file in Biologic BT-Lab, Maccor, or Arbin format. A parallel step graph
+that was hand-authored can silently diverge from what was actually run — which is
+worse than no graph at all.</p></li>
+<li><p><strong>Version fragility</strong>: step-graph records couple tightly to specific EMMO term IRIs.
+An upstream rename invalidates stored records in a way that a text description does
+not.</p></li>
+</ul>
+</section>
+<section id="current-recommendation">
+<h3>Current recommendation<a class="headerlink" href="#current-recommendation" title="Link to this heading">#</a></h3>
+<p>Type the protocol at the class level (e.g. <code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCycling</span></code>) and
+record protocol-level parameters (C-rate, voltage window, temperature, cut-off
+condition) as typed properties. Keep the free-text <code class="docutils literal notranslate"><span class="pre">description</span></code> as the human-readable
+ground truth. Reserve step-level decomposition for cases where:</p>
+<ol class="arabic simple">
+<li><p>The protocol is simple enough to express without gaps (standard CC, CC-CV, or rest
+steps only), <strong>and</strong></p></li>
+<li><p>The step graph is generated programmatically from a machine-readable protocol
+definition (e.g. a cycler script), not authored by hand.</p></li>
+</ol>
+<p>When the cycler file is included as a dataset distribution, it already carries the
+authoritative step definition — the EMMO class typing on the protocol record is
+then sufficient for discovery and filtering.</p>
+</section>
+</section>
 </section>
 
 
@@ -556,6 +650,13 @@ Python enum (<code class="docutils literal notranslate"><span class="pre">bundle
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authoring">Authoring</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#semantic-depth-of-a-test-protocol">Semantic depth of a test protocol</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-ontology-provides">What the ontology provides</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pros-of-explicit-step-decomposition">Pros of explicit step decomposition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cons-and-practical-limits">Cons and practical limits</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-recommendation">Current recommendation</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

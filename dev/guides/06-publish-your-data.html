@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>06 — Publish your first dataset &#8212; BattINFO  documentation</title>
+    <title>Guide 6 — Publish your first dataset &#8212; BattINFO  documentation</title>
   
   
   
@@ -163,7 +163,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -308,7 +308,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
-    Guides
+    Tutorials
   </a>
 </li>
 
@@ -397,11 +397,11 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="01-concepts.html">Guide 1 — Concepts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell: from materials to published record</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: instance, test, dataset, and publishing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: cells, tests, and datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04-semantic-layer.html">Guide 4 — The semantic layer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="05-descriptors.html">Guide 5 — Cell descriptors</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">06 — Publish your first dataset</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Guide 6 — Publish your first dataset</a></li>
 </ul>
 </div>
 </nav></div>
@@ -443,9 +443,9 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Guides</a></li>
+    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">06 — Publish your first dataset</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guide 6 — Publish your first dataset</span></li>
   </ul>
 </nav>
 </div>
@@ -462,8 +462,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="06-—-Publish-your-first-dataset">
-<h1>06 — Publish your first dataset<a class="headerlink" href="#06-—-Publish-your-first-dataset" title="Link to this heading">#</a></h1>
+  <section id="Guide-6-—-Publish-your-first-dataset">
+<h1>Guide 6 — Publish your first dataset<a class="headerlink" href="#Guide-6-—-Publish-your-first-dataset" title="Link to this heading">#</a></h1>
 <p><strong>The tutorial version of the</strong> <a class="reference external" href="https://battinfo.org/publish">publishing journey</a><strong>:</strong> you start with a raw cycler export and finish with validated, linked records, a citable archive, and a place in the Battery Genome registry. Every code cell here executes in CI, against the sample Neware CSV that ships with the repository — swap in your own files and the recipe is identical.</p>
 <p>The five stages:</p>
 <ol class="arabic simple">
@@ -473,46 +473,30 @@
 <li><p><strong>Save &amp; validate</strong> — canonical records with stable IRIs</p></li>
 <li><p><strong>Publish</strong> — a DOI on Zenodo + the registry review queue</p></li>
 </ol>
-<p><em>Prerequisites: ``pip install battinfo`` (or this repo’s dev environment). Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</em></p>
-<div class="nbinput docutils container">
+<p><em>Prerequisites: ``pip install “battinfo[processing]”`` — the ``processing`` extra brings the BDF converter (``batterydf``) that Stage 1 uses. Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</em></p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">shutil</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="c1"># Run from the repo root (so the sample data resolves) with a scratch workspace.</span>
-<span class="n">_here</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">_here</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-<span class="k">elif</span> <span class="p">(</span><span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;battinfo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">REPO</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">REPO</span> <span class="o">=</span> <span class="n">_here</span>
-
-<span class="n">WORKSPACE</span> <span class="o">=</span> <span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/notebooks/guide-06&quot;</span>
-<span class="k">if</span> <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">WORKSPACE</span><span class="p">)</span>  <span class="c1"># fresh start on every run</span>
-<span class="n">WORKSPACE</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># This notebook runs from its own folder (docs/guides); fresh scratch every run.</span>
+<span class="n">SCRATCH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;_scratch/guide-06&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">SCRATCH</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">SCRATCH</span><span class="p">)</span>
+<span class="n">SCRATCH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Your starting point: a folder with raw cycler exports. Here, the sample</span>
 <span class="c1"># Neware CSV that ships with the repo (one CC charge + discharge cycle).</span>
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">REPO</span> <span class="o">/</span> <span class="s2">&quot;docs/guides/data/neware-sample.csv&quot;</span><span class="p">,</span> <span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span><span class="p">)</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/neware-sample.csv&quot;</span><span class="p">),</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span><span class="p">)</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
-<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">WORKSPACE</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace ready:&quot;</span><span class="p">,</span> <span class="n">WORKSPACE</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">REPO</span><span class="p">))</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">SCRATCH</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Workspace ready: .battinfo\notebooks\guide-06
-</pre></div></div>
 </div>
 <section id="Stage-1-—-Convert">
 <h2>Stage 1 — Convert<a class="headerlink" href="#Stage-1-—-Convert" title="Link to this heading">#</a></h2>
@@ -523,7 +507,7 @@ Workspace ready: .battinfo\notebooks\guide-06
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">converted</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;*.csv&quot;</span><span class="p">)</span>
 
-<span class="n">bdf_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;bdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.bdf.csv&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">bdf_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;bdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.bdf.csv&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BDF columns:&quot;</span><span class="p">,</span> <span class="n">bdf_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
@@ -536,7 +520,7 @@ Workspace ready: .battinfo\notebooks\guide-06
 <div class="highlight"><pre>
   neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB)
 
-Converted 1 file(s) -&gt; &lt;repo&gt;\.battinfo\notebooks\guide-06\bdf
+Converted 1 file(s) -&gt; &lt;repo&gt;\docs\guides\_scratch\guide-06\bdf
 
 BDF columns: test_time_second,voltage_volt,current_ampere,step_index,unix_time_second
 </pre></div></div>
@@ -616,7 +600,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-<span class="n">records_root</span> <span class="o">=</span> <span class="n">WORKSPACE</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records/examples&quot;</span>
+<span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records/examples&quot;</span>
 <span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">records_root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -627,16 +611,16 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Saved 4 record(s) under &lt;repo&gt;\.battinfo\notebooks\guide-06\.battinfo\records:
+Saved 4 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-06\.battinfo\records:
   cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\examples\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
   cell        S1                                   [created]  .battinfo\records\examples\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
   test        S1 cycling                           [created]  .battinfo\records\examples\test\test-9f4c-mxny-yhym-2zh4.json
-  dataset     S1 data                              [created]  .battinfo\records\examples\dataset\dataset-4g59-2qnt-jqy8-n2qt.json
+  dataset     S1 data                              [created]  .battinfo\records\examples\dataset\dataset-22bt-7jxb-yv3k-xgq4.json
 
   Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
 cell-instance/cell-d6tp-jgqy-a3s9-4qem.json
 cell-spec/cell-spec-fpdr-z1qt-23v0-stzx.json
-dataset/dataset-4g59-2qnt-jqy8-n2qt.json
+dataset/dataset-22bt-7jxb-yv3k-xgq4.json
 test/test-9f4c-mxny-yhym-2zh4.json
 </pre></div></div>
 </div>
@@ -669,7 +653,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1783368199,
+  &#34;retrieved_at&#34;: 1783411818,
   &#34;battinfo_version&#34;: &#34;0.7.0&#34;
 }
 </pre></div></div>
@@ -711,7 +695,7 @@ To publish: ws.login(api_key=&#39;...&#39;) then re-run — see ws.quickstart().
 </section>
 <section id="What-you-have-now">
 <h2>What you have now<a class="headerlink" href="#What-you-have-now" title="Link to this heading">#</a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>guide-06/
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>_scratch/guide-06/
 ├── neware-sample.csv           # your raw export (untouched)
 ├── bdf/neware-sample.bdf.csv   # the tidy, shareable table
 └── .battinfo/records/examples/ # validated, linked records with stable IRIs
@@ -721,8 +705,8 @@ To publish: ws.login(api_key=&#39;...&#39;) then re-run — see ws.quickstart().
 <p>Re-run this notebook from the top: same IRIs, no duplicates — that determinism is what makes the workflow safe to automate.</p>
 <p><strong>Next steps</strong></p>
 <ul class="simple">
-<li><p><a class="reference internal" href="01-concepts.html"><span class="doc">Guide 01 — Concepts</span></a>: the data model behind what you just did</p></li>
-<li><p><a class="reference internal" href="03-linked-records.html"><span class="doc">Guide 03 — Linked records</span></a>: the full provenance chain in depth</p></li>
+<li><p><a class="reference internal" href="01-concepts.html"><span class="doc">Guide 1 — Concepts</span></a>: the data model behind what you just did</p></li>
+<li><p><a class="reference internal" href="03-linked-records.html"><span class="doc">Guide 3 — Linked records</span></a>: the full provenance chain in depth</p></li>
 <li><p><a class="reference external" href="https://battinfo.org/validate">battinfo.org/validate</a>: check any record in the browser</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ws.quickstart()</span></code> — this whole recipe, printed in your terminal</p></li>
 </ul>
