@@ -619,15 +619,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "properties": {
             "value": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string",
-                  "minLength": 1
-                }
-              ]
+              "type": "number"
             },
             "min_value": {
               "type": "number"

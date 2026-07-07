@@ -310,8 +310,8 @@ export const showcase: {
         "maximum_power": "battinfo:maximumPower",
         "specific_energy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
         "energy_density": "electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
-        "specific_power": "battinfo:specificPower",
-        "power_density": "battinfo:powerDensity",
+        "specific_power": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7",
+        "power_density": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a",
         "power_energy_ratio": "battinfo:powerEnergyRatio",
         "internal_resistance": "electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
         "dc_internal_resistance": "electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3",
@@ -338,7 +338,7 @@ export const showcase: {
         "cycle_life": "electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937",
         "cycle_life_c_rate": "battinfo:cycleLifeCRate",
         "calendar_life": "electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df",
-        "capacity_fade": "battinfo:capacityFade",
+        "capacity_fade": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6",
         "capacity_threshold_exhaustion": "battinfo:capacityThresholdExhaustion",
         "charging_time": "battinfo:chargingTime",
         "self_discharge_rate": "electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e",
@@ -382,7 +382,6 @@ export const showcase: {
         "h": "emmo:Hour",
         "min": "emmo:Minute",
         "s": "emmo:Second",
-        "C": "emmo:CoulombUnit",
         "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
         "%": "emmo:Percent",
         "license": {
@@ -391,11 +390,11 @@ export const showcase: {
         },
         "created_at": {
           "@id": "dcterms:created",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         },
         "modified_at": {
           "@id": "dcterms:modified",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         }
       },
       "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
@@ -704,8 +703,8 @@ export const showcase: {
         "maximum_power": "battinfo:maximumPower",
         "specific_energy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
         "energy_density": "electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
-        "specific_power": "battinfo:specificPower",
-        "power_density": "battinfo:powerDensity",
+        "specific_power": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7",
+        "power_density": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a",
         "power_energy_ratio": "battinfo:powerEnergyRatio",
         "internal_resistance": "electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
         "dc_internal_resistance": "electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3",
@@ -732,7 +731,7 @@ export const showcase: {
         "cycle_life": "electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937",
         "cycle_life_c_rate": "battinfo:cycleLifeCRate",
         "calendar_life": "electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df",
-        "capacity_fade": "battinfo:capacityFade",
+        "capacity_fade": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6",
         "capacity_threshold_exhaustion": "battinfo:capacityThresholdExhaustion",
         "charging_time": "battinfo:chargingTime",
         "self_discharge_rate": "electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e",
@@ -776,7 +775,6 @@ export const showcase: {
         "h": "emmo:Hour",
         "min": "emmo:Minute",
         "s": "emmo:Second",
-        "C": "emmo:CoulombUnit",
         "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
         "%": "emmo:Percent",
         "license": {
@@ -785,11 +783,11 @@ export const showcase: {
         },
         "created_at": {
           "@id": "dcterms:created",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         },
         "modified_at": {
           "@id": "dcterms:modified",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         }
       },
       "@type": "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",
@@ -920,8 +918,8 @@ export const showcase: {
         "maximum_power": "battinfo:maximumPower",
         "specific_energy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
         "energy_density": "electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
-        "specific_power": "battinfo:specificPower",
-        "power_density": "battinfo:powerDensity",
+        "specific_power": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7",
+        "power_density": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a",
         "power_energy_ratio": "battinfo:powerEnergyRatio",
         "internal_resistance": "electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
         "dc_internal_resistance": "electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3",
@@ -948,7 +946,7 @@ export const showcase: {
         "cycle_life": "electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937",
         "cycle_life_c_rate": "battinfo:cycleLifeCRate",
         "calendar_life": "electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df",
-        "capacity_fade": "battinfo:capacityFade",
+        "capacity_fade": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6",
         "capacity_threshold_exhaustion": "battinfo:capacityThresholdExhaustion",
         "charging_time": "battinfo:chargingTime",
         "self_discharge_rate": "electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e",
@@ -992,7 +990,6 @@ export const showcase: {
         "h": "emmo:Hour",
         "min": "emmo:Minute",
         "s": "emmo:Second",
-        "C": "emmo:CoulombUnit",
         "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
         "%": "emmo:Percent",
         "license": {
@@ -1001,11 +998,11 @@ export const showcase: {
         },
         "created_at": {
           "@id": "dcterms:created",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         },
         "modified_at": {
           "@id": "dcterms:modified",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         }
       },
       "@type": "http://www.w3.org/ns/dcat#Dataset",
