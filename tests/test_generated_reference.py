@@ -46,3 +46,13 @@ def test_battinfo_vocab_covers_every_emitted_term() -> None:
         "assets/vocab/battinfo-records.ttl is stale - a battinfo: term was "
         "added/removed; regenerate with `uv run python scripts/gen_battinfo_vocab.py`"
     )
+
+
+def test_property_reference_matches_the_mapping_tables() -> None:
+    gen = _load("gen_property_reference")
+
+    committed = (ROOT / "docs" / "pages" / "property-reference.md").read_text(encoding="utf-8")
+    assert committed == gen.build(), (
+        "docs/pages/property-reference.md is stale - regenerate with "
+        "`uv run python scripts/gen_property_reference.py`"
+    )

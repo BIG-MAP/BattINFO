@@ -1,4 +1,4 @@
-# Instance, Test, Dataset Workflow
+# From cell to dataset
 
 ## Purpose
 

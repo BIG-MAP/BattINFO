@@ -32,13 +32,21 @@ batteries.
 | Stacked | [`assets/logo/logo-stacked.svg`](assets/logo/logo-stacked.svg) | Vertical — symbol above centered wordmark |
 
 The wordmark is **"Batt"** in Ink + **"INFO"** in Signal Teal, set in
-**Plus Jakarta Sans 700**.
+**Plus Jakarta Sans ExtraBold (800)**.
 
-> ⚠ **Before external distribution, outline the wordmark.** The lockup SVGs render
-> the text via an embedded Google Fonts `@import`, which only works online. For
-> print, email signatures, or offline use, open the lockup in Figma/Illustrator
-> and run **Type → Create Outlines** so the text becomes vector paths. The
-> `icon*.svg` files are pure geometry and need no outlining.
+The lockup SVGs carry the wordmark as **outlined vector paths** (not live
+text), so they render identically everywhere — including `<img>` tags, GitHub
+READMEs, print, and offline use, none of which can load webfonts. To change
+the wordmark, edit the `<g class="wm">` group back to a `<text>` element (see
+`tools/outline_wordmark.py` docstring) and re-run:
+
+```bash
+uv run python brand/tools/outline_wordmark.py
+```
+
+The font itself ships at `assets/fonts/PlusJakartaSans[wght].ttf`
+(OFL-licensed, see `assets/fonts/OFL.txt`). The `icon*.svg` files are pure
+geometry and need no outlining.
 
 ### Clear space & minimum sizes
 

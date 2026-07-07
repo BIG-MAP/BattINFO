@@ -32,7 +32,16 @@ def build() -> str:
             env={**os.environ, "PYTHONUTF8": "1"},
         )
         text = raw.read_text(encoding="utf-8").replace("\r\n", "\n")
-    return text.replace("\\", "/")
+    text = text.replace("\\", "/")
+    # typer titles the page with the bare program name; give readers a real
+    # title and say what the page is.
+    header = (
+        "# CLI reference\n\n"
+        "Every `battinfo` command, generated from the CLI itself "
+        "(so it cannot drift). All commands and options:\n"
+    )
+    assert text.startswith("# `battinfo`\n"), "unexpected typer docs header"
+    return header + text[len("# `battinfo`\n"):]
 
 
 def main() -> int:

@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="brand/assets/logo/logo-horizontal-dark.png">
-  <img alt="BattINFO" src="brand/assets/logo/logo-horizontal-light.png" width="420">
+  <source media="(prefers-color-scheme: dark)" srcset="brand/assets/logo/logo-horizontal-on-dark.svg">
+  <img alt="BattINFO" src="brand/assets/logo/logo-horizontal.svg" width="420">
 </picture>
 
 ### The semantic data layer for battery technology
