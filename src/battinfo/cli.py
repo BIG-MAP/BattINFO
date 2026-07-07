@@ -3174,7 +3174,7 @@ def dataset_publish(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
     zenodo: bool = typer.Option(False, "--zenodo", help="Publish to Zenodo (creates a draft deposit)."),
     sandbox: bool = typer.Option(False, "--sandbox", help="Use the Zenodo sandbox (for testing)."),
-    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_TOKEN."),
+    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN)."),
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
 ) -> None:
@@ -3185,7 +3185,7 @@ def dataset_publish(
       --zenodo      Upload to Zenodo (creates a draft for your review)
       --sandbox     Use the Zenodo sandbox for testing
       --token       Your Zenodo personal access token
-                    (or set the ZENODO_TOKEN environment variable)
+                    (or set the ZENODO_API_TOKEN environment variable)
 
     Get a Zenodo token at:
       https://zenodo.org/account/settings/applications/tokens/new/
@@ -3203,9 +3203,9 @@ def dataset_publish(
         console.print("[yellow]Nothing to do.[/yellow] Pass --zenodo to upload to Zenodo.")
         raise typer.Exit(code=0)
 
-    resolved_token = token or os.environ.get("ZENODO_TOKEN", "").strip()
+    resolved_token = token or os.environ.get("ZENODO_API_TOKEN", "").strip() or os.environ.get("ZENODO_TOKEN", "").strip()
     if not resolved_token:
-        console.print("[red]Error:[/red] Zenodo token required. Pass --token or set ZENODO_TOKEN.")
+        console.print("[red]Error:[/red] Zenodo token required. Pass --token or set ZENODO_API_TOKEN.")
         raise typer.Exit(code=1)
 
     resolved_community = "" if no_community else community

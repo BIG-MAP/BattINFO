@@ -332,11 +332,12 @@ class ZenodoClient:
 def _resolve_token(token: str | None) -> str:
     if token is not None:
         return token
-    env = os.environ.get("ZENODO_API_TOKEN")
+    env = os.environ.get("ZENODO_API_TOKEN") or os.environ.get("ZENODO_TOKEN")
     if env:
         return env
     raise ZenodoError(
-        "No Zenodo API token provided. Pass token= or set ZENODO_API_TOKEN."
+        "No Zenodo API token provided. Pass token= or set ZENODO_API_TOKEN "
+        "(ZENODO_TOKEN is accepted as a legacy alias)."
     )
 
 

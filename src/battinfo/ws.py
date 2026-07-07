@@ -1008,7 +1008,8 @@ class AuthoringWorkspace:
             cred_path.parent.mkdir(parents=True, exist_ok=True)
             cred_path.write_text(_CREDENTIALS_TEMPLATE, encoding="utf-8")
             print(f"Created: {cred_path}")
-        print("\n  Next: get an API key from the registry settings page, then run")
+        print("\n  Next: get an API key (no self-service page yet - request one from")
+        print("  the registry operator via https://www.battery-genome.org), then run")
         print('        ws.login(api_key="YOUR_KEY")')
         print("  That fills in your workspace and publisher automatically - you do")
         print("  not need to know any IDs.  ws.quickstart() shows the full flow.")
@@ -1070,8 +1071,10 @@ class AuthoringWorkspace:
 
         Fetches your publisher/workspace identity from the registry so you never
         have to know workspace or publisher IDs, and stores the key in
-        ``.battinfo/credentials`` (git-ignored) for future sessions.  Get an API
-        key from the registry settings page.
+        ``.battinfo/credentials`` (git-ignored) for future sessions.  There is
+        no self-service key page yet: request a key from the registry operator
+        (Battery Genome - https://www.battery-genome.org, or your team's
+        registry admin).
 
         If the registry does not expose a profile endpoint yet, the key is still
         saved and sensible defaults are used — everything keeps working.
@@ -1086,7 +1089,11 @@ class AuthoringWorkspace:
 
         api_key = (api_key or "").strip()
         if not api_key:
-            raise ValueError("api_key is required. Get one from the registry settings page.")
+            raise ValueError(
+                "api_key is required. There is no self-service key page yet: "
+                "request a key from the registry operator (Battery Genome - "
+                "https://www.battery-genome.org, or your team's registry admin)."
+            )
         url = (registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
                or _DEFAULT_REGISTRY_URL).rstrip("/")
 
@@ -1740,7 +1747,7 @@ class AuthoringWorkspace:
             "import battinfo\n"
             'ws = battinfo.workspace(".")\n'
             "\n"
-            "# 1. One-time: log in (get a key at the registry settings page)\n"
+            "# 1. One-time: log in (request a key from the registry operator)\n"
             'ws.login(api_key="YOUR_KEY")        # or ws.setup() to see options\n'
             "\n"
             "# 2. Tag this work with the project that funded it (optional, once per\n"
@@ -2075,7 +2082,11 @@ class AuthoringWorkspace:
             ref = self._get_project()
             label = ref.summary() if ref else "project"
             print(f"  funding:    {label} stamped onto {stamped} record(s)")
-        print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
+        if not getattr(self, "_publishing", False):
+            # Suppressed mid-publish: telling the user to run ws.publish()
+            # from inside ws.publish() right before a credentials error reads
+            # as mockery (red-team W1.3).
+            print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
 
     def _rel_to_root(self, path: str) -> str:
@@ -2133,7 +2144,11 @@ class AuthoringWorkspace:
         only:
             Restrict submission to one or more record types (see :meth:`submit`).
         """
-        self.save()
+        self._publishing = True
+        try:
+            self.save()
+        finally:
+            self._publishing = False
         if zenodo:
             if self._r2_configured():
                 self.upload()
@@ -2166,12 +2181,14 @@ class AuthoringWorkspace:
         """
         import urllib.request
 
-        url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
+        url = (registry_url or self._registry_url
+               or os.environ.get("BATTINFO_REGISTRY_URL") or _DEFAULT_REGISTRY_URL)
         wid = workspace_id or self._credential("BATTINFO_WORKSPACE_ID")
-        if not url:
-            raise RuntimeError("registry_url required. Pass it or set BATTINFO_REGISTRY_URL.")
         if not wid:
-            raise RuntimeError("workspace_id required. Pass it or set BATTINFO_WORKSPACE_ID.")
+            raise RuntimeError(
+                "workspace_id required. Run ws.login(api_key=...) once - it stores "
+                "your workspace automatically - or set BATTINFO_WORKSPACE_ID."
+            )
 
         endpoint = f"{url.rstrip('/')}/workspaces/{wid}/submissions"
         try:
@@ -2794,7 +2811,9 @@ class AuthoringWorkspace:
             )
         if not key:
             raise RuntimeError(
-                "api_key is required. Pass it or set BATTINFO_API_KEY."
+                "api_key is required. Run ws.login(api_key=...) first, or set "
+                "BATTINFO_API_KEY. No self-service key page exists yet - request "
+                "a key from the registry operator (https://www.battery-genome.org)."
             )
         if not wid:
             raise RuntimeError(
