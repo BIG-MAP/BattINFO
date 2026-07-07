@@ -71,11 +71,11 @@ the offline-safe core is:
 walks this exact flow against a sample Neware CSV.
 
 
-If you are describing a product: models
----------------------------------------
+If you are describing a product: record classes
+------------------------------------------------
 
 For a standalone cell-spec record — a datasheet as data — use the ``CellSpec``
-model and the ``publish`` shortcut:
+record class and the ``publish`` shortcut:
 
 .. code-block:: python
 
@@ -132,7 +132,7 @@ What to read next
 
         :octicon:`code;1em;sd-text-info`  Python API overview
         ^^^^^^^^^^^^^^^^^^^
-        How the Python surface is organized: models, the workspace, and the ``api`` module.
+        How the Python surface is organized: the record classes, the workspace, and the ``api`` module.
 
     .. grid-item-card::
         :link: ../how-battinfo-is-built.html

@@ -6,12 +6,13 @@ and field descriptions — it cannot drift from the code. The narrative tour
 lives in :doc:`../python-api`; the authoring workspace has its own page at
 :doc:`../workspace-authoring`.
 
-Authoring models
-----------------
+The record classes
+------------------
 
-The five record models are both the canonical source of truth and the
+The five record classes are both the canonical source of truth and the
 authoring input: construct them with the flat field names you know from the
 datasheet and hand them to ``publish`` or the matching ``save_*`` function.
+Quantity keys and unit symbols are enumerated in :doc:`property-reference`.
 
 .. autopydantic_model:: battinfo.CellSpec
    :members: false

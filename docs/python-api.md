@@ -1,4 +1,4 @@
-# BattINFO Python API
+# Python API overview
 
 How the Python surface is organized. For the full symbol-by-symbol reference,
 see the [generated API reference](pages/api-reference.rst); for the layered
@@ -9,7 +9,7 @@ architecture, see [How BattINFO is built](how-battinfo-is-built.md).
 | Goal | Surface to use |
 |------|---------------|
 | Turn lab data into published, linked records | `battinfo.workspace(...)` — the one object for the whole journey |
-| Describe a battery product (a datasheet as data) | The `CellSpec` model + the `publish` shortcut |
+| Describe a battery product (a datasheet as data) | The `CellSpec` record class + the `publish` shortcut |
 | Author research-grade composition (materials, electrodes, electrolyte) | `battinfo.authoring` — see [Tutorial 5](guides/05-descriptors.ipynb) |
 | Load, query, save, or resolver-publish canonical records | `battinfo.api` helpers |
 | Turn a folder of photos and CSVs into a linked submission | `battinfo.ingest` — one-command folder intake |
@@ -18,7 +18,7 @@ architecture, see [How BattINFO is built](how-battinfo-is-built.md).
 If you are new here, start with the [tutorials](pages/guides.rst) — six
 notebooks that walk the whole story end to end.
 
-The curated top-level namespace (`import battinfo`) exposes the models, the
+The curated top-level namespace (`import battinfo`) exposes the record classes, the
 workspace, publishing, and validation — everything else lives in its home
 module (`battinfo.api`, `battinfo.authoring`, `battinfo.materials`, ...) and
 is documented there.
@@ -55,10 +55,10 @@ Drafts and templates: `ws.template("cell-spec", ...)` /
 authors them into the session. `ws.load(ws.search(...)[0])` references an
 existing registry record instead (reused, never re-published).
 
-## Models
+## Record classes
 
 `CellSpec`, `Cell`, `TestSpec`, `Test`, and `Dataset` are the record types as
-pydantic models — the single source of truth for authoring and for what is on
+pydantic classes — the single source of truth for authoring and for what is on
 disk. For a standalone cell-spec record, `publish` is the shortcut:
 
 ```python
@@ -86,9 +86,9 @@ registry_result = publish(
 - `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
 - `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.
 
-## Publication package (models path)
+## Publication package (record-classes path)
 
-When you hold the four core objects in Python and want the local publication
+When you hold the four core record objects in Python and want the local publication
 artifacts without a workspace, build the package directly:
 
 ```python
@@ -167,7 +167,7 @@ against `assets/schemas/ingest-manifest.schema.json`.
 
 ## Advanced: the internal engine
 
-`battinfo.workspace(...)` and the models are facades over an internal
+`battinfo.workspace(...)` and the record classes are facades over an internal
 authoring engine (`battinfo._workspace.Workspace`) that also powers
 submission-package export and release workflows. New code should not build on
 the engine directly — its surface is large, uncurated, and free to change;

@@ -27,7 +27,7 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
          spec = CellSpec(
              manufacturer="A123",
              model="ANR26650M1-B",
-             cell_format="cylindrical",
+             format="cylindrical",
              chemistry="Li-ion",
              nominal_capacity={"value": 2.5, "unit": "Ah"},
          )
