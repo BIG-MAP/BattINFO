@@ -1,38 +1,51 @@
-Python API reference
-====================
+Python API
+==========
 
-The curated core of the Python surface, generated from the source docstrings
-and field descriptions — it cannot drift from the code. The narrative tour
-lives in :doc:`../python-api`; the authoring workspace has its own page at
-:doc:`../workspace-authoring`.
+.. include:: ../python-api.md
+   :parser: myst_parser.sphinx_
 
-Authoring models
-----------------
+Generated reference
+-------------------
 
-The five record models are both the canonical source of truth and the
+Everything below is generated from the source docstrings and field
+descriptions — it cannot drift from the code. The authoring workspace has its
+own page at :doc:`../workspace-authoring`.
+
+The record classes
+~~~~~~~~~~~~~~~~~~
+
+The five record classes are both the canonical source of truth and the
 authoring input: construct them with the flat field names you know from the
 datasheet and hand them to ``publish`` or the matching ``save_*`` function.
+Every field is documented below; quantity keys and unit symbols are
+enumerated in :doc:`property-reference`.
 
 .. autopydantic_model:: battinfo.CellSpec
-   :members: false
+   :members:
+   :model-show-field-summary: True
 
 .. autopydantic_model:: battinfo.Cell
-   :members: false
+   :members:
+   :model-show-field-summary: True
 
 .. autopydantic_model:: battinfo.TestSpec
-   :members: false
+   :members:
+   :model-show-field-summary: True
 
 .. autopydantic_model:: battinfo.Test
-   :members: false
+   :members:
+   :model-show-field-summary: True
 
 .. autopydantic_model:: battinfo.Dataset
-   :members: false
+   :members:
+   :model-show-field-summary: True
 
 .. autopydantic_model:: battinfo.ProvenanceInfo
-   :members: false
+   :members:
+   :model-show-field-summary: True
 
 Publish and save
-----------------
+~~~~~~~~~~~~~~~~
 
 .. autofunction:: battinfo.publish
 
@@ -41,7 +54,7 @@ Publish and save
 .. autofunction:: battinfo.bulk_save_session
 
 Query and validate
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: battinfo.query_cell_specs
 
@@ -49,8 +62,8 @@ Query and validate
 
 .. autofunction:: battinfo.record_to_jsonld
 
-The workspace
--------------
+The workspace object
+~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: battinfo.AuthoringWorkspace
    :no-members:

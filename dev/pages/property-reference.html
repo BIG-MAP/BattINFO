@@ -1,0 +1,890 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Property &amp; unit reference &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=a95f357e85573c9b56d5" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=84b34183" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b3415309" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=a95f357e85573c9b56d5"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pages/property-reference';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CLI reference" href="cli-reference.html" />
+    <link rel="prev" title="Python API" href="api-reference.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">Python API</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="reference.html" class="nav-link">Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Property &amp; unit reference</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="property-unit-reference">
+<h1>Property &amp; unit reference<a class="headerlink" href="#property-unit-reference" title="Link to this heading">#</a></h1>
+<!-- GENERATED by scripts/gen_property_reference.py — do not edit.
+     Regenerate with `uv run python scripts/gen_property_reference.py`. -->
+<p>Every quantity you author — <code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">5.0,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">&quot;Ah&quot;}</span></code> under a
+<code class="docutils literal notranslate"><span class="pre">properties</span></code> key — is mapped to an EMMO class, and every unit symbol to a
+unit IRI, by the curated mapping tables under
+<code class="docutils literal notranslate"><span class="pre">assets/mappings/domain-battery/</span></code> — the single source of truth for the
+semantics of emitted JSON-LD. This page is generated from those tables.</p>
+<section id="properties-63">
+<h2>Properties (63)<a class="headerlink" href="#properties-63" title="Link to this heading">#</a></h2>
+<p>The keys accepted in <code class="docutils literal notranslate"><span class="pre">properties={...}</span></code> on a cell spec, and the EMMO
+class each becomes in JSON-LD:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>EMMO class</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ac_internal_resistance</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_964cd426_f3cf_4a52_8c5d_0490cf48edb5">ACInternalResistance</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">available_volume</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed">Volume</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calendar_life</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df">CalendarLife</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cap_assembly_weight</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405">Mass</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">certified_usable_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_cutoff_voltage</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88">UpperVoltageLimit</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_max</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260">MaximumChargingTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_min</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49">MinimumChargingTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_voltage</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87">ChargingVoltage</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">continuous_charging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78">MaximumContinuousChargingCurrent</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">continuous_discharging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5">MaximumContinuousDischargingCurrent</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cycle_life</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937">CycleLife</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">d50_particle_size</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c">D50ParticleSize</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dc_internal_resistance</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3">DCInternalResistance</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">diameter</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6">Diameter</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_cutoff_voltage</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9">LowerVoltageLimit</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_temperature_max</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d">MaximumDischargingTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_temperature_min</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b">MinimumDischargingTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">double_side_loading</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5">MassLoading</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">energy_density</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b">EnergyDensity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">foil_thickness</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656">Thickness</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">height</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba">Height</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">impedance</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_79a02de5_b884_4eab_bc18_f67997d597a2">ElectricImpedance</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">initial_coulombic_efficiency</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_469b9516_a96d_4aa2_b8e5_05ae982e2084">InitialCoulombicEfficiency</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">internal_resistance</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d">InternalResistance</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">length</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac">Length</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mass</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405">Mass</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_charging_temperature</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260">MaximumChargingTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_continuous_charging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78">MaximumContinuousChargingCurrent</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_continuous_discharging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5">MaximumContinuousDischargingCurrent</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_discharging_temperature</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d">MaximumDischargingTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_storage_temperature</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7">MaximumStorageTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5">MinimumCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5">MinimumCapacity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_charging_temperature</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49">MinimumChargingTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_discharging_temperature</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b">MinimumDischargingTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_storage_temperature</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302">MinimumStorageTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_p_ratio</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723">NPRatio</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100">NominalCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_voltage</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6">NominalVoltage</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">press_density</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379">CalenderedDensity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pulse_charging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da">MaximumPulseChargingCurrent</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pulse_discharging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b">MaximumPulseDischargingCurrent</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rated_areal_discharge_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a">AreicCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rated_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26">RatedCapacity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rated_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rated_specific_discharge_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee">DischargingSpecificCapacity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">self_discharge_rate</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e">SelfDischargeRate</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">single_side_loading</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5">MassLoading</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">specific_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9">SpecificEnergy</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">state_of_health</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce">StateOfHealth</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">storage_temperature_max</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7">MaximumStorageTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">storage_temperature_min</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302">MinimumStorageTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">theoretical_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23">TheoreticalCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">thickness</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656">Thickness</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tortuosity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8">Tortuosity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">typical_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upper_voltage_limit</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88">UpperVoltageLimit</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">volume</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed">Volume</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wall_thickness</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656">Thickness</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weight</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405">Mass</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">width</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0">Width</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="units-35">
+<h2>Units (35)<a class="headerlink" href="#units-35" title="Link to this heading">#</a></h2>
+<p>The unit symbols accepted in quantity dicts, and the unit IRI each maps
+to (EMMO where a term exists, QUDT as the documented fallback):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Symbol</p></th>
+<th class="head"><p>Unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">%</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505">WeightPercent</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">A</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Ampere">Ampere</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Ah</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#AmpereHour">AmpereHour</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cm</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#CentiMetre">CentiMetre</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">count</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978">UnitOne</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">degC</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#DegreeCelsius">DegreeCelsius</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">g</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Gram">Gram</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">g/cm3</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#GramPerCubicCentiMetre">GramPerCubicCentiMetre</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">h</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Hour">Hour</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">K</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Kelvin">Kelvin</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kg</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Kilogram">Kilogram</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kWh</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#KiloWattHour">KiloWattHour</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">L</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Litre">Litre</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">m</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Metre">Metre</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mA</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliAmpere">MilliAmpere</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mAh</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliAmpereHour">MilliAmpereHour</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mg/cm2</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliGramPerSquareCentiMetre">MilliGramPerSquareCentiMetre</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Minute">Minute</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mL</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliLitre">MilliLitre</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mm</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliMetre">MilliMetre</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mol/L</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MolePerLitre">MolePerLitre</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mV</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliVolt">MilliVolt</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mΩ</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MilliOhm">MilliOhm</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">s</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Second">Second</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">V</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Volt">Volt</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">vol%</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba">VolumePercent</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Watt">Watt</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">W/kg</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#WattPerKilogram">WattPerKilogram</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">W/L</span></code></p></td>
+<td><p><a class="reference external" href="http://qudt.org/vocab/unit/W-PER-L">WattPerLitre</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Wh</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#WattHour">WattHour</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Wh/kg</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#WattHourPerKilogram">WattHourPerKilogram</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Wh/L</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#WattHourPerLitre">WattHourPerLitre</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">°C</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#DegreeCelsius">DegreeCelsius</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">µm</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#MicroMetre">MicroMetre</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Ω</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Ohm">Ohm</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Unknown keys and symbols are refused, not guessed — see the
+<a class="reference internal" href="../validation-contract.html"><span class="std std-doc">validation contract</span></a> for how mapping gaps
+surface as machine-readable issues.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="api-reference.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Python API</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="cli-reference.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">CLI reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-63">Properties (63)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-35">Units (35)</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=a95f357e85573c9b56d5"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=a95f357e85573c9b56d5"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2025, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

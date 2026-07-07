@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Test Specs (test-protocol) &amp; full enum coverage &#8212; BattINFO  documentation</title>
+    <title>Test specs &#8212; BattINFO  documentation</title>
   
   
   
@@ -59,7 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Component Specs (electrode / electrolyte / separator / current-collector / housing)" href="component-specs.html" />
+    <link rel="next" title="From cell to dataset" href="instance-test-dataset-workflow.html" />
+    <link rel="prev" title="Cells" href="cell-fleet.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -391,17 +392,24 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="how-battinfo-is-built.html">How BattINFO is built</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">Instance, Test, Dataset Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifiers.html">Identifiers &amp; PURLs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-type-library.html">Cell specs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Test specs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">From cell to dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pages/contract.html">The infrastructure contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cell-type-library.html">Cell-Spec Library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cell Fleet &amp; the cell→component reference seam</a></li>
-<li class="toctree-l1"><a class="reference internal" href="material-spec.html">Material Spec &amp; Material Instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="component-specs.html">Component Specs (electrode / electrolyte / separator / current-collector / housing)</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Test Specs (test-protocol) &amp; full enum coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-spec.html">BattINFO CLI Specification (Scope)</a></li>
 </ul>
 </div>
 </nav></div>
@@ -445,7 +453,7 @@
     
     <li class="breadcrumb-item"><a href="pages/concepts.html" class="nav-link">Concepts</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Test Specs (test-protocol) &amp; full enum coverage</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Test specs</span></li>
   </ul>
 </nav>
 </div>
@@ -462,8 +470,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="test-specs-test-protocol-full-enum-coverage">
-<h1>Test Specs (test-protocol) &amp; full enum coverage<a class="headerlink" href="#test-specs-test-protocol-full-enum-coverage" title="Link to this heading">#</a></h1>
+  <section id="test-specs">
+<h1>Test specs<a class="headerlink" href="#test-specs" title="Link to this heading">#</a></h1>
 <p>A <strong>test-spec</strong> (<code class="docutils literal notranslate"><span class="pre">test-protocol</span></code> record) is the reusable, IRI-addressable description of a test
 procedure — the <em>spec</em> half of <code class="docutils literal notranslate"><span class="pre">test-spec</span></code> + <code class="docutils literal notranslate"><span class="pre">test</span></code>. A <code class="docutils literal notranslate"><span class="pre">test</span></code> (instance) links a cell-instance to
 a test-spec via <code class="docutils literal notranslate"><span class="pre">protocol_id</span></code> and to its <code class="docutils literal notranslate"><span class="pre">dataset</span></code>s.</p>
@@ -622,13 +630,22 @@ then sufficient for discovery and filtering.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="component-specs.html"
+       href="cell-fleet.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Component Specs (electrode / electrolyte / separator / current-collector / housing)</p>
+        <p class="prev-next-title">Cells</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="instance-test-dataset-workflow.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">From cell to dataset</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>

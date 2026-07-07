@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="BattINFO Python API" href="python-api.html" />
-    <link rel="prev" title="Reference" href="pages/reference.html" />
+    <link rel="next" title="Bulk-ingest thousands of records" href="howto/bulk-ingest.html" />
+    <link rel="prev" title="How-to guides" href="pages/howto.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -165,14 +165,14 @@
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="pages/howto.html">
     How-to guides
   </a>
 </li>
 
 
-<li class="nav-item current active">
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/reference.html">
     Reference
   </a>
@@ -310,14 +310,14 @@
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="pages/howto.html">
     How-to guides
   </a>
 </li>
 
 
-<li class="nav-item current active">
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/reference.html">
     Reference
   </a>
@@ -394,13 +394,10 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Workspace authoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="python-api.html">BattINFO Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/api-reference.html">Python API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/cli-reference.html"><code class="docutils literal notranslate"><span class="pre">battinfo</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli-spec.html">BattINFO CLI Specification (Scope)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="validation-contract.html">BattINFO Validation Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/bulk-ingest.html">Bulk-ingest thousands of records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
 </ul>
 </div>
@@ -443,7 +440,7 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="pages/reference.html" class="nav-link">Reference</a></li>
+    <li class="breadcrumb-item"><a href="pages/howto.html" class="nav-link">How-to guides</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Workspace authoring</span></li>
   </ul>
@@ -525,7 +522,7 @@ and publish, without touching the lower layers.</p>
 </tr>
 <tr class="row-odd"><td><p>Create a single record in code and save/publish it</p></td>
 <td><p><strong>Models + functions</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> — see the <a class="reference internal" href="python-api.html"><span class="std std-doc">Python API</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> — see the <a class="reference internal" href="pages/api-reference.html"><span class="std std-doc">Python API</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p>Build or script the full object graph programmatically (ingest pipelines, batch tooling)</p></td>
 <td><p><strong>Object-graph engine</strong></p></td>
@@ -564,20 +561,20 @@ writes/publishes the canonical records without a workspace.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pages/reference.html"
+       href="pages/howto.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Reference</p>
+        <p class="prev-next-title">How-to guides</p>
       </div>
     </a>
     <a class="right-next"
-       href="python-api.html"
+       href="howto/bulk-ingest.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">BattINFO Python API</p>
+        <p class="prev-next-title">Bulk-ingest thousands of records</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

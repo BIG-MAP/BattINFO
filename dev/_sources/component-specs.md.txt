@@ -1,4 +1,4 @@
-# Component Specs (electrode / electrolyte / separator / current-collector / housing)
+# Components
 
 BattINFO models every entity as a **spec + instance** pair. After materials
 ([material-spec.md](material-spec.md)), the five **component** families let a cell be

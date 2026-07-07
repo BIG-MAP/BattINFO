@@ -413,7 +413,7 @@
 </div>
 <section id="battinfo">
 <h1>BattINFO<a class="headerlink" href="#battinfo" title="Link to this heading">#</a></h1>
-<p><strong>BattINFO</strong> is the semantic data layer for battery science — a Python library, CLI, and canonical asset suite that validates, maps, and publishes battery metadata as machine-readable Linked Data aligned with the <a class="reference external" href="https://emmo-repo.github.io/domain-battery/">EMMO Battery Domain Ontology</a>.</p>
+<p><strong>BattINFO</strong> is the semantic data layer for battery technology — a Python library, CLI, and canonical asset suite that validates, maps, and publishes battery metadata as machine-readable Linked Data aligned with the <a class="reference external" href="https://emmo-repo.github.io/domain-battery/">EMMO Battery Domain Ontology</a>.</p>
 <p>Here is a minimal example that creates a canonical cell-spec record and publishes it locally. It uses the same flagship cell shown on <a class="reference external" href="https://battinfo.org">battinfo.org</a> (A123 ANR26650M1-B); the full canonical record lives at <code class="docutils literal notranslate"><span class="pre">examples/cell-spec/A123__ANR26650M1-B.json</span></code>.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
@@ -424,7 +424,7 @@ Python</label><div class="sd-tab-content docutils">
 <span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
-    <span class="n">cell_format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
     <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="n">nominal_capacity</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
 <span class="p">)</span>

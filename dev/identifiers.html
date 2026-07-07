@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cells &#8212; BattINFO  documentation</title>
+    <title>Identifiers &amp; PURLs &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'cell-fleet';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'identifiers';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Test specs" href="test-specs.html" />
-    <link rel="prev" title="Cell specs" href="cell-type-library.html" />
+    <link rel="next" title="Data federation" href="data-federation.html" />
+    <link rel="prev" title="BattINFO / Domain-Battery Target Architecture" href="ontology-profile-architecture.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -392,17 +392,17 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="how-battinfo-is-built.html">How BattINFO is built</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="identifiers.html">Identifiers &amp; PURLs</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Identifiers &amp; PURLs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cell-type-library.html">Cell specs</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Cells</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
 <li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">From cell to dataset</a></li>
 </ul>
@@ -453,7 +453,7 @@
     
     <li class="breadcrumb-item"><a href="pages/concepts.html" class="nav-link">Concepts</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Cells</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Identifiers &amp; PURLs</span></li>
   </ul>
 </nav>
 </div>
@@ -470,133 +470,93 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="cells">
-<h1>Cells<a class="headerlink" href="#cells" title="Link to this heading">#</a></h1>
-<p>A <strong>cell</strong> is one physical item with a serial number; this page covers how
-many cells reference one spec, and how a cell-spec is described from reusable
-parts: it references standalone component-specs by IRI, which in
-turn reference material-specs — completing the three-level graph
-<strong>cell → component → material</strong>.</p>
-<section id="reference-seam">
-<h2>Reference seam<a class="headerlink" href="#reference-seam" title="Link to this heading">#</a></h2>
-<p>A cell-spec gains five optional top-level reference fields (siblings of the inline
-<code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code>/<code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>/… holders):</p>
+  <section id="identifiers-purls">
+<h1>Identifiers &amp; PURLs<a class="headerlink" href="#identifiers-purls" title="Link to this heading">#</a></h1>
+<p>Every BattINFO record has one canonical identifier — an IRI of the form:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>https://w3id.org/battinfo/&lt;namespace&gt;/&lt;uid&gt;
+└──────┬──────┘ └──┬───┘ └───┬────┘ └─┬─┘
+   PURL host     project   record     16-char UID
+                           namespace  (Crockford Base32)
+</pre></div>
+</div>
+<p>Example: <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5</span></code></p>
+<section id="the-three-promises">
+<h2>The three promises<a class="headerlink" href="#the-three-promises" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Opaque</strong> — the IRI carries no embedded meaning: no manufacturer names, no
+dates, no chemistry codes. Anything meaningful would eventually be wrong
+(products get renamed, records get corrected), and identifiers must outlive
+every such change.</p></li>
+<li><p><strong>Stable</strong> — once minted, an IRI never changes and is never reused. It is
+safe to cite in a paper, store in a database, or print on a label.</p></li>
+<li><p><strong>Deterministic where it matters</strong> — the workspace mints IRIs from each
+record’s identity, so re-saving the same records is an update, never a
+duplicate (<code class="docutils literal notranslate"><span class="pre">tests/test_idempotent_minting.py</span></code> guards this). Standalone
+material specs are minted from the material name, so the same material
+lifts to the same spec IRI across cells.</p></li>
+</ul>
+</section>
+<section id="the-uid">
+<h2>The UID<a class="headerlink" href="#the-uid" title="Link to this heading">#</a></h2>
+<p>The 16-character UID uses the <strong>Crockford Base32 alphabet</strong>
+(<code class="docutils literal notranslate"><span class="pre">0-9</span> <span class="pre">a-h</span> <span class="pre">j</span> <span class="pre">k</span> <span class="pre">m</span> <span class="pre">n</span> <span class="pre">p-t</span> <span class="pre">v-z</span></code>) — no <code class="docutils literal notranslate"><span class="pre">i</span></code>, <code class="docutils literal notranslate"><span class="pre">l</span></code>, <code class="docutils literal notranslate"><span class="pre">o</span></code>, or <code class="docutils literal notranslate"><span class="pre">u</span></code>, so a UID survives
+being read aloud, handwritten on a cell wrapper, or retyped from a photo. It
+is displayed in four dash-separated groups (<code class="docutils literal notranslate"><span class="pre">7d9k-2m4p-8t3x-6nq5</span></code>); the first
+six characters form the <code class="docutils literal notranslate"><span class="pre">short_id</span></code> used in filenames and for matching data
+files to cells (<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">datasets=&quot;glob&quot;)</span></code>).</p>
+</section>
+<section id="namespaces">
+<h2>Namespaces<a class="headerlink" href="#namespaces" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Resolves to</p></th>
+<tr class="row-odd"><th class="head"><p>Namespace</p></th>
+<th class="head"><p>Record type(s)</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/spec/</span></code></p></td>
+<td><p>Cell specs <strong>and</strong> test specs — the reusable <em>descriptions</em></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/cell/</span></code></p></td>
+<td><p>Physical cells (instances)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">separator_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/test/</span></code></p></td>
+<td><p>Test executions</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/dataset/</span></code></p></td>
+<td><p>Datasets</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/material-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/material/</span></code></p></td>
+<td><p>Standalone materials, spec and instance</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/electrode-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/separator-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrolyte-spec/</span></code>, …</p></td>
+<td><p>Component specs (and their instance namespaces)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>A cell may <strong>reference</strong>, <strong>inline</strong>, or both — inline holders stay optional, so existing
-records are unaffected. References are existence-checked against the source root, and the
-JSON-LD emits reference nodes (<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">&lt;electrode-spec</span> <span class="pre">IRI&gt;}</span></code>, etc.);
-when a basis/inline node is also present, the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> is merged onto it.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
-
-<span class="n">rec</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">save_cell_spec</span><span class="p">(</span><span class="n">bi</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;COIN-NMC811-D&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;EMPA&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
-    <span class="n">positive_electrode_spec_id</span><span class="o">=</span><span class="n">NMC811_CATHODE_IRI</span><span class="p">,</span>
-    <span class="n">negative_electrode_spec_id</span><span class="o">=</span><span class="n">GRAPHITE_ANODE_IRI</span><span class="p">,</span>
-    <span class="n">electrolyte_spec_id</span><span class="o">=</span><span class="n">ORGANIC_ELECTROLYTE_IRI</span><span class="p">,</span>
-    <span class="n">separator_spec_id</span><span class="o">=</span><span class="n">CELGARD_IRI</span><span class="p">,</span>
-    <span class="n">housing_spec_id</span><span class="o">=</span><span class="n">COIN_HOUSING_IRI</span><span class="p">,</span>
-    <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.0038</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span> <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.8</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">}},</span>
-<span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<section id="bridge-inline-standalone">
-<h3>Bridge (inline → standalone)<a class="headerlink" href="#bridge-inline-standalone" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">extract_component_specs(cell_spec_record)</span></code> lifts a cell’s inline holders into standalone
-component-specs (the counterpart of <code class="docutils literal notranslate"><span class="pre">extract_material_specs</span></code>), so any inline cell can be
-decomposed and de-duplicated.</p>
+<p>The full map is code, not convention: <code class="docutils literal notranslate"><span class="pre">battinfo.entities.iri_namespace_map()</span></code>.</p>
 </section>
+<section id="why-w3id-org-the-purl-layer">
+<h2>Why w3id.org (the PURL layer)<a class="headerlink" href="#why-w3id-org-the-purl-layer" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">w3id.org</span></code> is the W3C Permanent Identifier Community Group’s redirect
+service: a community-maintained, permanently-hosted layer of indirection.
+The <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/...</span></code> IRIs redirect to wherever the resolver
+actually lives today — so records cite an address that outlives any single
+server, domain, or hosting decision. Dereferencing a record IRI serves its
+resolver artifact (<code class="docutils literal notranslate"><span class="pre">index.html</span></code> for humans, <code class="docutils literal notranslate"><span class="pre">index.jsonld</span></code> / <code class="docutils literal notranslate"><span class="pre">index.json</span></code>
+for machines — content-negotiated), produced by <code class="docutils literal notranslate"><span class="pre">battinfo.api.publish_record</span></code>.</p>
 </section>
-<section id="the-fleet-reference-based">
-<h2>The fleet (reference-based)<a class="headerlink" href="#the-fleet-reference-based" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">examples/cell-spec/</span></code> adds 8 cells that reference shared component-specs by IRI:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Cell</p></th>
-<th class="head"><p>format</p></th>
-<th class="head"><p>chemistry</p></th>
-<th class="head"><p>grounding</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>COIN-NMC811-D</p></td>
-<td><p>coin</p></td>
-<td><p>Li-ion (NMC811)</p></td>
-<td><p>Discovery</p></td>
-</tr>
-<tr class="row-odd"><td><p>COIN-LFP-D</p></td>
-<td><p>coin</p></td>
-<td><p>Li-ion (LFP)</p></td>
-<td><p>Discovery</p></td>
-</tr>
-<tr class="row-even"><td><p>COIN-LCO-D</p></td>
-<td><p>coin</p></td>
-<td><p>Li-ion (LCO)</p></td>
-<td><p>Discovery</p></td>
-</tr>
-<tr class="row-odd"><td><p>COIN-LMFP-D</p></td>
-<td><p>coin</p></td>
-<td><p>Li-ion (LMFP)</p></td>
-<td><p>Discovery</p></td>
-</tr>
-<tr class="row-even"><td><p>COIN-NMC622-D</p></td>
-<td><p>coin</p></td>
-<td><p>Li-ion (NMC622)</p></td>
-<td><p>Discovery</p></td>
-</tr>
-<tr class="row-odd"><td><p>PRISM-LFP-100AH</p></td>
-<td><p>prismatic</p></td>
-<td><p>Li-ion (LFP)</p></td>
-<td><p>Cell_Design (engineering)</p></td>
-</tr>
-<tr class="row-even"><td><p>COIN-ZNMNO2-ALK</p></td>
-<td><p>coin</p></td>
-<td><p>Zn-MnO2 alkaline</p></td>
-<td><p>synthetic (7M KOH, non-Li-ion)</p></td>
-</tr>
-<tr class="row-odd"><td><p>COIN-LNMO-D</p></td>
-<td><p>coin</p></td>
-<td><p>Li-ion (LNMO)</p></td>
-<td><p>synthetic (high-voltage)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The component fleet was extended with one cathode electrode-spec per chemistry
-(LFP/LCO/LMFP/NMC622/LNMO/MnO2 cathodes, Zn anode) and an MnO2 material-spec; the graphite
-anode, organic + aqueous electrolytes, Celgard separator, and coin/prismatic housings are
-shared across cells.</p>
-</section>
-<section id="full-graph-showcase">
-<h2>Full-graph showcase<a class="headerlink" href="#full-graph-showcase" title="Link to this heading">#</a></h2>
-<p>The NMC811 coin demonstrates the complete graph end-to-end:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cell-spec COIN-NMC811-D  →  cell-instance (P025-CEL-001)  →  test (cycling)  →  dataset
-        ↓ references
-   electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">examples/cell-instance/</span></code>, <code class="docutils literal notranslate"><span class="pre">examples/test/</span></code>, and <code class="docutils literal notranslate"><span class="pre">examples/dataset/</span></code> carry the linked
-instance/test/dataset for it; the broader instance/test/dataset fleet is Phase 4.</p>
+<section id="enforcement">
+<h2>Enforcement<a class="headerlink" href="#enforcement" title="Link to this heading">#</a></h2>
+<p>The policy is linted, not aspirational:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.tools/quality/lint_identifier_policy.py</span></code> checks every canonical record’s
+IRIs, UID shapes, and <code class="docutils literal notranslate"><span class="pre">short_id</span></code>s in CI.</p></li>
+<li><p>Records carry <code class="docutils literal notranslate"><span class="pre">id</span></code> (the IRI), <code class="docutils literal notranslate"><span class="pre">short_id</span></code>, and <code class="docutils literal notranslate"><span class="pre">identifier</span></code>
+(<code class="docutils literal notranslate"><span class="pre">&lt;entity-type&gt;:&lt;uid&gt;</span></code>) — all derived, never hand-authored. Draft inputs
+omit them; saving canonizes them.</p></li>
+</ul>
 </section>
 </section>
 
@@ -611,20 +571,20 @@ instance/test/dataset for it; the broader instance/test/dataset fleet is Phase 4
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="cell-type-library.html"
+       href="ontology-profile-architecture.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Cell specs</p>
+        <p class="prev-next-title">BattINFO / Domain-Battery Target Architecture</p>
       </div>
     </a>
     <a class="right-next"
-       href="test-specs.html"
+       href="data-federation.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Test specs</p>
+        <p class="prev-next-title">Data federation</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -647,12 +607,11 @@ instance/test/dataset for it; the broader instance/test/dataset fleet is Phase 4
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-seam">Reference seam</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bridge-inline-standalone">Bridge (inline → standalone)</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-fleet-reference-based">The fleet (reference-based)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#full-graph-showcase">Full-graph showcase</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-three-promises">The three promises</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-uid">The UID</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#namespaces">Namespaces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-w3id-org-the-purl-layer">Why w3id.org (the PURL layer)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enforcement">Enforcement</a></li>
 </ul>
   </nav></div>
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Python API reference &#8212; BattINFO  documentation</title>
+    <title>Python API &#8212; BattINFO  documentation</title>
   
   
   
@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="battinfo" href="cli-reference.html" />
-    <link rel="prev" title="BattINFO Python API" href="../python-api.html" />
+    <link rel="next" title="Property &amp; unit reference" href="property-reference.html" />
+    <link rel="prev" title="Reference" href="reference.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -393,15 +393,11 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../python-api.html">BattINFO Python API</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Python API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli-reference.html"><code class="docutils literal notranslate"><span class="pre">battinfo</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli-spec.html">BattINFO CLI Specification (Scope)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
 </ul>
 </div>
 </nav></div>
@@ -445,7 +441,7 @@
     
     <li class="breadcrumb-item"><a href="reference.html" class="nav-link">Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Python API reference</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Python API</span></li>
   </ul>
 </nav>
 </div>
@@ -462,50 +458,429 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="python-api-reference">
-<h1>Python API reference<a class="headerlink" href="#python-api-reference" title="Link to this heading">#</a></h1>
-<p>The curated core of the Python surface, generated from the source docstrings
-and field descriptions — it cannot drift from the code. The narrative tour
-lives in <a class="reference internal" href="../python-api.html"><span class="doc">BattINFO Python API</span></a>; the authoring workspace has its own page at
-<a class="reference internal" href="../workspace-authoring.html"><span class="doc">Workspace authoring</span></a>.</p>
-<section id="authoring-models">
-<h2>Authoring models<a class="headerlink" href="#authoring-models" title="Link to this heading">#</a></h2>
-<p>The five record models are both the canonical source of truth and the
+  <section id="python-api">
+<h1>Python API<a class="headerlink" href="#python-api" title="Link to this heading">#</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">orphan<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+<!-- This file is INCLUDED at the top of pages/api-reference.rst (the single
+     "Python API" reference page); it is not a standalone document. -->
+<p>How the Python surface is organized — the generated symbol-by-symbol
+reference follows below; for the layered architecture, see
+<a class="reference internal" href="../how-battinfo-is-built.html"><span class="doc">How BattINFO is built</span></a>.</p>
+<section id="where-to-start">
+<h2>Where to start<a class="headerlink" href="#where-to-start" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Goal</p></th>
+<th class="head"><p>Surface to use</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Turn lab data into published, linked records</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> — the one object for the whole journey</p></td>
+</tr>
+<tr class="row-odd"><td><p>Describe a battery product (a datasheet as data)</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> record class + the <code class="docutils literal notranslate"><span class="pre">publish</span></code> shortcut</p></td>
+</tr>
+<tr class="row-even"><td><p>Author research-grade composition (materials, electrodes, electrolyte)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.authoring</span></code> — see <a class="reference internal" href="../guides/05-descriptors.html"><span class="doc">Tutorial 5</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Load, query, save, or resolver-publish canonical records</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> helpers</p></td>
+</tr>
+<tr class="row-even"><td><p>Turn a folder of photos and CSVs into a linked submission</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code> — one-command folder intake</p></td>
+</tr>
+<tr class="row-odd"><td><p>Drive everything from the shell</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">battinfo</span></code> CLI — see the <a class="reference internal" href="cli-reference.html"><span class="doc">CLI reference</span></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If you are new here, start with the <a class="reference internal" href="guides.html"><span class="doc">tutorials</span></a> — six
+notebooks that walk the whole story end to end.</p>
+<p>The curated top-level namespace (<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">battinfo</span></code>) exposes the record classes, the
+workspace, publishing, and validation — everything else lives in its home
+module (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo.authoring</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo.materials</span></code>, …) and
+is documented there.</p>
+</section>
+<section id="the-workspace">
+<h2>The workspace<a class="headerlink" href="#the-workspace" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(root)</span></code> is the data-first surface: convert raw cycler
+files, register cells, link tests and data, save validated records with
+stable IRIs, and publish — to the registry review queue and, with
+<code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code>, to a citable DOI.</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>                              <span class="c1"># raw cycler files → tidy BDF tables</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;samsung inr21700 50e&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>   <span class="c1"># reuse the registry&#39;s identity</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="s2">&quot;S2&quot;</span><span class="p">])</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;bdf/S1.bdf.csv&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="s2">&quot;My cycling campaign, 2026&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ws.quickstart()</span></code> prints the full recipe, including login and funding
+attribution (<code class="docutils literal notranslate"><span class="pre">ws.project(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.contributor(...)</span></code>).
+<a class="reference internal" href="../guides/03-linked-records.html"><span class="doc">Tutorial 3</span></a> builds the chain step by step;
+<a class="reference internal" href="../guides/06-publish-your-data.html"><span class="doc">Tutorial 6</span></a> runs it from a raw cycler
+export.</p>
+<p>Drafts and templates: <code class="docutils literal notranslate"><span class="pre">ws.template(&quot;cell-spec&quot;,</span> <span class="pre">...)</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ws.template(&quot;test-spec&quot;,</span> <span class="pre">...)</span></code> write skeleton draft files; <code class="docutils literal notranslate"><span class="pre">ws.load(path)</span></code>
+authors them into the session. <code class="docutils literal notranslate"><span class="pre">ws.load(ws.search(...)[0])</span></code> references an
+existing registry record instead (reused, never re-published).</p>
+</section>
+<section id="record-classes">
+<h2>Record classes<a class="headerlink" href="#record-classes" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, and <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> are the record types as
+pydantic classes — the single source of truth for authoring and for what is on
+disk. For a standalone cell-spec record, <code class="docutils literal notranslate"><span class="pre">publish</span></code> is the shortcut:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
+
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;G20M7&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pouch&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">local_result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="n">registry_result</span> <span class="o">=</span> <span class="n">publish</span><span class="p">(</span>
+    <span class="n">cell_spec</span><span class="p">,</span>
+    <span class="n">destination</span><span class="o">=</span><span class="s2">&quot;registry&quot;</span><span class="p">,</span>
+    <span class="n">registry_base_url</span><span class="o">=</span><span class="s2">&quot;https://registry.example.org&quot;</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+    <span class="n">workspace_id</span><span class="o">=</span><span class="s2">&quot;hello-world&quot;</span><span class="p">,</span>
+    <span class="n">publisher_id</span><span class="o">=</span><span class="s2">&quot;demo-lab&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">destination=&quot;local&quot;</span></code> writes the canonical BattINFO record and returns its path in <code class="docutils literal notranslate"><span class="pre">debug_paths</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">destination=&quot;registry&quot;</span></code> also generates the submission package and submits it to <code class="docutils literal notranslate"><span class="pre">battinfo-registry</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">destination=&quot;battery-genome&quot;</span></code> additionally returns the expected Battery Genome page URL when <code class="docutils literal notranslate"><span class="pre">platform_base_url</span></code> is configured.</p></li>
+</ul>
+</section>
+<section id="publication-package-record-classes-path">
+<h2>Publication package (record-classes path)<a class="headerlink" href="#publication-package-record-classes-path" title="Link to this heading">#</a></h2>
+<p>When you hold the four core record objects in Python and want the local publication
+artifacts without a workspace, build the package directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Test</span><span class="p">,</span> <span class="n">build_publication_package</span><span class="p">,</span> <span class="n">load_publication_package</span>
+
+<span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/cr2032-run&quot;</span><span class="p">)</span>
+<span class="n">dataset_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;capacity.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;cycle,capacity_ah</span><span class="se">\n</span><span class="s2">1,0.225</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">cell_spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span><span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;energizer-cr2032-202602-dtjrga&quot;</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="s2">&quot;constant current discharging&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;completed&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">),</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Energizer CR2032 dataset&quot;</span><span class="p">)</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">build_publication_package</span><span class="p">(</span>
+    <span class="n">cell_spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">cell_instance</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">bundle</span> <span class="o">=</span> <span class="n">load_publication_package</span><span class="p">(</span><span class="n">dataset_dir</span> <span class="o">/</span> <span class="s2">&quot;battinfo.publish.jsonld&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.publish.jsonld</span></code> is the foundational Schema.org JSON-LD artifact.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ro-crate-metadata.json</span></code> and <code class="docutils literal notranslate"><span class="pre">datacite-metadata.json</span></code> are emitted alongside it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.dcat.jsonld</span></code> is available as an optional export.</p></li>
+</ul>
+</section>
+<section id="query-and-save-battinfo-api">
+<h2>Query and save (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)<a class="headerlink" href="#query-and-save-battinfo-api" title="Link to this heading">#</a></h2>
+<p>Canonical-record helpers for scripted workflows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_cell_specs</span><span class="p">,</span> <span class="n">save_cell_instance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">template_cell_instance</span>
+
+<span class="n">rows</span> <span class="o">=</span> <span class="n">query_cell_specs</span><span class="p">(</span><span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="n">draft</span> <span class="o">=</span> <span class="n">template_cell_instance</span><span class="p">(</span><span class="n">cell_spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/3m6k-9t2p-7x4h-9nq8&quot;</span><span class="p">)</span>
+<span class="n">draft</span><span class="p">[</span><span class="s2">&quot;cell_instance&quot;</span><span class="p">][</span><span class="s2">&quot;serial_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;LAB-001&quot;</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">save_cell_instance</span><span class="p">(</span><span class="n">draft</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">resolve_references</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Draft inputs omit canonical fields like <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">short_id</span></code>, and <code class="docutils literal notranslate"><span class="pre">identifier</span></code> —
+saving canonizes them and fills default provenance.</p>
+</section>
+<section id="index-and-resolver-publishing-battinfo-api">
+<h2>Index and resolver publishing (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)<a class="headerlink" href="#index-and-resolver-publishing-battinfo-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_index</span><span class="p">,</span> <span class="n">index_stats</span><span class="p">,</span> <span class="n">publish_record</span>
+
+<span class="n">publish_record</span><span class="p">(</span>
+    <span class="s2">&quot;examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json&quot;</span><span class="p">,</span>
+    <span class="n">target_root</span><span class="o">=</span><span class="s2">&quot;.battinfo/resolver-site&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">index</span> <span class="o">=</span> <span class="n">build_index</span><span class="p">(</span><span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">out_path</span><span class="o">=</span><span class="s2">&quot;.battinfo/index.json&quot;</span><span class="p">)</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">index_stats</span><span class="p">(</span><span class="s2">&quot;.battinfo/index.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="ingest-first-intake-battinfo-ingest">
+<h2>Ingest-first intake (<code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code>)<a class="headerlink" href="#ingest-first-intake-battinfo-ingest" title="Link to this heading">#</a></h2>
+<p>One-command registration for a typed resource instance plus its evidence
+files (photos become photo datasets; CSVs become a <code class="docutils literal notranslate"><span class="pre">Test</span></code> plus a <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.ingest</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_ingest_workspace</span><span class="p">,</span> <span class="n">publish_ingest_workspace</span><span class="p">,</span> <span class="n">write_ingest_manifest</span>
+</pre></div>
+</div>
+<p>The folder-local <code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code> manifest carries stable ingest
+metadata; its shape is defined by
+<a class="reference internal" href="../ingest-manifest-contract.html"><span class="doc">the ingest manifest contract</span></a> and validated
+against <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code>.
+<code class="docutils literal notranslate"><span class="pre">resource_type=&quot;cell-instance&quot;</span></code> is the currently implemented subject.</p>
+</section>
+<section id="advanced-the-internal-engine">
+<h2>Advanced: the internal engine<a class="headerlink" href="#advanced-the-internal-engine" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> and the record classes are facades over an internal
+authoring engine (<code class="docutils literal notranslate"><span class="pre">battinfo._workspace.Workspace</span></code>) that also powers
+submission-package export and release workflows. New code should not build on
+the engine directly — its surface is large, uncurated, and free to change;
+everything the tutorials and this page show goes through the stable facades.
+If you maintain older code that imports <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> from <code class="docutils literal notranslate"><span class="pre">battinfo</span></code>, you will
+see a deprecation message pointing at the replacement for each call.</p>
+</section>
+<section id="guidance">
+<h2>Guidance<a class="headerlink" href="#guidance" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Prefer <code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> for anything that ends in publishing.</p></li>
+<li><p>Prefer opaque BattINFO IRIs under <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/</span></code>.</p></li>
+<li><p>For validation policy and machine-readable issue output, see <a class="reference internal" href="../validation-contract.html"><span class="doc">the validation contract</span></a>.</p></li>
+<li><p>For submission-envelope internals, see <a class="reference internal" href="contract.html"><span class="doc">the contract explanation page</span></a>.</p></li>
+</ul>
+</section>
+<section id="generated-reference">
+<h2>Generated reference<a class="headerlink" href="#generated-reference" title="Link to this heading">#</a></h2>
+<p>Everything below is generated from the source docstrings and field
+descriptions — it cannot drift from the code. The authoring workspace has its
+own page at <a class="reference internal" href="../workspace-authoring.html"><span class="doc">Workspace authoring</span></a>.</p>
+<section id="the-record-classes">
+<h3>The record classes<a class="headerlink" href="#the-record-classes" title="Link to this heading">#</a></h3>
+<p>The five record classes are both the canonical source of truth and the
 authoring input: construct them with the flat field names you know from the
-datasheet and hand them to <code class="docutils literal notranslate"><span class="pre">publish</span></code> or the matching <code class="docutils literal notranslate"><span class="pre">save_*</span></code> function.</p>
+datasheet and hand them to <code class="docutils literal notranslate"><span class="pre">publish</span></code> or the matching <code class="docutils literal notranslate"><span class="pre">save_*</span></code> function.
+Every field is documented below; quantity keys and unit symbols are
+enumerated in <a class="reference internal" href="property-reference.html"><span class="doc">Property &amp; unit reference</span></a>.</p>
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.CellSpec">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">CellSpec</span></span><a class="headerlink" href="#battinfo.CellSpec" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bibliography</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_specification_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">chemistry</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">construction</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">country_of_origin</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">datasheet_revision</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">electrolyte</span> <span class="pre">(battinfo.bundle.Electrolyte</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">electrolyte_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">format</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">housing</span> <span class="pre">(battinfo.bundle.Housing</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">housing_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iec_code</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kind</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">manufacturer</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">manufacturer_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_electrode</span> <span class="pre">(battinfo.bundle.Electrode</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_electrode_basis</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">positive_electrode</span> <span class="pre">(battinfo.bundle.Electrode</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">positive_electrode_basis</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">product_type</span> <span class="pre">(battinfo.bundle.CellProductType</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">properties</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rechargeable</span> <span class="pre">(bool</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">separator</span> <span class="pre">(battinfo.bundle.Separator</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">separator_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size_code</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span> <span class="pre">(battinfo.bundle.ProvenanceInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">specification_comment</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">year</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.Cell">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">Cell</span></span><a class="headerlink" href="#battinfo.Cell" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_spec</span> <span class="pre">(battinfo.bundle.CellSpec</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">conformance</span> <span class="pre">(battinfo.bundle.Conformance</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataset_ids</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">expires_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grade</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kind</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">manufactured_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">measured</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">serial_number</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span> <span class="pre">(battinfo.bundle.ProvenanceInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.TestSpec">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">TestSpec</span></span><a class="headerlink" href="#battinfo.TestSpec" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">artifacts</span> <span class="pre">(list[battinfo.bundle.Artifact])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">conditions</span> <span class="pre">(dict[str,</span> <span class="pre">battinfo.testmethod.Quantity])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kind</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">method</span> <span class="pre">(list[battinfo.testmethod.Step])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol</span> <span class="pre">(battinfo.bundle.ProtocolInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">record</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">safety</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span> <span class="pre">(battinfo.bundle.ProvenanceInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_type</span> <span class="pre">(battinfo.bundle.BatteryTestType)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">version</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.Test">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">Test</span></span><a class="headerlink" href="#battinfo.Test" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">artifacts</span> <span class="pre">(list[battinfo.bundle.Artifact])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell</span> <span class="pre">(battinfo.bundle.Cell</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_instance_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">conformance</span> <span class="pre">(battinfo.bundle.Conformance</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataset_ids</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ended_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">instrument</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kind</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol</span> <span class="pre">(battinfo.bundle.ProtocolInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol_entity</span> <span class="pre">(battinfo.bundle.TestSpec</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span> <span class="pre">(battinfo.bundle.ProvenanceInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">started_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">status</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_type</span> <span class="pre">(battinfo.bundle.BatteryTestType)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.Dataset">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><a class="headerlink" href="#battinfo.Dataset" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">access_url</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_type</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell</span> <span class="pre">(battinfo.bundle.Cell</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_instance_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">checksum</span> <span class="pre">(battinfo.bundle.ChecksumInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">citations</span> <span class="pre">(list[dict[str,</span> <span class="pre">Any]])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">conditions_of_access</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">created_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">creators</span> <span class="pre">(list[dict[str,</span> <span class="pre">Any]])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_format</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataset_path</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">distributions</span> <span class="pre">(list[dict[str,</span> <span class="pre">Any]])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">funders</span> <span class="pre">(list[dict[str,</span> <span class="pre">Any]])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">identifier</span> <span class="pre">(Any)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_language</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">included_in_data_catalog</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_accessible_for_free</span> <span class="pre">(bool</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_based_on</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keywords</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kind</span> <span class="pre">(str)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">license</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_entity</span> <span class="pre">(list[dict[str,</span> <span class="pre">Any]])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">measurement_methods</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">measurement_techniques</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">modified_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">published_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">publisher</span> <span class="pre">(dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">related_cell_ids</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">related_test_ids</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">same_as</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span> <span class="pre">(battinfo.bundle.ProvenanceInfo)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spatial_coverage</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">temporal_coverage</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test</span> <span class="pre">(battinfo.bundle.Test</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">variable_measured</span> <span class="pre">(list[dict[str,</span> <span class="pre">Any]])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">version</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.ProvenanceInfo">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">ProvenanceInfo</span></span><a class="headerlink" href="#battinfo.ProvenanceInfo" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">battinfo_version</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">curated_by</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">file</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_hash</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">retrieved_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">url</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">workflow_version</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="publish-and-save">
-<h2>Publish and save<a class="headerlink" href="#publish-and-save" title="Link to this heading">#</a></h2>
+<h3>Publish and save<a class="headerlink" href="#publish-and-save" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="battinfo.publish">
 <span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">publish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PublishResult</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#battinfo.publish" title="Link to this definition">#</a></dt>
@@ -545,7 +920,7 @@ assumes single-writer access to <code class="docutils literal notranslate"><span
 
 </section>
 <section id="query-and-validate">
-<h2>Query and validate<a class="headerlink" href="#query-and-validate" title="Link to this heading">#</a></h2>
+<h3>Query and validate<a class="headerlink" href="#query-and-validate" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="battinfo.query_cell_specs">
 <span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">query_cell_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manufacturer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name_contains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nominal_capacity_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nominal_capacity_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nominal_voltage_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nominal_voltage_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.14)"><span class="pre">Mapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_specs_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('/home/runner/work/BattINFO/BattINFO/src/battinfo/data/examples/cell-spec')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#battinfo.query_cell_specs" title="Link to this definition">#</a></dt>
@@ -585,8 +960,8 @@ print(json.dumps(ld, indent=2))</p>
 </dd></dl>
 
 </section>
-<section id="the-workspace">
-<h2>The workspace<a class="headerlink" href="#the-workspace" title="Link to this heading">#</a></h2>
+<section id="the-workspace-object">
+<h3>The workspace object<a class="headerlink" href="#the-workspace-object" title="Link to this heading">#</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="battinfo.AuthoringWorkspace">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">AuthoringWorkspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">records_repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">registry_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#battinfo.AuthoringWorkspace" title="Link to this definition">#</a></dt>
@@ -603,6 +978,7 @@ in <code class="docutils literal notranslate"><span class="pre">battinfo._worksp
 top-level <code class="docutils literal notranslate"><span class="pre">Workspace</span></code> name points you back here.)</p>
 </section>
 </section>
+</section>
 
 
                 </article>
@@ -615,20 +991,20 @@ top-level <code class="docutils literal notranslate"><span class="pre">Workspace
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../python-api.html"
+       href="reference.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">BattINFO Python API</p>
+        <p class="prev-next-title">Reference</p>
       </div>
     </a>
     <a class="right-next"
-       href="cli-reference.html"
+       href="property-reference.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">battinfo</span></code></p>
+        <p class="prev-next-title">Property &amp; unit reference</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -651,29 +1027,41 @@ top-level <code class="docutils literal notranslate"><span class="pre">Workspace
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authoring-models">Authoring models</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.CellSpec"><code class="docutils literal notranslate"><span class="pre">CellSpec</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.Cell"><code class="docutils literal notranslate"><span class="pre">Cell</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.TestSpec"><code class="docutils literal notranslate"><span class="pre">TestSpec</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.Test"><code class="docutils literal notranslate"><span class="pre">Test</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.ProvenanceInfo"><code class="docutils literal notranslate"><span class="pre">ProvenanceInfo</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-to-start">Where to start</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-workspace">The workspace</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#record-classes">Record classes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#publication-package-record-classes-path">Publication package (record-classes path)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-and-save-battinfo-api">Query and save (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index-and-resolver-publishing-battinfo-api">Index and resolver publishing (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ingest-first-intake-battinfo-ingest">Ingest-first intake (<code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-the-internal-engine">Advanced: the internal engine</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guidance">Guidance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generated-reference">Generated reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-record-classes">The record classes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.CellSpec"><code class="docutils literal notranslate"><span class="pre">CellSpec</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.Cell"><code class="docutils literal notranslate"><span class="pre">Cell</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.TestSpec"><code class="docutils literal notranslate"><span class="pre">TestSpec</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.Test"><code class="docutils literal notranslate"><span class="pre">Test</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.ProvenanceInfo"><code class="docutils literal notranslate"><span class="pre">ProvenanceInfo</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#publish-and-save">Publish and save</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.publish"><code class="docutils literal notranslate"><span class="pre">publish()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.save_record"><code class="docutils literal notranslate"><span class="pre">save_record()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.bulk_save_session"><code class="docutils literal notranslate"><span class="pre">bulk_save_session()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#publish-and-save">Publish and save</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.publish"><code class="docutils literal notranslate"><span class="pre">publish()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.save_record"><code class="docutils literal notranslate"><span class="pre">save_record()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.bulk_save_session"><code class="docutils literal notranslate"><span class="pre">bulk_save_session()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-and-validate">Query and validate</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.query_cell_specs"><code class="docutils literal notranslate"><span class="pre">query_cell_specs()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.validate_record_report"><code class="docutils literal notranslate"><span class="pre">validate_record_report()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.record_to_jsonld"><code class="docutils literal notranslate"><span class="pre">record_to_jsonld()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#query-and-validate">Query and validate</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.query_cell_specs"><code class="docutils literal notranslate"><span class="pre">query_cell_specs()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.validate_record_report"><code class="docutils literal notranslate"><span class="pre">validate_record_report()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.record_to_jsonld"><code class="docutils literal notranslate"><span class="pre">record_to_jsonld()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-workspace">The workspace</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.AuthoringWorkspace"><code class="docutils literal notranslate"><span class="pre">AuthoringWorkspace</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-workspace-object">The workspace object</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#battinfo.AuthoringWorkspace"><code class="docutils literal notranslate"><span class="pre">AuthoringWorkspace</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

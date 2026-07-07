@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Component Specs (electrode / electrolyte / separator / current-collector / housing) &#8212; BattINFO  documentation</title>
+    <title>Components &#8212; BattINFO  documentation</title>
   
   
   
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Test Specs (test-protocol) &amp; full enum coverage" href="test-specs.html" />
-    <link rel="prev" title="Material Spec &amp; Material Instance" href="material-spec.html" />
+    <link rel="next" title="Cell specs" href="cell-type-library.html" />
+    <link rel="prev" title="Materials" href="material-spec.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -392,17 +392,24 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="how-battinfo-is-built.html">How BattINFO is built</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">Instance, Test, Dataset Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifiers.html">Identifiers &amp; PURLs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-type-library.html">Cell specs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance-test-dataset-workflow.html">From cell to dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pages/contract.html">The infrastructure contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cell-type-library.html">Cell-Spec Library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cell Fleet &amp; the cell→component reference seam</a></li>
-<li class="toctree-l1"><a class="reference internal" href="material-spec.html">Material Spec &amp; Material Instance</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Component Specs (electrode / electrolyte / separator / current-collector / housing)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test Specs (test-protocol) &amp; full enum coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-spec.html">BattINFO CLI Specification (Scope)</a></li>
 </ul>
 </div>
 </nav></div>
@@ -446,7 +453,7 @@
     
     <li class="breadcrumb-item"><a href="pages/concepts.html" class="nav-link">Concepts</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Component Specs (electrode / electrolyte / separator / current-collector / housing)</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Components</span></li>
   </ul>
 </nav>
 </div>
@@ -463,8 +470,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="component-specs-electrode-electrolyte-separator-current-collector-housing">
-<h1>Component Specs (electrode / electrolyte / separator / current-collector / housing)<a class="headerlink" href="#component-specs-electrode-electrolyte-separator-current-collector-housing" title="Link to this heading">#</a></h1>
+  <section id="components">
+<h1>Components<a class="headerlink" href="#components" title="Link to this heading">#</a></h1>
 <p>BattINFO models every entity as a <strong>spec + instance</strong> pair. After materials
 (<a class="reference internal" href="material-spec.html"><span class="std std-doc">material-spec.md</span></a>), the five <strong>component</strong> families let a cell be
 described from reusable, IRI-addressable parts. Each family is a thin registry entry that
@@ -575,15 +582,15 @@ Cell-specs will reference these component-specs by IRI in Phase 3.</p>
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Material Spec &amp; Material Instance</p>
+        <p class="prev-next-title">Materials</p>
       </div>
     </a>
     <a class="right-next"
-       href="test-specs.html"
+       href="cell-type-library.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Test Specs (test-protocol) &amp; full enum coverage</p>
+        <p class="prev-next-title">Cell specs</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

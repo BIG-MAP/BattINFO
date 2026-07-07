@@ -450,7 +450,7 @@
                   
   <section id="get-started">
 <h1>Get Started<a class="headerlink" href="#get-started" title="Link to this heading">#</a></h1>
-<p>BattINFO is the semantic data layer for battery science. It gives you:</p>
+<p>BattINFO is the semantic data layer for battery technology. It gives you:</p>
 <ul class="simple">
 <li><p>A Python library and CLI for authoring, validating, and publishing canonical battery metadata</p></li>
 <li><p>JSON Schema validation for cell specs, cells, test specs, tests, and datasets</p></li>
@@ -506,10 +506,10 @@ the offline-safe core is:</p>
 <p><a class="reference internal" href="../guides/06-publish-your-data.html"><span class="doc">Tutorial 6 — Publish your first dataset</span></a>
 walks this exact flow against a sample Neware CSV.</p>
 </section>
-<section id="if-you-are-describing-a-product-models">
-<h2>If you are describing a product: models<a class="headerlink" href="#if-you-are-describing-a-product-models" title="Link to this heading">#</a></h2>
+<section id="if-you-are-describing-a-product-record-classes">
+<h2>If you are describing a product: record classes<a class="headerlink" href="#if-you-are-describing-a-product-record-classes" title="Link to this heading">#</a></h2>
 <p>For a standalone cell-spec record — a datasheet as data — use the <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>
-model and the <code class="docutils literal notranslate"><span class="pre">publish</span></code> shortcut:</p>
+record class and the <code class="docutils literal notranslate"><span class="pre">publish</span></code> shortcut:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span><span class="p">,</span> <span class="n">publish</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
@@ -559,12 +559,12 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg>  Python API overview</p>
+<p class="sd-card-text"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code sd-text-info" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg>  Python API</p>
 </div>
 <div class="sd-card-body docutils">
-<p class="sd-card-text">How the Python surface is organized: models, the workspace, and the <code class="docutils literal notranslate"><span class="pre">api</span></code> module.</p>
+<p class="sd-card-text">How the Python surface is organized: the record classes, the workspace, and the <code class="docutils literal notranslate"><span class="pre">api</span></code> module.</p>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference external" href="../python-api.html"><span>../python-api.html</span></a></div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="api-reference.html"><span>api-reference.html</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
@@ -640,7 +640,7 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-data-the-workspace">If you have data: the workspace</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-are-describing-a-product-models">If you are describing a product: models</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-are-describing-a-product-record-classes">If you are describing a product: record classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-quick-reference">CLI quick reference</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-to-read-next">What to read next</a></li>
 </ul>

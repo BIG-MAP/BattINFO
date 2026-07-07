@@ -167,6 +167,6 @@ at every place the story is told — that is by design.
 ## Where to go next
 
 - **Use it:** [Guide 06 — publish your first dataset](guides/06-publish-your-data.ipynb)
-- **Author records:** [Python API tour](python-api.md) · [API reference](pages/api-reference.rst)
+- **Author records:** [Python API](pages/api-reference.rst)
 - **Build on it:** [the infrastructure contract](pages/contract.md) · [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md)
 - **Contribute:** [CONTRIBUTING](https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md)
