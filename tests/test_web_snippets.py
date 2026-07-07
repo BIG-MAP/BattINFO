@@ -126,3 +126,26 @@ def test_web_validator_discriminators_match_the_entity_registry() -> None:
         "web/lib/validate.ts DISCRIMINATORS drifted from battinfo.entities.ENTITY_KINDS: "
         f"web-only={set(web_map) - set(expected)}, missing={set(expected) - set(web_map)}"
     )
+
+
+def test_docs_page_quickstart_python_executes(tmp_path: Path) -> None:
+    """The /docs quickstart snippet must RUN, not just look plausible.
+
+    Red-team: the site's own quickstart used cell_format= (which CellSpec
+    rejects) and crashed verbatim - the drift suite only covered the hero
+    snippet. Every self-contained Python constant on the site executes here.
+    """
+    snippet = _ts_constant(WEB / "examples.ts", "quickstartPython")
+    import contextlib
+    import io
+    import os
+
+    cwd = os.getcwd()
+    buffer = io.StringIO()
+    try:
+        os.chdir(tmp_path)  # publish(destination="local") writes .battinfo/ here
+        with contextlib.redirect_stdout(buffer):
+            exec(compile(snippet, "<web quickstartPython>", "exec"), {})  # noqa: S102
+    finally:
+        os.chdir(cwd)
+    assert "w3id.org/battinfo/spec/" in buffer.getvalue()

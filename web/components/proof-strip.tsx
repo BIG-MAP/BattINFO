@@ -13,10 +13,12 @@ export function ProofStrip() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={site.ciBadge} alt="CI status" className="h-5" />
       </a>
-      <a href={site.pypi} target="_blank" rel="noreferrer" className="inline-flex">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={site.pypiBadge} alt="Latest release on PyPI" className="h-5" />
-      </a>
+      {site.pypiLive ? (
+        <a href={site.pypi} target="_blank" rel="noreferrer" className="inline-flex">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={site.pypiBadge} alt="Latest release on PyPI" className="h-5" />
+        </a>
+      ) : null}
       {site.doi ? (
         <a href={`https://doi.org/${site.doi}`} target="_blank" rel="noreferrer" className="inline-flex">
           {/* eslint-disable-next-line @next/next/no-img-element */}

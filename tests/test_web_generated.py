@@ -47,3 +47,26 @@ def test_public_jsonld_files_match_the_transform() -> None:
         assert actual == expected, (
             f"web/public/jsonld/{name} drifts — run scripts/gen_web_jsonld.py"
         )
+
+
+_spec2 = importlib.util.spec_from_file_location("gen_web_examples", ROOT / "scripts" / "gen_web_examples.py")
+assert _spec2 is not None and _spec2.loader is not None
+gen_showcase = importlib.util.module_from_spec(_spec2)
+_spec2.loader.exec_module(gen_showcase)
+
+
+def test_showcase_matches_the_current_library() -> None:
+    """Every /examples snippet still runs and still produces the committed record."""
+    expected = gen_showcase.render(gen_showcase.build_entries())
+    actual = (ROOT / "web" / "lib" / "showcase.generated.ts").read_text(encoding="utf-8")
+    assert actual == expected, (
+        "web/lib/showcase.generated.ts is stale - regenerate with "
+        "`uv run python scripts/gen_web_examples.py`"
+    )
+
+
+def test_public_showcase_jsonld_files_match() -> None:
+    entries = gen_showcase.build_entries()
+    for name, text in gen_showcase.render_public(entries).items():
+        committed = (ROOT / "web" / "public" / "jsonld" / name).read_text(encoding="utf-8")
+        assert committed == text, f"{name} is stale - regenerate with gen_web_examples.py"

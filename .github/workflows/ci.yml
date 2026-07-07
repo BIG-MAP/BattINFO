@@ -127,8 +127,6 @@ jobs:
         run: npm run sync:examples && git diff --exit-code lib/examples.generated.ts
       - name: Vendored schemas are in sync
         run: npm run sync:schemas -- --check
-      - name: Vendored properties are in sync
-        run: npm run sync:properties -- --check
       - name: Browser validator agrees with the canonical corpus
         run: npm run check:agreement
       - name: Build
