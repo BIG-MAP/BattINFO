@@ -44,7 +44,7 @@ export default function AboutPage() {
       <section className="mt-8 space-y-4 text-ink-muted">
         <h2 className="text-2xl font-semibold tracking-tight text-ink">Mission</h2>
         <p>
-          Battery science runs on data that mostly cannot be reused: numbers
+          Battery R&amp;D runs on data that mostly cannot be reused: numbers
           locked in PDFs, spreadsheets with private column names, cycler
           exports whose meaning left the lab with the person who ran them.
           BattINFO&apos;s mission is to make battery data{" "}

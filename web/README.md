@@ -1,7 +1,7 @@
 # battinfo.org — website
 
 The public landing pad and documentation site for **BattINFO**, the semantic
-data layer for battery science. Deployed at <https://battinfo.org>.
+data layer for battery technology. Deployed at <https://battinfo.org>.
 
 This is a self-contained Next.js app living inside the BattINFO monorepo. It is
 the only thing in this directory; it does **not** import from or modify the

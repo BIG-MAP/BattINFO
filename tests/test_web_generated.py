@@ -63,3 +63,10 @@ def test_showcase_matches_the_current_library() -> None:
         "web/lib/showcase.generated.ts is stale - regenerate with "
         "`uv run python scripts/gen_web_examples.py`"
     )
+
+
+def test_public_showcase_jsonld_files_match() -> None:
+    entries = gen_showcase.build_entries()
+    for name, text in gen_showcase.render_public(entries).items():
+        committed = (ROOT / "web" / "public" / "jsonld" / name).read_text(encoding="utf-8")
+        assert committed == text, f"{name} is stale - regenerate with gen_web_examples.py"

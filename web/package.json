@@ -2,7 +2,7 @@
   "name": "battinfo-org",
   "version": "0.0.1",
   "private": true,
-  "description": "Website for BattINFO \u00e2\u20ac\u201d the semantic data layer for battery science (battinfo.org)",
+  "description": "Website for BattINFO \u00e2\u20ac\u201d the semantic data layer for battery technology (battinfo.org)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

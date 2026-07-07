@@ -73,7 +73,9 @@ export default function ValidatePage() {
           <em>same canonical JSON Schemas</em> the Python library and the
           registry&rsquo;s publish gate enforce — the browser and{" "}
           <code className="text-sm">battinfo validate</code> give the same
-          structural verdict.
+          structural verdict. Paste the <em>canonical record JSON</em>; Python
+          authoring code and JSON-LD documents are recognized and pointed to
+          the right step.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 font-medium text-brand-700">

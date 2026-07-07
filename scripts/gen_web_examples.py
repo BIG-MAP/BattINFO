@@ -375,9 +375,28 @@ def render(entries: list[dict]) -> str:
     return banner + body
 
 
+PUBLIC_DIR = ROOT / "web" / "public" / "jsonld"
+
+
+def render_public(entries: list) -> dict:
+    """Raw JSON-LD for showcase entries that have one, served at
+    /jsonld/showcase-<slug>.jsonld so the W3C Playground can fetch them
+    (CORS headers for /jsonld/* are set in web/vercel.json)."""
+    return {
+        f"showcase-{e['slug']}.jsonld": json.dumps(e["jsonld"], indent=2, ensure_ascii=False) + NL
+        for e in entries
+        if e["jsonld"] is not None
+    }
+
+
 def main() -> int:
-    OUT.write_text(render(build_entries()), encoding="utf-8", newline=NL)
-    print(f"Wrote {OUT}")
+    entries = build_entries()
+    OUT.write_text(render(entries), encoding="utf-8", newline=NL)
+    PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    public = render_public(entries)
+    for name, text in public.items():
+        (PUBLIC_DIR / name).write_text(text, encoding="utf-8", newline=NL)
+    print(f"Wrote {OUT} + {len(public)} public jsonld files")
     return 0
 
 
