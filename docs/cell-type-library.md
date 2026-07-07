@@ -1,4 +1,4 @@
-# Cell-Spec Library
+# Cell specs
 
 ## Purpose
 

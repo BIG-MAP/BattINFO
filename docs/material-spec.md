@@ -1,4 +1,4 @@
-# Material Spec & Material Instance
+# Materials
 
 BattINFO models every entity as a **spec + instance** pair: a *spec* is the reusable,
 datasheet-like type description; an *instance* is a physical realization of that spec.

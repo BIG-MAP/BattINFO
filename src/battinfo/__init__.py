@@ -1,4 +1,4 @@
-"""BattINFO — the semantic data layer for battery science.
+"""BattINFO — the semantic data layer for battery technology.
 
 The curated public surface is the ~34 names in ``__all__``: the record models,
 the workspace, publish/save/query/validate, and the JSON-LD transform.

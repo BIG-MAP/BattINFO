@@ -1,7 +1,7 @@
 Get Started
 ===========
 
-BattINFO is the semantic data layer for battery science. It gives you:
+BattINFO is the semantic data layer for battery technology. It gives you:
 
 - A Python library and CLI for authoring, validating, and publishing canonical battery metadata
 - JSON Schema validation for cell specs, cells, test specs, tests, and datasets
@@ -71,11 +71,11 @@ the offline-safe core is:
 walks this exact flow against a sample Neware CSV.
 
 
-If you are describing a product: models
----------------------------------------
+If you are describing a product: record classes
+------------------------------------------------
 
 For a standalone cell-spec record — a datasheet as data — use the ``CellSpec``
-model and the ``publish`` shortcut:
+record class and the ``publish`` shortcut:
 
 .. code-block:: python
 
@@ -128,11 +128,11 @@ What to read next
         Six notebooks, one story — concepts, authoring, linked records, the semantic layer, and publishing.
 
     .. grid-item-card::
-        :link: ../python-api.html
+        :link: api-reference.html
 
-        :octicon:`code;1em;sd-text-info`  Python API overview
-        ^^^^^^^^^^^^^^^^^^^
-        How the Python surface is organized: models, the workspace, and the ``api`` module.
+        :octicon:`code;1em;sd-text-info`  Python API
+        ^^^^^^^^^^
+        How the Python surface is organized: the record classes, the workspace, and the ``api`` module.
 
     .. grid-item-card::
         :link: ../how-battinfo-is-built.html
