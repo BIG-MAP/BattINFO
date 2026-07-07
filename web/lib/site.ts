@@ -16,6 +16,10 @@ export const site = {
   reference: "https://github.com/BIG-MAP/BattINFO/tree/main/docs",
   github: "https://github.com/BIG-MAP/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
+  // The package is not on PyPI until the 0.8 release train publishes it
+  // (user decision: release LAST, once everything is in shape). The badge,
+  // footer link, and install copy stay hidden until this flips.
+  pypiLive: false,
   genome: "https://www.battery-genome.org",
   ciBadge: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main",
   ciRuns: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml",
@@ -106,7 +110,6 @@ export const footerNav = [
     heading: "Project",
     links: [
       { label: "GitHub", href: site.github, external: true },
-      { label: "PyPI", href: site.pypi, external: true },
       { label: "EMMO domain-battery", href: site.emmo, external: true },
     ],
   },

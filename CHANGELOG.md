@@ -9,6 +9,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **The site's own /docs quickstart crashed verbatim** (`cell_format=`, which
+  `CellSpec` rejects) — fixed, and the snippet drift suite now EXECUTES every
+  self-contained Python snippet on the site, so a non-running example fails CI.
+- **battinfo.org stops promising a PyPI package that isn't published yet**:
+  the version badge and footer link hide behind `site.pypiLive` (flipped by
+  the 0.8 release train), and the install snippet teaches the source install
+  until then. The /docs tutorial cards now link the six individual notebooks
+  (with current titles) instead of one folder listing; the dead
+  web-validator-plan link and the "live converter" over-claim are gone.
+
+
+### Fixed
+
 - **The brand wordmark is now outlined vector paths.** The lockups are loaded
   via `<img>` tags (docs navbar, web navbar, README), and SVGs inside `<img>`
   cannot load webfonts — so "BattINFO" rendered in whatever fallback font the

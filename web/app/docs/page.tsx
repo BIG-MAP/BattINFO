@@ -10,11 +10,12 @@ export const metadata: Metadata = {
 };
 
 const guides = [
-  { n: "01", title: "Concepts", body: "Data model, record types, IRIs, and the semantic layer." },
-  { n: "02", title: "First cell type", body: "Materials → components → cell type → publish." },
-  { n: "03", title: "Linked records", body: "Cell instance → test → dataset → registry submission." },
-  { n: "04", title: "Semantic layer", body: "JSON-LD anatomy, EMMO type stacking, RDF and SPARQL." },
-  { n: "05", title: "Descriptors", body: "Electrodes, electrolyte, separator — detailed, build-level descriptors." },
+  { n: "1", slug: "01-concepts", title: "Concepts", body: "The record model, IRIs, and the semantic layer." },
+  { n: "2", slug: "02-first-cell-type", title: "Describing a cell", body: "Author and publish a cell spec, with a taste of material-level depth." },
+  { n: "3", slug: "03-linked-records", title: "Linked records", body: "Cells, test specs, tests, and datasets with the workspace." },
+  { n: "4", slug: "04-semantic-layer", title: "Semantic layer", body: "JSON-LD anatomy, EMMO type stacking, RDF and SPARQL." },
+  { n: "5", slug: "05-descriptors", title: "Cell descriptors", body: "Research-grade composition: materials, BOMs, electrodes, electrolyte." },
+  { n: "6", slug: "06-publish-your-data", title: "Publish your first dataset", body: "Raw cycler export → validated records → DOI, in five stages." },
 ];
 
 const reference = [
@@ -86,12 +87,12 @@ export default function DocsPage() {
 
       {/* Guides */}
       <section className="mt-20">
-        <SectionHeading kicker="Guides" title="Learn the model step by step" />
+        <SectionHeading kicker="Tutorials" title="Learn the model step by step" />
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {guides.map((g) => (
             <a
               key={g.n}
-              href={`${site.reference}/guides`}
+              href={`${site.reference}/guides/${g.slug}.ipynb`}
               target="_blank"
               rel="noreferrer"
               className="prose-card transition hover:border-brand-300 hover:shadow-md"
@@ -138,23 +139,12 @@ export default function DocsPage() {
           <Link href="/convert" className="prose-card transition hover:border-brand-300 hover:shadow-md">
             <h3 className="text-lg font-semibold text-ink">Convert to JSON-LD</h3>
             <p className="mt-1 text-sm text-ink-muted">
-              See authored JSON become EMMO-aligned Linked Data live, with the
-              canonical and converter-compatible views side by side.
+              What ws.convert() supports for every cycler format, and how the
+              converted tables become linked records.
             </p>
           </Link>
         </div>
-        <p className="mt-4 text-sm text-ink-muted">
-          The roadmap for the canonical, same-engine web tools is in{" "}
-          <a
-            href={`${site.github}/blob/main/docs/web-validator-converter-plan.md`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-brand-600 underline"
-          >
-            docs/web-validator-converter-plan.md
-          </a>
-          .
-        </p>
+
       </section>
 
       {/* Standards alignment */}
