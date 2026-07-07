@@ -1,4 +1,4 @@
-# Test Specs (test-protocol) & full enum coverage
+# Test specs
 
 A **test-spec** (`test-protocol` record) is the reusable, IRI-addressable description of a test
 procedure — the *spec* half of `test-spec` + `test`. A `test` (instance) links a cell-instance to

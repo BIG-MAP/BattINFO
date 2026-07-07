@@ -1,7 +1,8 @@
-# Cell Fleet & the cell→component reference seam
+# Cells
 
-With materials and the five component families in place, a **cell-spec** can now be
-described from reusable parts: it references standalone component-specs by IRI, which in
+A **cell** is one physical item with a serial number; this page covers how
+many cells reference one spec, and how a cell-spec is described from reusable
+parts: it references standalone component-specs by IRI, which in
 turn reference material-specs — completing the three-level graph
 **cell → component → material**.
 

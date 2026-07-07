@@ -1,4 +1,6 @@
-# `battinfo`
+# CLI reference
+
+Every `battinfo` command, generated from the CLI itself (so it cannot drift). All commands and options:
 
 **Usage**:
 

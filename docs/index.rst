@@ -12,7 +12,7 @@
 BattINFO
 ========
 
-**BattINFO** is the semantic data layer for battery science — a Python library, CLI, and canonical asset suite that validates, maps, and publishes battery metadata as machine-readable Linked Data aligned with the `EMMO Battery Domain Ontology <https://emmo-repo.github.io/domain-battery/>`_.
+**BattINFO** is the semantic data layer for battery technology — a Python library, CLI, and canonical asset suite that validates, maps, and publishes battery metadata as machine-readable Linked Data aligned with the `EMMO Battery Domain Ontology <https://emmo-repo.github.io/domain-battery/>`_.
 
 Here is a minimal example that creates a canonical cell-spec record and publishes it locally. It uses the same flagship cell shown on `battinfo.org <https://battinfo.org>`_ (A123 ANR26650M1-B); the full canonical record lives at ``examples/cell-spec/A123__ANR26650M1-B.json``.
 
