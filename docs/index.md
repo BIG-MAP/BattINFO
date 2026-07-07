@@ -9,14 +9,14 @@ BattINFO is the implementation layer for the EMMO domain-battery ontology — pr
 | | |
 |---|---|
 | **[Quickstart](../QUICKSTART.md)** | Create and publish your first cell-spec record in 5 minutes |
-| **[01 — Concepts](guides/01-concepts.ipynb)** | Data model, record types, IRIs, and the semantic layer |
-| **[02 — First cell spec](guides/02-first-cell-type.ipynb)** | Materials → components → cell spec → publish |
-| **[03 — Linked records](guides/03-linked-records.ipynb)** | Cell instance → test → dataset → registry submission |
-| **[04 — Semantic layer](guides/04-semantic-layer.ipynb)** | JSON-LD anatomy, EMMO type stacking, RDF validation, SPARQL |
-| **[05 — Descriptors](guides/05-descriptors.ipynb)** | Research-grade descriptors: electrode composition, electrolyte, separator |
-| **[06 — Publish your data](guides/06-publish-your-data.ipynb)** | The end-to-end tutorial: raw cycler CSV → validated records → DOI + registry |
+| **[1 — Concepts](guides/01-concepts.ipynb)** | The record model, IRIs, and the semantic layer |
+| **[2 — Describing a cell](guides/02-first-cell-type.ipynb)** | Author and publish a cell spec, with a taste of material-level depth |
+| **[3 — Linked records](guides/03-linked-records.ipynb)** | Cells, test specs, tests, and datasets with the workspace |
+| **[4 — Semantic layer](guides/04-semantic-layer.ipynb)** | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
+| **[5 — Cell descriptors](guides/05-descriptors.ipynb)** | Research-grade composition: materials, BOMs, electrodes, electrolyte |
+| **[6 — Publish your first dataset](guides/06-publish-your-data.ipynb)** | End to end: raw cycler CSV → validated records → DOI + registry |
 
-Open notebooks from the repo root with the `.venv` kernel selected.
+Each notebook runs from its own folder and writes only to a throwaway `_scratch/` directory next to it.
 
 ---
 

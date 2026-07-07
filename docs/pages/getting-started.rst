@@ -4,7 +4,7 @@ Get Started
 BattINFO is the semantic data layer for battery science. It gives you:
 
 - A Python library and CLI for authoring, validating, and publishing canonical battery metadata
-- JSON Schema validation for cell specs, cell instances, tests, and datasets
+- JSON Schema validation for cell specs, cells, test specs, tests, and datasets
 - Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology
 - A reusable cell-spec library backed by canonical records in ``battinfo-records``
 
@@ -18,6 +18,15 @@ BattINFO requires Python 3.11 or later.
 
    pip install battinfo
 
+Optional extras add features as you need them (each missing dependency raises
+an error naming the extra to install):
+
+.. code-block:: bash
+
+   pip install "battinfo[processing]"   # cycler-file conversion (ws.convert) + plotting
+   pip install "battinfo[tabular]"      # CSV/Parquet/XLSX readers
+   pip install "battinfo[publish]"      # RO-Crate validation for publishing
+
 Or install from source for the latest development version:
 
 .. code-block:: bash
@@ -27,58 +36,64 @@ Or install from source for the latest development version:
    pip install -e ".[dev]"
 
 
-Your first cell-spec record
----------------------------
+If you have data: the workspace
+-------------------------------
 
-The fastest path is the ``publish`` shortcut:
+The ``workspace`` is the one object for the whole journey — convert raw cycler
+files, register the cells you tested, link tests and data, save validated
+records, publish. ``ws.quickstart()`` prints the full recipe in your terminal;
+the offline-safe core is:
+
+.. doc-snippet: skip
+
+.. code-block:: python
+
+   import battinfo
+
+   ws = battinfo.workspace(".")
+
+   ws.convert()                                  # raw cycler files → tidy BDF tables
+
+   spec = battinfo.CellSpec(                     # or reuse the registry's identity:
+       manufacturer="Molicel",                   #   spec = ws.search("molicel p45b")[0]
+       model="INR21700-P45B",
+       format="cylindrical",
+       chemistry="Li-ion",
+   )
+   ws.add("cell", spec=spec, serial_numbers=["S1"])
+   ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+
+   ws.save()                                     # validated records, stable IRIs
+   # ws.login(api_key="...")                     # then: ws.publish() for the registry
+   #                                             # (zenodo=True mints a citable DOI)
+
+:doc:`Tutorial 6 — Publish your first dataset <../guides/06-publish-your-data>`
+walks this exact flow against a sample Neware CSV.
+
+
+If you are describing a product: models
+---------------------------------------
+
+For a standalone cell-spec record — a datasheet as data — use the ``CellSpec``
+model and the ``publish`` shortcut:
 
 .. code-block:: python
 
    from battinfo import CellSpec, publish
 
-   cell_spec = CellSpec(
+   spec = CellSpec(
        manufacturer="Energizer",
        model="CR2032",
        format="coin",
        chemistry="Li-primary",
+       properties={"nominal_capacity": {"value": 0.235, "unit": "Ah"}},
    )
 
-   result = publish(cell_spec, destination="local")
-   print(result.debug_paths)
+   result = publish(spec, destination="local")
+   print(result.canonical_iri)
 
-This validates the record, assigns it a stable BattINFO IRI, and writes the canonical JSON file to ``.battinfo/``.
-
-
-Linking a cell instance, test, and dataset
-------------------------------------------
-
-Use ``Workspace`` to build a fully linked chain of records:
-
-.. code-block:: python
-
-   from pathlib import Path
-   from battinfo import Workspace
-
-   workspace = Workspace(root=Path(".battinfo/demo"))
-
-   cell_spec = workspace.cell_spec(
-       manufacturer="Energizer",
-       model="CR2032",
-       format="coin",
-       chemistry="Li-primary",
-   )
-   cell = workspace.cell(cell_spec, serial_number="LAB-001")
-
-   protocol = workspace.test_spec(
-       name="Constant current discharge",
-       kind="capacity_check",
-   )
-   test = workspace.test(cell, protocol_ref=protocol, instrument="Landt CT2001A")
-   dataset = workspace.dataset(cell, title="CR2032 baseline", test=test, path="data/run1.csv")
-
-   workspace.save()
-
-All records are saved to ``.battinfo/demo/`` with cross-references validated automatically.
+This validates the record, assigns it a stable BattINFO IRI, and writes the
+canonical JSON file to ``.battinfo/``.
 
 
 CLI quick reference
@@ -94,10 +109,10 @@ BattINFO ships a command-line interface for validation and querying:
    # Query all registered cell specs
    battinfo query cell-spec
 
-   # Save a cell instance from a draft file
+   # Save a cell record from a draft file
    battinfo save cell-instance --input draft.json --source-root examples
 
-See the :doc:`../cli-spec` page for the full CLI reference.
+See the :doc:`CLI reference <cli-reference>` for every command.
 
 
 What to read next
@@ -106,25 +121,25 @@ What to read next
 .. grid:: 2
 
     .. grid-item-card::
-        :link: ../guides/01-concepts.html
+        :link: guides.html
 
-        :octicon:`book;1em;sd-text-info`  Guide notebooks
-        ^^^^^^^^^^^^^^^^
-        Work through the five guide notebooks covering concepts, authoring, linking, and the semantic layer.
+        :octicon:`book;1em;sd-text-info`  Tutorials
+        ^^^^^^^^^
+        Six notebooks, one story — concepts, authoring, linked records, the semantic layer, and publishing.
 
     .. grid-item-card::
         :link: ../python-api.html
 
-        :octicon:`code;1em;sd-text-info`  Python API reference
-        ^^^^^^^^^^^^^^^^^^^^^^
-        Full surface documentation for ``Workspace``, ``CellSpec``, ingest helpers, and publishing utilities.
+        :octicon:`code;1em;sd-text-info`  Python API overview
+        ^^^^^^^^^^^^^^^^^^^
+        How the Python surface is organized: models, the workspace, and the ``api`` module.
 
     .. grid-item-card::
-        :link: ../ontology-profile-architecture.html
+        :link: ../how-battinfo-is-built.html
 
-        :octicon:`gear;1em;sd-text-info`  Concepts
-        ^^^^^^^^
-        How BattINFO relates to domain-battery, EMMO, and the Linked Data stack.
+        :octicon:`gear;1em;sd-text-info`  How BattINFO is built
+        ^^^^^^^^^^^^^^^^^^^^^
+        The orientation roadmap: layers, data flow, and where each module fits.
 
     .. grid-item-card::
         :link: ../validation-contract.html

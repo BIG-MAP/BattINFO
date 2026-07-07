@@ -34,3 +34,6 @@ docs/_build
 # Editor
 .vscode/
 catalog-v001.xml
+
+# Guide-notebook scratch outputs (created when running docs/guides/*.ipynb)
+docs/guides/_scratch/

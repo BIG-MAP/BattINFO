@@ -35,7 +35,7 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 
 [**Quickstart**](QUICKSTART.md) ·
 [**Documentation**](docs/index.md) ·
-[**Guide notebooks**](#guide-notebooks) ·
+[**Tutorials**](#tutorials) ·
 [**Contributing**](#contributing) ·
 [**Cite**](#citation)
 
@@ -57,7 +57,7 @@ queryable with SPARQL, and Battery Pass-compatible out of the box.
 - [Why BattINFO](#why-battinfo)
 - [Installation](#installation)
 - [Quickstart](#quickstart)
-- [Guide notebooks](#guide-notebooks)
+- [Tutorials](#tutorials)
 - [What BattINFO does](#what-battinfo-does)
 - [Semantic foundation](#semantic-foundation)
 - [Project status](#project-status)
@@ -85,9 +85,10 @@ Requires **Python 3.11+**.
 pip install battinfo
 ```
 
-Optional extras: `battinfo[storage]` (S3), `battinfo[processing]` (data
-analysis), `battinfo[docs]` (Sphinx), and `battinfo[dev]` (full test/lint/build
-toolchain).
+Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()`
++ plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]`
+(RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and
+`battinfo[dev]` (full test/lint/build toolchain).
 
 **Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
 
@@ -135,19 +136,20 @@ maps the three entry points (workspace, models + `publish`, `battinfo.Workspace`
 
 **→ Read the [full quickstart](QUICKSTART.md) and the [documentation index](docs/index.md).**
 
-## Guide notebooks
+## Tutorials
 
-Interactive Jupyter notebooks in [`docs/guides/`](docs/guides/) — open from the
-repo root with the `.venv` kernel.
+Six tutorial notebooks in [`docs/guides/`](docs/guides/) — one story, from the
+record model to a published dataset. Each runs from its own folder and writes
+only to a throwaway `_scratch/` directory next to it.
 
-| Notebook | What you'll learn |
+| Tutorial | What you'll learn |
 |---|---|
-| [01 — Concepts](docs/guides/01-concepts.ipynb) | Data model, record types, IRIs, and the semantic layer |
-| [02 — First cell spec](docs/guides/02-first-cell-type.ipynb) | Materials → components → cell spec → publish |
-| [03 — Linked records](docs/guides/03-linked-records.ipynb) | Cell instance → test → dataset → registry submission |
-| [04 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
-| [05 — Descriptors](docs/guides/05-descriptors.ipynb) | Research-grade descriptors: electrodes, electrolyte, separator |
-| [06 — Publish your data](docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |
+| [1 — Concepts](docs/guides/01-concepts.ipynb) | The record model, IRIs, and the semantic layer |
+| [2 — Describing a cell](docs/guides/02-first-cell-type.ipynb) | Author and publish a cell spec, with a taste of material-level depth |
+| [3 — Linked records](docs/guides/03-linked-records.ipynb) | Cells, test specs, tests, and datasets with the workspace |
+| [4 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
+| [5 — Cell descriptors](docs/guides/05-descriptors.ipynb) | Research-grade composition: materials, BOMs, electrodes, electrolyte |
+| [6 — Publish your first dataset](docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |
 
 ## What BattINFO does
 

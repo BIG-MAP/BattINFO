@@ -496,3 +496,26 @@ class TestUploadZenodoPackage:
         assert DEFAULT_RO_CRATE_METADATA_FILENAME in uploaded_names
         assert "dataset-001.csv" in uploaded_names
         assert "dataset-001.bdf.parquet" in uploaded_names
+
+
+class TestTypedDate:
+    """_typed_date wraps record date values for the publication JSON-LD.
+
+    Records store manufactured_at/expires_at as Unix timestamps (int); the
+    assembler used to crash on them (AttributeError: int has no strip) as soon
+    as a cell carried a production date.
+    """
+
+    def test_unix_timestamp_becomes_utc_xsd_date(self) -> None:
+        from battinfo.ws import _typed_date
+
+        # 2026-01-15T00:00:00Z — must not shift with the local timezone.
+        assert _typed_date(1768435200) == {"@value": "2026-01-15", "@type": "xsd:date"}
+
+    def test_string_shapes_keep_their_datatypes(self) -> None:
+        from battinfo.ws import _typed_date
+
+        assert _typed_date("2026")["@type"] == "xsd:gYear"
+        assert _typed_date("2026-01")["@type"] == "xsd:gYearMonth"
+        assert _typed_date("2026-01-15")["@type"] == "xsd:date"
+        assert _typed_date("2026-01-15T12:00:00Z")["@type"] == "xsd:dateTime"

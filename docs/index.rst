@@ -80,6 +80,10 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
 Explore the documentation
 --------------------------
 
+The documentation follows the `Diátaxis <https://diataxis.fr/>`_ structure:
+**tutorials** teach, **how-to guides** solve one task each, **reference**
+states the facts, and **concepts** explain the design.
+
 .. grid:: 2
 
     .. grid-item-card::
@@ -87,27 +91,43 @@ Explore the documentation
 
         :octicon:`rocket;1em;sd-text-info`  Get Started
         ^^^^^^^^^^^
-        Install BattINFO and publish your first cell-type record in five minutes.
+        Install BattINFO and publish your first records in five minutes.
 
     .. grid-item-card::
         :link: pages/guides.html
 
-        :octicon:`book;1em;sd-text-info`  Guides
-        ^^^^^^^
-        Step-by-step notebooks covering concepts, cell types, linked records, and the semantic layer.
+        :octicon:`book;1em;sd-text-info`  Tutorials
+        ^^^^^^^^^
+        Six notebooks, one story — from the record model to a published, citable dataset.
 
 .. grid:: 2
+
+    .. grid-item-card::
+        :link: pages/howto.html
+
+        :octicon:`checklist;1em;sd-text-info`  How-to guides
+        ^^^^^^^^^^^^^
+        Task-shaped recipes: bulk ingest, fixing validation errors, resuming submissions, funding tags.
 
     .. grid-item-card::
         :link: pages/reference.html
 
         :octicon:`code;1em;sd-text-info`  Reference
         ^^^^^^^^^
-        Python API, CLI commands, and the validation policy contract.
+        Python API, CLI commands, schemas, and the validation policy contract.
+
+.. grid:: 2
 
     .. grid-item-card::
         :link: pages/concepts.html
 
         :octicon:`gear;1em;sd-text-info`  Concepts
         ^^^^^^^^
-        Ontology architecture, authoring workflows, and the Linked Data model.
+        Ontology architecture, the spec-and-instance model, and how BattINFO is built.
+
+    .. grid-item-card::
+        :link: how-battinfo-is-built.html
+
+        :octicon:`stack;1em;sd-text-info`  How BattINFO is built
+        ^^^^^^^^^^^^^^^^^^^^^
+        The orientation roadmap: layers, data flow, and where each module fits.

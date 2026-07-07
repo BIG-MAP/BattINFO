@@ -24,6 +24,9 @@ If in doubt, start with `battinfo.workspace(".")` — it wraps everything else. 
 pip install battinfo
 ```
 
+> Converting raw cycler files (`ws.convert()`) needs the BDF converter:
+> `pip install "battinfo[processing]"`.
+
 ---
 
 ## 1. Create your first cell-spec record
@@ -91,7 +94,7 @@ print(jsonld["schema:size"])     # R18650
 
 BattINFO automatically stacks EMMO types based on the cell's format and chemistry. A cylindrical Li-ion cell is simultaneously `BatteryCell`, `CylindricalBattery`, and `LithiumIonBattery` — no manual annotation needed.
 
-The resolver JSON-LD is the lightweight document served at the cell's IRI. The full EMMO-aligned publication package — with `hasProperty` nodes for each quantitative specification — is produced by `workspace.build_publication_package()` (see [Guide 3](docs/guides/03-linked-records.ipynb)).
+The resolver JSON-LD is the lightweight document served at the cell's IRI. The full EMMO-aligned publication package — with `hasProperty` nodes for each quantitative specification — is produced when you publish (see [Tutorial 3](docs/guides/03-linked-records.ipynb)).
 
 ---
 
@@ -126,13 +129,13 @@ In four steps you have:
 
 ## Next steps
 
-The guide notebooks in `docs/guides/` continue the walkthrough interactively. Open them from the repo root with the `.venv` kernel selected.
+The tutorial notebooks in `docs/guides/` continue the walkthrough interactively. Each notebook runs from its own folder and writes only to a throwaway `_scratch/` directory next to it.
 
 | Notebook | What you'll learn |
 |---|---|
-| [01 — Concepts](docs/guides/01-concepts.ipynb) | The data model, record types, and how IRIs work |
-| [02 — First cell spec](docs/guides/02-first-cell-type.ipynb) | Full cell-spec authoring: specs, provenance, CLI and Python paths |
-| [03 — Linked records](docs/guides/03-linked-records.ipynb) | Cell instance → test → dataset provenance chain |
-| [04 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD, EMMO alignment, validation, and RDF queries |
-| [05 — Descriptors](docs/guides/05-descriptors.ipynb) | Deep cell descriptors: electrodes, electrolyte, separator |
-| [06 — Publish your data](docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |
+| [1 — Concepts](docs/guides/01-concepts.ipynb) | The record model, IRIs, and the semantic layer |
+| [2 — Describing a cell](docs/guides/02-first-cell-type.ipynb) | Author and publish a cell spec, with a taste of material-level depth |
+| [3 — Linked records](docs/guides/03-linked-records.ipynb) | Cells, test specs, tests, and datasets with the workspace |
+| [4 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
+| [5 — Cell descriptors](docs/guides/05-descriptors.ipynb) | Research-grade composition: materials, BOMs, electrodes, electrolyte |
+| [6 — Publish your first dataset](docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |
