@@ -519,3 +519,63 @@ class TestTypedDate:
         assert _typed_date("2026-01")["@type"] == "xsd:gYearMonth"
         assert _typed_date("2026-01-15")["@type"] == "xsd:date"
         assert _typed_date("2026-01-15T12:00:00Z")["@type"] == "xsd:dateTime"
+
+
+class TestZenodoOnlyPublicPath:
+    """Zenodo is the public publish path: no R2 required (red-team W1.2)."""
+
+    def test_apply_zenodo_file_urls_patches_records(self, tmp_path: Path) -> None:
+        from battinfo import workspace
+
+        ws = workspace(root=tmp_path)
+        data = tmp_path / "run1.csv"
+        data.write_text("cycle,cap\n1,4.9\n", encoding="utf-8")
+        ds_dir = ws._records_root / "examples" / "dataset"
+        ds_dir.mkdir(parents=True)
+        record = {
+            "schema_version": "0.2.0",
+            "dataset": {
+                "id": "https://w3id.org/battinfo/dataset/7d9k-2m4p-8t3x-6nq5",
+                "short_id": "7d9k2m",
+                "access_url": data.as_uri(),
+                "distributions": [
+                    {"type": "DataDownload", "content_url": data.as_uri()}
+                ],
+            },
+        }
+        rec_path = ds_dir / "dataset-7d9k.json"
+        rec_path.write_text(json.dumps(record), encoding="utf-8")
+
+        n = ws._apply_zenodo_file_urls(
+            "https://zenodo.org/records/12345", {"run1.csv"}
+        )
+        assert n == 1
+        patched = json.loads(rec_path.read_text(encoding="utf-8"))["dataset"]
+        assert patched["access_url"] == "https://zenodo.org/records/12345/files/run1.csv"
+        assert patched["distributions"][0]["content_url"].startswith("https://zenodo.org/")
+        assert patched["distributions"][0]["checksum"]["algorithm"] == "sha256"
+
+    def test_files_not_in_deposit_are_untouched(self, tmp_path: Path) -> None:
+        from battinfo import workspace
+
+        ws = workspace(root=tmp_path)
+        ds_dir = ws._records_root / "examples" / "dataset"
+        ds_dir.mkdir(parents=True)
+        record = {
+            "schema_version": "0.2.0",
+            "dataset": {
+                "id": "https://w3id.org/battinfo/dataset/7d9k-2m4p-8t3x-6nq5",
+                "distributions": [{"type": "DataDownload", "content_url": "file:///x/other.csv"}],
+            },
+        }
+        (ds_dir / "d.json").write_text(json.dumps(record), encoding="utf-8")
+        assert ws._apply_zenodo_file_urls("https://zenodo.org/records/1", {"run1.csv"}) == 0
+
+    def test_r2_configured_reads_env(self, tmp_path: Path, monkeypatch) -> None:
+        from battinfo import workspace
+
+        ws = workspace(root=tmp_path)
+        monkeypatch.delenv("R2_ENDPOINT", raising=False)
+        assert ws._r2_configured() is False
+        monkeypatch.setenv("R2_ENDPOINT", "https://acc.eu.r2.cloudflarestorage.com")
+        assert ws._r2_configured() is True

@@ -2135,7 +2135,14 @@ class AuthoringWorkspace:
         """
         self.save()
         if zenodo:
-            self.upload()
+            if self._r2_configured():
+                self.upload()
+            else:
+                print(
+                    "  No R2 object storage configured - Zenodo will host the "
+                    "data files (records get the Zenodo download URLs). R2 is "
+                    "only needed for team-internal registry hosting."
+                )
             result = self.zenodo(publish=True, sandbox=sandbox)
             doi = doi or result.doi
         return self.submit(
@@ -3354,6 +3361,64 @@ class AuthoringWorkspace:
         print(f"\nGenerated {len(written)} preview file(s) across the datasets.")
         return written
 
+    def _r2_configured(self) -> bool:
+        """True when R2 object storage is configured (env or credentials file)."""
+        return bool(os.environ.get("R2_ENDPOINT") or self._credential("R2_ENDPOINT"))
+
+    def _apply_zenodo_file_urls(self, record_url: str, uploaded_names: set) -> int:
+        """Point dataset records at the Zenodo-hosted copies of their files.
+
+        Mirrors what :meth:`upload` does for R2, without any extra storage:
+        each distribution whose filename was deposited gets
+        ``{record_url}/files/{name}`` as its ``content_url`` (plus a sha256
+        checksum if the local file is readable), and the primary distribution
+        sets the dataset ``access_url``. Returns the number of records updated.
+        """
+        import hashlib
+
+        ds_dir = self._records_root / "examples" / "dataset"
+        if not ds_dir.is_dir():
+            return 0
+        patched = 0
+        for record_path in sorted(ds_dir.glob("*.json")):
+            raw = json.loads(record_path.read_text(encoding="utf-8"))
+            ds = raw.get("dataset", {})
+            dists = ds.get("distributions") or []
+            if not dists:
+                continue
+            new_dists: list[dict] = []
+            primary_url: str | None = None
+            changed = False
+            for dist in dists:
+                local_url = dist.get("content_url") or ds.get("access_url") or ""
+                local_file = Path(local_url.replace("file:///", "").replace("file://", ""))
+                if not local_file.is_absolute():
+                    local_file = self._root / local_file
+                name = local_file.name
+                if name not in uploaded_names:
+                    new_dists.append(dist)
+                    continue
+                public_url = f"{record_url}/files/{name}"
+                dist = {**dist, "content_url": public_url}
+                if local_file.is_file() and not dist.get("checksum"):
+                    dist["checksum"] = {
+                        "algorithm": "sha256",
+                        "value": hashlib.sha256(local_file.read_bytes()).hexdigest(),
+                    }
+                changed = True
+                new_dists.append(dist)
+                if primary_url is None and dist.get("role") != "raw":
+                    primary_url = public_url
+            if not changed:
+                continue
+            raw["dataset"]["distributions"] = new_dists
+            if primary_url:
+                raw["dataset"]["access_url"] = primary_url
+            _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
+            self._session_paths.add(record_path)
+            patched += 1
+        return patched
+
     def upload(
         self,
         bucket: str | None = None,
@@ -3705,6 +3770,13 @@ class AuthoringWorkspace:
                   f"{len(sync['removed'])} removed")
             for name in sync["uploaded"]:
                 print(f"    + {name}")
+
+            # Zenodo now hosts these files: point the dataset records at the
+            # public record URLs so ws.submit() sends resolvable links even
+            # when no R2 object storage is configured (the public path).
+            patched = self._apply_zenodo_file_urls(record_url, set(upload_map.values()))
+            if patched:
+                print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
