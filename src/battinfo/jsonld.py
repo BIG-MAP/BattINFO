@@ -365,7 +365,9 @@ def dataset_to_jsonld(record: dict) -> dict:
     if ds.get("access_url"):
         node["dcat:accessURL"] = {"@id": ds["access_url"]}
     if ds.get("created_at"):
-        node["dcterms:created"] = ds["created_at"]
+        node["dcterms:created"] = _epoch_to_iso(ds["created_at"])
+    if ds.get("modified_at"):
+        node["dcterms:modified"] = _epoch_to_iso(ds["modified_at"])
     about = ds.get("about")
     if about:
         # Tolerate a single IRI string (wrap it) instead of iterating it
@@ -514,6 +516,23 @@ _TRANSFORMERS = {
     "housing_spec": _component_to_jsonld,
     "housing":      _component_to_jsonld,
 }
+
+
+def _epoch_to_iso(value):
+    """Records store times as Unix epoch ints; DCMI terms expect date literals.
+
+    Emitting the raw integer typed xsd:integer poisoned DCAT harvesters
+    (red-team W3.4). Non-numeric values pass through untouched.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return value
+    import datetime as _dt
+
+    return (
+        _dt.datetime.fromtimestamp(value, tz=_dt.timezone.utc)
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
 
 
 def record_to_jsonld(record: dict, record_type: str) -> dict:

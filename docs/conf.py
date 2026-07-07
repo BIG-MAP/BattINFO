@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "BattINFO"
-copyright = "2021-2025, Simon Clark"
+copyright = "2021-2026, Simon Clark"
 author = "Simon Clark"
 
 extensions = [

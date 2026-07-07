@@ -17,7 +17,8 @@ export const publishJourneySnippet = `import battinfo
 ws = battinfo.workspace(".")
 
 ws.convert()                          # cycler files -> tidy tables
-spec = ws.search("molicel p45b")[0]   # find your cell
+hits = ws.search("molicel p45b")      # find your cell...
+spec = hits[0] if hits else battinfo.CellSpec(...)  # ...or describe it
 ws.add("cell", spec=spec, serial_numbers=["S1", "S2"])
 ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
 

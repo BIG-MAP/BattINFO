@@ -149,7 +149,7 @@ def test_submit_all_failed_is_distinct_from_no_records(
         ws.submit(**_CREDS)
 
     empty = AuthoringWorkspace(root=tmp_path / "empty", registry_url=None)
-    (empty._records_root / "examples").mkdir(parents=True, exist_ok=True)
+    (empty._ws.source_root).mkdir(parents=True, exist_ok=True)
     assert empty.submit(**_CREDS) == []
 
 
@@ -157,7 +157,7 @@ def test_submit_fails_closed_on_corrupt_record_before_any_network(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     ws = _saved_ws(tmp_path, n=2)
-    spec_files = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))
+    spec_files = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))
     assert len(spec_files) == 2
     spec_files[0].write_text("{ this is not valid json", encoding="utf-8")  # truncate one
 
@@ -171,7 +171,7 @@ def test_submit_fails_closed_on_corrupt_sibling(tmp_path: Path, monkeypatch: pyt
     # R-6: a corrupt NON-selected sibling (its relationships would be silently stripped from the
     # submitted graph) must fail closed, not publish a record with links quietly missing.
     ws = _saved_ws(tmp_path, n=1)
-    ds_dir = ws._records_root / "examples" / "dataset"
+    ds_dir = ws._ws.source_root / "dataset"
     ds_dir.mkdir(parents=True, exist_ok=True)
     (ds_dir / "corrupt.json").write_text("{ not valid json", encoding="utf-8")
 
@@ -185,7 +185,7 @@ def test_submit_allow_partial_tolerates_corrupt_sibling(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     ws = _saved_ws(tmp_path, n=1)
-    ds_dir = ws._records_root / "examples" / "dataset"
+    ds_dir = ws._ws.source_root / "dataset"
     ds_dir.mkdir(parents=True, exist_ok=True)
     (ds_dir / "corrupt.json").write_text("{ not valid json", encoding="utf-8")
 
@@ -200,7 +200,7 @@ def test_submit_reads_bom_sibling_instead_of_dropping_it(
     # R-10: a BOM-prefixed (Excel/Windows norm) but otherwise valid sibling must be read, not
     # treated as corrupt and dropped/aborted.
     ws = _saved_ws(tmp_path, n=1)
-    ds_dir = ws._records_root / "examples" / "dataset"
+    ds_dir = ws._ws.source_root / "dataset"
     ds_dir.mkdir(parents=True, exist_ok=True)
     bom_json = chr(0xFEFF) + '{"dataset": {"id": "https://w3id.org/battinfo/dataset/x"}}'
     (ds_dir / "d.json").write_text(bom_json, encoding="utf-8")
@@ -315,7 +315,7 @@ def test_submit_allow_partial_includes_unreadable_and_submits_good(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     ws = _saved_ws(tmp_path, n=2)
-    spec_files = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))
+    spec_files = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))
     spec_files[0].write_text("{ broken", encoding="utf-8")
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
     outcomes = ws.submit(allow_partial=True, **_CREDS)
@@ -344,7 +344,7 @@ def test_submit_error_partitions_outcomes(tmp_path: Path, monkeypatch: pytest.Mo
 
 def test_submit_fails_closed_on_unrecognised_record(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
-    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
     spec_file.write_text('{"bogus": {}}', encoding="utf-8")  # valid JSON, not a known record type
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
     with pytest.raises(SubmitError):
@@ -356,7 +356,7 @@ def test_submit_fails_closed_on_invalid_record(tmp_path: Path, monkeypatch: pyte
     import json
 
     ws = _saved_ws(tmp_path)
-    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
     rec = json.loads(spec_file.read_text(encoding="utf-8"))
     rec["cell_spec"] = {"name": "broken"}  # recognised as a cell_spec, but missing required fields
     spec_file.write_text(json.dumps(rec), encoding="utf-8")
@@ -384,7 +384,7 @@ def test_submit_fails_closed_on_non_object_record(
     # string) must fail closed with a clean SubmitError, not crash submit() with a raw
     # TypeError from validate_record.
     ws = _saved_ws(tmp_path)
-    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
     spec_file.write_text(body, encoding="utf-8")
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
     with pytest.raises(SubmitError):
@@ -457,7 +457,7 @@ def test_changed_content_is_resubmitted(tmp_path: Path, monkeypatch: pytest.Monk
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
     ws.submit(**_CREDS)
 
-    spec_file = sorted((ws._records_root / "examples" / "cell-spec").glob("*.json"))[0]
+    spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
     import json as _json
     doc = _json.loads(spec_file.read_text(encoding="utf-8"))
     doc["cell_spec"]["model"] = "X0-revised"

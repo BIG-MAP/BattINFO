@@ -416,6 +416,81 @@ def _validate_spec_plausibility(
             )
 
 
+@lru_cache(maxsize=1)
+def _curated_property_map() -> dict[str, str]:
+    """key -> EMMO class IRI from the packaged curated property map."""
+    path = resources.files("battinfo").joinpath(
+        "data", "mappings", "domain-battery", "property_map.curated.json"
+    )
+    with path.open("r", encoding="utf-8") as fh:
+        doc = json.load(fh)
+    return {m["key"]: m.get("class_iri", "") for m in doc.get("mappings", [])}
+
+
+def _validate_property_mappability(
+    specs: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a schema-valid property will not survive the JSON-LD export.
+
+    Red-team finding: a record could be fully valid and still lose data on the
+    semantic path with no signal - unmapped keys vanished, text-only values
+    vanished, and two aliases of one EMMO class collapsed to a single node.
+    """
+    prop_map = _curated_property_map()
+    class_to_keys: dict[str, list[str]] = {}
+    for key, value in specs.items():
+        if not isinstance(value, Mapping):
+            continue
+        class_iri = prop_map.get(key)
+        if class_iri is None:
+            _append_issue(
+                issues,
+                code="semantic.property_unmapped",
+                severity="warning",
+                path=f"properties.{key}",
+                message=(
+                    f"'{key}' is schema-valid but has no curated EMMO mapping - "
+                    "it will be OMITTED from the exported JSON-LD. File a mapping "
+                    "in assets/mappings/domain-battery/property_map.curated.json."
+                ),
+                resource_type=resource_type,
+            )
+            continue
+        if class_iri:
+            class_to_keys.setdefault(class_iri, []).append(key)
+        has_number = any(
+            isinstance(value.get(k), (int, float)) and not isinstance(value.get(k), bool)
+            for k in ("value", "typical_value", "min_value", "max_value")
+        )
+        if not has_number and isinstance(value.get("value_text"), str):
+            _append_issue(
+                issues,
+                code="semantic.value_text_only",
+                severity="warning",
+                path=f"properties.{key}",
+                message=(
+                    f"'{key}' carries only value_text - the JSON-LD export emits "
+                    "numeric quantities, so this property will be OMITTED there."
+                ),
+                resource_type=resource_type,
+            )
+    for class_iri, keys in class_to_keys.items():
+        if len(keys) > 1:
+            _append_issue(
+                issues,
+                code="semantic.property_alias_collision",
+                severity="warning",
+                path=f"properties.{keys[1]}",
+                message=(
+                    f"{keys} all map to the same EMMO class ({class_iri.rsplit('#', 1)[-1]}); "
+                    "only one quantity node survives in JSON-LD - keep a single alias."
+                ),
+                resource_type=resource_type,
+            )
+
+
 def _validate_specs(
     specs: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -600,6 +675,52 @@ def _validate_test_semantics(
         )
 
 
+_EPOCH_MIN = 946684800    # 2000-01-01
+_EPOCH_MAX = 4102444800   # 2100-01-01
+
+
+def _walk_epoch_plausibility(
+    value: Any,
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn on any ``*_at`` epoch field outside 2000..2100.
+
+    A 1970 timestamp on a citable record is always converter/import garbage
+    (e.g. an epoch that was divided by 1000 upstream), yet it is schema-valid;
+    this is the loud channel the red-team review found missing.
+    """
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            child = f"{path}.{key}" if path else str(key)
+            if (
+                isinstance(key, str)
+                and key.endswith("_at")
+                and isinstance(item, (int, float))
+                and not isinstance(item, bool)
+                and item != 0
+                and not (_EPOCH_MIN <= float(item) <= _EPOCH_MAX)
+            ):
+                _append_issue(
+                    issues,
+                    code="semantic.timestamp_implausible",
+                    severity="warning",
+                    path=child,
+                    message=(
+                        f"{key} = {item} is outside 2000-2100 as a Unix epoch "
+                        "- likely a unit error upstream (ms vs s, or a /1000 bug). "
+                        "Verify the source data before publishing."
+                    ),
+                    resource_type=resource_type,
+                )
+            else:
+                _walk_epoch_plausibility(item, child, issues, resource_type)
+    elif isinstance(value, list):
+        for idx, item in enumerate(value):
+            _walk_epoch_plausibility(item, f"{path}[{idx}]", issues, resource_type)
+
+
 def _walk_non_finite(
     value: Any,
     path: str,
@@ -655,10 +776,12 @@ def validate_semantic_report(
     # whole doc so nested quantities (electrode coating, etc.) are caught, not just
     # flat specs.
     _walk_non_finite(doc, "", issues, resource_type)
+    _walk_epoch_plausibility(doc, "", issues, resource_type)
 
     specs = doc.get("properties")
     if isinstance(specs, Mapping):
         _validate_specs(specs, issues, resource_type, hard_issue_severity)
+        _validate_property_mappability(specs, issues, resource_type)
 
     # material-spec / material carry their quantities under <body>.property
     for body_key in ("material_spec", "material"):

@@ -296,7 +296,7 @@ def test_record_to_jsonld_emits_funding_for_every_kind(
     type_by_dir = {"cell-spec": "cell-spec", "cell-instance": "cell-instance",
                    "test": "test", "dataset": "dataset"}
     seen = set()
-    examples = ws._records_root / "examples"
+    examples = ws._ws.source_root
     for subdir, rtype in type_by_dir.items():
         for p in sorted((examples / subdir).glob("*.json")):
             rec = json.loads(p.read_text(encoding="utf-8"))
@@ -316,7 +316,7 @@ def test_record_to_jsonld_without_funding_omits_it(
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _populate(ws, tmp_path)
     ws.save(validation_policy="strict")  # no project
-    p = next((ws._records_root / "examples" / "dataset").glob("*.json"))
+    p = next((ws._ws.source_root / "dataset").glob("*.json"))
     node = record_to_jsonld(json.loads(p.read_text(encoding="utf-8")), "dataset")
     assert "schema:funding" not in node
 

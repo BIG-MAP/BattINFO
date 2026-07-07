@@ -70,7 +70,7 @@ def test_quickstart_recipe_runs_offline(ws: AuthoringWorkspace, tmp_path: Path) 
 
     # Step 7 (local half): save the linked records.
     ws.save()
-    examples = tmp_path / ".battinfo" / "records" / "examples"
+    examples = tmp_path / ".battinfo" / "records"
     kinds = {p.parent.name for p in examples.rglob("*.json")}
     assert "cell-instance" in kinds and "test" in kinds
 
@@ -146,7 +146,7 @@ def test_new_spec_passed_to_add_joins_the_save_set(ws: AuthoringWorkspace, tmp_p
     )
     cells = ws.add("cell", spec=spec, serial_numbers=["NEW-1"])
     ws.save()
-    examples = tmp_path / ".battinfo" / "records" / "examples"
+    examples = tmp_path / ".battinfo" / "records"
     spec_files = list((examples / "cell-spec").glob("*.json"))
     assert spec_files, "the new spec must be saved alongside its instances"
     assert cells[0].cell_spec_id == spec.id and spec.id is not None

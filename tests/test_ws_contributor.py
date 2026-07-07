@@ -268,7 +268,7 @@ def test_record_to_jsonld_emits_contributor_for_every_kind(tmp_path: Path) -> No
 
     type_by_dir = {"cell-spec": "cell-spec", "cell-instance": "cell-instance",
                    "test": "test", "dataset": "dataset"}
-    examples = ws._records_root / "examples"
+    examples = ws._ws.source_root
     seen = set()
     for subdir, rtype in type_by_dir.items():
         for p in sorted((examples / subdir).glob("*.json")):

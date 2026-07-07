@@ -322,7 +322,7 @@ def test_submit_does_not_crash_on_cell_spec_glob(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     # Make the examples dir exist so submit() proceeds past its early return,
     # but leave the per-type subdirs empty so no network call is attempted.
-    (ws._records_root / "examples").mkdir(parents=True, exist_ok=True)
+    (ws._ws.source_root).mkdir(parents=True, exist_ok=True)
     result = ws.submit(
         registry_url="https://registry.example",
         api_key="k",
@@ -365,7 +365,7 @@ def test_add_cell_reuses_provided_iris(tmp_path: Path) -> None:
     res = ws.save()
     saved = sorted(
         __import__("json").loads(p.read_text(encoding="utf-8"))["cell_instance"]["id"]
-        for p in (ws._records_root / "examples" / "cell-instance").glob("*.json")
+        for p in (ws._ws.source_root / "cell-instance").glob("*.json")
     )
     assert saved == sorted(iris), "saved records must carry the provided IRIs"
     assert len(res["cell_instances"]) == 2
@@ -406,7 +406,7 @@ def test_cell_name_persists_in_record_without_serial(tmp_path: Path) -> None:
     ws.add("cell", spec=spec, names=["lab-tpejqj"])
     ws.save()
     rec = _json.loads(
-        next((ws._records_root / "examples" / "cell-instance").glob("*.json")).read_text(encoding="utf-8")
+        next((ws._ws.source_root / "cell-instance").glob("*.json")).read_text(encoding="utf-8")
     )["cell_instance"]
     assert rec.get("name") == "lab-tpejqj"
     assert "serial_number" not in rec, "no serial should be persisted when none was given"
@@ -469,7 +469,7 @@ def test_built_zenodo_jsonld_is_valid_and_carries_raw_provenance(tmp_path: Path)
 
     # Dataset record carries both roles.
     ds = json.loads(
-        next((ws._records_root / "examples" / "dataset").glob("*.json")).read_text(encoding="utf-8")
+        next((ws._ws.source_root / "dataset").glob("*.json")).read_text(encoding="utf-8")
     )["dataset"]
     roles = {d.get("role") for d in ds["distributions"]}
     assert roles == {"processed", "raw"}
@@ -846,7 +846,7 @@ def test_add_test_conformance_flag(tmp_path: Path) -> None:
     assert tests[0].conformance.status == "non-conformant"
     ws.save()
     rec = _json.loads(
-        next((ws._records_root / "examples" / "test").glob("*.json")).read_text(encoding="utf-8")
+        next((ws._ws.source_root / "test").glob("*.json")).read_text(encoding="utf-8")
     )["test"]
     assert rec["conformance"]["status"] == "non-conformant"
     dev = rec["conformance"]["deviations"][0]
@@ -867,7 +867,7 @@ def test_add_cell_conformance(tmp_path: Path) -> None:
                          "deviations": [{"category": "out_of_tolerance", "type": "capacity 10% below spec"}]}])
     ws.save()
     by_name = {}
-    for p in (ws._records_root / "examples" / "cell-instance").glob("*.json"):
+    for p in (ws._ws.source_root / "cell-instance").glob("*.json"):
         ci = _json.loads(p.read_text(encoding="utf-8"))["cell_instance"]
         by_name[ci.get("name")] = ci.get("conformance")
     assert by_name["c-ok"]["status"] == "conformant"
@@ -966,7 +966,7 @@ def test_load_then_add_test_links_existing_cell_without_duplicating(
     assert len(res.get("cell_specs", [])) == 0
     assert len(res.get("tests", [])) == 1
     assert len(res.get("datasets", [])) == 1
-    rec_text = next((ws._records_root / "examples" / "test").glob("*.json")).read_text(encoding="utf-8")
+    rec_text = next((ws._ws.source_root / "test").glob("*.json")).read_text(encoding="utf-8")
     assert _REG_CELL["id"] in rec_text, "the test must link to the existing registry IRI"
 
 
@@ -981,3 +981,55 @@ def test_add_test_cell_arg_resolves_from_registry(
     assert len(tests) == 1
     res = ws.save()
     assert len(res.get("cell_instances", [])) == 0 and len(res.get("tests", [])) == 1
+
+
+# -- workspace layout (W5.3): user records live under records/, not examples/ --
+
+def _author_one_spec(ws: AuthoringWorkspace) -> None:
+    from battinfo import quantity
+
+    ws._ws.cell_spec(
+        manufacturer="Acme",
+        model="L1",
+        format="coin",
+        chemistry="Li-primary",
+        specs={
+            "nominal_voltage": quantity(3.0, "V"),
+            "diameter": quantity(20.0, "mm"),
+            "height": quantity(3.2, "mm"),
+        },
+        source_file="acme-l1.manual.json",
+    )
+
+
+def test_fresh_workspace_saves_records_under_records_not_examples(tmp_path: Path) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    assert ws._ws.source_root == tmp_path / ".battinfo" / "records"
+    _author_one_spec(ws)
+    ws.save(validation_policy="strict")
+    saved = list((tmp_path / ".battinfo" / "records" / "cell-spec").glob("*.json"))
+    assert saved, "records must land under .battinfo/records/<record-type>/"
+    assert not (tmp_path / ".battinfo" / "records" / "examples").exists(), (
+        "a fresh workspace must not create an 'examples' directory for user data"
+    )
+    # engine siblings (the index) sit next to records/ under .battinfo/
+    assert ws._ws.index_path == tmp_path / ".battinfo" / "index.json"
+
+
+def test_legacy_examples_layout_is_detected_and_reused(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Pre-seed a pre-0.8 workspace: records under .battinfo/records/examples/
+    legacy = tmp_path / ".battinfo" / "records" / "examples" / "cell-spec"
+    legacy.mkdir(parents=True)
+
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    out = capsys.readouterr().out
+    assert "legacy records/examples/ layout" in out
+    assert ws._ws.source_root == tmp_path / ".battinfo" / "records" / "examples"
+
+    # New saves keep using the legacy layout (no split-brain across two dirs).
+    _author_one_spec(ws)
+    ws.save(validation_policy="strict")
+    assert list(legacy.glob("*.json")), "records must keep landing in the legacy examples/ dir"
+    assert not (tmp_path / ".battinfo" / "records" / "cell-spec").exists()

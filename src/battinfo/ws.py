@@ -23,7 +23,10 @@ import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from battinfo._workspace import Workspace
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
@@ -418,9 +421,36 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
             tail = fb.read().decode("utf-8", "ignore").splitlines()
         last = next((ln for ln in reversed(tail) if ln.strip() and "," in ln), "")
         end = int(float(last.split(",")[col])) if last else start
+        # Plausibility gate: epochs outside 2000..2100 are converter garbage
+        # (batterydf 0.1.0 emitted epoch/1000 - a 1970 date on a citable record
+        # is worse than no date). Warn and withhold rather than stamp it.
+        if not (946684800 <= start <= 4102444800):
+            print(
+                f"  warning: {path.name} unix_time_second={start} is implausible "
+                "(outside 2000-2100) - not stamping test/dataset times from it. "
+                "Known cause: batterydf<0.1.1 wrote epoch/1000; upgrade batterydf "
+                "and re-run ws.convert()."
+            )
+            return None
         return (start, end) if end >= start else (end, start)
     except Exception:
         return None
+
+
+def _file_uri_to_path(url: str) -> Path:
+    """Convert a file:// URI (or plain path string) to a local Path.
+
+    The old inline ``.replace("file:///", "")`` pattern silently turned POSIX
+    URIs into RELATIVE paths (file:///tmp/x -> tmp/x), so downstream
+    existence checks failed on Linux while passing on Windows (/C:/... keeps
+    its drive). urllib handles both platforms and percent-encoding.
+    """
+    if url.startswith("file:"):
+        from urllib.parse import urlparse
+        from urllib.request import url2pathname
+
+        return Path(url2pathname(urlparse(url).path))
+    return Path(url)
 
 
 def _typed_date(value: "str | int | float") -> dict:
@@ -732,12 +762,13 @@ def _provider(creators: list[dict] | None, contributors: list[dict] | None) -> t
     return "", ""
 
 
-# Record-type subdirectories under a workspace's records ``examples/`` folder.
+# Record-type subdirectories under a workspace's records source folder
+# (``.battinfo/records/`` — or ``.battinfo/records/examples/`` in legacy workspaces).
 # Derived from the entity registry so new record types are picked up automatically.
 _RECORD_SET_DIRS = record_set_dirs()
 
 
-def _read_record_sets(examples: Path) -> dict[str, list[dict]]:
+def _read_record_sets(source_root: Path) -> dict[str, list[dict]]:
     """Load a workspace's saved records into the canonical ``record_sets`` mapping.
 
     Returns ``{subdir: [record_dict, ...]}`` for each record type, sorted by filename
@@ -747,7 +778,7 @@ def _read_record_sets(examples: Path) -> dict[str, list[dict]]:
     record_sets: dict[str, list[dict]] = {}
     for name in _RECORD_SET_DIRS:
         recs: list[dict] = []
-        subdir = examples / name
+        subdir = source_root / name
         if subdir.exists():
             for f in sorted(subdir.glob("*.json")):
                 try:
@@ -941,11 +972,10 @@ class AuthoringWorkspace:
         records_repo: str | Path | None = None,
         registry_url: str | None = None,
     ):
-        from battinfo._workspace import Workspace
-
         self._root = Path(root).resolve()
         self._records_root = self._root / ".battinfo" / "records"
-        self._ws = Workspace(root=self._records_root)
+        self._legacy_layout_announced = False
+        self._ws = self._make_engine()
         self._records_repo = (
             Path(records_repo).resolve() if records_repo else _find_records_repo(self._root)
         )
@@ -974,6 +1004,31 @@ class AuthoringWorkspace:
         self._contributor_ref: ContributorRef | None = None
         self._contributor_loaded = False
 
+    def _make_engine(self) -> "Workspace":
+        """Construct the record engine, choosing the on-disk workspace layout.
+
+        Layout (W5.3): the engine is rooted at ``<root>/.battinfo`` with
+        ``source_dir_name="records"``, so user records land under
+        ``.battinfo/records/<record-type>/`` — real lab data no longer lives in
+        a directory literally named "examples" — and engine siblings
+        (index.json, library/, package/) sit under ``.battinfo/``. This was
+        chosen over rooting the engine at ``.battinfo/records`` with
+        ``source_dir_name="records"`` because that would yield the redundant
+        ``.battinfo/records/records/``. Pre-0.8 workspaces that already have
+        ``.battinfo/records/examples/`` keep the legacy engine root
+        ``.battinfo/records`` (records under ``examples/``, index at
+        ``.battinfo/records/index.json``) so existing data stays where it is.
+        """
+        from battinfo._workspace import Workspace
+
+        legacy_source = self._records_root / "examples"
+        if legacy_source.is_dir():
+            if not self._legacy_layout_announced:
+                print("  note: using legacy records/examples/ layout (pre-0.8 workspace)")
+                self._legacy_layout_announced = True
+            return Workspace(root=self._records_root)
+        return Workspace(root=self._root / ".battinfo", source_dir_name="records")
+
     # ── Public API ─────────────────────────────────────────────────────────────
 
     def setup(self) -> Path:
@@ -997,7 +1052,8 @@ class AuthoringWorkspace:
             cred_path.parent.mkdir(parents=True, exist_ok=True)
             cred_path.write_text(_CREDENTIALS_TEMPLATE, encoding="utf-8")
             print(f"Created: {cred_path}")
-        print("\n  Next: get an API key from the registry settings page, then run")
+        print("\n  Next: get an API key (no self-service page yet - request one from")
+        print("  the registry operator via https://www.battery-genome.org), then run")
         print('        ws.login(api_key="YOUR_KEY")')
         print("  That fills in your workspace and publisher automatically - you do")
         print("  not need to know any IDs.  ws.quickstart() shows the full flow.")
@@ -1059,8 +1115,10 @@ class AuthoringWorkspace:
 
         Fetches your publisher/workspace identity from the registry so you never
         have to know workspace or publisher IDs, and stores the key in
-        ``.battinfo/credentials`` (git-ignored) for future sessions.  Get an API
-        key from the registry settings page.
+        ``.battinfo/credentials`` (git-ignored) for future sessions.  There is
+        no self-service key page yet: request a key from the registry operator
+        (Battery Genome - https://www.battery-genome.org, or your team's
+        registry admin).
 
         If the registry does not expose a profile endpoint yet, the key is still
         saved and sensible defaults are used — everything keeps working.
@@ -1075,7 +1133,11 @@ class AuthoringWorkspace:
 
         api_key = (api_key or "").strip()
         if not api_key:
-            raise ValueError("api_key is required. Get one from the registry settings page.")
+            raise ValueError(
+                "api_key is required. There is no self-service key page yet: "
+                "request a key from the registry operator (Battery Genome - "
+                "https://www.battery-genome.org, or your team's registry admin)."
+            )
         url = (registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
                or _DEFAULT_REGISTRY_URL).rstrip("/")
 
@@ -1729,7 +1791,7 @@ class AuthoringWorkspace:
             "import battinfo\n"
             'ws = battinfo.workspace(".")\n'
             "\n"
-            "# 1. One-time: log in (get a key at the registry settings page)\n"
+            "# 1. One-time: log in (request a key from the registry operator)\n"
             'ws.login(api_key="YOUR_KEY")        # or ws.setup() to see options\n'
             "\n"
             "# 2. Tag this work with the project that funded it (optional, once per\n"
@@ -1740,8 +1802,11 @@ class AuthoringWorkspace:
             "# 3. Convert raw cycler files (NEWARE/Biologic/Excel/... auto-detected)\n"
             "ws.convert()                         # -> bdf/*.bdf.csv\n"
             "\n"
-            "# 4. Find your cell in the registry (fuzzy search)\n"
-            'spec = ws.search("samsung inr21700 50e")[0]\n'
+            "# 4. Find your cell in the registry - or describe it yourself offline\n"
+            'hits = ws.search("samsung inr21700 50e")   # fuzzy; [] if offline/no match\n'
+            "spec = hits[0] if hits else battinfo.CellSpec(\n"
+            '    manufacturer="Samsung SDI", model="INR21700-50E",\n'
+            '    format="cylindrical", chemistry="Li-ion")\n'
             "\n"
             "# 5. Register the physical cells you tested\n"
             'ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])\n'
@@ -2049,7 +2114,7 @@ class AuthoringWorkspace:
                 name_by_id[ds_obj.id] = ds_obj.name or "dataset"
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
-        print(f"Saved {total} record(s) under {self._records_root}:")
+        print(f"Saved {total} record(s) under {self._ws.source_root}:")
         for key, label in _SAVE_DISPLAY:
             items = [i for i in result.get(key, []) if isinstance(i, dict)]
             for item in items[:10]:
@@ -2064,7 +2129,11 @@ class AuthoringWorkspace:
             ref = self._get_project()
             label = ref.summary() if ref else "project"
             print(f"  funding:    {label} stamped onto {stamped} record(s)")
-        print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
+        if not getattr(self, "_publishing", False):
+            # Suppressed mid-publish: telling the user to run ws.publish()
+            # from inside ws.publish() right before a credentials error reads
+            # as mockery (red-team W1.3).
+            print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
 
     def _rel_to_root(self, path: str) -> str:
@@ -2122,9 +2191,20 @@ class AuthoringWorkspace:
         only:
             Restrict submission to one or more record types (see :meth:`submit`).
         """
-        self.save()
+        self._publishing = True
+        try:
+            self.save()
+        finally:
+            self._publishing = False
         if zenodo:
-            self.upload()
+            if self._r2_configured():
+                self.upload()
+            else:
+                print(
+                    "  No R2 object storage configured - Zenodo will host the "
+                    "data files (records get the Zenodo download URLs). R2 is "
+                    "only needed for team-internal registry hosting."
+                )
             result = self.zenodo(publish=True, sandbox=sandbox)
             doi = doi or result.doi
         return self.submit(
@@ -2148,12 +2228,14 @@ class AuthoringWorkspace:
         """
         import urllib.request
 
-        url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
+        url = (registry_url or self._registry_url
+               or os.environ.get("BATTINFO_REGISTRY_URL") or _DEFAULT_REGISTRY_URL)
         wid = workspace_id or self._credential("BATTINFO_WORKSPACE_ID")
-        if not url:
-            raise RuntimeError("registry_url required. Pass it or set BATTINFO_REGISTRY_URL.")
         if not wid:
-            raise RuntimeError("workspace_id required. Pass it or set BATTINFO_WORKSPACE_ID.")
+            raise RuntimeError(
+                "workspace_id required. Run ws.login(api_key=...) once - it stores "
+                "your workspace automatically - or set BATTINFO_WORKSPACE_ID."
+            )
 
         endpoint = f"{url.rstrip('/')}/workspaces/{wid}/submissions"
         try:
@@ -2200,7 +2282,7 @@ class AuthoringWorkspace:
             ws.list()
             ws.list(verbose=True)
         """
-        examples = self._records_root / "examples"
+        records_dir = self._ws.source_root
         summary: dict[str, list[dict]] = {}
 
         _TYPE_KEYS = {
@@ -2214,7 +2296,7 @@ class AuthoringWorkspace:
         }
 
         for subdir, (record_key, name_field, id_field) in _TYPE_KEYS.items():
-            d = examples / subdir
+            d = records_dir / subdir
             if not d.exists():
                 continue
             items: list[dict] = []
@@ -2238,7 +2320,7 @@ class AuthoringWorkspace:
             return summary
 
         total = sum(len(v) for v in summary.values())
-        print(f"Workspace: {self._records_root}")
+        print(f"Workspace: {self._ws.source_root}")
         print(f"  {total} record(s) across {len(summary)} type(s):\n")
         for rtype, items in summary.items():
             print(f"  {rtype} ({len(items)})")
@@ -2279,7 +2361,7 @@ class AuthoringWorkspace:
         """
         from battinfo.bundle import Cell
 
-        ci_dir = self._records_root / "examples" / "cell-instance"
+        ci_dir = self._ws.source_root / "cell-instance"
         if not ci_dir.exists():
             print("  No saved cell instances found.")
             return 0
@@ -2670,9 +2752,7 @@ class AuthoringWorkspace:
             ws.add("cell-instance", spec=spec, serial_numbers=[...])
             ws.save()
         """
-        from battinfo._workspace import Workspace
-
-        self._ws = Workspace(root=self._records_root)
+        self._ws = self._make_engine()
         self._cells_by_short_id = {}
         self._session_paths = set()
         print("Workspace cleared.")
@@ -2776,7 +2856,9 @@ class AuthoringWorkspace:
             )
         if not key:
             raise RuntimeError(
-                "api_key is required. Pass it or set BATTINFO_API_KEY."
+                "api_key is required. Run ws.login(api_key=...) first, or set "
+                "BATTINFO_API_KEY. No self-service key page exists yet - request "
+                "a key from the registry operator (https://www.battery-genome.org)."
             )
         if not wid:
             raise RuntimeError(
@@ -2788,8 +2870,8 @@ class AuthoringWorkspace:
             )
 
 
-        examples = self._records_root / "examples"
-        if not examples.exists():
+        records_dir = self._ws.source_root
+        if not records_dir.exists():
             print("  No records found -- run ws.save() first.")
             return []
 
@@ -2828,7 +2910,7 @@ class AuthoringWorkspace:
         _SUBDIRS = ("cell-spec", "cell-instance", "test-protocol", "test", "dataset")
 
         def _all_in(subdir: str) -> list[Path]:
-            d = examples / subdir
+            d = records_dir / subdir
             return sorted(d.glob("*.json")) if d.exists() else []
 
         wanted = [s for s in _SUBDIRS if allowed is None or s in allowed]
@@ -2911,7 +2993,7 @@ class AuthoringWorkspace:
 
         def _load_all(subdir: str, key: str) -> dict[str, tuple[dict, dict]]:
             out: dict[str, tuple[dict, dict]] = {}
-            d = examples / subdir
+            d = records_dir / subdir
             if d.exists():
                 for f in sorted(d.glob("*.json")):
                     try:
@@ -2999,7 +3081,7 @@ class AuthoringWorkspace:
                                               validation=validations[src]))
 
         # ── Cell instances ────────────────────────────────────────────────────
-        cell_spec_dir = examples / "cell-spec"
+        cell_spec_dir = records_dir / "cell-spec"
         for src in _selected("cell-instance"):
             raw = parsed[src]
             ci = raw.get("cell_instance", {})
@@ -3291,7 +3373,7 @@ class AuthoringWorkspace:
 
         from battinfo import processing
 
-        ds_dir = self._records_root / "examples" / "dataset"
+        ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.exists():
             print("  No dataset records -- run ws.save() first.")
             return []
@@ -3306,7 +3388,7 @@ class AuthoringWorkspace:
 
             processed = next((d for d in dists if d.get("role") == "processed"), None)
             src_url = (processed or {}).get("content_url") or ds.get("access_url") or ""
-            local = Path(src_url.replace("file:///", "").replace("file://", ""))
+            local = _file_uri_to_path(src_url)
             if not local.is_absolute():
                 local = self._root / local
             if not local.exists():
@@ -3342,6 +3424,64 @@ class AuthoringWorkspace:
 
         print(f"\nGenerated {len(written)} preview file(s) across the datasets.")
         return written
+
+    def _r2_configured(self) -> bool:
+        """True when R2 object storage is configured (env or credentials file)."""
+        return bool(os.environ.get("R2_ENDPOINT") or self._credential("R2_ENDPOINT"))
+
+    def _apply_zenodo_file_urls(self, record_url: str, uploaded_names: set) -> int:
+        """Point dataset records at the Zenodo-hosted copies of their files.
+
+        Mirrors what :meth:`upload` does for R2, without any extra storage:
+        each distribution whose filename was deposited gets
+        ``{record_url}/files/{name}`` as its ``content_url`` (plus a sha256
+        checksum if the local file is readable), and the primary distribution
+        sets the dataset ``access_url``. Returns the number of records updated.
+        """
+        import hashlib
+
+        ds_dir = self._ws.source_root / "dataset"
+        if not ds_dir.is_dir():
+            return 0
+        patched = 0
+        for record_path in sorted(ds_dir.glob("*.json")):
+            raw = json.loads(record_path.read_text(encoding="utf-8"))
+            ds = raw.get("dataset", {})
+            dists = ds.get("distributions") or []
+            if not dists:
+                continue
+            new_dists: list[dict] = []
+            primary_url: str | None = None
+            changed = False
+            for dist in dists:
+                local_url = dist.get("content_url") or ds.get("access_url") or ""
+                local_file = _file_uri_to_path(local_url)
+                if not local_file.is_absolute():
+                    local_file = self._root / local_file
+                name = local_file.name
+                if name not in uploaded_names:
+                    new_dists.append(dist)
+                    continue
+                public_url = f"{record_url}/files/{name}"
+                dist = {**dist, "content_url": public_url}
+                if local_file.is_file() and not dist.get("checksum"):
+                    dist["checksum"] = {
+                        "algorithm": "sha256",
+                        "value": hashlib.sha256(local_file.read_bytes()).hexdigest(),
+                    }
+                changed = True
+                new_dists.append(dist)
+                if primary_url is None and dist.get("role") != "raw":
+                    primary_url = public_url
+            if not changed:
+                continue
+            raw["dataset"]["distributions"] = new_dists
+            if primary_url:
+                raw["dataset"]["access_url"] = primary_url
+            _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
+            self._session_paths.add(record_path)
+            patched += 1
+        return patched
 
     def upload(
         self,
@@ -3422,7 +3562,7 @@ class AuthoringWorkspace:
             max_concurrency=4,
         )
 
-        ds_dir = self._records_root / "examples" / "dataset"
+        ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.exists():
             print("  No dataset records -- run ws.save() first.")
             return []
@@ -3442,7 +3582,7 @@ class AuthoringWorkspace:
             primary_url: str | None = None
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = Path(local_url.replace("file:///", "").replace("file://", ""))
+                local_file = _file_uri_to_path(local_url)
                 if not local_file.is_absolute():
                     local_file = self._root / local_file
 
@@ -3608,8 +3748,8 @@ class AuthoringWorkspace:
             warnings.warn(_version_warning, stacklevel=2)
             print(f"  WARNING: {_version_warning}")
 
-        examples = self._records_root / "examples"
-        if not examples.exists():
+        records_dir = self._ws.source_root
+        if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
         client = ZenodoClient(token=tok, sandbox=sandbox)
@@ -3649,7 +3789,7 @@ class AuthoringWorkspace:
             record_url = f"https://{domain}/records/{zenodo_record_id}"
 
             # Bundle data files (zip by test kind if >90 files)
-            data_filenames = self._bundle_data_files(tmpdir, examples)
+            data_filenames = self._bundle_data_files(tmpdir, records_dir)
 
             # Single consolidated JSON-LD (replaces all individual JSON records)
             jsonld = self._build_zenodo_jsonld(
@@ -3694,6 +3834,13 @@ class AuthoringWorkspace:
                   f"{len(sync['removed'])} removed")
             for name in sync["uploaded"]:
                 print(f"    + {name}")
+
+            # Zenodo now hosts these files: point the dataset records at the
+            # public record URLs so ws.submit() sends resolvable links even
+            # when no R2 object storage is configured (the public path).
+            patched = self._apply_zenodo_file_urls(record_url, set(upload_map.values()))
+            if patched:
+                print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
@@ -3824,13 +3971,13 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
-        examples = self._records_root / "examples"
-        if not examples.exists():
+        records_dir = self._ws.source_root
+        if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-rocrate-"))
         try:
-            data_filenames = self._bundle_data_files(tmpdir, examples)
+            data_filenames = self._bundle_data_files(tmpdir, records_dir)
             # Write a placeholder linked-data file so contentSize is available
             placeholder = tmpdir / BATTINFO_LD_FILENAME
             placeholder.write_text("{}", encoding="utf-8")
@@ -3889,14 +4036,14 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
-        examples = self._records_root / "examples"
-        if not examples.exists():
+        records_dir = self._ws.source_root
+        if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
         # Collect data filenames using same logic as the real upload (dry run)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-preview-"))
         try:
-            data_filenames = self._bundle_data_files(tmpdir, examples)
+            data_filenames = self._bundle_data_files(tmpdir, records_dir)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
@@ -3969,14 +4116,14 @@ class AuthoringWorkspace:
                 + "; ".join(i.message for i in errors[:5])
             )
 
-    def _bundle_data_files(self, tmpdir: Path, examples: Path) -> builtins.list[str]:
+    def _bundle_data_files(self, tmpdir: Path, records_dir: Path) -> builtins.list[str]:
         """Copy data files into *tmpdir*, zipping by test kind when >90 files."""
         import shutil
         import zipfile
 
         # Map dataset IRI → test kind via test records
         ds_to_kind: dict[str, str] = {}
-        test_dir = examples / "test"
+        test_dir = records_dir / "test"
         if test_dir.exists():
             for f in sorted(test_dir.glob("*.json")):
                 try:
@@ -3991,7 +4138,7 @@ class AuthoringWorkspace:
         # Collect local data file paths
         collected: list[tuple[Path, str]] = []  # (local_path, kind)
         missing: list[str] = []  # file-scheme distributions whose local file is absent
-        ds_dir = examples / "dataset"
+        ds_dir = records_dir / "dataset"
         if ds_dir.exists():
             for ds_file in sorted(ds_dir.glob("*.json")):
                 try:
@@ -4003,7 +4150,7 @@ class AuthoringWorkspace:
                         url = dist.get("content_url") or ""
                         if not url.startswith("file://"):
                             continue
-                        lp = Path(url.replace("file:///", "").replace("file://", ""))
+                        lp = _file_uri_to_path(url)
                         if lp.exists():
                             collected.append((lp, kind))
                         else:
@@ -4032,7 +4179,7 @@ class AuthoringWorkspace:
         from battinfo.publication import plan_artifact_inclusion  # noqa: PLC0415
         artifact_records: list[dict] = []
         for sub in ("test-protocol", "test"):
-            sub_dir = examples / sub
+            sub_dir = records_dir / sub
             if sub_dir.exists():
                 for f in sorted(sub_dir.glob("*.json")):
                     try:
@@ -4636,7 +4783,7 @@ class AuthoringWorkspace:
                     dists = []
                     for dist in (ds.get("distributions") or []):
                         url   = dist.get("content_url") or ""
-                        fname = Path(url.replace("file:///", "").replace("file://", "")).name
+                        fname = _file_uri_to_path(url).name
                         cs    = dist.get("checksum", {})
                         dists.append({
                             "filename":     fname,
@@ -5053,7 +5200,7 @@ class AuthoringWorkspace:
         Thin adapter over :meth:`_assemble_zenodo_jsonld` (the shared graph builder):
         it only sources the canonical record dicts from the workspace directory.
         """
-        record_sets = _read_record_sets(self._records_root / "examples")
+        record_sets = _read_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
             record_sets,
             zenodo_record_id=zenodo_record_id,
@@ -5198,7 +5345,7 @@ class AuthoringWorkspace:
         community: str | None,
         extra_keywords: builtins.list[str] | None,
     ) -> dict:
-        ct_dir = self._records_root / "examples" / "cell-spec"
+        ct_dir = self._ws.source_root / "cell-spec"
         specs: list[dict] = []
         if ct_dir.exists():
             for f in sorted(ct_dir.glob("*.json")):
@@ -5224,8 +5371,8 @@ class AuthoringWorkspace:
             return text if text and text.lower() != "unknown" else None
 
         s0 = specs[0] if specs else {}
-        n_ds = len(list((self._records_root / "examples" / "dataset").glob("*.json"))
-                   if (self._records_root / "examples" / "dataset").exists() else [])
+        ds_dir = self._ws.source_root / "dataset"
+        n_ds = len(list(ds_dir.glob("*.json")) if ds_dir.exists() else [])
 
         if s0:
             name_parts = [p for p in (_clean_meta(s0.get("manufacturer")), _clean_meta(s0.get("model"))) if p]
@@ -5379,7 +5526,7 @@ class AuthoringWorkspace:
         }
         rdflib_fmt, ext = _FMT_MAP.get(fmt.lower(), (fmt.lower(), f".{fmt.lower()}"))
 
-        records_root = self._records_root / "examples"
+        records_root = self._ws.source_root
         if not records_root.exists():
             print("  No records found -- run ws.save() first.")
             return []
@@ -6045,7 +6192,7 @@ class AuthoringWorkspace:
 
         # Auto-reload cells saved in a previous session so matching can succeed.
         if not self._cells_by_short_id:
-            ci_dir = self._records_root / "examples" / "cell-instance"
+            ci_dir = self._ws.source_root / "cell-instance"
             if ci_dir.exists() and any(ci_dir.glob("*.json")):
                 print("  No cells in memory - reloading saved cell instances...")
                 self.reload_cells()

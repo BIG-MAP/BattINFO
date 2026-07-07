@@ -53,9 +53,17 @@ The full map is code, not convention: `battinfo.entities.iri_namespace_map()`.
 service: a community-maintained, permanently-hosted layer of indirection.
 The `https://w3id.org/battinfo/...` IRIs redirect to wherever the resolver
 actually lives today — so records cite an address that outlives any single
-server, domain, or hosting decision. Dereferencing a record IRI serves its
-resolver artifact (`index.html` for humans, `index.jsonld` / `index.json`
-for machines — content-negotiated), produced by `battinfo.api.publish_record`.
+server, domain, or hosting decision. The design: dereferencing a record IRI
+serves its resolver artifact (`index.html` for humans, `index.jsonld` /
+`index.json` for machines — content-negotiated), produced by
+`battinfo.api.publish_record`.
+
+> **Status:** during the soft launch the registry sits behind an access gate,
+> so record IRIs currently resolve to the platform's sign-in page rather than
+> the machine-readable artifact. Content negotiation with correct status
+> codes (and public reads for published records) is being implemented as the
+> gate comes down — until then, treat dereferencing as not yet reliable for
+> harvesters.
 
 ## Enforcement
 
