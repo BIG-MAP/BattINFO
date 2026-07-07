@@ -26,7 +26,16 @@ def test_validate_record_report_accepts_canonical_cell_spec_example() -> None:
     doc["properties"]["rated_energy"] = {"value": 8.0, "unit": "Wh"}
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
-    assert not report.issues
+    # The record is valid but NOT fully exportable - the mappability warnings
+    # (red-team W3.3) truthfully flag what the JSON-LD path would drop:
+    # unmapped keys, text-only values, and alias pairs collapsing to one node.
+    expected_warnings = {
+        "semantic.property_unmapped",       # specific_power, power_density, nominal_continuous_*
+        "semantic.value_text_only",         # cycle_life ">1000"
+        "semantic.property_alias_collision",  # typical_energy + rated_energy
+    }
+    assert {i.code for i in report.issues} <= expected_warnings
+    assert all(i.severity == "warning" for i in report.issues)
     assert doc["cell_spec"]["iec_code"] == "IFpR26650"
     assert doc["cell_spec"]["country_of_origin"] == "United States"
     assert doc["cell_spec"]["year"] == 2012
@@ -48,7 +57,10 @@ def test_validate_record_report_accepts_cell_spec_with_bibliography() -> None:
     }
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
-    assert not report.issues
+    # Only the truthful mappability warnings the base example carries.
+    assert {i.code for i in report.issues} <= {
+        "semantic.property_unmapped", "semantic.value_text_only",
+    }
 
 
 def test_validate_record_report_accepts_linked_dataset_example_with_source_root() -> None:

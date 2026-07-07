@@ -200,3 +200,83 @@ class TestTimestampPlausibility:
         report = validate_semantic_report(record)
         paths = [i.path for i in report.issues if i.code == "semantic.timestamp_implausible"]
         assert paths == ["provenance.retrieved_at"]
+
+
+class TestPropertyMappability:
+    """Schema-valid properties that would vanish from JSON-LD must warn."""
+
+    @staticmethod
+    def _record(props):
+        return {
+            "schema_version": "0.2.0",
+            "cell_spec": {"id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"},
+            "properties": props,
+        }
+
+    def test_unmapped_key_warns(self) -> None:
+        report = validate_semantic_report(
+            self._record({"nominal_continuous_charging_current": {"value": 4.875, "unit": "A"}})
+        )
+        issues = [i for i in report.issues if i.code == "semantic.property_unmapped"]
+        assert len(issues) == 1 and issues[0].severity == "warning"
+        assert "OMITTED" in issues[0].message
+
+    def test_value_text_only_warns(self) -> None:
+        report = validate_semantic_report(
+            self._record({"cycle_life": {"value_text": ">1000", "unit": "count"}})
+        )
+        assert [i.code for i in report.issues if "value_text" in i.code] == ["semantic.value_text_only"]
+
+    def test_alias_collision_warns(self) -> None:
+        report = validate_semantic_report(
+            self._record({
+                "nominal_energy": {"value": 18.0, "unit": "Wh"},
+                "rated_energy": {"value": 18.2, "unit": "Wh"},
+            })
+        )
+        codes = [i.code for i in report.issues]
+        assert "semantic.property_alias_collision" in codes
+
+    def test_mapped_numeric_property_is_silent(self) -> None:
+        report = validate_semantic_report(
+            self._record({"nominal_capacity": {"value": 2.5, "unit": "Ah"}})
+        )
+        noisy = [i for i in report.issues if i.code.startswith("semantic.property_") or i.code == "semantic.value_text_only"]
+        assert noisy == []
+
+
+def test_specset_keys_are_mapped_or_consciously_deferred() -> None:
+    """Every schema-valid property key must be curated-mapped OR listed here.
+
+    This list is the red-team's 'silent drop' inventory. It may only SHRINK:
+    curate a mapping and remove the key. Adding a new SpecSet key without a
+    mapping fails this test - no new silent drops.
+    """
+    import json as _json
+
+    KNOWN_UNMAPPED = {
+        "capacity_fade", "capacity_threshold_exhaustion", "charging_time",
+        "cycle_life_c_rate", "maximum_power",
+        "nominal_continuous_charging_current", "nominal_continuous_discharging_current",
+        "power_capability", "power_density", "power_energy_ratio",
+        "round_trip_energy_efficiency", "round_trip_energy_efficiency_50pct",
+        "specific_power",
+    }
+    spec_set = set(_json.loads(
+        (ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json")
+        .read_text(encoding="utf-8")
+    )["$defs"]["SpecSet"]["properties"])
+    curated = set(_json.loads(
+        (ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json")
+        .read_text(encoding="utf-8")
+    )["mappings"] and {
+        m["key"] for m in _json.loads(
+            (ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json")
+            .read_text(encoding="utf-8")
+        )["mappings"]
+    })
+    unmapped = spec_set - curated
+    new_drops = unmapped - KNOWN_UNMAPPED
+    assert not new_drops, f"new schema keys without EMMO mapping (silent JSON-LD drops): {sorted(new_drops)}"
+    resolved = KNOWN_UNMAPPED - unmapped
+    assert not resolved, f"now mapped - remove from KNOWN_UNMAPPED: {sorted(resolved)}"

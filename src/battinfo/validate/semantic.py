@@ -416,6 +416,81 @@ def _validate_spec_plausibility(
             )
 
 
+@lru_cache(maxsize=1)
+def _curated_property_map() -> dict[str, str]:
+    """key -> EMMO class IRI from the packaged curated property map."""
+    path = resources.files("battinfo").joinpath(
+        "data", "mappings", "domain-battery", "property_map.curated.json"
+    )
+    with path.open("r", encoding="utf-8") as fh:
+        doc = json.load(fh)
+    return {m["key"]: m.get("class_iri", "") for m in doc.get("mappings", [])}
+
+
+def _validate_property_mappability(
+    specs: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a schema-valid property will not survive the JSON-LD export.
+
+    Red-team finding: a record could be fully valid and still lose data on the
+    semantic path with no signal - unmapped keys vanished, text-only values
+    vanished, and two aliases of one EMMO class collapsed to a single node.
+    """
+    prop_map = _curated_property_map()
+    class_to_keys: dict[str, list[str]] = {}
+    for key, value in specs.items():
+        if not isinstance(value, Mapping):
+            continue
+        class_iri = prop_map.get(key)
+        if class_iri is None:
+            _append_issue(
+                issues,
+                code="semantic.property_unmapped",
+                severity="warning",
+                path=f"properties.{key}",
+                message=(
+                    f"'{key}' is schema-valid but has no curated EMMO mapping - "
+                    "it will be OMITTED from the exported JSON-LD. File a mapping "
+                    "in assets/mappings/domain-battery/property_map.curated.json."
+                ),
+                resource_type=resource_type,
+            )
+            continue
+        if class_iri:
+            class_to_keys.setdefault(class_iri, []).append(key)
+        has_number = any(
+            isinstance(value.get(k), (int, float)) and not isinstance(value.get(k), bool)
+            for k in ("value", "typical_value", "min_value", "max_value")
+        )
+        if not has_number and isinstance(value.get("value_text"), str):
+            _append_issue(
+                issues,
+                code="semantic.value_text_only",
+                severity="warning",
+                path=f"properties.{key}",
+                message=(
+                    f"'{key}' carries only value_text - the JSON-LD export emits "
+                    "numeric quantities, so this property will be OMITTED there."
+                ),
+                resource_type=resource_type,
+            )
+    for class_iri, keys in class_to_keys.items():
+        if len(keys) > 1:
+            _append_issue(
+                issues,
+                code="semantic.property_alias_collision",
+                severity="warning",
+                path=f"properties.{keys[1]}",
+                message=(
+                    f"{keys} all map to the same EMMO class ({class_iri.rsplit('#', 1)[-1]}); "
+                    "only one quantity node survives in JSON-LD - keep a single alias."
+                ),
+                resource_type=resource_type,
+            )
+
+
 def _validate_specs(
     specs: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -706,6 +781,7 @@ def validate_semantic_report(
     specs = doc.get("properties")
     if isinstance(specs, Mapping):
         _validate_specs(specs, issues, resource_type, hard_issue_severity)
+        _validate_property_mappability(specs, issues, resource_type)
 
     # material-spec / material carry their quantities under <body>.property
     for body_key in ("material_spec", "material"):

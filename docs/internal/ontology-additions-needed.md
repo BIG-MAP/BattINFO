@@ -69,3 +69,22 @@ the `battinfo:` fallback.
 `CellLid`, `CellCan`, `Spring`, `Spacer`, and the electrode chemistry classes
 (`LithiumManganeseIronPhosphateElectrode`, `LithiumManganeseOxideElectrode`,
 `LithiumTitanateElectrode`, …).
+
+
+## Continuous-current rated properties (red-team W3.3, 2026-07-07)
+
+The canonical schema accepts `nominal_continuous_charging_current` /
+`nominal_continuous_discharging_current` (datasheet staples), but neither has
+a resolvable EMMO class - the candidate mappings point at fabricated
+`w3id.org/emmo/domain/battery#nominalContinuous...` IRIs that do not exist.
+Until EMMO gains these terms, the keys validate with a
+`semantic.property_unmapped` warning and are omitted from JSON-LD.
+
+- **NominalContinuousChargingCurrent** - proposed electrochemistry class
+- **NominalContinuousDischargingCurrent** - proposed electrochemistry class
+- Also unmapped SpecSet keys awaiting terms or curation: capacity_fade,
+  capacity_threshold_exhaustion, charging_time, cycle_life_c_rate,
+  maximum_power, power_capability, power_density, power_energy_ratio,
+  round_trip_energy_efficiency(-_50pct), specific_power
+  (see tests/test_validation_plausibility.py KNOWN_UNMAPPED - the list may
+  only shrink).
