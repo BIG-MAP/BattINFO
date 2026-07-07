@@ -48,7 +48,7 @@ def construction(
 
     Args:
         assembly_type: How layers are arranged, e.g. ``"wound"`` or ``"stacked"``.
-        layering: Stacking pattern, e.g. ``"jelly-roll"`` or ``"z-fold"``.
+        layering: Stacking pattern: ``"single_layer"``, ``"multilayer"``, ``"not_applicable"``, or ``"unknown"`` (the schema enum); put finer detail (jelly-roll, z-fold, ...) in ``comment``.
         layer_count: Number of electrode layers or winding turns.
         cathode_sheet_count: Number of cathode sheets in the stack.
         anode_sheet_count: Number of anode sheets in the stack.

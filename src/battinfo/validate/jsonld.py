@@ -220,6 +220,14 @@ def _collect_bare_terms(value: Any, out: set[str]) -> None:
 def _allowed_type_terms() -> set[str]:
     allowed = set(_EXPLICIT_ALLOWED_TYPE_TERMS)
 
+    # The test-spec method graph emits its vocabulary (workflow/process classes,
+    # control/termination quantities) straight from the bundled context via
+    # battinfo.jsonld.TEST_METHOD_CONTEXT_TERMS — the validator must accept what
+    # the library itself emits, and this shared source cannot drift.
+    from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS  # noqa: PLC0415
+
+    allowed.update(TEST_METHOD_CONTEXT_TERMS)
+
     entity_map = _load_mapping_json("entity_type_map.json")
     _collect_bare_terms(entity_map.get("mappings", {}), allowed)
 

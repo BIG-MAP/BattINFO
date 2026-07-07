@@ -7,6 +7,48 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The tutorials tell one story on the modern API.** Tutorial 3 (linked
+  records) is rewritten on `battinfo.workspace()` — cells, a draft-file test
+  spec with PyBaMM steps, a test with data, save, validation, a publication
+  preview, and guarded publishing; the deprecated engine no longer appears in
+  any notebook. Tutorial 2 sheds the material-level walkthrough that
+  duplicated Tutorial 5 step-for-step and instead teaches the
+  spec-and-instance model for materials (salts as `material(...)`, lifting
+  components to standalone material specs). Tutorial 5 gains that lifting as
+  a step of its own and now publishes the descriptor record directly.
+- **Notebook bootstrap is two lines.** Notebooks run from their own folder
+  (as nbmake/nbconvert always did) and write to a gitignored
+  `docs/guides/_scratch/` directory — the cwd-detection/chdir preamble and
+  `.battinfo/notebooks/` are gone.
+- **Docs follow Diátaxis.** "Guides" are now *Tutorials* (learning-oriented,
+  ordered, with a what-you-learn/time table); *How-to guides* state that they
+  are task recipes; the landing page links the four quadrants explicitly.
+  `getting-started` and `python-api` are rewritten around `workspace()` and
+  the models (the engine appears only as an "advanced: internal" note), and
+  the test-protocol semantic-depth essay moved from Tutorial 3 into the
+  `test-specs` explanation page.
+- `ws.convert()` without the BDF converter now points at
+  `pip install "battinfo[processing]"`; README/QUICKSTART/getting-started
+  document the extras.
+
+### Fixed
+
+- **`ws.preview_jsonld()` crashed on any workspace whose cells carry a
+  production date**: records store `manufactured_at` as a Unix timestamp, but
+  the publication assembler assumed a string (`AttributeError: 'int' object
+  has no attribute 'strip'`). Timestamps now become UTC `xsd:date` values.
+- **The gold-standard JSON-LD check rejected the library's own test-spec
+  method graphs** (8 errors for `IterativeWorkflow`, `VoltageHold`,
+  `Duration`, ...): the validator's allowed term set now includes the
+  test-method vocabulary the emitter draws from the bundled context, with a
+  can't-drift regression test.
+- Two self-contradicting docstrings: `ws.add`'s example used
+  `production_date="2026-01"` (a value it rejects — full dates required) and
+  `construction()` suggested `layering="jelly-roll"` (not in the schema enum).
+
+
 ### Fixed
 
 - **Unit mappings corrected at the source** (`unit_map.curated.json` + packaged copy):

@@ -51,3 +51,18 @@ def test_dataset_checksum_as_mapping_is_emitted() -> None:
 def test_test_dataset_ids_with_none_does_not_emit_null_id() -> None:
     out = record_to_jsonld({"test": {"id": "t1", "dataset_ids": ["ds-a", None, ""]}}, "test")
     assert out["battinfo:hasDataset"] == [{"@id": "ds-a"}]
+
+
+def test_test_method_vocabulary_is_allowed() -> None:
+    """The gold-standard checker accepts every @type the method graph emits.
+
+    ws.preview_jsonld() on a workspace with a stepped test spec used to print
+    8 errors (IterativeWorkflow, VoltageHold, Duration, ...) because the
+    validator's allowed set never learned the test-method vocabulary the
+    library itself emits.
+    """
+    from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS
+    from battinfo.validate.jsonld import _allowed_type_terms
+
+    missing = set(TEST_METHOD_CONTEXT_TERMS) - _allowed_type_terms()
+    assert not missing, f"emitted method terms rejected by validator: {sorted(missing)}"

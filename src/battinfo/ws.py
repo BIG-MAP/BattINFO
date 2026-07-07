@@ -423,12 +423,18 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
         return None
 
 
-def _typed_date(value: str) -> dict:
-    """Wrap a date string as a typed JSON-LD value so consumers can parse it.
+def _typed_date(value: "str | int | float") -> dict:
+    """Wrap a date value as a typed JSON-LD value so consumers can parse it.
 
-    Picks the xsd datatype from the string's shape: ``YYYY`` → gYear,
+    Records store dates as Unix timestamps (int); those become xsd:date in UTC.
+    For strings, picks the xsd datatype from the shape: ``YYYY`` → gYear,
     ``YYYY-MM`` → gYearMonth, an ISO timestamp → dateTime, else date.
     """
+    if isinstance(value, (int, float)):
+        import datetime as _dt  # noqa: PLC0415
+
+        day = _dt.datetime.fromtimestamp(value, tz=_dt.timezone.utc).date().isoformat()
+        return {"@value": day, "@type": "xsd:date"}
     v = (value or "").strip()
     if len(v) == 4 and v.isdigit():
         datatype = "xsd:gYear"
@@ -1512,7 +1518,10 @@ class AuthoringWorkspace:
             import bdf.io as _bdf_io
             import bdf.repair as _bdf_repair
         except ImportError:
-            raise ImportError("batterydf not installed.  Run: pip install batterydf")
+            raise ImportError(
+                "convert() needs the BDF converter (module 'bdf' from the batterydf "
+                "package). Run: pip install 'battinfo[processing]'"
+            )
 
         # ── Resolve input files ────────────────────────────────────────────
         if pattern is not None:
@@ -1955,7 +1964,7 @@ class AuthoringWorkspace:
         **Cells** (``"cell"``)::
 
             ws.add("cell", spec=spec,
-                   serial_numbers=["FAC-001", "FAC-002"], production_date="2026-01")
+                   serial_numbers=["FAC-001", "FAC-002"], production_date="2026-01-15")
 
             # Reuse pre-allocated IRIs instead of minting new ones (parallel lists):
             ws.add("cell", spec=spec, serial_numbers=["FAC-001", "FAC-002"],
