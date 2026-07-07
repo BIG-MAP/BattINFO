@@ -20,6 +20,10 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
+# The Python API page includes python-api.md as a fragment whose headings
+# start at H2 by design (the .rst include supplies the H1).
+suppress_warnings = ["myst.header"]
+
 myst_enable_extensions = [
     "colon_fence",
     "deflist",

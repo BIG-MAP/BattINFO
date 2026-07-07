@@ -1,24 +1,29 @@
-# BattINFO Python API
+---
+orphan: true
+---
 
-How the Python surface is organized. For the full symbol-by-symbol reference,
-see the [generated API reference](pages/api-reference.rst); for the layered
-architecture, see [How BattINFO is built](how-battinfo-is-built.md).
+<!-- This file is INCLUDED at the top of pages/api-reference.rst (the single
+     "Python API" reference page); it is not a standalone document. -->
+
+How the Python surface is organized — the generated symbol-by-symbol
+reference follows below; for the layered architecture, see
+{doc}`How BattINFO is built <../how-battinfo-is-built>`.
 
 ## Where to start
 
 | Goal | Surface to use |
 |------|---------------|
 | Turn lab data into published, linked records | `battinfo.workspace(...)` — the one object for the whole journey |
-| Describe a battery product (a datasheet as data) | The `CellSpec` model + the `publish` shortcut |
-| Author research-grade composition (materials, electrodes, electrolyte) | `battinfo.authoring` — see [Tutorial 5](guides/05-descriptors.ipynb) |
+| Describe a battery product (a datasheet as data) | The `CellSpec` record class + the `publish` shortcut |
+| Author research-grade composition (materials, electrodes, electrolyte) | `battinfo.authoring` — see {doc}`Tutorial 5 <../guides/05-descriptors>` |
 | Load, query, save, or resolver-publish canonical records | `battinfo.api` helpers |
 | Turn a folder of photos and CSVs into a linked submission | `battinfo.ingest` — one-command folder intake |
-| Drive everything from the shell | The `battinfo` CLI — see the [CLI reference](pages/cli-reference.md) |
+| Drive everything from the shell | The `battinfo` CLI — see the {doc}`CLI reference </pages/cli-reference>` |
 
-If you are new here, start with the [tutorials](pages/guides.rst) — six
+If you are new here, start with the {doc}`tutorials </pages/guides>` — six
 notebooks that walk the whole story end to end.
 
-The curated top-level namespace (`import battinfo`) exposes the models, the
+The curated top-level namespace (`import battinfo`) exposes the record classes, the
 workspace, publishing, and validation — everything else lives in its home
 module (`battinfo.api`, `battinfo.authoring`, `battinfo.materials`, ...) and
 is documented there.
@@ -46,8 +51,8 @@ ws.publish(note="My cycling campaign, 2026")
 
 `ws.quickstart()` prints the full recipe, including login and funding
 attribution (`ws.project(...)`, `ws.contributor(...)`).
-[Tutorial 3](guides/03-linked-records.ipynb) builds the chain step by step;
-[Tutorial 6](guides/06-publish-your-data.ipynb) runs it from a raw cycler
+{doc}`Tutorial 3 <../guides/03-linked-records>` builds the chain step by step;
+{doc}`Tutorial 6 <../guides/06-publish-your-data>` runs it from a raw cycler
 export.
 
 Drafts and templates: `ws.template("cell-spec", ...)` /
@@ -55,10 +60,10 @@ Drafts and templates: `ws.template("cell-spec", ...)` /
 authors them into the session. `ws.load(ws.search(...)[0])` references an
 existing registry record instead (reused, never re-published).
 
-## Models
+## Record classes
 
 `CellSpec`, `Cell`, `TestSpec`, `Test`, and `Dataset` are the record types as
-pydantic models — the single source of truth for authoring and for what is on
+pydantic classes — the single source of truth for authoring and for what is on
 disk. For a standalone cell-spec record, `publish` is the shortcut:
 
 ```python
@@ -86,9 +91,9 @@ registry_result = publish(
 - `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
 - `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.
 
-## Publication package (models path)
+## Publication package (record-classes path)
 
-When you hold the four core objects in Python and want the local publication
+When you hold the four core record objects in Python and want the local publication
 artifacts without a workspace, build the package directly:
 
 ```python
@@ -161,13 +166,13 @@ from battinfo.ingest import build_ingest_workspace, publish_ingest_workspace, wr
 
 The folder-local `battinfo.ingest.json` manifest carries stable ingest
 metadata; its shape is defined by
-[the ingest manifest contract](ingest-manifest-contract.md) and validated
+{doc}`the ingest manifest contract <../ingest-manifest-contract>` and validated
 against `assets/schemas/ingest-manifest.schema.json`.
 `resource_type="cell-instance"` is the currently implemented subject.
 
 ## Advanced: the internal engine
 
-`battinfo.workspace(...)` and the models are facades over an internal
+`battinfo.workspace(...)` and the record classes are facades over an internal
 authoring engine (`battinfo._workspace.Workspace`) that also powers
 submission-package export and release workflows. New code should not build on
 the engine directly — its surface is large, uncurated, and free to change;
@@ -179,5 +184,5 @@ see a deprecation message pointing at the replacement for each call.
 
 - Prefer `battinfo.workspace(...)` for anything that ends in publishing.
 - Prefer opaque BattINFO IRIs under `https://w3id.org/battinfo/`.
-- For validation policy and machine-readable issue output, see [the validation contract](validation-contract.md).
-- For submission-envelope internals, see [the contract explanation page](pages/contract.md).
+- For validation policy and machine-readable issue output, see {doc}`the validation contract <../validation-contract>`.
+- For submission-envelope internals, see {doc}`the contract explanation page </pages/contract>`.

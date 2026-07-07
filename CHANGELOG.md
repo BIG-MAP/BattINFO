@@ -20,6 +20,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Reference and Concepts sections restructured** (pass-2 review): Reference
+  is now facts-only (Python API overview → generated API / property & unit /
+  CLI / schema references → validation contract); Concepts tells a story
+  (big picture → the spec-and-instance record model from materials up → the
+  contracts). "Workspace authoring" and "How to read a published record"
+  moved to How-to guides, where they belong.
+- New **Identifiers & PURLs** concepts page: the IRI anatomy, the three
+  promises (opaque / stable / deterministic-from-identity), the Crockford
+  Base32 UID, the namespace map, and why w3id.org.
+- New generated **Property & unit reference** (63 property keys, 35 unit
+  symbols, each linked to its EMMO/QUDT IRI) — produced from the curated
+  mapping tables and drift-checked like the other generated references.
+- Terminology: the five record types are "record classes" everywhere (the
+  word "models" appeared only in docs); the homepage Python example used
+  `cell_format=`, which `CellSpec` rejects — now `format=`, matching what the
+  class accepts (the JSON record key stays `cell_format`; data contract
+  unchanged).
+
+
+### Changed
+
 - **The tutorials tell one story on the modern API.** Tutorial 3 (linked
   records) is rewritten on `battinfo.workspace()` — cells, a draft-file test
   spec with PyBaMM steps, a test with data, save, validation, a publication

@@ -11,7 +11,9 @@ the model that these recipes assume.
 .. toctree::
    :maxdepth: 1
 
+   ../workspace-authoring
    ../howto/bulk-ingest
    ../howto/fix-validation-errors
    ../howto/resume-a-submission
    ../howto/tag-funding-and-orcid
+   ../reading-a-record

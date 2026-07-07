@@ -25,7 +25,7 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 | | |
 |---|---|
 | **[Workspace authoring](workspace-authoring.md)** | The blessed authoring surface: `battinfo.workspace(".")` end-to-end, and which surface to use when |
-| **[Python API](python-api.md)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
+| **[Python API](pages/api-reference.rst)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
 | **[CLI spec](cli-spec.md)** | All CLI commands, options, and output formats |
 | **[Validation contract](validation-contract.md)** | Validation policies, machine-readable issue output |
 | **[Identifier policy](../IDENTIFIER_POLICY.md)** | IRI minting, governance, and stability guarantees |

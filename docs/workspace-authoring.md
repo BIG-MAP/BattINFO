@@ -53,7 +53,7 @@ Every verb is a method on the returned `AuthoringWorkspace` (also importable as
 | You want to… | Use | Entry point |
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` — this page |
-| Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` — see the [Python API](python-api.md) |
+| Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` — see the [Python API](pages/api-reference.rst) |
 | Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo.Workspace` |
 
 ## The layers underneath
