@@ -12,6 +12,18 @@ module-level constant). The registry's publish gate validates against pinned,
 vendored copies of the same schemas and **flags unknown versions** rather than
 guessing. Changes to record shape are CHANGELOG entries, never silent.
 
+Three versions exist in the wild, and consumers should accept all three:
+
+| `schema_version` | What it means |
+|---|---|
+| `0.1.0` | The original record shape (most of the example corpus still carries it) |
+| `1.0.0` | An interim stamp used briefly before the numbering was consolidated |
+| `0.2.0` | The current shape: snake_case keys throughout, `properties` (ex `specs`), organizations use `same_as` |
+
+The differences are additive/renaming only — no field changed meaning. New
+records always stamp the current version; old records validate against the
+same schemas (the keys they use are all still accepted).
+
 ## Records are attributable
 
 Every emitted record's provenance block carries `battinfo_version` — the

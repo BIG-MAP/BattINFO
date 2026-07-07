@@ -2163,7 +2163,7 @@ sub-folders are processed automatically.</p>
 –zenodo      Upload to Zenodo (creates a draft for your review)
 –sandbox     Use the Zenodo sandbox for testing
 –token       Your Zenodo personal access token
-(or set the ZENODO_TOKEN environment variable)</p>
+(or set the ZENODO_API_TOKEN environment variable)</p>
 <p>Get a Zenodo token at:
 https://zenodo.org/account/settings/applications/tokens/new/
 Required scopes: deposit:write</p>
@@ -2179,7 +2179,7 @@ Required scopes: deposit:write</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--zenodo</span></code>: Publish to Zenodo (creates a draft deposit).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>: Use the Zenodo sandbox (for testing).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">TEXT</span></code>: Zenodo API token. Env: ZENODO_TOKEN.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">TEXT</span></code>: Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--community</span> <span class="pre">TEXT</span></code>: Zenodo community identifier.  [default: battery-genome]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--no-community</span></code>: Skip community submission.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
@@ -2660,7 +2660,7 @@ battinfo config set community battinfo-reference</p>
 
   <p class="copyright">
     
-      © Copyright 2021-2025, Simon Clark.
+      © Copyright 2021-2026, Simon Clark.
       <br/>
     
   </p>

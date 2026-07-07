@@ -578,6 +578,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+  warning: neware-sample.bdf.csv unix_time_second=1772442 is implausible (outside 2000-2100) - not stamping test/dataset times from it. Known cause: batterydf&lt;0.1.1 wrote epoch/1000; upgrade batterydf and re-run ws.convert().
   test [cycling] on S1  +1 dataset(s)  (+1 raw source)
 </pre></div></div>
 </div>
@@ -587,7 +588,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[Test(schema_version=&#39;0.2.0&#39;, kind=&#39;Test&#39;, id=None, name=&#39;S1 cycling&#39;, test_type=&lt;BatteryTestType.CYCLING: &#39;cycling&#39;&gt;, protocol_id=None, cell_instance_id=None, description=None, status=&#39;completed&#39;, protocol=ProtocolInfo(name=&#39;cycling&#39;, url=None), instrument=None, started_at=1772442, ended_at=1772443, dataset_ids=[], conformance=None, artifacts=[], source=ProvenanceInfo(type=&#39;measurement&#39;, name=None, file=None, url=None, citation=None, retrieved_at=None, workflow_version=None, file_hash=None, curated_by=None, comment=None, battinfo_version=None), comment=[])]
+[Test(schema_version=&#39;0.2.0&#39;, kind=&#39;Test&#39;, id=None, name=&#39;S1 cycling&#39;, test_type=&lt;BatteryTestType.CYCLING: &#39;cycling&#39;&gt;, protocol_id=None, cell_instance_id=None, description=None, status=&#39;completed&#39;, protocol=ProtocolInfo(name=&#39;cycling&#39;, url=None), instrument=None, started_at=None, ended_at=None, dataset_ids=[], conformance=None, artifacts=[], source=ProvenanceInfo(type=&#39;measurement&#39;, name=None, file=None, url=None, citation=None, retrieved_at=None, workflow_version=None, file_hash=None, curated_by=None, comment=None, battinfo_version=None), comment=[])]
 </pre></div></div>
 </div>
 </section>
@@ -600,7 +601,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-<span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records/examples&quot;</span>
+<span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records&quot;</span>
 <span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">records_root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -612,10 +613,10 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Saved 4 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-06\.battinfo\records:
-  cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\examples\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
-  cell        S1                                   [created]  .battinfo\records\examples\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
-  test        S1 cycling                           [created]  .battinfo\records\examples\test\test-9f4c-mxny-yhym-2zh4.json
-  dataset     S1 data                              [created]  .battinfo\records\examples\dataset\dataset-22bt-7jxb-yv3k-xgq4.json
+  cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
+  cell        S1                                   [created]  .battinfo\records\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
+  test        S1 cycling                           [created]  .battinfo\records\test\test-9f4c-mxny-yhym-2zh4.json
+  dataset     S1 data                              [created]  .battinfo\records\dataset\dataset-22bt-7jxb-yv3k-xgq4.json
 
   Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
 cell-instance/cell-d6tp-jgqy-a3s9-4qem.json
@@ -653,7 +654,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1783411818,
+  &#34;retrieved_at&#34;: 1783455670,
   &#34;battinfo_version&#34;: &#34;0.7.0&#34;
 }
 </pre></div></div>
@@ -698,7 +699,7 @@ To publish: ws.login(api_key=&#39;...&#39;) then re-run — see ws.quickstart().
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>_scratch/guide-06/
 ├── neware-sample.csv           # your raw export (untouched)
 ├── bdf/neware-sample.bdf.csv   # the tidy, shareable table
-└── .battinfo/records/examples/ # validated, linked records with stable IRIs
+└── .battinfo/records/ # validated, linked records with stable IRIs
     ├── cell-spec/  ├── cell-instance/  ├── test/  └── dataset/
 </pre></div>
 </div>
@@ -794,7 +795,7 @@ To publish: ws.login(api_key=&#39;...&#39;) then re-run — see ws.quickstart().
 
   <p class="copyright">
     
-      © Copyright 2021-2025, Simon Clark.
+      © Copyright 2021-2026, Simon Clark.
       <br/>
     
   </p>

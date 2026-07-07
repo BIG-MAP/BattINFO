@@ -1870,7 +1870,7 @@ Options:
   --zenodo      Upload to Zenodo (creates a draft for your review)
   --sandbox     Use the Zenodo sandbox for testing
   --token       Your Zenodo personal access token
-                (or set the ZENODO_TOKEN environment variable)
+                (or set the ZENODO_API_TOKEN environment variable)
 
 Get a Zenodo token at:
   https://zenodo.org/account/settings/applications/tokens/new/
@@ -1890,7 +1890,7 @@ $ battinfo dataset publish [OPTIONS] FOLDER
 
 * `--zenodo`: Publish to Zenodo (creates a draft deposit).
 * `--sandbox`: Use the Zenodo sandbox (for testing).
-* `--token TEXT`: Zenodo API token. Env: ZENODO_TOKEN.
+* `--token TEXT`: Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN).
 * `--community TEXT`: Zenodo community identifier.  [default: battery-genome]
 * `--no-community`: Skip community submission.
 * `--help`: Show this message and exit.

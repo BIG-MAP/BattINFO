@@ -516,8 +516,9 @@ kinds), enforced by <code class="docutils literal notranslate"><span class="pre"
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">experiment</span></code> PyBaMM-style strings parse into the structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (steps with
-mode/direction/setpoints/termination); <code class="docutils literal notranslate"><span class="pre">facets</span></code> are derived automatically for filtering. See
-[project_test_spec_model] in the design notes for the two-layer method/artifact model.</p>
+mode/direction/setpoints/termination); <code class="docutils literal notranslate"><span class="pre">facets</span></code> are derived automatically for filtering.
+The model is two-layer by design: a descriptive <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (what the procedure is) plus
+actionable <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code> (runnable protocol files carried as linked distributions).</p>
 <blockquote>
 <div><p>The <code class="docutils literal notranslate"><span class="pre">kind</span></code> enum in <code class="docutils literal notranslate"><span class="pre">test-protocol.schema.json</span></code> is kept in sync with the <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code>
 Python enum (<code class="docutils literal notranslate"><span class="pre">bundle.py</span></code>); the coverage test guards against drift.</p>
@@ -702,7 +703,7 @@ then sufficient for discovery and filtering.</p>
 
   <p class="copyright">
     
-      © Copyright 2021-2025, Simon Clark.
+      © Copyright 2021-2026, Simon Clark.
       <br/>
     
   </p>

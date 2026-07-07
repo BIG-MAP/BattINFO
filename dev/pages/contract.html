@@ -482,6 +482,29 @@ registry.</p>
 module-level constant). The registry’s publish gate validates against pinned,
 vendored copies of the same schemas and <strong>flags unknown versions</strong> rather than
 guessing. Changes to record shape are CHANGELOG entries, never silent.</p>
+<p>Three versions exist in the wild, and consumers should accept all three:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">schema_version</span></code></p></th>
+<th class="head"><p>What it means</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0.1.0</span></code></p></td>
+<td><p>The original record shape (most of the example corpus still carries it)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.0.0</span></code></p></td>
+<td><p>An interim stamp used briefly before the numbering was consolidated</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0.2.0</span></code></p></td>
+<td><p>The current shape: snake_case keys throughout, <code class="docutils literal notranslate"><span class="pre">properties</span></code> (ex <code class="docutils literal notranslate"><span class="pre">specs</span></code>), organizations use <code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The differences are additive/renaming only — no field changed meaning. New
+records always stamp the current version; old records validate against the
+same schemas (the keys they use are all still accepted).</p>
 </section>
 <section id="records-are-attributable">
 <h2>Records are attributable<a class="headerlink" href="#records-are-attributable" title="Link to this heading">#</a></h2>
@@ -637,7 +660,7 @@ expiring shims are swept at each release.</p>
 
   <p class="copyright">
     
-      © Copyright 2021-2025, Simon Clark.
+      © Copyright 2021-2026, Simon Clark.
       <br/>
     
   </p>

@@ -30,8 +30,9 @@ bi.save_test_spec(bi.TestSpec(
 ```
 
 `experiment` PyBaMM-style strings parse into the structured `method[]` (steps with
-mode/direction/setpoints/termination); `facets` are derived automatically for filtering. See
-[project_test_spec_model] in the design notes for the two-layer method/artifact model.
+mode/direction/setpoints/termination); `facets` are derived automatically for filtering.
+The model is two-layer by design: a descriptive `method[]` (what the procedure is) plus
+actionable `artifacts[]` (runnable protocol files carried as linked distributions).
 
 > The `kind` enum in `test-protocol.schema.json` is kept in sync with the `BatteryTestType`
 > Python enum (`bundle.py`); the coverage test guards against drift.

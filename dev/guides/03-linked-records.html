@@ -653,7 +653,7 @@ Test spec: 1C cycle life at 25 °C
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-<span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records/examples&quot;</span>
+<span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records&quot;</span>
 <span class="nb">print</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">records_root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -666,12 +666,12 @@ Test spec: 1C cycle life at 25 °C
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Saved 6 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-03\.battinfo\records:
-  cell spec   Samsung SDI INR21700-50E             [created]  .battinfo\records\examples\cell-spec\cell-spec-me0t-k16f-eh5y-rq0k.json
-  cell        A001                                 [created]  .battinfo\records\examples\cell-instance\cell-y9xy-kr0v-y5tn-dfj7.json
-  cell        A002                                 [created]  .battinfo\records\examples\cell-instance\cell-3w87-0ddf-ryjg-evxe.json
-  test spec   1C cycle life at 25 °C               [created]  .battinfo\records\examples\test-protocol\test-protocol-kxwy-5f5f-f682-hhch.json
-  test        1C cycle life, cell A001             [created]  .battinfo\records\examples\test\test-6nec-h262-tthy-4rnt.json
-  dataset     1C cycle life, cell A001 data        [created]  .battinfo\records\examples\dataset\dataset-0rp6-kncv-cyem-qwcd.json
+  cell spec   Samsung SDI INR21700-50E             [created]  .battinfo\records\cell-spec\cell-spec-me0t-k16f-eh5y-rq0k.json
+  cell        A001                                 [created]  .battinfo\records\cell-instance\cell-y9xy-kr0v-y5tn-dfj7.json
+  cell        A002                                 [created]  .battinfo\records\cell-instance\cell-3w87-0ddf-ryjg-evxe.json
+  test spec   1C cycle life at 25 °C               [created]  .battinfo\records\test-protocol\test-protocol-kxwy-5f5f-f682-hhch.json
+  test        1C cycle life, cell A001             [created]  .battinfo\records\test\test-6nec-h262-tthy-4rnt.json
+  dataset     1C cycle life, cell A001 data        [created]  .battinfo\records\dataset\dataset-0rp6-kncv-cyem-qwcd.json
 
   Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
 
@@ -717,9 +717,9 @@ Saved 6 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-03\.battinfo\rec
   &#34;name&#34;: &#34;1C cycle life, cell A001 data&#34;,
   &#34;license&#34;: &#34;CC-BY-4.0&#34;,
   &#34;access_url&#34;: &#34;file:///&lt;repo&gt;/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv&#34;,
-  &#34;created_at&#34;: 1783411782,
-  &#34;modified_at&#34;: 1783411782,
-  &#34;published_at&#34;: 1783411782,
+  &#34;created_at&#34;: 1783455647,
+  &#34;modified_at&#34;: 1783455647,
+  &#34;published_at&#34;: 1783455647,
   &#34;about&#34;: [
     &#34;https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7&#34;,
     &#34;https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt&#34;
@@ -962,7 +962,7 @@ Workspace: &lt;repo&gt;\docs\guides\_scratch\guide-03\.battinfo\records
 
   <p class="copyright">
     
-      © Copyright 2021-2025, Simon Clark.
+      © Copyright 2021-2026, Simon Clark.
       <br/>
     
   </p>
