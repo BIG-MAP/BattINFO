@@ -530,7 +530,7 @@ class TestZenodoOnlyPublicPath:
         ws = workspace(root=tmp_path)
         data = tmp_path / "run1.csv"
         data.write_text("cycle,cap\n1,4.9\n", encoding="utf-8")
-        ds_dir = ws._records_root / "examples" / "dataset"
+        ds_dir = ws._ws.source_root / "dataset"
         ds_dir.mkdir(parents=True)
         record = {
             "schema_version": "0.2.0",
@@ -559,7 +559,7 @@ class TestZenodoOnlyPublicPath:
         from battinfo import workspace
 
         ws = workspace(root=tmp_path)
-        ds_dir = ws._records_root / "examples" / "dataset"
+        ds_dir = ws._ws.source_root / "dataset"
         ds_dir.mkdir(parents=True)
         record = {
             "schema_version": "0.2.0",
