@@ -23,7 +23,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "assets" / "vocab" / "battinfo-records.ttl"
 
-TERM_RE = re.compile(r'"battinfo:([A-Za-z_][A-Za-z0-9_]*)"')
+# Both mint forms: the CURIE ("battinfo:cellFormat") and the full IRI
+# ("https://w3id.org/battinfo/Cell") - the publication emitter uses the latter.
+TERM_RE = re.compile(
+    r'"battinfo:([A-Za-z_][A-Za-z0-9_]*)"'
+    r'|"https://w3id\.org/battinfo/([A-Za-z][A-Za-z0-9_]*)"'
+)
 SCAN = ["src/battinfo"]
 SUFFIXES = {".py", ".json"}
 
@@ -33,7 +38,8 @@ def collect_terms() -> list[str]:
     for base in SCAN:
         for path in (ROOT / base).rglob("*"):
             if path.suffix in SUFFIXES and path.is_file():
-                terms.update(TERM_RE.findall(path.read_text(encoding="utf-8", errors="ignore")))
+                for curie, full in TERM_RE.findall(path.read_text(encoding="utf-8", errors="ignore")):
+                    terms.add(curie or full)
     return sorted(terms)
 
 

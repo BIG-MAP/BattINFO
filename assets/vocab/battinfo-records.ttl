@@ -36,6 +36,10 @@ battinfo:BatterySystem a owl:Class ;
     rdfs:label "Battery System"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
+battinfo:Cell a owl:Class ;
+    rdfs:label "Cell"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
+
 battinfo:affectedProperty a rdf:Property ;
     rdfs:label "Affected Property"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
