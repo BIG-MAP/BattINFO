@@ -316,3 +316,18 @@ def test_validate_references_report_detects_wrong_reference_type(tmp_path: Path)
     assert report.errors[0].code == "reference.type_mismatch"
     assert report.errors[0].path == "cell_instance.cell_spec_id"
 
+
+
+def test_report_to_dict_is_json_serializable() -> None:
+    import json as _json
+
+    from battinfo.validate.core import ValidationIssue, ValidationReport
+
+    report = ValidationReport(issues=(
+        ValidationIssue(code="semantic.unit_mismatch", severity="error",
+                        path="properties.mass", message="bad unit"),
+    ))
+    doc = _json.loads(report.to_json())
+    assert doc["ok"] is False
+    assert doc["issues"][0]["code"] == "semantic.unit_mismatch"
+    assert doc["issues"][0]["path"] == "properties.mass"

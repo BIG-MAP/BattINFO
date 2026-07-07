@@ -74,6 +74,27 @@ class ValidationReport:
     def render_errors(self) -> list[str]:
         return [issue.render() for issue in self.errors]
 
+    def to_dict(self) -> dict:
+        """JSON-serializable form of the report (red-team W5.6).
+
+        Same shape family as the CLI's ``--format json`` envelope: consumers
+        get code/severity/path/message per issue without reaching into
+        dataclass internals.
+        """
+        from dataclasses import asdict
+
+        return {
+            "ok": self.ok,
+            "policy": self.policy.name,
+            "issues": [asdict(issue) for issue in self.issues],
+        }
+
+    def to_json(self, **dumps_kwargs) -> str:
+        """``json.dumps`` of :meth:`to_dict`."""
+        import json as _json
+
+        return _json.dumps(self.to_dict(), **dumps_kwargs)
+
     def to_result(self) -> ValidationResult:
         return ValidationResult(
             ok=self.ok,

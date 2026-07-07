@@ -89,7 +89,10 @@ ws.convert("*.csv")   # or force generic CSV exports`,
   {
     stage: "Identify",
     verb: "ws.search() + ws.add(\"cell\")",
-    code: `spec = ws.search("molicel p45b")[0]
+    code: `hits = ws.search("molicel p45b")          # fuzzy; [] if no match
+spec = hits[0] if hits else battinfo.CellSpec(
+    manufacturer="Molicel", model="INR21700-P45B",
+    format="cylindrical", chemistry="Li-ion")
 ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])`,
     produces: "Cell records for the physical cells you tested, linked to a shared cell spec with a persistent IRI.",
     why: "Your measurements are about specific physical cells. Naming them once gives every test and dataset an unambiguous subject — the start of the provenance chain.",

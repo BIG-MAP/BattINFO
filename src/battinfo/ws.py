@@ -1758,8 +1758,11 @@ class AuthoringWorkspace:
             "# 3. Convert raw cycler files (NEWARE/Biologic/Excel/... auto-detected)\n"
             "ws.convert()                         # -> bdf/*.bdf.csv\n"
             "\n"
-            "# 4. Find your cell in the registry (fuzzy search)\n"
-            'spec = ws.search("samsung inr21700 50e")[0]\n'
+            "# 4. Find your cell in the registry - or describe it yourself offline\n"
+            'hits = ws.search("samsung inr21700 50e")   # fuzzy; [] if offline/no match\n'
+            "spec = hits[0] if hits else battinfo.CellSpec(\n"
+            '    manufacturer="Samsung SDI", model="INR21700-50E",\n'
+            '    format="cylindrical", chemistry="Li-ion")\n'
             "\n"
             "# 5. Register the physical cells you tested\n"
             'ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])\n'
