@@ -136,16 +136,50 @@ export function detectRecordType(record: Record<string, unknown>): string | null
   return null;
 }
 
+const PYTHON_HINT = /^\s*(from\s+\w|import\s+\w|def\s+\w|\w+\s*=\s*(battinfo\.|CellSpec\(|Cell\(|TestSpec\(|Test\(|Dataset\())/m;
+
 /** Validate a canonical BattINFO record (as JSON text) against the real schemas. */
 export function validateRecord(raw: string): ValidationResult {
   let doc: unknown;
   try {
     doc = JSON.parse(raw);
   } catch (e) {
+    // Python authoring code is a common honest mistake — point at the record.
+    if (PYTHON_HINT.test(raw)) {
+      return {
+        ok: false,
+        recordType: null,
+        issues: [{
+          severity: "error",
+          path: "(root)",
+          message:
+            "This looks like Python authoring code. The validator checks the JSON record it produces — " +
+            "run record = spec.to_record() (or ws.save(), which validates for you) and paste the JSON here.",
+        }],
+      };
+    }
     return {
       ok: false,
       recordType: null,
       issues: [{ severity: "error", path: "(root)", message: `Invalid JSON: ${(e as Error).message}` }],
+    };
+  }
+
+  // JSON-LD is the *published* form; schemas validate the canonical record.
+  if (typeof doc === "object" && doc !== null && !Array.isArray(doc)
+      && ("@context" in doc || "@graph" in doc)) {
+    return {
+      ok: false,
+      recordType: null,
+      issues: [{
+        severity: "error",
+        path: "(root)",
+        message:
+          "This is a JSON-LD document (it carries @context/@graph) — the published form, generated from a canonical record. " +
+          "Paste the canonical record JSON to validate it here; for JSON-LD-level checks (RDF parse, term resolution), " +
+          "run battinfo.validate_record_report / the publish pipeline locally, which validates both layers.",
+      }],
+      parsed: doc,
     };
   }
 

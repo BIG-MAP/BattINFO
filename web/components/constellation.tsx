@@ -2,26 +2,24 @@
 
 /**
  * The hero constellation: the provenance chain as a gently floating graph.
- * CellSpec → Cell → Test → Dataset, grounded by EMMO underneath. Pure SVG +
+ * Cell → Test → Dataset, grounded by shared semantics underneath. Pure SVG +
  * CSS keyframes (no dependencies); hover names each node's job, click
  * navigates. Colors come from the brand tokens via Tailwind's palette.
  */
 
 const NODES = [
-  { id: "cellspec", label: "CellSpec", hint: "The product datasheet, as data", href: "/examples#cell-spec", x: 90, y: 90, r: 34, accent: false },
-  { id: "cell", label: "Cell", hint: "The physical cell on your bench", href: "/publish", x: 235, y: 60, r: 30, accent: false },
-  { id: "test", label: "Test", hint: "What you did to it, linked forever", href: "/publish", x: 360, y: 130, r: 30, accent: false },
-  { id: "dataset", label: "Dataset", hint: "What it produced — citable, with a DOI", href: "/publish", x: 300, y: 265, r: 34, accent: false },
-  { id: "emmo", label: "EMMO", hint: "The shared ontology every record speaks", href: "/properties", x: 120, y: 250, r: 38, accent: true },
+  { id: "cell", label: "Cell", hint: "The physical cell on your bench", href: "/publish", x: 120, y: 80, r: 32, accent: false },
+  { id: "test", label: "Test", hint: "What you did to it, linked forever", href: "/publish", x: 305, y: 70, r: 30, accent: false },
+  { id: "dataset", label: "Dataset", hint: "What it produced — citable, with a DOI", href: "/publish", x: 330, y: 245, r: 34, accent: false },
+  { id: "semantics", label: "Semantics", hint: "Shared meaning every record carries", href: "/examples", x: 120, y: 245, r: 38, accent: true },
 ] as const;
 
 const EDGES: [string, string, boolean][] = [
-  ["cellspec", "cell", false],
   ["cell", "test", false],
   ["test", "dataset", false],
-  ["emmo", "cellspec", true],
-  ["emmo", "dataset", true],
-  ["emmo", "test", true],
+  ["semantics", "cell", true],
+  ["semantics", "test", true],
+  ["semantics", "dataset", true],
 ];
 
 function node(id: string) {
@@ -41,7 +39,7 @@ export function Constellation() {
         .bi-node:hover .bi-hint { opacity: 1; }
         @media (prefers-reduced-motion: reduce) { .bi-drift { animation: none !important; } }
       `}</style>
-      <svg viewBox="0 0 470 330" className="w-full" role="img" aria-label="The BattINFO provenance graph: CellSpec, Cell, Test, and Dataset records, grounded in the EMMO ontology">
+      <svg viewBox="0 0 470 330" className="w-full" role="img" aria-label="The BattINFO provenance graph: Cell, Test, and Dataset records, grounded in shared semantics">
         {/* edges */}
         {EDGES.map(([from, to, dashed]) => {
           const a = node(from);

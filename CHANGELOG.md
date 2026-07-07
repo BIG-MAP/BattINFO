@@ -9,6 +9,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **The site's own /docs quickstart crashed verbatim** (`cell_format=`, which
+  `CellSpec` rejects) — fixed, and the snippet drift suite now EXECUTES every
+  self-contained Python snippet on the site, so a non-running example fails CI.
+- **battinfo.org stops promising a PyPI package that isn't published yet**:
+  the version badge and footer link hide behind `site.pypiLive` (flipped by
+  the 0.8 release train), and the install snippet teaches the source install
+  until then. The /docs tutorial cards now link the six individual notebooks
+  (with current titles) instead of one folder listing; the dead
+  web-validator-plan link and the "live converter" over-claim are gone.
+
+
+### Fixed
+
 - **The brand wordmark is now outlined vector paths.** The lockups are loaded
   via `<img>` tags (docs navbar, web navbar, README), and SVGs inside `<img>`
   cannot load webfonts — so "BattINFO" rendered in whatever fallback font the
@@ -37,6 +50,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `cell_format=`, which `CellSpec` rejects — now `format=`, matching what the
   class accepts (the JSON record key stays `cell_format`; data contract
   unchanged).
+
+
+### Changed
+
+- **battinfo.org/examples is now "Describe your thing"**: nine entries —
+  material, electrode, electrolyte, separator, cell spec, cell, test spec,
+  test, dataset — each showing real authoring code next to the record it
+  produces. The snippets live in `scripts/gen_web_examples.py`, are executed
+  at generation time (so every example on the site is guaranteed to run), and
+  are drift-checked in CI. The record → JSON-LD pairs remain as an "under the
+  hood" section with their Playground links.
+- **battinfo.org/properties is now a pointer** to the documentation's
+  generated property & unit reference (reference material belongs in the
+  docs); the in-browser explorer, its vendored data, and its CI sync step are
+  removed. `battinfo properties show` remains the terminal equivalent.
+- **New battinfo.org/about page**: mission, history (ontology → implementation
+  layer), and the ecosystem (EMMO domain-battery, Battery Genome,
+  battinfo-records, BIG-MAP, Battery Data Alliance). Nav gains About.
 
 
 ### Changed

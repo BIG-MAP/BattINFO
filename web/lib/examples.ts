@@ -43,7 +43,7 @@ result = publish(
     CellSpec(
         manufacturer="A123",
         model="ANR26650M1-B",
-        cell_format="cylindrical",
+        format="cylindrical",
         chemistry="Li-ion",
         nominal_capacity={"value": 2.5, "unit": "Ah"},
     ),
@@ -53,4 +53,5 @@ print(result.canonical_iri)
 # https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5`;
 
 export const installSnippet = `python -m venv .venv
-.venv/bin/pip install battinfo`;
+# until the 0.8 release lands on PyPI, install from source:
+.venv/bin/pip install git+https://github.com/BIG-MAP/BattINFO.git`;
