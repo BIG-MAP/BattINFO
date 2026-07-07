@@ -162,3 +162,41 @@ def test_validate_record_includes_shacl_for_bad_voltage() -> None:
     shacl_issues = [i for i in report.issues if i.code == "shacl.constraint_violation"]
     assert sem_issues, "Expected semantic plausibility warning for 33V"
     assert shacl_issues, "Expected SHACL warning for 33V"
+
+
+class TestTimestampPlausibility:
+    """*_at epochs outside 2000-2100 must warn (red-team: 1970 dates from a
+    1000x converter bug validated cleanly and shipped into citable records)."""
+
+    def test_1970_started_at_warns(self) -> None:
+        record = {
+            "schema_version": "0.2.0",
+            "test": {"id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+                     "started_at": 1772442, "ended_at": 1772443},
+        }
+        report = validate_semantic_report(record)
+        codes = [i.code for i in report.issues]
+        assert codes.count("semantic.timestamp_implausible") == 2
+        offender = next(i for i in report.issues if i.code == "semantic.timestamp_implausible")
+        assert offender.severity == "warning"
+        assert "started_at" in offender.path or "ended_at" in offender.path
+
+    def test_plausible_and_zero_epochs_are_silent(self) -> None:
+        record = {
+            "schema_version": "0.2.0",
+            "test": {"id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+                     "started_at": 1772442000, "ended_at": 1772442600},
+            "provenance": {"retrieved_at": 1772442000},
+        }
+        report = validate_semantic_report(record)
+        assert not [i for i in report.issues if i.code == "semantic.timestamp_implausible"]
+
+    def test_nested_provenance_epoch_is_checked(self) -> None:
+        record = {
+            "schema_version": "0.2.0",
+            "cell_spec": {"id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"},
+            "provenance": {"retrieved_at": 1746230},
+        }
+        report = validate_semantic_report(record)
+        paths = [i.path for i in report.issues if i.code == "semantic.timestamp_implausible"]
+        assert paths == ["provenance.retrieved_at"]

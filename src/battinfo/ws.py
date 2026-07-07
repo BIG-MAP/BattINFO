@@ -418,6 +418,17 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
             tail = fb.read().decode("utf-8", "ignore").splitlines()
         last = next((ln for ln in reversed(tail) if ln.strip() and "," in ln), "")
         end = int(float(last.split(",")[col])) if last else start
+        # Plausibility gate: epochs outside 2000..2100 are converter garbage
+        # (batterydf 0.1.0 emitted epoch/1000 - a 1970 date on a citable record
+        # is worse than no date). Warn and withhold rather than stamp it.
+        if not (946684800 <= start <= 4102444800):
+            print(
+                f"  warning: {path.name} unix_time_second={start} is implausible "
+                "(outside 2000-2100) - not stamping test/dataset times from it. "
+                "Known cause: batterydf<0.1.1 wrote epoch/1000; upgrade batterydf "
+                "and re-run ws.convert()."
+            )
+            return None
         return (start, end) if end >= start else (end, start)
     except Exception:
         return None
