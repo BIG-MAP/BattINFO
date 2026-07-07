@@ -371,11 +371,11 @@ export const jsonldGallery: {
         },
         "created_at": {
           "@id": "dcterms:created",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         },
         "modified_at": {
           "@id": "dcterms:modified",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         }
       },
       "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
@@ -723,11 +723,11 @@ export const jsonldGallery: {
         },
         "created_at": {
           "@id": "dcterms:created",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         },
         "modified_at": {
           "@id": "dcterms:modified",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         }
       },
       "@type": "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",
@@ -1030,11 +1030,11 @@ export const jsonldGallery: {
         },
         "created_at": {
           "@id": "dcterms:created",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         },
         "modified_at": {
           "@id": "dcterms:modified",
-          "@type": "xsd:integer"
+          "@type": "xsd:dateTime"
         }
       },
       "@type": "http://www.w3.org/ns/dcat#Dataset",
@@ -1046,7 +1046,8 @@ export const jsonldGallery: {
       "dcat:accessURL": {
         "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
       },
-      "dcterms:created": 1771718400,
+      "dcterms:created": "2026-02-22T00:00:00Z",
+      "dcterms:modified": "2026-02-22T00:00:00Z",
       "dcterms:subject": [
         {
           "@id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"

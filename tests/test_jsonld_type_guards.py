@@ -66,3 +66,15 @@ def test_test_method_vocabulary_is_allowed() -> None:
 
     missing = set(TEST_METHOD_CONTEXT_TERMS) - _allowed_type_terms()
     assert not missing, f"emitted method terms rejected by validator: {sorted(missing)}"
+
+
+def test_dcterms_dates_are_iso_datetime_not_epoch_ints() -> None:
+    """DCMI terms expect date literals; raw epoch ints typed xsd:integer
+    poisoned DCAT harvesters (red-team W3.4)."""
+    out = record_to_jsonld(
+        {"dataset": {"id": "https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
+                     "name": "DS", "created_at": 1771718400, "modified_at": 1771718500}},
+        "dataset",
+    )
+    assert out["dcterms:created"] == "2026-02-22T00:00:00Z"
+    assert out["dcterms:modified"] == "2026-02-22T00:01:40Z"

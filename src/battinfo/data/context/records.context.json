@@ -170,11 +170,11 @@
     },
     "created_at": {
       "@id": "dcterms:created",
-      "@type": "xsd:integer"
+      "@type": "xsd:dateTime"
     },
     "modified_at": {
       "@id": "dcterms:modified",
-      "@type": "xsd:integer"
+      "@type": "xsd:dateTime"
     }
   }
 }

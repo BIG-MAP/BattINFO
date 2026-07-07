@@ -170,11 +170,11 @@
     },
     "created_at": {
       "@id": "dcterms:created",
-      "@type": "xsd:integer"
+      "@type": "xsd:dateTime"
     },
     "modified_at": {
       "@id": "dcterms:modified",
-      "@type": "xsd:integer"
+      "@type": "xsd:dateTime"
     }
   },
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",

@@ -170,11 +170,11 @@
     },
     "created_at": {
       "@id": "dcterms:created",
-      "@type": "xsd:integer"
+      "@type": "xsd:dateTime"
     },
     "modified_at": {
       "@id": "dcterms:modified",
-      "@type": "xsd:integer"
+      "@type": "xsd:dateTime"
     }
   },
   "@type": "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",

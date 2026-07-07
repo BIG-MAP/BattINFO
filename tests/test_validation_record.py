@@ -144,3 +144,14 @@ def test_validate_record_report_rejects_invalid_size_code_shape() -> None:
     codes = {issue.code for issue in report.errors}
     assert "semantic.size_code_invalid" in codes
 
+
+
+def test_string_number_value_fails_loud() -> None:
+    """'2.5' (string) used to pass strict validation and emit an untyped
+    string literal into RDF (red-team W3.4). The schema now requires number;
+    value_text exists for genuinely textual values."""
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["properties"]["nominal_capacity"]["value"] = "2.5"
+    report = validate_record_report(doc, policy=STRICT)
+    assert not report.ok
+    assert any("nominal_capacity" in i.path and i.severity == "error" for i in report.issues)
