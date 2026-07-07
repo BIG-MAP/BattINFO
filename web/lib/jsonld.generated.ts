@@ -363,7 +363,6 @@ export const jsonldGallery: {
         "h": "emmo:Hour",
         "min": "emmo:Minute",
         "s": "emmo:Second",
-        "C": "emmo:CoulombUnit",
         "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
         "%": "emmo:Percent",
         "license": {
@@ -716,7 +715,6 @@ export const jsonldGallery: {
         "h": "emmo:Hour",
         "min": "emmo:Minute",
         "s": "emmo:Second",
-        "C": "emmo:CoulombUnit",
         "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
         "%": "emmo:Percent",
         "license": {
@@ -1024,7 +1022,6 @@ export const jsonldGallery: {
         "h": "emmo:Hour",
         "min": "emmo:Minute",
         "s": "emmo:Second",
-        "C": "emmo:CoulombUnit",
         "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
         "%": "emmo:Percent",
         "license": {
