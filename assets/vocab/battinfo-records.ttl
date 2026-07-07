@@ -48,10 +48,6 @@ battinfo:batchId a rdf:Property ;
     rdfs:label "Batch Id"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:capacityFade a rdf:Property ;
-    rdfs:label "Capacity Fade"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:capacityThresholdExhaustion a rdf:Property ;
     rdfs:label "Capacity Threshold Exhaustion"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
@@ -140,10 +136,6 @@ battinfo:powerCapability a rdf:Property ;
     rdfs:label "Power Capability"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:powerDensity a rdf:Property ;
-    rdfs:label "Power Density"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:powerEnergyRatio a rdf:Property ;
     rdfs:label "Power Energy Ratio"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
@@ -182,10 +174,6 @@ battinfo:sourceType a rdf:Property ;
 
 battinfo:sourceURL a rdf:Property ;
     rdfs:label "Source URL"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:specificPower a rdf:Property ;
-    rdfs:label "Specific Power"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:status a rdf:Property ;

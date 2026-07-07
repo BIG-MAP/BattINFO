@@ -12,6 +12,15 @@ Serving: w3id.org/battinfo/<term> should resolve to this document (W2 routing
 work); the namespace is the SLASH form by decision — the hash form belongs to
 the ontology.
 
+POLICY (2026-07-07, after review): battinfo: must never carry scientific/
+domain semantics — quantities and battery concepts live in EMMO domain-battery
+/ electrochemistry (which we control upstream; missing terms are ADDED THERE,
+not minted here). Administrative terms re-home to dcterms/PROV/DCAT/schema.org
+where standard terms exist. This generated file is therefore TRANSITIONAL
+scaffolding: the term set may only SHRINK (emitter convergence removes the
+EMMO duplicates; upstream additions drain the placeholders) toward a small
+hand-written residue of genuinely local record-plumbing terms.
+
 Usage:
     uv run python scripts/gen_battinfo_vocab.py
 """

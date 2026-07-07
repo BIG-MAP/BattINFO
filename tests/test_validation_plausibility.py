@@ -255,12 +255,11 @@ def test_specset_keys_are_mapped_or_consciously_deferred() -> None:
     import json as _json
 
     KNOWN_UNMAPPED = {
-        "capacity_fade", "capacity_threshold_exhaustion", "charging_time",
+        "capacity_threshold_exhaustion", "charging_time",
         "cycle_life_c_rate", "maximum_power",
         "nominal_continuous_charging_current", "nominal_continuous_discharging_current",
-        "power_capability", "power_density", "power_energy_ratio",
+        "power_capability", "power_energy_ratio",
         "round_trip_energy_efficiency", "round_trip_energy_efficiency_50pct",
-        "specific_power",
     }
     spec_set = set(_json.loads(
         (ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json")

@@ -88,3 +88,19 @@ Until EMMO gains these terms, the keys validate with a
   round_trip_energy_efficiency(-_50pct), specific_power
   (see tests/test_validation_plausibility.py KNOWN_UNMAPPED - the list may
   only shrink).
+
+
+## Update 2026-07-07 — policy + first curation pass
+
+Policy decided: battinfo never mints domain semantics; missing terms are added
+to EMMO domain-battery/electrochemistry upstream (we control it). This file is
+the WORKING QUEUE for those additions.
+
+Curated against existing EMMO terms (placeholders removed): capacity_fade →
+CapacityFade, power_density → PowerDensity, specific_power → SpecificPower.
+
+Still needing upstream EMMO terms (JSON-preserved, RDF-omitted-with-warning
+meanwhile): maximum_power, charging_time, power_capability,
+round_trip_energy_efficiency(-_50pct), cycle_life_c_rate,
+capacity_threshold_exhaustion, operating temperature rating terms,
+NominalContinuousChargingCurrent, NominalContinuousDischargingCurrent.
