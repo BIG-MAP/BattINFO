@@ -39,9 +39,9 @@ export const primaryNav = [
   { label: "Publish", href: "/publish" },
   { label: "Validate", href: "/validate" },
   { label: "Convert", href: "/convert" },
-  { label: "Properties", href: "/properties" },
   { label: "Examples", href: "/examples" },
   { label: "Why", href: "/federation" },
+  { label: "About", href: "/about" },
   { label: "Docs", href: "/docs" },
 ] as const;
 
@@ -91,6 +91,7 @@ export const footerNav = [
       { label: "Validate a record", href: "/validate" },
       { label: "Convert cycler data", href: "/convert" },
       { label: "Properties & units", href: "/properties" },
+      { label: "About BattINFO", href: "/about" },
     ],
   },
   {

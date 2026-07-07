@@ -12,7 +12,7 @@ const NODES = [
   { id: "cell", label: "Cell", hint: "The physical cell on your bench", href: "/publish", x: 235, y: 60, r: 30, accent: false },
   { id: "test", label: "Test", hint: "What you did to it, linked forever", href: "/publish", x: 360, y: 130, r: 30, accent: false },
   { id: "dataset", label: "Dataset", hint: "What it produced — citable, with a DOI", href: "/publish", x: 300, y: 265, r: 34, accent: false },
-  { id: "emmo", label: "EMMO", hint: "The shared ontology every record speaks", href: "/properties", x: 120, y: 250, r: 38, accent: true },
+  { id: "emmo", label: "EMMO", hint: "The shared ontology every record speaks", href: "/examples", x: 120, y: 250, r: 38, accent: true },
 ] as const;
 
 const EDGES: [string, string, boolean][] = [

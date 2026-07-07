@@ -9,6 +9,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **battinfo.org/examples is now "Describe your thing"**: nine entries —
+  material, electrode, electrolyte, separator, cell spec, cell, test spec,
+  test, dataset — each showing real authoring code next to the record it
+  produces. The snippets live in `scripts/gen_web_examples.py`, are executed
+  at generation time (so every example on the site is guaranteed to run), and
+  are drift-checked in CI. The record → JSON-LD pairs remain as an "under the
+  hood" section with their Playground links.
+- **battinfo.org/properties is now a pointer** to the documentation's
+  generated property & unit reference (reference material belongs in the
+  docs); the in-browser explorer, its vendored data, and its CI sync step are
+  removed. `battinfo properties show` remains the terminal equivalent.
+- **New battinfo.org/about page**: mission, history (ontology → implementation
+  layer), and the ecosystem (EMMO domain-battery, Battery Genome,
+  battinfo-records, BIG-MAP, Battery Data Alliance). Nav gains About.
+
+
+### Changed
+
 - **The tutorials tell one story on the modern API.** Tutorial 3 (linked
   records) is rewritten on `battinfo.workspace()` — cells, a draft-file test
   spec with PyBaMM steps, a test with data, save, validation, a publication
