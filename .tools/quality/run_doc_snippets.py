@@ -37,6 +37,7 @@ SNIPPET_FILES = (
     "docs/pages/getting-started.rst",
     "docs/howto/bulk-ingest.md",
     "docs/howto/fix-validation-errors.md",
+    "docs/howto/register-equipment.md",
 )
 
 SKIP_MARKERS = ("<!-- doc-snippet: skip -->", ".. doc-snippet: skip")

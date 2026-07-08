@@ -74,6 +74,7 @@ def _record_from_equipment_spec(
     equipment_class: str | None = None,
     model: str | None = None,
     channel_count: int | None = None,
+    supported_chemistries: list[str] | None = None,
     property: dict[str, Any] | None = None,
     manufacturer: str | dict[str, Any] | None = None,
     supplier: str | dict[str, Any] | None = None,
@@ -107,6 +108,11 @@ def _record_from_equipment_spec(
         spec["model"] = model
     if channel_count is not None:
         spec["channel_count"] = channel_count
+    if supported_chemistries is not None:
+        chems = [str(c) for c in supported_chemistries]
+        if not chems or any(not c.strip() for c in chems) or len(set(chems)) != len(chems):
+            raise ValueError("supported_chemistries must be a non-empty list of unique non-empty strings.")
+        spec["supported_chemistries"] = chems
     if property:
         spec["property"] = property
     for org_field, org_input in (("manufacturer", manufacturer), ("supplier", supplier)):

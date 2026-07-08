@@ -14,6 +14,7 @@ the model that these recipes assume.
    ../workspace-authoring
    ../howto/bulk-ingest
    ../howto/fix-validation-errors
+   ../howto/register-equipment
    ../howto/resume-a-submission
    ../howto/tag-funding-and-orcid
    ../reading-a-record

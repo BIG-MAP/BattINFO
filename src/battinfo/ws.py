@@ -988,6 +988,11 @@ class AuthoringWorkspace:
         self._session_credentials: dict[str, str] = {}
         # name -> Cell, keyed by short_id for test matching
         self._cells_by_short_id: dict[str, Any] = {}
+        # channel reference -> (equipment_id, channel_id) for test attachment.
+        # Keys: the channel IRI, the channel label, and "unit/CHn" for the
+        # unit's name and serial number. Populated by ws.add("equipment", ...)
+        # and lazily from channel records already saved in the workspace.
+        self._channels_by_ref: dict[str, tuple[str, str]] = {}
         # in-memory search cache; populated lazily from registry API or local index
         self._search_cache: list[dict] | None = None
         # converted-file → original-source mapping (lazy-loaded from manifest)
@@ -1908,7 +1913,7 @@ class AuthoringWorkspace:
         return out
 
     def template(self, record_type: str, **kwargs) -> Path:
-        """Write a fillable JSON template for a cell spec or test spec.
+        """Write a fillable JSON template for a cell spec, test spec, or equipment spec.
 
         Fill in the generated file, then load it with ``ws.load(path)``.
 
@@ -1921,13 +1926,19 @@ class AuthoringWorkspace:
                         name="CC discharge C/5",
                         type="capacity_check",
                         description="Constant-current discharge at C/5 to 2.5 V cutoff.")
+
+            ws.template("equipment-spec",
+                        name="SkyRC MC3000", manufacturer="SkyRC", model="MC3000",
+                        equipment_class="cycler", channel_count=4)
         """
         rt = record_type.replace("_", "-")
         if rt in ("test-spec", "test-protocol"):   # accept old name during transition
             return self._template_test_spec(**kwargs)
+        if rt == "equipment-spec":
+            return self._template_equipment_spec(**kwargs)
         if rt != "cell-spec":
             raise ValueError(
-                f"template() supports 'cell-spec' and 'test-spec' (got {record_type!r})"
+                f"template() supports 'cell-spec', 'test-spec', and 'equipment-spec' (got {record_type!r})"
             )
 
         manufacturer = kwargs.get("manufacturer", "")
@@ -1994,6 +2005,36 @@ class AuthoringWorkspace:
         print(f"  wrote: {out_path.name}")
         return out_path
 
+    def _template_equipment_spec(self, **kwargs) -> Path:
+        name = kwargs.get("name", "")
+        template = {
+            "name":                  name,
+            "manufacturer":          kwargs.get("manufacturer", ""),
+            "model":                 kwargs.get("model", ""),
+            "equipment_class":       kwargs.get("equipment_class", "cycler"),
+            "channel_count":         kwargs.get("channel_count", None),
+            "supported_chemistries": kwargs.get("supported_chemistries", []),
+            "product_id":            kwargs.get("product_id", None),
+            "comment":               kwargs.get("comment", None),
+            "source_url":            kwargs.get("source_url", None),
+            "citation":              kwargs.get("citation", None),
+            # Datasheet quantities: value/min_value/max_value + unit (or
+            # value_text for ranges that resist a clean unit).
+            "property": kwargs.get("property", {
+                "charge_current":    {"min_value": None, "max_value": None, "unit": "A"},
+                "discharge_current": {"min_value": None, "max_value": None, "unit": "A"},
+                "channel_voltage_max": {"value": None, "unit": "V"},
+            }),
+        }
+        safe_name = re.sub(r"[^a-zA-Z0-9]", "-", name or "equipment-spec")
+        out_path = self._root / f"{safe_name}.equipment-spec.json"
+        if out_path.exists():
+            print(f"  exists: {out_path.name}  (delete to regenerate)")
+            return out_path
+        out_path.write_text(json.dumps(template, indent=2), encoding="utf-8")
+        print(f"  wrote: {out_path.name}")
+        return out_path
+
     def load(self, source: str | Path | dict | builtins.list) -> Any:
         """Bring a record into the workspace — author a new one, or reference an existing one.
 
@@ -2021,6 +2062,8 @@ class AuthoringWorkspace:
             raise FileNotFoundError(f"Draft file not found: {source}")
         if ".test-spec" in source.name or ".test-protocol" in source.name:
             return self._load_test_spec(source)
+        if ".equipment-spec" in source.name:
+            return self._load_equipment_spec(source)
         return self._load_from_file(source)
 
     def add(self, record_type: str, **kwargs) -> builtins.list:
@@ -2047,19 +2090,38 @@ class AuthoringWorkspace:
         resolved in this session, locally, then in the registry (referenced if it
         already exists).  ``data`` is a path or list of paths.  ``type`` is the test
         type (``"cycling"``, ``"capacity_check"``, …); ``kind`` is accepted as an alias.
+        ``channel`` attaches the test to an equipment channel — a channel IRI, a
+        channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
 
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
+
+        **Equipment** (``"equipment"``) — register a physical unit + its channels::
+
+            ws.add("equipment", spec="skyrc-mc3000.json",
+                   serial_number="MC3K-2026-0001", name="Cycler 1", location="Lab B")
+
+        ``spec`` accepts a canonical equipment-spec record dict, a path to one, or
+        the IRI of one already saved in this workspace.  ``channels=N`` overrides
+        the spec's ``channel_count``.  Re-running with the same inputs is
+        idempotent (deterministic equipment + channel IRIs).
         """
-        rt = _canon_type(record_type)
+        rt_key = str(record_type).strip().lower().replace("_", "-")
+        if rt_key == "equipment":
+            return self._add_equipment(**kwargs)
+        try:
+            rt = _canon_type(record_type)
+        except ValueError:
+            rt = None
         if rt == "cell":
             return self._add_cell_instances(**kwargs)
         if rt == "test":
             return self._add_tests(**kwargs)
         raise ValueError(
-            f"add() supports type 'cell' and 'test' (got {record_type!r}). "
+            f"add() supports type 'cell', 'test', and 'equipment' (got {record_type!r}). "
             "Author a cell-spec/test-spec with ws.load(<draft file>); attach datasets "
-            "via ws.add('test', data=...)."
+            "via ws.add('test', data=...); register lab equipment via "
+            "ws.add('equipment', spec=..., serial_number=...)."
         )
 
     def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
@@ -5995,6 +6057,266 @@ class AuthoringWorkspace:
         )
         return tp
 
+    def _load_equipment_spec(self, path: Path) -> dict:
+        """Lift an equipment-spec draft (from ``ws.template``) to a canonical record.
+
+        The uid is minted deterministically from the draft's natural key
+        (manufacturer :: model :: name), so re-loading the same draft converges
+        on the same spec IRI instead of minting a duplicate.
+        """
+        from battinfo.api import create_equipment_spec  # noqa: PLC0415
+        from battinfo.entities import stable_uid  # noqa: PLC0415
+
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        name = raw.get("name") or ""
+        manufacturer = raw.get("manufacturer") or None
+        model = raw.get("model") or None
+        if not (name or manufacturer or model):
+            raise ValueError(
+                f"{path.name} needs at least a name (or manufacturer/model) - "
+                "fill in the template before loading it."
+            )
+        uid = stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        # Drop template placeholders (null quantity fields) so the record stays valid.
+        props: dict[str, dict] = {}
+        for key, value in (raw.get("property") or {}).items():
+            if not isinstance(value, dict):
+                continue
+            cleaned = {f: fv for f, fv in value.items() if fv is not None}
+            if any(f in cleaned for f in ("value", "min_value", "max_value", "typical_value", "value_text")):
+                props[key] = cleaned
+        chemistries = [c for c in (raw.get("supported_chemistries") or []) if c]
+        record = create_equipment_spec(
+            uid=uid,
+            name=name or " ".join(p for p in (manufacturer, model) if p),
+            equipment_class=raw.get("equipment_class"),
+            model=model,
+            channel_count=raw.get("channel_count"),
+            supported_chemistries=chemistries or None,
+            property=props or None,
+            manufacturer=manufacturer,
+            supplier=raw.get("supplier"),
+            product_id=raw.get("product_id"),
+            comment=raw.get("comment"),
+            source_type="datasheet",
+            source_url=raw.get("source_url"),
+            citation=raw.get("citation"),
+        )
+        body = record["equipment_spec"]
+        print(f"  equipment-spec: {body['name']}  {body['id']}")
+        return record
+
+    def _resolve_equipment_spec_arg(self, spec: Any) -> dict:
+        """Resolve ``spec=`` for ``ws.add('equipment', ...)`` to a canonical record.
+
+        Accepts a canonical equipment-spec record dict, a path to one (a
+        template draft is also accepted and lifted like ``ws.load`` would), or
+        the IRI of a spec already saved in this workspace's records tree.
+        """
+        if isinstance(spec, dict):
+            if isinstance(spec.get("equipment_spec"), dict):
+                return spec
+            raise TypeError(
+                "spec= must be a canonical equipment-spec record (a dict with an "
+                "'equipment_spec' key), a path to one, or its IRI. Author one with "
+                "ws.template('equipment-spec', ...) then ws.load(<draft file>)."
+            )
+        if isinstance(spec, str) and spec.startswith("http"):
+            spec_dir = self._ws.source_root / "equipment-spec"
+            for path in sorted(spec_dir.glob("*.json")) if spec_dir.exists() else []:
+                try:
+                    doc = _read_json(path)
+                except (OSError, ValueError):
+                    continue
+                body = doc.get("equipment_spec") or {}
+                if body.get("id") == spec:
+                    return doc
+            raise ValueError(
+                f"No equipment-spec record with id {spec!r} in this workspace. "
+                "Pass the record dict (or a path to it) instead - "
+                "ws.add('equipment', ...) saves it for you."
+            )
+        if isinstance(spec, (str, Path)):
+            path = Path(spec) if not isinstance(spec, Path) else spec
+            if not path.is_absolute():
+                path = self._root / path
+            if not path.exists():
+                raise FileNotFoundError(f"equipment-spec file not found: {path}")
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(doc.get("equipment_spec"), dict):
+                return doc
+            # A template draft (no canonical envelope): lift it like ws.load would.
+            return self._load_equipment_spec(path)
+        raise TypeError(
+            "spec= must be a canonical equipment-spec record dict, a path to one, "
+            "or its IRI (https://w3id.org/battinfo/spec/...)."
+        )
+
+    def _add_equipment(
+        self,
+        spec: Any = None,
+        *,
+        serial_number: str | None = None,
+        name: str | None = None,
+        location: str | None = None,
+        status: str = "active",
+        channels: int | None = None,
+        commissioned_at: int | str | None = None,
+    ) -> builtins.list:
+        """Register a physical equipment unit and its channels (saved immediately).
+
+        Saves the spec record into the workspace records tree if it is new,
+        then creates the equipment record and N channel records (N =
+        ``channels=`` or the spec's ``channel_count``) via the same canonical
+        ``save_record`` path the api builders use (the entities registry picks
+        the subdir/namespace per kind). Idempotent: the equipment uid is minted
+        deterministically from (spec uid, serial_number) and channel uids from
+        (equipment uid, index), so re-running with the same inputs converges on
+        the same records instead of duplicating them.
+        """
+        from battinfo.api import create_channel, create_equipment, save_record  # noqa: PLC0415
+        from battinfo.entities import stable_uid  # noqa: PLC0415
+
+        if spec is None:
+            raise ValueError(
+                "ws.add('equipment', ...) needs spec=<equipment-spec record, path, or IRI>. "
+                "Author one with ws.template('equipment-spec', ...) + ws.load(<draft file>)."
+            )
+        if not serial_number:
+            raise ValueError(
+                "ws.add('equipment', ...) needs serial_number=... - it is the unit's "
+                "stable identity (the equipment IRI is minted from spec uid + serial number)."
+            )
+        spec_record = self._resolve_equipment_spec_arg(spec)
+        spec_body = spec_record["equipment_spec"]
+        spec_id = spec_body["id"]
+        spec_uid = spec_id.rsplit("/", 1)[-1]
+
+        n_channels = channels if channels is not None else spec_body.get("channel_count")
+        if n_channels is None:
+            raise ValueError(
+                f"{spec_body.get('name', 'this equipment-spec')!r} has no channel_count - "
+                "pass channels=<N> to say how many channels this unit has."
+            )
+        if isinstance(n_channels, bool) or not isinstance(n_channels, int) or n_channels < 0:
+            raise ValueError(f"channels must be a non-negative integer (got {n_channels!r}).")
+
+        source_root = self._ws.source_root
+        spec_result = save_record(spec_record, source_root=source_root, mode="upsert")
+
+        # Deterministic equipment identity: the same (spec, serial_number) always
+        # mints the same equipment IRI - the seed mirrors the ratified channel
+        # seed "channel:{equipment_uid}:{index}" - so re-running
+        # ws.add('equipment', ...) with the same inputs converges on the existing
+        # unit instead of minting a duplicate. Chosen over random minting because
+        # a physical unit's natural key IS its model + serial number.
+        equipment_uid = stable_uid(f"equipment:{spec_uid}:{serial_number}")
+        equipment_record = create_equipment(
+            uid=equipment_uid,
+            equipment_spec_id=spec_id,
+            serial_number=serial_number,
+            name=name,
+            location=location,
+            status=status,
+            commissioned_at=commissioned_at,
+        )
+        save_record(equipment_record, source_root=source_root, mode="upsert")
+        equipment_id = equipment_record["equipment"]["id"]
+
+        unit_label = name or serial_number
+        channel_records = []
+        for index in range(1, n_channels + 1):
+            channel_record = create_channel(
+                equipment_id=equipment_id,
+                index=index,
+                label=f"{unit_label}/CH{index}",
+            )
+            save_record(channel_record, source_root=source_root, mode="upsert")
+            self._register_channel_keys(channel_record["channel"], equipment_record["equipment"])
+            channel_records.append(channel_record)
+
+        spec_label = spec_body.get("name") or spec_body.get("model") or spec_id
+        print(f"  equipment-spec: {spec_label}  [{spec_result.get('status', '')}]")
+        print(f"  equipment:      {unit_label}  {equipment_id}")
+        if n_channels:
+            print(f"  channels:       {n_channels} registered  ({unit_label}/CH1 .. {unit_label}/CH{n_channels})")
+            print(f"\n  Next: ws.add('test', ..., channel='{unit_label}/CH1') to attach a test.")
+        return [equipment_record, *channel_records]
+
+    def _register_channel_keys(self, channel_body: dict, equipment_body: dict) -> None:
+        """Index a channel under every reference form ``channel=`` accepts."""
+        channel_id = channel_body.get("id")
+        if not channel_id:
+            return
+        equipment_id = channel_body.get("equipment_id") or equipment_body.get("id") or ""
+        pair = (equipment_id, channel_id)
+        keys = {channel_id}
+        label = channel_body.get("label")
+        if label:
+            keys.add(str(label))
+        index = channel_body.get("index")
+        if index is not None:
+            for unit_key in (equipment_body.get("name"), equipment_body.get("serial_number")):
+                if unit_key:
+                    keys.add(f"{unit_key}/CH{index}")
+        for key in keys:
+            self._channels_by_ref[key] = pair
+
+    def _reload_channels(self) -> None:
+        """Merge channel records already saved in this workspace into the index."""
+        channel_dir = self._ws.source_root / "channel"
+        if not channel_dir.exists():
+            return
+        equipment_by_id: dict[str, dict] = {}
+        equipment_dir = self._ws.source_root / "equipment"
+        if equipment_dir.exists():
+            for path in sorted(equipment_dir.glob("*.json")):
+                try:
+                    body = _read_json(path).get("equipment") or {}
+                except (OSError, ValueError):
+                    continue
+                if body.get("id"):
+                    equipment_by_id[body["id"]] = body
+        for path in sorted(channel_dir.glob("*.json")):
+            try:
+                body = _read_json(path).get("channel") or {}
+            except (OSError, ValueError):
+                continue
+            self._register_channel_keys(body, equipment_by_id.get(body.get("equipment_id") or "", {}))
+
+    def _resolve_channel(self, ref: Any) -> tuple[str, str]:
+        """Resolve a channel reference to ``(equipment_id, channel_id)``.
+
+        Accepts a channel IRI, a channel label, or ``"unit/CHn"`` (unit = the
+        equipment's name or serial number). Looks among channels registered
+        this session, then channel records already saved in this workspace.
+        """
+        if isinstance(ref, dict) and isinstance(ref.get("channel"), dict):
+            body = ref["channel"]
+            return body.get("equipment_id", ""), body["id"]
+        if not isinstance(ref, str):
+            raise TypeError("channel= must be a channel IRI, a channel label, or 'unit/CHn'.")
+        key = ref.strip()
+        hit = self._channels_by_ref.get(key)
+        if hit is None:
+            self._reload_channels()
+            hit = self._channels_by_ref.get(key)
+        if hit is not None:
+            return hit
+        known = sorted(k for k in self._channels_by_ref if not k.startswith("http"))
+        if known:
+            shown = ", ".join(known[:8]) + (" ..." if len(known) > 8 else "")
+            hint = f"  Channels in this workspace: {shown}"
+        else:
+            hint = (
+                "  No channels registered yet - run "
+                "ws.add('equipment', spec=..., serial_number=...) first."
+            )
+        raise ValueError(
+            f"Unknown channel {ref!r}. Pass a channel IRI, a channel label, "
+            "or 'unit/CHn'.\n" + hint
+        )
+
     def _add_tests(
         self,
         type: str | None = None,
@@ -6009,6 +6331,7 @@ class AuthoringWorkspace:
         conformance: Any = None,
         name: str | None = None,
         instrument: str | None = None,
+        channel: Any = None,
         license: str | None = None,
         description: str | None = None,
         status: str = "completed",
@@ -6017,6 +6340,10 @@ class AuthoringWorkspace:
 
         Explicit (preferred): ``cell=<serial|IRI|object>`` and ``data=<path|list>``.
         Batch: ``datasets="glob"`` matches files to loaded cells by short ID.
+
+        ``channel`` attaches the test to an equipment channel (a channel IRI, a
+        channel label, or ``"unit/CHn"``); the test record then carries
+        ``equipment_id`` + ``channel_id``.
 
         ``raw`` attaches the original, pre-conversion instrument file(s) alongside
         each processed ``data`` file as a "raw"-role distribution, so the source
@@ -6054,6 +6381,12 @@ class AuthoringWorkspace:
         # Normalise / validate the conformance flag (status + optional deviations).
         conformance = _coerce_conformance(conformance)
 
+        # Resolve the equipment channel (if any) up front so an unknown
+        # reference fails before any test is created.
+        equipment_id = channel_id = None
+        if channel is not None:
+            equipment_id, channel_id = self._resolve_channel(channel)
+
         # ── Explicit mode: a named cell (+ optional data files) ──────────────────
         if cell is not None:
             resolved = self._resolve_cell(cell)
@@ -6084,6 +6417,12 @@ class AuthoringWorkspace:
                 started_at=min(s for s, _ in _spans) if _spans else None,
                 ended_at=max(e for _, e in _spans) if _spans else None,
             )
+            if channel_id is not None:
+                # The engine constructor predates equipment support; the Test
+                # model already declares the fields, so stamp them on the
+                # object - they flow into the saved record via Test.to_record().
+                test.equipment_id = equipment_id
+                test.channel_id = channel_id
             label = getattr(resolved, "name", None) or getattr(resolved, "serial_number", None) or resolved.id or "cell"
             n_raw = 0
             for i, f in enumerate(files):
@@ -6107,6 +6446,7 @@ class AuthoringWorkspace:
             print(f"  test [{test_type}] on {label}"
                   + (f"  +{len(files)} dataset(s)" if files else "")
                   + (f"  (+{n_raw} raw source{'s' if n_raw != 1 else ''})" if n_raw else "")
+                  + (f"  channel: {channel}" if channel_id is not None else "")
                   + (f"  conformance: {conf_status}" if conf_status else ""))
             return [test]
 
@@ -6117,10 +6457,15 @@ class AuthoringWorkspace:
                     "conformance is per-test — use the explicit form "
                     "ws.add('test', cell=..., conformance=...) to flag each test."
                 )
-            return self._add_tests_by_filename(
+            tests = self._add_tests_by_filename(
                 test_type, datasets, protocol_name, protocol_url, protocol_ref,
                 instrument, license, description, status,
             )
+            if channel_id is not None:
+                for t in tests:
+                    t.equipment_id = equipment_id
+                    t.channel_id = channel_id
+            return tests
 
         raise ValueError(
             "ws.add('test', ...) needs either cell=<serial|IRI|object> (with data=...) "

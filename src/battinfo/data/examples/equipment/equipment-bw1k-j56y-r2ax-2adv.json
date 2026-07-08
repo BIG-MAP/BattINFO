@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.2.0",
+  "equipment": {
+    "id": "https://w3id.org/battinfo/equipment/bw1k-j56y-r2ax-2adv",
+    "equipment_spec_id": "https://w3id.org/battinfo/spec/rchb-csx8-3vp8-ekcs",
+    "short_id": "bw1kj5",
+    "serial_number": "MC3K-2026-0001",
+    "name": "Cycler 1",
+    "location": "Lab B",
+    "status": "active"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781900000,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "Physical SkyRC MC3000 unit in Lab B; channels register under this unit.",
+    "Equipment uid minted deterministically from (spec uid, serial number)."
+  ]
+}

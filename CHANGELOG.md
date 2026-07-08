@@ -9,6 +9,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Equipment workspace UX + SkyRC MC3000 canonical example (Phase A)**:
+  registering the machine your tests ran on is now a workspace one-liner.
+  `ws.add("equipment", spec=..., serial_number=..., name=..., location=...,
+  channels=N)` saves the equipment-spec into the workspace if it is new
+  (`spec` accepts a canonical record dict, a path to one, or its IRI), then
+  creates the physical-unit record and N channel records (N defaults to the
+  spec's `channel_count`) through the same canonical `save_record` path the
+  api uses. The call is idempotent: the equipment uid is minted
+  deterministically from (spec uid, serial number), channel uids from
+  (equipment uid, index). `ws.add("test", ..., channel=...)` attaches a test
+  to a channel — by channel IRI, channel label, or `"unit/CHn"` — resolving
+  among channels registered this session and channel records already saved
+  on disk, and stamps `equipment_id` + `channel_id` into the saved test
+  record; an unknown reference lists the channels it knows.
+  `ws.template("equipment-spec", ...)` writes a fillable draft that
+  `ws.load()` lifts to a strict-valid canonical record with a
+  natural-key-deterministic IRI. The equipment-spec schema gains optional
+  `supported_chemistries` (unique non-empty strings), and the placeholder
+  Neware BTS-4000 examples are replaced by a real, purchasable device: the
+  SkyRC MC3000 4-channel charger-analyzer, with its full datasheet as a
+  quantitative property set. New how-to: `docs/howto/register-equipment.md`;
+  new website showcase entry "Equipment + channels". NOTE: the registry
+  needs a schema re-vendor after this merge (equipment-spec schema changed).
+
 - **Equipment + channel entity families (IDENTIFIER_POLICY 6.1)**: three new
   record types describe where a test physically ran. `equipment-spec` (the
   model, e.g. "Neware BTS-4000 series") mints under the shared `spec/`

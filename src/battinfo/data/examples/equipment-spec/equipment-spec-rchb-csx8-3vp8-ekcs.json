@@ -1,0 +1,92 @@
+{
+  "schema_version": "0.2.0",
+  "equipment_spec": {
+    "id": "https://w3id.org/battinfo/spec/rchb-csx8-3vp8-ekcs",
+    "short_id": "rchbcs",
+    "name": "SkyRC MC3000",
+    "equipment_class": "cycler",
+    "model": "MC3000",
+    "channel_count": 4,
+    "supported_chemistries": [
+      "NiMH",
+      "NiCd",
+      "NiZn",
+      "Eneloop",
+      "Li-ion",
+      "LiIo4.35",
+      "LiFePO4",
+      "RAM",
+      "LTO",
+      "Na-ion"
+    ],
+    "property": {
+      "charge_current": {
+        "min_value": 0.05,
+        "max_value": 3.0,
+        "unit": "A"
+      },
+      "discharge_current": {
+        "min_value": 0.05,
+        "max_value": 2.0,
+        "unit": "A"
+      },
+      "charge_power_max": {
+        "value": 50,
+        "unit": "W"
+      },
+      "discharge_power_max": {
+        "value": 15,
+        "unit": "W"
+      },
+      "battery_capacity": {
+        "min_value": 0.1,
+        "max_value": 50.0,
+        "unit": "Ah"
+      },
+      "operating_temperature": {
+        "min_value": 0,
+        "max_value": 40,
+        "unit": "degC"
+      },
+      "weight": {
+        "value": 600,
+        "unit": "g"
+      },
+      "channel_voltage_max": {
+        "value": 5,
+        "unit": "V"
+      },
+      "channel_current_max": {
+        "value": 3,
+        "unit": "A"
+      },
+      "input_power": {
+        "value_text": "DC 11-18V/4A",
+        "unit_text": "V/A"
+      },
+      "usb_power_output": {
+        "value_text": "DC 5V/2.1A",
+        "unit_text": "V/A"
+      },
+      "dimensions": {
+        "value_text": "200x124x69 mm",
+        "unit_text": "mm"
+      }
+    },
+    "manufacturer": {
+      "type": "Organization",
+      "name": "SkyRC"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://www.skyrc.com/mc3000_charger",
+    "citation": "https://www.skyrc.com/mc3000_charger"
+  },
+  "notes": [
+    "Four-channel benchtop charger-analyzer for round cells; each slot is an independent channel.",
+    "Datasheet battery capacity range 100-50000 mAh, recorded here as 0.1-50 Ah."
+  ]
+}
