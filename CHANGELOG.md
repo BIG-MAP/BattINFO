@@ -7,6 +7,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Equipment + channel entity families (IDENTIFIER_POLICY 6.1)**: three new
+  record types describe where a test physically ran. `equipment-spec` (the
+  model, e.g. "Neware BTS-4000 series") mints under the shared `spec/`
+  namespace like every reusable description; `equipment` (the physical unit,
+  "Cycler 1") mints under `equipment/`; `channel` (one channel of one unit)
+  under `channel/`. Channels are instance-only — no channel-spec kind — with
+  FLAT IRIs: containment is never encoded in the address (channel boards get
+  re-homed), the parent link `equipment_id` lives in the record body, and
+  channel uids are minted deterministically from (equipment uid, index) so
+  registration is idempotent. Equipment category (cycler, glovebox, ...) is
+  data (`equipment_class`), never a namespace segment, and battinfo mints no
+  domain classes for it. New builders `create_equipment_spec` /
+  `create_equipment` / `create_channel` on `battinfo.api`; `Test` records
+  gain optional `equipment_id` / `channel_id` links (`instrument` untouched);
+  schemas, canonical examples, and the web validator all learn the three
+  kinds.
+
 ### Changed
 
 - **Namespace consolidation (IDENTIFIER_POLICY 6.1)**: every reusable

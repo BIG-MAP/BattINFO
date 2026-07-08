@@ -33,6 +33,9 @@ const RECORD_DIRS = [
   "electrolyte",
   "housing-spec",
   "housing",
+  "equipment-spec",
+  "equipment",
+  "channel",
   "organization",
 ];
 

@@ -17,6 +17,7 @@ Layout (private submodules; import from ``battinfo.api``, not from them):
 - ``_resolver``   — ``publish_record``/``publish_batch`` + resolver JSON-LD/HTML
   artifact building
 - ``_components`` — materials/component families + generated per-family wrappers
+- ``_equipment``  — equipment/channel families (IDENTIFIER_POLICY 6.1)
 - ``_index``      — ``build_index``/``index_stats``
 
 Truly shared helpers live one level up in ``battinfo._util`` and
@@ -86,6 +87,14 @@ from battinfo.api._components import (
     template_component_spec,
     template_material,
     template_material_spec,
+)
+from battinfo.api._equipment import (
+    _record_from_channel,
+    _record_from_equipment,
+    _record_from_equipment_spec,
+    create_channel,
+    create_equipment,
+    create_equipment_spec,
 )
 from battinfo.api._index import (
     build_index,
@@ -323,6 +332,9 @@ __all__ = [
     "template_material",
     "create_component_spec",
     "create_component_instance",
+    "create_equipment_spec",
+    "create_equipment",
+    "create_channel",
     "save_component_spec",
     "save_component_instance",
     "query_component_specs",

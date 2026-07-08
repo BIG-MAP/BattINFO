@@ -126,6 +126,27 @@ registry's publish gate, and the [browser validator](https://battinfo.org/valida
 - **Required in `housing`:** `id`, `housing_spec_id`
 - **Schema:** [`housing.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/housing.schema.json)
 
+## equipment-spec
+
+- **Record key (discriminator):** `equipment_spec`
+- **Required top-level:** `schema_version`, `equipment_spec`, `provenance`
+- **Required in `equipment_spec`:** `id`, `name`
+- **Schema:** [`equipment-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/equipment-spec.schema.json)
+
+## equipment
+
+- **Record key (discriminator):** `equipment`
+- **Required top-level:** `schema_version`, `equipment`, `provenance`
+- **Required in `equipment`:** `id`, `equipment_spec_id`
+- **Schema:** [`equipment.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/equipment.schema.json)
+
+## channel
+
+- **Record key (discriminator):** `channel`
+- **Required top-level:** `schema_version`, `channel`, `provenance`
+- **Required in `channel`:** `id`, `equipment_id`, `index`
+- **Schema:** [`channel.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/channel.schema.json)
+
 ## organization
 
 - **Record key (discriminator):** `organization`

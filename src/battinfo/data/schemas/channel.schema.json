@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/channel.schema.json",
+  "title": "BattINFO Channel Instance",
+  "description": "One channel of one physical equipment unit. Instance-only (no channel-spec kind): flat IRIs under channel/, parent link equipment_id in the record body, uid minted deterministically from (equipment uid, index).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "channel",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "equipment_id",
+        "index"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ChannelIri"
+        },
+        "equipment_id": {
+          "$ref": "#/$defs/EquipmentIri"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "label": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "maintenance",
+            "retired",
+            "unknown"
+          ]
+        },
+        "property": {
+          "$ref": "modules/common/quantitative-properties.schema.json"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "ChannelIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "EquipmentIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet",
+            "manufacturer",
+            "measurement",
+            "lab",
+            "literature",
+            "manual",
+            "other"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "battinfo_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        }
+      }
+    }
+  }
+}

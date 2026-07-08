@@ -2242,6 +2242,8 @@ class Test(BundleJsonModel):
     status: str | None = Field(default=None, description="Execution status (e.g. 'running', 'completed', 'aborted').")
     protocol: ProtocolInfo = Field(default_factory=ProtocolInfo, description="Name and optional URL of the protocol followed (authoring aliases: protocol_name=, protocol_url=).")
     instrument: str | None = Field(default=None, description="Instrument/cycler the test ran on (authoring alias: instrument_name=).")
+    equipment_id: str | None = Field(default=None, description="IRI of the equipment unit the test ran on (https://w3id.org/battinfo/equipment/{uid}).")
+    channel_id: str | None = Field(default=None, description="IRI of the equipment channel the test ran on (https://w3id.org/battinfo/channel/{uid}).")
     started_at: int | str | None = Field(default=None, description="When the test started: Unix seconds, ISO 8601 string, or datetime/date.")
     ended_at: int | str | None = Field(default=None, description="When the test ended: Unix seconds, ISO 8601 string, or datetime/date.")
     dataset_ids: list[str] = Field(default_factory=list, description="IRIs of datasets produced by this test.")
@@ -2377,6 +2379,8 @@ class Test(BundleJsonModel):
                 url=test.get("protocol_url"),
             ),
             instrument=test.get("instrument_name"),
+            equipment_id=test.get("equipment_id"),
+            channel_id=test.get("channel_id"),
             started_at=test.get("started_at"),
             ended_at=test.get("ended_at"),
             dataset_ids=[str(item) for item in dataset_ids],
@@ -2417,6 +2421,10 @@ class Test(BundleJsonModel):
             record["test"]["protocol_url"] = self.protocol.url
         if self.instrument is not None:
             record["test"]["instrument_name"] = self.instrument
+        if self.equipment_id is not None:
+            record["test"]["equipment_id"] = self.equipment_id
+        if self.channel_id is not None:
+            record["test"]["channel_id"] = self.channel_id
         if self.started_at is not None:
             record["test"]["started_at"] = self.started_at
         if self.ended_at is not None:

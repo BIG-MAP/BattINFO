@@ -161,6 +161,27 @@ Recommended initial scope:
 - `dataset`
 - `material`
 - `model`
+- `equipment`
+- `channel`
+
+### 6.1 Spec/Instance Namespace Consolidation
+
+The namespace segment encodes exactly one distinction: reusable description
+vs concrete thing. Every spec kind (cell, test, material, component, and
+equipment specs) mints under the shared `spec/` namespace; type lives in
+`@type`, not in the address. Each kind of concrete thing keeps its own
+instance noun: `cell/`, `test/`, `dataset/`, `material/`, `electrode/`,
+`separator/`, `current-collector/`, `electrolyte/`, `housing/`,
+`equipment/`, `channel/`.
+
+Channels are flat instance IRIs under `channel/` — containment is never
+encoded in the address (channel boards get re-homed to other units; the IRI
+must survive that), so the parent link `equipment_id` lives in the record
+body, not the IRI. Channel UIDs are minted deterministically from
+`(equipment uid, index)` so registering the same channel twice is
+idempotent. Channels are instance-only: there is no channel-spec kind.
+Equipment category (cycler, glovebox, ...) is data (`equipment_class`),
+never a namespace segment.
 
 ## 7. Resolver and Dereferencing Policy
 

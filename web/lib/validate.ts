@@ -53,6 +53,9 @@ export const DISCRIMINATORS: Record<string, string> = {
   electrolyte: "electrolyte.schema.json",
   housing_spec: "housing-spec.schema.json",
   housing: "housing.schema.json",
+  equipment_spec: "equipment-spec.schema.json",
+  equipment: "equipment.schema.json",
+  channel: "channel.schema.json",
   organization: "organization.schema.json",
 };
 

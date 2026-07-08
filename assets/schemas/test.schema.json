@@ -93,6 +93,12 @@
         "instrument_name": {
           "type": "string"
         },
+        "equipment_id": {
+          "$ref": "#/$defs/EquipmentIri"
+        },
+        "channel_id": {
+          "$ref": "#/$defs/ChannelIri"
+        },
         "started_at": {
           "$ref": "#/$defs/UnixTime"
         },
@@ -365,6 +371,14 @@
     "SpecIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "EquipmentIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ChannelIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "Funding": {
       "type": "object",
