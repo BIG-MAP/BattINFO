@@ -255,7 +255,43 @@ This policy applies to:
 - Bulk imports MUST run duplicate detection before commit.
 - Registry backups SHOULD support disaster recovery without identifier reassignment.
 
-## 14. Design Principles
+## 14. Vocabulary and Alias Policy (ratified 2026-07-08)
+
+BattINFO **never mints or aliases domain IRIs.** Scientific and battery
+semantics — quantities, battery classes, measurement concepts — are
+identified exclusively by their EMMO IRIs (domain-battery /
+domain-electrochemistry). Terms missing from EMMO are added upstream (the
+working queue is `docs/internal/ontology-additions-needed.md`); while a term
+is missing, the value is preserved in the JSON record and omitted from RDF
+with a `semantic.property_unmapped` warning — never bridged with a
+BattINFO-minted IRI.
+
+In particular, a "thin human-friendly IRI layer" over EMMO (e.g. a readable
+`battinfo:PowerDensity` aliasing an opaque EMMO IRI) is **rejected as
+policy**, not deferred: two IRIs per concept fragment graphs for every
+consumer that does not run an OWL reasoner, and the accidental instances of
+exactly this pattern measurably caused silent data loss (red-team review,
+2026-07). The human-friendly layer is **labels and contexts, not
+identifiers**:
+
+- authoring: snake_case JSON keys mapped by the records JSON-LD context;
+- reading: `skos:prefLabel` annotations emitted alongside every EMMO term in
+  exports, plus the generated property & unit reference;
+- querying: a generated labels-companion file for SPARQL users.
+
+`battinfo.ttl` is an **application ontology** in the strict sense: (a) the
+import/pin manifest for the EMMO modules a release speaks, (b) the small
+record-layer residue of genuinely non-domain terms (after re-homing to
+DCTERMS/PROV/DCAT/schema.org where standard terms exist), and (c) optionally
+the profile constraints (SHACL shapes). Nothing else. The same ruling applies
+to sub-namespaces granted under `w3id.org/battinfo/` (e.g. `/twin`): quantity
+terms resolve to EMMO or go upstream; only structural terms may be minted
+locally, hand-defined.
+
+Reserved namespace segments (never usable as entity types): `id`, `ontology`,
+`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`.
+
+## 15. Design Principles
 
 The BattINFO identifier system is designed to be:
 
@@ -265,7 +301,7 @@ The BattINFO identifier system is designed to be:
 - Compatible with distributed data generation
 - Independent of any single software platform
 
-## 15. Rationale
+## 16. Rationale
 
 The 16-character Base32 UID:
 
