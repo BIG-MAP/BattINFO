@@ -254,42 +254,31 @@ def _rdf_types_for(cell_format: str, chemistry: str) -> list[str]:
 # ── Per-type transformers ─────────────────────────────────────────────────────
 
 def cell_spec_to_jsonld(record: dict) -> dict:
-    """Transform a cell-spec record dict to JSON-LD."""
-    product = record.get("cell_spec") or record.get("specification") or {}
-    specs   = record.get("properties") or {}
-    prov    = record.get("provenance") or {}
+    """Transform a cell-spec record dict to JSON-LD (canonical spec-node shape).
 
-    node: dict = {
-        "@context":  _CONTEXT_INLINE,
-        "@id":       product.get("id", ""),
-        "@type":     _rdf_types_for(product.get("cell_format", ""), product.get("chemistry", "")),
-        "schema:name":  product.get("name"),
-        "schema:model": product.get("model"),
-    }
+    Delegates to the shared canonical builder
+    (:func:`battinfo.transform.cell_spec_node.build_cell_spec_node`) so
+    ``record_to_jsonld`` emits the exact node the resolver artifact and the
+    Zenodo/local publication graph emit: ``@type ["BatteryCellSpecification",
+    "schema:CreativeWork"]``, the physical EMMO class stack under
+    ``isDescriptionFor`` (chemistry/format/electrode bases via @type stacking,
+    not literal predicates), quantities as an EMMO ``hasProperty`` array, and a
+    standard-vocabulary (dcterms/PROV) provenance node.
 
-    mfr = product.get("manufacturer")
-    if mfr:
-        node["schema:manufacturer"] = {
-            "@type":      "schema:Organization",
-            "schema:name": mfr.get("name") if isinstance(mfr, dict) else mfr,
-        }
+    The inline ``@context`` is the records context extended with the
+    prefLabel -> compact-IRI table, so every emitted ``@type`` resolves offline.
+    """
+    # Deferred import: transform.cell_spec_node pulls in the transform stack.
+    from battinfo.transform.cell_spec_node import (  # noqa: PLC0415
+        build_cell_spec_node,
+        label_to_compact,
+    )
 
-    for field in ("cell_format", "chemistry", "positive_electrode_basis",
-                  "negative_electrode_basis", "size_code", "iec_code",
-                  "country_of_origin"):
-        val = product.get(field)
-        if val is not None:
-            node[f"battinfo:{field}"] = val
-
-    for key, qty in specs.items():
-        prop_iri = _PROP_MAP.get(key)
-        if prop_iri and isinstance(qty, dict) and qty.get("value") is not None:
-            node[_compact_iri(prop_iri)] = _quantity(qty["value"], qty.get("unit", ""))
-
-    if prov:
-        node["battinfo:provenance"] = _provenance(prov)
-
-    return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+    if "cell_spec" not in record and "specification" in record:
+        record = {**record, "cell_spec": record["specification"]}
+    context: dict = dict(_CONTEXT_INLINE)
+    context.update(label_to_compact())
+    return {"@context": context, **build_cell_spec_node(record)}
 
 
 def cell_instance_to_jsonld(record: dict) -> dict:

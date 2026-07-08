@@ -395,50 +395,177 @@ export const showcase: {
         "modified_at": {
           "@id": "dcterms:modified",
           "@type": "xsd:dateTime"
+        },
+        "LR03": "battery:battery_a5299801_2a8d_4d03_a476_ca2c5e9ca702",
+        "LR6": "battery:battery_6b2540b9_5af6_478a_81ae_583db9636db8",
+        "LR14": "battery:battery_d00e842e_ee0b_4e25_bd17_d64d76d69730",
+        "LR20": "battery:battery_0c9979c2_c981_48ea_a8e1_72bdcb58fd58",
+        "LR1": "battery:battery_1c0306f5_5698_4874_b6ce_e5cc45a46b91",
+        "CR2032": "battery:battery_b61b96ac_f2f4_4b74_82d5_565fe3a2d88b",
+        "CR2025": "battery:battery_9984642f_c9dc_4b98_94f6_6ffe20cfc014",
+        "LR44": "battery:battery_d10ff656_f9fd_4b0e_9de9_4812a44ea359",
+        "HR6": "battery:battery_a71a4bf2_dee6_4aa4_8ad4_9f38c261fb84",
+        "KR6": "battery:battery_ad7c1d81_9a9f_4174_88ea_3ba3e8f4dbe2",
+        "ACInternalResistance": "electrochemistry:electrochemistry_964cd426_f3cf_4a52_8c5d_0490cf48edb5",
+        "Volume": "emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed",
+        "CalendarLife": "electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df",
+        "Mass": "emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405",
+        "CapacityFade": "electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6",
+        "NominalEnergy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+        "UpperVoltageLimit": "electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88",
+        "MaximumChargingTemperature": "electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260",
+        "MinimumChargingTemperature": "electrochemistry:electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49",
+        "ChargingVoltage": "electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87",
+        "MaximumContinuousChargingCurrent": "electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+        "MaximumContinuousDischargingCurrent": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+        "CycleLife": "electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937",
+        "D50ParticleSize": "electrochemistry:electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c",
+        "DCInternalResistance": "electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3",
+        "Diameter": "emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6",
+        "LowerVoltageLimit": "electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
+        "MaximumDischargingTemperature": "electrochemistry:electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d",
+        "MinimumDischargingTemperature": "electrochemistry:electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b",
+        "MassLoading": "electrochemistry:electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
+        "EnergyDensity": "electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
+        "Thickness": "emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656",
+        "Height": "emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba",
+        "ElectricImpedance": "emmo:EMMO_79a02de5_b884_4eab_bc18_f67997d597a2",
+        "InitialCoulombicEfficiency": "electrochemistry:electrochemistry_469b9516_a96d_4aa2_b8e5_05ae982e2084",
+        "InternalResistance": "electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
+        "Length": "emmo:EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac",
+        "MaximumStorageTemperature": "electrochemistry:electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7",
+        "MinimumCapacity": "electrochemistry:electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5",
+        "MinimumStorageTemperature": "electrochemistry:electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302",
+        "NPRatio": "electrochemistry:electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723",
+        "NominalCapacity": "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
+        "NominalVoltage": "electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6",
+        "PowerDensity": "electrochemistry:electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a",
+        "CalenderedDensity": "electrochemistry:electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379",
+        "MaximumPulseChargingCurrent": "electrochemistry:electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da",
+        "MaximumPulseDischargingCurrent": "electrochemistry:electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b",
+        "AreicCapacity": "electrochemistry:electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a",
+        "RatedCapacity": "electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26",
+        "DischargingSpecificCapacity": "electrochemistry:electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee",
+        "SelfDischargeRate": "electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e",
+        "SpecificEnergy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
+        "SpecificPower": "electrochemistry:electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7",
+        "StateOfHealth": "electrochemistry:electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce",
+        "TheoreticalCapacity": "electrochemistry:electrochemistry_372c89d0_adab_4585_9662_33c912acef23",
+        "Tortuosity": "emmo:EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8",
+        "Width": "emmo:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0",
+        "AmpereHour": "emmo:AmpereHour",
+        "MilliAmpereHour": "emmo:MilliAmpereHour",
+        "Volt": "emmo:Volt",
+        "MilliVolt": "emmo:MilliVolt",
+        "Ampere": "emmo:Ampere",
+        "MilliAmpere": "emmo:MilliAmpere",
+        "Watt": "emmo:Watt",
+        "WattHour": "emmo:WattHour",
+        "KiloWattHour": "emmo:KiloWattHour",
+        "MilliOhm": "emmo:MilliOhm",
+        "DegreeCelsius": "emmo:DegreeCelsius",
+        "Kelvin": "emmo:Kelvin",
+        "Gram": "emmo:Gram",
+        "Kilogram": "emmo:Kilogram",
+        "MilliMetre": "emmo:MilliMetre",
+        "CentiMetre": "emmo:CentiMetre",
+        "Metre": "emmo:Metre",
+        "Litre": "emmo:Litre",
+        "MilliLitre": "emmo:MilliLitre",
+        "UnitOne": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+        "Hour": "emmo:Hour",
+        "Minute": "emmo:Minute",
+        "Second": "emmo:Second",
+        "WattHourPerKilogram": "emmo:WattHourPerKilogram",
+        "WattHourPerLitre": "emmo:WattHourPerLitre",
+        "WattPerKilogram": "emmo:WattPerKilogram",
+        "WattPerLitre": "http://qudt.org/vocab/unit/W-PER-L",
+        "WeightPercent": "electrochemistry:electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
+        "VolumePercent": "electrochemistry:electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
+        "MicroMetre": "emmo:MicroMetre",
+        "MilliGramPerSquareCentiMetre": "emmo:MilliGramPerSquareCentiMetre",
+        "GramPerCubicCentiMetre": "emmo:GramPerCubicCentiMetre",
+        "MolePerLitre": "emmo:MolePerLitre",
+        "LithiumManganeseDioxideBattery": "battery:battery_05adf5d2_0fbd_4c58_906e_4b875a7f2363",
+        "LithiumIonIronPhosphateBattery": "battery:battery_04a4e5a4_e6fd_43af_b1ca_4a16d5f8886c",
+        "LithiumIonNickelManganeseCobaltOxideBattery": "battery:battery_834095fa_f684_4368_a7ce_853579a1362a",
+        "LithiumIonNickelCobaltAluminiumOxideBattery": "battery:battery_217e44ed_efd9_4b9e_9cb4_1f7488d996b2",
+        "LithiumIonCobaltOxideBattery": "battery:battery_4f0b1312_da2f_4039_a06d_d571ce51f835",
+        "LithiumIonManganeseIronPhosphateBattery": "battery:battery_c429bb30_50d6_4cec_ae7e_279f59c36ccd",
+        "LithiumIonManganeseOxideBattery": "battery:battery_45804eeb_fba3_49dd_ae79_6b4e958d6e09",
+        "LithiumIonGraphiteBattery": "battery:battery_2018e0da_4c25_46e9_83db_38431fc81ce0",
+        "LithiumIonTitanateBattery": "battery:battery_fd811dc3_8c37_4741_a099_78e26e4110ef",
+        "RealData": "emmo:EMMO_18d180e4_5e3e_42f7_820c_e08951223486",
+        "ConventionalProperty": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456",
+        "MeasuredProperty": "emmo:EMMO_873b0ab3_88e6_4054_b901_5531e01f14a4",
+        "NominalProperty": "emmo:EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66",
+        "hasMeasurementParameter": {
+          "@id": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#hasMeasurementParameter",
+          "@type": "@id"
         }
       },
-      "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
       "@type": [
-        "https://w3id.org/emmo/domain/battery#battery_68ed592a_7924_45d0_a108_94d6275d57f0",
-        "https://w3id.org/emmo/domain/battery#battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
-        "https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f"
+        "BatteryCellSpecification",
+        "schema:CreativeWork"
       ],
+      "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+      "schema:identifier": "7d9k-2m4p-8t3x-6nq5",
       "schema:name": "Samsung SDI INR21700-50E",
       "schema:model": "INR21700-50E",
       "schema:manufacturer": {
         "@type": "schema:Organization",
         "schema:name": "Samsung SDI"
       },
-      "battinfo:cell_format": "cylindrical",
-      "battinfo:chemistry": "Li-ion",
-      "battinfo:positive_electrode_basis": "NMC",
-      "battinfo:negative_electrode_basis": "graphite",
-      "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100": {
-        "hasNumericalPart": {
-          "hasNumberValue": 5.0
-        },
-        "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#AmpereHour"
-        }
+      "schema:url": "https://www.battery-genome.org/registry/spec/7d9k-2m4p-8t3x-6nq5",
+      "isDescriptionFor": {
+        "@type": [
+          "BatteryCell",
+          "CylindricalBattery",
+          "LithiumIonBattery",
+          "LithiumIonNickelManganeseCobaltOxideBattery",
+          "LithiumIonGraphiteBattery"
+        ]
       },
-      "electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6": {
-        "hasNumericalPart": {
-          "hasNumberValue": 3.6
+      "schema:schemaVersion": "0.2.0",
+      "hasProperty": [
+        {
+          "@type": [
+            "NominalCapacity",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 5.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
         },
-        "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#Volt"
-        }
-      },
-      "emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405": {
-        "hasNumericalPart": {
-          "hasNumberValue": 68.0
+        {
+          "@type": [
+            "NominalVoltage",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 3.6
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
         },
-        "hasMeasurementUnit": {
-          "@id": "https://w3id.org/emmo#Gram"
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 68.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
         }
-      },
-      "battinfo:provenance": {
-        "battinfo:sourceType": "datasheet"
+      ],
+      "dcterms:source": {
+        "@type": "prov:Entity",
+        "dcterms:type": "datasheet",
+        "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
       }
     }
   },
