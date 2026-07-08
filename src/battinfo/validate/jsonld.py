@@ -47,6 +47,7 @@ _LOCAL_CONTEXT_FILES = {
 }
 
 _EXPLICIT_ALLOWED_TYPE_TERMS = {
+    "Battery",
     "BatteryCell",
     "BatteryTest",
     "BatteryModule",

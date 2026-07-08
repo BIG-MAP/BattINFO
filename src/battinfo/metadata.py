@@ -295,7 +295,9 @@ def _coerce_column_metadata(data: Any, column_metadata: Mapping[str, Any] | None
         return column_metadata
     attrs = getattr(data, "attrs", {}) if data is not None else {}
     if isinstance(attrs, Mapping):
-        for key in ("battinfo:columns", "bdf:columns"):
+        # csvw:column is the standard (CSVW) attrs key; the battinfo:/bdf:
+        # spellings are read for back-compat with existing dataframes only.
+        for key in ("csvw:column", "battinfo:columns", "bdf:columns"):
             value = attrs.get(key)
             if isinstance(value, Mapping):
                 return value

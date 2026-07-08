@@ -860,10 +860,17 @@ def _apply_conformance_jsonld(
                 "rdfs:comment": _label
                 + (f" — {dev['description']}" if dev.get("description") else ""),
             }
+            # Standard vocabulary (no battinfo: mints): the deviation category is
+            # a dcterms:type on the activity; the affected property is the
+            # activity's object, carried as a schema:PropertyValue whose
+            # propertyID names the record property that deviated.
             if dev.get("category"):
-                dev_node["battinfo:deviationCategory"] = dev["category"]
+                dev_node["dcterms:type"] = dev["category"]
             if dev.get("type"):
-                dev_node["battinfo:affectedProperty"] = dev["type"]
+                dev_node["schema:object"] = {
+                    "@type": "schema:PropertyValue",
+                    "schema:propertyID": dev["type"],
+                }
             if dev.get("description"):
                 dev_node["schema:description"] = dev["description"]
             iso_ts = _unix_to_iso(dev.get("occurred_at"))
@@ -6665,7 +6672,7 @@ def _cell_instance_submission_payload(
     return _authoring_envelope(
         resource_type="cell",
         records={"cell": record, **({"cell_spec": spec_record} if spec_record else {})},
-        rdf_type="Cell",
+        rdf_type="BatteryCell",
         workspace_id=wid,
         publisher_id=pid,
         source_version=ver,

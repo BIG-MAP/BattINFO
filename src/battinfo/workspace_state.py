@@ -797,7 +797,7 @@ class WorkspaceStateStore:
             source_local_id=self._source_local_id("cell", record),
             title=self._cell_title(record, cell_spec_by_id),
             semantic_payload={
-                "@type": "Cell",
+                "@type": "BatteryCell",
                 "battinfo_records": battinfo_records,
             },
         )

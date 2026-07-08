@@ -12,12 +12,16 @@ from battinfo._util import _citation_doi_from_url
 from battinfo.entities import COMPONENT_FAMILIES
 from battinfo.validate.jsonld import validate_jsonld
 
+# Battery aggregation level -> EMMO domain-battery class (resolved by the
+# domain-battery context). No battinfo: duplicates of EMMO classes are minted.
 BATTERY_TYPE_MAP = {
-    "cell": "battinfo:BatteryCell",
-    "module": "battinfo:BatteryModule",
-    "pack": "battinfo:BatteryPack",
-    "system": "battinfo:BatterySystem",
+    "cell": "BatteryCell",
+    "module": "BatteryModule",
+    "pack": "BatteryPack",
+    "system": "BatterySystem",
 }
+# Fallback when the aggregation level is unknown: the generic EMMO Battery class.
+BATTERY_TYPE_FALLBACK = "Battery"
 
 
 # EMMO domain-battery context.  The w3id.org redirect resolves to the latest
@@ -510,11 +514,15 @@ def _quantity_to_jsonld(quantity: dict[str, Any] | None) -> dict[str, Any] | Non
     if quantity.get("max_value") is not None:
         out["schema:maxValue"] = quantity["max_value"]
         has_content = True
-    if quantity.get("typical_value") is not None:
-        out["battinfo:typicalValue"] = quantity["typical_value"]
+    if quantity.get("typical_value") is not None and "schema:value" not in out:
+        # A typical value is a nominal-by-convention value: emit it as the
+        # schema:value and co-type the node so the nature stays explicit
+        # (no battinfo:typicalValue duplicate of the schema/EMMO forms).
+        out["schema:value"] = quantity["typical_value"]
+        out["@type"] = ["schema:QuantitativeValue", "NominalProperty"]
         has_content = True
-    if quantity.get("value_text"):
-        out["battinfo:valueText"] = quantity["value_text"]
+    if quantity.get("value_text") and "schema:value" not in out:
+        out["schema:value"] = quantity["value_text"]
         has_content = True
 
     unit = quantity.get("unit") or quantity.get("unit_text")
@@ -1053,27 +1061,45 @@ def _converter_coin_hardware_nodes(coin_hardware: dict[str, Any] | None) -> tupl
 
 
 def _battery_to_jsonld(battery: dict[str, Any]) -> dict[str, Any]:
-    out: dict[str, Any] = {
-        "@type": BATTERY_TYPE_MAP.get(str(battery.get("type")), "battinfo:Battery"),
-    }
+    """Legacy metadata-record battery node, standard vocabularies only.
+
+    The aggregation level and (where mappable) the chemistry are expressed
+    through the EMMO @type stack; an unmappable chemistry keyword is kept as a
+    ``schema:additionalProperty`` PropertyValue rather than a minted
+    ``battinfo:chemistry`` predicate. The headline quantities use the shared
+    EMMO ``hasProperty`` quantity-node shape (NominalCapacity / NominalVoltage
+    / Mass via the curated property map).
+    """
+    types: list[str] = [BATTERY_TYPE_MAP.get(str(battery.get("type")), BATTERY_TYPE_FALLBACK)]
+    chemistry = battery.get("chemistry")
+    chem_entry = _entity_mapping("chemistry", chemistry) if chemistry else None
+    for battery_type in (chem_entry or {}).get("battery_types", []):
+        if isinstance(battery_type, str) and battery_type not in types:
+            types.append(battery_type)
+    out: dict[str, Any] = {"@type": types if len(types) > 1 else types[0]}
     battery_id = battery.get("id")
     if battery_id is not None:
         out["@id"] = battery_id
-    if battery.get("chemistry"):
-        out["battinfo:chemistry"] = battery["chemistry"]
+    if chemistry and chem_entry is None:
+        out["schema:additionalProperty"] = {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "chemistry",
+            "schema:value": chemistry,
+        }
 
     manufacturer = _agent_to_jsonld(battery.get("manufacturer"))
     if manufacturer:
         out["schema:manufacturer"] = manufacturer
 
-    for key, pred in (
-        ("nominal_capacity", "battinfo:nominalCapacity"),
-        ("nominal_voltage", "battinfo:nominalVoltage"),
-        ("mass", "battinfo:mass"),
-    ):
-        quant = _quantity_to_jsonld(battery.get(key))
-        if quant:
-            out[pred] = quant
+    prop_nodes: list[dict[str, Any]] = []
+    for key in ("nominal_capacity", "nominal_voltage", "mass"):
+        quantity = battery.get(key)
+        if isinstance(quantity, dict):
+            node = _descriptor_quantity_node(key, quantity)
+            if node is not None:
+                prop_nodes.append(node)
+    if prop_nodes:
+        out["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
     return out
 
 
@@ -1610,15 +1636,28 @@ def _base_context(
 ) -> list[Any]:
     context_entry: dict[str, Any] = {
         "schema": "https://schema.org/",
+        "dcterms": "http://purl.org/dc/terms/",
     }
     if include_bibo:
         context_entry["bibo"] = "http://purl.org/ontology/bibo/"
     if include_battinfo:
-        context_entry["battinfo"] = "https://w3id.org/battinfo#"
+        # SLASH namespace (record layer): only the unmapped-property fallback
+        # terms resolve here. The hash namespace belongs to the application
+        # ontology (battinfo.ttl) and is never used for record predicates.
+        context_entry["battinfo"] = "https://w3id.org/battinfo/"
     if include_has_measurement:
-        context_entry["hasMeasurement"] = {"@id": "battinfo:hasMeasurement"}
+        # Human-layer alias for the EMMO hasProperty relation — the label stays
+        # readable, the identifier is the EMMO term (no battinfo: mint).
+        context_entry["hasMeasurement"] = {
+            "@id": "https://w3id.org/emmo#EMMO_e1097637_70d2_4895_973f_2396f04fa204"
+        }
     if include_has_battery:
-        context_entry["hasBattery"] = {"@id": "battinfo:hasBattery", "@type": "@id"}
+        # Human-layer alias for EMMO isDescriptionFor: the metadata record is a
+        # description of the battery it points at (no battinfo: mint).
+        context_entry["hasBattery"] = {
+            "@id": "https://w3id.org/emmo#EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3",
+            "@type": "@id",
+        }
     return [BATTERY_CONTEXT_URL, context_entry]
 
 
@@ -1629,7 +1668,9 @@ def _to_domain_battery_jsonld_legacy(data: dict[str, Any]) -> dict[str, Any]:
 
     doc: dict[str, Any] = {
         "@context": _base_context(),
-        "@type": "battinfo:BatteryMetadataRecord",
+        # A metadata record is a data artifact, not a battery: schema:Dataset
+        # (no battinfo:BatteryMetadataRecord mint).
+        "@type": "schema:Dataset",
         "hasBattery": _battery_to_jsonld(battery),
     }
     record_id = record.get("id")
@@ -1644,7 +1685,8 @@ def _to_domain_battery_jsonld_legacy(data: dict[str, Any]) -> dict[str, Any]:
     if record.get("source"):
         doc["schema:isBasedOn"] = record["source"]
     if data.get("profile"):
-        doc["battinfo:profile"] = data["profile"]
+        # The profile is a conformance statement, not a domain fact.
+        doc["dcterms:conformsTo"] = data["profile"]
 
     author = _agent_to_jsonld(record.get("created_by"))
     if author:

@@ -12,34 +12,6 @@
     rdfs:comment "Terms used by canonical BattINFO record exports (JSON-LD). This is the record/data layer under the slash namespace; the EMMO-based battery ontology lives in its own hash namespace."@en ;
     dcterms:source <https://github.com/BIG-MAP/BattINFO> .
 
-battinfo:Battery a owl:Class ;
-    rdfs:label "Battery"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:BatteryCell a owl:Class ;
-    rdfs:label "Battery Cell"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:BatteryMetadataRecord a owl:Class ;
-    rdfs:label "Battery Metadata Record"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:BatteryModule a owl:Class ;
-    rdfs:label "Battery Module"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:BatteryPack a owl:Class ;
-    rdfs:label "Battery Pack"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:BatterySystem a owl:Class ;
-    rdfs:label "Battery System"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:affectedProperty a rdf:Property ;
-    rdfs:label "Affected Property"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:capacityThresholdExhaustion a rdf:Property ;
     rdfs:label "Capacity Threshold Exhaustion"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
@@ -68,32 +40,8 @@ battinfo:cycleLifeCRate a rdf:Property ;
     rdfs:label "Cycle Life CRate"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:deviationCategory a rdf:Property ;
-    rdfs:label "Deviation Category"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:hasBattery a rdf:Property ;
-    rdfs:label "Has Battery"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:hasMeasurement a rdf:Property ;
-    rdfs:label "Has Measurement"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:mass a rdf:Property ;
-    rdfs:label "Mass"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:maximumPower a rdf:Property ;
     rdfs:label "Maximum Power"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:nominalCapacity a rdf:Property ;
-    rdfs:label "Nominal Capacity"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:nominalVoltage a rdf:Property ;
-    rdfs:label "Nominal Voltage"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:operatingTemperatureMax a rdf:Property ;
@@ -110,10 +58,6 @@ battinfo:powerCapability a rdf:Property ;
 
 battinfo:powerEnergyRatio a rdf:Property ;
     rdfs:label "Power Energy Ratio"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:profile a rdf:Property ;
-    rdfs:label "Profile"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:retrievedAt a rdf:Property ;
@@ -138,14 +82,6 @@ battinfo:sourceType a rdf:Property ;
 
 battinfo:sourceURL a rdf:Property ;
     rdfs:label "Source URL"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:typicalValue a rdf:Property ;
-    rdfs:label "Typical Value"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:valueText a rdf:Property ;
-    rdfs:label "Value Text"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:workflowVersion a rdf:Property ;
