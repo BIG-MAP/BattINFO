@@ -128,6 +128,15 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
         "housing", "housing", "housing.schema.json", "housing", "housing",
         spec_ref_field="housing_spec_id", spec_entity_type="housing-spec",
     ),
+    EntityKind("equipment-spec", "equipment_spec", "equipment-spec.schema.json", "equipment-spec", "spec"),
+    EntityKind(
+        "equipment", "equipment", "equipment.schema.json", "equipment", "equipment",
+        spec_ref_field="equipment_spec_id", spec_entity_type="equipment-spec",
+    ),
+    # Channels are instance-only (no channel-spec kind): flat IRIs, parent link
+    # ``equipment_id`` lives in the record body, uid minted deterministically
+    # from (equipment uid, index) — IDENTIFIER_POLICY 6.1.
+    EntityKind("channel", "channel", "channel.schema.json", "channel", "channel"),
 )
 
 

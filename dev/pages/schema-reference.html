@@ -618,6 +618,33 @@ registry’s publish gate, and the <a class="reference external" href="https://b
 <li><p><strong>Schema:</strong> <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/housing.schema.json"><code class="docutils literal notranslate"><span class="pre">housing.schema.json</span></code></a></p></li>
 </ul>
 </section>
+<section id="equipment-spec">
+<h2>equipment-spec<a class="headerlink" href="#equipment-spec" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Record key (discriminator):</strong> <code class="docutils literal notranslate"><span class="pre">equipment_spec</span></code></p></li>
+<li><p><strong>Required top-level:</strong> <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">equipment_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p></li>
+<li><p><strong>Required in <code class="docutils literal notranslate"><span class="pre">equipment_spec</span></code>:</strong> <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code></p></li>
+<li><p><strong>Schema:</strong> <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/equipment-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">equipment-spec.schema.json</span></code></a></p></li>
+</ul>
+</section>
+<section id="equipment">
+<h2>equipment<a class="headerlink" href="#equipment" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Record key (discriminator):</strong> <code class="docutils literal notranslate"><span class="pre">equipment</span></code></p></li>
+<li><p><strong>Required top-level:</strong> <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">equipment</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p></li>
+<li><p><strong>Required in <code class="docutils literal notranslate"><span class="pre">equipment</span></code>:</strong> <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">equipment_spec_id</span></code></p></li>
+<li><p><strong>Schema:</strong> <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/equipment.schema.json"><code class="docutils literal notranslate"><span class="pre">equipment.schema.json</span></code></a></p></li>
+</ul>
+</section>
+<section id="channel">
+<h2>channel<a class="headerlink" href="#channel" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Record key (discriminator):</strong> <code class="docutils literal notranslate"><span class="pre">channel</span></code></p></li>
+<li><p><strong>Required top-level:</strong> <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p></li>
+<li><p><strong>Required in <code class="docutils literal notranslate"><span class="pre">channel</span></code>:</strong> <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">equipment_id</span></code>, <code class="docutils literal notranslate"><span class="pre">index</span></code></p></li>
+<li><p><strong>Schema:</strong> <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/channel.schema.json"><code class="docutils literal notranslate"><span class="pre">channel.schema.json</span></code></a></p></li>
+</ul>
+</section>
 <section id="organization">
 <h2>organization<a class="headerlink" href="#organization" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -693,6 +720,9 @@ registry’s publish gate, and the <a class="reference external" href="https://b
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte">electrolyte</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#housing-spec">housing-spec</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#housing">housing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#equipment-spec">equipment-spec</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#equipment">equipment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#channel">channel</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#organization">organization</a></li>
 </ul>
   </nav></div>
