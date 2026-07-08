@@ -26,7 +26,7 @@ from battinfo.api._shared import (
     _validate_canonical_record,
     _validate_publication_artifact,
 )
-from battinfo.transform.json_to_jsonld import _descriptor_quantity_node as _jsonld_quantity_node
+from battinfo.transform.cell_spec_node import build_cell_spec_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 
@@ -332,49 +332,21 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
     _, uid = _iri_tail(entity_iri)
     entity_type = _logical_entity_type_from_doc(doc)
     # csvw: is used by _schema_main_entity_value helpers called from the dataset block.
+    # battinfo: is the fallback-term prefix used by unmapped-property quantity nodes
+    # (dcterms:/prov: for the provenance node already resolve via the remote context).
     context = [
         "https://w3id.org/emmo/domain/battery/context",
         {
             "schema": "https://schema.org/",
             "csvw": "http://www.w3.org/ns/csvw#",
+            "battinfo": "https://w3id.org/battinfo/",
         },
     ]
 
     if entity_type == "cell-spec":
-        cell = doc.get("cell_spec")
-        if not isinstance(cell, Mapping):
-            cell = doc["cell_spec"]
-        manufacturer = cell.get("manufacturer")
-        if isinstance(manufacturer, Mapping):
-            manufacturer_name = manufacturer.get("name")
-        else:
-            manufacturer_name = manufacturer
-        out: dict[str, Any] = {
-            "@context": context,
-            "@id": entity_iri,
-            "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
-            "schema:identifier": uid,
-            "schema:name": cell.get("name") or cell.get("model") or cell.get("model_name"),
-            "schema:manufacturer": {"@type": "schema:Organization", "schema:name": manufacturer_name},
-        }
-        product_type = cell.get("product_type") or cell.get("product_type")
-        if product_type:
-            out["schema:additionalType"] = str(product_type)
-        size_code = cell.get("size_code") or cell.get("size_code")
-        if size_code:
-            out["schema:size"] = size_code
-        # Quantitative specifications as EMMO ConventionalProperty nodes.
-        # Chemistry and format are already expressed through @type stacking.
-        specs = doc.get("properties") or {}
-        if isinstance(specs, Mapping):
-            prop_nodes = [
-                node
-                for key, value in specs.items()
-                if isinstance(value, Mapping)
-                if (node := _jsonld_quantity_node(key, value)) is not None
-            ]
-            if prop_nodes:
-                out["hasProperty"] = prop_nodes
+        # Shared canonical builder — the same node the Zenodo/local publication
+        # graph emits, so resolver and package spec nodes are byte-identical.
+        out: dict[str, Any] = {"@context": context, **build_cell_spec_node(doc)}
         return out
 
     if entity_type == "cell":
