@@ -177,14 +177,18 @@
       "@type": "xsd:dateTime"
     }
   },
-  "@type": "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+  "@type": [
+    "BatteryTest",
+    "schema:Action",
+    "prov:Activity"
+  ],
   "@id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "LAB-2026-0001 C/10 constant-current discharge",
-  "battinfo:testKind": "capacity_check",
-  "battinfo:instrumentName": "Biologic VMP-300",
-  "battinfo:protocolName": "C/10 constant-current discharge",
-  "battinfo:status": "completed",
-  "battinfo:testedCell": {
+  "schema:additionalType": "capacity_check",
+  "schema:instrument": "Biologic VMP-300",
+  "schema:measurementTechnique": "C/10 constant-current discharge",
+  "schema:actionStatus": "completed",
+  "hasTestObject": {
     "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
   }
 }

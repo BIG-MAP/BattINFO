@@ -36,16 +36,8 @@ battinfo:BatterySystem a owl:Class ;
     rdfs:label "Battery System"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:Cell a owl:Class ;
-    rdfs:label "Cell"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:affectedProperty a rdf:Property ;
     rdfs:label "Affected Property"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:batchId a rdf:Property ;
-    rdfs:label "Batch Id"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:capacityThresholdExhaustion a rdf:Property ;
@@ -54,10 +46,6 @@ battinfo:capacityThresholdExhaustion a rdf:Property ;
 
 battinfo:cellFormat a rdf:Property ;
     rdfs:label "Cell Format"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:cellSpecification a rdf:Property ;
-    rdfs:label "Cell Specification"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:chargingTime a rdf:Property ;
@@ -84,28 +72,12 @@ battinfo:deviationCategory a rdf:Property ;
     rdfs:label "Deviation Category"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:doi a rdf:Property ;
-    rdfs:label "Doi"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:expiresAt a rdf:Property ;
-    rdfs:label "Expires At"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:hasBattery a rdf:Property ;
     rdfs:label "Has Battery"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:hasDataset a rdf:Property ;
-    rdfs:label "Has Dataset"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:hasMeasurement a rdf:Property ;
     rdfs:label "Has Measurement"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:instrumentName a rdf:Property ;
-    rdfs:label "Instrument Name"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:mass a rdf:Property ;
@@ -144,14 +116,6 @@ battinfo:profile a rdf:Property ;
     rdfs:label "Profile"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:protocolName a rdf:Property ;
-    rdfs:label "Protocol Name"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:provenance a rdf:Property ;
-    rdfs:label "Provenance"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:retrievedAt a rdf:Property ;
     rdfs:label "Retrieved At"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
@@ -174,22 +138,6 @@ battinfo:sourceType a rdf:Property ;
 
 battinfo:sourceURL a rdf:Property ;
     rdfs:label "Source URL"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:status a rdf:Property ;
-    rdfs:label "Status"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:testKind a rdf:Property ;
-    rdfs:label "Test Kind"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:testProtocol a rdf:Property ;
-    rdfs:label "Test Protocol"@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:testedCell a rdf:Property ;
-    rdfs:label "Tested Cell"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:typicalValue a rdf:Property ;

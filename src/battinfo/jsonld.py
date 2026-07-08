@@ -282,58 +282,81 @@ def cell_spec_to_jsonld(record: dict) -> dict:
 
 
 def cell_instance_to_jsonld(record: dict) -> dict:
-    """Transform a cell-instance record dict to JSON-LD."""
+    """Transform a cell-instance record dict to JSON-LD.
+
+    Standard vocabularies only (IDENTIFIER_POLICY.md section 14): the physical
+    cell is an EMMO ``BatteryCell`` (+ ``schema:IndividualProduct``), the link
+    to its spec uses EMMO ``hasDescription`` mirrored by ``schema:isVariantOf``
+    (the same pair the resolver emits), the batch id rides in a
+    ``schema:identifier`` PropertyValue, and datasets hang off
+    ``schema:workExample`` — no ``battinfo:`` predicates.
+    """
     ci   = record.get("cell_instance") or {}
     prov = record.get("provenance") or {}
     datasets = record.get("datasets") or []
 
     node: dict = {
         "@context": _CONTEXT_INLINE,
-        "@type":    "https://w3id.org/battinfo/Cell",
+        "@type":    ["BatteryCell", "schema:IndividualProduct"],
         "@id":      ci.get("id", ""),
         "schema:serialNumber": ci.get("serial_number"),
     }
     if ci.get("cell_spec_id"):
-        node["battinfo:cellSpecification"] = {"@id": ci["cell_spec_id"]}
+        node["hasDescription"] = {"@id": ci["cell_spec_id"]}
+        node["schema:isVariantOf"] = {"@id": ci["cell_spec_id"]}
     if ci.get("batch_id"):
-        node["battinfo:batchId"] = ci["batch_id"]
+        node["schema:identifier"] = {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "batch_id",
+            "schema:value": ci["batch_id"],
+        }
     if ci.get("manufactured_at"):
         node["schema:productionDate"] = ci["manufactured_at"]
     if ci.get("expires_at"):
-        node["battinfo:expiresAt"] = ci["expires_at"]
+        node["schema:expires"] = ci["expires_at"]
     if datasets:
-        node["battinfo:hasDataset"] = [{"@id": d["id"]} for d in datasets if d.get("id")]
+        node["schema:workExample"] = [{"@id": d["id"]} for d in datasets if d.get("id")]
     if prov:
-        node["battinfo:provenance"] = _provenance(prov)
+        node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
 
 
 def test_to_jsonld(record: dict) -> dict:
-    """Transform a test record dict to JSON-LD."""
+    """Transform a test record dict to JSON-LD.
+
+    Standard vocabularies only (IDENTIFIER_POLICY.md section 14): the test is a
+    ``BatteryTest`` / ``schema:Action`` / ``prov:Activity``; its kind is a
+    ``schema:additionalType``, the instrument a ``schema:instrument``, the
+    protocol name a ``schema:measurementTechnique`` (the term the round-trip
+    importer already reads — ``schema:name`` carries the test's own name), the
+    status a ``schema:actionStatus``, the tested cell the EMMO
+    ``hasTestObject``, the protocol reference a ``dcterms:conformsTo``, and
+    produced datasets ``schema:result`` — no ``battinfo:`` predicates.
+    """
     test = record.get("test") or {}
     prov = record.get("provenance") or {}
 
     node: dict = {
         "@context": _CONTEXT_INLINE,
-        "@type":    "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+        "@type":    ["BatteryTest", "schema:Action", "prov:Activity"],
         "@id":      test.get("id", ""),
         "schema:name": test.get("name"),
-        "battinfo:testKind": test.get("kind"),
-        "battinfo:instrumentName": test.get("instrument_name"),
-        "battinfo:protocolName": test.get("protocol_name"),
-        "battinfo:status": test.get("status"),
+        "schema:additionalType": test.get("kind"),
+        "schema:instrument": test.get("instrument_name"),
+        "schema:measurementTechnique": test.get("protocol_name"),
+        "schema:actionStatus": test.get("status"),
     }
     if test.get("cell_id"):
-        node["battinfo:testedCell"] = {"@id": test["cell_id"]}
+        node["hasTestObject"] = {"@id": test["cell_id"]}
     if test.get("protocol_id"):
-        node["battinfo:testProtocol"] = {"@id": test["protocol_id"]}
+        node["dcterms:conformsTo"] = {"@id": test["protocol_id"]}
     if test.get("dataset_ids"):
         # Skip None / non-string entries so a partial record never emits {"@id": null}
         # (invalid JSON-LD — @id must be a string IRI).
-        node["battinfo:hasDataset"] = [{"@id": d} for d in test["dataset_ids"] if isinstance(d, str) and d]
+        node["schema:result"] = [{"@id": d} for d in test["dataset_ids"] if isinstance(d, str) and d]
     if prov:
-        node["battinfo:provenance"] = _provenance(prov)
+        node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
 
@@ -387,22 +410,19 @@ def dataset_to_jsonld(record: dict) -> dict:
         node["dcat:distribution"] = ld_dists
 
     if prov:
-        node["battinfo:provenance"] = _provenance(prov)
+        node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
 
 
 def _provenance(prov: dict) -> dict:
-    out: dict = {}
-    if prov.get("source_type"):
-        out["battinfo:sourceType"] = prov["source_type"]
-    if prov.get("source_file"):
-        out["battinfo:sourceFile"] = prov["source_file"]
-    if prov.get("source_url"):
-        out["battinfo:sourceURL"] = {"@id": prov["source_url"]}
-    if prov.get("citation"):
-        out["dcterms:bibliographicCitation"] = prov["citation"]
-    return out
+    """Record ``provenance`` block -> the SAME standard-vocabulary (dcterms/PROV)
+    node the shared canonical builder emits, so every emitter produces one
+    provenance shape. ``source_file`` stays in the canonical JSON record only
+    (no standard term; the publication path already omits it)."""
+    from battinfo.transform.cell_spec_node import provenance_node  # noqa: PLC0415
+
+    return provenance_node(prov) or {}
 
 
 def funding_to_jsonld(funding: Any) -> dict | None:

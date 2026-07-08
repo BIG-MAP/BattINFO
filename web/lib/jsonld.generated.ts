@@ -916,26 +916,31 @@ export const jsonldGallery: {
           "@type": "xsd:dateTime"
         }
       },
-      "@type": "https://w3id.org/emmo/domain/battery#battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+      "@type": [
+        "BatteryTest",
+        "schema:Action",
+        "prov:Activity"
+      ],
       "@id": "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r",
       "schema:name": "A123 ANR26650M1-B baseline cycling",
-      "battinfo:testKind": "cycling",
-      "battinfo:protocolName": "0.5C charge/discharge baseline cycling",
-      "battinfo:status": "completed",
-      "battinfo:testedCell": {
+      "schema:additionalType": "cycling",
+      "schema:measurementTechnique": "0.5C charge/discharge baseline cycling",
+      "schema:actionStatus": "completed",
+      "hasTestObject": {
         "@id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
       },
-      "battinfo:hasDataset": [
+      "schema:result": [
         {
           "@id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"
         }
       ],
-      "battinfo:provenance": {
-        "battinfo:sourceType": "measurement",
-        "battinfo:sourceFile": "test-5p7v-2n8k-4m3t-6q9r.json",
-        "battinfo:sourceURL": {
+      "dcterms:source": {
+        "@type": "prov:Entity",
+        "dcterms:type": "measurement",
+        "prov:hadPrimarySource": {
           "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
         },
+        "prov:generatedAtTime": "2026-02-23T00:00:00+00:00",
         "dcterms:bibliographicCitation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
       }
     }
@@ -1256,12 +1261,13 @@ export const jsonldGallery: {
           }
         }
       ],
-      "battinfo:provenance": {
-        "battinfo:sourceType": "measurement",
-        "battinfo:sourceFile": "dataset-1f8r-6v2k-9p4m-3t7x.json",
-        "battinfo:sourceURL": {
+      "dcterms:source": {
+        "@type": "prov:Entity",
+        "dcterms:type": "measurement",
+        "prov:hadPrimarySource": {
           "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
         },
+        "prov:generatedAtTime": "2026-02-22T00:00:00+00:00",
         "dcterms:bibliographicCitation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
       }
     }

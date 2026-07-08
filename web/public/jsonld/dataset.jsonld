@@ -210,12 +210,13 @@
       }
     }
   ],
-  "battinfo:provenance": {
-    "battinfo:sourceType": "measurement",
-    "battinfo:sourceFile": "dataset-1f8r-6v2k-9p4m-3t7x.json",
-    "battinfo:sourceURL": {
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "measurement",
+    "prov:hadPrimarySource": {
       "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
     },
+    "prov:generatedAtTime": "2026-02-22T00:00:00+00:00",
     "dcterms:bibliographicCitation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
   }
 }
