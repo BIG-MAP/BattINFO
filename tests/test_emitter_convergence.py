@@ -263,6 +263,108 @@ def test_import_reads_new_shape_package_with_descriptors_intact(tmp_path: Path) 
     assert spec.properties["nominal_voltage"]["unit"] == "V"
 
 
+# ── Step 3: C shares the builder with B ──────────────────────────────────────
+
+
+def _assemble_package(record: dict) -> dict:
+    from battinfo.ws import AuthoringWorkspace
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return AuthoringWorkspace._assemble_zenodo_jsonld(
+            {"cell-spec": [record]},
+            zenodo_record_id=1,
+            prereserved_doi="10.5281/zenodo.1",
+            record_url="https://zenodo.org/records/1",
+            data_filenames=[],
+            title="Convergence test deposit",
+            license="CC-BY-4.0",
+        )
+
+
+def test_resolver_and_package_spec_nodes_are_byte_identical() -> None:
+    record = _cell_spec_record()
+
+    resolver_doc = _resolver_jsonld(record)
+    resolver_node = {k: v for k, v in resolver_doc.items() if k != "@context"}
+
+    package = _assemble_package(record)
+    package_node = next(
+        n for n in package["@graph"] if n.get("@id") == record["cell_spec"]["id"]
+    )
+
+    assert json.dumps(resolver_node, sort_keys=False) == json.dumps(
+        package_node, sort_keys=False
+    )
+
+
+def test_package_spec_node_drops_battinfo_literals_for_type_stack() -> None:
+    package = _assemble_package(_cell_spec_record())
+    node = next(n for n in package["@graph"] if n.get("@id") == SPEC_IRI)
+
+    assert "battinfo:chemistry" not in node
+    assert "battinfo:cellFormat" not in node
+    physical = node["isDescriptionFor"]["@type"]
+    assert "CylindricalBattery" in physical
+    assert "LithiumIonBattery" in physical
+    capacity = next(p for p in node["hasProperty"] if p["@type"][0] == "NominalCapacity")
+    assert capacity["@type"] == ["NominalCapacity", "ConventionalProperty"]
+    assert capacity["hasNumericalPart"]["@type"] == "RealData"
+    assert isinstance(capacity["hasMeasurementUnit"], str)
+
+
+def test_package_keywords_keep_chemistry_and_format() -> None:
+    package = _assemble_package(_cell_spec_record())
+    catalog = package["@graph"][0]
+    keywords = set(catalog.get("schema:keywords", []))
+    assert {"Li-ion", "cylindrical", "A123"} <= keywords
+
+
+def test_package_round_trips_through_import(tmp_path: Path) -> None:
+    """battinfo.json emitted by the shared builder imports with descriptors intact."""
+    package = _assemble_package(_cell_spec_record())
+    ws, counts = _import_package(tmp_path, package)
+
+    assert counts["properties"] == 1
+    spec = ws._ws.cell_specs[0]
+    assert spec.id == SPEC_IRI
+    assert spec.format == "cylindrical"
+    assert spec.chemistry == "li-ion"
+    assert spec.size_code == "R26650"
+    assert spec.iec_code in ("IFpR26650", "ifpr26650")
+    assert spec.properties["nominal_capacity"] == {"value": 2.5, "unit": "Ah"}
+    assert spec.properties["nominal_voltage"] == {"value": 3.3, "unit": "V"}
+
+
+def test_unconvertible_spec_record_warns_instead_of_silent_skip(monkeypatch) -> None:
+    import battinfo.transform.cell_spec_node as csn
+    from battinfo.ws import AuthoringWorkspace
+
+    real = csn.build_cell_spec_node
+
+    def boom(record):
+        if record.get("cell_spec", {}).get("id", "").endswith("bad-1"):
+            raise ValueError("boom")
+        return real(record)
+
+    monkeypatch.setattr(csn, "build_cell_spec_node", boom)
+    bad = {"cell_spec": {"id": "https://w3id.org/battinfo/spec/bad-1"}}
+    good = _cell_spec_record()
+
+    with pytest.warns(UserWarning, match="spec/bad-1.*OMITTED"):
+        package = AuthoringWorkspace._assemble_zenodo_jsonld(
+            {"cell-spec": [bad, good]},
+            zenodo_record_id=1,
+            prereserved_doi="10.5281/zenodo.1",
+            record_url="https://zenodo.org/records/1",
+            data_filenames=[],
+        )
+
+    ids = {n.get("@id") for n in package["@graph"]}
+    assert good["cell_spec"]["id"] in ids
+    assert "https://w3id.org/battinfo/spec/bad-1" not in ids
+
+
 def test_import_new_shape_does_not_misread_uid_as_size_code(tmp_path: Path) -> None:
     record = _cell_spec_record()
     del record["cell_spec"]["size_code"]

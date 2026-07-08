@@ -21,6 +21,7 @@ import difflib
 import json
 import os
 import re
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -4350,7 +4351,6 @@ class AuthoringWorkspace:
         any JSON-LD tool that resolves the embedded context.
         """
         from battinfo.jsonld import (
-            _PROP_MAP,
             _UNIT_MAP,
             TEST_CONDITION_CLASS,
             TEST_CONDITION_GENERIC_CLASSES,
@@ -4377,110 +4377,24 @@ class AuthoringWorkspace:
 
         _DATA_DIR = Path(__file__).parent / "data"
 
-        # ── Load entity-type map (format / chemistry / iec_code → class names) ──
-        _entity_map_path = _DATA_DIR / "mappings" / "domain-battery" / "entity_type_map.json"
-        _entity_map: dict = {}
-        if _entity_map_path.exists():
-            _entity_map = json.loads(
-                _entity_map_path.read_text(encoding="utf-8")
-            ).get("mappings", {})
+        # Shared canonical builders (also used by the resolver artifact path, so
+        # both emitters produce byte-identical cell-spec nodes) plus the
+        # prefLabel → compact-IRI table used for inline context terms.
+        from battinfo.transform.cell_spec_node import (  # noqa: PLC0415
+            build_cell_spec_node,
+            label_to_compact,
+        )
+        from battinfo.transform.cell_spec_node import (
+            compact_iri as _compact_iri,
+        )
 
-        def _physical_types(format_val: str, chemistry_val: str, iec_val: str) -> list[str]:
-            """Return domain-battery prefLabel class names for a cell's descriptors."""
-            types: list[str] = []
-            for section, key in (
-                ("format",   format_val.lower()),
-                ("chemistry", chemistry_val.lower()),
-                ("iec_code",  iec_val.lower()),
-            ):
-                entry = _entity_map.get(section, {}).get(key, {})
-                for bt in entry.get("battery_types", []):
-                    if bt not in types and bt in _LABEL_TO_COMPACT:
-                        types.append(bt)
-            return types or ["BatteryCell"]
-
-        # ── Build prefLabel lookup tables from curated mapping files ───────────
-        # {class_iri → prefLabel}  e.g. "https://...#electrochemistry_639b..." → "NominalVoltage"
-        _iri_to_label: dict[str, str] = {}
-        _prop_json = _DATA_DIR / "mappings" / "domain-battery" / "property_map.curated.json"
+        # {unit_symbol → (unit_iri, prefLabel)} for test-condition / method-step units.
         _unit_json = _DATA_DIR / "mappings" / "domain-battery" / "unit_map.curated.json"
-        if _prop_json.exists():
-            for m in json.loads(_prop_json.read_text(encoding="utf-8")).get("mappings", []):
-                if m.get("class_iri") and m.get("class_pref_label"):
-                    _iri_to_label[m["class_iri"]] = m["class_pref_label"]
-        # {unit_symbol → (unit_iri, prefLabel)}
         _unit_label: dict[str, tuple[str, str]] = {}
         if _unit_json.exists():
             for m in json.loads(_unit_json.read_text(encoding="utf-8")).get("mappings", []):
                 if m.get("symbol") and m.get("unit_iri") and m.get("unit_pref_label"):
                     _unit_label[m["symbol"]] = (m["unit_iri"], m["unit_pref_label"])
-
-        # battery type class → prefLabel (from entity_type_map prefLabels)
-        # _FORMAT_LABEL / _CHEM_LABEL removed — now loaded from entity_type_map.json
-        # prefLabel → full compact IRI (for context terms)
-        _LABEL_TO_COMPACT: dict[str, str] = {
-            "BatteryTest":            "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
-            "BatteryCell":            "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
-            "BatteryCellSpecification":"battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
-            "CylindricalBattery":     "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
-            "PrismaticBattery":       "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
-            "PouchCell":              "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
-            "CoinCell":               "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
-            "LithiumIonBattery":                  "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
-            "LithiumMetalBattery":                "battery:battery_ada13509_4eed_4e40_a7b1_4cc488144154",
-            "SodiumIonBattery":                   "battery:battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
-            "AlkalineZincManganeseDioxideBattery":"battery:battery_b572826a_b4e4_4986_b57d_f7b945061f8b",
-            "AlkalineCell":                       "battery:battery_50b911f7_c903_4700_9764_c308d8a95470",
-            "PrimaryBattery":                     "battery:battery_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69",
-            "SecondaryBattery":                   "battery:battery_efc38420_ecbb_42e4_bb3f_208e7c417098",
-            # IEC standard size codes — subclasses already defined in domain-battery
-            "LR03":   "battery:battery_a5299801_2a8d_4d03_a476_ca2c5e9ca702",  # AAA alkaline
-            "LR6":    "battery:battery_6b2540b9_5af6_478a_81ae_583db9636db8",  # AA alkaline
-            "LR14":   "battery:battery_d00e842e_ee0b_4e25_bd17_d64d76d69730",  # C alkaline
-            "LR20":   "battery:battery_0c9979c2_c981_48ea_a8e1_72bdcb58fd58",  # D alkaline
-            "LR1":    "battery:battery_1c0306f5_5698_4874_b6ce_e5cc45a46b91",  # N alkaline
-            "CR2032": "battery:battery_b61b96ac_f2f4_4b74_82d5_565fe3a2d88b",  # coin
-            "CR2025": "battery:battery_9984642f_c9dc_4b98_94f6_6ffe20cfc014",  # coin
-            "LR44":   "battery:battery_d10ff656_f9fd_4b0e_9de9_4812a44ea359",  # button
-            "HR6":    "battery:battery_a71a4bf2_dee6_4aa4_8ad4_9f38c261fb84",  # AA NiMH
-            "KR6":    "battery:battery_ad7c1d81_9a9f_4174_88ea_3ba3e8f4dbe2",  # AA NiCd
-        }
-        # Add quantity class prefLabels → compact IRI
-        def _compact_iri(iri: str) -> str:
-            for prefix, base in (
-                ("battery:", "https://w3id.org/emmo/domain/battery#"),
-                ("electrochemistry:", "https://w3id.org/emmo/domain/electrochemistry#"),
-                ("emmo:", "https://w3id.org/emmo#"),
-            ):
-                if iri.startswith(base):
-                    return prefix + iri[len(base):]
-            return iri
-
-        for iri, label in _iri_to_label.items():
-            _LABEL_TO_COMPACT[label] = _compact_iri(iri)
-        # Add unit prefLabels → compact IRI
-        for sym, (unit_iri, unit_label) in _unit_label.items():
-            _LABEL_TO_COMPACT[unit_label] = _compact_iri(unit_iri)
-
-        def _quantity_node(prop_key: str, value: float, unit_symbol: str) -> dict | None:
-            class_iri = _PROP_MAP.get(prop_key)
-            if not class_iri:
-                return None
-            # Use prefLabel as @type (readable) — context maps it to the full IRI
-            label = _iri_to_label.get(class_iri, _compact_iri(class_iri))
-            node: dict = {
-                "@type":            label,
-                "hasNumericalPart": {"hasNumberValue": value},
-            }
-            ul = _unit_label.get(unit_symbol)
-            if ul:
-                unit_iri, _ulabel = ul
-                node["hasMeasurementUnit"] = {"@id": _compact_iri(unit_iri)}
-            elif unit_symbol:
-                mapped_iri = _UNIT_MAP.get(unit_symbol)
-                if mapped_iri:
-                    node["hasMeasurementUnit"] = {"@id": _compact_iri(mapped_iri)}
-            return node
 
         def _resolve_unit_iri(unit_symbol: str) -> str | None:
             """Symbol → compact unit IRI, across curated maps, the records context
@@ -4621,91 +4535,33 @@ class AuthoringWorkspace:
             return node
 
         # ── Load cell specs ────────────────────────────────────────────────────
+        # One canonical builder (shared with the resolver path): the physical
+        # @type stack via isDescriptionFor expresses chemistry/format (no
+        # battinfo: literals), quantities use the shared EMMO quantity-node
+        # shape, and provenance rides along as a standard-vocabulary node.
         spec_nodes: dict[str, dict] = {}
+        # chemistry/format keyword strings, collected from the records (the node
+        # no longer carries the verbatim literals).
+        _spec_keywords: set[str] = set()
         _ct_recs = record_sets.get("cell-spec", [])
         if _ct_recs:
             for raw in _ct_recs:
-                try:
-                    prod = raw.get("cell_spec", {})
-                    iri  = prod.get("id", "")
-                    if not iri:
-                        continue
-                    mfr      = prod.get("manufacturer", {})
-                    mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
-                    fmt      = (prod.get("cell_format") or "").lower()
-                    chem     = (prod.get("chemistry") or "").lower()
-                    short_id = iri.split("/")[-1]
-
-                    # Physical battery types — loaded from entity_type_map.json
-                    iec_code     = prod.get("iec_code", "")
-                    rechargeable = prod.get("rechargeable")
-                    physical_types = _physical_types(fmt, chem, iec_code)
-                    # rechargeable maps to SecondaryBattery / PrimaryBattery in domain-battery
-                    if rechargeable is True and "SecondaryBattery" not in physical_types:
-                        physical_types.append("SecondaryBattery")
-                    elif rechargeable is False and "PrimaryBattery" not in physical_types:
-                        physical_types.append("PrimaryBattery")
-
-                    node: dict = {
-                        # BatteryCellSpecification = a Description (information artifact),
-                        # not a physical battery — the physical individual is linked via
-                        # isDescriptionFor below, so the schema.org co-type is CreativeWork.
-                        "@type":       ["BatteryCellSpecification", "schema:CreativeWork"],
-                        "@id":         iri,
-                        "schema:name": prod.get("name", ""),
-                        "schema:model":prod.get("model", ""),
-                        "schema:manufacturer": {
-                            "@type":       "schema:Organization",
-                            "schema:name": mfr_name,
-                        },
-                        "schema:url": (
-                            f"https://www.battery-genome.org/registry/spec/{short_id}"
-                        ),
-                        # isDescriptionFor links the spec to an anonymous individual
-                        # of the correct physical battery type
-                        "isDescriptionFor": {
-                            "@type": physical_types if len(physical_types) > 1
-                                     else physical_types[0],
-                        },
-                    }
-                    if prod.get("size_code"):
-                        node["schema:identifier"] = prod["size_code"]
-                    if prod.get("iec_code"):
-                        node["schema:productID"] = prod["iec_code"]
-                    if prod.get("product_type"):
-                        node["schema:additionalType"] = str(prod["product_type"])
-                    if prod.get("country_of_origin"):
-                        node["schema:countryOfOrigin"] = {
-                            "@type":       "schema:Country",
-                            "schema:name": prod["country_of_origin"],
-                        }
-                    if prod.get("year"):
-                        node["schema:releaseDate"] = f"{prod['year']}-01-01"
-                    if prod.get("schema_version"):
-                        node["schema:schemaVersion"] = prod["schema_version"]
-                    # Preserve original chemistry and format strings verbatim
-                    # so the round-trip through JSON-LD is lossless.
-                    if prod.get("chemistry"):
-                        node["battinfo:chemistry"] = prod["chemistry"]
-                    if prod.get("cell_format"):
-                        node["battinfo:cellFormat"] = prod["cell_format"]
-                    # rechargeable is already encoded in @type via PrimaryBattery/SecondaryBattery
-
-                    # Measurements using EMMO hasProperty pattern
-                    specs = raw.get("properties", {})
-                    quantity_nodes = []
-                    for prop_key, qty in (specs or {}).items():
-                        if not isinstance(qty, dict) or qty.get("value") is None:
-                            continue
-                        qn = _quantity_node(prop_key, qty["value"], qty.get("unit", ""))
-                        if qn:
-                            quantity_nodes.append(qn)
-                    if quantity_nodes:
-                        node["hasProperty"] = quantity_nodes
-
-                    spec_nodes[iri] = node
-                except Exception:
+                prod = raw.get("cell_spec", {}) if isinstance(raw, dict) else {}
+                iri = prod.get("id", "") if isinstance(prod, dict) else ""
+                if not iri:
                     continue
+                try:
+                    spec_nodes[iri] = build_cell_spec_node(raw)
+                except Exception as exc:  # noqa: BLE001 - one bad record must not sink the deposit
+                    warnings.warn(
+                        f"cell-spec record '{iri}' could not be converted to "
+                        f"JSON-LD and will be OMITTED from the publication graph: {exc}",
+                        stacklevel=2,
+                    )
+                    continue
+                for _field in ("chemistry", "cell_format"):
+                    if prod.get(_field):
+                        _spec_keywords.add(str(prod[_field]))
 
         # ── Map cell instance IRI → {cell_spec_id, serial_number} ──────────────────
         instances: dict[str, dict] = {}
@@ -5228,10 +5084,8 @@ class AuthoringWorkspace:
         # Auto-derived from the cells, specs and test kinds so every record is
         # discoverable without manual tagging; merged with any explicit keywords.
         _kw: set[str] = {"battery"}
+        _kw |= _spec_keywords  # chemistry/format strings from the cell-spec records
         for _sn in spec_nodes.values():
-            for _k in ("battinfo:chemistry", "battinfo:cellFormat"):
-                if _sn.get(_k):
-                    _kw.add(str(_sn[_k]))
             _mfr = _sn.get("schema:manufacturer")
             if isinstance(_mfr, dict) and _mfr.get("schema:name"):
                 _kw.add(_mfr["schema:name"])
@@ -5259,9 +5113,10 @@ class AuthoringWorkspace:
         # ── Inline context: load from records.context.json + dynamic prefLabel terms ─
         # _RECORDS_CONTEXT is generated by `python scripts/assemble_context.py`
         # from schema/*.yaml (the LinkML single source of truth).
-        # _LABEL_TO_COMPACT adds quantity/unit prefLabels loaded from curated JSON maps.
+        # label_to_compact() adds the core class terms plus quantity/unit
+        # prefLabels loaded from the curated maps and the entity-type map.
         context = dict(_RECORDS_CONTEXT)
-        context.update(_LABEL_TO_COMPACT)
+        context.update(label_to_compact())
         # Test-protocol vocabulary (control/termination parameters + their quantity
         # classes) — only needed when conditions are emitted, but harmless otherwise.
         from battinfo.jsonld import (  # noqa: PLC0415

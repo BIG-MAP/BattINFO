@@ -644,7 +644,8 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     assert cell_spec_node["schema:countryOfOrigin"]["schema:name"] == "Japan"
     assert cell_spec_node["schema:releaseDate"] == "2022-01-01"
     property_types = {
-        entry.get("@type")
+        # Canonical quantity nodes carry a list @type of [PropertyClass, co-type].
+        entry["@type"][0] if isinstance(entry.get("@type"), list) else entry.get("@type")
         for entry in cell_spec_node.get("hasProperty", [])
         if isinstance(entry, dict)
     }
