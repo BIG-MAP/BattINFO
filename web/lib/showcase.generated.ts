@@ -21,7 +21,7 @@ export const showcase: {
     "record": {
       "schema_version": "0.2.0",
       "material_spec": {
-        "id": "https://w3id.org/battinfo/material-spec/7d9k-2m4p-8t3x-6nq5",
+        "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         "short_id": "7d9k2m",
         "name": "NMC811",
         "material_class": "active_material",

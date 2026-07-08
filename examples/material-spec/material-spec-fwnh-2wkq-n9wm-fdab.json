@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/fwnh-2wkq-n9wm-fdab",
+    "id": "https://w3id.org/battinfo/spec/fwnh-2wkq-n9wm-fdab",
     "short_id": "fwnh2w",
     "name": "MnO2",
     "material_class": "active_material",

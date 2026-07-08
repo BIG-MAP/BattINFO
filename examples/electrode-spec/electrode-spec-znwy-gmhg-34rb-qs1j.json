@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/electrode-spec/znwy-gmhg-34rb-qs1j",
+    "id": "https://w3id.org/battinfo/spec/znwy-gmhg-34rb-qs1j",
     "short_id": "znwygm",
     "name": "Zn anode",
     "coating": {
@@ -9,7 +9,7 @@
         "active_material": [
           {
             "name": "Zinc",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/kg0e-vqce-3439-bnfk",
+            "material_spec_id": "https://w3id.org/battinfo/spec/kg0e-vqce-3439-bnfk",
             "property": {
               "mass_fraction": {
                 "value": 0.95,

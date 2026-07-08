@@ -7,6 +7,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Namespace consolidation (IDENTIFIER_POLICY 6.1)**: every reusable
+  description now mints under the shared `spec/` namespace — material,
+  electrode, separator, electrolyte, current-collector, and housing specs
+  join cell and test specs there. The namespace segment encodes exactly one
+  distinction (description vs concrete thing); type lives in `@type`, and
+  the generic segment has already survived three type renames that per-type
+  segments would not have. Instance kinds keep their nouns (`cell/`,
+  `material/`, `electrode/`, ...). Superseded `*-spec/` IRIs remain accepted
+  everywhere as input (builders, references, schemas) and become permanent
+  resolver aliases — nothing ever minted breaks. New import-time guard:
+  reserved segments (`id`, `ontology`, `vocab`, `doc`, `context`,
+  `resolver`, `twin`, `w3id`) can never become entity namespaces.
+
+
 ### Fixed
 
 - **The site's own /docs quickstart crashed verbatim** (`cell_format=`, which

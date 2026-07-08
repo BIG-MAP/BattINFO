@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "electrolyte_spec": {
-    "id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+    "id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc",
     "short_id": "gpkh74",
     "name": "1M LiPF6 in EC:EMC 3:7",
     "family": "organic",
     "salt": {
       "name": "LiPF6",
-      "material_spec_id": "https://w3id.org/battinfo/material-spec/fpeg-3wg8-e6cs-2vn1",
+      "material_spec_id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1",
       "cation": "Li+",
       "anion": "PF6-",
       "property": {
@@ -21,7 +21,7 @@
       "component": [
         {
           "name": "EC",
-          "material_spec_id": "https://w3id.org/battinfo/material-spec/efxx-b9yg-wh00-d23a",
+          "material_spec_id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a",
           "property": {
             "volume_fraction": {
               "value": 0.3,
@@ -31,7 +31,7 @@
         },
         {
           "name": "EMC",
-          "material_spec_id": "https://w3id.org/battinfo/material-spec/hy9g-22sd-czdb-nmm4",
+          "material_spec_id": "https://w3id.org/battinfo/spec/hy9g-22sd-czdb-nmm4",
           "property": {
             "volume_fraction": {
               "value": 0.7,

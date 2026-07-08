@@ -23,7 +23,7 @@ A reusable material specification. Top-level key `material_spec`.
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `id` | ✓ | `https://w3id.org/battinfo/material-spec/{uid}` |
+| `id` | ✓ | `https://w3id.org/battinfo/spec/{uid}` |
 | `name` | ✓ | Material grade, e.g. `"LFP"`, `"Graphite"`, `"NMC811"` |
 | `material_class` | | `active_material`, `binder`, `conductive_additive`, `current_collector`, `separator_material`, `electrolyte_salt`, `electrolyte_solvent`, `electrolyte_additive`, `metal_electrode`, `coating`, `other` |
 | `electrode_polarity` | | `positive` / `negative` / `none` (for active materials) |
@@ -65,8 +65,8 @@ For derived/blended grades, `composition` references other material-specs by IRI
 
 ```json
 "composition": {
-  "base_material_id": "https://w3id.org/battinfo/material-spec/<NMC811>",
-  "coatings": [{"material_spec_id": "https://w3id.org/battinfo/material-spec/<Al2O3>",
+  "base_material_id": "https://w3id.org/battinfo/spec/<NMC811>",
+  "coatings": [{"material_spec_id": "https://w3id.org/battinfo/spec/<Al2O3>",
                 "name": "Al2O3", "property": {"thickness": {"value": 5, "unit": "nm"}}}],
   "dopants": [{"element": "Al", "fraction": {"value": 0.01, "unit": "1"}}],
   "constituents": []

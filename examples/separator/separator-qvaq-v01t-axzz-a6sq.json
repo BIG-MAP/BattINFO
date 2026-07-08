@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "separator": {
     "id": "https://w3id.org/battinfo/separator/qvaq-v01t-axzz-a6sq",
-    "separator_spec_id": "https://w3id.org/battinfo/separator-spec/v94j-jm2h-t8d1-t5a6",
+    "separator_spec_id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6",
     "short_id": "qvaqv0",
     "property": {
       "diameter": {

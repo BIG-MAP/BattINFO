@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/kg0e-vqce-3439-bnfk",
+    "id": "https://w3id.org/battinfo/spec/kg0e-vqce-3439-bnfk",
     "short_id": "kg0evq",
     "name": "Zinc",
     "material_class": "metal_electrode",

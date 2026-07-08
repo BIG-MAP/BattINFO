@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "current_collector_spec": {
-    "id": "https://w3id.org/battinfo/current-collector-spec/vkaf-f5bv-fwt2-e6yz",
+    "id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz",
     "short_id": "vkaff5",
     "name": "Aluminium foil",
     "property": {

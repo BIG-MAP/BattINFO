@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/efxx-b9yg-wh00-d23a",
+    "id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a",
     "short_id": "efxxb9",
     "name": "EC",
     "material_class": "electrolyte_solvent",

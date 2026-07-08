@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "housing_spec": {
-    "id": "https://w3id.org/battinfo/housing-spec/ypyh-v38v-r276-snmk",
+    "id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",
     "short_id": "ypyhv3",
     "name": "LFP 100Ah prismatic housing",
     "cell_format": "prismatic",

@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/electrode-spec/ck8b-r1dz-h8my-3k05",
+    "id": "https://w3id.org/battinfo/spec/ck8b-r1dz-h8my-3k05",
     "short_id": "ck8br1",
     "name": "LNMO cathode",
     "coating": {
@@ -9,7 +9,7 @@
         "active_material": [
           {
             "name": "LNMO",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/83bd-jmk7-2x47-s04a",
+            "material_spec_id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
             "property": {
               "mass_fraction": {
                 "value": 0.96,
@@ -21,7 +21,7 @@
         "binder": [
           {
             "name": "PVDF",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+            "material_spec_id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
             "property": {
               "mass_fraction": {
                 "value": 0.02,
@@ -33,7 +33,7 @@
         "additive": [
           {
             "name": "Carbon black",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
             "property": {
               "mass_fraction": {
                 "value": 0.02,

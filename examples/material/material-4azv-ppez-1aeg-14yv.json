@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "material": {
     "id": "https://w3id.org/battinfo/material/4azv-ppez-1aeg-14yv",
-    "material_spec_id": "https://w3id.org/battinfo/material-spec/5ms1-9jv8-hr54-mn4e",
+    "material_spec_id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
     "short_id": "4azvpp",
     "lot_id": "CANRUD-LFP-2026-03",
     "supplier": {

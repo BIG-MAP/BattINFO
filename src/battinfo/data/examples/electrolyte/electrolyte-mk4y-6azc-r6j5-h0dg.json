@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "electrolyte": {
     "id": "https://w3id.org/battinfo/electrolyte/mk4y-6azc-r6j5-h0dg",
-    "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
+    "electrolyte_spec_id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc",
     "short_id": "mk4y6a",
     "property": {
       "conductivity": {

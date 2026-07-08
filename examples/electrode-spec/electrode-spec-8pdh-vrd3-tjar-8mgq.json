@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/electrode-spec/8pdh-vrd3-tjar-8mgq",
+    "id": "https://w3id.org/battinfo/spec/8pdh-vrd3-tjar-8mgq",
     "short_id": "8pdhvr",
     "name": "MnO2 cathode",
     "coating": {
@@ -9,7 +9,7 @@
         "active_material": [
           {
             "name": "MnO2",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/fwnh-2wkq-n9wm-fdab",
+            "material_spec_id": "https://w3id.org/battinfo/spec/fwnh-2wkq-n9wm-fdab",
             "property": {
               "mass_fraction": {
                 "value": 0.9,
@@ -21,7 +21,7 @@
         "additive": [
           {
             "name": "Carbon black",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
             "property": {
               "mass_fraction": {
                 "value": 0.1,

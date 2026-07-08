@@ -32,6 +32,7 @@ from battinfo.api._shared import (
     _normalized_dashed_uid,
     _paginate,
     _resolved_retrieved_at,
+    _spec_iri_re,
     _str_eq,
     _to_unix_time,
     _validate_canonical_record,
@@ -117,14 +118,14 @@ def _org_value(value: str | dict[str, Any] | None) -> dict[str, Any] | None:
 def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
     if draft.id is not None:
         if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.id):
-            raise ValueError("material spec id must match https://w3id.org/battinfo/material-spec/{uid}.")
+            raise ValueError("material spec id must match https://w3id.org/battinfo/spec/{uid}.")
         if draft.uid is not None:
             _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(draft.uid)
-        entity_id = f"https://w3id.org/battinfo/material-spec/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
     spec: dict[str, Any] = {
         "id": entity_id,
@@ -173,7 +174,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
 
 def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
     if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.material_spec_id):
-        raise ValueError("material_spec_id must match https://w3id.org/battinfo/material-spec/{uid}.")
+        raise ValueError("material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if draft.id is not None:
         if not MATERIAL_IRI_RE.fullmatch(draft.id):
             raise ValueError("material id must match https://w3id.org/battinfo/material/{uid}.")
@@ -239,7 +240,7 @@ def template_material_spec(*, name: str = "Example Material", uid: str | None = 
 
 def template_material(
     *,
-    material_spec_id: str = "https://w3id.org/battinfo/material-spec/0000-0000-0000-0000",
+    material_spec_id: str = "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
     uid: str | None = TEMPLATE_UID,
 ) -> dict[str, Any]:
     """Build a starter canonical material (instance) document for save workflows."""
@@ -475,17 +476,19 @@ def _record_from_component_spec(
     notes: list[str] | None = None,
     **extra: Any,
 ) -> dict[str, Any]:
-    namespace = f"{family.replace('_', '-')}-spec"
+    legacy_namespace = f"{family.replace('_', '-')}-spec"
     if id is not None:
-        if not _component_iri_re(namespace).fullmatch(id):
-            raise ValueError(f"{namespace} id must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
+        # Canonical spec/ form; the superseded per-family form is accepted so
+        # pre-consolidation records keep their identity (never break an IRI).
+        if not _spec_iri_re(legacy_namespace).fullmatch(id):
+            raise ValueError(f"{legacy_namespace} id must match https://w3id.org/battinfo/spec/{{uid}}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/{namespace}/{dashed_uid}"
+        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     spec.update(body or {})
@@ -531,8 +534,8 @@ def _record_from_component_instance(
 ) -> dict[str, Any]:
     base_namespace = family.replace("_", "-")
     spec_namespace = f"{base_namespace}-spec"
-    if not _component_iri_re(spec_namespace).fullmatch(spec_id):
-        raise ValueError(f"{family}_spec_id must match https://w3id.org/battinfo/{spec_namespace}/{{uid}}.")
+    if not _spec_iri_re(spec_namespace).fullmatch(spec_id):
+        raise ValueError(f"{family}_spec_id must match https://w3id.org/battinfo/spec/{{uid}}.")
     if id is not None:
         if not _component_iri_re(base_namespace).fullmatch(id):
             raise ValueError(f"{family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
@@ -726,7 +729,7 @@ def template_component_instance(
 ) -> dict[str, Any]:
     """Build a starter component (instance) document for a family."""
     return _record_from_component_instance(
-        family, spec_id=spec_id or f"https://w3id.org/battinfo/{family}-spec/0000-0000-0000-0000", uid=uid,
+        family, spec_id=spec_id or "https://w3id.org/battinfo/spec/0000-0000-0000-0000", uid=uid,
         notes=[f"Template-generated {family} instance. Set {family}_spec_id before saving."],
     )
 

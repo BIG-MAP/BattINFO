@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/5ms1-9jv8-hr54-mn4e",
+    "id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
     "short_id": "5ms19j",
     "name": "LFP",
     "material_class": "active_material",

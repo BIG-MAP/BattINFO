@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/s2m9-ksma-nb61-8tpa",
+    "id": "https://w3id.org/battinfo/spec/s2m9-ksma-nb61-8tpa",
     "short_id": "s2m9ks",
     "name": "NMC622",
     "material_class": "active_material",

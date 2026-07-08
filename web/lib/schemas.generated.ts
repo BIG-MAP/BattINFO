@@ -736,7 +736,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         }
       }
     }
@@ -1065,7 +1065,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",
@@ -1764,7 +1764,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "OrganizationIri": {
           "type": "string",
@@ -1772,19 +1772,19 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "ElectrodeSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrode-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ElectrolyteSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrolyte-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "SeparatorSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/separator-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "HousingSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/housing-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",
@@ -1921,7 +1921,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
             },
             "property": {
               "$ref": "modules/common/quantitative-properties.schema.json"
@@ -1953,7 +1953,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/current-collector-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -2140,7 +2140,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/current-collector-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -3271,7 +3271,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrode-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -3458,7 +3458,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrode-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -3678,7 +3678,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrolyte-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -3865,7 +3865,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrolyte-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -4107,7 +4107,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/housing-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -4417,7 +4417,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/housing-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -4876,7 +4876,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "MaterialSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "OrganizationIri": {
           "type": "string",
@@ -5166,7 +5166,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "MaterialSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "DatasetIri": {
           "type": "string",
@@ -5470,7 +5470,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec for the current-collector foil material."
         },
         "manufacturer": {
@@ -5643,7 +5643,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+              "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
               "description": "Optional canonical IRI of a standalone material-spec for the salt."
             },
             "cation": {
@@ -5712,7 +5712,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec record this embedded holder realizes. Lets a cell-spec dedup materials by reference instead of/in addition to inlining them."
         },
         "manufacturer": {
@@ -5799,7 +5799,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec for the separator base material."
         },
         "structure": {
@@ -6351,7 +6351,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
             },
             "property": {
               "$ref": "modules/common/quantitative-properties.schema.json"
@@ -6383,7 +6383,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/separator-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -6570,7 +6570,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/separator-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -6976,7 +6976,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Quantity": {
           "type": "object",
@@ -7645,7 +7645,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",

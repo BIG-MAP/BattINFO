@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "current_collector_spec": {
-    "id": "https://w3id.org/battinfo/current-collector-spec/z25y-gab5-hd3n-qfpr",
+    "id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr",
     "short_id": "z25yga",
     "name": "Copper foil",
     "property": {

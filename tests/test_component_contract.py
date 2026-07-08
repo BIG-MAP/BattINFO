@@ -111,7 +111,39 @@ def test_electrolyte_assembles_material_specs(tmp_path):
     spec = bi.create_electrolyte_spec(
         uid="elye23456789abcd", name="1M LiPF6 EC:EMC",
         body={"family": "organic",
-              "salt": {"name": "LiPF6", "material_spec_id": "https://w3id.org/battinfo/material-spec/0000-0000-0000-0000"}},
+              "salt": {"name": "LiPF6", "material_spec_id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000"}},
         validate=False)
     result = validate_record(spec, source_root=tmp_path)
     assert any(i.code == "reference.missing" for i in result.issues)
+
+
+def test_superseded_spec_namespaces_still_load(tmp_path) -> None:
+    """IDENTIFIER_POLICY 6.1: specs mint under spec/, but records and
+    references minted under the superseded per-family namespaces must keep
+    working forever - alias, never break."""
+    from battinfo.api import create_separator, create_separator_spec
+    from battinfo.validate.record import validate_record_report
+
+    spec = create_separator_spec(
+        uid="sepa23456789abcd", name="Celgard 2400",
+        id="https://w3id.org/battinfo/separator-spec/sepa-2345-6789-abcd",
+    )
+    assert spec["separator_spec"]["id"].startswith("https://w3id.org/battinfo/separator-spec/")
+    report = validate_record_report(spec)
+    assert report.ok
+
+    inst = create_separator(
+        uid="seps23456789abcd",
+        spec_id="https://w3id.org/battinfo/separator-spec/sepa-2345-6789-abcd",
+        lot_id="L1",
+    )
+    # New instance minted under the canonical noun namespace; legacy reference kept.
+    assert inst["separator"]["id"].startswith("https://w3id.org/battinfo/separator/")
+    assert inst["separator"]["separator_spec_id"].startswith("https://w3id.org/battinfo/separator-spec/")
+
+
+def test_new_specs_mint_under_shared_spec_namespace() -> None:
+    from battinfo.api import create_electrolyte_spec
+
+    spec = create_electrolyte_spec(uid="elya23456789abcd", name="LP30", body={"family": "organic"})
+    assert spec["electrolyte_spec"]["id"].startswith("https://w3id.org/battinfo/spec/")

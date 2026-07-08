@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/s9h8-dfbw-zs4k-2qk8",
+    "id": "https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8",
     "short_id": "s9h8df",
     "name": "KOH",
     "material_class": "electrolyte_salt",

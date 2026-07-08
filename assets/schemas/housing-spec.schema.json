@@ -98,7 +98,7 @@
   "$defs": {
     "ComponentSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/housing-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "ShortId": {
       "type": "string",

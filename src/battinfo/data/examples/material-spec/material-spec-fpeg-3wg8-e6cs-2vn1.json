@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/fpeg-3wg8-e6cs-2vn1",
+    "id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1",
     "short_id": "fpeg3w",
     "name": "LiPF6",
     "material_class": "electrolyte_salt",

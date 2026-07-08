@@ -86,7 +86,7 @@ def test_material_spec_and_instance_roundtrip(tmp_path: Path) -> None:
         property={"specific_capacity": {"value": 160, "unit": "mAh/g"}},
     )
     spec_id = spec["material_spec"]["id"]
-    assert spec_id.startswith("https://w3id.org/battinfo/material-spec/")
+    assert spec_id.startswith("https://w3id.org/battinfo/spec/")
 
     saved_spec = api.save_material_spec(spec, source_root=tmp_path)
     assert saved_spec["status"] == "created"
@@ -108,7 +108,7 @@ def test_material_instance_missing_spec_reference_is_flagged(tmp_path: Path) -> 
     from battinfo.validate.record import validate_record
 
     material = api.create_material(
-        material_spec_id="https://w3id.org/battinfo/material-spec/0000-0000-0000-0000",
+        material_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
         lot_id="ORPHAN",
         validate=False,
     )
