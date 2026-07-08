@@ -821,20 +821,33 @@ JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4
     &#34;https://w3id.org/emmo/domain/battery/context&#34;,
     {
       &#34;schema&#34;: &#34;https://schema.org/&#34;,
-      &#34;csvw&#34;: &#34;http://www.w3.org/ns/csvw#&#34;
+      &#34;csvw&#34;: &#34;http://www.w3.org/ns/csvw#&#34;,
+      &#34;battinfo&#34;: &#34;https://w3id.org/battinfo/&#34;
     }
   ],
-  &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e&#34;,
   &#34;@type&#34;: [
     &#34;BatteryCellSpecification&#34;,
     &#34;schema:CreativeWork&#34;
   ],
+  &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e&#34;,
   &#34;schema:identifier&#34;: &#34;e4t5-w9re-mpq6-8g7e&#34;,
   &#34;schema:name&#34;: &#34;A123 Systems ANR26650M1-B&#34;,
+  &#34;schema:model&#34;: &#34;ANR26650M1-B&#34;,
   &#34;schema:manufacturer&#34;: {
     &#34;@type&#34;: &#34;schema:Organization&#34;,
     &#34;schema:name&#34;: &#34;A123 Systems&#34;
   },
+  &#34;schema:url&#34;: &#34;https://www.battery-genome.org/registry/spec/e4t5-w9re-mpq6-8g7e&#34;,
+  &#34;isDescriptionFor&#34;: {
+    &#34;@type&#34;: [
+      &#34;BatteryCell&#34;,
+      &#34;CylindricalBattery&#34;,
+      &#34;LithiumIonBattery&#34;,
+      &#34;LithiumIonIronPhosphateBattery&#34;,
+      &#34;LithiumIonGraphiteBattery&#34;
+    ]
+  },
+  &#34;schema:schemaVersion&#34;: &#34;0.2.0&#34;,
   &#34;hasProperty&#34;: [
     {
       &#34;@type&#34;: [
@@ -858,7 +871,12 @@ JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4
       },
       &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#Volt&#34;
     }
-  ]
+  ],
+  &#34;dcterms:source&#34;: {
+    &#34;@type&#34;: &#34;prov:Entity&#34;,
+    &#34;dcterms:type&#34;: &#34;datasheet&#34;,
+    &#34;prov:generatedAtTime&#34;: &#34;2026-07-08T19:10:57+00:00&#34;
+  }
 }
 </pre></div></div>
 </div>
