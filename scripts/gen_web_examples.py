@@ -154,6 +154,40 @@ def snippet_test_spec():
     return record
 
 
+def snippet_equipment():
+    from battinfo.api import create_channel, create_equipment, create_equipment_spec
+
+    spec = create_equipment_spec(
+        # Explicit IRIs here; ws.add("equipment", ...) mints them for you.
+        id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        name="SkyRC MC3000",
+        manufacturer="SkyRC",
+        model="MC3000",
+        equipment_class="cycler",          # category is data, never a namespace
+        channel_count=4,
+        supported_chemistries=["NiMH", "Li-ion", "LiFePO4", "Na-ion"],
+    )
+    unit = create_equipment(
+        id="https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+        equipment_spec_id=spec["equipment_spec"]["id"],
+        serial_number="MC3K-2026-0001",
+        name="Cycler 1",
+        location="Lab B",
+        status="active",
+    )
+    channels = [                           # uid deterministic from (unit, index)
+        create_channel(equipment_id=unit["equipment"]["id"], index=i,
+                       label=f"MC3000-A/CH{i}")
+        for i in (1, 2, 3, 4)
+    ]
+    record = {
+        "equipment_spec": spec["equipment_spec"],
+        "equipment": unit["equipment"],
+        "channels": [c["channel"] for c in channels],
+    }
+    return record
+
+
 def snippet_test():
     from battinfo import Cell, CellSpec, Test
 
@@ -256,6 +290,13 @@ SHOWCASE = [
         "tagline": "The reusable procedure — steps in PyBaMM syntax a machine can re-run, conditions a human can check.",
         "recordType": None,
         "fn": snippet_test_spec,
+    },
+    {
+        "slug": "equipment",
+        "title": "Equipment + channels",
+        "tagline": "The cycler on the bench: the model as a spec, the physical unit, and one channel per slot — so every test can say exactly where it ran.",
+        "recordType": None,
+        "fn": snippet_equipment,
     },
     {
         "slug": "test",

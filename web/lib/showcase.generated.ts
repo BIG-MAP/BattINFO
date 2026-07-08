@@ -589,6 +589,73 @@ export const showcase: {
     "jsonld": null
   },
   {
+    "slug": "equipment",
+    "title": "Equipment + channels",
+    "tagline": "The cycler on the bench: the model as a spec, the physical unit, and one channel per slot — so every test can say exactly where it ran.",
+    "recordType": null,
+    "code": "from battinfo.api import create_channel, create_equipment, create_equipment_spec\n\nspec = create_equipment_spec(\n    # Explicit IRIs here; ws.add(\"equipment\", ...) mints them for you.\n    id=\"https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\",\n    name=\"SkyRC MC3000\",\n    manufacturer=\"SkyRC\",\n    model=\"MC3000\",\n    equipment_class=\"cycler\",          # category is data, never a namespace\n    channel_count=4,\n    supported_chemistries=[\"NiMH\", \"Li-ion\", \"LiFePO4\", \"Na-ion\"],\n)\nunit = create_equipment(\n    id=\"https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7\",\n    equipment_spec_id=spec[\"equipment_spec\"][\"id\"],\n    serial_number=\"MC3K-2026-0001\",\n    name=\"Cycler 1\",\n    location=\"Lab B\",\n    status=\"active\",\n)\nchannels = [                           # uid deterministic from (unit, index)\n    create_channel(equipment_id=unit[\"equipment\"][\"id\"], index=i,\n                   label=f\"MC3000-A/CH{i}\")\n    for i in (1, 2, 3, 4)\n]\nrecord = {\n    \"equipment_spec\": spec[\"equipment_spec\"],\n    \"equipment\": unit[\"equipment\"],\n    \"channels\": [c[\"channel\"] for c in channels],\n}",
+    "record": {
+      "equipment_spec": {
+        "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        "short_id": "7d9k2m",
+        "name": "SkyRC MC3000",
+        "equipment_class": "cycler",
+        "model": "MC3000",
+        "channel_count": 4,
+        "supported_chemistries": [
+          "NiMH",
+          "Li-ion",
+          "LiFePO4",
+          "Na-ion"
+        ],
+        "manufacturer": {
+          "type": "Organization",
+          "name": "SkyRC"
+        }
+      },
+      "equipment": {
+        "id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+        "equipment_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        "short_id": "y9xykr",
+        "serial_number": "MC3K-2026-0001",
+        "name": "Cycler 1",
+        "location": "Lab B",
+        "status": "active"
+      },
+      "channels": [
+        {
+          "id": "https://w3id.org/battinfo/channel/3w87-0ddf-ryjg-evxe",
+          "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+          "index": 1,
+          "short_id": "3w870d",
+          "label": "MC3000-A/CH1"
+        },
+        {
+          "id": "https://w3id.org/battinfo/channel/kxwy-5f5f-f682-hhch",
+          "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+          "index": 2,
+          "short_id": "kxwy5f",
+          "label": "MC3000-A/CH2"
+        },
+        {
+          "id": "https://w3id.org/battinfo/channel/6nec-h262-tthy-4rnt",
+          "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+          "index": 3,
+          "short_id": "6nech2",
+          "label": "MC3000-A/CH3"
+        },
+        {
+          "id": "https://w3id.org/battinfo/channel/0rp6-kncv-cyem-qwcd",
+          "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+          "index": 4,
+          "short_id": "0rp6kn",
+          "label": "MC3000-A/CH4"
+        }
+      ]
+    },
+    "jsonld": null
+  },
+  {
     "slug": "test",
     "title": "A test",
     "tagline": "One execution of a procedure on one cell: instrument, status, and the link every dataset hangs off.",

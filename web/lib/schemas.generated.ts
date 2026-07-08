@@ -4197,6 +4197,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "integer",
               "minimum": 0
             },
+            "supported_chemistries": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
             "property": {
               "$ref": "modules/common/quantitative-properties.schema.json"
             },

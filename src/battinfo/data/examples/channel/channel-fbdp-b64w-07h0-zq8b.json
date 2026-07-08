@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.2.0",
+  "channel": {
+    "id": "https://w3id.org/battinfo/channel/fbdp-b64w-07h0-zq8b",
+    "equipment_id": "https://w3id.org/battinfo/equipment/bw1k-j56y-r2ax-2adv",
+    "index": 1,
+    "short_id": "fbdpb6",
+    "label": "MC3000-A/CH1",
+    "status": "active"
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1781900000,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "Slot 1 of the MC3000 unit. Deterministic uid from (equipment uid, index)."
+  ]
+}
