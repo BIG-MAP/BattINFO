@@ -165,3 +165,116 @@ def test_mapped_numeric_properties_do_not_warn() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         build_cell_spec_node(_cell_spec_record())
+
+
+# ── Step 2: round-trip importer accepts old- and new-shape packages ──────────
+
+SPEC_IRI = "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+
+
+def _import_package(tmp_path: Path, doc: dict):
+    from battinfo.ws import AuthoringWorkspace
+
+    path = tmp_path / "battinfo.json"
+    path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+    ws = AuthoringWorkspace(root=tmp_path / "ws", registry_url=None)
+    counts = ws.import_(str(path))
+    return ws, counts
+
+
+def test_import_accepts_legacy_shape_package(tmp_path: Path) -> None:
+    """A package published before the convergence (single-string quantity @type,
+    {"@id": ...} unit refs, battinfo: literals, size code in schema:identifier)
+    must keep importing unchanged."""
+    from battinfo.jsonld import _PROP_MAP, _UNIT_MAP
+
+    doc = {
+        "@context": {
+            "battery": "https://w3id.org/emmo/domain/battery#",
+            "electrochemistry": "https://w3id.org/emmo/domain/electrochemistry#",
+            "emmo": "https://w3id.org/emmo#",
+            "schema": "https://schema.org/",
+            "battinfo": "https://w3id.org/battinfo/",
+            "NominalCapacity": _PROP_MAP["nominal_capacity"],
+        },
+        "@graph": [
+            {
+                "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+                "@id": SPEC_IRI,
+                "schema:name": "A123 ANR26650M1-B",
+                "schema:model": "ANR26650M1-B",
+                "schema:manufacturer": {"@type": "schema:Organization", "schema:name": "A123"},
+                "schema:identifier": "R26650",
+                "schema:productID": "IFpR26650",
+                "battinfo:chemistry": "Li-ion",
+                "battinfo:cellFormat": "cylindrical",
+                "isDescriptionFor": {"@type": ["BatteryCell", "CylindricalBattery", "LithiumIonBattery"]},
+                "hasProperty": [
+                    {
+                        "@type": "NominalCapacity",
+                        "hasNumericalPart": {"hasNumberValue": 2.5},
+                        "hasMeasurementUnit": {"@id": _UNIT_MAP["Ah"]},
+                    }
+                ],
+            }
+        ],
+    }
+
+    ws, counts = _import_package(tmp_path, doc)
+
+    assert counts["properties"] == 1
+    spec = ws._ws.cell_specs[0]
+    assert spec.id == SPEC_IRI
+    assert spec.format == "cylindrical"       # verbatim battinfo: literal wins
+    assert spec.chemistry == "Li-ion"
+    assert spec.size_code == "R26650"          # legacy schema:identifier slot
+    assert spec.iec_code == "IFpR26650"
+    assert spec.properties["nominal_capacity"]["value"] == 2.5
+    assert spec.properties["nominal_capacity"]["unit"] == "Ah"
+
+
+def _new_shape_package() -> dict:
+    from battinfo.transform.cell_spec_node import label_to_compact
+    from battinfo.ws import _RECORDS_CONTEXT
+
+    context = dict(_RECORDS_CONTEXT)
+    context.update(label_to_compact())
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        node = build_cell_spec_node(_cell_spec_record())
+    return {"@context": context, "@graph": [node]}
+
+
+def test_import_reads_new_shape_package_with_descriptors_intact(tmp_path: Path) -> None:
+    """The canonical shape drops the battinfo: literals; format and chemistry
+    must be recovered from the isDescriptionFor physical @type stack, list-@type
+    quantity nodes must be read, and the bare-IRI unit resolved to its symbol."""
+    ws, counts = _import_package(tmp_path, _new_shape_package())
+
+    assert counts["properties"] == 1
+    spec = ws._ws.cell_specs[0]
+    assert spec.id == SPEC_IRI
+    assert spec.format == "cylindrical"        # from CylindricalBattery
+    assert spec.chemistry == "li-ion"          # from LithiumIonBattery
+    assert spec.size_code == "R26650"          # from schema:size
+    assert spec.properties["nominal_capacity"]["value"] == 2.5
+    assert spec.properties["nominal_capacity"]["unit"] == "Ah"
+    assert spec.properties["nominal_voltage"]["value"] == 3.3
+    assert spec.properties["nominal_voltage"]["unit"] == "V"
+
+
+def test_import_new_shape_does_not_misread_uid_as_size_code(tmp_path: Path) -> None:
+    record = _cell_spec_record()
+    del record["cell_spec"]["size_code"]
+    from battinfo.transform.cell_spec_node import label_to_compact
+    from battinfo.ws import _RECORDS_CONTEXT
+
+    context = dict(_RECORDS_CONTEXT)
+    context.update(label_to_compact())
+    doc = {"@context": context, "@graph": [build_cell_spec_node(record)]}
+
+    ws, _ = _import_package(tmp_path, doc)
+
+    spec = ws._ws.cell_specs[0]
+    # schema:identifier now carries the record uid; it must not leak into size_code.
+    assert spec.size_code is None

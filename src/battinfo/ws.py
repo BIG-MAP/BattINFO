@@ -2593,6 +2593,18 @@ class AuthoringWorkspace:
                     rev_prop[iri] = key
 
         rev_unit: dict[str, str] = {v: k for k, v in _UNIT_MAP.items()}
+        # The shared quantity-node builder resolves units through the curated /
+        # candidate unit maps as well, so reverse those too (first symbol wins;
+        # _UNIT_MAP symbols take precedence for stability with older files).
+        for _unit_file in ("unit_map.curated.json", "unit_map.candidates.json"):
+            _unit_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / _unit_file
+            if _unit_path.exists():
+                for m in json.loads(_unit_path.read_text(encoding="utf-8")).get("mappings", []):
+                    if m.get("unit_iri") and m.get("symbol"):
+                        rev_unit.setdefault(m["unit_iri"], m["symbol"])
+        from battinfo.transform.json_to_jsonld import MANUAL_UNIT_TYPES as _MANUAL_UNIT_TYPES
+        for _sym, _iri in _MANUAL_UNIT_TYPES.items():
+            rev_unit.setdefault(_iri, _sym)
 
         # Build chemistry value reverse map (IRI → original-case chemistry string)
         # so the reconstructed records match the source exactly.
@@ -2624,16 +2636,34 @@ class AuthoringWorkspace:
             return d
 
         def _specs_from_property_nodes(nodes: list) -> dict:
-            """Reverse EMMO hasProperty nodes → {key: {value, unit}}."""
+            """Reverse EMMO hasProperty nodes → {key: {value, unit}}.
+
+            Accepts both quantity-node generations: the legacy single-string
+            ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
+            shape (list ``@type`` of ``[PropertyClass, co-type]`` with the unit
+            as a bare IRI string)."""
             specs: dict = {}
             for node in nodes:
                 type_raw = node.get("@type", "")
-                class_iri = _expand(type_raw) if isinstance(type_raw, str) else ""
-                prop_key = rev_prop.get(class_iri)
+                type_terms = (
+                    [type_raw] if isinstance(type_raw, str)
+                    else [t for t in type_raw if isinstance(t, str)] if isinstance(type_raw, list)
+                    else []
+                )
+                prop_key = next(
+                    (key for term in type_terms if (key := rev_prop.get(_expand(term)))),
+                    None,
+                )
                 if not prop_key:
                     continue
                 value = (node.get("hasNumericalPart") or {}).get("hasNumberValue", (node.get("hasNumericalPart") or {}).get("hasNumericalValue"))
-                unit_term = (node.get("hasMeasurementUnit") or {}).get("@id", "")
+                unit_raw = node.get("hasMeasurementUnit")
+                if isinstance(unit_raw, str):
+                    unit_term = unit_raw
+                elif isinstance(unit_raw, dict):
+                    unit_term = unit_raw.get("@id", "")
+                else:
+                    unit_term = ""
                 unit_iri  = _expand(unit_term)
                 unit_sym  = rev_unit.get(unit_iri, unit_term.split(":")[-1])
                 if value is not None:
@@ -2681,14 +2711,22 @@ class AuthoringWorkspace:
             mfr_name  = mfr_node.get("schema:name", "") if isinstance(mfr_node, dict) else str(mfr_node)
             specs = _specs_from_property_nodes(node.get("hasProperty", []))
 
+            # size_code: the canonical shape emits it as schema:size; older
+            # packages used schema:identifier. In the canonical shape
+            # schema:identifier carries the record uid (the IRI tail) instead,
+            # so ignore it as a size code when it matches the tail.
+            _ident = node.get("schema:identifier")
+            if isinstance(_ident, str) and _ident == iri.rstrip("/").split("/")[-1]:
+                _ident = None
             ct = self._ws.cell_spec(
                 manufacturer=mfr_name,
                 model=node.get("schema:model", ""),
-                # Use verbatim strings if present, else fall back to reverse-mapped values
+                # Use verbatim strings if present (legacy packages), else fall
+                # back to values reverse-mapped from the isDescriptionFor @type stack.
                 format=node.get("battinfo:cellFormat") or descriptors.get("format", ""),
                 chemistry=node.get("battinfo:chemistry") or descriptors.get("chemistry", ""),
                 iec_code=descriptors.get("iec_code") or node.get("schema:productID") or node.get("schema:gtin"),
-                size_code=node.get("schema:identifier"),
+                size_code=node.get("schema:size") or _ident,
                 specs=specs or None,
                 source_type="zenodo",
             )
