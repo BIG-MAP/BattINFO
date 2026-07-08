@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.2.0",
+  "equipment_spec": {
+    "id": "https://w3id.org/battinfo/spec/e9p2-m4kx-7t3v-1n8q",
+    "short_id": "e9p2m4",
+    "name": "Neware BTS-4000 series",
+    "equipment_class": "cycler",
+    "model": "BTS-4000",
+    "channel_count": 8,
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Neware"
+    }
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781900000,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "Eight-channel benchtop battery cycler used for coin-cell cycling."
+  ]
+}

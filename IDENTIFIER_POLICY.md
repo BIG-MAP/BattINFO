@@ -161,6 +161,8 @@ Recommended initial scope:
 - `dataset`
 - `material`
 - `model`
+- `equipment`
+- `channel`
 
 ### 6.1 Namespace scheme (ratified 2026-07-08)
 
@@ -173,9 +175,10 @@ duality at the heart of the data model — and nothing else:
   of thing; their differences are expressed by `@type`, not by the IRI.
 - **Each kind of concrete thing or event gets a short generic noun**:
   `cell/`, `test/`, `dataset/`, `material/`, `electrode/`, `separator/`,
-  `electrolyte/`, `current-collector/`, `housing/`, `organization/` (and
-  `twin/` for registered twin instances). Instance identifiers are the ones
-  humans handle physically — the noun is a deliberate affordance.
+  `electrolyte/`, `current-collector/`, `housing/`, `organization/`,
+  `equipment/`, `channel/` (and `twin/` for registered twin instances).
+  Instance identifiers are the ones humans handle physically — the noun is a
+  deliberate affordance.
 
 Rationale: type names have churned three times (cell-type→cell-spec,
 test-protocol→test-spec, coin_hardware→housing) and the generic `spec/`
@@ -190,6 +193,22 @@ resolver aliases — anything ever minted resolves forever.
 
 Reserved segments (never usable as entity namespaces): `id`, `ontology`,
 `vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`.
+
+### 6.2 Equipment and channels (ratified 2026-07-08)
+
+Equipment specs (the model, e.g. "Neware BTS-4000") are descriptions and
+mint under `spec/`; physical units mint under `equipment/`. Equipment
+category (cycler, glovebox, coater, ...) is data (`equipment_class`,
+mapped to EMMO classes upstream), never a namespace segment and never a
+battinfo-minted class (SS14).
+
+Channels are flat instance IRIs under `channel/` — containment is never
+encoded in the address (channel boards get re-homed between units; the IRI
+must survive that), so the parent link `equipment_id` lives in the record
+body. Channel UIDs mint deterministically from `(equipment uid, index)`, so
+registering the same channel twice is idempotent. Channels are
+instance-only: there is no channel-spec kind — per-channel ratings are
+properties of the equipment spec.
 
 ## 7. Resolver and Dereferencing Policy
 
