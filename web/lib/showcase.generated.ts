@@ -236,6 +236,7 @@ export const showcase: {
         "earl": "http://www.w3.org/ns/earl#",
         "spdx": "http://spdx.org/rdf/terms#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
         "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
@@ -528,7 +529,8 @@ export const showcase: {
           "LithiumIonBattery",
           "LithiumIonNickelManganeseCobaltOxideBattery",
           "LithiumIonGraphiteBattery"
-        ]
+        ],
+        "skos:prefLabel": "Samsung SDI INR21700-50E"
       },
       "schema:schemaVersion": "0.2.0",
       "hasProperty": [
@@ -537,6 +539,7 @@ export const showcase: {
             "NominalCapacity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "NominalCapacity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 5.0
@@ -548,6 +551,7 @@ export const showcase: {
             "NominalVoltage",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "NominalVoltage",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 3.6
@@ -559,6 +563,7 @@ export const showcase: {
             "Mass",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Mass",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 68.0
@@ -827,6 +832,7 @@ export const showcase: {
         "earl": "http://www.w3.org/ns/earl#",
         "spdx": "http://spdx.org/rdf/terms#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
         "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
@@ -1050,6 +1056,7 @@ export const showcase: {
         "earl": "http://www.w3.org/ns/earl#",
         "spdx": "http://spdx.org/rdf/terms#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
         "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",

@@ -306,6 +306,10 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     node["isDescriptionFor"] = {
         "@type": physical_types if len(physical_types) > 1 else physical_types[0],
     }
+    if name:
+        # Human layer: label the anonymous physical individual with the name
+        # already in hand, so the typed node reads without EMMO lookups.
+        node["isDescriptionFor"]["skos:prefLabel"] = name
     if cell.get("size_code"):
         node["schema:size"] = cell["size_code"]
     if cell.get("iec_code"):

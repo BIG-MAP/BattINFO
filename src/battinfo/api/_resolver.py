@@ -350,6 +350,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             "schema": "https://schema.org/",
             "csvw": "http://www.w3.org/ns/csvw#",
             "battinfo": "https://w3id.org/battinfo/",
+            "skos": "http://www.w3.org/2004/02/skos/core#",
         },
     ]
 

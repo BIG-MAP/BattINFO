@@ -400,6 +400,9 @@ def _descriptor_quantity_node(
     co_token = quantity.get("co_type")
     co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
     node: dict[str, Any] = {"@type": [resolved_term, co_class or _property_co_type(name)]}
+    # Human layer: carry the class prefLabel on the instance node so readers
+    # need not dereference EMMO to see what the quantity is.
+    node["skos:prefLabel"] = resolved_term.split(":", 1)[-1]
 
     # Emit the primary (nominal/typical) value only.  EMMO's canonical pattern for a
     # ConventionalProperty is a single RealData node; a range (min/max) is correctly
@@ -435,7 +438,9 @@ def _descriptor_quantity_node(
         if params:
             node["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
 
-    return node if len(node) > 1 else None
+    # @type + skos:prefLabel alone carry no data - treat as empty (same
+    # behaviour as before the prefLabel injection).
+    return node if len(node) > 2 else None
 
 
 # Dimensionless fraction keys (need the UnitOne %→[0,1] encoding) → EMMO class.

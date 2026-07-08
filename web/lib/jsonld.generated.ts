@@ -217,6 +217,7 @@ export const jsonldGallery: {
         "earl": "http://www.w3.org/ns/earl#",
         "spdx": "http://spdx.org/rdf/terms#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
         "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
@@ -508,7 +509,8 @@ export const jsonldGallery: {
           "CylindricalBattery",
           "LithiumIonBattery",
           "LithiumIonIronPhosphateBattery"
-        ]
+        ],
+        "skos:prefLabel": "A123 ANR26650M1-B"
       },
       "schema:size": "R26650",
       "schema:productID": "IFpR26650",
@@ -529,6 +531,7 @@ export const jsonldGallery: {
             "NominalCapacity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "NominalCapacity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.5
@@ -540,6 +543,7 @@ export const jsonldGallery: {
             "MinimumCapacity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MinimumCapacity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.4
@@ -551,6 +555,7 @@ export const jsonldGallery: {
             "NominalVoltage",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "NominalVoltage",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 3.3
@@ -562,6 +567,7 @@ export const jsonldGallery: {
             "InternalResistance",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "InternalResistance",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 6.0
@@ -573,6 +579,7 @@ export const jsonldGallery: {
             "Mass",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Mass",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 76.0
@@ -584,6 +591,7 @@ export const jsonldGallery: {
             "Diameter",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Diameter",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 26.0
@@ -595,6 +603,7 @@ export const jsonldGallery: {
             "Height",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Height",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 65.0
@@ -606,6 +615,7 @@ export const jsonldGallery: {
             "MaximumPulseChargingCurrent",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MaximumPulseChargingCurrent",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 10.0
@@ -617,6 +627,7 @@ export const jsonldGallery: {
             "NominalContinuousChargingCurrent",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "NominalContinuousChargingCurrent",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.5
@@ -628,6 +639,7 @@ export const jsonldGallery: {
             "MaximumContinuousChargingCurrent",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MaximumContinuousChargingCurrent",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.5
@@ -639,6 +651,7 @@ export const jsonldGallery: {
             "MaximumContinuousDischargingCurrent",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MaximumContinuousDischargingCurrent",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 50.0
@@ -650,6 +663,7 @@ export const jsonldGallery: {
             "MinimumDischargingTemperature",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MinimumDischargingTemperature",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": -30
@@ -661,6 +675,7 @@ export const jsonldGallery: {
             "MaximumDischargingTemperature",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MaximumDischargingTemperature",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 55
@@ -672,6 +687,7 @@ export const jsonldGallery: {
             "MinimumStorageTemperature",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MinimumStorageTemperature",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": -40
@@ -683,6 +699,7 @@ export const jsonldGallery: {
             "MaximumStorageTemperature",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MaximumStorageTemperature",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 60
@@ -694,6 +711,7 @@ export const jsonldGallery: {
             "CycleLife",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "CycleLife",
           "schema:value": ">1000",
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
         }
@@ -759,6 +777,7 @@ export const jsonldGallery: {
         "earl": "http://www.w3.org/ns/earl#",
         "spdx": "http://spdx.org/rdf/terms#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
         "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
@@ -1075,6 +1094,7 @@ export const jsonldGallery: {
         "earl": "http://www.w3.org/ns/earl#",
         "spdx": "http://spdx.org/rdf/terms#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
         "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",

@@ -9,6 +9,60 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **EMMO label companion (`assets/vocab/emmo-labels.ttl`)**: a generated
+  `skos:prefLabel` triple for every EMMO-family term the record emitters use
+  (curated property classes, units, entity-map battery classes, quantity-node
+  structure terms), produced by `scripts/gen_emmo_labels.py` from the same
+  table the publication emitters use for inline contexts; drift-guarded by
+  `tests/test_generated_reference.py`. Emitted quantity nodes and the
+  `isDescriptionFor` physical individual now also carry an inline
+  `skos:prefLabel` (the label already in hand), so exported RDF reads without
+  dereferencing EMMO.
+
+### Changed
+
+- **Emitter convergence step 4 — `record_to_jsonld` adopts the canonical
+  cell-spec shape**: `cell_spec_to_jsonld` now delegates to the shared
+  canonical builder (`battinfo.transform.cell_spec_node.build_cell_spec_node`),
+  so all three emitters (resolver artifact, Zenodo/local publication graph,
+  `record_to_jsonld`) produce the identical spec node:
+  `@type ["BatteryCellSpecification", "schema:CreativeWork"]`, the physical
+  EMMO class stack under `isDescriptionFor` (chemistry/format/electrode bases
+  via @type stacking, not literal predicates), quantities as an EMMO
+  `hasProperty` array, and a dcterms/PROV provenance node. The SHACL
+  plausibility shapes were retargeted from the old EMMO-IRI-predicate
+  flattening (`sh:targetObjectsOf`) to the typed canonical quantity nodes
+  (`sh:targetClass`); web gallery/showcase JSON-LD and all guide outputs are
+  regenerated in the new shape.
+
+- **Emitter convergence step 5 — the `battinfo:` purge (IDENTIFIER_POLICY
+  section 14)**: `battinfo:` never carries domain semantics; every EMMO
+  duplicate and administrative term is deleted or re-homed to standard
+  vocabularies. Highlights: cell instances are `BatteryCell` +
+  `schema:IndividualProduct` with `hasDescription`/`schema:isVariantOf` spec
+  links, `schema:identifier` PropertyValue batch ids, `schema:expires`,
+  `schema:workExample` datasets; tests use `schema:additionalType` /
+  `schema:instrument` / `schema:measurementTechnique` / `schema:actionStatus`
+  / `hasTestObject` / `dcterms:conformsTo` / `schema:result`; provenance is
+  the same dcterms/PROV node everywhere; the legacy metadata-record path emits
+  EMMO battery classes, EMMO `hasProperty` quantities, `schema:Dataset` and
+  `dcterms:conformsTo` (its `hasMeasurement`/`hasBattery` keys are now
+  human-layer context aliases for EMMO `hasProperty`/`isDescriptionFor`);
+  conformance deviations use `dcterms:type` + `schema:object`; the records
+  context re-homes provenance aliases to `dcterms:type` /
+  `prov:hadPrimarySource` / `bibo:doi` / `prov:generatedAtTime` /
+  `pav:version`. Back-compat: the package importer still reads the legacy
+  `battinfo:` keys from previously published packages, and the legacy
+  dataframe `battinfo:columns` attrs key is still read (preferred spelling is
+  now `csvw:column`). The generated record-layer vocabulary
+  (`assets/vocab/battinfo-records.ttl`) shrinks from 40 to 10 terms — exactly
+  the placeholder terms awaiting upstream EMMO releases (step 6, gated), with
+  zero local residue — and `scripts/gen_battinfo_vocab.py` is now an honest
+  closed inventory that fails the build on any unaccounted `battinfo:` mint
+  (including f-string mints, its previous blind spot). `battinfo.ttl` is
+  annotated as the EMMO import/pin manifest pointing at the record-layer
+  companions.
+
 - **Equipment workspace UX + SkyRC MC3000 canonical example (Phase A)**:
   registering the machine your tests ran on is now a workspace one-liner.
   `ws.add("equipment", spec=..., serial_number=..., name=..., location=...,
