@@ -162,6 +162,35 @@ Recommended initial scope:
 - `material`
 - `model`
 
+### 6.1 Namespace scheme (ratified 2026-07-08)
+
+The namespace segment encodes exactly ONE distinction — the spec/instance
+duality at the heart of the data model — and nothing else:
+
+- **`spec/` holds every reusable description**: cell specs, test specs,
+  material specs, and all component specs (electrode, separator, electrolyte,
+  current-collector, housing), present and future. Descriptions are one kind
+  of thing; their differences are expressed by `@type`, not by the IRI.
+- **Each kind of concrete thing or event gets a short generic noun**:
+  `cell/`, `test/`, `dataset/`, `material/`, `electrode/`, `separator/`,
+  `electrolyte/`, `current-collector/`, `housing/`, `organization/` (and
+  `twin/` for registered twin instances). Instance identifiers are the ones
+  humans handle physically — the noun is a deliberate affordance.
+
+Rationale: type names have churned three times (cell-type→cell-spec,
+test-protocol→test-spec, coin_hardware→housing) and the generic `spec/`
+segment survived every rename untouched; per-type spec segments demonstrably
+do not. Tooling MUST NOT infer a record's type from its namespace segment —
+`spec/` is shared by design; the type lives in the record and its `@type`.
+
+Superseded segments (`material-spec/`, `electrode-spec/`, `separator-spec/`,
+`electrolyte-spec/`, `current-collector-spec/`, `housing-spec/`, and the
+older `cell-type/`, `cell_type/`, `test_protocol/` forms) remain permanent
+resolver aliases — anything ever minted resolves forever.
+
+Reserved segments (never usable as entity namespaces): `id`, `ontology`,
+`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`.
+
 ## 7. Resolver and Dereferencing Policy
 
 BattINFO IRIs identify resources and MUST resolve via HTTP.
