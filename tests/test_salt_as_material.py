@@ -25,7 +25,7 @@ def test_salt_accepts_the_material_component_form() -> None:
 
 
 def test_salt_material_keeps_its_materialspec_link() -> None:
-    spec_iri = "https://w3id.org/battinfo/material-spec/7d9k-2m4p-8t3x-6nq5"
+    spec_iri = "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
     component = material("LiPF6", concentration={"value": 1.0, "unit": "mol/L"})
     component.material_spec_id = spec_iri
     e = electrolyte_recipe(family="organic", salt=component)

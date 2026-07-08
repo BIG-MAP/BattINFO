@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+    "id": "https://w3id.org/battinfo/spec/fvwx-7fq1-wwfs-fn3g",
     "short_id": "fvwx7f",
     "name": "Graphite anode",
     "coating": {
@@ -9,7 +9,7 @@
         "active_material": [
           {
             "name": "Graphite",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/gwck-k5kf-ae1f-gfgc",
+            "material_spec_id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
             "property": {
               "mass_fraction": {
                 "value": 0.95,
@@ -32,7 +32,7 @@
         "additive": [
           {
             "name": "Carbon black",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
             "property": {
               "mass_fraction": {
                 "value": 0.01,

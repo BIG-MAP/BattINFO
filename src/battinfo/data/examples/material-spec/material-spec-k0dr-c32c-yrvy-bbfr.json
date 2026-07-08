@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/k0dr-c32c-yrvy-bbfr",
+    "id": "https://w3id.org/battinfo/spec/k0dr-c32c-yrvy-bbfr",
     "short_id": "k0drc3",
     "name": "Alumina",
     "material_class": "coating",

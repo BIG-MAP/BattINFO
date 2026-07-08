@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/electrode-spec/3e43-kbz8-ptjn-szs9",
+    "id": "https://w3id.org/battinfo/spec/3e43-kbz8-ptjn-szs9",
     "short_id": "3e43kb",
     "name": "LCO cathode",
     "coating": {
@@ -9,7 +9,7 @@
         "active_material": [
           {
             "name": "LCO",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/shzh-t2jt-wwqv-k54m",
+            "material_spec_id": "https://w3id.org/battinfo/spec/shzh-t2jt-wwqv-k54m",
             "property": {
               "mass_fraction": {
                 "value": 0.96,
@@ -21,7 +21,7 @@
         "binder": [
           {
             "name": "PVDF",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+            "material_spec_id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
             "property": {
               "mass_fraction": {
                 "value": 0.02,
@@ -33,7 +33,7 @@
         "additive": [
           {
             "name": "Carbon black",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
             "property": {
               "mass_fraction": {
                 "value": 0.02,

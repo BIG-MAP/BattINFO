@@ -50,8 +50,10 @@ DATASET_IRI_RE = re.compile(
 TEST_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
+# spec/ is canonical; the superseded material-spec/ form stays accepted as
+# input so pre-consolidation records keep loading (IDENTIFIER_POLICY 6.1).
 MATERIAL_SPEC_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/material-spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    r"^https://w3id\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
 MATERIAL_IRI_RE = re.compile(
     r"^https://w3id\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
@@ -385,3 +387,12 @@ _UID_TAIL = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
 
 def _component_iri_re(namespace: str) -> re.Pattern[str]:
     return re.compile(rf"^https://w3id\.org/battinfo/{re.escape(namespace)}/{_UID_TAIL}$")
+
+
+def _spec_iri_re(family_namespace: str) -> re.Pattern[str]:
+    """Spec IRIs mint under the shared spec/ namespace (IDENTIFIER_POLICY 6.1);
+    the superseded per-family '{family}-spec/' form stays accepted as input so
+    records minted before the consolidation keep loading (never break an IRI)."""
+    return re.compile(
+        rf"^https://w3id\.org/battinfo/(?:spec|{re.escape(family_namespace)})/{_UID_TAIL}$"
+    )

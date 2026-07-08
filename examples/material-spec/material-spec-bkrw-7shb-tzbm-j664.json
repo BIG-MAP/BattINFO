@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+    "id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
     "short_id": "bkrw7s",
     "name": "PVDF",
     "material_class": "binder",

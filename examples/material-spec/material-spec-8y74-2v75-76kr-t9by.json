@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/8y74-2v75-76kr-t9by",
+    "id": "https://w3id.org/battinfo/spec/8y74-2v75-76kr-t9by",
     "short_id": "8y742v",
     "name": "Al2O3-coated NMC811",
     "material_class": "active_material",
@@ -14,10 +14,10 @@
       "id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z"
     },
     "composition": {
-      "base_material_id": "https://w3id.org/battinfo/material-spec/npa4-0dnw-evyh-hhdm",
+      "base_material_id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
       "coatings": [
         {
-          "material_spec_id": "https://w3id.org/battinfo/material-spec/k0dr-c32c-yrvy-bbfr",
+          "material_spec_id": "https://w3id.org/battinfo/spec/k0dr-c32c-yrvy-bbfr",
           "name": "Al2O3",
           "property": {
             "thickness": {

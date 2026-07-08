@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "current_collector": {
     "id": "https://w3id.org/battinfo/current-collector/dwnd-tyk8-be76-1a3j",
-    "current_collector_spec_id": "https://w3id.org/battinfo/current-collector-spec/vkaf-f5bv-fwt2-e6yz",
+    "current_collector_spec_id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz",
     "short_id": "dwndty",
     "property": {
       "thickness": {

@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/qwae-x6cg-c61k-njw7",
+    "id": "https://w3id.org/battinfo/spec/qwae-x6cg-c61k-njw7",
     "short_id": "qwaex6",
     "name": "LMFP",
     "material_class": "active_material",

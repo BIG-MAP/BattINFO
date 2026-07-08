@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "housing": {
     "id": "https://w3id.org/battinfo/housing/kdc9-hph3-2a7j-hfrd",
-    "housing_spec_id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+    "housing_spec_id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
     "short_id": "kdc9hp",
     "lot_id": "CR2032-LOT-001"
   },

@@ -20,14 +20,14 @@ def test_routed_builder_preserves_all_fields_and_validates() -> None:
         uid="1c4m-7p9q-2k6t-8v3r", model_name="CR2032",
         manufacturer={"name": "Energizer", "id": "https://w3id.org/battinfo/organization/1111-2222-3333-4444"},
         format="coin", chemistry="Li-primary", product_type="commercial", size_code="R2032",
-        positive_electrode_spec_id="https://w3id.org/battinfo/electrode-spec/5555-6666-7777-8888",
+        positive_electrode_spec_id="https://w3id.org/battinfo/spec/5555-6666-7777-8888",
         specs={"nominal_capacity": {"value": 0.24, "unit": "Ah"}}, notes=["note"],
     ))
     assert validate_record(rec).ok, [str(e) for e in validate_record(rec).errors][:3]
     cs = rec["cell_spec"]
     assert cs["manufacturer"]["id"] == "https://w3id.org/battinfo/organization/1111-2222-3333-4444"
     assert cs["product_type"] == "commercial"  # regression: the hand-builder dropped product_type
-    assert rec["positive_electrode_spec_id"] == "https://w3id.org/battinfo/electrode-spec/5555-6666-7777-8888"
+    assert rec["positive_electrode_spec_id"] == "https://w3id.org/battinfo/spec/5555-6666-7777-8888"
     assert rec["notes"] == ["note"]
 
 

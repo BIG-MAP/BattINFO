@@ -81,8 +81,8 @@ def test_manufacturer_id_provenance_and_component_refs_round_trip() -> None:
         name="Acme X", manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
         size_code="R2032",
         manufacturer_id="https://w3id.org/battinfo/organization/1111-2222-3333-4444",
-        positive_electrode_spec_id="https://w3id.org/battinfo/electrode-spec/5555-6666-7777-8888",
-        electrolyte_spec_id="https://w3id.org/battinfo/electrolyte-spec/9999-aaaa-bbbb-cccc",
+        positive_electrode_spec_id="https://w3id.org/battinfo/spec/5555-6666-7777-8888",
+        electrolyte_spec_id="https://w3id.org/battinfo/spec/9999-aaaa-bbbb-cccc",
         source=ProvenanceInfo(type="converter-jsonld", name="BattINFO Converter",
                               workflow_version="app=1.1.17", comment="blended salt note"),
     )

@@ -32,11 +32,11 @@
     "source_url": null,
     "retrieved_at": 1781772767
   },
-  "positive_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/3e43-kbz8-ptjn-szs9",
-  "negative_electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
-  "electrolyte_spec_id": "https://w3id.org/battinfo/electrolyte-spec/gpkh-74nj-6sdb-vcsc",
-  "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
-  "housing_spec_id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/spec/3e43-kbz8-ptjn-szs9",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/spec/fvwx-7fq1-wwfs-fn3g",
+  "electrolyte_spec_id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc",
+  "separator_spec_id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
+  "housing_spec_id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
   "notes": [
     "Discovery LCO-Graphite coin cell."
   ]

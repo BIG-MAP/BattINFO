@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "electrode": {
     "id": "https://w3id.org/battinfo/electrode/svnh-5a39-fjrz-em1a",
-    "electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/fvwx-7fq1-wwfs-fn3g",
+    "electrode_spec_id": "https://w3id.org/battinfo/spec/fvwx-7fq1-wwfs-fn3g",
     "short_id": "svnh5a",
     "property": {
       "diameter": {

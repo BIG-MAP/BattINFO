@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "electrolyte_spec": {
-    "id": "https://w3id.org/battinfo/electrolyte-spec/gzt2-hrqq-gsfn-sp94",
+    "id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94",
     "short_id": "gzt2hr",
     "name": "7M KOH in H2O",
     "family": "aqueous",
     "salt": {
       "name": "KOH",
-      "material_spec_id": "https://w3id.org/battinfo/material-spec/s9h8-dfbw-zs4k-2qk8",
+      "material_spec_id": "https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8",
       "cation": "K+",
       "anion": "OH-",
       "property": {

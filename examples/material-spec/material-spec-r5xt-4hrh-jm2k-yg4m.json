@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+    "id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
     "short_id": "r5xt4h",
     "name": "Carbon black",
     "material_class": "conductive_additive",

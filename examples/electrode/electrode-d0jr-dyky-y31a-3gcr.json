@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "electrode": {
     "id": "https://w3id.org/battinfo/electrode/d0jr-dyky-y31a-3gcr",
-    "electrode_spec_id": "https://w3id.org/battinfo/electrode-spec/t947-yem5-73n7-beb7",
+    "electrode_spec_id": "https://w3id.org/battinfo/spec/t947-yem5-73n7-beb7",
     "short_id": "d0jrdy",
     "property": {
       "diameter": {

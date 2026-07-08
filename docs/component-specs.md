@@ -48,7 +48,7 @@ Per family you get `create_<family>_spec`, `save_<family>_spec`, `query_<family>
 ### Naming convention
 
 Family identifiers use **underscores** (`current_collector`); the IRI namespace uses
-**hyphens** (`https://w3id.org/battinfo/current-collector-spec/…`). The generic API derives
+**hyphens** (`https://w3id.org/battinfo/spec/…`). The generic API derives
 the namespace via `family.replace("_", "-")`.
 
 ## Electrolyte assembles material constituents

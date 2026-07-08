@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/material-spec/gwck-k5kf-ae1f-gfgc",
+    "id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
     "short_id": "gwckk5",
     "name": "Graphite",
     "material_class": "active_material",

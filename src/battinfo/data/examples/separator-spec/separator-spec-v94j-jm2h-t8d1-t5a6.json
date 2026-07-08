@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "separator_spec": {
-    "id": "https://w3id.org/battinfo/separator-spec/v94j-jm2h-t8d1-t5a6",
+    "id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6",
     "short_id": "v94jjm",
     "name": "Ceramic-coated PE",
     "material": "polyethylene",

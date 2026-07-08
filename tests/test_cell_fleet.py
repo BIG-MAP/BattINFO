@@ -66,7 +66,7 @@ def test_missing_component_reference_is_flagged(tmp_path):
     from battinfo import api
     rec = api._record_from_cell_spec(CellSpec(
         uid="cmiss123456789ab", model_name="X", manufacturer="Y", format="coin", chemistry="Li-ion",
-        electrolyte_spec_id="https://w3id.org/battinfo/electrolyte-spec/0000-0000-0000-0000"))
+        electrolyte_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000"))
     result = validate_record(rec, source_root=tmp_path)
     assert any(i.code == "reference.missing" for i in result.issues)
 

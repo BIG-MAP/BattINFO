@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "housing_spec": {
-    "id": "https://w3id.org/battinfo/housing-spec/38af-bpnv-1zmm-32hs",
+    "id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
     "short_id": "38afbp",
     "name": "CR2032 coin housing",
     "cell_format": "coin",

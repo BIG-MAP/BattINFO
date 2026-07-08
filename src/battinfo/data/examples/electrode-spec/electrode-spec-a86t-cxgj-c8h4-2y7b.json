@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/electrode-spec/a86t-cxgj-c8h4-2y7b",
+    "id": "https://w3id.org/battinfo/spec/a86t-cxgj-c8h4-2y7b",
     "short_id": "a86tcx",
     "name": "LFP cathode",
     "coating": {
@@ -9,7 +9,7 @@
         "active_material": [
           {
             "name": "LFP",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/5ms1-9jv8-hr54-mn4e",
+            "material_spec_id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
             "property": {
               "mass_fraction": {
                 "value": 0.96,
@@ -21,7 +21,7 @@
         "binder": [
           {
             "name": "PVDF",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/bkrw-7shb-tzbm-j664",
+            "material_spec_id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
             "property": {
               "mass_fraction": {
                 "value": 0.02,
@@ -33,7 +33,7 @@
         "additive": [
           {
             "name": "Carbon black",
-            "material_spec_id": "https://w3id.org/battinfo/material-spec/r5xt-4hrh-jm2k-yg4m",
+            "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
             "property": {
               "mass_fraction": {
                 "value": 0.02,

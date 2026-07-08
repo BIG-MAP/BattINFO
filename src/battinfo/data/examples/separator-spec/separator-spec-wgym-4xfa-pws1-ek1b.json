@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "separator_spec": {
-    "id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+    "id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
     "short_id": "wgym4x",
     "name": "Celgard 2400",
     "material": "polypropylene",

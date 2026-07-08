@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "separator": {
     "id": "https://w3id.org/battinfo/separator/q4th-js57-e60p-ws1e",
-    "separator_spec_id": "https://w3id.org/battinfo/separator-spec/wgym-4xfa-pws1-ek1b",
+    "separator_spec_id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
     "short_id": "q4thjs",
     "property": {
       "diameter": {

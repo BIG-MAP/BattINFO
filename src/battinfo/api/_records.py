@@ -40,7 +40,6 @@ from battinfo.api._shared import (
     TEST_IRI_RE,
     TEST_PROTOCOL_IRI_RE,
     PathLike,
-    _component_iri_re,
     _entity_id,
     _in_range,
     _iri_tail,
@@ -52,6 +51,7 @@ from battinfo.api._shared import (
     _resolved_retrieved_at,
     _resolved_time,
     _short_id_from_iri,
+    _spec_iri_re,
     _spec_numeric_value,
     _str_contains,
     _str_eq,
@@ -947,11 +947,13 @@ _COMPONENT_SPEC_REF_NAMESPACES = {
 
 
 def _record_from_cell_spec(spec: CellSpec) -> dict[str, Any]:
-    # Validate component-spec reference IRIs at the input boundary.
+    # Validate component-spec reference IRIs at the input boundary. Canonical
+    # form is spec/ (IDENTIFIER_POLICY 6.1); the superseded per-family form is
+    # accepted so pre-consolidation references keep loading.
     for field_name, namespace in _COMPONENT_SPEC_REF_NAMESPACES.items():
         value = getattr(spec, field_name)
-        if value is not None and not _component_iri_re(namespace).fullmatch(value):
-            raise ValueError(f"{field_name} must match https://w3id.org/battinfo/{namespace}/{{uid}}.")
+        if value is not None and not _spec_iri_re(namespace).fullmatch(value):
+            raise ValueError(f"{field_name} must match https://w3id.org/battinfo/spec/{{uid}}.")
     # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
     return _mint_cell_spec_record(spec)
 
