@@ -23,10 +23,10 @@
    "id": "6aa2a3a6",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T20:20:39.303935Z",
-     "iopub.status.busy": "2026-07-07T20:20:39.303935Z",
-     "iopub.status.idle": "2026-07-07T20:20:39.317537Z",
-     "shell.execute_reply": "2026-07-07T20:20:39.317537Z"
+     "iopub.execute_input": "2026-07-08T08:58:30.764944Z",
+     "iopub.status.busy": "2026-07-08T08:58:30.764944Z",
+     "iopub.status.idle": "2026-07-08T08:58:30.776733Z",
+     "shell.execute_reply": "2026-07-08T08:58:30.776733Z"
     }
    },
    "outputs": [],
@@ -56,10 +56,10 @@
    "id": "3e2a2bcd",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T20:20:39.319661Z",
-     "iopub.status.busy": "2026-07-07T20:20:39.319661Z",
-     "iopub.status.idle": "2026-07-07T20:20:40.360520Z",
-     "shell.execute_reply": "2026-07-07T20:20:40.360520Z"
+     "iopub.execute_input": "2026-07-08T08:58:30.782452Z",
+     "iopub.status.busy": "2026-07-08T08:58:30.782452Z",
+     "iopub.status.idle": "2026-07-08T08:58:31.733083Z",
+     "shell.execute_reply": "2026-07-08T08:58:31.733083Z"
     }
    },
    "outputs": [
@@ -112,10 +112,10 @@
    "id": "0bd7097b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T20:20:40.362525Z",
-     "iopub.status.busy": "2026-07-07T20:20:40.362525Z",
-     "iopub.status.idle": "2026-07-07T20:20:40.367773Z",
-     "shell.execute_reply": "2026-07-07T20:20:40.367773Z"
+     "iopub.execute_input": "2026-07-08T08:58:31.735096Z",
+     "iopub.status.busy": "2026-07-08T08:58:31.735096Z",
+     "iopub.status.idle": "2026-07-08T08:58:31.740900Z",
+     "shell.execute_reply": "2026-07-08T08:58:31.740900Z"
     }
    },
    "outputs": [
@@ -191,7 +191,7 @@
       "    \"source_type\": \"datasheet\",\n",
       "    \"source_name\": \"INR21700-50E Product Specification Rev 1.0\",\n",
       "    \"source_url\": \"https://example.com/samsung-inr21700-50e.pdf\",\n",
-      "    \"retrieved_at\": 1783455639,\n",
+      "    \"retrieved_at\": 1783501111,\n",
       "    \"battinfo_version\": \"0.7.0\"\n",
       "  }\n",
       "}\n"
@@ -210,10 +210,10 @@
    "id": "65e1f16b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T20:20:40.369780Z",
-     "iopub.status.busy": "2026-07-07T20:20:40.369780Z",
-     "iopub.status.idle": "2026-07-07T20:20:40.829035Z",
-     "shell.execute_reply": "2026-07-07T20:20:40.829035Z"
+     "iopub.execute_input": "2026-07-08T08:58:31.745234Z",
+     "iopub.status.busy": "2026-07-08T08:58:31.745234Z",
+     "iopub.status.idle": "2026-07-08T08:58:32.280840Z",
+     "shell.execute_reply": "2026-07-08T08:58:32.279835Z"
     }
    },
    "outputs": [
@@ -284,10 +284,10 @@
    "id": "bb91e73d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T20:20:40.829035Z",
-     "iopub.status.busy": "2026-07-07T20:20:40.829035Z",
-     "iopub.status.idle": "2026-07-07T20:20:40.839045Z",
-     "shell.execute_reply": "2026-07-07T20:20:40.839045Z"
+     "iopub.execute_input": "2026-07-08T08:58:32.284352Z",
+     "iopub.status.busy": "2026-07-08T08:58:32.283352Z",
+     "iopub.status.idle": "2026-07-08T08:58:32.291037Z",
+     "shell.execute_reply": "2026-07-08T08:58:32.289958Z"
     }
    },
    "outputs": [
@@ -333,10 +333,10 @@
    "id": "795996e9",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T20:20:40.843618Z",
-     "iopub.status.busy": "2026-07-07T20:20:40.841611Z",
-     "iopub.status.idle": "2026-07-07T20:20:40.848802Z",
-     "shell.execute_reply": "2026-07-07T20:20:40.848802Z"
+     "iopub.execute_input": "2026-07-08T08:58:32.293550Z",
+     "iopub.status.busy": "2026-07-08T08:58:32.293550Z",
+     "iopub.status.idle": "2026-07-08T08:58:32.299667Z",
+     "shell.execute_reply": "2026-07-08T08:58:32.298661Z"
     }
    },
    "outputs": [
@@ -344,8 +344,8 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Material-spec IRI: https://w3id.org/battinfo/material-spec/xcv1-hpy1-b0bw-z5s2\n",
-      "Component reference: https://w3id.org/battinfo/material-spec/xcv1-hpy1-b0bw-z5s2\n"
+      "Material-spec IRI: https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2\n",
+      "Component reference: https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2\n"
      ]
     }
    ],

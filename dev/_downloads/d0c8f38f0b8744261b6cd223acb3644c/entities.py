@@ -84,7 +84,7 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     EntityKind("test-protocol", "test_spec", "test-protocol.schema.json", "test-protocol", "spec"),
     EntityKind("test", "test", "test.schema.json", "test", "test"),
     EntityKind("dataset", "dataset", "dataset.schema.json", "dataset", "dataset"),
-    EntityKind("material-spec", "material_spec", "material-spec.schema.json", "material-spec", "material-spec"),
+    EntityKind("material-spec", "material_spec", "material-spec.schema.json", "material-spec", "spec"),
     EntityKind(
         "material",
         "material",
@@ -94,7 +94,7 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
         spec_ref_field="material_spec_id",
         spec_entity_type="material-spec",
     ),
-    EntityKind("electrode-spec", "electrode_spec", "electrode-spec.schema.json", "electrode-spec", "electrode-spec"),
+    EntityKind("electrode-spec", "electrode_spec", "electrode-spec.schema.json", "electrode-spec", "spec"),
     EntityKind(
         "electrode",
         "electrode",
@@ -104,26 +104,26 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
         spec_ref_field="electrode_spec_id",
         spec_entity_type="electrode-spec",
     ),
-    EntityKind("separator-spec", "separator_spec", "separator-spec.schema.json", "separator-spec", "separator-spec"),
+    EntityKind("separator-spec", "separator_spec", "separator-spec.schema.json", "separator-spec", "spec"),
     EntityKind(
         "separator", "separator", "separator.schema.json", "separator", "separator",
         spec_ref_field="separator_spec_id", spec_entity_type="separator-spec",
     ),
     EntityKind(
         "current-collector-spec", "current_collector_spec", "current-collector-spec.schema.json",
-        "current-collector-spec", "current-collector-spec",
+        "current-collector-spec", "spec",
     ),
     EntityKind(
         "current-collector", "current_collector", "current-collector.schema.json",
         "current-collector", "current-collector",
         spec_ref_field="current_collector_spec_id", spec_entity_type="current-collector-spec",
     ),
-    EntityKind("electrolyte-spec", "electrolyte_spec", "electrolyte-spec.schema.json", "electrolyte-spec", "electrolyte-spec"),
+    EntityKind("electrolyte-spec", "electrolyte_spec", "electrolyte-spec.schema.json", "electrolyte-spec", "spec"),
     EntityKind(
         "electrolyte", "electrolyte", "electrolyte.schema.json", "electrolyte", "electrolyte",
         spec_ref_field="electrolyte_spec_id", spec_entity_type="electrolyte-spec",
     ),
-    EntityKind("housing-spec", "housing_spec", "housing-spec.schema.json", "housing-spec", "housing-spec"),
+    EntityKind("housing-spec", "housing_spec", "housing-spec.schema.json", "housing-spec", "spec"),
     EntityKind(
         "housing", "housing", "housing.schema.json", "housing", "housing",
         spec_ref_field="housing_spec_id", spec_entity_type="housing-spec",
@@ -162,6 +162,14 @@ def kind_for_type(entity_type: str) -> Optional[EntityKind]:
 def record_set_dirs() -> tuple[str, ...]:
     """On-disk subdirectory names for every registered record type."""
     return tuple(kind.subdir for kind in ENTITY_KINDS)
+
+
+RESERVED_NAMESPACE_SEGMENTS = frozenset(
+    {"id", "ontology", "vocab", "doc", "context", "resolver", "twin", "w3id"}
+)
+_reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {k.iri_namespace for k in ENTITY_KINDS}
+if _reserved_clash:  # fail at import: a reserved segment can never become an entity namespace
+    raise RuntimeError(f"reserved namespace segment(s) used by ENTITY_KINDS: {sorted(_reserved_clash)}")
 
 
 def iri_namespace_map() -> dict[str, str]:
