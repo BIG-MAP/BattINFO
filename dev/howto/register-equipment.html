@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tag your work with a grant and your ORCID &#8212; BattINFO  documentation</title>
+    <title>Register your lab equipment and log which channel ran a test &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/tag-funding-and-orcid';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/register-equipment';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.19.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="How to read a published BattINFO record (battinfo.json)" href="../reading-a-record.html" />
-    <link rel="prev" title="Resume an interrupted bulk submission" href="resume-a-submission.html" />
+    <link rel="next" title="Resume an interrupted bulk submission" href="resume-a-submission.html" />
+    <link rel="prev" title="Fix the five classic validation errors" href="fix-validation-errors.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -392,9 +392,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Register your lab equipment and log which channel ran a test</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tag your work with a grant and your ORCID</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
 </ul>
 </div>
@@ -439,7 +439,7 @@
     
     <li class="breadcrumb-item"><a href="../pages/howto.html" class="nav-link">How-to guides</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tag your work with a grant and your ORCID</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Register your lab equipment and log which channel ran a test</span></li>
   </ul>
 </nav>
 </div>
@@ -456,24 +456,47 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="tag-your-work-with-a-grant-and-your-orcid">
-<h1>Tag your work with a grant and your ORCID<a class="headerlink" href="#tag-your-work-with-a-grant-and-your-orcid" title="Link to this heading">#</a></h1>
-<p>Set both once per workspace; every record you save carries them from then on —
-so your data stays traceable to the project that funded it and the person who
-made it.</p>
-<!-- doc-snippet: skip -->
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="s2">&quot;101103997&quot;</span><span class="p">)</span>      <span class="c1"># EU grant number — resolved via OpenAIRE</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">)</span>   <span class="c1"># your ORCID</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>                    <span class="c1"># records now carry funding + contributor</span>
+  <section id="register-your-lab-equipment-and-log-which-channel-ran-a-test">
+<h1>Register your lab equipment and log which channel ran a test<a class="headerlink" href="#register-your-lab-equipment-and-log-which-channel-ran-a-test" title="Link to this heading">#</a></h1>
+<p>One <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;,</span> <span class="pre">...)</span></code> call saves the equipment-spec (the model), the
+physical unit, and one channel record per slot — then any test can name its
+channel and the saved test record carries <code class="docutils literal notranslate"><span class="pre">equipment_id</span></code> + <code class="docutils literal notranslate"><span class="pre">channel_id</span></code>.</p>
+<p><strong>1. Register a unit.</strong> Reuse a canonical equipment-spec record (here: the
+packaged SkyRC MC3000 example). <code class="docutils literal notranslate"><span class="pre">ws.add</span></code> saves the spec into your workspace if
+it is new, and channel count defaults to the spec’s <code class="docutils literal notranslate"><span class="pre">channel_count</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">()</span>
+
+<span class="n">spec_path</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;examples/equipment-spec&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">))</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;equipment&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec_path</span><span class="p">,</span>
+       <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;MC3K-2026-0001&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cycler 1&quot;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;Lab B&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>The grant is stamped into each record’s <code class="docutils literal notranslate"><span class="pre">funding</span></code> block and lifted to the
-submission envelope, so the registry can answer “everything from grant X”.</p></li>
-<li><p>The contributor ORCID flows to the registry’s contribution tracker and your
-profile on Battery Genome.</p></li>
-<li><p>Both live in <code class="docutils literal notranslate"><span class="pre">.battinfo/workspace.json</span></code>; edit or clear them there.</p></li>
-</ul>
+<p>Re-running the same call is safe: equipment and channel IRIs are minted
+deterministically from (spec, serial number) and (unit, index), so the records
+converge instead of duplicating.</p>
+<p>No canonical spec to reuse? Author one from a template and load it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">template</span><span class="p">(</span><span class="s2">&quot;equipment-spec&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;....equipment-spec.json&quot;</span><span class="p">)</span>   <span class="c1"># fill in the file first</span>
+</pre></div>
+</div>
+<p><strong>2. Attach a test to a channel.</strong> Reference the channel by label, by
+<code class="docutils literal notranslate"><span class="pre">&quot;&lt;unit&gt;/CHn&quot;</span></code>, or by its IRI — an unknown reference lists the channels it
+knows about:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cell_spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span><span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;X-1&quot;</span><span class="p">,</span>
+                              <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">cell_spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CELL-001&quot;</span><span class="p">])</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;CELL-001&quot;</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="s2">&quot;Cycler 1/CH2&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The saved test record now contains the channel’s <code class="docutils literal notranslate"><span class="pre">equipment_id</span></code> and
+<code class="docutils literal notranslate"><span class="pre">channel_id</span></code>, so “which slot of which cycler produced this data” survives into
+the published record.</p>
 </section>
 
 
@@ -487,20 +510,20 @@ profile on Battery Genome.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="resume-a-submission.html"
+       href="fix-validation-errors.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Resume an interrupted bulk submission</p>
+        <p class="prev-next-title">Fix the five classic validation errors</p>
       </div>
     </a>
     <a class="right-next"
-       href="../reading-a-record.html"
+       href="resume-a-submission.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</p>
+        <p class="prev-next-title">Resume an interrupted bulk submission</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
