@@ -96,6 +96,10 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "ConstantVoltageDischarging",
     "ElectrochemicalTestingProcedure",
     "Resting",
+    # Rechargeability classes (from the cell-spec `rechargeable` flag; not part of
+    # the entity_type_map sections, so listed explicitly)
+    "PrimaryBattery",
+    "SecondaryBattery",
     # New in domain-battery 0.19.0
     "BatterySpecification",
     "BatteryCellSpecification",
