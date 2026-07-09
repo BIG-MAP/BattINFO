@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+
+- **Dependabot backlog (web/)**: `postcss` bumped 8.4.39 → 8.5.16 and pinned
+  via an npm `overrides` entry so Next.js's bundled copy (8.4.31) is forced to
+  the same patched version — closes GHSA-qx2v-qp2m-jg93 (XSS via unescaped
+  `</style>` in stringified CSS output) for both lockfile nodes. The Python
+  lockfile audits clean (`pip-audit` over `uv export`, no known
+  vulnerabilities). **Known remaining**: 14 advisories against `next@14.2.35`
+  (DoS, cache-poisoning, XSS, SSRF, middleware-bypass families; e.g.
+  GHSA-c4j6-fc7j-m34r, GHSA-36qx-fr4f-26g5, GHSA-q4gf-8mx6-v5v3) are only
+  patched in Next >= 15.5.16 — the 14.x line is EOL with no backports, so the
+  fix is a major upgrade (Next 15 + React 19 for App Router apps like this
+  one), deliberately deferred to its own change rather than smuggled into a
+  dependency sweep.
+
 ### Added
 
 - **EMMO label companion (`assets/vocab/emmo-labels.ttl`)**: a generated
