@@ -53,7 +53,8 @@ _BDF_VARIABLE_MAP: dict[str, tuple[str, str]] = {
     "temperature_t5_celsius":        ("temperature_t5",         "°C"),
 }
 
-# bdf.read() returns human-readable "Name / unit" column headers.
+# In-memory frames from bdf.read() carry human-readable "Name / unit" column
+# headers (bdf.io.save() writes the snake_case machine labels above to disk).
 # This maps the lowercased, space→underscore name part to battinfo variable names.
 _BDF_HUMAN_NAME_MAP: dict[str, str] = {
     "voltage":                  "voltage",
@@ -122,10 +123,12 @@ def _read_df(source: Any, warnings: list[str]) -> tuple[Any, Path | None]:
         return source, None
 
     path = Path(source)
-    # Try BDF-aware reader first
+    # Try BDF-aware reader first.  batterydf >= 0.2: read() returns a
+    # (polars_frame, metadata) tuple; the helper collects to pandas and applies
+    # the ratified tz="UTC" timestamp policy.
     try:
-        import bdf as _bdf  # noqa: PLC0415
-        df = _bdf.read(path, validate=False)
+        from battinfo.processing import _read_bdf_pandas  # noqa: PLC0415
+        df, _meta = _read_bdf_pandas(path, validate=False)
         return df, path
     except ImportError:
         warnings.append(
