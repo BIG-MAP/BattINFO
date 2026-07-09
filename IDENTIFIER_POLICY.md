@@ -192,7 +192,10 @@ older `cell-type/`, `cell_type/`, `test_protocol/` forms) remain permanent
 resolver aliases — anything ever minted resolves forever.
 
 Reserved segments (never usable as entity namespaces): `id`, `ontology`,
-`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`.
+`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`, `raw`, `inferred`,
+`turtle`, `latest`, `source`. The last five are claimed by the ontology
+block in the upstream w3id.org `.htaccess`, so requests to those paths can
+never reach the record resolver.
 
 ### 6.2 Equipment and channels (ratified 2026-07-08)
 
@@ -337,7 +340,8 @@ terms resolve to EMMO or go upstream; only structural terms may be minted
 locally, hand-defined.
 
 Reserved namespace segments (never usable as entity types): `id`, `ontology`,
-`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`.
+`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`, `raw`, `inferred`,
+`turtle`, `latest`, `source`.
 
 ## 15. Design Principles
 
