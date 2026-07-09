@@ -110,6 +110,32 @@ def process_timeseries_csv(
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
+def _read_bdf_pandas(source: Path, *, validate: bool = False):
+    """Read a cycler file with ``bdf.read`` and return ``(pandas_df, metadata)``.
+
+    batterydf >= 0.2 returns a ``(polars_frame, metadata)`` tuple; this helper
+    collects to a pandas DataFrame because the downstream helpers we chain
+    (``bdf.repair.fix_time``, ``bdf.io.save``, ``bdf.validate``) operate on
+    pandas.  ``metadata`` carries at least a ``"source"`` key naming the
+    resolved reader plugin — useful provenance for callers.
+
+    ``tz="UTC"`` is passed explicitly: UTC timestamps are the ratified project
+    policy.  Upstream cannot distinguish a deliberate UTC from its default and
+    still emits a "tz defaulted to UTC" UserWarning for naive-datetime formats,
+    so that specific warning is suppressed here.
+    """
+    import warnings as _warnings  # noqa: PLC0415
+
+    import bdf  # noqa: PLC0415
+
+    with _warnings.catch_warnings():
+        _warnings.filterwarnings(
+            "ignore", message="tz defaulted to UTC", category=UserWarning
+        )
+        frame, metadata = bdf.read(source, validate=validate, lazy=False, tz="UTC")
+    return frame.to_pandas(), metadata
+
+
 def _read_bdf_csv(path: Path):
     """Read a BDF CSV or Parquet file into a DataFrame, returning None on failure."""
     try:
@@ -158,7 +184,6 @@ def generate_dataset_plots(
 def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
     """Convert *csv_path* to BDF CSV; return output path or None."""
     try:
-        import bdf
         from bdf.io import save as bdf_save
     except ImportError:
         return None
@@ -168,11 +193,10 @@ def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
         return out_path
 
     try:
-        sniff = bdf.detect(csv_path)
-        if sniff.id == "abstract" or sniff.confidence <= 0:
-            df = bdf.read(csv_path, validate=False)
-        else:
-            df = bdf.read(csv_path, validate=True)
+        # Tolerant conversion: bdf.read auto-detects the format (raising if no
+        # reader matches) and validate=False keeps partially-conformant files
+        # convertible — the interop policy is "express what you can".
+        df, _meta = _read_bdf_pandas(csv_path, validate=False)
         bdf_save(df, out_path, index=False)
         return out_path
     except Exception:
@@ -225,7 +249,6 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
     ``.bdf.parquet`` already exists (test type re-inferred from the parquet).
     """
     try:
-        import bdf
         from bdf.io import save as bdf_save
     except ImportError:
         return None, None
@@ -252,7 +275,7 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
         if df is None:
             # Suppress any diagnostic prints from batterydf plugins
             with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
-                df = bdf.read(raw_path, validate=False)
+                df, _meta = _read_bdf_pandas(raw_path, validate=False)
             bdf_save(df, out_path, index=False)
         return out_path, _infer_test_type_from_df(df)
     except Exception:

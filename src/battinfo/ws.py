@@ -429,7 +429,7 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
             print(
                 f"  warning: {path.name} unix_time_second={start} is implausible "
                 "(outside 2000-2100) - not stamping test/dataset times from it. "
-                "Known cause: batterydf<0.1.1 wrote epoch/1000; upgrade batterydf "
+                "Known cause: batterydf<0.2 wrote epoch/1000; upgrade batterydf "
                 "and re-run ws.convert()."
             )
             return None
@@ -1589,9 +1589,10 @@ class AuthoringWorkspace:
             raise ValueError(f"fmt must be 'parquet' or 'csv' (got {fmt!r})")
 
         try:
-            import bdf as _bdf
             import bdf.io as _bdf_io
             import bdf.repair as _bdf_repair
+
+            from battinfo.processing import _read_bdf_pandas
         except ImportError:
             raise ImportError(
                 "convert() needs the BDF converter (module 'bdf' from the batterydf "
@@ -1637,14 +1638,19 @@ class AuthoringWorkspace:
                 self._record_conversion(src, out)
                 continue
             try:
-                df = _bdf.read(src, validate=False)
+                # batterydf >= 0.2: read() returns (polars_frame, metadata); the
+                # helper collects to pandas (fix_time/save are pandas-based) and
+                # applies the ratified tz="UTC" timestamp policy.
+                df, meta = _read_bdf_pandas(src, validate=False)
                 df = _bdf_repair.fix_time(df)
                 _bdf_io.save(df, out)
             except Exception as exc:  # one bad file must not abort the batch
                 failed.append((src.name, str(exc)))
                 print(f"  FAILED: {src.name} -- {exc}")
                 continue
-            print(f"  {src.name}  ->  {out.name}  ({out.stat().st_size / 1e6:.1f} MB)")
+            reader = meta.get("source") if isinstance(meta, dict) else None
+            via = f", via {reader}" if reader else ""
+            print(f"  {src.name}  ->  {out.name}  ({out.stat().st_size / 1e6:.1f} MB{via})")
             written.append(out)
             # Remember the original so it can travel with the dataset as raw-source
             # provenance when the test is published (see ws.add('test', ...)).
@@ -1760,7 +1766,13 @@ class AuthoringWorkspace:
             try:
                 import bdf as _bdf
                 report = _bdf.validate(df)
-                if getattr(report, "ok", True) is False:
+                # batterydf >= 0.2 returns a dict report; older versions returned
+                # an object with an ``ok`` attribute.
+                if isinstance(report, dict):
+                    ok = report.get("ok", True)
+                else:
+                    ok = getattr(report, "ok", True)
+                if ok is False:
                     print(f"  BDF validation issues: {report}")
                 else:
                     print("  BDF validation passed.")

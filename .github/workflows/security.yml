@@ -31,7 +31,11 @@ jobs:
         with:
           enable-cache: true
       - name: Export locked dependency graph
-        run: uv export --no-emit-project --all-extras --format requirements-txt > requirements-audit.txt
+        # --no-emit-package batterydf: TEMPORARY while batterydf is a git-source
+        # pin (pip cannot hash-verify VCS requirements, and pip-audit cannot
+        # audit them). Remove together with the [tool.uv.sources] pin once
+        # batterydf 0.2.0 is on PyPI so it re-enters the audit.
+        run: uv export --no-emit-project --no-emit-package batterydf --all-extras --format requirements-txt > requirements-audit.txt
       - name: Audit dependencies (OSV / PyPI advisories)
         run: uvx pip-audit -r requirements-audit.txt
 

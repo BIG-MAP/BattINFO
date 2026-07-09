@@ -66,7 +66,7 @@ storage = [
   "boto3>=1.34"
 ]
 processing = [
-  "batterydf>=0.1",
+  "batterydf>=0.2,<0.3",
   "matplotlib>=3.8",
   "plotly>=5.20",
 ]
@@ -109,6 +109,10 @@ Changelog = "https://github.com/BIG-MAP/BattINFO/blob/main/CHANGELOG.md"
 
 [project.scripts]
 battinfo = "battinfo.cli:app"
+
+# TEMPORARY until batterydf 0.2.0 is on PyPI — remove and re-lock on release
+[tool.uv.sources]
+batterydf = { git = "https://github.com/battery-data-alliance/battery-data-format", rev = "f64c338" }
 
 [tool.setuptools]
 package-dir = { "" = "src" }
