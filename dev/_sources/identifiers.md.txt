@@ -38,30 +38,47 @@ files to cells (`ws.add("test", datasets="glob")`).
 
 | Namespace | Record type(s) |
 |---|---|
-| `/spec/` | Cell specs **and** test specs — the reusable *descriptions* |
+| `/spec/` | Every reusable *description* — cell, test, material, and component specs |
 | `/cell/` | Physical cells (instances) |
 | `/test/` | Test executions |
 | `/dataset/` | Datasets |
-| `/material-spec/`, `/material/` | Standalone materials, spec and instance |
-| `/electrode-spec/`, `/separator-spec/`, `/electrolyte-spec/`, ... | Component specs (and their instance namespaces) |
+| `/material/`, `/electrode/`, `/separator/`, ... | Material and component instances |
+| `/equipment/`, `/channel/` | Physical equipment units and their channels |
 
 The full map is code, not convention: `battinfo.entities.iri_namespace_map()`.
+
+Two more segment rules keep old links alive and new ones honest:
+
+- **Legacy segments are permanent aliases.** Superseded namespaces
+  (`/material-spec/`, `/electrode-spec/`, the older `/cell-type/` forms, ...)
+  keep resolving forever — anything ever minted stays dereferenceable.
+- **Reserved segments** (`id`, `ontology`, `vocab`, `doc`, `context`,
+  `resolver`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`,
+  `source`) can never become record namespaces — they are claimed by the
+  resolver and ontology infrastructure
+  (`battinfo.entities.RESERVED_NAMESPACE_SEGMENTS`).
 
 ## Why w3id.org (the PURL layer)
 
 `w3id.org` is the W3C Permanent Identifier Community Group's redirect
 service: a community-maintained, permanently-hosted layer of indirection.
-The `https://w3id.org/battinfo/...` IRIs redirect to wherever the resolver
-actually lives today — so records cite an address that outlives any single
-server, domain, or hosting decision. The design: dereferencing a record IRI
-serves its resolver artifact (`index.html` for humans, `index.jsonld` /
-`index.json` for machines — content-negotiated), produced by
-`battinfo.api.publish_record`.
+The `https://w3id.org/battinfo/...` IRIs redirect to wherever the registry
+resolver actually lives today — so records cite an address that outlives any
+single server, domain, or hosting decision.
+
+Dereferencing follows linked-data convention: a record IRI names the *thing*
+(a cell, a test), not a document, so the resolver answers with a **303
+redirect** to a representation chosen by content negotiation — JSON-LD (or
+Turtle) for machines, a human-readable landing page for browsers.
+
+Records also never disappear. A withdrawn record gets a **tombstone** — the
+resource stays dereferenceable, marked `owl:deprecated` and pointing at its
+replacement where one exists — never a 404. An IRI that once resolved always
+resolves.
 
 > **Status:** during the soft launch the registry sits behind an access gate,
-> so record IRIs currently resolve to the platform's sign-in page rather than
-> the machine-readable artifact. Content negotiation with correct status
-> codes (and public reads for published records) is being implemented as the
+> so record IRIs may resolve to the platform's sign-in page rather than the
+> machine-readable artifact. Public reads for published records arrive as the
 > gate comes down — until then, treat dereferencing as not yet reliable for
 > harvesters.
 

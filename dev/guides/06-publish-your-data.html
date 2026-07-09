@@ -518,11 +518,11 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-  neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB)
+  neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB, via neware_csv)
 
 Converted 1 file(s) -&gt; &lt;repo&gt;\docs\guides\_scratch\guide-06\bdf
 
-BDF columns: test_time_second,voltage_volt,current_ampere,step_index,unix_time_second
+BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle_count,step_id,step_time_second,step_charging_capacity_ah,step_discharging_capacity_ah
 </pre></div></div>
 </div>
 </section>
@@ -578,7 +578,6 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-  warning: neware-sample.bdf.csv unix_time_second=1772442 is implausible (outside 2000-2100) - not stamping test/dataset times from it. Known cause: batterydf&lt;0.1.1 wrote epoch/1000; upgrade batterydf and re-run ws.convert().
   test [cycling] on S1  +1 dataset(s)  (+1 raw source)
 </pre></div></div>
 </div>
@@ -588,7 +587,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[Test(schema_version=&#39;0.2.0&#39;, kind=&#39;Test&#39;, id=None, name=&#39;S1 cycling&#39;, test_type=&lt;BatteryTestType.CYCLING: &#39;cycling&#39;&gt;, protocol_id=None, cell_instance_id=None, description=None, status=&#39;completed&#39;, protocol=ProtocolInfo(name=&#39;cycling&#39;, url=None), instrument=None, equipment_id=None, channel_id=None, started_at=None, ended_at=None, dataset_ids=[], conformance=None, artifacts=[], source=ProvenanceInfo(type=&#39;measurement&#39;, name=None, file=None, url=None, citation=None, retrieved_at=None, workflow_version=None, file_hash=None, curated_by=None, comment=None, battinfo_version=None), comment=[])]
+[Test(schema_version=&#39;0.2.0&#39;, kind=&#39;Test&#39;, id=None, name=&#39;S1 cycling&#39;, test_type=&lt;BatteryTestType.CYCLING: &#39;cycling&#39;&gt;, protocol_id=None, cell_instance_id=None, description=None, status=&#39;completed&#39;, protocol=ProtocolInfo(name=&#39;cycling&#39;, url=None), instrument=None, equipment_id=None, channel_id=None, started_at=1772442000, ended_at=1772443380, dataset_ids=[], conformance=None, artifacts=[], source=ProvenanceInfo(type=&#39;measurement&#39;, name=None, file=None, url=None, citation=None, retrieved_at=None, workflow_version=None, file_hash=None, curated_by=None, comment=None, battinfo_version=None), comment=[])]
 </pre></div></div>
 </div>
 </section>
@@ -616,12 +615,12 @@ Saved 4 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-06\.battinfo\rec
   cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
   cell        S1                                   [created]  .battinfo\records\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
   test        S1 cycling                           [created]  .battinfo\records\test\test-9f4c-mxny-yhym-2zh4.json
-  dataset     S1 data                              [created]  .battinfo\records\dataset\dataset-22bt-7jxb-yv3k-xgq4.json
+  dataset     S1 data                              [created]  .battinfo\records\dataset\dataset-6p2d-cy0w-25h0-2820.json
 
   Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
 cell-instance/cell-d6tp-jgqy-a3s9-4qem.json
 cell-spec/cell-spec-fpdr-z1qt-23v0-stzx.json
-dataset/dataset-22bt-7jxb-yv3k-xgq4.json
+dataset/dataset-6p2d-cy0w-25h0-2820.json
 test/test-9f4c-mxny-yhym-2zh4.json
 </pre></div></div>
 </div>
@@ -654,7 +653,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1783548159,
+  &#34;retrieved_at&#34;: 1783617421,
   &#34;battinfo_version&#34;: &#34;0.7.0&#34;
 }
 </pre></div></div>

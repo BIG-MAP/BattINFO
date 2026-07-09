@@ -515,7 +515,7 @@ files to cells (<code class="docutils literal notranslate"><span class="pre">ws.
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/spec/</span></code></p></td>
-<td><p>Cell specs <strong>and</strong> test specs — the reusable <em>descriptions</em></p></td>
+<td><p>Every reusable <em>description</em> — cell, test, material, and component specs</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/cell/</span></code></p></td>
 <td><p>Physical cells (instances)</p></td>
@@ -526,32 +526,47 @@ files to cells (<code class="docutils literal notranslate"><span class="pre">ws.
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/dataset/</span></code></p></td>
 <td><p>Datasets</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/material-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/material/</span></code></p></td>
-<td><p>Standalone materials, spec and instance</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/material/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrode/</span></code>, <code class="docutils literal notranslate"><span class="pre">/separator/</span></code>, …</p></td>
+<td><p>Material and component instances</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/electrode-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/separator-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrolyte-spec/</span></code>, …</p></td>
-<td><p>Component specs (and their instance namespaces)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/equipment/</span></code>, <code class="docutils literal notranslate"><span class="pre">/channel/</span></code></p></td>
+<td><p>Physical equipment units and their channels</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p>The full map is code, not convention: <code class="docutils literal notranslate"><span class="pre">battinfo.entities.iri_namespace_map()</span></code>.</p>
+<p>Two more segment rules keep old links alive and new ones honest:</p>
+<ul class="simple">
+<li><p><strong>Legacy segments are permanent aliases.</strong> Superseded namespaces
+(<code class="docutils literal notranslate"><span class="pre">/material-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrode-spec/</span></code>, the older <code class="docutils literal notranslate"><span class="pre">/cell-type/</span></code> forms, …)
+keep resolving forever — anything ever minted stays dereferenceable.</p></li>
+<li><p><strong>Reserved segments</strong> (<code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">ontology</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab</span></code>, <code class="docutils literal notranslate"><span class="pre">doc</span></code>, <code class="docutils literal notranslate"><span class="pre">context</span></code>,
+<code class="docutils literal notranslate"><span class="pre">resolver</span></code>, <code class="docutils literal notranslate"><span class="pre">twin</span></code>, <code class="docutils literal notranslate"><span class="pre">w3id</span></code>, <code class="docutils literal notranslate"><span class="pre">raw</span></code>, <code class="docutils literal notranslate"><span class="pre">inferred</span></code>, <code class="docutils literal notranslate"><span class="pre">turtle</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
+<code class="docutils literal notranslate"><span class="pre">source</span></code>) can never become record namespaces — they are claimed by the
+resolver and ontology infrastructure
+(<code class="docutils literal notranslate"><span class="pre">battinfo.entities.RESERVED_NAMESPACE_SEGMENTS</span></code>).</p></li>
+</ul>
 </section>
 <section id="why-w3id-org-the-purl-layer">
 <h2>Why w3id.org (the PURL layer)<a class="headerlink" href="#why-w3id-org-the-purl-layer" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">w3id.org</span></code> is the W3C Permanent Identifier Community Group’s redirect
 service: a community-maintained, permanently-hosted layer of indirection.
-The <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/...</span></code> IRIs redirect to wherever the resolver
-actually lives today — so records cite an address that outlives any single
-server, domain, or hosting decision. The design: dereferencing a record IRI
-serves its resolver artifact (<code class="docutils literal notranslate"><span class="pre">index.html</span></code> for humans, <code class="docutils literal notranslate"><span class="pre">index.jsonld</span></code> /
-<code class="docutils literal notranslate"><span class="pre">index.json</span></code> for machines — content-negotiated), produced by
-<code class="docutils literal notranslate"><span class="pre">battinfo.api.publish_record</span></code>.</p>
+The <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/...</span></code> IRIs redirect to wherever the registry
+resolver actually lives today — so records cite an address that outlives any
+single server, domain, or hosting decision.</p>
+<p>Dereferencing follows linked-data convention: a record IRI names the <em>thing</em>
+(a cell, a test), not a document, so the resolver answers with a <strong>303
+redirect</strong> to a representation chosen by content negotiation — JSON-LD (or
+Turtle) for machines, a human-readable landing page for browsers.</p>
+<p>Records also never disappear. A withdrawn record gets a <strong>tombstone</strong> — the
+resource stays dereferenceable, marked <code class="docutils literal notranslate"><span class="pre">owl:deprecated</span></code> and pointing at its
+replacement where one exists — never a 404. An IRI that once resolved always
+resolves.</p>
 <blockquote>
 <div><p><strong>Status:</strong> during the soft launch the registry sits behind an access gate,
-so record IRIs currently resolve to the platform’s sign-in page rather than
-the machine-readable artifact. Content negotiation with correct status
-codes (and public reads for published records) is being implemented as the
+so record IRIs may resolve to the platform’s sign-in page rather than the
+machine-readable artifact. Public reads for published records arrive as the
 gate comes down — until then, treat dereferencing as not yet reliable for
 harvesters.</p>
 </div></blockquote>

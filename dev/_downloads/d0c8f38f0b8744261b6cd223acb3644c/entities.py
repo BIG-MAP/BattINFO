@@ -174,7 +174,10 @@ def record_set_dirs() -> tuple[str, ...]:
 
 
 RESERVED_NAMESPACE_SEGMENTS = frozenset(
-    {"id", "ontology", "vocab", "doc", "context", "resolver", "twin", "w3id"}
+    {"id", "ontology", "vocab", "doc", "context", "resolver", "twin", "w3id",
+     # Claimed by the ontology block in the upstream w3id.org .htaccess —
+     # requests to these paths can never reach the record resolver.
+     "raw", "inferred", "turtle", "latest", "source"}
 )
 _reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {k.iri_namespace for k in ENTITY_KINDS}
 if _reserved_clash:  # fail at import: a reserved segment can never become an entity namespace
