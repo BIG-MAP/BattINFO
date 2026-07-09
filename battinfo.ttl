@@ -10,10 +10,18 @@
 # ---------------------------------------------------------------------------
 # BattINFO application ontology
 #
-# This ontology is the application/profile layer for the BattINFO battery
-# data ecosystem.  It imports the EMMO domain modules that cover battery
-# cells and electrochemical processes, and provides the semantic foundation
-# for BattINFO records, schemas, and JSON-LD exports.
+# ROLE (IDENTIFIER_POLICY.md section 14): this file is the EMMO import/pin
+# manifest for the BattINFO stack, plus a tiny local residue (currently only
+# the ConformanceStatus SKOS scheme below). It deliberately defines NO domain
+# terms: quantities and battery concepts live in the imported EMMO modules
+# (missing terms are added upstream, not minted here), and administrative
+# record predicates use dcterms/PROV/DCAT/schema.org/PAV.
+#
+# Companions (slash namespace, record layer):
+#   assets/vocab/battinfo-records.ttl - the closed inventory of battinfo:
+#     record-layer placeholder terms (scripts/gen_battinfo_vocab.py)
+#   assets/vocab/emmo-labels.ttl - skos:prefLabel companion for every EMMO
+#     term the record emitters use (scripts/gen_emmo_labels.py)
 #
 # EMMO dependency versions (pinned):
 #   domain-battery          0.19.0   (2026-05-04)
@@ -62,9 +70,12 @@ as Linked Data."""@en ;
 
     rdfs:seeAlso <https://w3id.org/emmo/domain/battery> ;
     rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry> ;
+    # Record-layer companions under the slash namespace: the battinfo:
+    # placeholder vocabulary and the EMMO prefLabel companion.
+    rdfs:seeAlso <https://w3id.org/battinfo/> ;
 
     rdfs:label "BattINFO application ontology"@en ;
-    rdfs:comment "EMMO dependency versions pinned in owl:imports. Run .tools/quality/check_emmo_versions.py to check for upstream updates."@en .
+    rdfs:comment """Application ontology = EMMO import/pin manifest plus a tiny local residue (the ConformanceStatus scheme). No domain terms are defined here (IDENTIFIER_POLICY.md section 14): battery concepts come from the pinned EMMO imports; record-layer battinfo: placeholder terms are declared in assets/vocab/battinfo-records.ttl and human-readable labels for the EMMO terms the emitters use in assets/vocab/emmo-labels.ttl. EMMO dependency versions pinned in owl:imports; run .tools/quality/check_emmo_versions.py to check for upstream updates."""@en .
 
 # ---------------------------------------------------------------------------
 # Annotation properties declared so OWL tools do not warn about unknown

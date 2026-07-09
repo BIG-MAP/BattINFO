@@ -9,11 +9,14 @@
     "dcterms": "http://purl.org/dc/terms/",
     "prov": "http://www.w3.org/ns/prov#",
     "dcat": "http://www.w3.org/ns/dcat#",
+    "bibo": "http://purl.org/ontology/bibo/",
+    "pav": "http://purl.org/pav/",
     "dqv": "http://www.w3.org/ns/dqv#",
     "oa": "http://www.w3.org/ns/oa#",
     "earl": "http://www.w3.org/ns/earl#",
     "spdx": "http://spdx.org/rdf/terms#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
     "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
@@ -123,13 +126,15 @@
     "charging_time": "battinfo:chargingTime",
     "self_discharge_rate": "electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e",
     "state_of_health": "electrochemistry:electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce",
-    "source_type": "battinfo:sourceType",
-    "source_url": "battinfo:sourceURL",
-    "source_file": "battinfo:sourceFile",
+    "source_type": "dcterms:type",
+    "source_url": {
+      "@id": "prov:hadPrimarySource",
+      "@type": "@id"
+    },
     "citation": "dcterms:bibliographicCitation",
-    "citation_doi": "battinfo:citationDOI",
-    "retrieved_at": "battinfo:retrievedAt",
-    "workflow_version": "battinfo:workflowVersion",
+    "citation_doi": "bibo:doi",
+    "retrieved_at": "prov:generatedAtTime",
+    "workflow_version": "pav:version",
     "curated_by": "dcterms:contributor",
     "protocol_name": "schema:name",
     "protocol_url": "schema:url",
@@ -210,12 +215,13 @@
       }
     }
   ],
-  "battinfo:provenance": {
-    "battinfo:sourceType": "measurement",
-    "battinfo:sourceFile": "dataset-1f8r-6v2k-9p4m-3t7x.json",
-    "battinfo:sourceURL": {
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "measurement",
+    "prov:hadPrimarySource": {
       "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
     },
+    "prov:generatedAtTime": "2026-02-22T00:00:00+00:00",
     "dcterms:bibliographicCitation": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
   }
 }

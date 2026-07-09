@@ -105,10 +105,20 @@ def _schema_citation_value(value: Any) -> Any:
         out["schema:name"] = value["name"]
     if isinstance(value.get("kind"), str):
         out["schema:additionalType"] = value["kind"]
+    identifiers: list[Any] = []
     if isinstance(value.get("doi"), str):
-        out["battinfo:doi"] = value["doi"]
+        # Standard form (no battinfo: predicate): a typed PropertyValue identifier.
+        identifiers.append(
+            {
+                "@type": "schema:PropertyValue",
+                "schema:propertyID": "doi",
+                "schema:value": value["doi"],
+            }
+        )
     if isinstance(value.get("citation_key"), str):
-        out["schema:identifier"] = value["citation_key"]
+        identifiers.append(value["citation_key"])
+    if identifiers:
+        out["schema:identifier"] = identifiers[0] if len(identifiers) == 1 else identifiers
     return out if len(out) > 1 else None
 
 
@@ -340,6 +350,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             "schema": "https://schema.org/",
             "csvw": "http://www.w3.org/ns/csvw#",
             "battinfo": "https://w3id.org/battinfo/",
+            "skos": "http://www.w3.org/2004/02/skos/core#",
         },
     ]
 

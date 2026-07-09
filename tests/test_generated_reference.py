@@ -48,6 +48,17 @@ def test_battinfo_vocab_covers_every_emitted_term() -> None:
     )
 
 
+def test_emmo_labels_cover_every_mapped_term() -> None:
+    gen = _load("gen_emmo_labels")
+
+    committed = (ROOT / "assets" / "vocab" / "emmo-labels.ttl").read_text(encoding="utf-8")
+    assert committed == gen.build(), (
+        "assets/vocab/emmo-labels.ttl is stale - the curated property/unit/"
+        "entity mappings changed; regenerate with "
+        "`uv run python scripts/gen_emmo_labels.py`"
+    )
+
+
 def test_property_reference_matches_the_mapping_tables() -> None:
     gen = _load("gen_property_reference")
 

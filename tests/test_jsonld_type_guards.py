@@ -50,7 +50,7 @@ def test_dataset_checksum_as_mapping_is_emitted() -> None:
 
 def test_test_dataset_ids_with_none_does_not_emit_null_id() -> None:
     out = record_to_jsonld({"test": {"id": "t1", "dataset_ids": ["ds-a", None, ""]}}, "test")
-    assert out["battinfo:hasDataset"] == [{"@id": "ds-a"}]
+    assert out["schema:result"] == [{"@id": "ds-a"}]
 
 
 def test_test_method_vocabulary_is_allowed() -> None:

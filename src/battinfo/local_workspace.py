@@ -1449,7 +1449,7 @@ class LocalWorkspace:
             source_local_id=self._submission_source_local_id(manifest, "cell"),
             title=cell_record.get("name") or f"{cell_spec_record.get('manufacturer', 'Battery')} {cell_spec_record.get('model', 'Cell')}",
             semantic_payload={
-                "@type": "Cell",
+                "@type": "BatteryCell",
                 "battinfo_records": {
                     "cell_spec": records["cell_spec"],
                     "cell": records["cell"],

@@ -10,14 +10,19 @@
 
 # ── Plausibility shapes for cell-type spec quantities ─────────────────────────
 #
-# These shapes apply to the *quantity nodes* that are values of cell-spec
-# properties in the BattINFO JSON-LD output (produced by
-# battinfo.jsonld.cell_spec_to_jsonld).  Each quantity node has:
+# These shapes apply to the *quantity nodes* in the canonical BattINFO cell-spec
+# JSON-LD (produced by battinfo.jsonld.cell_spec_to_jsonld, which shares the
+# canonical builder with the resolver and publication emitters).  Each quantity
+# is an entry of the spec node's EMMO `hasProperty` array, typed with its EMMO
+# property class (plus a property-nature co-type):
 #
-#   <spec-IRI>  <property-IRI>  [ hasNumericalPart [ hasNumericalValue <num> ] ; hasMeasurementUnit <unit-IRI> ] .
+#   <spec-IRI>  hasProperty  [ a <PropertyClass>, ConventionalProperty ;
+#                              hasNumericalPart [ a RealData ; hasNumberValue <num> ] ;
+#                              hasMeasurementUnit <unit-IRI> ] .
 #
-# SHACL sh:targetObjectsOf selects the blank node objects; sh:property then
-# constrains the EMMO numerical value (hasNumericalPart/hasNumericalValue) on those nodes.
+# SHACL sh:targetClass selects the typed quantity nodes; sh:property then
+# constrains the EMMO numerical value (hasNumericalPart/hasNumberValue) on
+# those nodes.
 #
 # Bounds are intentionally loose (order-of-magnitude sanity only) so that
 # legitimate edge-case cells (ultra-high-capacity, miniature coin cells, etc.)
@@ -27,7 +32,7 @@
 # ── Voltages ──────────────────────────────────────────────────────────────────
 
 shapes:NominalVoltageValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6 ;
+    sh:targetClass electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.3 ;
@@ -37,7 +42,7 @@ shapes:NominalVoltageValueShape a sh:NodeShape ;
     ] .
 
 shapes:ChargingVoltageValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87 ;
+    sh:targetClass electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.3 ;
@@ -47,7 +52,7 @@ shapes:ChargingVoltageValueShape a sh:NodeShape ;
     ] .
 
 shapes:DischargingCutoffVoltageValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9 ;
+    sh:targetClass electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.0 ;
@@ -57,7 +62,7 @@ shapes:DischargingCutoffVoltageValueShape a sh:NodeShape ;
     ] .
 
 shapes:ChargingCutoffVoltageValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88 ;
+    sh:targetClass electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 1.0 ;
@@ -67,10 +72,12 @@ shapes:ChargingCutoffVoltageValueShape a sh:NodeShape ;
     ] .
 
 # ── Capacity ──────────────────────────────────────────────────────────────────
-# (nominal, minimum, rated, typical all use the same IRI)
+# (nominal/typical share one class; minimum and rated have their own classes)
 
 shapes:CapacityValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100 ;
+    sh:targetClass electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100 ;
+    sh:targetClass electrochemistry:electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5 ;
+    sh:targetClass electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -79,10 +86,10 @@ shapes:CapacityValueShape a sh:NodeShape ;
     ] .
 
 # ── Energy ────────────────────────────────────────────────────────────────────
-# (nominal, typical, rated, certified-usable all use same IRI)
+# (nominal, typical, rated, certified-usable all use same class)
 
 shapes:EnergyValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d ;
+    sh:targetClass electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -93,7 +100,7 @@ shapes:EnergyValueShape a sh:NodeShape ;
 # ── Specific energy / energy density ─────────────────────────────────────────
 
 shapes:SpecificEnergyValueShape a sh:NodeShape ;
-    sh:targetObjectsOf emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9 ;
+    sh:targetClass emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 1.0 ;
@@ -103,7 +110,7 @@ shapes:SpecificEnergyValueShape a sh:NodeShape ;
     ] .
 
 shapes:EnergyDensityValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b ;
+    sh:targetClass electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 1.0 ;
@@ -115,7 +122,7 @@ shapes:EnergyDensityValueShape a sh:NodeShape ;
 # ── Mass ──────────────────────────────────────────────────────────────────────
 
 shapes:MassValueShape a sh:NodeShape ;
-    sh:targetObjectsOf emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405 ;
+    sh:targetClass emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -126,7 +133,7 @@ shapes:MassValueShape a sh:NodeShape ;
 # ── Dimensions ────────────────────────────────────────────────────────────────
 
 shapes:DiameterValueShape a sh:NodeShape ;
-    sh:targetObjectsOf emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6 ;
+    sh:targetClass emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -136,7 +143,7 @@ shapes:DiameterValueShape a sh:NodeShape ;
     ] .
 
 shapes:HeightValueShape a sh:NodeShape ;
-    sh:targetObjectsOf emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ;
+    sh:targetClass emmo:EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -146,7 +153,7 @@ shapes:HeightValueShape a sh:NodeShape ;
     ] .
 
 shapes:WidthValueShape a sh:NodeShape ;
-    sh:targetObjectsOf emmo:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0 ;
+    sh:targetClass emmo:EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -156,7 +163,7 @@ shapes:WidthValueShape a sh:NodeShape ;
     ] .
 
 shapes:ThicknessValueShape a sh:NodeShape ;
-    sh:targetObjectsOf emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656 ;
+    sh:targetClass emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minExclusive 0.0 ;
@@ -168,7 +175,7 @@ shapes:ThicknessValueShape a sh:NodeShape ;
 # ── Cycle life ────────────────────────────────────────────────────────────────
 
 shapes:CycleLifeValueShape a sh:NodeShape ;
-    sh:targetObjectsOf electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937 ;
+    sh:targetClass electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 1.0 ;
@@ -178,9 +185,11 @@ shapes:CycleLifeValueShape a sh:NodeShape ;
     ] .
 
 # ── Efficiency / fade percentages ─────────────────────────────────────────────
+# round_trip_energy_efficiency has no published EMMO class yet, so its quantity
+# node is typed with the battinfo: placeholder term (see records context).
 
 shapes:RoundTripEfficiencyValueShape a sh:NodeShape ;
-    sh:targetObjectsOf battinfo:roundTripEnergyEfficiency ;
+    sh:targetClass battinfo:roundTripEnergyEfficiency ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.0 ;
@@ -190,7 +199,7 @@ shapes:RoundTripEfficiencyValueShape a sh:NodeShape ;
     ] .
 
 shapes:CapacityFadeValueShape a sh:NodeShape ;
-    sh:targetObjectsOf battinfo:capacityFade ;
+    sh:targetClass electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.0 ;
