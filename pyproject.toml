@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77", "wheel"]
+requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -74,7 +74,7 @@ dev = [
   "battinfo[tabular]",  # the suite exercises the tabular + publish feature paths,
   "battinfo[publish]",  # so CI (--all-extras) installs both optional groups
   "build>=1.5.1",
-  "setuptools>=77",   # build backend, needed in-env for `build --no-isolation` (verification gate)
+  "setuptools>=83.0.0",   # build backend, needed in-env for `build --no-isolation` (verification gate)
   "wheel",
   "twine>=5.0",       # dist metadata validation (`twine check`) before publishing
   "datamodel-code-generator>=0.68.1",
