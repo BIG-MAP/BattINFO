@@ -60,10 +60,10 @@ tabular = [
 ]
 # RO-Crate validation for the publish pipeline.
 publish = [
-  "rocrate>=0.9",
+  "rocrate>=0.15.1",
 ]
 storage = [
-  "boto3>=1.43.44"
+  "boto3>=1.43.45"
 ]
 processing = [
   "batterydf>=0.2,<0.3",
@@ -83,7 +83,7 @@ dev = [
   "nbmake>=1.5",      # execute guide notebooks in CI (pytest --nbmake docs/guides)
   "ipykernel>=6.29",  # kernel for nbmake execution
   "pyshacl>=0.40.0",
-  "ruff>=0.15.20",
+  "ruff>=0.15.21",
   "pytest>=9.1.1",
   "pytest-cov>=5.0",
   "pytest-timeout>=2.3",
