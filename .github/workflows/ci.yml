@@ -68,7 +68,7 @@ jobs:
         run: uv run --no-sync python scripts/assemble_context.py --check
       - name: Upload coverage report
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-xml
           path: coverage.xml
@@ -161,7 +161,7 @@ jobs:
           uv run --no-sync python tests/installed_smoke.py
           uv run --no-sync battinfo --help > /dev/null
       - name: Upload distribution
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
