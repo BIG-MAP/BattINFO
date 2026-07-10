@@ -50,7 +50,7 @@ jobs:
           print(f"OK: {len(nbs)} notebooks parsed")
           PY
       - name: Upload rendered site
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-html
           path: docs/_build/html
