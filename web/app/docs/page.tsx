@@ -77,9 +77,9 @@ export default function DocsPage() {
           <CodeBlock label="python" code={quickstartPython} />
         </div>
         <p className="mt-4 text-sm text-ink-muted">
-          Full notebook walkthroughs ship in the repo under{" "}
-          <a href={`${site.reference}/guides`} className="text-brand-600 underline" target="_blank" rel="noreferrer">
-            docs/guides
+          Full notebook walkthroughs are rendered in the{" "}
+          <a href={`${site.reference}/guides/01-concepts.html`} className="text-brand-600 underline" target="_blank" rel="noreferrer">
+            documentation guides
           </a>
           .
         </p>
@@ -92,7 +92,7 @@ export default function DocsPage() {
           {guides.map((g) => (
             <a
               key={g.n}
-              href={`${site.reference}/guides/${g.slug}.ipynb`}
+              href={`${site.reference}/guides/${g.slug}.html`}
               target="_blank"
               rel="noreferrer"
               className="prose-card transition hover:border-brand-300 hover:shadow-md"

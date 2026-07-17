@@ -10,10 +10,11 @@ export const site = {
   // The IRI namespace is resolved by w3id.org, NOT by this site.
   iriBase: "https://w3id.org/battinfo/",
   // Developer reference (Sphinx). This site owns "why/try"; the reference owns
-  // "how/reference" — see docs/CONTENT-MODEL.md. TODO: point at
-  // https://docs.battinfo.org once the Sphinx site is deployed; until then the
-  // canonical reference is the docs/ tree on GitHub.
-  reference: "https://github.com/BIG-MAP/BattINFO/tree/main/docs",
+  // "how/reference" — see docs/CONTENT-MODEL.md. The rendered Sphinx site is
+  // deployed by CI (docs.yml) on every push to main; /dev is the tip-of-main
+  // build. Versioned paths appear alongside it at release tags. A future
+  // docs.battinfo.org alias would change only this constant.
+  reference: "https://big-map.github.io/BattINFO/dev",
   github: "https://github.com/BIG-MAP/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
   // The package is not on PyPI until the 0.8 release train publishes it
