@@ -16,11 +16,8 @@ from battinfo._util import _as_path, _citation_url_value
 from battinfo.api._records import _assert_id_matches_uid, save_record
 from battinfo.api._shared import (
     DATASET_IRI_RE,
-    DEFAULT_MATERIAL_SPECS_DIR,
-    DEFAULT_MATERIALS_DIR,
     DEFAULT_REGISTRATION_SOURCE_ROOT,
     DUPLICATE_POLICY_ERROR,
-    EXAMPLES_ROOT,
     MATERIAL_IRI_RE,
     MATERIAL_SPEC_IRI_RE,
     REGISTER_MODE_CREATE_ONLY,
@@ -28,9 +25,9 @@ from battinfo.api._shared import (
     PathLike,
     _component_iri_re,
     _iri_tail,
-    _iter_json_files,
     _normalized_dashed_uid,
     _paginate,
+    _query_record_files,
     _resolved_retrieved_at,
     _spec_iri_re,
     _str_eq,
@@ -364,13 +361,27 @@ def query_material_specs(
     formula: str | None = None,
     manufacturer: str | None = None,
     source_type: str | None = None,
-    directory: PathLike = DEFAULT_MATERIAL_SPECS_DIR,
+    source_root: PathLike | None = None,
+    directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query reusable material specifications."""
+    """Query reusable material specifications.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``, the
+    same root ``save_material_spec`` writes to). BattINFO's bundled example
+    materials are only searched with ``include_packaged_examples=True``; those
+    hits carry ``origin="packaged-example"`` so they can never masquerade as
+    your lab's inventory. ``directory=`` is a deprecated alias.
+    """
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(_as_path(directory)):
+    for path, origin in _query_record_files(
+        "material-spec",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    ):
         doc = _load_json(path)
         spec = doc.get("material_spec", {})
         prov = doc.get("provenance", {})
@@ -385,6 +396,7 @@ def query_material_specs(
                 "formula": spec.get("formula"),
                 "manufacturer": spec.get("manufacturer"),
                 "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                "origin": origin,
                 "path": str(path),
                 "record": doc,
             }
@@ -418,13 +430,25 @@ def query_materials(
     short_id_prefix: str | None = None,
     lot_id: str | None = None,
     source_type: str | None = None,
-    directory: PathLike = DEFAULT_MATERIALS_DIR,
+    source_root: PathLike | None = None,
+    directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query physical material lots/batches."""
+    """Query physical material lots/batches.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled example records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(_as_path(directory)):
+    for path, origin in _query_record_files(
+        "material",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    ):
         doc = _load_json(path)
         material = doc.get("material", {})
         prov = doc.get("provenance", {})
@@ -437,6 +461,7 @@ def query_materials(
                 "short_id": material.get("short_id"),
                 "lot_id": material.get("lot_id"),
                 "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                "origin": origin,
                 "path": str(path),
                 "record": doc,
             }
@@ -635,7 +660,7 @@ def save_component_instance(family: str, record: dict[str, Any] | PathLike, **kw
 
 def _query_component(
     record_key: str,
-    directory: Path,
+    files: list[tuple[Path, str]],
     *,
     id: str | None,
     name: str | None,
@@ -646,7 +671,7 @@ def _query_component(
     offset: int,
 ) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(directory):
+    for path, origin in files:
         doc = _load_json(path)
         body = doc.get(record_key)
         if not isinstance(body, Mapping):
@@ -655,6 +680,7 @@ def _query_component(
             "id": body.get("id"),
             "name": body.get("name"),
             "short_id": body.get("short_id"),
+            "origin": origin,
             "path": str(path),
             "record": doc,
         }
@@ -679,17 +705,29 @@ def _query_component(
 def query_component_specs(
     family: str,
     *,
+    source_root: PathLike | None = None,
     directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     id: str | None = None,
     name: str | None = None,
     short_id_prefix: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query reusable component specifications for a family."""
-    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / f"{family.replace('_', '-')}-spec"
+    """Query reusable component specifications for a family.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled example records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
+    files = _query_record_files(
+        f"{family.replace('_', '-')}-spec",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    )
     return _query_component(
-        f"{family}_spec", d, id=id, name=name, short_id_prefix=short_id_prefix,
+        f"{family}_spec", files, id=id, name=name, short_id_prefix=short_id_prefix,
         spec_ref_field=None, spec_id=None, limit=limit, offset=offset,
     )
 
@@ -697,7 +735,9 @@ def query_component_specs(
 def query_component_instances(
     family: str,
     *,
+    source_root: PathLike | None = None,
     directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     id: str | None = None,
     name: str | None = None,
     short_id_prefix: str | None = None,
@@ -705,10 +745,20 @@ def query_component_instances(
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query physical component instances for a family."""
-    d = _as_path(directory) if directory is not None else EXAMPLES_ROOT / family.replace("_", "-")
+    """Query physical component instances for a family.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled example records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
+    files = _query_record_files(
+        family.replace("_", "-"),
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    )
     return _query_component(
-        family, d, id=id, name=name, short_id_prefix=short_id_prefix,
+        family, files, id=id, name=name, short_id_prefix=short_id_prefix,
         spec_ref_field=f"{family}_spec_id", spec_id=spec_id, limit=limit, offset=offset,
     )
 

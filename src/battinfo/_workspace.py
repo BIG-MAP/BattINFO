@@ -46,7 +46,7 @@ from battinfo.bundle import (
     TestConformance,
     TestSpec,
 )
-from battinfo.entities import iri_namespace_map, stable_uid
+from battinfo.entities import cell_instance_identity_seed, iri_namespace_map, stable_uid
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -1713,47 +1713,42 @@ class Workspace:
             )
         return results
 
+    def _query_location(self, filters: dict[str, Any], *, dir_param: str = "directory") -> dict[str, Any]:
+        """Default a query to this workspace's records root unless the caller
+        already targeted a location (source_root= or a deprecated dir alias)."""
+        if dir_param not in filters and "source_root" not in filters:
+            filters["source_root"] = self.source_root
+        return filters
+
     def query_cell_specs(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("cell_specs_dir", self.source_root / "cell-spec")
-        return query_cell_specs(**filters)
+        return query_cell_specs(**self._query_location(filters, dir_param="cell_specs_dir"))
 
     def query(self, type: str, /, **filters: Any) -> list[dict[str, Any]]:
         normalized = type.strip().lower().replace("-", "_")
-        if normalized in {"cell_spec", "cell_specs", "cell_spec", "cell_specs"}:
-            filters.setdefault("cell_specs_dir", self.source_root / "cell-spec")
-            return query_api(type, **filters)
-        if normalized in {"cell", "cells", "cell_instance", "cell_instances"}:
-            filters.setdefault("directory", self.source_root / "cell-instance")
-            return query_api(type, **filters)
-        if normalized in {"test_spec", "test_specs", "test_protocol", "test_protocols"}:
-            filters.setdefault("directory", self.source_root / "test-protocol")
-            return query_api(type, **filters)
-        if normalized in {"test", "tests"}:
-            filters.setdefault("directory", self.source_root / "test")
-            return query_api(type, **filters)
-        if normalized in {"dataset", "datasets"}:
-            filters.setdefault("directory", self.source_root / "dataset")
-            return query_api(type, **filters)
+        if normalized in {"cell_spec", "cell_specs"}:
+            return query_api(type, **self._query_location(filters, dir_param="cell_specs_dir"))
+        if normalized in {
+            "cell", "cells", "cell_instance", "cell_instances",
+            "test_spec", "test_specs", "test_protocol", "test_protocols",
+            "test", "tests", "dataset", "datasets",
+        }:
+            return query_api(type, **self._query_location(filters))
         if normalized in {"description", "descriptions", "library_cell_spec", "library_cell_specs"}:
             filters.setdefault("directory", self.library_root)
             return query_api(type, **filters)
         return query_api(type, **filters)
 
     def query_cells(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "cell-instance")
-        return query_cell_instances(**filters)
+        return query_cell_instances(**self._query_location(filters))
 
     def query_tests(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "test")
-        return query_tests(**filters)
+        return query_tests(**self._query_location(filters))
 
     def query_test_specs(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "test-protocol")
-        return query_test_specs(**filters)
+        return query_test_specs(**self._query_location(filters))
 
     def query_datasets(self, **filters: Any) -> list[dict[str, Any]]:
-        filters.setdefault("directory", self.source_root / "dataset")
-        return query_datasets(**filters)
+        return query_datasets(**self._query_location(filters))
 
     def query_descriptions(self, **filters: Any) -> list[dict[str, Any]]:
         filters.setdefault("directory", self.library_root)
@@ -1977,17 +1972,23 @@ class Workspace:
         if finalized.name is None:
             finalized.name = finalized.serial_number or finalized.batch_id or "cell"
         if finalized.id is None:
-            finalized.id = _entity_iri(
-                "cell",
-                "::".join(
-                    [
-                        _with_default(finalized.cell_spec_id, "unknown-cell-spec"),
-                        finalized.serial_number or "",
-                        finalized.batch_id or "",
-                        _with_default(finalized.name, "cell"),
-                    ]
-                ),
+            # Shared cell-instance identity policy (entities.py): the same
+            # (spec IRI, serial/name) mints the same IRI here and on the
+            # low-level save_cell_instance/create_cell_instance surfaces.
+            seed = cell_instance_identity_seed(
+                cell_spec_id=finalized.cell_spec_id,
+                serial_number=finalized.serial_number,
+                batch_id=finalized.batch_id,
+                name=finalized.name,
             )
+            # name is defaulted above, so the seed is essentially always
+            # available; the fallback keeps the pre-refactor anonymous seed
+            # (colliding siblings are re-minted by _disambiguate_entity_ids).
+            if seed is None:
+                seed = "::".join(
+                    [_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", "cell"]
+                )
+            finalized.id = _entity_iri("cell", seed)
         if finalized.source.type is None:
             finalized.source.type = "measurement"
         if finalized.source.retrieved_at is None:

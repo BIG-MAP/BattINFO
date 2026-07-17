@@ -30,7 +30,7 @@ from __future__ import annotations
 import re
 from typing import Any, Optional, Sequence
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 __all__ = [
     "Quantity",
@@ -56,10 +56,37 @@ class ExperimentSyntaxError(ValueError):
 # ── Model ─────────────────────────────────────────────────────────────────────
 
 class Quantity(BaseModel):
-    """A scalar value with its unit (e.g. ``{value: 4.2, unit: "V"}``)."""
+    """A value (or min/max window) with its unit.
+
+    Scalar form: ``{value: 4.2, unit: "V"}``. Window form (aligned with the
+    canonical quantity schema's ``min_value``/``max_value`` fields):
+    ``{min_value: 2.5, max_value: 4.2, unit: "V"}`` — e.g. a test-spec voltage
+    window. At least one of ``value``/``min_value``/``max_value`` is required.
+    """
     model_config = ConfigDict(extra="forbid")
-    value: float
+    value: Optional[float] = None
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
     unit: str
+
+    @model_validator(mode="after")
+    def _require_some_value(self) -> "Quantity":
+        if self.value is None and self.min_value is None and self.max_value is None:
+            raise ValueError(
+                "Quantity needs at least one of value, min_value, max_value "
+                "(e.g. {'value': 25, 'unit': 'degC'} or "
+                "{'min_value': 2.5, 'max_value': 4.2, 'unit': 'V'})."
+            )
+        if (
+            self.min_value is not None
+            and self.max_value is not None
+            and self.min_value > self.max_value
+        ):
+            raise ValueError(
+                f"Quantity min_value ({self.min_value}) must not exceed "
+                f"max_value ({self.max_value})."
+            )
+        return self
 
 
 class Termination(BaseModel):
@@ -294,6 +321,11 @@ def _fmt_crate(value: float) -> str:
 
 
 def _fmt_setpoint(kind: str, qty: Quantity) -> str:
+    if qty.value is None:
+        # Window form ({min_value, max_value}) — render as a range label.
+        lo = _fmt_number(qty.min_value) if qty.min_value is not None else "?"
+        hi = _fmt_number(qty.max_value) if qty.max_value is not None else "?"
+        return f"{lo}..{hi} {qty.unit}"
     if kind == "c_rate":
         return _fmt_crate(qty.value)
     if kind == "current":
@@ -333,7 +365,7 @@ def render_step(step: Step) -> str:
         head = "Rest"
     elif step.mode == "cv":
         volt = step.setpoints.get("voltage")
-        head = f"Hold at {_fmt_number(volt.value)} V" if volt else "Hold"
+        head = f"Hold at {_fmt_number(volt.value)} V" if volt and volt.value is not None else "Hold"
     elif step.mode in ("cc", "cp", "cr"):
         word = "Charge" if step.direction == "charge" else "Discharge"
         kind = next(iter(step.setpoints), None)
@@ -343,7 +375,7 @@ def render_step(step: Step) -> str:
         rate = next((k for k in step.setpoints if k != "voltage"), None)
         volt = step.setpoints.get("voltage")
         rate_str = f" at {_fmt_setpoint(rate, step.setpoints[rate])}" if rate else ""
-        volt_str = f" to {_fmt_number(volt.value)} V then hold" if volt else ""
+        volt_str = f" to {_fmt_number(volt.value)} V then hold" if volt and volt.value is not None else ""
         head = f"{word}{rate_str}{volt_str}"
     else:
         # eis / scan / group / unknown — not PyBaMM-expressible; use a label.
@@ -401,22 +433,25 @@ def compute_facets(steps: Sequence[Step],
         if step.mode in _CONTROL_MODE:
             control_modes.add(_CONTROL_MODE[step.mode])
         for key, qty in step.setpoints.items():
+            values = [v for v in (qty.value, qty.min_value, qty.max_value) if v is not None]
             if key == "c_rate":
-                c_rates.append(qty.value)
+                c_rates.extend(values)
             elif key == "voltage":
-                voltages.append(qty.value)
+                voltages.extend(values)
         for term in step.termination:
             if term.quantity == "voltage":
                 voltages.append(term.value)
             elif term.quantity == "c_rate":
                 c_rates.append(term.value)
-        if step.temperature is not None:
+        if step.temperature is not None and step.temperature.value is not None:
             temperatures.append(step.temperature.value)
         tags.update(step.tags)
 
     for key, qty in (conditions or {}).items():
         if key in ("temperature", "ambient_temperature", "room_temperature"):
-            temperatures.append(qty.value)
+            temperatures.extend(
+                v for v in (qty.value, qty.min_value, qty.max_value) if v is not None
+            )
 
     leaf_modes = {s.mode for s in _iter_leaf_steps(steps)}
     facets: dict[str, Any] = {

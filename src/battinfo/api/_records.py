@@ -19,9 +19,6 @@ from battinfo.api._shared import (
     CELL_IRI_RE,
     CELL_SPEC_IRI_RE,
     DATASET_IRI_RE,
-    DEFAULT_CELL_INSTANCES_DIR,
-    DEFAULT_CELL_TYPES_DIR,
-    DEFAULT_DATASETS_DIR,
     DEFAULT_LIBRARY_AGGREGATE_JSONLD,
     DEFAULT_LIBRARY_CELL_TYPES_DIR,
     DEFAULT_LIBRARY_MANIFEST_JSON,
@@ -29,8 +26,6 @@ from battinfo.api._shared import (
     DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR,
     DEFAULT_PUBLISH_SOURCES,
     DEFAULT_REGISTRATION_SOURCE_ROOT,
-    DEFAULT_TEST_PROTOCOLS_DIR,
-    DEFAULT_TESTS_DIR,
     DUPLICATE_POLICIES,
     DUPLICATE_POLICY_ERROR,
     DUPLICATE_POLICY_RETURN_EXISTING,
@@ -48,6 +43,7 @@ from battinfo.api._shared import (
     _normalized_dashed_uid,
     _paginate,
     _quantity_numeric_value,
+    _query_record_files,
     _resolved_retrieved_at,
     _resolved_time,
     _short_id_from_iri,
@@ -340,15 +336,30 @@ def query_cell_specs(
     nominal_voltage_min: float | None = None,
     nominal_voltage_max: float | None = None,
     spec_filters: Mapping[str, tuple[float | None, float | None]] | None = None,
-    cell_specs_dir: PathLike = DEFAULT_CELL_TYPES_DIR,
+    source_root: PathLike | None = None,
+    cell_specs_dir: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query cell types using practical metadata/property filters."""
+    """Query cell types using practical metadata/property filters.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``, the
+    same root ``save_cell_spec`` writes to). BattINFO's bundled demo fleet is
+    only searched with ``include_packaged_examples=True``; those hits carry
+    ``origin="packaged-example"``. ``cell_specs_dir=`` is a deprecated alias
+    pointing directly at one record directory.
+    """
     records: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
 
-    for path in _iter_json_files(_as_path(cell_specs_dir)):
+    for path, origin in _query_record_files(
+        "cell-spec",
+        source_root=source_root,
+        directory=cell_specs_dir,
+        include_packaged_examples=include_packaged_examples,
+        directory_param="cell_specs_dir",
+    ):
         doc = _load_json(path)
         product = doc.get("cell_spec", {})
         specs = doc.get("properties", {})
@@ -401,6 +412,7 @@ def query_cell_specs(
                 "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
                 "properties": specs,
                 "source": "cell-spec",
+                "origin": origin,
                 "path": str(path),
             }
         )
@@ -449,13 +461,25 @@ def query_cell_instances(
     has_dataset: bool | None = None,
     dataset_id: str | None = None,
     source_type: str | None = None,
-    directory: PathLike = DEFAULT_CELL_INSTANCES_DIR,
+    source_root: PathLike | None = None,
+    directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query physical cell instances."""
+    """Query physical cell instances.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled demo records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(_as_path(directory)):
+    for path, origin in _query_record_files(
+        "cell",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    ):
         doc = _load_json(path)
         inst = doc.get("cell_instance", {})
         prov = doc.get("provenance", {})
@@ -483,6 +507,7 @@ def query_cell_instances(
             "dataset_id": linked_dataset_ids[0] if linked_dataset_ids else None,
             "dataset_ids": linked_dataset_ids,
             "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+            "origin": origin,
             "path": str(path),
             "record": doc,
         }
@@ -520,13 +545,25 @@ def query_datasets(
     source_type: str | None = None,
     format: str | None = None,
     license: str | None = None,
-    directory: PathLike = DEFAULT_DATASETS_DIR,
+    source_root: PathLike | None = None,
+    directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query dataset metadata records."""
+    """Query dataset metadata records.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled demo records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(_as_path(directory)):
+    for path, origin in _query_record_files(
+        "dataset",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    ):
         doc = _load_json(path)
         dataset = doc.get("dataset", {})
         prov = doc.get("provenance", {})
@@ -569,6 +606,7 @@ def query_datasets(
                 item for item in about if isinstance(item, str) and TEST_IRI_RE.fullmatch(item)
             ] if isinstance(about, list) else [],
             "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+            "origin": origin,
             "path": str(path),
             "record": doc,
         }
@@ -602,13 +640,25 @@ def query_tests(
     dataset_id: str | None = None,
     kind: str | None = None,
     source_type: str | None = None,
-    directory: PathLike = DEFAULT_TESTS_DIR,
+    source_root: PathLike | None = None,
+    directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """Query canonical test metadata records."""
+    """Query canonical test metadata records.
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled demo records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(_as_path(directory)):
+    for path, origin in _query_record_files(
+        "test",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    ):
         doc = _load_json(path)
         test = doc.get("test", {})
         prov = doc.get("provenance", {})
@@ -629,6 +679,7 @@ def query_tests(
                 "conformance": test.get("conformance"),
                 "dataset_ids": [item for item in dataset_ids if isinstance(item, str)],
                 "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
+                "origin": origin,
                 "path": str(path),
                 "record": doc,
             }
@@ -664,7 +715,9 @@ def query_test_specs(
     has_cv_hold: bool | None = None,
     has_rest: bool | None = None,
     has_eis: bool | None = None,
-    directory: PathLike = DEFAULT_TEST_PROTOCOLS_DIR,
+    source_root: PathLike | None = None,
+    directory: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
@@ -673,9 +726,19 @@ def query_test_specs(
     Beyond identity filters, the ``mode`` / ``direction`` / ``tag`` / ``c_rate`` /
     ``has_cv_hold`` / ``has_rest`` / ``has_eis`` filters match against the derived
     ``facets`` rollup, so an agent can find protocols by what their method *does*
-    (e.g. all specs with a CV hold, or any using C/2)."""
+    (e.g. all specs with a CV hold, or any using C/2).
+
+    Searches YOUR records under ``source_root`` (default: ``./examples``);
+    bundled demo records only with ``include_packaged_examples=True`` (hits
+    labeled ``origin="packaged-example"``). ``directory=`` is a deprecated alias.
+    """
     records: list[dict[str, Any]] = []
-    for path in _iter_json_files(_as_path(directory)):
+    for path, origin in _query_record_files(
+        "test-protocol",
+        source_root=source_root,
+        directory=directory,
+        include_packaged_examples=include_packaged_examples,
+    ):
         doc = _load_json(path)
         protocol = doc.get("test_spec", {})
         prov = doc.get("provenance", {})
@@ -691,6 +754,7 @@ def query_test_specs(
                 "protocol_url": protocol.get("protocol_url"),
                 "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
                 "facets": doc.get("facets") if isinstance(doc.get("facets"), Mapping) else {},
+                "origin": origin,
                 "path": str(path),
                 "record": doc,
             }
@@ -765,9 +829,16 @@ def resolve_cell_spec_id(
     chemistry: str | None = None,
     format: str | None = None,
     exact_model: bool = True,
+    source_root: PathLike | None = None,
+    include_packaged_examples: bool = False,
     limit: int = 50,
 ) -> str:
-    """Resolve a unique `cell-spec` IRI from metadata filters."""
+    """Resolve a unique `cell-spec` IRI from metadata filters.
+
+    Metadata filters resolve against YOUR records (see ``query_cell_specs``);
+    pass ``include_packaged_examples=True`` to also match BattINFO's bundled
+    demo fleet.
+    """
     if cell_spec_id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(cell_spec_id):
             raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -778,6 +849,8 @@ def resolve_cell_spec_id(
         chemistry=chemistry,
         format=format,
         model_name_contains=model_name,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
         limit=limit,
         offset=0,
     )
@@ -811,13 +884,17 @@ def create_cell_instance(
     dataset_id: str | None = None,
     source_type: str = "measurement",
     uid: str | None = None,
+    source_root: PathLike | None = None,
+    include_packaged_examples: bool = False,
     out_path: PathLike | None = None,
     validate: bool = True,
 ) -> dict[str, Any]:
     """Create a physical cell-instance document.
 
     You can pass a canonical `cell_spec_id`, a `cell_spec` document/path, or metadata filters
-    (`model_name`, `manufacturer`, ...) to resolve the type.
+    (`model_name`, `manufacturer`, ...) to resolve the type. Metadata filters resolve against
+    YOUR records under ``source_root`` (default ``./examples``); pass
+    ``include_packaged_examples=True`` to also match the bundled demo fleet.
     """
     resolved_cell_spec_id = cell_spec_id
 
@@ -843,6 +920,8 @@ def create_cell_instance(
         manufacturer=manufacturer,
         chemistry=chemistry,
         format=format,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
     )
 
     if source_type not in {"measurement", "lab", "bms", "other"}:
@@ -851,7 +930,18 @@ def create_cell_instance(
     if dataset_id is not None and not DATASET_IRI_RE.fullmatch(dataset_id):
         raise ValueError("dataset_id must match https://w3id.org/battinfo/dataset/{uid}.")
 
-    dashed_uid = _normalized_dashed_uid(uid)
+    if uid is None:
+        # Mint through the shared cell-instance identity policy so the same
+        # (spec IRI, serial) yields the same IRI here, in save_cell_instance,
+        # and in the workspace — not a fresh random identity per surface.
+        from battinfo.entities import cell_instance_identity_seed, stable_uid  # noqa: PLC0415
+
+        identity_seed = cell_instance_identity_seed(
+            cell_spec_id=resolved_cell_spec_id, serial_number=serial_number
+        )
+        dashed_uid = stable_uid(identity_seed) if identity_seed is not None else _normalized_dashed_uid(None)
+    else:
+        dashed_uid = _normalized_dashed_uid(uid)
     instance_id = f"https://w3id.org/battinfo/cell/{dashed_uid}"
 
     out: dict[str, Any] = {
@@ -998,17 +1088,19 @@ def _identity_minted_uid(entity_kind: str, entity: Any) -> str:
             ]
         )
     elif entity_kind == "cell":
-        name = entity.name or entity.serial_number or entity.batch_id
-        if not _seed_part(name):
-            return _normalized_dashed_uid(None)
-        seed = "::".join(
-            [
-                _seed_part(entity.cell_spec_id, "unknown-cell-spec"),
-                entity.serial_number or "",
-                entity.batch_id or "",
-                _seed_part(name, "cell"),
-            ]
+        from battinfo.entities import cell_instance_identity_seed  # noqa: PLC0415
+
+        # Single shared identity policy for cell instances (see entities.py):
+        # the workspace finalizer and both low-level save surfaces mint from it.
+        shared_seed = cell_instance_identity_seed(
+            cell_spec_id=entity.cell_spec_id,
+            serial_number=entity.serial_number,
+            batch_id=entity.batch_id,
+            name=entity.name,
         )
+        if shared_seed is None:
+            return _normalized_dashed_uid(None)
+        seed = shared_seed
     elif entity_kind == "test-protocol":
         if not (_seed_part(entity.name) or _seed_part(entity.version)):
             return _normalized_dashed_uid(None)
@@ -1196,7 +1288,15 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
 
 
 def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None:
-    report = validate_references_report(doc, source_root, allow_missing=True)
+    """Reference gate for the save path (default ON via ``resolve_references=True``).
+
+    Cross-record references (``cell_spec_id``, component/material ``*_spec_id``,
+    ``protocol_id``, dataset links, ...) must resolve to records that exist under
+    *source_root* — a dangling reference is an error, not a silent success.
+    Staged workflows that intentionally save the referencing record first can
+    opt out with ``resolve_references=False``.
+    """
+    report = validate_references_report(doc, source_root, allow_missing=False)
     if report.ok:
         return
     raise ValueError(format_report_errors(report, prefix="Reference validation failed"))
@@ -1954,7 +2054,13 @@ def save_batch(
                         source_root=source_root,
                         mode=mode_normalized,
                         duplicate_policy=duplicate_policy_normalized,
-                        resolve_references=resolve_references,
+                        # Per-record reference checks are deferred inside the
+                        # batch (records in a set may legitimately reference
+                        # each other in any order, even circularly); when
+                        # resolve_references=True the COMPLETED set is
+                        # link-validated below, so a dangling reference still
+                        # fails the batch — just not half-way through it.
+                        resolve_references=False,
                         publish=publish,
                         publish_root=publish_root,
                         build_jsonld=build_jsonld,

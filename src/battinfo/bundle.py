@@ -2210,7 +2210,8 @@ class TestSpec(BundleJsonModel):
             record["safety"] = copy.deepcopy(self.safety)
         if self.conditions:
             record["conditions"] = {
-                name: qty.model_dump(mode="json") for name, qty in self.conditions.items()
+                name: qty.model_dump(mode="json", exclude_none=True)
+                for name, qty in self.conditions.items()
             }
         if self.artifacts:
             record["artifacts"] = [a.to_record() for a in self.artifacts]

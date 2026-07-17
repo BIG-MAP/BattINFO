@@ -96,8 +96,8 @@ def test_material_spec_and_instance_roundtrip(tmp_path: Path) -> None:
     saved_material = api.save_material(material, source_root=tmp_path)  # resolves spec reference
     assert saved_material["entity_type"] == "material"
 
-    assert [s["name"] for s in api.query_material_specs(directory=tmp_path / "material-spec")] == ["LFP"]
-    assert [m["lot_id"] for m in api.query_materials(directory=tmp_path / "material")] == ["LOT-1"]
+    assert [s["name"] for s in api.query_material_specs(source_root=tmp_path)] == ["LFP"]
+    assert [m["lot_id"] for m in api.query_materials(source_root=tmp_path)] == ["LOT-1"]
 
     index = api.build_index(source_root=tmp_path)
     assert index["material_spec_count"] == 1
