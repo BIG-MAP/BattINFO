@@ -4604,6 +4604,77 @@ class AuthoringWorkspace:
                 except Exception:
                     continue
 
+        # ── Equipment / channel lookups (test provenance) ──────────────────────
+        # Registered lab equipment records let a test's equipment_id/channel_id
+        # resolve to a REAL equipment node (name, serial number, spec link)
+        # instead of degrading to a nameless instrument string.
+        equipment_by_id: dict[str, dict] = {}
+        for raw in record_sets.get("equipment", []) or []:
+            body = raw.get("equipment", {}) if isinstance(raw, dict) else {}
+            if isinstance(body, dict) and body.get("id"):
+                equipment_by_id[body["id"]] = body
+        equipment_spec_by_id: dict[str, dict] = {}
+        for raw in record_sets.get("equipment-spec", []) or []:
+            body = raw.get("equipment_spec", {}) if isinstance(raw, dict) else {}
+            if isinstance(body, dict) and body.get("id"):
+                equipment_spec_by_id[body["id"]] = body
+        channel_by_id: dict[str, dict] = {}
+        for raw in record_sets.get("channel", []) or []:
+            body = raw.get("channel", {}) if isinstance(raw, dict) else {}
+            if isinstance(body, dict) and body.get("id"):
+                channel_by_id[body["id"]] = body
+
+        # Equipment/channel nodes referenced by at least one test, emitted as
+        # graph-level nodes (an equipment unit is shared across tests).
+        equipment_nodes: dict[str, dict] = {}
+        channel_nodes: dict[str, dict] = {}
+
+        def _equipment_graph_node(eq_id: str, instrument: str) -> dict:
+            """Full equipment node for the publication graph: EMMO instrument
+            class (from the equipment-spec's class/name/model, falling back to
+            the test's instrument string), display name, serial number, and the
+            spec link — mirroring the cell → cell-spec instance pattern."""
+            from battinfo._emmo_instruments import _instrument_emmo_type  # noqa: PLC0415
+
+            body = equipment_by_id.get(eq_id, {})
+            spec = equipment_spec_by_id.get(body.get("equipment_spec_id", ""), {})
+            class_seed = " ".join(
+                str(v) for v in (
+                    spec.get("equipment_class"), spec.get("name"), spec.get("model"), instrument,
+                ) if v
+            )
+            enode: dict = {
+                "@id": eq_id,
+                "@type": [_instrument_emmo_type(class_seed), "prov:Entity"],
+            }
+            display = body.get("name") or spec.get("name") or instrument
+            if display:
+                enode["schema:name"] = display
+                enode["rdfs:label"] = display
+            if body.get("serial_number"):
+                enode["schema:serialNumber"] = body["serial_number"]
+            if body.get("location"):
+                enode["schema:location"] = body["location"]
+            if body.get("equipment_spec_id"):
+                enode["hasDescription"] = {"@id": body["equipment_spec_id"]}
+                enode["dcterms:conformsTo"] = {"@id": body["equipment_spec_id"]}
+            return enode
+
+        def _channel_graph_node(ch_id: str, eq_id: str) -> dict:
+            body = channel_by_id.get(ch_id, {})
+            cnode: dict = {"@id": ch_id, "@type": ["schema:Thing", "prov:Entity"]}
+            label = body.get("label") or (
+                f"CH{body['index']}" if isinstance(body.get("index"), int) else ""
+            )
+            if label:
+                cnode["schema:name"] = label
+                cnode["rdfs:label"] = label
+            if isinstance(body.get("index"), int):
+                cnode["schema:position"] = body["index"]
+            if eq_id:
+                cnode["schema:isPartOf"] = {"@id": eq_id}
+            return cnode
+
         # ── Build test instance nodes + dataset→test mapping ──────────────────
         ds_to_test: dict[str, dict] = {}
         test_nodes: list[dict] = []
@@ -4646,14 +4717,41 @@ class AuthoringWorkspace:
                             tnode["schema:additionalType"] = test["kind"]
                         if protocol:
                             tnode["schema:measurementTechnique"] = protocol
-                        if instrument:
-                            # Instrument is EMMO-canonical (schema.org has no apt
-                            # predicate — schema:instrument is an Action property and
-                            # this node is an Activity, so it is intentionally omitted).
+                        # Equipment provenance (EMMO-canonical; schema.org has no apt
+                        # predicate — schema:instrument is an Action property and this
+                        # node is an Activity, so it is intentionally omitted).
+                        # A registered equipment/channel reference wins over the free-
+                        # text instrument string: the test links the REAL equipment
+                        # node (emitted into the graph below) and the channel it ran
+                        # on; the bare instrument string remains the fallback.
+                        equipment_id = test.get("equipment_id", "")
+                        channel_id = test.get("channel_id", "")
+                        if channel_id and not equipment_id:
+                            equipment_id = channel_by_id.get(channel_id, {}).get("equipment_id", "")
+                        if equipment_id:
+                            if equipment_id not in equipment_nodes:
+                                equipment_nodes[equipment_id] = _equipment_graph_node(
+                                    equipment_id, instrument
+                                )
+                            equip_ref: dict = {"@id": equipment_id}
+                            # Keep the display name inline so the round-trip importer
+                            # (which reads hasTestEquipment/schema:name) still sees it.
+                            equip_name = equipment_nodes[equipment_id].get("schema:name")
+                            if equip_name:
+                                equip_ref["schema:name"] = equip_name
+                            tnode["hasTestEquipment"] = equip_ref
+                        elif instrument:
                             tnode["hasTestEquipment"] = {
                                 "@type":       "schema:Thing",
                                 "schema:name": instrument,
                             }
+                        if channel_id:
+                            if channel_id not in channel_nodes:
+                                channel_nodes[channel_id] = _channel_graph_node(
+                                    channel_id, equipment_id
+                                )
+                            # The channel is the piece of equipment the activity used.
+                            tnode["prov:used"].append({"@id": channel_id})
                         # hasOutput → the dataset IRIs produced by this test, mirrored
                         # as prov:generated so PROV alone reaches the output dataset.
                         outputs = [{"@id": ds_id} for ds_id in (test.get("dataset_ids") or [])]
@@ -5127,6 +5225,10 @@ class AuthoringWorkspace:
             + test_spec_nodes
             + instance_nodes
             + test_nodes
+            # Equipment provenance: the units/channels the tests actually ran on,
+            # so hasTestEquipment / prov:used resolve to described nodes.
+            + [equipment_nodes[k] for k in sorted(equipment_nodes)]
+            + [channel_nodes[k] for k in sorted(channel_nodes)]
         )
 
         # ── Inline context: load from records.context.json + dynamic prefLabel terms ─
