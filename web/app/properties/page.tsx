@@ -30,7 +30,7 @@ export default function PropertiesPage() {
       </p>
       <div className="mt-8 flex flex-wrap gap-4">
         <a
-          href={`${site.reference}/pages/property-reference.md`}
+          href={`${site.reference}/pages/property-reference.html`}
           target="_blank"
           rel="noreferrer"
           className="rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700"
