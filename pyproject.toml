@@ -43,7 +43,7 @@ classifiers = [
 ]
 dependencies = [
   "pydantic>=2.7",
-  "typer>=0.26.8",
+  "typer>=0.27.0",
   "rich>=13.7",
   "jsonschema>=4.21",
   "rdflib>=7.0",
@@ -63,7 +63,7 @@ publish = [
   "rocrate>=0.15.1",
 ]
 storage = [
-  "boto3>=1.43.45"
+  "boto3>=1.43.50"
 ]
 processing = [
   "batterydf>=0.2,<0.3",
@@ -83,12 +83,12 @@ dev = [
   "nbmake>=1.5",      # execute guide notebooks in CI (pytest --nbmake docs/guides)
   "ipykernel>=6.29",  # kernel for nbmake execution
   "pyshacl>=0.40.0",
-  "ruff>=0.15.21",
+  "ruff>=0.15.22",
   "pytest>=9.1.1",
   "pytest-cov>=5.0",
   "pytest-timeout>=2.3",
   "pytest-socket>=0.7",
-  "mypy>=2.2.0"
+  "mypy>=2.3.0"
 ]
 docs = [
   "autodoc-pydantic>=2.2",  # renders pydantic Field(description=...) in the API reference
