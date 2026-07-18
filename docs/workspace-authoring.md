@@ -1,8 +1,10 @@
 # Workspace authoring
 
-`battinfo.workspace(".")` is the blessed authoring surface — the one entry point that
-covers the common case end-to-end: describe the cells you tested, attach tests and data,
-and publish, without touching the lower layers.
+`battinfo.workspace(".")` is the blessed authoring surface for the lab-log
+workflow — describe the cells you tested, attach tests and data, and publish,
+without touching the lower layers. It covers cells, tests, datasets, and
+equipment; materials and component specs are authored through `battinfo.api`
+(see the [coverage table](#what-each-surface-can-author-today) below).
 
 ```python
 import battinfo
@@ -17,7 +19,9 @@ ws.quickstart()   # prints the copy-pasteable version of everything below
 import battinfo
 ws = battinfo.workspace(".")
 
-# 1. One-time: log in (get a key at the registry settings page)
+# 1. One-time: log in. Publishing goes to the Battery Genome registry
+#    (battery-genome.org); during the soft launch API keys are granted by
+#    the registry operators — there is no self-service key page yet.
 ws.login(api_key="YOUR_KEY")        # or ws.setup() to see options
 
 # 2. Tag this work with the project that funded it (optional, once per
@@ -54,11 +58,34 @@ Every verb is a method on the returned `AuthoringWorkspace` (also importable as
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` — this page |
 | Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` — see the [Python API](pages/api-reference.rst) |
-| Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo.Workspace` |
+| Register materials and component specs (electrodes, electrolytes, …) | **`battinfo.api` functions** | `create_*` / `save_*` — see the [cookbook](pages/cookbook.md) |
+| Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo._workspace.Workspace` |
+
+## What each surface can author today
+
+Verified against the current release — where a cell says "no", that is a
+roadmap item, not an omission in your usage:
+
+| Record type | Workspace (`ws.*`) | Python (`battinfo` / `battinfo.api`) | CLI (`battinfo …`) |
+|---|---|---|---|
+| Cell spec | yes — `template` + `load`, `search` + reuse, `spec=` on `add("cell")` | yes — `CellSpec` + `save_cell_spec` / `publish` | yes — `template` / `save cell-spec` / `validate` |
+| Cell (physical instance) | yes — `add("cell", names=[...])` | yes — `save_cell_instance` | yes — `create` / `save cell-instance` |
+| Test spec (protocol) | partial — `template("test-spec")` exists but its output currently fails `ws.load()` ([troubleshooting](pages/troubleshooting.md)) | yes — `TestSpec` + `save_test_spec` (recommended) | yes — `template` / `save test-spec` |
+| Test | yes — `add("test", cell=..., data=..., channel=...)` | yes — `Test` + `save_test` | yes — `save test` |
+| Dataset | yes — created by `add("test", data=...)` | yes — `Dataset` + `save_dataset` | yes — `save dataset` |
+| Equipment + channels | **yes — best path**: `add("equipment", ...)` ([how-to](howto/register-equipment.md)) | yes — `battinfo.api` equipment/channel functions | no |
+| Material spec / lot | no | **yes — the path**: `battinfo.api` `create`/`save_material_spec` ([how-to](howto/register-materials.md)) | partial — `save record --input file.json` |
+| Component specs (electrode, electrolyte, separator, current-collector, housing) | no | **yes — the path**: `battinfo.api` per-family `create`/`save` ([how-to](howto/build-a-cell-from-components.md)) | partial — `save record --input file.json` |
+
+Two CLI caveats: `battinfo query` currently reads only the example records
+packaged with BattINFO (no directory option — use the Python `query_*`
+functions for your own library), and there are no CLI `template`/`query`
+commands for materials or components.
 
 ## The layers underneath
 
-- **`battinfo.Workspace`** (in `battinfo._workspace`) is the object-graph engine: it
+- **`battinfo._workspace.Workspace`** is the object-graph engine (the top-level
+  `battinfo.Workspace` alias is deprecated): it
   holds linked `CellSpec` / `Cell` / `Test` / `Dataset` objects,
   finalizes ids and provenance, and writes the canonical records. The authoring
   workspace delegates to it; script against it directly when you are building

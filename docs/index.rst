@@ -3,6 +3,7 @@
    :hidden:
 
    pages/getting-started
+   pages/cookbook
    pages/guides
    pages/howto
    pages/reference

@@ -35,9 +35,15 @@ SNIPPET_FILES = (
     "QUICKSTART.md",
     "docs/python-api.md",
     "docs/pages/getting-started.rst",
+    "docs/pages/troubleshooting.md",
     "docs/howto/bulk-ingest.md",
+    "docs/howto/build-a-cell-from-components.md",
+    "docs/howto/find-existing-records.md",
     "docs/howto/fix-validation-errors.md",
+    "docs/howto/label-your-cells.md",
     "docs/howto/register-equipment.md",
+    "docs/howto/register-materials.md",
+    "docs/test-specs.md",
 )
 
 SKIP_MARKERS = ("<!-- doc-snippet: skip -->", ".. doc-snippet: skip")

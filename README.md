@@ -35,9 +35,13 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 
 [**Quickstart**](QUICKSTART.md) ·
 [**Documentation**](docs/index.md) ·
+[**Cookbook**](docs/pages/cookbook.md) ·
 [**Tutorials**](#tutorials) ·
 [**Contributing**](#contributing) ·
 [**Cite**](#citation)
+
+New words? The [plain-language glossary](docs/pages/glossary.md) decodes
+*Linked Data*, *EMMO*, *IRI*, and friends in two sentences each.
 
 </div>
 
@@ -122,8 +126,8 @@ Or from the command line:
 battinfo --help
 ```
 
-For interactive, multi-record work, the authoring workspace is the blessed surface —
-it wraps everything else:
+For interactive, multi-record work — cells, tests, datasets, equipment — the
+authoring workspace is the blessed surface:
 
 ```python
 import battinfo
@@ -131,8 +135,11 @@ ws = battinfo.workspace(".")
 ws.quickstart()   # prints a copy-pasteable end-to-end example
 ```
 
-The [quickstart's "Which surface do I use?" table](QUICKSTART.md#which-surface-do-i-use)
-maps the three entry points (workspace, models + `publish`, `battinfo.Workspace` engine).
+**Lab work?** Start at the [cookbook](docs/pages/cookbook.md) — twelve bench
+tasks (register materials, build a cell from components, label cells, convert
+cycler exports, publish) each mapped to a runnable recipe. The
+[capability table](docs/workspace-authoring.md#what-each-surface-can-author-today)
+shows which surface (workspace, `battinfo.api`, CLI) authors which record types today.
 
 **→ Read the [full quickstart](QUICKSTART.md) and the [documentation index](docs/index.md).**
 
@@ -239,8 +246,9 @@ CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
 
 ## Citation
 
-If you use BattINFO in your research, please cite it. Once the first release is
-archived on Zenodo, the concept DOI badge above will resolve to a citable record:
+If you use BattINFO in your research, please cite it. The concept DOI arrives
+with the 0.8 release (the first Zenodo-archived release); the badge above will
+then resolve to a citable record:
 
 ```bibtex
 @software{battinfo,
