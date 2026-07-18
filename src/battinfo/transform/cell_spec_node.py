@@ -32,10 +32,22 @@ from importlib import resources
 from typing import Any, Mapping
 
 from battinfo.transform.json_to_jsonld import (
+    _ASSEMBLY_QUANTITY_TERMS,
+    _CC_FORM_FACTOR_MAP,
+    _CC_MATERIAL_MAP,
+    _DESCRIPTOR_COATING_PROPERTY_TERMS,
+    _DESCRIPTOR_PROPERTY_TERMS,
+    _ELECTROLYTE_FAMILY_TYPES,
+    _FORMAT_CASE_TYPE,
+    _FRACTION_PROPERTY_TERMS,
+    _HARDWARE_PART_TYPE,
+    _apply_specification_composition,
+    _apply_specification_structure_and_refs,
     _descriptor_quantity_node,
     _entity_mapping,
     _epoch_to_iso8601,
     _load_mapping_file,
+    _material_name_map,
     _property_type_map,
     _property_type_term,
 )
@@ -109,6 +121,56 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "hasMeasurementParameter",
 )
 
+# Composition-tree terms emitted by the shared specification appliers
+# (_apply_specification_composition / _apply_specification_structure_and_refs)
+# and the equipment provenance nodes. Relations + fixed classes; the per-map
+# class values (materials, cases, electrolyte families, …) are appended in
+# label_to_compact(). Terms absent from the bundled domain-battery context
+# (pending ontology additions, e.g. Seal / JellyRoll) are skipped there — the
+# same resolution gap the descriptor path has against the remote context.
+_COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
+    # relations
+    "hasPositiveElectrode",
+    "hasNegativeElectrode",
+    "hasElectrolyte",
+    "hasSeparator",
+    "hasCoating",
+    "hasCurrentCollector",
+    "hasCurrentCollectorTab",
+    "hasActiveMaterial",
+    "hasBinder",
+    "hasConductiveAdditive",
+    "hasSolute",
+    "hasSolvent",
+    "hasAdditive",
+    "hasCase",
+    "hasTerminal",
+    "hasConstituent",
+    # component / constituent classes
+    "Electrode",
+    "ElectrodeCoating",
+    "CurrentCollector",
+    "CurrentCollectorTab",
+    "Separator",
+    "ElectrolyteSolution",
+    "ActiveMaterial",
+    "Binder",
+    "ConductiveAdditive",
+    "Solute",
+    "Solvent",
+    "ElectrolyteAdditive",
+    "Case",
+    "Terminal",
+    "Seal",
+    "ElectrodeStack",
+    "JellyRoll",
+    # equipment provenance classes (test nodes)
+    "BatteryCycler",
+    "Potentiostat",
+    "Galvanostat",
+    "MeasuringInstrument",
+)
+
 
 @lru_cache(maxsize=1)
 def label_to_compact() -> dict[str, Any]:
@@ -151,8 +213,34 @@ def label_to_compact() -> dict[str, Any]:
             for battery_type in entry.get("battery_types", []):
                 if isinstance(battery_type, str):
                     _resolve(battery_type)
+            # Electrode node refinements used by the shared composition applier
+            # (e.g. LithiumIronPhosphateElectrode) and any mapped relation term.
+            for key in ("node_type", "relation"):
+                if isinstance(entry.get(key), str):
+                    _resolve(entry[key])
     for term in _EXTRA_CONTEXT_TERMS:
         _resolve(term)
+    # Composition-tree vocabulary: fixed relations/classes plus every class the
+    # shared composition emitters can produce from their lookup maps (material
+    # classes, case/hardware types, electrolyte families, collector forms and
+    # substrates, fraction/holder property classes).
+    for term in _COMPOSITION_CONTEXT_TERMS:
+        _resolve(term)
+    for mapping in (
+        _material_name_map(),
+        _ELECTROLYTE_FAMILY_TYPES,
+        _CC_FORM_FACTOR_MAP,
+        _CC_MATERIAL_MAP,
+        _FORMAT_CASE_TYPE,
+        _HARDWARE_PART_TYPE,
+        _FRACTION_PROPERTY_TERMS,
+        _DESCRIPTOR_PROPERTY_TERMS,
+        _DESCRIPTOR_COATING_PROPERTY_TERMS,
+        _ASSEMBLY_QUANTITY_TERMS,
+    ):
+        for value in mapping.values():
+            if isinstance(value, str):
+                _resolve(value)
     return table
 
 
@@ -263,6 +351,43 @@ def _iri_tail(iri: str) -> str:
     return iri.rstrip("/").split("/")[-1] if iri else ""
 
 
+# Composition fields of a canonical cell-spec record. Inline holders and
+# construction are top-level siblings of ``cell_spec`` (the schema's shape);
+# the five ``*_spec_id`` references likewise. Older/alternate payloads may
+# carry them inside the ``cell_spec`` body, so both locations are read.
+_COMPOSITION_FIELDS: tuple[str, ...] = (
+    "construction",
+    "positive_electrode",
+    "negative_electrode",
+    "electrolyte",
+    "separator",
+    "housing",
+    "positive_electrode_spec_id",
+    "negative_electrode_spec_id",
+    "electrolyte_spec_id",
+    "separator_spec_id",
+    "housing_spec_id",
+)
+
+
+def _composition_view(record: Mapping[str, Any], cell: Mapping[str, Any]) -> dict[str, Any]:
+    """Normalise a canonical cell-spec record to the specification-shaped dict
+    the shared composition appliers consume (``format`` + electrode bases +
+    inline holders + ``*_spec_id`` references)."""
+    view: dict[str, Any] = {
+        "format": cell.get("cell_format") or cell.get("format"),
+        "positive_electrode_basis": cell.get("positive_electrode_basis"),
+        "negative_electrode_basis": cell.get("negative_electrode_basis"),
+    }
+    for field in _COMPOSITION_FIELDS:
+        value = record.get(field)
+        if value is None:
+            value = cell.get(field)
+        if value is not None:
+            view[field] = value
+    return view
+
+
 def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     """Build the canonical BatteryCellSpecification JSON-LD node for a record.
 
@@ -339,6 +464,15 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     )
     if property_nodes:
         node["hasProperty"] = property_nodes
+
+    # Composition + component references (emitter convergence): the SAME
+    # appliers the descriptor path uses emit the inline electrode/electrolyte/
+    # separator/housing tree, the construction details, the stack/jelly-roll
+    # geometry and the *_spec_id reference links — the canonical node carries
+    # everything the user authored, not just chemistry/format/properties.
+    spec_view = _composition_view(record, cell)
+    _apply_specification_composition(node, spec_view)
+    _apply_specification_structure_and_refs(node, spec_view)
 
     prov = provenance_node(record.get("provenance"))
     if prov is not None:

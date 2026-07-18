@@ -273,13 +273,32 @@
     "MolePerLitre": "emmo:MolePerLitre",
     "LithiumManganeseDioxideBattery": "battery:battery_05adf5d2_0fbd_4c58_906e_4b875a7f2363",
     "LithiumIonIronPhosphateBattery": "battery:battery_04a4e5a4_e6fd_43af_b1ca_4a16d5f8886c",
+    "LithiumIronPhosphateElectrode": "electrochemistry:electrochemistry_1d0f15cb_d6b5_4c27_89ca_fe78adc1ce5b",
+    "hasPositiveElectrode": {
+      "@id": "electrochemistry:electrochemistry_8e9cf965_9f92_46e8_b678_b50410ce3616",
+      "@type": "@id"
+    },
     "LithiumIonNickelManganeseCobaltOxideBattery": "battery:battery_834095fa_f684_4368_a7ce_853579a1362a",
+    "LithiumNickelManganeseCobaltOxideElectrode": "electrochemistry:electrochemistry_b3eb8c65_5644_45e3_9e17_0be6277c7962",
     "LithiumIonNickelCobaltAluminiumOxideBattery": "battery:battery_217e44ed_efd9_4b9e_9cb4_1f7488d996b2",
     "LithiumIonCobaltOxideBattery": "battery:battery_4f0b1312_da2f_4039_a06d_d571ce51f835",
+    "LithiumCobaltOxideElectrode": "electrochemistry:electrochemistry_fd7caf39_0a43_4fbf_958e_a62067aa9007",
+    "ManganeseDioxideElectrode": "electrochemistry:electrochemistry_ca4d9efc_70be_441e_b358_d927aa4c36c4",
     "LithiumIonManganeseIronPhosphateBattery": "battery:battery_c429bb30_50d6_4cec_ae7e_279f59c36ccd",
+    "LithiumManganeseIronPhosphateElectrode": "electrochemistry:electrochemistry_9109b3f6_112b_456d_ae45_b82c271c656b",
     "LithiumIonManganeseOxideBattery": "battery:battery_45804eeb_fba3_49dd_ae79_6b4e958d6e09",
+    "LithiumManganeseOxideElectrode": "electrochemistry:electrochemistry_c231227b_f318_4e59_ad90_6e91072903ed",
     "LithiumIonGraphiteBattery": "battery:battery_2018e0da_4c25_46e9_83db_38431fc81ce0",
+    "GraphiteElectrode": "electrochemistry:electrochemistry_c831d963_629a_41ab_850f_97fb6841b739",
+    "hasNegativeElectrode": {
+      "@id": "electrochemistry:electrochemistry_5d299271_3f68_494f_ab96_3db9acdd3138",
+      "@type": "@id"
+    },
+    "SiliconGraphiteElectrode": "electrochemistry:electrochemistry_e8c39ecc_29d1_4172_996e_d5b05dc88015",
+    "HardCarbonElectrode": "electrochemistry:electrochemistry_6235cc7c_2eee_432a_93af_47d7e05db007",
+    "LithiumElectrode": "electrochemistry:electrochemistry_55775b50_b9d9_4d68_8cb5_38fcd7b9b54d",
     "LithiumIonTitanateBattery": "battery:battery_fd811dc3_8c37_4741_a099_78e26e4110ef",
+    "LithiumTitanateElectrode": "electrochemistry:electrochemistry_6d0fe07e_a629_479c_ab24_2846f209bb0b",
     "RealData": "emmo:EMMO_18d180e4_5e3e_42f7_820c_e08951223486",
     "ConventionalProperty": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456",
     "MeasuredProperty": "emmo:EMMO_873b0ab3_88e6_4054_b901_5531e01f14a4",
@@ -287,7 +306,134 @@
     "hasMeasurementParameter": {
       "@id": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#hasMeasurementParameter",
       "@type": "@id"
-    }
+    },
+    "hasElectrolyte": {
+      "@id": "electrochemistry:electrochemistry_3bd08946_4e81_455d_9fca_dc7a5ead9315",
+      "@type": "@id"
+    },
+    "hasSeparator": {
+      "@id": "electrochemistry:electrochemistry_9317be62_e602_4343_a72d_02c87201b9f6",
+      "@type": "@id"
+    },
+    "hasCoating": {
+      "@id": "electrochemistry:electrochemistry_4df9926d_d4f2_4955_93f3_a03c5edc5383",
+      "@type": "@id"
+    },
+    "hasCurrentCollector": {
+      "@id": "electrochemistry:electrochemistry_cc8c2c5d_cf3d_444d_a7e8_44ec4c06a88e",
+      "@type": "@id"
+    },
+    "hasActiveMaterial": {
+      "@id": "electrochemistry:electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee",
+      "@type": "@id"
+    },
+    "hasBinder": {
+      "@id": "electrochemistry:electrochemistry_056a5fab_3d99_46bd_8eb1_6e89a368e1a7",
+      "@type": "@id"
+    },
+    "hasConductiveAdditive": {
+      "@id": "electrochemistry:electrochemistry_c830c469_60c3_4380_8382_4df13a32a1e7",
+      "@type": "@id"
+    },
+    "hasSolute": {
+      "@id": "electrochemistry:electrochemistry_8784ef24_320b_4a3d_b200_654aec6c271c",
+      "@type": "@id"
+    },
+    "hasSolvent": {
+      "@id": "electrochemistry:electrochemistry_808e94df_e002_4e64_a6db_182ed75078c6",
+      "@type": "@id"
+    },
+    "hasAdditive": {
+      "@id": "electrochemistry:electrochemistry_7df82c48_b599_4b02_bef0_9facc9c39410",
+      "@type": "@id"
+    },
+    "hasCase": {
+      "@id": "electrochemistry:electrochemistry_3dcfe33d_6825_43c0_a798_68e871a68d39",
+      "@type": "@id"
+    },
+    "hasConstituent": {
+      "@id": "emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec",
+      "@type": "@id"
+    },
+    "Electrode": "electrochemistry:electrochemistry_0f007072_a8dd_4798_b865_1bf9363be627",
+    "ElectrodeCoating": "electrochemistry:electrochemistry_403c300e_09b9_400b_943b_04e82a3cfb56",
+    "CurrentCollector": "electrochemistry:electrochemistry_212af058_3bbb_419f_a9c6_90ba9ebb3706",
+    "CurrentCollectorTab": "electrochemistry:electrochemistry_6913368b_39cf_42da_ac51_c1b508930ac5",
+    "Separator": "electrochemistry:electrochemistry_331e6cca_f260_4bf8_af55_35304fe1bbe0",
+    "ElectrolyteSolution": "electrochemistry:electrochemistry_fa22874b_76a9_4043_8b8f_6086c88746de",
+    "ActiveMaterial": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+    "Binder": "electrochemistry:electrochemistry_68eb5e35_5bd8_47b1_9b7f_f67224fa291e",
+    "ConductiveAdditive": "electrochemistry:electrochemistry_82fef384_8eec_4765_b707_5397054df594",
+    "Solute": "https://w3id.org/emmo/domain/chemical-substance#substance_3899a9c9_9b34_443e_8ce6_0257589bb38a",
+    "Solvent": "https://w3id.org/emmo/domain/chemical-substance#substance_0f2f65a7_5cc4_4c86_a4d0_676771c646f1",
+    "ElectrolyteAdditive": "electrochemistry:electrochemistry_554286d4_1f46_44c0_bebc_4ddae00dbce1",
+    "Case": "electrochemistry:electrochemistry_1aec4cc0_82d5_4042_a657_ed7fe291c3d8",
+    "Terminal": "electrochemistry:electrochemistry_3f70e5c5_67f0_483e_998b_b83b7739c4bc",
+    "ElectrodeStack": "electrochemistry:electrochemistry_27662d03_1bcf_4393_a239_32e31b760839",
+    "BatteryCycler": "battery:battery_23e6170d_a70b_4de9_a4db_458e24a327ac",
+    "Potentiostat": "electrochemistry:electrochemistry_a9fc3f77_e48e_4bce_b118_044d608722f6",
+    "Galvanostat": "electrochemistry:electrochemistry_22725105_c941_4b14_a4a2_fcb627958607",
+    "MeasuringInstrument": "emmo:EMMO_f2d5d3ad_2e00_417f_8849_686f3988d929",
+    "LithiumIronPhosphate": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
+    "LithiumNickelManganeseCobaltOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
+    "LithiumNickelCobaltAluminiumOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_cd17ca33_ae3d_4738_8930_547673bf6c1f",
+    "LithiumCobaltOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_4c62d334_a124_40b3_9fd1_fe713d01a6af",
+    "LithiumNickelManganeseOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_f3e7979a_e3ef_450a_8762_7d8778afe478",
+    "Graphite": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "HardCarbon": "https://w3id.org/emmo/domain/chemical-substance#substance_5cee19d2_f916_4264_a8ed_efed13a808d2",
+    "Silicon": "https://w3id.org/emmo/domain/chemical-substance#substance_68c0876b_cb62_41cd_846d_95cc9d9a8733",
+    "SiliconOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_0160f86c_e567_40d4_a457_25cf170e7ef2",
+    "CarbonBlack": "https://w3id.org/emmo/domain/chemical-substance#substance_0a5cb747_60cf_4929_a54a_712c54b49f3b",
+    "PolyvinylideneFluoride": "https://w3id.org/emmo/domain/chemical-substance#substance_f2e48e9e_f774_4f42_939f_1fe522efb7c8",
+    "CarboxymethylCellulose": "https://w3id.org/emmo/domain/chemical-substance#substance_d36fbe2f_6b0a_4178_b6ca_7373bdefcb51",
+    "StyreneButadiene": "https://w3id.org/emmo/domain/chemical-substance#substance_210edf30_ad63_438c_97db_f817942db49b",
+    "LithiumHexafluorophosphate": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771",
+    "EthyleneCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226",
+    "DimethylCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_c4a7d7bd_497e_457e_b858_ff73254266d0",
+    "PropyleneCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_46e9f253_40cb_4b48_b8d0_0b976ea4e156",
+    "FluoroethyleneCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_20004d19_02cf_4667_a09f_b5c595b44b1f",
+    "VinyleneCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_31d0d139_7b45_4d1e_8603_92cc12da2fad",
+    "VinylEthyleneCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_edef7f16_a517_4577_91b1_a90099869f1b",
+    "Polypropylene": "https://w3id.org/emmo/domain/chemical-substance#substance_c5cff8c2_581e_4341_a3e6_8ba8c8ce2d2b",
+    "Polyethylene": "https://w3id.org/emmo/domain/chemical-substance#substance_79220ea3_3426_47a0_9b41_33012d565fc2",
+    "Aluminium": "https://w3id.org/emmo/domain/chemical-substance#substance_8f7dd877_5ad0_48f1_bbec_84153d8215f4",
+    "Copper": "https://w3id.org/emmo/domain/chemical-substance#substance_0993cbab_ff7f_4ec3_8a6c_cd67497d54d9",
+    "EthylMethylCarbonate": "https://w3id.org/emmo/domain/chemical-substance#substance_bb20bdea_343c_4911_8c45_37fc1077d22f",
+    "LithiumManganeseIronPhosphate": "https://w3id.org/emmo/domain/chemical-substance#substance_40c605fd_4e47_4e90_a055_185f749d834c",
+    "Zinc": "https://w3id.org/emmo/domain/chemical-substance#substance_9bd78e1c_a4dc_41b6_8013_adb51df1ffdc",
+    "PotassiumHydroxide": "https://w3id.org/emmo/domain/chemical-substance#substance_ccdce7d4_b695_4871_84c2_13679807d077",
+    "OrganicElectrolyte": "electrochemistry:electrochemistry_564d31be_91cb_4a8f_8369_2a55f1180499",
+    "AqueousElectrolyte": "electrochemistry:electrochemistry_b812e9d0_7c58_4455_b3e7_6847f10c8e8a",
+    "IonicLiquidElectrolyte": "electrochemistry:electrochemistry_c3f4b34a_0e2c_46f3_baab_4ebd2682d26f",
+    "PolymerElectrolyte": "electrochemistry:electrochemistry_c6d6c0a1_a06b_437a_978f_a469d3071ca9",
+    "SolidElectrolyte": "electrochemistry:electrochemistry_0508a114_544a_4f54_a7de_9b947fb4b618",
+    "Foil": "electrochemistry:electrochemistry_1d5377a7_9f2b_4fdf_958a_7eeadce158d6",
+    "PerforatedFoil": "electrochemistry:electrochemistry_c84a1d8f_e405_42ba_8c80_bbe3b9c6c66a",
+    "ExpandedMesh": "electrochemistry:electrochemistry_31b38a1b_5873_454c_ba99_00491497fb43",
+    "WovenMesh": "electrochemistry:electrochemistry_3a69a00e_235a_4948_b369_8ac20116c85e",
+    "ElectrospunMesh": "electrochemistry:electrochemistry_9e2f4509_e3f1_4bff_a5f4_8792c372e338",
+    "Nickel": "https://w3id.org/emmo/domain/chemical-substance#substance_f92b3948_72a5_4662_acf7_5d8dd64e85de",
+    "StainlessSteel": "https://w3id.org/emmo/domain/chemical-substance#substance_2cd874c8_f8f0_4794_bba9_d520603ab6bb",
+    "Titanium": "https://w3id.org/emmo/domain/chemical-substance#substance_f8d50782_11fa_4188_ba55_d043d2eb597d",
+    "Carbon": "https://w3id.org/emmo/domain/chemical-substance#substance_4e5582a6_caec_4917_acad_6f472cd7d831",
+    "CoinCase": "electrochemistry:electrochemistry_3979cd56_6256_414d_966c_7f723bf71e37",
+    "CylindricalCase": "electrochemistry:electrochemistry_b1cf9fee_2164_4f95_8204_90f717373a8a",
+    "PouchCase": "electrochemistry:electrochemistry_74459386_875c_4303_b774_60125b599d06",
+    "PrismaticCase": "electrochemistry:electrochemistry_43cd6e14_dd43_41b5_b5b4_344d53841603",
+    "CellLid": "electrochemistry:electrochemistry_1e33e37e_d7c9_4701_ba6d_a09456a13aaf",
+    "CellCan": "electrochemistry:electrochemistry_4a5660bd_1c1a_40e5_8a41_463c720d3903",
+    "Spring": "electrochemistry:electrochemistry_872b11e1_8bb3_4a2a_af90_bbaa0055d01e",
+    "Spacer": "electrochemistry:electrochemistry_49909cd1_44f4_41b4_877a_82a52845a5cb",
+    "MassFraction": "emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50",
+    "VolumeFraction": "emmo:EMMO_a8eb87b5_4d10_4137_a75c_e04ee59ca095",
+    "Porosity": "emmo:EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9",
+    "AmountConcentration": "emmo:EMMO_d5be1faf_0c56_4f5a_9b78_581e6dee949f",
+    "ElectrolyticConductivity": "emmo:EMMO_e6e7277a_1d40_4be5_a3a9_afd3da53d937",
+    "DynamicViscosity": "emmo:EMMO_908da3d5_775e_425e_af96_33914618eb66",
+    "Density": "emmo:EMMO_06448f64_8db6_4304_8b2c_e785dba82044",
+    "CelsiusTemperature": "emmo:EMMO_66bc9029_f473_45ff_bab9_c3509ff37a22",
+    "ActiveMassLoading": "electrochemistry:electrochemistry_1eeb0e2a_229a_43f1_b197_348d475067ff",
+    "CalenderedCoatingThickness": "electrochemistry:electrochemistry_f9e1c862_c510_4b11_9141_bc91045df817"
   },
   "@type": [
     "BatteryCellSpecification",
@@ -515,6 +661,9 @@
       "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
     }
   ],
+  "hasPositiveElectrode": {
+    "@type": "LithiumIronPhosphateElectrode"
+  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "datasheet",

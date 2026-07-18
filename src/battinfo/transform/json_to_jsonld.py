@@ -1278,6 +1278,14 @@ def _typed_constituent_node(
     node_type: str | list[str] = [mat_class, role_class] if mat_class else role_class
     node: dict[str, Any] = {"@type": node_type, "schema:name": name}
 
+    # Material provenance edge: a constituent that references a standalone
+    # material-spec record carries the same MaterialSpec link every whole-record
+    # material instance emits (schema:isVariantOf → the spec IRI), so the
+    # cell → component → material chain stays connected at the bottom.
+    spec_ref = mat.get("material_spec_id")
+    if isinstance(spec_ref, str) and spec_ref:
+        node["schema:isVariantOf"] = {"@id": spec_ref}
+
     prop_nodes = _descriptor_property_nodes(mat.get("property"), term_overrides=_DESCRIPTOR_PROPERTY_TERMS)
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
@@ -1412,6 +1420,127 @@ def _descriptor_separator_to_jsonld(separator: dict[str, Any] | None) -> dict[st
     return node if len(node) > 1 else None
 
 
+def _apply_specification_composition(battery: dict[str, Any], specification: dict[str, Any]) -> None:
+    """Apply the electrochemical composition tree of a specification-shaped dict.
+
+    Adds hasPositiveElectrode / hasNegativeElectrode (coating, current collector,
+    tab), hasElectrolyte and hasSeparator to *battery* in place. Shared by the
+    descriptor emitter (``to_jsonld(target="domain-battery")``) and the canonical
+    cell-spec node builder (``transform.cell_spec_node.build_cell_spec_node``) so
+    every user-facing semantic output emits the same composition (emitter
+    convergence — never a third emitter).
+    """
+    for basis_field, data_key, default_relation in (
+        ("positive_electrode_basis", "positive_electrode", "hasPositiveElectrode"),
+        ("negative_electrode_basis", "negative_electrode", "hasNegativeElectrode"),
+    ):
+        electrode_data = specification.get(data_key)
+        mapping = _entity_mapping(basis_field, specification.get(basis_field)) or {}
+        # Relation is fixed by which side this is; the entity mapping only refines
+        # the @type. Never gate electrode emission on a mapped chemistry basis —
+        # an electrode that has composition data must never be dropped.
+        relation = mapping.get("relation") or default_relation
+        node_type = mapping.get("node_type")
+        electrode_node: dict[str, Any] = {}
+        if isinstance(electrode_data, dict):
+            coating = _descriptor_electrode_coating_to_jsonld(electrode_data.get("coating"))
+            if coating:
+                electrode_node["hasCoating"] = coating
+            cc = _descriptor_current_collector_to_jsonld(electrode_data.get("current_collector"))
+            if cc:
+                electrode_node["hasCurrentCollector"] = cc
+            tab = electrode_data.get("tab")
+            if isinstance(tab, dict):
+                tab_node: dict[str, Any] = {"@type": "CurrentCollectorTab"}
+                if tab.get("material"):
+                    tab_node["schema:material"] = tab["material"]
+                _converter_component_metadata(tab_node, tab)
+                tab_props = _descriptor_property_nodes(tab.get("property"))
+                if tab_props:
+                    tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
+                if len(tab_node) > 1:
+                    electrode_node["hasCurrentCollectorTab"] = tab_node
+            prop_nodes = _descriptor_property_nodes(electrode_data.get("property"))
+            if prop_nodes:
+                electrode_node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+        if isinstance(node_type, str) and node_type:
+            electrode_node["@type"] = node_type
+        elif electrode_node:
+            # Composition present but the basis has no specific EMMO electrode class.
+            electrode_node["@type"] = "Electrode"
+        if electrode_node:
+            battery[relation] = electrode_node
+
+    electrolyte_node = _descriptor_electrolyte_to_jsonld(specification.get("electrolyte"))
+    if electrolyte_node:
+        battery["hasElectrolyte"] = electrolyte_node
+
+    separator_node = _descriptor_separator_to_jsonld(specification.get("separator"))
+    if separator_node:
+        battery["hasSeparator"] = separator_node
+
+
+def _apply_specification_structure_and_refs(battery: dict[str, Any], specification: dict[str, Any]) -> None:
+    """Apply construction, housing, component-spec references and electrode assembly.
+
+    The second half of the shared composition emitter (see
+    :func:`_apply_specification_composition`): construction details as
+    ``schema:additionalProperty`` PropertyValues, the format-neutral housing
+    relations, the ``*_spec_id`` reference merging (an inline holder gains the
+    ``@id``; a ref without an inline holder emits a bare ``{"@id"}`` node — never
+    a duplicate of the same component), and the stack / jelly-roll geometry.
+    Mutates *battery* in place.
+    """
+    construction_nodes = _descriptor_construction_to_jsonld(specification.get("construction"))
+    if construction_nodes:
+        battery["schema:additionalProperty"] = construction_nodes[0] if len(construction_nodes) == 1 else construction_nodes
+
+    # Format-neutral housing for ALL formats: case (format-typed: CoinCase/PrismaticCase/…),
+    # terminals, seals, cap, and lid/can/spring/spacer parts (coin lid/can nest under the case).
+    cell_format = specification.get("format")
+    housing_relations = _descriptor_housing_to_jsonld(specification.get("housing"), cell_format)
+    for relation, value in housing_relations.items():
+        battery[relation] = value
+
+    # Component-spec references: attach the @id of the referenced spec to each relation.
+    # If an inline holder / basis already produced a typed node, the @id is merged onto it;
+    # otherwise a bare {@id} reference node is emitted.
+    for ref_field, relation in (
+        ("positive_electrode_spec_id", "hasPositiveElectrode"),
+        ("negative_electrode_spec_id", "hasNegativeElectrode"),
+        ("electrolyte_spec_id", "hasElectrolyte"),
+        ("separator_spec_id", "hasSeparator"),
+    ):
+        ref_id = specification.get(ref_field)
+        if not isinstance(ref_id, str):
+            continue
+        existing = battery.get(relation)
+        if isinstance(existing, dict) and "@id" not in existing:
+            existing["@id"] = ref_id
+        elif existing is None:
+            battery[relation] = {"@id": ref_id}
+    housing_ref = specification.get("housing_spec_id")
+    if isinstance(housing_ref, str):
+        existing = battery.get("hasConstituent")
+        ref_node = {"@id": housing_ref}
+        if existing is None:
+            battery["hasConstituent"] = ref_node
+        elif isinstance(existing, list):
+            battery["hasConstituent"] = [*existing, ref_node]
+        else:
+            battery["hasConstituent"] = [existing, ref_node]
+
+    # Electrode assembly (stack / jelly-roll geometry) → hasConstituent.
+    assembly_node = _descriptor_electrode_assembly_to_jsonld(specification.get("construction"))
+    if assembly_node is not None:
+        existing = battery.get("hasConstituent")
+        if existing is None:
+            battery["hasConstituent"] = assembly_node
+        else:
+            existing_list = existing if isinstance(existing, list) else [existing]
+            battery["hasConstituent"] = [*existing_list, assembly_node]
+
+
 def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[str, Any]:
     manufacturer = specification.get("manufacturer")
     model = specification.get("model")
@@ -1463,54 +1592,7 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     if specification.get("size_code"):
         battery[size_code_target] = specification["size_code"]
 
-    for electrode_mapping, data_key, default_relation in (
-        (positive_electrode, "positive_electrode", "hasPositiveElectrode"),
-        (negative_electrode, "negative_electrode", "hasNegativeElectrode"),
-    ):
-        electrode_data = specification.get(data_key)
-        mapping = electrode_mapping or {}
-        # Relation is fixed by which side this is; the entity mapping only refines
-        # the @type. Never gate electrode emission on a mapped chemistry basis —
-        # an electrode that has composition data must never be dropped.
-        relation = mapping.get("relation") or default_relation
-        node_type = mapping.get("node_type")
-        electrode_node: dict[str, Any] = {}
-        if isinstance(electrode_data, dict):
-            coating = _descriptor_electrode_coating_to_jsonld(electrode_data.get("coating"))
-            if coating:
-                electrode_node["hasCoating"] = coating
-            cc = _descriptor_current_collector_to_jsonld(electrode_data.get("current_collector"))
-            if cc:
-                electrode_node["hasCurrentCollector"] = cc
-            tab = electrode_data.get("tab")
-            if isinstance(tab, dict):
-                tab_node: dict[str, Any] = {"@type": "CurrentCollectorTab"}
-                if tab.get("material"):
-                    tab_node["schema:material"] = tab["material"]
-                _converter_component_metadata(tab_node, tab)
-                tab_props = _descriptor_property_nodes(tab.get("property"))
-                if tab_props:
-                    tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
-                if len(tab_node) > 1:
-                    electrode_node["hasCurrentCollectorTab"] = tab_node
-            prop_nodes = _descriptor_property_nodes(electrode_data.get("property"))
-            if prop_nodes:
-                electrode_node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
-        if isinstance(node_type, str) and node_type:
-            electrode_node["@type"] = node_type
-        elif electrode_node:
-            # Composition present but the basis has no specific EMMO electrode class.
-            electrode_node["@type"] = "Electrode"
-        if electrode_node:
-            battery[relation] = electrode_node
-
-    electrolyte_node = _descriptor_electrolyte_to_jsonld(specification.get("electrolyte"))
-    if electrolyte_node:
-        battery["hasElectrolyte"] = electrolyte_node
-
-    separator_node = _descriptor_separator_to_jsonld(specification.get("separator"))
-    if separator_node:
-        battery["hasSeparator"] = separator_node
+    _apply_specification_composition(battery, specification)
 
     properties = specification.get("property")
     if isinstance(properties, dict):
@@ -1522,54 +1604,7 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
         if property_nodes:
             battery["hasProperty"] = property_nodes
 
-    construction_nodes = _descriptor_construction_to_jsonld(specification.get("construction"))
-    if construction_nodes:
-        battery["schema:additionalProperty"] = construction_nodes[0] if len(construction_nodes) == 1 else construction_nodes
-
-    # Format-neutral housing for ALL formats: case (format-typed: CoinCase/PrismaticCase/…),
-    # terminals, seals, cap, and lid/can/spring/spacer parts (coin lid/can nest under the case).
-    cell_format = specification.get("format")
-    housing_relations = _descriptor_housing_to_jsonld(specification.get("housing"), cell_format)
-    for relation, value in housing_relations.items():
-        battery[relation] = value
-
-    # Component-spec references: attach the @id of the referenced spec to each relation.
-    # If an inline holder / basis already produced a typed node, the @id is merged onto it;
-    # otherwise a bare {@id} reference node is emitted.
-    for ref_field, relation in (
-        ("positive_electrode_spec_id", "hasPositiveElectrode"),
-        ("negative_electrode_spec_id", "hasNegativeElectrode"),
-        ("electrolyte_spec_id", "hasElectrolyte"),
-        ("separator_spec_id", "hasSeparator"),
-    ):
-        ref_id = specification.get(ref_field)
-        if not isinstance(ref_id, str):
-            continue
-        existing = battery.get(relation)
-        if isinstance(existing, dict) and "@id" not in existing:
-            existing["@id"] = ref_id
-        elif existing is None:
-            battery[relation] = {"@id": ref_id}
-    housing_ref = specification.get("housing_spec_id")
-    if isinstance(housing_ref, str):
-        existing = battery.get("hasConstituent")
-        ref_node = {"@id": housing_ref}
-        if existing is None:
-            battery["hasConstituent"] = ref_node
-        elif isinstance(existing, list):
-            battery["hasConstituent"] = [*existing, ref_node]
-        else:
-            battery["hasConstituent"] = [existing, ref_node]
-
-    # Electrode assembly (stack / jelly-roll geometry) → hasConstituent.
-    assembly_node = _descriptor_electrode_assembly_to_jsonld(specification.get("construction"))
-    if assembly_node is not None:
-        existing = battery.get("hasConstituent")
-        if existing is None:
-            battery["hasConstituent"] = assembly_node
-        else:
-            existing_list = existing if isinstance(existing, list) else [existing]
-            battery["hasConstituent"] = [*existing_list, assembly_node]
+    _apply_specification_structure_and_refs(battery, specification)
 
     comment = _comment_value(specification.get("comment"))
     if comment is not None:

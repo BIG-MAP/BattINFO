@@ -429,10 +429,23 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             protocol_ref = {"@id": test["protocol_id"]}
             out["schema:instrument"] = protocol_ref
         instrument_name = test.get("instrument_name")
+        equipment_id = test.get("equipment_id")
         if isinstance(instrument_name, str) and instrument_name:
             equip_node = _instrument_node(instrument_name)
+            if isinstance(equipment_id, str) and equipment_id:
+                # Registered equipment: the node carries its canonical IRI so the
+                # instrument is a resolvable entity, not an anonymous label.
+                equip_node["@id"] = equipment_id
             out["hasTestEquipment"] = equip_node
             out["schema:instrument"] = [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
+        elif isinstance(equipment_id, str) and equipment_id:
+            equip_node = {"@id": equipment_id}
+            out["hasTestEquipment"] = equip_node
+            out["schema:instrument"] = [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
+        channel_id = test.get("channel_id")
+        if isinstance(channel_id, str) and channel_id:
+            # The channel the test ran on: the activity used that equipment part.
+            out["prov:used"] = {"@id": channel_id}
         datasets = test.get("dataset_ids")
         if isinstance(datasets, list):
             refs = [{"@id": did} for did in datasets if isinstance(did, str)]

@@ -349,6 +349,16 @@ def test_to_jsonld(record: dict) -> dict:
     }
     if test.get("cell_id"):
         node["hasTestObject"] = {"@id": test["cell_id"]}
+    # Equipment/channel provenance: a registered equipment unit becomes a real
+    # hasTestEquipment node (its IRI + the instrument display name), and the
+    # channel the test ran on rides prov:used (the node is a prov:Activity).
+    if test.get("equipment_id"):
+        equip: dict = {"@id": test["equipment_id"]}
+        if test.get("instrument_name"):
+            equip["schema:name"] = test["instrument_name"]
+        node["hasTestEquipment"] = equip
+    if test.get("channel_id"):
+        node["prov:used"] = {"@id": test["channel_id"]}
     if test.get("protocol_id"):
         node["dcterms:conformsTo"] = {"@id": test["protocol_id"]}
     if test.get("dataset_ids"):
