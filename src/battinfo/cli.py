@@ -1498,6 +1498,10 @@ def query_cell_specs(
     nominal_capacity_max: float | None = typer.Option(None, help="Filter maximum nominal capacity."),
     nominal_voltage_min: float | None = typer.Option(None, help="Filter minimum nominal voltage."),
     nominal_voltage_max: float | None = typer.Option(None, help="Filter maximum nominal voltage."),
+    source_root: Path | None = typer.Option(None, help="Records root to search (default: ./examples)."),
+    include_packaged_examples: bool = typer.Option(
+        False, "--include-packaged-examples", help="Also search BattINFO's bundled example records."
+    ),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -1514,6 +1518,8 @@ def query_cell_specs(
         nominal_capacity_max=nominal_capacity_max,
         nominal_voltage_min=nominal_voltage_min,
         nominal_voltage_max=nominal_voltage_max,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
         limit=limit,
         offset=offset,
     )
@@ -1542,6 +1548,10 @@ def query_cell_instances(
     has_dataset: str | None = typer.Option(None, help="Filter by dataset presence: true|false."),
     dataset_id: str | None = typer.Option(None, help="Filter by linked dataset IRI."),
     source_type: str | None = typer.Option(None, help="Filter by source type."),
+    source_root: Path | None = typer.Option(None, help="Records root to search (default: ./examples)."),
+    include_packaged_examples: bool = typer.Option(
+        False, "--include-packaged-examples", help="Also search BattINFO's bundled example records."
+    ),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -1557,6 +1567,8 @@ def query_cell_instances(
         has_dataset=dataset_bool,
         dataset_id=dataset_id,
         source_type=source_type,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
         limit=limit,
         offset=offset,
     )
@@ -1582,6 +1594,10 @@ def query_datasets(
     source_type: str | None = typer.Option(None, help="Filter by source type."),
     data_format: str | None = typer.Option(None, "--data-format", help="Filter by dataset format."),
     license: str | None = typer.Option(None, help="Filter by license."),
+    source_root: Path | None = typer.Option(None, help="Records root to search (default: ./examples)."),
+    include_packaged_examples: bool = typer.Option(
+        False, "--include-packaged-examples", help="Also search BattINFO's bundled example records."
+    ),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -1596,6 +1612,8 @@ def query_datasets(
         source_type=source_type,
         format=data_format,
         license=license,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
         limit=limit,
         offset=offset,
     )
@@ -1619,6 +1637,10 @@ def query_test_specs(
     kind: str | None = typer.Option(None, help="Filter by protocol kind."),
     name_contains: str | None = typer.Option(None, help="Case-insensitive substring filter on protocol name."),
     source_type: str | None = typer.Option(None, help="Filter by source type."),
+    source_root: Path | None = typer.Option(None, help="Records root to search (default: ./examples)."),
+    include_packaged_examples: bool = typer.Option(
+        False, "--include-packaged-examples", help="Also search BattINFO's bundled example records."
+    ),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -1630,6 +1652,8 @@ def query_test_specs(
         kind=kind,
         name_contains=name_contains,
         source_type=source_type,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
         limit=limit,
         offset=offset,
     )
@@ -1653,6 +1677,10 @@ def query_tests(
     dataset_id: str | None = typer.Option(None, help="Filter by linked dataset IRI."),
     kind: str | None = typer.Option(None, help="Filter by test kind."),
     source_type: str | None = typer.Option(None, help="Filter by source type."),
+    source_root: Path | None = typer.Option(None, help="Records root to search (default: ./examples)."),
+    include_packaged_examples: bool = typer.Option(
+        False, "--include-packaged-examples", help="Also search BattINFO's bundled example records."
+    ),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -1665,6 +1693,8 @@ def query_tests(
         dataset_id=dataset_id,
         kind=kind,
         source_type=source_type,
+        source_root=source_root,
+        include_packaged_examples=include_packaged_examples,
         limit=limit,
         offset=offset,
     )
@@ -1695,6 +1725,13 @@ def create_cell_instance(
     dataset_id: str | None = typer.Option(None, help="Optional linked dataset IRI."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
     uid: str | None = typer.Option(None, help="Optional 16-char UID (dashed or undashed)."),
+    source_root: Path | None = typer.Option(
+        None, help="Records root for metadata type resolution (default: ./examples)."
+    ),
+    include_packaged_examples: bool = typer.Option(
+        False, "--include-packaged-examples",
+        help="Also match BattINFO's bundled example records during type resolution.",
+    ),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate against schema."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
@@ -1713,6 +1750,8 @@ def create_cell_instance(
             dataset_id=dataset_id,
             source_type=source_type,
             uid=uid,
+            source_root=source_root,
+            include_packaged_examples=include_packaged_examples,
             out_path=out,
             validate=validate,
         )

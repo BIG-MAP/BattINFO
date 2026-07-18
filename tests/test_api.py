@@ -193,7 +193,7 @@ def test_query_cell_specs_exposes_iec_code(tmp_path: Path) -> None:
     )
     save_cell_spec(record, source_root=tmp_path)
 
-    rows = query_cell_specs(cell_specs_dir=tmp_path / "cell-spec")
+    rows = query_cell_specs(source_root=tmp_path)
 
     assert len(rows) == 1
     assert rows[0]["iec_code"] == "IFpR26650"
@@ -637,11 +637,11 @@ def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> 
     assert protocol["entity_type"] == "test-protocol"
     assert test["entity_type"] == "test"
 
-    protocol_rows = query_test_specs(directory=tmp_path / "test-protocol")
+    protocol_rows = query_test_specs(source_root=tmp_path)
     assert len(protocol_rows) == 1
     assert protocol_rows[0]["id"] == protocol["id"]
 
-    test_rows = query_tests(directory=tmp_path / "test")
+    test_rows = query_tests(source_root=tmp_path)
     assert len(test_rows) == 1
     assert test_rows[0]["protocol_id"] == protocol["id"]
 
@@ -908,20 +908,27 @@ def test_save_record_accepts_canonical_records_and_paths(tmp_path: Path) -> None
     assert dataset_payload["path"].endswith("dataset-8c1h-8pk6-8034-vav6.json")
 
 
-def test_save_cell_instance_missing_reference_is_deferred_until_set_validation(tmp_path: Path) -> None:
+def test_save_cell_instance_dangling_reference_fails_by_default(tmp_path: Path) -> None:
+    """P1 fix 2: a dangling *_spec_id reference is an error at save time (default ON),
+    with the missing IRIs named; resolve_references=False remains the staged-workflow
+    opt-out, and set-level validation still catches the gap afterwards."""
     source_root = tmp_path / "examples"
-    payload = save_cell_instance(
-        Cell(
-            uid="eysh4h5sk4bxzkgg",
-            cell_spec_id="https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq",
-            dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
-            source_type="measurement",
-        ),
-        source_root=source_root,
-        resolve_references=True,
+    draft = Cell(
+        uid="eysh4h5sk4bxzkgg",
+        cell_spec_id="https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq",
+        dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
+        source_type="measurement",
     )
-    assert payload["status"] == "created"
+    with pytest.raises(ValueError) as excinfo:
+        save_cell_instance(draft, source_root=source_root, resolve_references=True)
+    message = str(excinfo.value)
+    assert "Reference validation failed" in message
+    assert "https://w3id.org/battinfo/spec/pvn1-43h7-rm3e-mjqq" in message
+    assert "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x" in message
 
+    # Staged workflows can opt out explicitly; the set validator still reports the gap.
+    payload = save_cell_instance(draft, source_root=source_root, resolve_references=False)
+    assert payload["status"] == "created"
     index = build_index(source_root=source_root, validate=True)
     assert index["failed"] == 1
     assert "cell_instance.cell_spec_id" in index["failures"][0]["error"]

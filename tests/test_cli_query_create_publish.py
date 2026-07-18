@@ -234,7 +234,10 @@ def test_publish_cell_spec_cli_accepts_input_file(tmp_path: Path, monkeypatch) -
     assert payload["page_url"] == "https://battery-genome.org/registry/cell-spec/cell-spec-002"
 
 
-def test_save_record_with_resolve_references_defers_missing_targets(tmp_path: Path) -> None:
+def test_save_record_with_resolve_references_rejects_missing_targets(tmp_path: Path) -> None:
+    """P1 fix 2: --resolve-references (the default) fails a save whose references
+    don't exist under source_root; --no-resolve-references stays the staged-workflow
+    opt-out."""
     runner = CliRunner()
     source_root = tmp_path / "examples"
     cell_instance_path = tmp_path / "cell-instance.json"
@@ -277,8 +280,26 @@ def test_save_record_with_resolve_references_defers_missing_targets(tmp_path: Pa
             "json",
         ],
     )
-    assert result.exit_code == 0, result.stdout
-    payload = json.loads(result.stdout)
+    assert result.exit_code == 1
+    assert "Reference validation failed" in result.stdout
+    assert "https://w3id.org/battinfo/spec/eysh-4h5s-k4bx-zkgg" in result.stdout
+
+    deferred = runner.invoke(
+        app,
+        [
+            "save",
+            "record",
+            "--input",
+            str(cell_instance_path),
+            "--source-root",
+            str(source_root),
+            "--no-resolve-references",
+            "--format",
+            "json",
+        ],
+    )
+    assert deferred.exit_code == 0, deferred.stdout
+    payload = json.loads(deferred.stdout)
     assert payload["status"] == "created"
 
 

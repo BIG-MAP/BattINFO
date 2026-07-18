@@ -7474,12 +7474,36 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "value",
             "unit"
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "value"
+              ]
+            },
+            {
+              "required": [
+                "min_value"
+              ]
+            },
+            {
+              "required": [
+                "max_value"
+              ]
+            }
           ],
           "properties": {
             "value": {
               "type": "number"
+            },
+            "min_value": {
+              "type": "number",
+              "description": "Lower bound of a window quantity (e.g. a 2.5-4.2 V voltage window); field names align with modules/common/quantity.schema.json."
+            },
+            "max_value": {
+              "type": "number",
+              "description": "Upper bound of a window quantity; field names align with modules/common/quantity.schema.json."
             },
             "unit": {
               "type": "string",

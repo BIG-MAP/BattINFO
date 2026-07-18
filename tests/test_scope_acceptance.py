@@ -89,14 +89,14 @@ def test_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path: Path
     cell_rows = query_cell_specs(
         manufacturer="A123",
         format="cylindrical",
-        cell_specs_dir=source_root / "cell-spec",
+        source_root=source_root,
     )
     assert len(cell_rows) == 1
     assert cell_rows[0]["model_name"] == "ANR26650M1-B"
     assert cell_rows[0]["nominal_capacity"] == 2.5
 
     instance_rows = query_cell_instances(
-        directory=source_root / "cell-instance",
+        source_root=source_root,
         cell_spec_id=cell_spec_doc["cell_spec"]["id"],
         has_dataset=True,
         dataset_id=dataset_doc["dataset"]["id"],
@@ -104,14 +104,14 @@ def test_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path: Path
     assert len(instance_rows) == 1
     assert instance_rows[0]["id"] == cell_instance_doc["cell_instance"]["id"]
 
-    observed_kinds = {row["kind"] for row in query_tests(directory=source_root / "test", cell_id=cell_instance_doc["cell_instance"]["id"])}
+    observed_kinds = {row["kind"] for row in query_tests(source_root=source_root, cell_id=cell_instance_doc["cell_instance"]["id"])}
     assert expected_kinds.issubset(observed_kinds)
 
-    hppc_rows = query_tests(directory=source_root / "test", kind="hppc", dataset_id=dataset_doc["dataset"]["id"])
+    hppc_rows = query_tests(source_root=source_root, kind="hppc", dataset_id=dataset_doc["dataset"]["id"])
     assert len(hppc_rows) == 1
 
     dataset_rows = query_datasets(
-        directory=source_root / "dataset",
+        source_root=source_root,
         related_cell_id=cell_instance_doc["cell_instance"]["id"],
         related_test_id="https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r",
         format="application/x-hdf5",

@@ -41,6 +41,38 @@ def stable_uid(seed: str) -> str:
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
+def cell_instance_identity_seed(
+    *,
+    cell_spec_id: str | None,
+    serial_number: str | None = None,
+    batch_id: str | None = None,
+    name: str | None = None,
+) -> Optional[str]:
+    """Identity seed for a physical cell instance — shared by every minting surface.
+
+    The instance IRI is deterministic from (spec IRI, serial/batch/name), so the
+    same physical cell authored through the workspace (``ws.add('cell', ...)``),
+    ``save_cell_instance`` or ``create_cell_instance`` lands on the same IRI
+    instead of minting parallel identities per surface.
+
+    Returns ``None`` when the instance carries no distinguishing identity at all
+    (no name, serial, or batch) — callers must then fall back to their own
+    anonymous policy (e.g. a random uid), because two anonymous but physically
+    distinct cells must never silently dedup into one.
+    """
+    label = (name or serial_number or batch_id or "").strip()
+    if not label:
+        return None
+    return "::".join(
+        [
+            (cell_spec_id or "").strip() or "unknown-cell-spec",
+            serial_number or "",
+            batch_id or "",
+            label,
+        ]
+    )
+
+
 @dataclass(frozen=True)
 class EntityKind:
     """Metadata describing one BattINFO record type.

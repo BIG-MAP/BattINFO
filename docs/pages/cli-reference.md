@@ -185,6 +185,8 @@ $ battinfo query cell-spec [OPTIONS]
 * `--nominal-capacity-max FLOAT`: Filter maximum nominal capacity.
 * `--nominal-voltage-min FLOAT`: Filter minimum nominal voltage.
 * `--nominal-voltage-max FLOAT`: Filter maximum nominal voltage.
+* `--source-root PATH`: Records root to search (default: ./examples).
+* `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -209,6 +211,8 @@ $ battinfo query cell-instance [OPTIONS]
 * `--has-dataset TEXT`: Filter by dataset presence: true|false.
 * `--dataset-id TEXT`: Filter by linked dataset IRI.
 * `--source-type TEXT`: Filter by source type.
+* `--source-root PATH`: Records root to search (default: ./examples).
+* `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -233,6 +237,8 @@ $ battinfo query dataset [OPTIONS]
 * `--source-type TEXT`: Filter by source type.
 * `--data-format TEXT`: Filter by dataset format.
 * `--license TEXT`: Filter by license.
+* `--source-root PATH`: Records root to search (default: ./examples).
+* `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -254,6 +260,8 @@ $ battinfo query test-protocol [OPTIONS]
 * `--kind TEXT`: Filter by protocol kind.
 * `--name-contains TEXT`: Case-insensitive substring filter on protocol name.
 * `--source-type TEXT`: Filter by source type.
+* `--source-root PATH`: Records root to search (default: ./examples).
+* `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -275,6 +283,8 @@ $ battinfo query test-spec [OPTIONS]
 * `--kind TEXT`: Filter by protocol kind.
 * `--name-contains TEXT`: Case-insensitive substring filter on protocol name.
 * `--source-type TEXT`: Filter by source type.
+* `--source-root PATH`: Records root to search (default: ./examples).
+* `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -297,6 +307,8 @@ $ battinfo query tests [OPTIONS]
 * `--dataset-id TEXT`: Filter by linked dataset IRI.
 * `--kind TEXT`: Filter by test kind.
 * `--source-type TEXT`: Filter by source type.
+* `--source-root PATH`: Records root to search (default: ./examples).
+* `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
 * `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
 * `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
 * `--format TEXT`: Output format: table|json.  [default: table]
@@ -342,6 +354,8 @@ $ battinfo create cell-instance [OPTIONS]
 * `--dataset-id TEXT`: Optional linked dataset IRI.
 * `--source-type TEXT`: Source type: measurement|lab|bms|other.  [default: measurement]
 * `--uid TEXT`: Optional 16-char UID (dashed or undashed).
+* `--source-root PATH`: Records root for metadata type resolution (default: ./examples).
+* `--include-packaged-examples`: Also match BattINFO&#x27;s bundled example records during type resolution.
 * `--out PATH`: Optional output JSON path.
 * `--validate / --no-validate`: Validate against schema.  [default: validate]
 * `--format TEXT`: Output format: table|json.  [default: json]

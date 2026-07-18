@@ -10,17 +10,19 @@ import json
 import math
 import re
 import secrets
+import warnings
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-from battinfo._util import _now_unix
+from battinfo._util import _as_path, _now_unix
 from battinfo.bundle import (
     BatteryTestType,
 )
 from battinfo.entities import (
     ENTITY_KINDS,
     entity_id_from_doc,
+    iter_entity_files,
     kind_for_doc,
 )
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
@@ -263,6 +265,51 @@ def _iter_json_files(directory: Path) -> Iterable[Path]:
     if not directory.exists():
         return []
     return sorted(directory.glob("*.json"))
+
+
+# Origin labels attached to query hits so results always say where they came from.
+QUERY_ORIGIN_LOCAL = "local"
+QUERY_ORIGIN_PACKAGED = "packaged-example"
+
+
+def _query_record_files(
+    entity_type: str,
+    *,
+    source_root: PathLike | None,
+    directory: PathLike | None,
+    include_packaged_examples: bool,
+    directory_param: str = "directory",
+) -> list[tuple[Path, str]]:
+    """Resolve which record files a ``query_*`` function searches, with origins.
+
+    The default location is the user's own records under
+    ``<cwd>/examples/<type-dir>`` — the same root the ``save_*`` functions write
+    to by default — never the examples bundled inside the installed wheel.
+    BattINFO's packaged demo records are only searched when the caller asks for
+    them explicitly (``include_packaged_examples=True``), and those hits are
+    labeled ``origin="packaged-example"`` so they can never masquerade as lab
+    records. ``directory``/per-function dir kwargs remain as deprecated aliases
+    pointing directly at a single record directory.
+    """
+    files: list[tuple[Path, str]] = []
+    if directory is not None:
+        if source_root is not None:
+            raise ValueError(f"Pass either source_root= or {directory_param}=, not both.")
+        warnings.warn(
+            f"{directory_param}= is deprecated; pass source_root= pointing at the records "
+            "root (the parent of the per-type directories) instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        files.extend((path, QUERY_ORIGIN_LOCAL) for path in _iter_json_files(_as_path(directory)))
+    else:
+        root = _as_path(source_root) if source_root is not None else Path(DEFAULT_REGISTRATION_SOURCE_ROOT)
+        files.extend((path, QUERY_ORIGIN_LOCAL) for path in iter_entity_files(entity_type, root))
+    if include_packaged_examples:
+        files.extend(
+            (path, QUERY_ORIGIN_PACKAGED) for path in iter_entity_files(entity_type, EXAMPLES_ROOT)
+        )
+    return files
 
 
 def _editorial_record_id(*values: object) -> str:

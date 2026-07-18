@@ -965,6 +965,134 @@ _BDF_CANONICAL_COLUMNS: list[tuple[str, str]] = [
 ]
 
 
+def _unmapped_source_columns(
+    src: Path, plugin_id: str | None, out_columns: list[str]
+) -> list[str]:
+    """Source columns that did not survive a BDF conversion (best-effort).
+
+    Reads the raw column header of *src* through the resolved reader plugin and
+    returns every source column that neither resolves to a BDF canonical name
+    nor passes through to the converted output. Binary formats whose parsers
+    cannot cheaply expose a header return ``[]`` (nothing to compare against),
+    and any inspection failure degrades to ``[]`` — the report must never break
+    a conversion that already succeeded.
+    """
+    try:
+        import bdf.io as _bdf_io  # noqa: PLC0415
+
+        plugin = _bdf_io.PLUGINS[plugin_id] if plugin_id in _bdf_io.PLUGINS else None
+        parser = getattr(plugin, "table_parser", None)
+        read_headings = getattr(parser, "read_column_headings", None)
+        if read_headings is None:
+            return []
+        raw_headers = [h for h in read_headings(src) if isinstance(h, str) and h.strip()]
+        normalizer = getattr(parser, "normalizer", None)
+        survived = set(out_columns)
+        unmapped: list[str] = []
+        for header in raw_headers:
+            if header in survived:
+                continue
+            try:
+                if normalizer is not None and normalizer.resolve([header]):
+                    continue  # renamed into a canonical BDF column
+            except Exception:  # noqa: BLE001 — treat resolver hiccups as unmapped
+                pass
+            unmapped.append(header)
+        return unmapped
+    except Exception:  # noqa: BLE001 — reporting is best-effort by design
+        return []
+
+
+# Legacy/authored test-spec condition keys -> (canonical condition name, default unit).
+# ws.template() used to emit unit-suffixed keys with bare scalars or {min,max}
+# dicts; these keep loading (coerced to proper quantities) so old drafts survive.
+_TEMPLATE_CONDITION_KEYS: dict[str, tuple[str, str]] = {
+    "temperature": ("temperature", "degC"),
+    "temperature_degC": ("temperature", "degC"),
+    "applied_pressure": ("applied_pressure", "kPa"),
+    "applied_pressure_kilopascal": ("applied_pressure", "kPa"),
+    "voltage_window": ("voltage_window", "V"),
+    "voltage_window_volt": ("voltage_window", "V"),
+    "soc_window": ("soc_window", "%"),
+    "c_rate": ("c_rate", "A/Ah"),
+    "d_rate": ("d_rate", "A/Ah"),
+}
+
+
+def _clean_template_conditions(raw: Any) -> tuple[dict[str, dict] | None, list[str]]:
+    """Lift authored/template ``conditions`` to quantity shapes the model accepts.
+
+    - Drops null placeholders (unfilled template entries) instead of failing.
+    - Coerces legacy shapes: bare scalars under unit-suffixed keys
+      (``temperature_degC: 25``) and ``{min, max}`` windows become
+      ``{value|min_value|max_value, unit}`` quantities.
+    - Non-numeric entries (e.g. ``atmosphere: "argon"``) cannot be quantities;
+      they are returned as notes so the information is kept, not dropped.
+    """
+    if not isinstance(raw, dict):
+        return None, []
+    out: dict[str, dict] = {}
+    notes: list[str] = []
+    for key, value in raw.items():
+        if value is None or str(key).startswith("_"):
+            continue
+        name, default_unit = _TEMPLATE_CONDITION_KEYS.get(key, (str(key), ""))
+        if isinstance(value, bool):
+            notes.append(f"condition {key}: {value}")
+            continue
+        if isinstance(value, (int, float)):
+            qty: dict[str, Any] = {"value": float(value)}
+        elif isinstance(value, dict):
+            qty = {k: v for k, v in value.items() if v is not None and not str(k).startswith("_")}
+            # legacy window keys
+            if "min" in qty:
+                qty["min_value"] = qty.pop("min")
+            if "max" in qty:
+                qty["max_value"] = qty.pop("max")
+            if not any(k in qty for k in ("value", "min_value", "max_value")):
+                continue  # placeholder left unfilled
+        elif isinstance(value, str):
+            if value.strip():
+                notes.append(f"condition {key}: {value.strip()}")
+            continue
+        else:
+            notes.append(f"condition {key}: {value!r}")
+            continue
+        if not qty.get("unit"):
+            if not default_unit:
+                raise ValueError(
+                    f"condition {key!r} needs a unit, e.g. "
+                    '{"value": 25, "unit": "degC"}.'
+                )
+            qty["unit"] = default_unit
+        out[name] = qty
+    return (out or None), notes
+
+
+def _clean_template_steps(raw: Any) -> builtins.list[str] | None:
+    """Normalize authored/template ``steps`` to the PyBaMM-string list the model parses.
+
+    Strings pass through; the old template's ``{"description": ...}`` dict
+    placeholder is dropped, and a dict whose description was actually edited is
+    lifted to its string so the authored step is not silently ignored.
+    """
+    if not isinstance(raw, list):
+        return None
+    steps: list[str] = []
+    for item in raw:
+        if isinstance(item, str) and item.strip():
+            steps.append(item.strip())
+        elif isinstance(item, dict):
+            description = item.get("description")
+            if (
+                isinstance(description, str)
+                and description.strip()
+                and description.strip().lower() != "fill in test steps here"
+            ):
+                steps.append(description.strip())
+    return steps or None
+
+
 class AuthoringWorkspace:
     """The blessed authoring surface: a simplified workspace for BattINFO records.
 
@@ -1004,7 +1132,7 @@ class AuthoringWorkspace:
         # in-memory search cache; populated lazily from registry API or local index
         self._search_cache: list[dict] | None = None
         # converted-file → original-source mapping (lazy-loaded from manifest)
-        self._conversion_sources: dict[str, str] | None = None
+        self._conversion_sources: dict[str, Any] | None = None
         # paths written by the most recent ws.save() — submit() uses this to
         # avoid re-submitting records from previous sessions in the same directory
         self._session_paths: set[Path] = set()
@@ -1626,6 +1754,7 @@ class AuthoringWorkspace:
         suffix = f".bdf.{fmt}"
         written: list[Path] = []
         failed: list[tuple[str, str]] = []
+        lossy: list[tuple[str, list[str]]] = []
         for src in input_files:
             # NEWARE filenames carry an embedded short-ID batch key used later for
             # cell↔file matching; keep that.  Other formats use the plain stem.
@@ -1652,12 +1781,29 @@ class AuthoringWorkspace:
             via = f", via {reader}" if reader else ""
             print(f"  {src.name}  ->  {out.name}  ({out.stat().st_size / 1e6:.1f} MB{via})")
             written.append(out)
+            # A conversion that silently discards source columns is data loss
+            # behind a success message — compare the source header against what
+            # actually survived and report every column left behind.
+            unmapped = _unmapped_source_columns(src, reader, list(df.columns))
+            if unmapped:
+                lossy.append((src.name, unmapped))
+                print(f"  WARNING: {len(unmapped)} source column(s) were NOT mapped to BDF "
+                      f"and are missing from {out.name}:")
+                for col in unmapped:
+                    print(f"    - {col}")
+                print(f"    (reader plugin: {reader or 'unknown'} -- if that looks wrong, the "
+                      "file was likely detected as the wrong instrument format)")
+                print("    Fix: ws.bdf_columns() lists the canonical names, then "
+                      f"ws.convert_csv({src.name!r}, hints={{'<source column>': '<bdf name>'}}).")
             # Remember the original so it can travel with the dataset as raw-source
             # provenance when the test is published (see ws.add('test', ...)).
-            self._record_conversion(src, out)
+            self._record_conversion(src, out, unmapped_columns=unmapped)
 
         print(f"\nConverted {len(written)} file(s) -> {bdf_dir}"
               + (f"  ({len(failed)} failed)" if failed else ""))
+        if lossy:
+            print(f"  DATA-LOSS WARNING: {len(lossy)} file(s) had unmapped source columns "
+                  "(details above) -- the converted files do NOT contain those columns.")
         if failed:
             print("  Failed files may be an unsupported variant -- try exporting a CSV "
                   "and ws.convert('*.csv'), or ws.convert_csv(path, hints={...}).")
@@ -1783,6 +1929,24 @@ class AuthoringWorkspace:
 
         mapped = ", ".join(sorted(set(hints.values()))) if hints else "(no remap)"
         print(f"  {src.name}  ->  {out.name}   mapped: {mapped}")
+        # Columns that are still not BDF canonical names were kept as-is, but
+        # downstream BDF tooling will not recognize them — say so out loud
+        # instead of green-lighting a partially mapped file silently.
+        def _is_canonical(column: str) -> bool:
+            try:
+                from bdf.spec import COLUMN_ONTOLOGY  # noqa: PLC0415
+                return COLUMN_ONTOLOGY.get(column) is not None
+            except Exception:  # noqa: BLE001 — fall back to the curated subset
+                return column in {name for name, _ in _BDF_CANONICAL_COLUMNS}
+
+        unmapped = [c for c in df.columns if not _is_canonical(c)]
+        if unmapped:
+            print(f"  WARNING: {len(unmapped)} column(s) are not BDF canonical names "
+                  "(kept unchanged, but BDF tooling will ignore them):")
+            for col in unmapped:
+                print(f"    - {col}")
+            print("    Fix: ws.bdf_columns() lists the canonical names; re-run "
+                  "ws.convert_csv(path, hints={'<source column>': '<bdf name>'}).")
         return out
 
     def commands(self) -> None:
@@ -1932,7 +2096,7 @@ class AuthoringWorkspace:
             print(f"No {label} records found" + (f" matching {query!r}." if query else "."))
         return out
 
-    def template(self, record_type: str, **kwargs) -> Path:
+    def template(self, record_type: str | None = None, **kwargs) -> Path:
         """Write a fillable JSON template for a cell spec, test spec, or equipment spec.
 
         Fill in the generated file, then load it with ``ws.load(path)``.
@@ -1951,6 +2115,11 @@ class AuthoringWorkspace:
                         name="SkyRC MC3000", manufacturer="SkyRC", model="MC3000",
                         equipment_class="cycler", channel_count=4)
         """
+        if record_type is None:
+            raise ValueError(
+                "template() needs a record type: 'cell-spec', 'test-spec', or "
+                "'equipment-spec'. Example: ws.template('cell-spec', manufacturer='...', model='...')"
+            )
         rt = record_type.replace("_", "-")
         if rt in ("test-spec", "test-protocol"):   # accept old name during transition
             return self._template_test_spec(**kwargs)
@@ -1985,7 +2154,8 @@ class AuthoringWorkspace:
 
         safe_mfr = re.sub(r"[^a-zA-Z0-9]", "-", manufacturer)
         safe_model = re.sub(r"[^a-zA-Z0-9]", "-", model)
-        out_path = self._root / f"{safe_mfr}-{safe_model}.cell-spec.json"
+        slug = f"{safe_mfr}-{safe_model}".strip("-") or "cell-spec"
+        out_path = self._root / f"{slug}.cell-spec.json"
         if out_path.exists():
             print(f"  exists: {out_path.name}  (delete to regenerate)")
             return out_path
@@ -1994,29 +2164,56 @@ class AuthoringWorkspace:
         return out_path
 
     def _template_test_spec(self, **kwargs) -> Path:
+        from battinfo.bundle import BatteryTestType  # noqa: PLC0415
+
         name = kwargs.get("name", "")
-        test_type = kwargs.get("type", kwargs.get("kind", ""))
+        test_type = kwargs.get("type", kwargs.get("kind", "")) or ""
+        allowed_types = [t.value for t in BatteryTestType]
+        if test_type and test_type not in allowed_types:
+            raise ValueError(
+                f"type must be one of: {', '.join(allowed_types)} (got {test_type!r})."
+            )
+
+        def _scalar(value: Any, unit: str) -> dict:
+            return {"value": value, "unit": unit}
+
+        def _window(value: Any, unit: str) -> dict:
+            lo = hi = None
+            if isinstance(value, dict):
+                lo = value.get("min_value", value.get("min"))
+                hi = value.get("max_value", value.get("max"))
+            elif isinstance(value, (list, tuple)) and len(value) == 2:
+                lo, hi = value
+            return {"min_value": lo, "max_value": hi, "unit": unit}
+
+        steps = kwargs.get("steps", kwargs.get("experiment"))
         template = {
             "name":        name,
             "type":        test_type,
+            "_allowed_types": allowed_types,
             "description": kwargs.get("description", None),
             "instrument":  kwargs.get("instrument",  None),
-            "steps": kwargs.get("steps", [
-                {"description": "Fill in test steps here"}
-            ]),
+            "atmosphere":  kwargs.get("atmosphere",  None),
+            # PyBaMM-style step strings; ws.load() parses them into the
+            # structured method. Leave empty if the method comes later.
+            "steps": list(steps) if steps else [],
+            "_steps_help": "PyBaMM-style strings, e.g. 'Discharge at C/5 for 10 hours "
+                           "or until 2.5 V', 'Hold at 4.2 V until C/50', 'Rest for 30 minutes'.",
+            # Every condition is a quantity: {value, unit} or {min_value, max_value, unit}.
+            # Fill in what applies and delete the rest; null placeholders are
+            # ignored by ws.load(). Keys starting with '_' are comments.
             "conditions": {
-                "temperature_degC": kwargs.get("temperature_degC", None),
-                "applied_pressure_kilopascal": kwargs.get("applied_pressure_kilopascal", None),
-                "atmosphere":       kwargs.get("atmosphere",       None),
-                "voltage_window_volt": kwargs.get("voltage_window_volt", {"min": None, "max": None}),
-                "soc_window":       kwargs.get("soc_window",       {"min": None, "max": None}),
-                "c_rate":           kwargs.get("c_rate",           None),
-                "d_rate":           kwargs.get("d_rate",           None),
+                "temperature":      _scalar(kwargs.get("temperature_degC"), "degC"),
+                "applied_pressure": _scalar(kwargs.get("applied_pressure_kilopascal"), "kPa"),
+                "voltage_window":   _window(kwargs.get("voltage_window_volt"), "V"),
+                "soc_window":       _window(kwargs.get("soc_window"), "%"),
+                "c_rate":           _scalar(kwargs.get("c_rate"), "A/Ah"),
+                "d_rate":           _scalar(kwargs.get("d_rate"), "A/Ah"),
             },
             "citation":    kwargs.get("citation",    None),
             "source_file": kwargs.get("source_file", None),
         }
-        safe_name = re.sub(r"[^a-zA-Z0-9]", "-", name or "test-spec")
+        safe_name = re.sub(r"[^a-zA-Z0-9]", "-", name).strip("-") or "test-spec"
         out_path = self._root / f"{safe_name}.test-spec.json"
         if out_path.exists():
             print(f"  exists: {out_path.name}  (delete to regenerate)")
@@ -5522,8 +5719,9 @@ class AuthoringWorkspace:
     def _conversions_path(self) -> Path:
         return self._root / ".battinfo" / "conversions.json"
 
-    def _load_conversions(self) -> dict[str, str]:
-        """Mapping of converted-file path → original source path (both absolute)."""
+    def _load_conversions(self) -> dict[str, Any]:
+        """Mapping of converted-file path → source path (str) or a dict with
+        ``source`` + ``unmapped_columns`` (both paths absolute)."""
         if self._conversion_sources is None:
             p = self._conversions_path()
             self._conversion_sources = (
@@ -5531,10 +5729,29 @@ class AuthoringWorkspace:
             )
         return self._conversion_sources
 
-    def _record_conversion(self, src: Path, out: Path) -> None:
-        """Remember that *out* was converted from *src*, for provenance at publish."""
+    def _record_conversion(
+        self, src: Path, out: Path, *, unmapped_columns: builtins.list[str] | None = None
+    ) -> None:
+        """Remember that *out* was converted from *src*, for provenance at publish.
+
+        When the conversion dropped source columns (see :meth:`convert`), their
+        names are recorded alongside the source link so the loss stays visible
+        after the session ends. Entries without loss keep the legacy plain-string
+        form (out -> src) for compatibility with existing manifests.
+        """
         conv = self._load_conversions()
-        conv[str(out.resolve())] = str(src.resolve())
+        if unmapped_columns:
+            conv[str(out.resolve())] = {
+                "source": str(src.resolve()),
+                "unmapped_columns": list(unmapped_columns),
+            }
+        else:
+            existing = conv.get(str(out.resolve()))
+            # Don't erase a previously recorded loss report with a bare re-link.
+            if isinstance(existing, dict) and existing.get("unmapped_columns"):
+                existing["source"] = str(src.resolve())
+            else:
+                conv[str(out.resolve())] = str(src.resolve())
         p = self._conversions_path()
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(conv, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -5547,7 +5764,10 @@ class AuthoringWorkspace:
         no longer exists.
         """
         conv = self._load_conversions()
-        src = conv.get(str(data_path.resolve()))
+        entry = conv.get(str(data_path.resolve()))
+        # Entries are either the legacy plain source string or a dict carrying
+        # the source plus an unmapped-column loss report (see _record_conversion).
+        src = entry.get("source") if isinstance(entry, dict) else entry
         if not src:
             return None
         sp = Path(src)
@@ -6001,19 +6221,13 @@ class AuthoringWorkspace:
             print("  No cell instances to add" + (f" (match={match!r})." if match else "."))
             return []
 
-        # Inherit spec properties as default measured values on each instance.
-        spec_defaults: dict[str, Any] = {}
-        try:
-            specs_obj = getattr(spec, "properties", None)
-            raw_specs: dict = specs_obj if isinstance(specs_obj, dict) else (
-                spec.to_record().get("properties") or {}
-            )
-            spec_defaults = {
-                k: v for k, v in raw_specs.items()
-                if isinstance(v, dict) and v.get("value") is not None
-            }
-        except Exception:
-            pass
+        # NOTE: spec nominal ratings are deliberately NOT copied into each
+        # instance's `measured` block. Rated/nominal values are not
+        # measurements — auto-copying them fabricated per-cell "measurement"
+        # provenance for values nobody measured. The spec's ratings stay on
+        # the spec record, which every instance already references via
+        # cell_spec_id; genuine measurements arrive via measured=... on
+        # ws.cell()/Cell or from test data.
 
         # Conformance (vs the cell spec): one value applied to all, or a parallel list.
         if isinstance(conformance, (list, tuple)):
@@ -6035,7 +6249,6 @@ class AuthoringWorkspace:
                 grade=grade,
                 manufactured_at=production_date,
                 expires_at=expiration_date,
-                measured=spec_defaults if spec_defaults else None,
                 conformance=conf,
             )
             if iri is not None:
@@ -6052,22 +6265,57 @@ class AuthoringWorkspace:
         return cells
 
     def _load_test_spec(self, path: Path) -> Any:
+        from battinfo.bundle import BatteryTestType  # noqa: PLC0415
+
         raw = json.loads(path.read_text(encoding="utf-8"))
+        # Keys starting with "_" are in-file comments written by ws.template()
+        # (e.g. _allowed_types, _steps_help) — never record content.
+        raw = {k: v for k, v in raw.items() if not str(k).startswith("_")}
+
+        allowed_types = [t.value for t in BatteryTestType]
+        test_type = raw.get("type") or raw.get("kind") or ""
+        if not test_type:
+            raise ValueError(
+                f"{path.name}: fill in 'type' before loading. "
+                f"Allowed values: {', '.join(allowed_types)}."
+            )
+        if test_type not in allowed_types:
+            raise ValueError(
+                f"{path.name}: unknown type {test_type!r}. "
+                f"Allowed values: {', '.join(allowed_types)}."
+            )
+
+        conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
+        steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
+
+        # Fields with no structured home on a test spec are preserved as notes
+        # rather than silently dropped (instrument belongs on the test run;
+        # atmosphere has no numeric quantity form).
+        notes: list[str] = []
+        for label, value in (("instrument", raw.get("instrument")),
+                             ("atmosphere", raw.get("atmosphere"))):
+            if isinstance(value, str) and value.strip():
+                notes.append(f"{label}: {value.strip()}")
+        notes.extend(condition_notes)
+
         # Forward the authored method so it survives into the saved record (and
         # thence the published JSON-LD as an EMMO process graph). Humans author the
         # PyBaMM-style `experiment`/`steps` strings; a pre-built structured `method`
         # is also accepted. Protocol-level record/safety/conditions/artifacts pass through.
         tp = self._ws.test_protocol(
             name=raw.get("name", ""),
-            type=raw.get("type") or raw.get("kind", ""),
+            type=test_type,
             description=raw.get("description"),
-            experiment=raw.get("experiment") or raw.get("steps"),
+            experiment=steps,
             cycles=raw.get("cycles"),
             method=raw.get("method"),
-            conditions=raw.get("conditions"),
+            conditions=conditions,
             record=raw.get("record"),
             safety=raw.get("safety"),
             artifacts=raw.get("artifacts"),
+            citation=raw.get("citation"),
+            source_file=raw.get("source_file"),
+            comment=notes or None,
         )
         return tp
 
