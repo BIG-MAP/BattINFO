@@ -18,7 +18,7 @@ reference follows below; for the layered architecture, see
 | Author research-grade composition (materials, electrodes, electrolyte) | `battinfo.authoring` — see {doc}`Tutorial 5 <../guides/05-descriptors>` |
 | Load, query, save, or resolver-publish canonical records | `battinfo.api` helpers |
 | Turn a folder of photos and CSVs into a linked submission | `battinfo.ingest` — one-command folder intake |
-| Drive everything from the shell | The `battinfo` CLI — see the {doc}`CLI reference </pages/cli-reference>` |
+| Script validation, saving, and publishing from the shell | The `battinfo` CLI — see the {doc}`CLI reference </pages/cli-reference>` |
 
 If you are new here, start with the {doc}`tutorials </pages/guides>` — six
 notebooks that walk the whole story end to end.

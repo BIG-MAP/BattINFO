@@ -8,10 +8,13 @@ BattINFO turns battery metadata into machine-readable Linked Data. In five minut
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` then `ws.quickstart()` |
 | Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` (this page) |
-| Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo.Workspace` — the lower-level engine the authoring workspace wraps |
+| Register materials, electrodes, and other components | **`battinfo.api` functions** | `create_material_spec(...)` + `save_material_spec(...)` — see the [cookbook](docs/pages/cookbook.md) |
 
-If in doubt, start with `battinfo.workspace(".")` — it wraps everything else. See
-[Workspace authoring](docs/workspace-authoring.md) for the guided tour.
+If in doubt, start with `battinfo.workspace(".")` for cells, tests, datasets,
+and equipment. The workspace does **not** cover materials or component specs —
+those are authored through `battinfo.api`. The full per-record-type coverage
+map is in [Workspace authoring](docs/workspace-authoring.md#what-each-surface-can-author-today);
+the guided tour is on the same page.
 
 ---
 

@@ -76,11 +76,13 @@ resource stays dereferenceable, marked `owl:deprecated` and pointing at its
 replacement where one exists — never a 404. An IRI that once resolved always
 resolves.
 
-> **Status:** during the soft launch the registry sits behind an access gate,
-> so record IRIs may resolve to the platform's sign-in page rather than the
-> machine-readable artifact. Public reads for published records arrive as the
-> gate comes down — until then, treat dereferencing as not yet reliable for
-> harvesters.
+> **Status:** the resolver and content negotiation are live for published
+> records — a request with `Accept: application/ld+json` (or `text/turtle`)
+> returns the machine-readable record with no login. In a *browser*, the
+> human landing page sits behind the platform's sign-in gate during the soft
+> launch, so a scanned label may show a sign-in prompt while a harvester gets
+> data from the same IRI. Records that were never published to the registry
+> return `404 Record not found`.
 
 ## Enforcement
 

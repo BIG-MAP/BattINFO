@@ -8,6 +8,11 @@ BattINFO is the semantic data layer for battery technology. It gives you:
 - Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology
 - A reusable cell-spec library backed by canonical records in ``battinfo-records``
 
+Working at the bench? The :doc:`cookbook <cookbook>` maps twelve lab tasks —
+register materials, build a cell from components, label cells, publish — to
+short runnable recipes, and the :doc:`glossary <glossary>` decodes the
+vocabulary in plain language.
+
 
 Installation
 ------------
@@ -106,7 +111,8 @@ BattINFO ships a command-line interface for validation and querying:
    # Validate a cell-spec record
    battinfo validate examples/cell-spec/A123__ANR26650M1-B.json --profile cell-spec
 
-   # Query all registered cell specs
+   # Query the example cell specs packaged with BattINFO (for your own
+   # library, use the Python query_* functions with an explicit directory)
    battinfo query cell-spec
 
    # Save a cell record from a draft file

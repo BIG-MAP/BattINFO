@@ -19,9 +19,15 @@ A cell-spec gains five optional top-level reference fields (siblings of the inli
 | `housing_spec_id` | `housing-spec` |
 
 A cell may **reference**, **inline**, or both — inline holders stay optional, so existing
-records are unaffected. References are existence-checked against the source root, and the
-JSON-LD emits reference nodes (`hasPositiveElectrode: {"@id": <electrode-spec IRI>}`, etc.);
+records are unaffected. The JSON-LD emits reference nodes
+(`hasPositiveElectrode: {"@id": <electrode-spec IRI>}`, etc.);
 when a basis/inline node is also present, the `@id` is merged onto it.
+
+> **Check your references.** Saving does *not* currently reject a
+> `*_spec_id` that points at nothing — a typo lands on disk silently. Run
+> `validate_record_report` over the record set after building (it reports
+> `reference.missing` per dangling IRI); the recipe is in
+> {ref}`How-to: build a cell from components <validate-the-set>`.
 
 ```python
 import battinfo as bi
