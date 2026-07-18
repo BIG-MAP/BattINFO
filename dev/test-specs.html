@@ -159,6 +159,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
@@ -178,13 +185,6 @@
   </a>
 </li>
 
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,6 +193,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -299,6 +306,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/getting-started.html">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -473,10 +487,39 @@
                   
   <section id="test-specs">
 <h1>Test specs<a class="headerlink" href="#test-specs" title="Link to this heading">#</a></h1>
-<p>A <strong>test-spec</strong> (<code class="docutils literal notranslate"><span class="pre">test-protocol</span></code> record) is the reusable, IRI-addressable description of a test
+<p>A <strong>test-spec</strong> is the reusable, IRI-addressable description of a test
 procedure — the <em>spec</em> half of <code class="docutils literal notranslate"><span class="pre">test-spec</span></code> + <code class="docutils literal notranslate"><span class="pre">test</span></code>. A <code class="docutils literal notranslate"><span class="pre">test</span></code> (instance) links a cell-instance to
 a test-spec via <code class="docutils literal notranslate"><span class="pre">protocol_id</span></code> and to its <code class="docutils literal notranslate"><span class="pre">dataset</span></code>s.</p>
-<p><code class="docutils literal notranslate"><span class="pre">examples/test-protocol/</span></code> now carries <strong>one example for every <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code></strong> value (20
+<blockquote>
+<div><p><strong>One thing, three names.</strong> A <em>test spec</em> is stored as a <code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>
+record on disk and authored as the <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code> Python class — same object
+throughout. The <code class="docutils literal notranslate"><span class="pre">kind=</span></code> argument (the workspace calls it <code class="docutils literal notranslate"><span class="pre">type=</span></code>) takes any
+<code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code> value: <code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hppc</span></code>, <code class="docutils literal notranslate"><span class="pre">ici</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, <code class="docutils literal notranslate"><span class="pre">dcir</span></code>, <code class="docutils literal notranslate"><span class="pre">eis</span></code>, <code class="docutils literal notranslate"><span class="pre">impedance</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_ageing</span></code>,
+<code class="docutils literal notranslate"><span class="pre">formation</span></code>, <code class="docutils literal notranslate"><span class="pre">rpt</span></code>, <code class="docutils literal notranslate"><span class="pre">quasi_ocv</span></code>, <code class="docutils literal notranslate"><span class="pre">field</span></code>, <code class="docutils literal notranslate"><span class="pre">duty_cycle</span></code>, <code class="docutils literal notranslate"><span class="pre">wltp</span></code>, <code class="docutils literal notranslate"><span class="pre">nedc</span></code>,
+<code class="docutils literal notranslate"><span class="pre">sem</span></code>, <code class="docutils literal notranslate"><span class="pre">characterization</span></code>, <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+</div></blockquote>
+<section id="authoring">
+<h2>Authoring<a class="headerlink" href="#authoring" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">battinfo</span><span class="o">.</span><span class="n">save_test_spec</span><span class="p">(</span><span class="n">battinfo</span><span class="o">.</span><span class="n">TestSpec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Capacity Check — C/10 at 25 C&quot;</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;CC-CV charge then slow C/10 discharge.&quot;</span><span class="p">,</span>
+    <span class="n">experiment</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Charge at C/3 until 4.2 V&quot;</span><span class="p">,</span> <span class="s2">&quot;Hold at 4.2 V until C/20&quot;</span><span class="p">,</span> <span class="s2">&quot;Discharge at C/10 until 2.5 V&quot;</span><span class="p">],</span>
+    <span class="n">conditions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;degC&quot;</span><span class="p">}},</span>
+<span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">experiment</span></code> PyBaMM-style strings parse into the structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (steps with
+mode/direction/setpoints/termination); <code class="docutils literal notranslate"><span class="pre">facets</span></code> are derived automatically for filtering.
+The model is two-layer by design: a descriptive <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (what the procedure is) plus
+actionable <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code> (runnable protocol files carried as linked distributions).</p>
+</section>
+<section id="how-each-kind-is-modelled">
+<h2>How each kind is modelled<a class="headerlink" href="#how-each-kind-is-modelled" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">examples/test-protocol/</span></code> carries <strong>one example for every <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code></strong> value (20
 kinds), enforced by <code class="docutils literal notranslate"><span class="pre">tests/test_test_contract.py::test_test_protocol_examples_cover_full_battery_test_type_enum</span></code>.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -503,30 +546,15 @@ kinds), enforced by <code class="docutils literal notranslate"><span class="pre"
 </tbody>
 </table>
 </div>
-<section id="authoring">
-<h2>Authoring<a class="headerlink" href="#authoring" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
-
-<span class="n">bi</span><span class="o">.</span><span class="n">save_test_spec</span><span class="p">(</span><span class="n">bi</span><span class="o">.</span><span class="n">TestSpec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Capacity Check — C/10 at 25 C&quot;</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="n">bi</span><span class="o">.</span><span class="n">BatteryTestType</span><span class="o">.</span><span class="n">CAPACITY_CHECK</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;CC-CV charge then slow C/10 discharge.&quot;</span><span class="p">,</span>
-    <span class="n">experiment</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Charge at C/3 until 4.2 V&quot;</span><span class="p">,</span> <span class="s2">&quot;Hold at 4.2 V until C/20&quot;</span><span class="p">,</span> <span class="s2">&quot;Discharge at C/10 until 2.5 V&quot;</span><span class="p">],</span>
-    <span class="n">conditions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;degC&quot;</span><span class="p">}},</span>
-<span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">experiment</span></code> PyBaMM-style strings parse into the structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (steps with
-mode/direction/setpoints/termination); <code class="docutils literal notranslate"><span class="pre">facets</span></code> are derived automatically for filtering.
-The model is two-layer by design: a descriptive <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (what the procedure is) plus
-actionable <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code> (runnable protocol files carried as linked distributions).</p>
 <blockquote>
 <div><p>The <code class="docutils literal notranslate"><span class="pre">kind</span></code> enum in <code class="docutils literal notranslate"><span class="pre">test-protocol.schema.json</span></code> is kept in sync with the <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code>
-Python enum (<code class="docutils literal notranslate"><span class="pre">bundle.py</span></code>); the coverage test guards against drift.</p>
+Python enum (<code class="docutils literal notranslate"><span class="pre">battinfo.bundle.BatteryTestType</span></code>); the coverage test guards against drift.</p>
 </div></blockquote>
 </section>
-<section id="semantic-depth-of-a-test-protocol">
-<h2>Semantic depth of a test protocol<a class="headerlink" href="#semantic-depth-of-a-test-protocol" title="Link to this heading">#</a></h2>
+<section id="going-deeper-semantic-depth-of-a-test-protocol">
+<h2>Going deeper: semantic depth of a test protocol<a class="headerlink" href="#going-deeper-semantic-depth-of-a-test-protocol" title="Link to this heading">#</a></h2>
+<p><em>Everything below is background for ontology-curious readers — nothing in it
+is needed to author or run a test spec.</em></p>
 <p>The current representation types the protocol at the class level and carries a free-text
 <code class="docutils literal notranslate"><span class="pre">description</span></code>. EMMO domain-electrochemistry has richer terms that allow a more explicit,
 machine-replicable representation — here is what is available and when to use it.</p>
@@ -669,7 +697,8 @@ then sufficient for discovery and filtering.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authoring">Authoring</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#semantic-depth-of-a-test-protocol">Semantic depth of a test protocol</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-each-kind-is-modelled">How each kind is modelled</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-deeper-semantic-depth-of-a-test-protocol">Going deeper: semantic depth of a test protocol</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-ontology-provides">What the ontology provides</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pros-of-explicit-step-decomposition">Pros of explicit step decomposition</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cons-and-practical-limits">Cons and practical limits</a></li>

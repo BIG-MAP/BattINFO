@@ -159,6 +159,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
@@ -178,13 +185,6 @@
   </a>
 </li>
 
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,6 +193,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -299,6 +306,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/getting-started.html">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -475,18 +489,15 @@
 <h1>Materials<a class="headerlink" href="#materials" title="Link to this heading">#</a></h1>
 <p>BattINFO models every entity as a <strong>spec + instance</strong> pair: a <em>spec</em> is the reusable,
 datasheet-like type description; an <em>instance</em> is a physical realization of that spec.
-This page documents the first standalone material family — <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> (the type)
-and <code class="docutils literal notranslate"><span class="pre">material</span></code> (a physical lot/batch) — and the entity registry that makes adding such
-families uniform.</p>
-<section id="the-entity-registry">
-<h2>The entity registry<a class="headerlink" href="#the-entity-registry" title="Link to this heading">#</a></h2>
-<p>All record types are declared once in <a class="reference download internal" download="" href="_downloads/d0c8f38f0b8744261b6cd223acb3644c/entities.py"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">src/battinfo/entities.py</span></code></span></a>
-as <code class="docutils literal notranslate"><span class="pre">EntityKind</span></code> entries (top-level JSON key, schema file, on-disk subdirectory, IRI
-namespace, and the instance→spec link field). Dispatch, validation, IRI minting, the
-record-set directory list, and <code class="docutils literal notranslate"><span class="pre">build_index</span></code> all derive from this registry, so a new
-spec/instance family is a single registry entry plus its schema and examples — not a
-copy-paste across <code class="docutils literal notranslate"><span class="pre">api.py</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.py</span></code>, and the validators.</p>
-</section>
+This page is the field reference for the material family — <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> (the grade)
+and <code class="docutils literal notranslate"><span class="pre">material</span></code> (a physical lot/batch).</p>
+<blockquote>
+<div><p><strong>Just want to register your materials?</strong> The recipe is
+<a class="reference internal" href="howto/register-materials.html"><span class="std std-doc">How-to: register materials</span></a>. (How new
+spec/instance families are added uniformly — the entity registry in
+<a class="reference download internal" download="" href="_downloads/d0c8f38f0b8744261b6cd223acb3644c/entities.py"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">src/battinfo/entities.py</span></code></span></a> — is an
+implementation topic; see <a class="reference internal" href="how-battinfo-is-built.html"><span class="std std-doc">How BattINFO is built</span></a>.)</p>
+</div></blockquote>
 <section id="records">
 <h2>Records<a class="headerlink" href="#records" title="Link to this heading">#</a></h2>
 <section id="material-spec">
@@ -594,9 +605,12 @@ compatibility are checked for known material keys during semantic validation.</p
 <p>Cell-specs still embed materials inline (<code class="docutils literal notranslate"><span class="pre">positive_electrode.coating.component</span></code>,
 <code class="docutils literal notranslate"><span class="pre">electrolyte.salt</span></code>, …). To dedup a material across many cells, lift the embedded holder
 to a standalone spec and reference it by IRI:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">specs</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">extract_material_specs</span><span class="p">(</span><span class="n">cell_spec_record</span><span class="p">)</span>   <span class="c1"># one material-spec per unique material</span>
-<span class="n">spec</span>  <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">material_spec_from_component</span><span class="p">(</span><span class="n">holder</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">)</span>
-<span class="n">holder</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">link_component_to_spec</span><span class="p">(</span><span class="n">holder</span><span class="p">,</span> <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>  <span class="c1"># holder now carries material_spec_id</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.materials</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">extract_material_specs</span><span class="p">,</span> <span class="n">link_component_to_spec</span><span class="p">,</span> <span class="n">material_spec_from_component</span><span class="p">)</span>
+
+<span class="n">specs</span> <span class="o">=</span> <span class="n">extract_material_specs</span><span class="p">(</span><span class="n">cell_spec_record</span><span class="p">)</span>   <span class="c1"># one material-spec per unique material</span>
+<span class="n">spec</span>  <span class="o">=</span> <span class="n">material_spec_from_component</span><span class="p">(</span><span class="n">holder</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">)</span>
+<span class="n">holder</span> <span class="o">=</span> <span class="n">link_component_to_spec</span><span class="p">(</span><span class="n">holder</span><span class="p">,</span> <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>  <span class="c1"># holder now carries material_spec_id</span>
 </pre></div>
 </div>
 <p>The embedded <code class="docutils literal notranslate"><span class="pre">material-component</span></code> holder gained an optional <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code> field for
@@ -604,9 +618,11 @@ this reference. Rewiring the full cell-spec fleet onto references is Phase 3.</p
 </section>
 <section id="worked-example-python-api">
 <h2>Worked example (Python API)<a class="headerlink" href="#worked-example-python-api" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_material</span><span class="p">,</span> <span class="n">create_material_spec</span><span class="p">,</span> <span class="n">query_material_specs</span><span class="p">,</span>
+    <span class="n">save_material</span><span class="p">,</span> <span class="n">save_material_spec</span><span class="p">)</span>
 
-<span class="n">spec</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">create_material_spec</span><span class="p">(</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">create_material_spec</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
     <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span>
     <span class="n">electrode_polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
@@ -615,17 +631,18 @@ this reference. Rewiring the full cell-spec fleet onto references is Phase 3.</p
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Canrud&quot;</span><span class="p">,</span>
     <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;specific_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">160</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mAh/g&quot;</span><span class="p">}},</span>
 <span class="p">)</span>
-<span class="n">bi</span><span class="o">.</span><span class="n">save_material_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>
+<span class="n">save_material_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
 
-<span class="n">lot</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">create_material</span><span class="p">(</span>
+<span class="n">lot</span> <span class="o">=</span> <span class="n">create_material</span><span class="p">(</span>
     <span class="n">material_spec_id</span><span class="o">=</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
     <span class="n">lot_id</span><span class="o">=</span><span class="s2">&quot;CANRUD-LFP-2026-03&quot;</span><span class="p">,</span>
     <span class="n">supplier</span><span class="o">=</span><span class="s2">&quot;Canrud&quot;</span><span class="p">,</span>
     <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;mass&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">19.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg&quot;</span><span class="p">}},</span>
 <span class="p">)</span>
-<span class="n">bi</span><span class="o">.</span><span class="n">save_material</span><span class="p">(</span><span class="n">lot</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>  <span class="c1"># resolves the material_spec_id reference</span>
+<span class="n">save_material</span><span class="p">(</span><span class="n">lot</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>  <span class="c1"># resolves the material_spec_id reference</span>
 
-<span class="n">bi</span><span class="o">.</span><span class="n">query_material_specs</span><span class="p">(</span><span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">)</span>
+<span class="c1"># pass directory= explicitly — the default reads the packaged examples</span>
+<span class="n">query_material_specs</span><span class="p">(</span><span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;examples/material-spec&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -694,7 +711,6 @@ constituents. See the spec/instance roadmap for the remaining component families
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-entity-registry">The entity registry</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records">Records</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#material-spec"><code class="docutils literal notranslate"><span class="pre">material-spec</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-with-conditions">Properties with conditions</a></li>

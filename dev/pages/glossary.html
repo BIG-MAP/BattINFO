@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>How-to guides &#8212; BattINFO  documentation</title>
+    <title>Glossary — the vocabulary, in plain language &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'pages/howto';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pages/glossary';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Workspace authoring" href="../workspace-authoring.html" />
-    <link rel="prev" title="Guide 6 — Publish your first dataset" href="../guides/06-publish-your-data.html" />
+    <link rel="next" title="Tutorials" href="guides.html" />
+    <link rel="prev" title="Troubleshooting" href="troubleshooting.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -158,7 +158,7 @@
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="cookbook.html">
     Cookbook — I want to…
   </a>
@@ -172,8 +172,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
     How-to guides
   </a>
 </li>
@@ -306,7 +306,7 @@
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="cookbook.html">
     Cookbook — I want to…
   </a>
@@ -320,8 +320,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
     How-to guides
   </a>
 </li>
@@ -403,18 +403,9 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/register-materials.html">Register the materials in your lab</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/build-a-cell-from-components.html">Build a cell from components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/find-existing-records.html">Find what already exists</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/bulk-ingest.html">Bulk-ingest thousands of records</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Glossary — the vocabulary, in plain language</a></li>
 </ul>
 </div>
 </nav></div>
@@ -455,7 +446,10 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How-to guides</span></li>
+    
+    <li class="breadcrumb-item"><a href="cookbook.html" class="nav-link">Cookbook — I want to…</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Glossary — the vocabulary, in plain language</span></li>
   </ul>
 </nav>
 </div>
@@ -472,29 +466,76 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="how-to-guides">
-<h1>How-to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading">#</a></h1>
-<p>Short, task-shaped recipes for people who already know the basics: each one
-does a single job, states its ingredients up front, and gets out of your way.
-The code is executed in CI wherever it can run offline.</p>
-<p>New to BattINFO? Start with the <a class="reference internal" href="guides.html"><span class="doc">tutorials</span></a> instead — they teach
-the model that these recipes assume. Not sure which recipe you need? The
-<a class="reference internal" href="cookbook.html"><span class="doc">cookbook</span></a> maps twelve bench tasks to their recipes.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/register-materials.html">Register the materials in your lab</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/build-a-cell-from-components.html">Build a cell from components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/find-existing-records.html">Find what already exists</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/bulk-ingest.html">Bulk-ingest thousands of records</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
-</ul>
-</div>
+  <section id="glossary-the-vocabulary-in-plain-language">
+<h1>Glossary — the vocabulary, in plain language<a class="headerlink" href="#glossary-the-vocabulary-in-plain-language" title="Link to this heading">#</a></h1>
+<p>Two sentences per term, no prerequisites. For the full story behind any of
+them, follow the link at the end of the entry.</p>
+<dl class="simple myst">
+<dt><strong>Linked Data</strong></dt><dd><p>Data published so that every thing (a cell, a material, a test) has a web
+address, and records point at each other by those addresses instead of by
+ambiguous names. It is what lets someone else’s software follow your
+cell → test → dataset chain without guessing.</p>
+</dd>
+<dt><strong>IRI</strong></dt><dd><p>The web address that names one record, e.g.
+<code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/cell/gm6p-mrc6-p6cc-0m18</span></code> — an
+internationalized URL used as a permanent identifier. BattINFO IRIs never
+change and never get reused, so they are safe to print on a cell wrapper or
+cite in a paper (<a class="reference internal" href="../identifiers.html"><span class="std std-doc">Identifiers</span></a>).</p>
+</dd>
+<dt><strong>EMMO</strong></dt><dd><p>The Elementary Multiperspective Material Ontology — a big, curated
+dictionary of science and engineering concepts, each with a formal
+definition and an IRI. BattINFO uses its battery and electrochemistry
+branches so that “capacity” in your record means exactly the same thing as
+in everyone else’s.</p>
+</dd>
+<dt><strong>Ontology</strong></dt><dd><p>A machine-readable dictionary plus the rules relating its terms (“a coin
+cell <em>is a</em> battery cell”). Software uses it to reason about your records;
+you mostly never touch it directly.</p>
+</dd>
+<dt><strong>JSON-LD</strong></dt><dd><p>Ordinary JSON with a small <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> block that maps its keys to ontology
+IRIs — human-readable and machine-interpretable at once. BattINFO generates
+it from your records automatically; you author plain JSON or Python.</p>
+</dd>
+<dt><strong>RDF</strong></dt><dd><p>The underlying data model of Linked Data: every fact is a triple
+(<em>subject – property – value</em>), and a pile of triples forms a graph.
+JSON-LD is one way of writing RDF down; Turtle is another.</p>
+</dd>
+<dt><strong>SPARQL</strong></dt><dd><p>The query language for RDF graphs — SQL’s cousin for linked records. It is
+what makes questions like “all datasets from NMC811 cells cycled at 45 °C”
+answerable across datasets that have never seen each other.</p>
+</dd>
+<dt><strong>spec vs. instance</strong></dt><dd><p>A <em>spec</em> is a reusable description — the datasheet: a material grade, a
+cell product, a test protocol. An <em>instance</em> is one physical realization —
+this jar of powder, the cell labelled B7-01, the test run that finished
+Tuesday.</p>
+</dd>
+<dt><strong>descriptor</strong></dt><dd><p>The research-grade level of a cell spec: electrode composition,
+electrolyte formulation, separator, construction — the detail below the
+datasheet numbers (<a class="reference internal" href="../guides/05-descriptors.html"><span class="doc">Guide 5</span></a>).</p>
+</dd>
+<dt><strong>&#64;type stacking</strong></dt><dd><p>One record carrying several ontology classes at once: a cylindrical LFP
+cell is simultaneously a <code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, a <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, and a
+<code class="docutils literal notranslate"><span class="pre">LithiumIronPhosphateBattery</span></code>. BattINFO stacks these automatically from
+the format and chemistry you enter.</p>
+</dd>
+<dt><strong>SHACL</strong></dt><dd><p>A rule language for checking RDF graphs — the semantic layer’s
+counterpart of JSON Schema. One of the layers behind
+<code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> (<a class="reference internal" href="../validation-contract.html"><span class="std std-doc">validation contract</span></a>).</p>
+</dd>
+<dt><strong>content negotiation</strong></dt><dd><p>One IRI, several representations: the same address returns JSON-LD to a
+script asking for <code class="docutils literal notranslate"><span class="pre">application/ld+json</span></code> and a human web page to a browser.
+This is why an IRI can “open a sign-in page” for you but still serve data
+to machines (<a class="reference internal" href="troubleshooting.html"><span class="std std-doc">troubleshooting</span></a>).</p>
+</dd>
+<dt><strong>BDF</strong></dt><dd><p>Battery Data Format — the one tidy, documented table layout that every
+cycler export is converted into (<code class="docutils literal notranslate"><span class="pre">ws.convert()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">ws.convert_csv()</span></code>), so downstream tools read one format instead of ten.</p>
+</dd>
+<dt><strong>short ID</strong></dt><dd><p>The first six characters of a record’s UID (e.g. <code class="docutils literal notranslate"><span class="pre">gm6pmr</span></code>) — the
+handwriting-sized version of an IRI, used in filenames and on cell labels
+(<a class="reference internal" href="../howto/label-your-cells.html"><span class="std std-doc">Label your cells</span></a>).</p>
+</dd>
+</dl>
 </section>
 
 
@@ -508,20 +549,20 @@ the model that these recipes assume. Not sure which recipe you need? The
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../guides/06-publish-your-data.html"
+       href="troubleshooting.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Guide 6 — Publish your first dataset</p>
+        <p class="prev-next-title">Troubleshooting</p>
       </div>
     </a>
     <a class="right-next"
-       href="../workspace-authoring.html"
+       href="guides.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Workspace authoring</p>
+        <p class="prev-next-title">Tutorials</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

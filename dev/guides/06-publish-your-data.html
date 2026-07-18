@@ -161,6 +161,13 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
     Tutorials
@@ -181,13 +188,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -196,6 +196,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -302,6 +309,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../pages/getting-started.html">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -475,6 +489,7 @@
 <li><p><strong>Publish</strong> — a DOI on Zenodo + the registry review queue</p></li>
 </ol>
 <p><em>Prerequisites: ``pip install “battinfo[processing]”`` — the ``processing`` extra brings the BDF converter (``batterydf``) that Stage 1 uses. Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</em></p>
+<p><em>New words? The</em> <a class="reference internal" href="../pages/glossary.html"><span class="doc">plain-language glossary</span></a> <em>decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.</em></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -502,6 +517,7 @@
 <section id="Stage-1-—-Convert">
 <h2>Stage 1 — Convert<a class="headerlink" href="#Stage-1-—-Convert" title="Link to this heading">#</a></h2>
 <p>Every instrument speaks its own format; BDF (Battery Data Format) is the one tidy, documented table they all become. NEWARE <code class="docutils literal notranslate"><span class="pre">.ndax</span></code>, Biologic <code class="docutils literal notranslate"><span class="pre">.mpt</span></code>, Excel and MATLAB exports are auto-detected by <code class="docutils literal notranslate"><span class="pre">ws.convert()</span></code>; CSV exports use an explicit pattern.</p>
+<p>No reader for your instrument (Arbin, Maccor, an in-house export)? Save a CSV from the instrument software and map its headers yourself: <code class="docutils literal notranslate"><span class="pre">ws.bdf_columns()</span></code> prints the canonical column names, and <code class="docutils literal notranslate"><span class="pre">ws.convert_csv(path,</span> <span class="pre">hints={&quot;Voltage(V)&quot;:</span> <span class="pre">&quot;voltage_volt&quot;,</span> <span class="pre">...})</span></code> does the rename. Check the validation report it prints — a measured column listed under <code class="docutils literal notranslate"><span class="pre">extras</span></code> is unmapped and will be invisible downstream.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -566,6 +582,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 <section id="Stage-3-—-Link">
 <h2>Stage 3 — Link<a class="headerlink" href="#Stage-3-—-Link" title="Link to this heading">#</a></h2>
 <p>Data without its test conditions is trivia. The chain <strong>cell → test → dataset</strong> is what lets someone who was never in your lab reuse the numbers. <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">...)</span></code> creates the test record and a dataset record pointing at the converted file.</p>
+<p>(To also record <em>which cycler channel</em> ran the test, register your equipment once — <a class="reference internal" href="../howto/register-equipment.html"><span class="doc">How-to: register equipment</span></a> — and pass <code class="docutils literal notranslate"><span class="pre">channel=...</span></code> here.)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -664,7 +681,7 @@ provenance: {
 <h2>Stage 5 — Publish<a class="headerlink" href="#Stage-5-—-Publish" title="Link to this heading">#</a></h2>
 <p>The payoff: <code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> submits the records to the registry’s review queue (staged — a curator promotes them to the public index), and <code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code> archives the dataset with a citable DOI. Both need credentials, so this cell is a guarded no-op until you provide them:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code> — registry key, from the registry settings page</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code> — key for the Battery Genome registry (battery-genome.org). During the soft launch keys are granted by the registry operators; there is no self-service key page yet</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ZENODO_SANDBOX_TOKEN</span></code> — a <a class="reference external" href="https://sandbox.zenodo.org">Zenodo sandbox</a> token for a dry-run DOI (use <code class="docutils literal notranslate"><span class="pre">sandbox=True</span></code>); drop it for the real thing</p></li>
 </ul>
 <div class="nbinput docutils container">

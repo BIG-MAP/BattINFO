@@ -59,7 +59,7 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Bulk-ingest thousands of records" href="howto/bulk-ingest.html" />
+    <link rel="next" title="Register the materials in your lab" href="howto/register-materials.html" />
     <link rel="prev" title="How-to guides" href="pages/howto.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -159,6 +159,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
@@ -178,13 +185,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,6 +193,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -304,6 +311,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
@@ -395,9 +409,13 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Workspace authoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/register-materials.html">Register the materials in your lab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/build-a-cell-from-components.html">Build a cell from components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto/find-existing-records.html">Find what already exists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto/bulk-ingest.html">Bulk-ingest thousands of records</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
@@ -463,9 +481,11 @@
                   
   <section id="workspace-authoring">
 <h1>Workspace authoring<a class="headerlink" href="#workspace-authoring" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(&quot;.&quot;)</span></code> is the blessed authoring surface — the one entry point that
-covers the common case end-to-end: describe the cells you tested, attach tests and data,
-and publish, without touching the lower layers.</p>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(&quot;.&quot;)</span></code> is the blessed authoring surface for the lab-log
+workflow — describe the cells you tested, attach tests and data, and publish,
+without touching the lower layers. It covers cells, tests, datasets, and
+equipment; materials and component specs are authored through <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>
+(see the <a class="reference internal" href="#what-each-surface-can-author-today"><span class="std std-ref">coverage table</span></a> below).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 
 <span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -477,7 +497,9 @@ and publish, without touching the lower layers.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 <span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
-<span class="c1"># 1. One-time: log in (get a key at the registry settings page)</span>
+<span class="c1"># 1. One-time: log in. Publishing goes to the Battery Genome registry</span>
+<span class="c1">#    (battery-genome.org); during the soft launch API keys are granted by</span>
+<span class="c1">#    the registry operators — there is no self-service key page yet.</span>
 <span class="n">ws</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;YOUR_KEY&quot;</span><span class="p">)</span>        <span class="c1"># or ws.setup() to see options</span>
 
 <span class="c1"># 2. Tag this work with the project that funded it (optional, once per</span>
@@ -526,18 +548,84 @@ and publish, without touching the lower layers.</p>
 <td><p><strong>Models + functions</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> — see the <a class="reference internal" href="pages/api-reference.html"><span class="std std-doc">Python API</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p>Build or script the full object graph programmatically (ingest pipelines, batch tooling)</p></td>
+<tr class="row-even"><td><p>Register materials and component specs (electrodes, electrolytes, …)</p></td>
+<td><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> functions</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">create_*</span></code> / <code class="docutils literal notranslate"><span class="pre">save_*</span></code> — see the <a class="reference internal" href="pages/cookbook.html"><span class="std std-doc">cookbook</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Build or script the full object graph programmatically (ingest pipelines, batch tooling)</p></td>
 <td><p><strong>Object-graph engine</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.Workspace</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo._workspace.Workspace</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
+<section id="what-each-surface-can-author-today">
+<h2>What each surface can author today<a class="headerlink" href="#what-each-surface-can-author-today" title="Link to this heading">#</a></h2>
+<p>Verified against the current release — where a cell says “no”, that is a
+roadmap item, not an omission in your usage:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Record type</p></th>
+<th class="head"><p>Workspace (<code class="docutils literal notranslate"><span class="pre">ws.*</span></code>)</p></th>
+<th class="head"><p>Python (<code class="docutils literal notranslate"><span class="pre">battinfo</span></code> / <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</p></th>
+<th class="head"><p>CLI (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">…</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Cell spec</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">template</span></code> + <code class="docutils literal notranslate"><span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">search</span></code> + reuse, <code class="docutils literal notranslate"><span class="pre">spec=</span></code> on <code class="docutils literal notranslate"><span class="pre">add(&quot;cell&quot;)</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> + <code class="docutils literal notranslate"><span class="pre">save_cell_spec</span></code> / <code class="docutils literal notranslate"><span class="pre">publish</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">template</span></code> / <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">cell-spec</span></code> / <code class="docutils literal notranslate"><span class="pre">validate</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Cell (physical instance)</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">add(&quot;cell&quot;,</span> <span class="pre">names=[...])</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">save_cell_instance</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">create</span></code> / <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">cell-instance</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Test spec (protocol)</p></td>
+<td><p>partial — <code class="docutils literal notranslate"><span class="pre">template(&quot;test-spec&quot;)</span></code> exists but its output currently fails <code class="docutils literal notranslate"><span class="pre">ws.load()</span></code> (<a class="reference internal" href="pages/troubleshooting.html"><span class="std std-doc">troubleshooting</span></a>)</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code> + <code class="docutils literal notranslate"><span class="pre">save_test_spec</span></code> (recommended)</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">template</span></code> / <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">test-spec</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Test</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">add(&quot;test&quot;,</span> <span class="pre">cell=...,</span> <span class="pre">data=...,</span> <span class="pre">channel=...)</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">Test</span></code> + <code class="docutils literal notranslate"><span class="pre">save_test</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">test</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Dataset</p></td>
+<td><p>yes — created by <code class="docutils literal notranslate"><span class="pre">add(&quot;test&quot;,</span> <span class="pre">data=...)</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> + <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">dataset</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Equipment + channels</p></td>
+<td><p><strong>yes — best path</strong>: <code class="docutils literal notranslate"><span class="pre">add(&quot;equipment&quot;,</span> <span class="pre">...)</span></code> (<a class="reference internal" href="howto/register-equipment.html"><span class="std std-doc">how-to</span></a>)</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> equipment/channel functions</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p>Material spec / lot</p></td>
+<td><p>no</p></td>
+<td><p><strong>yes — the path</strong>: <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> <code class="docutils literal notranslate"><span class="pre">create</span></code>/<code class="docutils literal notranslate"><span class="pre">save_material_spec</span></code> (<a class="reference internal" href="howto/register-materials.html"><span class="std std-doc">how-to</span></a>)</p></td>
+<td><p>partial — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">record</span> <span class="pre">--input</span> <span class="pre">file.json</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Component specs (electrode, electrolyte, separator, current-collector, housing)</p></td>
+<td><p>no</p></td>
+<td><p><strong>yes — the path</strong>: <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> per-family <code class="docutils literal notranslate"><span class="pre">create</span></code>/<code class="docutils literal notranslate"><span class="pre">save</span></code> (<a class="reference internal" href="howto/build-a-cell-from-components.html"><span class="std std-doc">how-to</span></a>)</p></td>
+<td><p>partial — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">record</span> <span class="pre">--input</span> <span class="pre">file.json</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two CLI caveats: <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span></code> currently reads only the example records
+packaged with BattINFO (no directory option — use the Python <code class="docutils literal notranslate"><span class="pre">query_*</span></code>
+functions for your own library), and there are no CLI <code class="docutils literal notranslate"><span class="pre">template</span></code>/<code class="docutils literal notranslate"><span class="pre">query</span></code>
+commands for materials or components.</p>
+</section>
 <section id="the-layers-underneath">
 <h2>The layers underneath<a class="headerlink" href="#the-layers-underneath" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.Workspace</span></code></strong> (in <code class="docutils literal notranslate"><span class="pre">battinfo._workspace</span></code>) is the object-graph engine: it
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo._workspace.Workspace</span></code></strong> is the object-graph engine (the top-level
+<code class="docutils literal notranslate"><span class="pre">battinfo.Workspace</span></code> alias is deprecated): it
 holds linked <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> / <code class="docutils literal notranslate"><span class="pre">Cell</span></code> / <code class="docutils literal notranslate"><span class="pre">Test</span></code> / <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> objects,
 finalizes ids and provenance, and writes the canonical records. The authoring
 workspace delegates to it; script against it directly when you are building
@@ -572,11 +660,11 @@ writes/publishes the canonical records without a workspace.</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="howto/bulk-ingest.html"
+       href="howto/register-materials.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Bulk-ingest thousands of records</p>
+        <p class="prev-next-title">Register the materials in your lab</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -601,6 +689,7 @@ writes/publishes the canonical records without a workspace.</p></li>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-end-to-end-flow">The end-to-end flow</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-surface-do-i-use">Which surface do I use?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-each-surface-can-author-today">What each surface can author today</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-layers-underneath">The layers underneath</a></li>
 </ul>
   </nav></div>

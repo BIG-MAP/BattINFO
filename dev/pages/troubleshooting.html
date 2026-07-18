@@ -1,0 +1,716 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Troubleshooting &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=84b34183" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b3415309" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pages/troubleshooting';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Glossary — the vocabulary, in plain language" href="glossary.html" />
+    <link rel="prev" title="Cookbook — I want to…" href="cookbook.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference.html">
+    Reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary — the vocabulary, in plain language</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="cookbook.html" class="nav-link">Cookbook — I want to…</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Troubleshooting</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h1>
+<p>The classic surprises, with what is actually happening and the fix. Everything
+here reflects the current release; several of these edges are actively being
+smoothed.</p>
+<section id="ws-search-returns-nothing">
+<h2><code class="docutils literal notranslate"><span class="pre">ws.search(...)</span></code> returns nothing<a class="headerlink" href="#ws-search-returns-nothing" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ws.search</span></code> queries the <strong>live registry</strong> — only <em>published</em> records exist
+there. Your own unsaved/unpublished records will never show up in search;
+inspect them with <code class="docutils literal notranslate"><span class="pre">ws.list(verbose=True)</span></code> or the <code class="docutils literal notranslate"><span class="pre">query_*</span></code> functions instead
+(<a class="reference internal" href="../howto/find-existing-records.html"><span class="std std-doc">Find existing records</span></a>).</p>
+<p>If you are offline (or the registry is unreachable), search prints a
+“Registry unreachable” notice and falls back to a local clone of the records
+repository if configured — otherwise you get an empty list. An empty result
+while offline proves nothing about what exists.</p>
+</section>
+<section id="i-don-t-have-an-api-key">
+<h2>“I don’t have an API key”<a class="headerlink" href="#i-don-t-have-an-api-key" title="Link to this heading">#</a></h2>
+<p>Reading needs no key: <code class="docutils literal notranslate"><span class="pre">ws.search</span></code>, resolving IRIs, and all local authoring
+work without an account. A key (<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code>) is only needed
+to <strong>publish</strong> to the registry (battery-genome.org). During the soft launch,
+keys are granted by the registry operators — there is no self-service key
+page yet; contact the Battery Genome team for publish access. <code class="docutils literal notranslate"><span class="pre">ws.status()</span></code>
+also needs a login, because it asks the registry about <em>your</em> workspace.</p>
+</section>
+<section id="ws-template-test-spec-output-won-t-load">
+<h2><code class="docutils literal notranslate"><span class="pre">ws.template(&quot;test-spec&quot;)</span></code> output won’t load<a class="headerlink" href="#ws-template-test-spec-output-won-t-load" title="Link to this heading">#</a></h2>
+<p>Known sharp edge. The generated test-spec template currently emits shapes the
+record model rejects: bare scalars where <code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">...}</span></code> maps
+are required, a <code class="docutils literal notranslate"><span class="pre">{&quot;min&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;max&quot;:</span> <span class="pre">...}</span></code> voltage window the model cannot
+yet express, and <code class="docutils literal notranslate"><span class="pre">null</span></code> placeholders that are themselves invalid — so
+<code class="docutils literal notranslate"><span class="pre">ws.load()</span></code> fails with a stack of pydantic errors even after you fill it in.</p>
+<p>Until the template round-trip is fixed, author test specs directly in Python —
+this path works today and parses plain-English steps into the structured
+method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">battinfo</span><span class="o">.</span><span class="n">save_test_spec</span><span class="p">(</span><span class="n">battinfo</span><span class="o">.</span><span class="n">TestSpec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Capacity Check - C/10 at 25 C&quot;</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span>
+    <span class="n">experiment</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Charge at C/3 until 4.2 V&quot;</span><span class="p">,</span> <span class="s2">&quot;Hold at 4.2 V until C/20&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Discharge at C/10 until 2.5 V&quot;</span><span class="p">],</span>
+    <span class="n">conditions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;degC&quot;</span><span class="p">}},</span>
+<span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Put voltage limits in the step strings (as above) rather than in a
+min/max window. See <a class="reference internal" href="../test-specs.html"><span class="std std-doc">Test specs</span></a> for the full recipe.</p>
+</section>
+<section id="which-install-extra-do-i-need">
+<h2>“Which install extra do I need?”<a class="headerlink" href="#which-install-extra-do-i-need" title="Link to this heading">#</a></h2>
+<p>Each missing optional dependency raises an error naming its extra. The map:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>You want</p></th>
+<th class="head"><p>Install</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Convert raw cycler files (<code class="docutils literal notranslate"><span class="pre">ws.convert()</span></code>) + plotting</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;battinfo[processing]&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Read CSV/Parquet/XLSX tables (<code class="docutils literal notranslate"><span class="pre">ws.convert_csv</span></code>, dataset enrichment)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;battinfo[tabular]&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>RO-Crate validation when publishing</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;battinfo[publish]&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>QR codes for cell labels</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">segno</span></code> (not a BattINFO extra)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="my-record-s-iri-opens-a-sign-in-page">
+<h2>My record’s IRI opens a sign-in page<a class="headerlink" href="#my-record-s-iri-opens-a-sign-in-page" title="Link to this heading">#</a></h2>
+<p>Content negotiation is doing its job. A <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/...</span></code> IRI
+serves <strong>two representations</strong>: machine clients asking for
+<code class="docutils literal notranslate"><span class="pre">application/ld+json</span></code> (or <code class="docutils literal notranslate"><span class="pre">text/turtle</span></code>) get the record data — publicly, no
+login; browsers get the human landing page on the Battery Genome platform,
+which sits behind a sign-in gate during the soft launch. Verify the machine
+path yourself:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-sL<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/ld+json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://w3id.org/battinfo/spec/27p5-216g-0vyc-98he
+</pre></div>
+</div>
+<p>A <code class="docutils literal notranslate"><span class="pre">404</span> <span class="pre">Record</span> <span class="pre">not</span> <span class="pre">found</span></code> from the resolver means the record was never
+published to the registry (local records resolve only after publishing).</p>
+</section>
+<section id="converted-file-is-missing-columns">
+<h2>Converted file is missing columns<a class="headerlink" href="#converted-file-is-missing-columns" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ws.convert_csv(path,</span> <span class="pre">hints=...)</span></code> renames only the columns you map; columns
+it does not recognize pass through with their original names, and the BDF
+validation report then lists them under <code class="docutils literal notranslate"><span class="pre">extras</span></code> (with anything required
+under <code class="docutils literal notranslate"><span class="pre">missing</span></code>). If a column you care about — a capacity or step column —
+shows up in <code class="docutils literal notranslate"><span class="pre">extras</span></code>, it is not mapped to the canonical vocabulary and
+downstream tools will not see it.</p>
+<p>Fix: print the canonical target names and extend <code class="docutils literal notranslate"><span class="pre">hints</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">bdf_columns</span><span class="p">()</span>   <span class="c1"># prints all canonical BDF column names</span>
+</pre></div>
+</div>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">convert_csv</span><span class="p">(</span><span class="s2">&quot;export.csv&quot;</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;Voltage(V)&quot;</span><span class="p">:</span>  <span class="s2">&quot;voltage_volt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Current(A)&quot;</span><span class="p">:</span>  <span class="s2">&quot;current_ampere&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AhDis[Ah]&quot;</span><span class="p">:</span>   <span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span>   <span class="c1"># map, don&#39;t lose, capacity</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>Treat any non-empty <code class="docutils literal notranslate"><span class="pre">extras</span></code> list on a column you measured as a red flag —
+never accept a “successful” conversion without checking it.</p>
+</section>
+<section id="validation-error-date-is-not-of-type-integer">
+<h2>Validation error: date “is not of type ‘integer’”<a class="headerlink" href="#validation-error-date-is-not-of-type-integer" title="Link to this heading">#</a></h2>
+<p>Canonical records store timestamps (<code class="docutils literal notranslate"><span class="pre">test.started_at</span></code>, <code class="docutils literal notranslate"><span class="pre">test.ended_at</span></code>,
+<code class="docutils literal notranslate"><span class="pre">provenance.retrieved_at</span></code>, …) as <strong>Unix seconds</strong>. The authoring surfaces
+(<code class="docutils literal notranslate"><span class="pre">battinfo.TestSpec(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">create_*</span></code>) accept ISO dates like
+<code class="docutils literal notranslate"><span class="pre">&quot;2026-01-15&quot;</span></code> and convert for you — but if you hand-edit a saved JSON record
+and type an ISO string into one of these fields, schema validation rejects it
+with <code class="docutils literal notranslate"><span class="pre">'2026-07-17'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">of</span> <span class="pre">type</span> <span class="pre">'integer'</span></code>. Fix: edit through the authoring
+surface, or enter the Unix timestamp. (Some fields, like a cell instance’s
+<code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code>, are flexible and take either form — the validator error
+tells you which field objected.)</p>
+</section>
+<section id="dangling-references-save-without-complaint">
+<h2>Dangling references save without complaint<a class="headerlink" href="#dangling-references-save-without-complaint" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">save_cell_spec</span></code> does not currently verify that a referenced
+<code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> exists — a typo lands on disk silently. Run
+<code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> over your library after a build session; it reports
+<code class="docutils literal notranslate"><span class="pre">reference.missing</span></code> with the offending IRI. The recipe is in
+<a class="reference internal" href="../howto/build-a-cell-from-components.html#validate-the-set"><span class="std std-ref">Build a cell from components</span></a>.</p>
+</section>
+<section id="still-stuck">
+<h2>Still stuck?<a class="headerlink" href="#still-stuck" title="Link to this heading">#</a></h2>
+<p>Open an issue at
+<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/issues">github.com/BIG-MAP/BattINFO/issues</a>
+with the record (or a redacted version) and the full error text — the
+validators’ machine-readable output is designed to be pasted.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="cookbook.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Cookbook — I want to…</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="glossary.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Glossary — the vocabulary, in plain language</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ws-search-returns-nothing"><code class="docutils literal notranslate"><span class="pre">ws.search(...)</span></code> returns nothing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#i-don-t-have-an-api-key">“I don’t have an API key”</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ws-template-test-spec-output-won-t-load"><code class="docutils literal notranslate"><span class="pre">ws.template("test-spec")</span></code> output won’t load</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#which-install-extra-do-i-need">“Which install extra do I need?”</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#my-record-s-iri-opens-a-sign-in-page">My record’s IRI opens a sign-in page</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#converted-file-is-missing-columns">Converted file is missing columns</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validation-error-date-is-not-of-type-integer">Validation error: date “is not of type ‘integer’”</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dangling-references-save-without-complaint">Dangling references save without complaint</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#still-stuck">Still stuck?</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -159,6 +159,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
@@ -178,13 +185,6 @@
   </a>
 </li>
 
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,6 +193,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -299,6 +306,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/getting-started.html">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -505,9 +519,16 @@ turn reference material-specs — completing the three-level graph
 </table>
 </div>
 <p>A cell may <strong>reference</strong>, <strong>inline</strong>, or both — inline holders stay optional, so existing
-records are unaffected. References are existence-checked against the source root, and the
-JSON-LD emits reference nodes (<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">&lt;electrode-spec</span> <span class="pre">IRI&gt;}</span></code>, etc.);
+records are unaffected. The JSON-LD emits reference nodes
+(<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">&lt;electrode-spec</span> <span class="pre">IRI&gt;}</span></code>, etc.);
 when a basis/inline node is also present, the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> is merged onto it.</p>
+<blockquote>
+<div><p><strong>Check your references.</strong> Saving does <em>not</em> currently reject a
+<code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> that points at nothing — a typo lands on disk silently. Run
+<code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> over the record set after building (it reports
+<code class="docutils literal notranslate"><span class="pre">reference.missing</span></code> per dangling IRI); the recipe is in
+<a class="reference internal" href="howto/build-a-cell-from-components.html#validate-the-set"><span class="std std-ref">How-to: build a cell from components</span></a>.</p>
+</div></blockquote>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
 
 <span class="n">rec</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">save_cell_spec</span><span class="p">(</span><span class="n">bi</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>

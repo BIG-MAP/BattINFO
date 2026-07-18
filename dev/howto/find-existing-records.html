@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tag your work with a grant and your ORCID &#8212; BattINFO  documentation</title>
+    <title>Find what already exists &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/tag-funding-and-orcid';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/find-existing-records';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="How to read a published BattINFO record (battinfo.json)" href="../reading-a-record.html" />
-    <link rel="prev" title="Resume an interrupted bulk submission" href="resume-a-submission.html" />
+    <link rel="next" title="Bulk-ingest thousands of records" href="bulk-ingest.html" />
+    <link rel="prev" title="Register your lab equipment and log which channel ran a test" href="register-equipment.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -273,6 +273,10 @@
   
 
   
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
 
     </header>
@@ -409,11 +413,11 @@
 <li class="toctree-l1"><a class="reference internal" href="build-a-cell-from-components.html">Build a cell from components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
-<li class="toctree-l1"><a class="reference internal" href="find-existing-records.html">Find what already exists</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Find what already exists</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tag your work with a grant and your ORCID</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
 </ul>
 </div>
@@ -458,7 +462,7 @@
     
     <li class="breadcrumb-item"><a href="../pages/howto.html" class="nav-link">How-to guides</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tag your work with a grant and your ORCID</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Find what already exists</span></li>
   </ul>
 </nav>
 </div>
@@ -475,24 +479,103 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="tag-your-work-with-a-grant-and-your-orcid">
-<h1>Tag your work with a grant and your ORCID<a class="headerlink" href="#tag-your-work-with-a-grant-and-your-orcid" title="Link to this heading">#</a></h1>
-<p>Set both once per workspace; every record you save carries them from then on —
-so your data stays traceable to the project that funded it and the person who
-made it.</p>
-<!-- doc-snippet: skip -->
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="s2">&quot;101103997&quot;</span><span class="p">)</span>      <span class="c1"># EU grant number — resolved via OpenAIRE</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">)</span>   <span class="c1"># your ORCID</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>                    <span class="c1"># records now carry funding + contributor</span>
+  <section id="find-what-already-exists">
+<h1>Find what already exists<a class="headerlink" href="#find-what-already-exists" title="Link to this heading">#</a></h1>
+<p>Three surfaces, three scopes. Know which one you are asking before you trust
+an answer:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>You are asking about…</p></th>
+<th class="head"><p>Use</p></th>
+<th class="head"><p>Scope</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Records in <strong>this workspace session</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ws.list(verbose=True)</span></code></p></td>
+<td><p>What you have added/saved locally with the workspace</p></td>
+</tr>
+<tr class="row-odd"><td><p>Records in a <strong>library folder on disk</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api.query_*</span></code> / <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span></code> (CLI)</p></td>
+<td><p>Exactly the directory you point it at</p></td>
+</tr>
+<tr class="row-even"><td><p>Records <strong>published to the registry</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ws.search(...)</span></code></p></td>
+<td><p>The live Battery Genome registry (battery-genome.org)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="your-workspace-session-ws-list">
+<h2>Your workspace session: <code class="docutils literal notranslate"><span class="pre">ws.list</span></code><a class="headerlink" href="#your-workspace-session-ws-list" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span><span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;My Lab&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;COIN-NMC811-A&quot;</span><span class="p">,</span>
+                         <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;B7-01&quot;</span><span class="p">,</span> <span class="s2">&quot;B7-02&quot;</span><span class="p">])</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="n">listing</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># prints every record, grouped by type, with IRIs</span>
 </pre></div>
 </div>
+<p>Records tagged <code class="docutils literal notranslate"><span class="pre">[this</span> <span class="pre">session]</span></code> are the ones <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> would send.
+Equipment and channel records are registered separately
+(<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;,</span> <span class="pre">...)</span></code>) and do not currently appear in <code class="docutils literal notranslate"><span class="pre">ws.list</span></code> output.</p>
+</section>
+<section id="a-library-folder-query">
+<h2>A library folder: <code class="docutils literal notranslate"><span class="pre">query_*</span></code><a class="headerlink" href="#a-library-folder-query" title="Link to this heading">#</a></h2>
+<p>Every <code class="docutils literal notranslate"><span class="pre">query_*</span></code> function takes the directory to search. <strong>Pass it explicitly</strong>
+— with no argument they read the example records packaged inside the BattINFO
+wheel, which look plausible but are not yours:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_cell_specs</span><span class="p">,</span> <span class="n">query_material_specs</span>
+
+<span class="c1"># the records ws.save() wrote for this workspace:</span>
+<span class="n">mine</span> <span class="o">=</span> <span class="n">query_cell_specs</span><span class="p">(</span><span class="n">cell_specs_dir</span><span class="o">=</span><span class="s2">&quot;.battinfo/records/cell-spec&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;model_name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">mine</span><span class="p">])</span>       <span class="c1"># [&#39;COIN-NMC811-A&#39;]</span>
+
+<span class="c1"># a library you built with save_* functions (source_root=&quot;my-library&quot;):</span>
+<span class="n">mats</span> <span class="o">=</span> <span class="n">query_material_specs</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">&quot;my-library/material-spec&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>One asymmetry to know about: <code class="docutils literal notranslate"><span class="pre">query_cell_specs</span></code> calls its directory argument
+<code class="docutils literal notranslate"><span class="pre">cell_specs_dir</span></code>; the other <code class="docutils literal notranslate"><span class="pre">query_*</span></code> functions call it <code class="docutils literal notranslate"><span class="pre">directory</span></code>.</p>
+<p>The CLI equivalent (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">cell-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">test-spec</span></code>, …)
+currently reads only the packaged example records — it has no directory
+option, so use the Python <code class="docutils literal notranslate"><span class="pre">query_*</span></code> functions for your own library.</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Filters match the record fields:</span>
+<span class="n">query_cell_specs</span><span class="p">(</span><span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span> <span class="n">cell_format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
+                 <span class="n">cell_specs_dir</span><span class="o">=</span><span class="s2">&quot;my-library/cell-spec&quot;</span><span class="p">)</span>
+<span class="n">query_material_specs</span><span class="p">(</span><span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;binder&quot;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;my-library/material-spec&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="the-registry-ws-search">
+<h2>The registry: <code class="docutils literal notranslate"><span class="pre">ws.search</span></code><a class="headerlink" href="#the-registry-ws-search" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ws.search</span></code> asks the live registry — the shared index of <em>published</em> records:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;samsung inr21700 50e&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>        <span class="c1"># fuzzy: tolerates typos</span>
+<span class="n">cells</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">serial</span><span class="o">=</span><span class="s2">&quot;tpejqj&quot;</span><span class="p">)</span>     <span class="c1"># instances by serial / short ID</span>
+<span class="n">tests</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;test-spec&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="s2">&quot;capacity&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Reading the registry needs no account or API key. What the results mean:</p>
 <ul class="simple">
-<li><p>The grant is stamped into each record’s <code class="docutils literal notranslate"><span class="pre">funding</span></code> block and lifted to the
-submission envelope, so the registry can answer “everything from grant X”.</p></li>
-<li><p>The contributor ORCID flows to the registry’s contribution tracker and your
-profile on Battery Genome.</p></li>
-<li><p>Both live in <code class="docutils literal notranslate"><span class="pre">.battinfo/workspace.json</span></code>; edit or clear them there.</p></li>
+<li><p><strong>A hit</strong> is a published record; <code class="docutils literal notranslate"><span class="pre">ws.load(hit)</span></code> references it in your session
+(reusing its IRI) instead of authoring a duplicate.</p></li>
+<li><p><strong>No hits</strong> means nothing published matches — your own unpublished records
+will <em>not</em> appear here; they are only visible to <code class="docutils literal notranslate"><span class="pre">ws.list</span></code> and <code class="docutils literal notranslate"><span class="pre">query_*</span></code>.</p></li>
+<li><p><strong>Offline</strong> (or registry unreachable): search falls back to a local clone of
+the records repository if you have one configured, otherwise it returns an
+empty list after printing a “Registry unreachable” notice. An empty result
+while offline is not evidence that a record does not exist.</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">ws.status()</span></code> (what have I published?) talks to the registry too, and needs
+<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=...)</span></code> first — see the
+<a class="reference internal" href="../pages/troubleshooting.html"><span class="std std-doc">troubleshooting page</span></a> if it asks for a
+workspace id.</p>
+</section>
 </section>
 
 
@@ -506,20 +589,20 @@ profile on Battery Genome.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="resume-a-submission.html"
+       href="register-equipment.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Resume an interrupted bulk submission</p>
+        <p class="prev-next-title">Register your lab equipment and log which channel ran a test</p>
       </div>
     </a>
     <a class="right-next"
-       href="../reading-a-record.html"
+       href="bulk-ingest.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</p>
+        <p class="prev-next-title">Bulk-ingest thousands of records</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -529,6 +612,26 @@ profile on Battery Genome.</p></li>
             </div>
             
             
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#your-workspace-session-ws-list">Your workspace session: <code class="docutils literal notranslate"><span class="pre">ws.list</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#a-library-folder-query">A library folder: <code class="docutils literal notranslate"><span class="pre">query_*</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-registry-ws-search">The registry: <code class="docutils literal notranslate"><span class="pre">ws.search</span></code></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

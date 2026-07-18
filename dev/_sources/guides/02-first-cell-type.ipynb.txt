@@ -14,7 +14,9 @@
     "**Estimated time:** 15 minutes\n",
     "**Prerequisites:** [Guide 1 — Concepts](01-concepts.ipynb)\n",
     "\n",
-    "Everything this guide writes lands in `_scratch/guide-02/`."
+    "Everything this guide writes lands in `_scratch/guide-02/`.\n",
+    "\n",
+    "*New words? The [plain-language glossary](../pages/glossary.md) decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.*"
    ]
   },
   {

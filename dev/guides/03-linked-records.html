@@ -161,6 +161,13 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
     Tutorials
@@ -181,13 +188,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -196,6 +196,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -302,6 +309,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../pages/getting-started.html">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -473,6 +487,7 @@
 </div>
 <p><strong>Estimated time:</strong> 20 minutes <strong>Prerequisites:</strong> <a class="reference internal" href="02-first-cell-type.html"><span class="doc">Guide 2 — Describing a cell</span></a></p>
 <p>Everything writes to <code class="docutils literal notranslate"><span class="pre">_scratch/guide-03/</span></code>. This is the depth version of <a class="reference internal" href="06-publish-your-data.html"><span class="doc">Guide 6 — Publish your first dataset</span></a>, which runs the same chain from a raw cycler file in five minutes.</p>
+<p><em>New words? The</em> <a class="reference internal" href="../pages/glossary.html"><span class="doc">plain-language glossary</span></a> <em>decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.</em></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -610,6 +625,7 @@ Test spec: 1C cycle life at 25 °C
 <section id="Step-4-—-The-test-and-its-data">
 <h2>Step 4 — The test and its data<a class="headerlink" href="#Step-4-—-The-test-and-its-data" title="Link to this heading">#</a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">Test</span></code> is one execution of the test spec on one cell. Passing <code class="docutils literal notranslate"><span class="pre">data=</span></code> attaches the measured file, and the workspace creates the linked <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> record for it in the same call:</p>
+<p>Testing on a multi-channel cycler? Register the unit once and name the channel on each test (<code class="docutils literal notranslate"><span class="pre">channel=&quot;Cycler</span> <span class="pre">1/CH2&quot;</span></code>) so the record keeps which slot produced the data — see <a class="reference internal" href="../howto/register-equipment.html"><span class="doc">How-to: register equipment</span></a>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -778,7 +794,7 @@ ok: True | errors: 0 | warnings: 0
 </section>
 <section id="Step-8-—-Publish">
 <h2>Step 8 — Publish<a class="headerlink" href="#Step-8-—-Publish" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> submits the records to the registry review queue (staged — a curator promotes them to the public index); <code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code> archives the data with a citable DOI first. Both need credentials, so this cell is a guarded no-op without them:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> submits the records to the registry review queue (staged — a curator promotes them to the public index); <code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code> archives the data with a citable DOI first. Both need credentials, so this cell is a guarded no-op without them. (Publishing goes to the Battery Genome registry at battery-genome.org; during the soft launch, API keys are granted by the registry operators — there is no self-service key page yet.)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>

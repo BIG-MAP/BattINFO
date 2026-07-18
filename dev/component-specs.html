@@ -159,6 +159,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
@@ -178,13 +185,6 @@
   </a>
 </li>
 
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,6 +193,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -299,6 +306,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/getting-started.html">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -519,10 +533,10 @@ by IRI.</p>
 <h2>Generic API + per-family wrappers<a class="headerlink" href="#generic-api-per-family-wrappers" title="Link to this heading">#</a></h2>
 <p>A generic factory in <code class="docutils literal notranslate"><span class="pre">api.py</span></code> is parameterized by family; thin per-family wrappers are
 generated from the entity registry, so the surface matches the cell/material API:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrode_spec</span><span class="p">,</span> <span class="n">save_electrode_spec</span><span class="p">,</span> <span class="n">create_component_spec</span>
 
 <span class="c1"># electrode-spec whose coating references standalone material-specs by IRI</span>
-<span class="n">electrode</span> <span class="o">=</span> <span class="n">bi</span><span class="o">.</span><span class="n">create_electrode_spec</span><span class="p">(</span>
+<span class="n">electrode</span> <span class="o">=</span> <span class="n">create_electrode_spec</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811 cathode&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Canrud&quot;</span><span class="p">,</span>
     <span class="n">body</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -533,12 +547,14 @@ generated from the entity registry, so the surface matches the cell/material API
             <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">}}},</span>
         <span class="s2">&quot;current_collector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}},</span>
     <span class="p">})</span>
-<span class="n">bi</span><span class="o">.</span><span class="n">save_electrode_spec</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">)</span>
+<span class="n">save_electrode_spec</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
 
 <span class="c1"># generic form is also available</span>
-<span class="n">bi</span><span class="o">.</span><span class="n">create_component_spec</span><span class="p">(</span><span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;…&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
+<span class="n">create_component_spec</span><span class="p">(</span><span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;…&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
 </pre></div>
 </div>
+<p>The step-by-step bench version of this — materials first, IRIs harvested from
+each save — is <a class="reference internal" href="howto/build-a-cell-from-components.html"><span class="std std-doc">How-to: build a cell from components</span></a>.</p>
 <p>Per family you get <code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">save_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;_specs</span></code>,
 <code class="docutils literal notranslate"><span class="pre">template_&lt;family&gt;_spec</span></code> and the bare-name instance equivalents (<code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;</span></code>,
 <code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;s</span></code>). Generic functions <code class="docutils literal notranslate"><span class="pre">create/save/query/template_component_spec(family,</span> <span class="pre">…)</span></code>
@@ -563,7 +579,9 @@ and emit <code class="docutils literal notranslate"><span class="pre">OrganicEle
 wheel). Coverage: NMC811 cathode + graphite anode electrodes; Celgard PP + ceramic-coated PE
 separators; Al/Cu current collectors; organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah
 prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
-Cell-specs will reference these component-specs by IRI in Phase 3.</p>
+Cell-specs reference these component-specs by IRI today via the five <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code>
+fields — see <a class="reference internal" href="cell-fleet.html"><span class="std std-doc">Cells</span></a> for the reference seam and the example fleet
+that uses it.</p>
 </section>
 </section>
 

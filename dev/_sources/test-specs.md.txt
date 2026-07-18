@@ -1,10 +1,39 @@
 # Test specs
 
-A **test-spec** (`test-protocol` record) is the reusable, IRI-addressable description of a test
+A **test-spec** is the reusable, IRI-addressable description of a test
 procedure — the *spec* half of `test-spec` + `test`. A `test` (instance) links a cell-instance to
 a test-spec via `protocol_id` and to its `dataset`s.
 
-`examples/test-protocol/` now carries **one example for every `BatteryTestType`** value (20
+> **One thing, three names.** A *test spec* is stored as a `test-protocol`
+> record on disk and authored as the `TestSpec` Python class — same object
+> throughout. The `kind=` argument (the workspace calls it `type=`) takes any
+> `BatteryTestType` value: `cycling`, `capacity_check`, `rate_capability`,
+> `hppc`, `ici`, `gitt`, `dcir`, `eis`, `impedance`, `calendar_ageing`,
+> `formation`, `rpt`, `quasi_ocv`, `field`, `duty_cycle`, `wltp`, `nedc`,
+> `sem`, `characterization`, `other`.
+
+## Authoring
+
+```python
+import battinfo
+
+battinfo.save_test_spec(battinfo.TestSpec(
+    name="Capacity Check — C/10 at 25 C",
+    kind="capacity_check",
+    description="CC-CV charge then slow C/10 discharge.",
+    experiment=["Charge at C/3 until 4.2 V", "Hold at 4.2 V until C/20", "Discharge at C/10 until 2.5 V"],
+    conditions={"ambient_temperature": {"value": 25.0, "unit": "degC"}},
+), source_root="examples", mode="upsert")
+```
+
+`experiment` PyBaMM-style strings parse into the structured `method[]` (steps with
+mode/direction/setpoints/termination); `facets` are derived automatically for filtering.
+The model is two-layer by design: a descriptive `method[]` (what the procedure is) plus
+actionable `artifacts[]` (runnable protocol files carried as linked distributions).
+
+## How each kind is modelled
+
+`examples/test-protocol/` carries **one example for every `BatteryTestType`** value (20
 kinds), enforced by `tests/test_test_contract.py::test_test_protocol_examples_cover_full_battery_test_type_enum`.
 
 | Kind | Modelled with |
@@ -15,29 +44,13 @@ kinds), enforced by `tests/test_test_contract.py::test_test_protocol_examples_co
 | wltp, nedc | drive-cycle power profile — `description` + `protocol_url`; the full time-resolved trace is carried as a linked actionable artifact |
 | sem, characterization, field, other | minimal `name` + `kind` + `description` (no electrochemical method) |
 
-## Authoring
-
-```python
-import battinfo as bi
-
-bi.save_test_spec(bi.TestSpec(
-    name="Capacity Check — C/10 at 25 C",
-    kind=bi.BatteryTestType.CAPACITY_CHECK,
-    description="CC-CV charge then slow C/10 discharge.",
-    experiment=["Charge at C/3 until 4.2 V", "Hold at 4.2 V until C/20", "Discharge at C/10 until 2.5 V"],
-    conditions={"ambient_temperature": {"value": 25.0, "unit": "degC"}},
-), source_root="examples")
-```
-
-`experiment` PyBaMM-style strings parse into the structured `method[]` (steps with
-mode/direction/setpoints/termination); `facets` are derived automatically for filtering.
-The model is two-layer by design: a descriptive `method[]` (what the procedure is) plus
-actionable `artifacts[]` (runnable protocol files carried as linked distributions).
-
 > The `kind` enum in `test-protocol.schema.json` is kept in sync with the `BatteryTestType`
-> Python enum (`bundle.py`); the coverage test guards against drift.
+> Python enum (`battinfo.bundle.BatteryTestType`); the coverage test guards against drift.
 
-## Semantic depth of a test protocol
+## Going deeper: semantic depth of a test protocol
+
+*Everything below is background for ontology-curious readers — nothing in it
+is needed to author or run a test spec.*
 
 The current representation types the protocol at the class level and carries a free-text
 `description`. EMMO domain-electrochemistry has richer terms that allow a more explicit,

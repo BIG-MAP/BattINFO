@@ -2,18 +2,14 @@
 
 BattINFO models every entity as a **spec + instance** pair: a *spec* is the reusable,
 datasheet-like type description; an *instance* is a physical realization of that spec.
-This page documents the first standalone material family — `material-spec` (the type)
-and `material` (a physical lot/batch) — and the entity registry that makes adding such
-families uniform.
+This page is the field reference for the material family — `material-spec` (the grade)
+and `material` (a physical lot/batch).
 
-## The entity registry
-
-All record types are declared once in [`src/battinfo/entities.py`](../src/battinfo/entities.py)
-as `EntityKind` entries (top-level JSON key, schema file, on-disk subdirectory, IRI
-namespace, and the instance→spec link field). Dispatch, validation, IRI minting, the
-record-set directory list, and `build_index` all derive from this registry, so a new
-spec/instance family is a single registry entry plus its schema and examples — not a
-copy-paste across `api.py`, `ws.py`, and the validators.
+> **Just want to register your materials?** The recipe is
+> [How-to: register materials](howto/register-materials.md). (How new
+> spec/instance families are added uniformly — the entity registry in
+> [`src/battinfo/entities.py`](../src/battinfo/entities.py) — is an
+> implementation topic; see [How BattINFO is built](how-battinfo-is-built.md).)
 
 ## Records
 
@@ -89,9 +85,12 @@ Cell-specs still embed materials inline (`positive_electrode.coating.component`,
 to a standalone spec and reference it by IRI:
 
 ```python
-specs = bi.extract_material_specs(cell_spec_record)   # one material-spec per unique material
-spec  = bi.material_spec_from_component(holder, material_class="active_material")
-holder = bi.link_component_to_spec(holder, spec["material_spec"]["id"])  # holder now carries material_spec_id
+from battinfo.materials import (
+    extract_material_specs, link_component_to_spec, material_spec_from_component)
+
+specs = extract_material_specs(cell_spec_record)   # one material-spec per unique material
+spec  = material_spec_from_component(holder, material_class="active_material")
+holder = link_component_to_spec(holder, spec["material_spec"]["id"])  # holder now carries material_spec_id
 ```
 
 The embedded `material-component` holder gained an optional `material_spec_id` field for
@@ -100,9 +99,11 @@ this reference. Rewiring the full cell-spec fleet onto references is Phase 3.
 ## Worked example (Python API)
 
 ```python
-import battinfo as bi
+from battinfo.api import (
+    create_material, create_material_spec, query_material_specs,
+    save_material, save_material_spec)
 
-spec = bi.create_material_spec(
+spec = create_material_spec(
     name="LFP",
     material_class="active_material",
     electrode_polarity="positive",
@@ -111,17 +112,18 @@ spec = bi.create_material_spec(
     manufacturer="Canrud",
     property={"specific_capacity": {"value": 160, "unit": "mAh/g"}},
 )
-bi.save_material_spec(spec, source_root="examples")
+save_material_spec(spec, source_root="examples", mode="upsert")
 
-lot = bi.create_material(
+lot = create_material(
     material_spec_id=spec["material_spec"]["id"],
     lot_id="CANRUD-LFP-2026-03",
     supplier="Canrud",
     property={"mass": {"value": 19.5, "unit": "mg"}},
 )
-bi.save_material(lot, source_root="examples")  # resolves the material_spec_id reference
+save_material(lot, source_root="examples", mode="upsert")  # resolves the material_spec_id reference
 
-bi.query_material_specs(material_class="active_material")
+# pass directory= explicitly — the default reads the packaged examples
+query_material_specs(material_class="active_material", directory="examples/material-spec")
 ```
 
 ## Examples

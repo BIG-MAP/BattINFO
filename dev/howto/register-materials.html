@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Tag your work with a grant and your ORCID &#8212; BattINFO  documentation</title>
+    <title>Register the materials in your lab &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/tag-funding-and-orcid';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/register-materials';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="How to read a published BattINFO record (battinfo.json)" href="../reading-a-record.html" />
-    <link rel="prev" title="Resume an interrupted bulk submission" href="resume-a-submission.html" />
+    <link rel="next" title="Build a cell from components" href="build-a-cell-from-components.html" />
+    <link rel="prev" title="Workspace authoring" href="../workspace-authoring.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -273,6 +273,10 @@
   
 
   
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
 
     </header>
@@ -405,7 +409,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="register-materials.html">Register the materials in your lab</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Register the materials in your lab</a></li>
 <li class="toctree-l1"><a class="reference internal" href="build-a-cell-from-components.html">Build a cell from components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
@@ -413,7 +417,7 @@
 <li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Tag your work with a grant and your ORCID</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
 </ul>
 </div>
@@ -458,7 +462,7 @@
     
     <li class="breadcrumb-item"><a href="../pages/howto.html" class="nav-link">How-to guides</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tag your work with a grant and your ORCID</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Register the materials in your lab</span></li>
   </ul>
 </nav>
 </div>
@@ -475,24 +479,82 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="tag-your-work-with-a-grant-and-your-orcid">
-<h1>Tag your work with a grant and your ORCID<a class="headerlink" href="#tag-your-work-with-a-grant-and-your-orcid" title="Link to this heading">#</a></h1>
-<p>Set both once per workspace; every record you save carries them from then on —
-so your data stays traceable to the project that funded it and the person who
-made it.</p>
-<!-- doc-snippet: skip -->
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="s2">&quot;101103997&quot;</span><span class="p">)</span>      <span class="c1"># EU grant number — resolved via OpenAIRE</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">)</span>   <span class="c1"># your ORCID</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>                    <span class="c1"># records now carry funding + contributor</span>
+  <section id="register-the-materials-in-your-lab">
+<h1>Register the materials in your lab<a class="headerlink" href="#register-the-materials-in-your-lab" title="Link to this heading">#</a></h1>
+<p>Five lines per material — create it, save it into your library, keep the IRI:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_material_spec</span><span class="p">,</span> <span class="n">save_material_spec</span>
+
+<span class="n">nmc</span> <span class="o">=</span> <span class="n">create_material_spec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span>
+                           <span class="n">electrode_polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;LiNi0.8Mn0.1Co0.1O2&quot;</span><span class="p">)</span>
+<span class="n">saved</span> <span class="o">=</span> <span class="n">save_material_spec</span><span class="p">(</span><span class="n">nmc</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+<span class="n">NMC811_IRI</span> <span class="o">=</span> <span class="n">saved</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>   <span class="c1"># e.g. https://w3id.org/battinfo/spec/3ypr-gngx-x28c-rarf</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>The grant is stamped into each record’s <code class="docutils literal notranslate"><span class="pre">funding</span></code> block and lifted to the
-submission envelope, so the registry can answer “everything from grant X”.</p></li>
-<li><p>The contributor ORCID flows to the registry’s contribution tracker and your
-profile on Battery Genome.</p></li>
-<li><p>Both live in <code class="docutils literal notranslate"><span class="pre">.battinfo/workspace.json</span></code>; edit or clear them there.</p></li>
-</ul>
+<p><code class="docutils literal notranslate"><span class="pre">source_root</span></code> is the folder that holds your record library (records land in
+<code class="docutils literal notranslate"><span class="pre">my-library/material-spec/</span></code>). <code class="docutils literal notranslate"><span class="pre">mode=&quot;upsert&quot;</span></code> makes the call safe to re-run:
+the same material converges on the same record instead of erroring as a
+duplicate.</p>
+<section id="variants">
+<h2>Variants<a class="headerlink" href="#variants" title="Link to this heading">#</a></h2>
+<p>A binder, a conductive additive, a salt, a solvent — same five lines, different
+<code class="docutils literal notranslate"><span class="pre">material_class</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pvdf</span> <span class="o">=</span> <span class="n">save_material_spec</span><span class="p">(</span><span class="n">create_material_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;binder&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;(C2H2F2)n&quot;</span><span class="p">),</span>
+    <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+
+<span class="n">salt</span> <span class="o">=</span> <span class="n">save_material_spec</span><span class="p">(</span><span class="n">create_material_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;electrolyte_salt&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;LiPF6&quot;</span><span class="p">),</span>
+    <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Valid <code class="docutils literal notranslate"><span class="pre">material_class</span></code> values: <code class="docutils literal notranslate"><span class="pre">active_material</span></code>, <code class="docutils literal notranslate"><span class="pre">binder</span></code>,
+<code class="docutils literal notranslate"><span class="pre">conductive_additive</span></code>, <code class="docutils literal notranslate"><span class="pre">current_collector</span></code>, <code class="docutils literal notranslate"><span class="pre">separator_material</span></code>,
+<code class="docutils literal notranslate"><span class="pre">electrolyte_salt</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_solvent</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_additive</span></code>,
+<code class="docutils literal notranslate"><span class="pre">metal_electrode</span></code>, <code class="docutils literal notranslate"><span class="pre">coating</span></code>, <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+<p>With a manufacturer and a datasheet number:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">graphite</span> <span class="o">=</span> <span class="n">save_material_spec</span><span class="p">(</span><span class="n">create_material_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Graphite&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span> <span class="n">electrode_polarity</span><span class="o">=</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span>
+    <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Targray&quot;</span><span class="p">,</span>
+    <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;specific_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">355</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mAh/g&quot;</span><span class="p">}}),</span>
+    <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Quantities are always <code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">...}</span></code> maps; a measured value can
+also carry the conditions it was measured under — see
+<a class="reference internal" href="../material-spec.html"><span class="std std-doc">Materials</span></a> for the property and composition reference.</p>
+</section>
+<section id="find-them-again">
+<h2>Find them again<a class="headerlink" href="#find-them-again" title="Link to this heading">#</a></h2>
+<p>Query your own library by passing its directory explicitly — with no argument,
+<code class="docutils literal notranslate"><span class="pre">query_material_specs()</span></code> reads the example records packaged with BattINFO, not
+yours:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_material_specs</span>
+
+<span class="n">mine</span> <span class="o">=</span> <span class="n">query_material_specs</span><span class="p">(</span><span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span>
+                            <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;my-library/material-spec&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mine</span><span class="p">))</span>   <span class="c1"># [&#39;Graphite&#39;, &#39;NMC811&#39;]</span>
+</pre></div>
+</div>
+</section>
+<section id="log-a-physical-lot">
+<h2>Log a physical lot<a class="headerlink" href="#log-a-physical-lot" title="Link to this heading">#</a></h2>
+<p>The spec is the datasheet; a <code class="docutils literal notranslate"><span class="pre">material</span></code> record is the jar on the shelf:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_material</span><span class="p">,</span> <span class="n">save_material</span>
+
+<span class="n">lot</span> <span class="o">=</span> <span class="n">create_material</span><span class="p">(</span><span class="n">material_spec_id</span><span class="o">=</span><span class="n">NMC811_IRI</span><span class="p">,</span> <span class="n">lot_id</span><span class="o">=</span><span class="s2">&quot;CANRUD-NMC-2026-07&quot;</span><span class="p">)</span>
+<span class="n">save_material</span><span class="p">(</span><span class="n">lot</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="what-just-happened">
+<h2>What just happened<a class="headerlink" href="#what-just-happened" title="Link to this heading">#</a></h2>
+<p>Each save wrote one plain-JSON record into your library and minted it a
+permanent <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/</span></code> IRI. That IRI is how everything
+else refers to the material: electrode recipes reference it
+(see <a class="reference internal" href="build-a-cell-from-components.html"><span class="std std-doc">Build a cell from components</span></a>), and the
+saved record validates against the material-spec schema before it lands.
+Re-saving with <code class="docutils literal notranslate"><span class="pre">mode=&quot;upsert&quot;</span></code> updates in place — same IRI, never a duplicate.</p>
+</section>
 </section>
 
 
@@ -506,20 +568,20 @@ profile on Battery Genome.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="resume-a-submission.html"
+       href="../workspace-authoring.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Resume an interrupted bulk submission</p>
+        <p class="prev-next-title">Workspace authoring</p>
       </div>
     </a>
     <a class="right-next"
-       href="../reading-a-record.html"
+       href="build-a-cell-from-components.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</p>
+        <p class="prev-next-title">Build a cell from components</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -529,6 +591,27 @@ profile on Battery Genome.</p></li>
             </div>
             
             
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variants">Variants</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#find-them-again">Find them again</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#log-a-physical-lot">Log a physical lot</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-just-happened">What just happened</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

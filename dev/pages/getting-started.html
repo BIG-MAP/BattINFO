@@ -59,7 +59,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tutorials" href="guides.html" />
+    <link rel="next" title="Cookbook — I want to…" href="cookbook.html" />
     <link rel="prev" title="BattINFO" href="../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -159,6 +159,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="guides.html">
     Tutorials
   </a>
@@ -178,13 +185,6 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="concepts.html">
-    Concepts
-  </a>
-</li>
-
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,6 +193,13 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -299,6 +306,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#">
     Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cookbook.html">
+    Cookbook — I want to…
   </a>
 </li>
 
@@ -458,6 +472,10 @@
 <li><p>Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology</p></li>
 <li><p>A reusable cell-spec library backed by canonical records in <code class="docutils literal notranslate"><span class="pre">battinfo-records</span></code></p></li>
 </ul>
+<p>Working at the bench? The <a class="reference internal" href="cookbook.html"><span class="doc">cookbook</span></a> maps twelve lab tasks —
+register materials, build a cell from components, label cells, publish — to
+short runnable recipes, and the <a class="reference internal" href="glossary.html"><span class="doc">glossary</span></a> decodes the
+vocabulary in plain language.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
 <p>BattINFO requires Python 3.11 or later.</p>
@@ -534,7 +552,8 @@ canonical JSON file to <code class="docutils literal notranslate"><span class="p
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate a cell-spec record</span>
 battinfo<span class="w"> </span>validate<span class="w"> </span>examples/cell-spec/A123__ANR26650M1-B.json<span class="w"> </span>--profile<span class="w"> </span>cell-spec
 
-<span class="c1"># Query all registered cell specs</span>
+<span class="c1"># Query the example cell specs packaged with BattINFO (for your own</span>
+<span class="c1"># library, use the Python query_* functions with an explicit directory)</span>
 battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec
 
 <span class="c1"># Save a cell record from a draft file</span>
@@ -612,11 +631,11 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
       </div>
     </a>
     <a class="right-next"
-       href="guides.html"
+       href="cookbook.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Tutorials</p>
+        <p class="prev-next-title">Cookbook — I want to…</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

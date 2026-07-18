@@ -20,10 +20,10 @@ A generic factory in `api.py` is parameterized by family; thin per-family wrappe
 generated from the entity registry, so the surface matches the cell/material API:
 
 ```python
-import battinfo as bi
+from battinfo.api import create_electrode_spec, save_electrode_spec, create_component_spec
 
 # electrode-spec whose coating references standalone material-specs by IRI
-electrode = bi.create_electrode_spec(
+electrode = create_electrode_spec(
     name="NMC811 cathode", polarity="positive", manufacturer="Canrud",
     body={
         "coating": {"component": {
@@ -34,11 +34,14 @@ electrode = bi.create_electrode_spec(
             "property": {"loading": {"value": 21, "unit": "mg/cm2"}}},
         "current_collector": {"name": "Aluminium foil", "property": {"thickness": {"value": 15, "unit": "um"}}},
     })
-bi.save_electrode_spec(electrode, source_root="examples")
+save_electrode_spec(electrode, source_root="examples", mode="upsert")
 
 # generic form is also available
-bi.create_component_spec("electrolyte", name="…", body={...})
+create_component_spec("electrolyte", name="…", body={...})
 ```
+
+The step-by-step bench version of this — materials first, IRIs harvested from
+each save — is [How-to: build a cell from components](howto/build-a-cell-from-components.md).
 
 Per family you get `create_<family>_spec`, `save_<family>_spec`, `query_<family>_specs`,
 `template_<family>_spec` and the bare-name instance equivalents (`create_<family>`,
@@ -64,4 +67,6 @@ and emit `OrganicElectrolyte` / `AqueousElectrolyte` JSON-LD with `hasSolute`/`h
 wheel). Coverage: NMC811 cathode + graphite anode electrodes; Celgard PP + ceramic-coated PE
 separators; Al/Cu current collectors; organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah
 prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
-Cell-specs will reference these component-specs by IRI in Phase 3.
+Cell-specs reference these component-specs by IRI today via the five `*_spec_id`
+fields — see [Cells](cell-fleet.md) for the reference seam and the example fleet
+that uses it.

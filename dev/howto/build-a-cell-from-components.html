@@ -1,0 +1,771 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Build a cell from components &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=84b34183" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b3415309" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/build-a-cell-from-components';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Label your cells — names, serials, and QR codes" href="label-your-cells.html" />
+    <link rel="prev" title="Register the materials in your lab" href="register-materials.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register-materials.html">Register the materials in your lab</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Build a cell from components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find-existing-records.html">Find what already exists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../pages/howto.html" class="nav-link">How-to guides</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Build a cell from components</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="build-a-cell-from-components">
+<h1>Build a cell from components<a class="headerlink" href="#build-a-cell-from-components" title="Link to this heading">#</a></h1>
+<p>Describe a coin cell the way you built it: materials → electrodes →
+electrolyte/separator/housing → cell spec → physical cells — every layer a
+saved record, every link an IRI. This whole page is one continuous script;
+run it top to bottom.</p>
+<p><strong>Ingredients:</strong> a library folder (here <code class="docutils literal notranslate"><span class="pre">my-library</span></code>) and the material specs
+from <a class="reference internal" href="register-materials.html"><span class="std std-doc">Register materials</span></a>. All the <code class="docutils literal notranslate"><span class="pre">create_*</span></code>/<code class="docutils literal notranslate"><span class="pre">save_*</span></code>
+functions live in <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>.</p>
+<section id="register-the-parts-and-harvest-their-iris">
+<h2>1. Register the parts and harvest their IRIs<a class="headerlink" href="#register-the-parts-and-harvest-their-iris" title="Link to this heading">#</a></h2>
+<p>Every <code class="docutils literal notranslate"><span class="pre">save_*</span></code> call returns a dict whose <code class="docutils literal notranslate"><span class="pre">&quot;id&quot;</span></code> is the record’s permanent IRI —
+capture it, it is how the next layer refers to this one:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_material_spec</span><span class="p">,</span> <span class="n">save_material_spec</span>
+
+<span class="n">LAB</span> <span class="o">=</span> <span class="s2">&quot;my-library&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">material</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">save_material_spec</span><span class="p">(</span><span class="n">create_material_spec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+                              <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+<span class="n">NMC811_IRI</span>   <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span>
+                        <span class="n">electrode_polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;LiNi0.8Mn0.1Co0.1O2&quot;</span><span class="p">)</span>
+<span class="n">GRAPHITE_IRI</span> <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;Graphite&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;active_material&quot;</span><span class="p">,</span>
+                        <span class="n">electrode_polarity</span><span class="o">=</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">PVDF_IRI</span>     <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;binder&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;(C2H2F2)n&quot;</span><span class="p">)</span>
+<span class="n">CB_IRI</span>       <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;conductive_additive&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">LIPF6_IRI</span>    <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;electrolyte_salt&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;LiPF6&quot;</span><span class="p">)</span>
+<span class="n">EC_IRI</span>       <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;EC&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;electrolyte_solvent&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C3H4O3&quot;</span><span class="p">)</span>
+<span class="n">EMC_IRI</span>      <span class="o">=</span> <span class="n">material</span><span class="p">(</span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;electrolyte_solvent&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;C4H8O3&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="the-electrodes-a-96-2-2-coating-by-iri">
+<span id="electrode-recipe"></span><h2>2. The electrodes — a 96/2/2 coating, by IRI<a class="headerlink" href="#the-electrodes-a-96-2-2-coating-by-iri" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_spec</span><span class="p">,</span> <span class="n">save_component_spec</span>
+
+<span class="n">cathode</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
+    <span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811 cathode 96/2/2&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
+    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">NMC811_IRI</span><span class="p">,</span>
+                                     <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+                <span class="s2">&quot;binder&quot;</span><span class="p">:</span>   <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">,</span>
+                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+                <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">CB_IRI</span><span class="p">,</span>
+                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span>   <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">},</span>
+                         <span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;current_collector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}},</span>
+    <span class="p">})</span>
+<span class="n">CATHODE_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">cathode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+<span class="n">anode</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
+    <span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Graphite anode&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span>
+    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Graphite&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">GRAPHITE_IRI</span><span class="p">,</span>
+                                     <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+                <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">}],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">}},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;current_collector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}},</span>
+    <span class="p">})</span>
+<span class="n">ANODE_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">anode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">body=</span></code> shapes mirror the canonical examples in
+<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/tree/main/examples/electrode-spec"><code class="docutils literal notranslate"><span class="pre">examples/electrode-spec/</span></code></a>
+— when in doubt, open one and copy its structure.</p>
+</section>
+<section id="electrolyte-separator-housing">
+<h2>3. Electrolyte, separator, housing<a class="headerlink" href="#electrolyte-separator-housing" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">electrolyte</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
+    <span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1M LiPF6 EC:EMC 3:7&quot;</span><span class="p">,</span>
+    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;organic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;salt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">LIPF6_IRI</span><span class="p">,</span>
+                 <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;concentration&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mol/L&quot;</span><span class="p">}}},</span>
+        <span class="s2">&quot;solvent_mixture&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">EC_IRI</span><span class="p">,</span>
+             <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;volume_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}},</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;EMC&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">EMC_IRI</span><span class="p">,</span>
+             <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;volume_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}},</span>
+        <span class="p">]},</span>
+    <span class="p">})</span>
+<span class="n">ELECTROLYTE_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">electrolyte</span><span class="p">,</span>
+                                      <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+<span class="n">separator</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
+    <span class="s2">&quot;separator&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Celgard 2325&quot;</span><span class="p">,</span>
+    <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="s2">&quot;polypropylene&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="s2">&quot;trilayer&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">},</span>
+                       <span class="s2">&quot;porosity&quot;</span><span class="p">:</span>  <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.39</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}})</span>
+<span class="n">SEPARATOR_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;separator&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span>
+                                    <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+<span class="n">housing</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
+    <span class="s2">&quot;housing&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CR2032 coin housing&quot;</span><span class="p">,</span>
+    <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cell_format&quot;</span><span class="p">:</span> <span class="s2">&quot;coin&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;size_code&quot;</span><span class="p">:</span> <span class="s2">&quot;2032&quot;</span><span class="p">,</span> <span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="s2">&quot;Stainless steel&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;diameter&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mm&quot;</span><span class="p">},</span>
+                                <span class="s2">&quot;height&quot;</span><span class="p">:</span>   <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.2</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mm&quot;</span><span class="p">}}}})</span>
+<span class="n">HOUSING_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;housing&quot;</span><span class="p">,</span> <span class="n">housing</span><span class="p">,</span>
+                                  <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>The first argument names the component family — note it goes before <code class="docutils literal notranslate"><span class="pre">name=</span></code>:
+the electrolyte’s <code class="docutils literal notranslate"><span class="pre">&quot;organic&quot;</span></code>/<code class="docutils literal notranslate"><span class="pre">&quot;aqueous&quot;</span></code> classification is the <code class="docutils literal notranslate"><span class="pre">family</span></code> key
+<em>inside</em> <code class="docutils literal notranslate"><span class="pre">body=</span></code>, not a keyword argument.</p>
+</div></blockquote>
+</section>
+<section id="the-cell-spec-all-five-references">
+<h2>4. The cell spec — all five references<a class="headerlink" href="#the-cell-spec-all-five-references" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_cell_spec</span>
+
+<span class="n">cell</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;My Lab&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;COIN-NMC811-A&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+    <span class="n">positive_electrode_spec_id</span><span class="o">=</span><span class="n">CATHODE_IRI</span><span class="p">,</span>
+    <span class="n">negative_electrode_spec_id</span><span class="o">=</span><span class="n">ANODE_IRI</span><span class="p">,</span>
+    <span class="n">electrolyte_spec_id</span><span class="o">=</span><span class="n">ELECTROLYTE_IRI</span><span class="p">,</span>
+    <span class="n">separator_spec_id</span><span class="o">=</span><span class="n">SEPARATOR_IRI</span><span class="p">,</span>
+    <span class="n">housing_spec_id</span><span class="o">=</span><span class="n">HOUSING_IRI</span><span class="p">,</span>
+    <span class="n">nominal_capacity</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.004</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
+    <span class="n">nominal_voltage</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.7</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">CELL_IRI</span> <span class="o">=</span> <span class="n">save_cell_spec</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This is shipped, working behavior — the five <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> reference fields are
+part of the <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> model today, and the packaged
+<a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">example fleet</span></a> uses exactly this pattern. A cell may
+reference components, inline them, or both (inline holders remain optional —
+see <a class="reference internal" href="../component-specs.html"><span class="std std-doc">Components</span></a>).</p>
+</section>
+<section id="the-physical-cells">
+<h2>5. The physical cells<a class="headerlink" href="#the-physical-cells" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_cell_instance</span>
+
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;B7-01&quot;</span><span class="p">,</span> <span class="s2">&quot;B7-02&quot;</span><span class="p">,</span> <span class="s2">&quot;B7-03&quot;</span><span class="p">):</span>
+    <span class="n">save_cell_instance</span><span class="p">({</span><span class="s2">&quot;cell_spec_id&quot;</span><span class="p">:</span> <span class="n">CELL_IRI</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">},</span>
+                       <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(For interactive batches — including printing labels — the workspace’s
+<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;cell&quot;,</span> <span class="pre">spec=...,</span> <span class="pre">names=[...])</span></code> does the same thing; see
+<a class="reference internal" href="label-your-cells.html"><span class="std std-doc">Label your cells</span></a>.)</p>
+</section>
+<section id="validate-the-whole-set">
+<span id="validate-the-set"></span><h2>6. Validate the whole set<a class="headerlink" href="#validate-the-whole-set" title="Link to this heading">#</a></h2>
+<p>Save does <strong>not</strong> currently reject a reference to a spec that does not exist —
+a typo in an IRI lands on disk silently. <code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> catches it,
+so finish every build session by sweeping the library:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_record_report</span>
+
+<span class="n">bad</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">LAB</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="n">validate_record_report</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
+                                    <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="n">bad</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INVALID </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">issues</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  -&quot;</span><span class="p">,</span> <span class="n">issue</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bad</span><span class="si">}</span><span class="s2"> invalid record(s)&quot;</span><span class="p">)</span>   <span class="c1"># 0 invalid record(s)</span>
+<span class="k">assert</span> <span class="n">bad</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>A dangling reference reports as <code class="docutils literal notranslate"><span class="pre">reference.missing</span></code> with the offending IRI —
+fix the reference (or register the missing part) and re-run.</p>
+</section>
+<section id="what-you-have-now">
+<h2>What you have now<a class="headerlink" href="#what-you-have-now" title="Link to this heading">#</a></h2>
+<p>A three-level graph on disk — cell → components → materials — where every node
+is a schema-valid record with a permanent IRI, and shared parts (that binder,
+that electrolyte) are registered once and referenced everywhere. The
+<a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">cell fleet page</span></a> shows the same pattern across the packaged
+example fleet, and <a class="reference internal" href="find-existing-records.html"><span class="std std-doc">Find existing records</span></a> shows how
+to query what you have built.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="register-materials.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Register the materials in your lab</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="label-your-cells.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Label your cells — names, serials, and QR codes</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#register-the-parts-and-harvest-their-iris">1. Register the parts and harvest their IRIs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-electrodes-a-96-2-2-coating-by-iri">2. The electrodes — a 96/2/2 coating, by IRI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte-separator-housing">3. Electrolyte, separator, housing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-cell-spec-all-five-references">4. The cell spec — all five references</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-physical-cells">5. The physical cells</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validate-the-whole-set">6. Validate the whole set</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-you-have-now">What you have now</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>
