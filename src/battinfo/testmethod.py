@@ -193,15 +193,25 @@ def _parse_duration(text: str) -> Quantity:
     return Quantity(value=_to_float(m.group(1), text) * _TIME_TABLE[m.group(2).lower()], unit="s")
 
 
+def _require_value(qty: Quantity, context: str) -> float:
+    """Step-syntax quantities are always single-valued; min/max windows have no
+    meaning inside a parsed step, so reject them with a parse-level error."""
+    if qty.value is None:
+        raise ExperimentSyntaxError(f"{context} requires a single value, not a min/max window.")
+    return qty.value
+
+
 def _termination_from_value(kind: str, qty: Quantity, direction: str | None) -> Termination:
     """Map a parsed ``until`` value to a termination, inferring approach direction
     from the step's charge/discharge sense when not otherwise determined."""
     if kind == "voltage":
-        return Termination(quantity="voltage", value=qty.value, unit=qty.unit,
+        return Termination(quantity="voltage", value=_require_value(qty, "A voltage termination"),
+                           unit=qty.unit,
                            direction="above" if direction == "charge" else "below")
     if kind in ("current", "c_rate"):
         # Cutoff currents are crossed from above as the cell relaxes/charges taper.
-        return Termination(quantity=kind, value=qty.value, unit=qty.unit, direction="below")
+        return Termination(quantity=kind, value=_require_value(qty, "A current termination"),
+                           unit=qty.unit, direction="below")
     raise ExperimentSyntaxError(f"Unsupported termination quantity '{kind}'.")
 
 
@@ -340,7 +350,7 @@ def _fmt_setpoint(kind: str, qty: Quantity) -> str:
 
 
 def _fmt_duration(qty: Quantity) -> str:
-    seconds = qty.value
+    seconds = _require_value(qty, "A step duration")
     if seconds % 3600 == 0:
         return f"for {_fmt_number(seconds / 3600)} hours"
     if seconds % 60 == 0:
