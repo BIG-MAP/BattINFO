@@ -31,6 +31,10 @@ myst_enable_extensions = [
     "fieldlist",
 ]
 
+# GitHub-style #anchors for markdown headings (h1-h3), so pages can deep-link
+# each other the same way on GitHub and in the built site.
+myst_heading_anchors = 3
+
 autosectionlabel_prefix_document = True
 
 templates_path = ["_templates"]
