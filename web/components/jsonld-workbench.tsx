@@ -24,7 +24,8 @@ import {
 } from "@/lib/validate";
 import { jsonldGallery } from "@/lib/jsonld.generated";
 import { JsonLdTree } from "@/components/jsonld-tree";
-import { SummaryView, TableView, JsonView } from "@/components/jsonld-views";
+import { SummaryView, TableView } from "@/components/jsonld-views";
+import { JsonLdGraph } from "@/components/jsonld-graph";
 
 const LAYER_LABEL: Record<string, string> = {
   "well-formedness": "well-formedness",
@@ -32,13 +33,13 @@ const LAYER_LABEL: Record<string, string> = {
   semantic: "semantic",
 };
 
-type ViewKind = "summary" | "table" | "tree" | "json";
+type ViewKind = "summary" | "table" | "tree" | "graph";
 
 const VIEWS: { key: ViewKind; label: string; hint: string }[] = [
   { key: "summary", label: "Summary", hint: "A datasheet: identity, properties, and components at a glance." },
   { key: "table", label: "Table", hint: "The same facts as plain tables you can scan or copy." },
   { key: "tree", label: "Tree", hint: "The full document as a collapsible tree, term by term." },
-  { key: "json", label: "JSON", hint: "The document as formatted text." },
+  { key: "graph", label: "Graph", hint: "The entities in the document and how they connect." },
 ];
 
 function IssueRow({ issue }: { issue: LayeredIssue }) {
@@ -63,16 +64,26 @@ function IssueRow({ issue }: { issue: LayeredIssue }) {
   );
 }
 
-function LayerSection({ title, note, issues }: { title: string; note: string; issues: LayeredIssue[] }) {
+function countIssues(issues: LayeredIssue[]) {
   const errors = issues.filter((i) => i.severity === "error").length;
   const warnings = issues.filter((i) => i.severity === "warning").length;
-  const clean = issues.length === 0;
+  return { errors, warnings, status: errors > 0 ? "error" : warnings > 0 ? "warn" : "clean" };
+}
+
+function LayerSection({ title, note, issues }: { title: string; note: string; issues: LayeredIssue[] }) {
+  const { errors, warnings, status } = countIssues(issues);
+  const spine =
+    status === "error" ? "border-l-error" : status === "warn" ? "border-l-warning" : "border-l-volt-400";
+  const tally =
+    status === "clean" ? "text-volt-700" : status === "error" ? "text-error" : "text-warning";
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
+    <div className={`rounded-lg border-y border-r border-l-4 border-border bg-paper p-4 ${spine}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-sm font-semibold text-ink">{title}</h3>
-        <span className={`text-xs ${clean ? "text-volt-700" : "text-ink-muted"}`}>
-          {clean ? "no issues" : `${errors} error${errors === 1 ? "" : "s"} · ${warnings} warning${warnings === 1 ? "" : "s"}`}
+        <span className={`text-xs font-medium ${tally}`}>
+          {status === "clean"
+            ? "passed"
+            : `${errors} error${errors === 1 ? "" : "s"} · ${warnings} warning${warnings === 1 ? "" : "s"}`}
         </span>
       </div>
       <p className="mt-1 text-xs text-ink-faint">{note}</p>
@@ -146,7 +157,7 @@ export default function JsonLdWorkbench() {
         : "Structural JSON Schema describes the canonical record form. Pick a type to force-check, or validate the record on the Record tab.";
 
   const summary = output?.framed ? extractSummary(output.framed) : null;
-  const showForm = view === "tree" || view === "json";
+  const showForm = view === "tree";
 
   return (
     <div>
@@ -230,48 +241,73 @@ export default function JsonLdWorkbench() {
         )}
       </div>
 
-      {/* Checks */}
+      {/* Checks — a distinct panel so results never read as document content. */}
       {output ? (
-        <div className="mt-10 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">Checks</h2>
-            <label className="flex items-center gap-2 text-xs text-ink-muted">
-              Validate as
-              <select
-                value={override}
-                onChange={(e) => onOverride(e.target.value)}
-                className="rounded-md border border-border bg-white px-2 py-1 font-mono text-xs text-ink"
-              >
-                <option value="auto">auto-detect</option>
-                {Object.keys(DISCRIMINATORS).map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <p className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-ink-muted">
+        <section className="mt-12 rounded-2xl border-2 border-border bg-white p-6">
+          {(() => {
+            const all = [
+              ...output.wellFormedness,
+              ...(structural ? structuralIssues(structural) : []),
+              ...output.semantic,
+            ];
+            const { errors, warnings, status } = countIssues(all);
+            const pill =
+              status === "clean"
+                ? "border-volt-200 bg-volt-50 text-volt-700"
+                : status === "error"
+                  ? "border-error/30 bg-error-tint text-error"
+                  : "border-warning/30 bg-warning-tint text-warning";
+            return (
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-ink">Validation</h2>
+                  <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${pill}`}>
+                    {status === "clean"
+                      ? "no issues found"
+                      : `${errors} error${errors === 1 ? "" : "s"} · ${warnings} warning${warnings === 1 ? "" : "s"}`}
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 text-xs text-ink-muted">
+                  Validate as
+                  <select
+                    value={override}
+                    onChange={(e) => onOverride(e.target.value)}
+                    className="rounded-md border border-border bg-white px-2 py-1 font-mono text-xs text-ink"
+                  >
+                    <option value="auto">auto-detect</option>
+                    {Object.keys(DISCRIMINATORS).map((k) => (
+                      <option key={k} value={k}>
+                        {k}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            );
+          })()}
+          <p className="mb-4 text-sm text-ink-muted">
             Three independent layers, each reporting on its own. This is a browser pre-check — the{" "}
             <code className="text-xs">battinfo</code> package (or the publish gate) remains the canonical verdict, and
             runs the referential-integrity and shape checks that need your full record set.
           </p>
-          <LayerSection
-            title="Layer 1 — JSON-LD well-formedness"
-            note="Parses, resolves a @context, and expands. Terms the context does not define are listed, never dropped."
-            issues={output.wellFormedness}
-          />
-          <LayerSection
-            title="Layer 2 — Structural (canonical JSON Schema)"
-            note={structuralNote}
-            issues={structural ? structuralIssues(structural) : []}
-          />
-          <LayerSection
-            title="Layer 3 — Semantic sanity"
-            note="Identity IRIs, quantities carrying a value and a unit, and references shaped like our identifiers."
-            issues={output.semantic}
-          />
-        </div>
+          <div className="space-y-3">
+            <LayerSection
+              title="Layer 1 — JSON-LD well-formedness"
+              note="Parses, resolves a @context, and expands. Terms the context does not define are listed, never dropped."
+              issues={output.wellFormedness}
+            />
+            <LayerSection
+              title="Layer 2 — Structural (canonical JSON Schema)"
+              note={structuralNote}
+              issues={structural ? structuralIssues(structural) : []}
+            />
+            <LayerSection
+              title="Layer 3 — Semantic sanity"
+              note="Identity IRIs, quantities carrying a value and a unit, and references shaped like our identifiers."
+              issues={output.semantic}
+            />
+          </div>
+        </section>
       ) : null}
     </div>
   );
@@ -310,8 +346,8 @@ function ViewBody({
       <NoCanonical />
     );
   }
-  const data = form === "canonical" ? output.framed : output.parsed;
-  return data ? <JsonView data={data} /> : <NoCanonical />;
+  // graph
+  return output.framed ? <JsonLdGraph framed={output.framed} /> : <NoCanonical />;
 }
 
 function NoCanonical() {

@@ -181,10 +181,3 @@ export function TableView({ model }: { model: SummaryModel }) {
   );
 }
 
-export function JsonView({ data }: { data: unknown }) {
-  return (
-    <pre className="max-h-[32rem] overflow-auto rounded-xl bg-ink-deep p-4 text-xs">
-      <code className="font-mono text-paper">{JSON.stringify(data, null, 2)}</code>
-    </pre>
-  );
-}

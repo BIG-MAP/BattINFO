@@ -104,7 +104,7 @@ function TypeBadges({ value, map }: { value: unknown; map: TermMap }) {
 function TermKey({ term, map }: { term: string; map: TermMap }) {
   const iri = resolveIri(term, map);
   return (
-    <span title={iri ?? undefined} className="font-mono text-xs text-ink-faint">
+    <span title={iri ?? undefined} className="mt-[1px] shrink-0 font-mono text-xs text-ink-muted">
       {term}
     </span>
   );
@@ -129,12 +129,23 @@ function prefLabel(node: Record<string, unknown>): string | null {
 
 function Primitive({ value }: { value: unknown }) {
   if (typeof value === "string" && /^https?:\/\//.test(value)) return <IriValue iri={value} />;
-  if (typeof value === "string") return <span className="text-sm text-ink">&ldquo;{value}&rdquo;</span>;
+  if (typeof value === "string") return <span className="text-sm text-ink">{value}</span>;
   if (typeof value === "number" || typeof value === "boolean")
     return <span className="font-mono text-sm text-info">{String(value)}</span>;
   if (value === null) return <span className="font-mono text-sm text-ink-faint">null</span>;
   return <span className="text-sm text-ink">{String(value)}</span>;
 }
+
+// A fixed-width slot so keys line up whether or not a row has a disclosure caret.
+function Caret({ open }: { open?: boolean }) {
+  return (
+    <span className="mt-[3px] w-3 shrink-0 select-none text-center font-mono text-[10px] leading-none text-ink-faint">
+      {open === undefined ? "" : open ? "▾" : "▸"}
+    </span>
+  );
+}
+
+const ROW = "flex items-start gap-2 rounded-md px-1.5 py-1 hover:bg-tint/40";
 
 function NodeRow({ termKey, value, map, depth }: { termKey: string; value: unknown; map: TermMap; depth: number }) {
   const isObject = value !== null && typeof value === "object";
@@ -142,7 +153,8 @@ function NodeRow({ termKey, value, map, depth }: { termKey: string; value: unkno
 
   if (!isObject) {
     return (
-      <div className="flex flex-wrap items-baseline gap-2 py-0.5">
+      <div className={ROW}>
+        <Caret />
         <TermKey term={termKey} map={map} />
         <Primitive value={value} />
       </div>
@@ -156,12 +168,9 @@ function NodeRow({ termKey, value, map, depth }: { termKey: string; value: unkno
   const count = isArray ? (value as unknown[]).length : Object.keys(obj as object).length;
 
   return (
-    <div className="py-0.5">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full flex-wrap items-baseline gap-2 text-left"
-      >
-        <span className="select-none font-mono text-[10px] text-ink-faint">{open ? "▾" : "▸"}</span>
+    <div>
+      <button onClick={() => setOpen((o) => !o)} className={`${ROW} w-full text-left`}>
+        <Caret open={open} />
         <TermKey term={termKey} map={map} />
         {obj && "@type" in obj ? <TypeBadges value={obj["@type"]} map={map} /> : null}
         {label ? <span className="text-xs text-ink-muted">{label}</span> : null}
@@ -171,11 +180,11 @@ function NodeRow({ termKey, value, map, depth }: { termKey: string; value: unkno
             {quantity.unit ? <span className="text-ink-muted"> {quantity.unit}</span> : null}
           </span>
         ) : (
-          <span className="text-xs text-ink-faint">{isArray ? `[${count}]` : `{${count}}`}</span>
+          <span className="text-xs text-ink-faint">{isArray ? `${count} items` : `${count} fields`}</span>
         )}
       </button>
       {open ? (
-        <div className="ml-3 border-l border-border pl-3">
+        <div className="ml-[10px] border-l border-border/60 pl-2">
           <TreeChildren value={value} map={map} depth={depth + 1} />
         </div>
       ) : null}
@@ -188,7 +197,7 @@ function TreeChildren({ value, map, depth }: { value: unknown; map: TermMap; dep
     return (
       <>
         {value.map((item, i) => (
-          <NodeRow key={i} termKey={`[${i}]`} value={item} map={map} depth={depth} />
+          <NodeRow key={i} termKey={`${i + 1}.`} value={item} map={map} depth={depth} />
         ))}
       </>
     );
@@ -198,18 +207,14 @@ function TreeChildren({ value, map, depth }: { value: unknown; map: TermMap; dep
     <>
       {Object.entries(obj).map(([key, v]) => {
         if (key === "@type") return null; // rendered as badges in the parent row
-        if (key === "@context") {
-          return (
-            <div key={key} className="py-0.5">
-              <TermKey term="@context" map={map} />
-              <span className="ml-2 text-xs text-ink-faint">(context — hidden)</span>
-            </div>
-          );
-        }
+        if (key === "@context") return null; // the context is not part of the data
+        // @id/id is shown in the root header (depth 0); render it inline when nested.
+        if ((key === "@id" || key === "id") && depth === 0) return null;
         if (key === "@id" || key === "id") {
           return (
-            <div key={key} className="flex flex-wrap items-baseline gap-2 py-0.5">
-              <span className="font-mono text-xs text-ink-faint">{key}</span>
+            <div key={key} className={ROW}>
+              <Caret />
+              <span className="font-mono text-xs text-ink-muted">{key}</span>
               {typeof v === "string" ? <IriValue iri={v} /> : <Primitive value={v} />}
             </div>
           );
@@ -222,8 +227,16 @@ function TreeChildren({ value, map, depth }: { value: unknown; map: TermMap; dep
 
 export function JsonLdTree({ data, context }: { data: unknown; context: Record<string, unknown> }) {
   const map = buildTermMap(context);
+  const root = data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, unknown>) : null;
+  const rootId = root ? root["@id"] ?? root["id"] : undefined;
   return (
-    <div className="rounded-xl border border-border bg-white p-4 text-sm">
+    <div className="max-h-[34rem] overflow-auto rounded-xl border border-border bg-white p-3 text-sm">
+      {root && (root["@type"] || rootId) ? (
+        <div className="mb-2 flex flex-wrap items-center gap-2 border-b border-border pb-2">
+          {root["@type"] ? <TypeBadges value={root["@type"]} map={map} /> : null}
+          {typeof rootId === "string" ? <IriValue iri={rootId} /> : null}
+        </div>
+      ) : null}
       <TreeChildren value={data} map={map} depth={0} />
     </div>
   );
