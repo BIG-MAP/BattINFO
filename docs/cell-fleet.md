@@ -23,10 +23,12 @@ records are unaffected. The JSON-LD emits reference nodes
 (`hasPositiveElectrode: {"@id": <electrode-spec IRI>}`, etc.);
 when a basis/inline node is also present, the `@id` is merged onto it.
 
-> **Check your references.** Saving does *not* currently reject a
-> `*_spec_id` that points at nothing — a typo lands on disk silently. Run
-> `validate_record_report` over the record set after building (it reports
-> `reference.missing` per dangling IRI); the recipe is in
+> **References are checked at save.** A `*_spec_id` that points at nothing
+> fails the save with the missing IRI named (opt out with
+> `resolve_references=False` for staged workflows; `save_batch` allows
+> references within the batch and validates the completed set). Running
+> `validate_record_report` over a finished set is still a good final sweep;
+> the recipe is in
 > {ref}`How-to: build a cell from components <validate-the-set>`.
 
 ```python

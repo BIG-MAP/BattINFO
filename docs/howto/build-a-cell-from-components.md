@@ -187,7 +187,10 @@ assert bad == 0
 ```
 
 A dangling reference reports as `reference.missing` with the offending IRI —
-fix the reference (or register the missing part) and re-run.
+fix the reference (or register the missing part) and re-run. Saves also
+check references by default, so a typo normally fails at `save_*` time
+before it ever lands on disk; this sweep is the belt-and-braces check over
+a finished set.
 
 ## What you have now
 
