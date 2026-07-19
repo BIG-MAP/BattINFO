@@ -523,10 +523,12 @@ records are unaffected. The JSON-LD emits reference nodes
 (<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">&lt;electrode-spec</span> <span class="pre">IRI&gt;}</span></code>, etc.);
 when a basis/inline node is also present, the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> is merged onto it.</p>
 <blockquote>
-<div><p><strong>Check your references.</strong> Saving does <em>not</em> currently reject a
-<code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> that points at nothing — a typo lands on disk silently. Run
-<code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> over the record set after building (it reports
-<code class="docutils literal notranslate"><span class="pre">reference.missing</span></code> per dangling IRI); the recipe is in
+<div><p><strong>References are checked at save.</strong> A <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> that points at nothing
+fails the save with the missing IRI named (opt out with
+<code class="docutils literal notranslate"><span class="pre">resolve_references=False</span></code> for staged workflows; <code class="docutils literal notranslate"><span class="pre">save_batch</span></code> allows
+references within the batch and validates the completed set). Running
+<code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> over a finished set is still a good final sweep;
+the recipe is in
 <a class="reference internal" href="howto/build-a-cell-from-components.html#validate-the-set"><span class="std std-ref">How-to: build a cell from components</span></a>.</p>
 </div></blockquote>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bi</span>

@@ -497,14 +497,17 @@ also needs a login, because it asks the registry about <em>your</em> workspace.<
 </section>
 <section id="ws-template-test-spec-output-won-t-load">
 <h2><code class="docutils literal notranslate"><span class="pre">ws.template(&quot;test-spec&quot;)</span></code> output won’t load<a class="headerlink" href="#ws-template-test-spec-output-won-t-load" title="Link to this heading">#</a></h2>
-<p>Known sharp edge. The generated test-spec template currently emits shapes the
-record model rejects: bare scalars where <code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">...}</span></code> maps
-are required, a <code class="docutils literal notranslate"><span class="pre">{&quot;min&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;max&quot;:</span> <span class="pre">...}</span></code> voltage window the model cannot
-yet express, and <code class="docutils literal notranslate"><span class="pre">null</span></code> placeholders that are themselves invalid — so
-<code class="docutils literal notranslate"><span class="pre">ws.load()</span></code> fails with a stack of pydantic errors even after you fill it in.</p>
-<p>Until the template round-trip is fixed, author test specs directly in Python —
-this path works today and parses plain-English steps into the structured
-method:</p>
+<p>Fixed as of the current release: the template now round-trips through
+<code class="docutils literal notranslate"><span class="pre">ws.load()</span></code> once you fill in the values. Condition placeholders use
+<code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">...}</span></code> maps, windows use
+<code class="docutils literal notranslate"><span class="pre">{&quot;min_value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;max_value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">...}</span></code> (a 2.5–4.2 V voltage
+window is expressible), and the file lists the allowed <code class="docutils literal notranslate"><span class="pre">type</span></code> values in
+<code class="docutils literal notranslate"><span class="pre">_allowed_types</span></code>. If <code class="docutils literal notranslate"><span class="pre">type</span></code> is left empty, the load error names every
+allowed value.</p>
+<p>If you are on an older version and the template fails with a stack of
+pydantic errors, author the test spec directly in Python instead — this
+path works on all versions and parses plain-English steps into the
+structured method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 
 <span class="n">battinfo</span><span class="o">.</span><span class="n">save_test_spec</span><span class="p">(</span><span class="n">battinfo</span><span class="o">.</span><span class="n">TestSpec</span><span class="p">(</span>
@@ -516,8 +519,7 @@ method:</p>
 <span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Put voltage limits in the step strings (as above) rather than in a
-min/max window. See <a class="reference internal" href="../test-specs.html"><span class="std std-doc">Test specs</span></a> for the full recipe.</p>
+<p>See <a class="reference internal" href="../test-specs.html"><span class="std std-doc">Test specs</span></a> for the full recipe.</p>
 </section>
 <section id="which-install-extra-do-i-need">
 <h2>“Which install extra do I need?”<a class="headerlink" href="#which-install-extra-do-i-need" title="Link to this heading">#</a></h2>

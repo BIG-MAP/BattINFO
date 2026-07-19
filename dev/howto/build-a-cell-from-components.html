@@ -659,7 +659,10 @@ so finish every build session by sweeping the library:</p>
 </pre></div>
 </div>
 <p>A dangling reference reports as <code class="docutils literal notranslate"><span class="pre">reference.missing</span></code> with the offending IRI —
-fix the reference (or register the missing part) and re-run.</p>
+fix the reference (or register the missing part) and re-run. Saves also
+check references by default, so a typo normally fails at <code class="docutils literal notranslate"><span class="pre">save_*</span></code> time
+before it ever lands on disk; this sweep is the belt-and-braces check over
+a finished set.</p>
 </section>
 <section id="what-you-have-now">
 <h2>What you have now<a class="headerlink" href="#what-you-have-now" title="Link to this heading">#</a></h2>

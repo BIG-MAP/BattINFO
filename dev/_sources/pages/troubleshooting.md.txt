@@ -27,15 +27,18 @@ also needs a login, because it asks the registry about *your* workspace.
 
 ## `ws.template("test-spec")` output won't load
 
-Known sharp edge. The generated test-spec template currently emits shapes the
-record model rejects: bare scalars where `{"value": ..., "unit": ...}` maps
-are required, a `{"min": ..., "max": ...}` voltage window the model cannot
-yet express, and `null` placeholders that are themselves invalid — so
-`ws.load()` fails with a stack of pydantic errors even after you fill it in.
+Fixed as of the current release: the template now round-trips through
+`ws.load()` once you fill in the values. Condition placeholders use
+`{"value": ..., "unit": ...}` maps, windows use
+`{"min_value": ..., "max_value": ..., "unit": ...}` (a 2.5–4.2 V voltage
+window is expressible), and the file lists the allowed `type` values in
+`_allowed_types`. If `type` is left empty, the load error names every
+allowed value.
 
-Until the template round-trip is fixed, author test specs directly in Python —
-this path works today and parses plain-English steps into the structured
-method:
+If you are on an older version and the template fails with a stack of
+pydantic errors, author the test spec directly in Python instead — this
+path works on all versions and parses plain-English steps into the
+structured method:
 
 ```python
 import battinfo
@@ -49,8 +52,7 @@ battinfo.save_test_spec(battinfo.TestSpec(
 ), source_root="my-library", mode="upsert")
 ```
 
-Put voltage limits in the step strings (as above) rather than in a
-min/max window. See [Test specs](../test-specs.md) for the full recipe.
+See [Test specs](../test-specs.md) for the full recipe.
 
 ## "Which install extra do I need?"
 
