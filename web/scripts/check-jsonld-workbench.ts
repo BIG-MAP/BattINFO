@@ -20,6 +20,7 @@ import {
   checkSemantics,
   checkWellFormedness,
   effectiveContext,
+  extractSummary,
   type JsonLdLib,
 } from "../lib/jsonld-workbench";
 import { RECORDS_CONTEXT_URL } from "../lib/records-context.generated";
@@ -126,6 +127,20 @@ async function main() {
   await check("effectiveContext resolves the hosted URL to vendored terms", () => {
     const ctx = effectiveContext({ "@context": RECORDS_CONTEXT_URL });
     assert.ok("hasProperty" in ctx, "expected vendored terms after resolving the hosted URL");
+  });
+
+  // 8. Datasheet extraction pulls identity, properties, and components.
+  await check("extractSummary builds a datasheet from the canonical example", async () => {
+    const raw = readFileSync(resolve(webRoot, "public/jsonld/cell-spec.jsonld"), "utf-8");
+    const out = await runJsonLdLayers(raw, lib);
+    assert.ok(out.framed);
+    const s = extractSummary(out.framed);
+    assert.equal(s.title, "A123 ANR26650M1-B");
+    assert.equal(s.manufacturer, "A123");
+    assert.ok(s.properties.length >= 10, `expected several properties, got ${s.properties.length}`);
+    const cap = s.properties.find((p) => p.label === "NominalCapacity");
+    assert.ok(cap && cap.value === "2.5" && cap.unit, `expected a NominalCapacity with value+unit, got ${JSON.stringify(cap)}`);
+    assert.ok(s.types.includes("CylindricalBattery"), "expected the EMMO type stack in the summary");
   });
 
   await Promise.resolve();

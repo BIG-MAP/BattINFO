@@ -347,14 +347,158 @@ function labelOf(node: Record<string, unknown>): string | null {
 
 // --- expand + frame orchestration --------------------------------------------
 
-/** A frame that re-nests any graph into our canonical record view. */
+/**
+ * A frame that re-nests any graph into our canonical record view. Anchoring it
+ * to the document's own top-level @type keeps the record as a single root node
+ * (with its parts embedded) instead of a flat @graph of every node.
+ */
 export function canonicalFrame(doc: Record<string, unknown>): Record<string, unknown> {
   const inline = effectiveContext(doc);
   const base = (recordsContext as Record<string, unknown>)["@context"] as Record<string, unknown>;
-  return {
+  const frame: Record<string, unknown> = {
     "@context": { ...base, ...inline },
     "@embed": "@once",
   };
+  const topType = doc["@type"];
+  if (typeof topType === "string" || (Array.isArray(topType) && topType.length > 0)) {
+    frame["@type"] = topType;
+  }
+  return frame;
+}
+
+// --- datasheet extraction (for the Summary and Table views) ------------------
+
+export interface PropertyRow {
+  label: string;
+  value: string;
+  unit: string | null;
+}
+
+export interface ComponentRow {
+  relation: string;
+  label: string;
+}
+
+export interface SummaryModel {
+  title: string | null;
+  model: string | null;
+  manufacturer: string | null;
+  id: string | null;
+  types: string[];
+  properties: PropertyRow[];
+  components: ComponentRow[];
+}
+
+function shortIri(token: string): string {
+  if (/^https?:\/\//.test(token)) {
+    const cut = Math.max(token.lastIndexOf("#"), token.lastIndexOf("/"));
+    return cut >= 0 ? token.slice(cut + 1) : token;
+  }
+  // Compacted CURIE like emmo:AmpereHour or schema:CreativeWork -> local part.
+  const colon = token.indexOf(":");
+  if (colon > 0) return token.slice(colon + 1);
+  return token;
+}
+
+function asString(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
+function collectTypes(node: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  const push = (t: unknown) => {
+    if (typeof t === "string") out.push(shortIri(t));
+    else if (Array.isArray(t)) t.forEach(push);
+  };
+  push(node["@type"]);
+  const desc = node["isDescriptionFor"];
+  if (desc && typeof desc === "object") push((desc as Record<string, unknown>)["@type"]);
+  // Drop the generic wrappers that add no lab-facing meaning.
+  return out.filter((t) => t !== "CreativeWork" && !t.startsWith("EMMO_"));
+}
+
+function propertyLabel(node: Record<string, unknown>): string {
+  const pref = node["skos:prefLabel"] ?? node["prefLabel"];
+  if (typeof pref === "string") return pref;
+  const t = node["@type"];
+  if (typeof t === "string") return shortIri(t);
+  if (Array.isArray(t) && typeof t[0] === "string") return shortIri(t[0]);
+  return "property";
+}
+
+function propertyValue(node: Record<string, unknown>): string | null {
+  const part = node["hasNumericalPart"] as Record<string, unknown> | undefined;
+  if (part && typeof part === "object") {
+    const v = part["hasNumberValue"] ?? part["hasNumericalValue"];
+    if (v !== undefined) return asString(v);
+  }
+  return asString(node["value"] ?? node["schema:value"]);
+}
+
+function propertyUnit(node: Record<string, unknown>): string | null {
+  const u = node["hasMeasurementUnit"] ?? node["unit"];
+  return typeof u === "string" ? shortIri(u) : null;
+}
+
+function relationLabel(key: string): string {
+  const words = key.replace(/^has/, "").replace(/([A-Z])/g, " $1").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1).toLowerCase();
+}
+
+/** Pull a datasheet-style summary out of the framed canonical document. */
+export function extractSummary(framed: Record<string, unknown>): SummaryModel {
+  const props: PropertyRow[] = [];
+  const raw = framed["hasProperty"];
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  for (const item of list) {
+    if (!item || typeof item !== "object") continue;
+    const node = item as Record<string, unknown>;
+    props.push({ label: propertyLabel(node), value: propertyValue(node) ?? "—", unit: propertyUnit(node) });
+  }
+
+  const components: ComponentRow[] = [];
+  for (const [key, value] of Object.entries(framed)) {
+    if (!key.startsWith("has") || key === "hasProperty") continue;
+    const nodes = Array.isArray(value) ? value : [value];
+    for (const n of nodes) {
+      if (!n || typeof n !== "object") continue;
+      const node = n as Record<string, unknown>;
+      const label =
+        asString(node["name"] ?? node["schema:name"]) ??
+        collectTypes(node)[0] ??
+        propertyLabel(node);
+      components.push({ relation: relationLabel(key), label });
+    }
+  }
+
+  const manu = framed["manufacturer"] ?? framed["schema:manufacturer"];
+  const manuName =
+    manu && typeof manu === "object"
+      ? asString((manu as Record<string, unknown>)["name"] ?? (manu as Record<string, unknown>)["schema:name"])
+      : asString(manu);
+
+  return {
+    title: asString(framed["name"] ?? framed["schema:name"]),
+    model: asString(framed["model"] ?? framed["schema:model"]),
+    manufacturer: manuName,
+    id: asString(framed["@id"]),
+    types: Array.from(new Set(collectTypes(framed))),
+    properties: props,
+    components,
+  };
+}
+
+// A single-node document frames cleaner without the @graph wrapper. When the
+// result still carries a one-element @graph (some processing paths keep it),
+// lift that node up so the datasheet views see the record directly.
+function unwrapGraph(framed: Record<string, unknown>): Record<string, unknown> {
+  const graph = framed["@graph"];
+  if (Array.isArray(graph) && graph.length === 1 && graph[0] && typeof graph[0] === "object") {
+    return { "@context": framed["@context"], ...(graph[0] as Record<string, unknown>) };
+  }
+  return framed;
 }
 
 export interface WorkbenchOutput {
@@ -399,13 +543,16 @@ export async function runJsonLdLayers(raw: string, jsonld: JsonLdLib): Promise<W
   let framed: Record<string, unknown> | null = null;
   if (expanded && expanded.length > 0) {
     try {
-      framed = await jsonld.frame(expanded, canonicalFrame(doc), { documentLoader });
+      const result = await jsonld.frame(expanded, canonicalFrame(doc), { documentLoader, omitGraph: true });
+      framed = unwrapGraph(result);
     } catch {
       framed = null;
     }
   }
 
   const wellFormedness = checkWellFormedness(doc, expanded, expandError);
-  const semantic = framed ? checkSemantics(framed) : checkSemantics(doc);
+  // Semantic checks run on the document as authored: it keeps full IRIs, so
+  // @id and reference shape checks aren't blunted by prefix compaction.
+  const semantic = checkSemantics(doc);
   return { parsed: doc, expanded, framed, expandError, wellFormedness, semantic };
 }
