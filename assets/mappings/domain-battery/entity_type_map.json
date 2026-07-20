@@ -221,12 +221,29 @@
         "node_type": "SiliconGraphiteElectrode",
         "battery_types": []
       },
+      "silicon": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "SiliconBasedElectrode",
+        "battery_types": []
+      },
+      "si": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "SiliconBasedElectrode",
+        "battery_types": []
+      },
       "hard-carbon": {
         "relation": "hasNegativeElectrode",
         "node_type": "HardCarbonElectrode",
         "battery_types": []
       },
       "lithium": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "LithiumElectrode",
+        "battery_types": [
+          "LithiumMetalBattery"
+        ]
+      },
+      "lithium-metal": {
         "relation": "hasNegativeElectrode",
         "node_type": "LithiumElectrode",
         "battery_types": [

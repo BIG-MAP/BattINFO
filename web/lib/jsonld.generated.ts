@@ -496,6 +496,7 @@ export const jsonldGallery: {
           "@type": "@id"
         },
         "SiliconGraphiteElectrode": "electrochemistry:electrochemistry_e8c39ecc_29d1_4172_996e_d5b05dc88015",
+        "SiliconBasedElectrode": "electrochemistry:electrochemistry_79e12290_d1e5_4c41_916c_18f1e4d7fb51",
         "HardCarbonElectrode": "electrochemistry:electrochemistry_6235cc7c_2eee_432a_93af_47d7e05db007",
         "LithiumElectrode": "electrochemistry:electrochemistry_55775b50_b9d9_4d68_8cb5_38fcd7b9b54d",
         "LithiumIonTitanateBattery": "battery:battery_fd811dc3_8c37_4741_a099_78e26e4110ef",
