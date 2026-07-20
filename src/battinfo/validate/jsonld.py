@@ -43,7 +43,10 @@ _BATTINFO_RECORDS_CONTEXT_URL = "https://w3id.org/battinfo/context/records/v1.js
 # via .tools/quality/refresh_emmo_context.py.
 _LOCAL_CONTEXT_FILES = {
     _EMMO_BATTERY_CONTEXT_URL: "domain-battery.context.json",
-    _BATTINFO_RECORDS_CONTEXT_URL: "records.context.json",
+    # The hosted records context is the COMPLETE, versioned superset (generated
+    # by scripts/gen_context.py), so a document that references the URL resolves
+    # every record @type/property offline.
+    _BATTINFO_RECORDS_CONTEXT_URL: "records.context.v1.json",
 }
 
 _EXPLICIT_ALLOWED_TYPE_TERMS = {
