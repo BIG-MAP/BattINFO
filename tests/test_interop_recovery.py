@@ -49,25 +49,30 @@ def test_every_source_reaches_canonical_jsonld(scores):
             assert rating == gen.PASS, f"{s.label}: {dim} regressed to {rating!r} ({detail})"
 
 
-def test_no_red_cells(scores):
+def test_every_cell_is_green(scores):
+    # The whole grid is green: every source is fully recovered on every
+    # dimension. A regression anywhere flips a cell and fails here.
     for s in scores:
         for dim, _ in gen.DIMENSIONS:
             rating, detail = s.dims[dim]
-            assert rating != gen.FAIL, f"{s.label}: {dim} went red ({detail})"
+            assert rating == gen.PASS, f"{s.label}: {dim} is {rating!r} ({detail})"
 
 
-def test_converter_family_recovers_quantities(scores):
+def test_converter_family_recovers_component_specs(scores):
+    # Converter component-spec extraction (import_converter_package(components=True))
+    # must keep emitting standalone electrode/material/electrolyte specs.
     converter = [s for s in scores if s.family == "converter"]
     assert converter, "expected converter sources"
     for s in converter:
-        assert s.dims["quantities"][0] == gen.PASS, f"{s.label}: {s.dims['quantities']}"
+        assert s.dims["components"][0] == gen.PASS, f"{s.label}: {s.dims['components']}"
+        assert s.metrics.get("component_specs", 0) > 0, f"{s.label}: no component specs"
 
 
-def test_discovery_family_recovers_component_specs(scores):
+def test_discovery_family_recovers_quantities(scores):
     discovery = [s for s in scores if s.family == "discovery"]
     assert discovery, "expected a discovery source"
     for s in discovery:
-        assert s.dims["components"][0] == gen.PASS, f"{s.label}: {s.dims['components']}"
+        assert s.dims["quantities"][0] == gen.PASS, f"{s.label}: {s.dims['quantities']}"
 
 
 def test_scorecard_page_is_in_sync():

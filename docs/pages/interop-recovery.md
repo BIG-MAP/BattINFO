@@ -14,21 +14,21 @@ The scores come from `scripts/gen_interop_recovery.py` and are asserted by
 changes a cell here. This page is generated; regenerate it with
 `uv run python scripts/gen_interop_recovery.py`.
 
-Across 9 sources and 6 dimensions: 🟢 45 full · 🟡 9 partial · 🔴 0 none, out of 54.
+Across 9 sources and 6 dimensions: 🟢 54 full · 🟡 0 partial · 🔴 0 none, out of 54.
 
 Legend: 🟢 full · 🟡 partial · 🔴 none.
 
 | Source | Shape | Ingest | Normalize | Identity | Quantities | Components | Canonical JSON-LD |
 |---|---|---|---|---|---|---|---|
-| **Converter Excel v1.0.0** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **Converter Excel v1.1.2** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **Converter Excel v1.1.8** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **Converter Excel v1.1.11** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **Converter Excel v1.1.15** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **Converter Excel v1.1.17** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **EMPA converter sample** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **EMPA reference v3** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| **Discovery RO-Crate (.eln)** | `@graph[23]` | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 |
+| **Converter Excel v1.0.0** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **Converter Excel v1.1.2** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **Converter Excel v1.1.8** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **Converter Excel v1.1.11** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **Converter Excel v1.1.15** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **Converter Excel v1.1.17** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **EMPA converter sample** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **EMPA reference v3** | `cell-root` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| **Discovery RO-Crate (.eln)** | `@graph[23]` | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 
 ## What the columns mean
 
@@ -41,111 +41,111 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 
 ## Per-source detail
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  Converter Excel v1.0.0
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.0.0
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.0.0.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 12
 
 - 🟢 **Ingest** — parsed after repairing bare NaN/Infinity.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 12 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 45 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 51 value+unit quantities.
+- 🟢 **Components** — 6 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 12 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  Converter Excel v1.1.2
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.2
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.1.2.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 12
 
 - 🟢 **Ingest** — parsed after repairing bare NaN/Infinity.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 12 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 50 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 56 value+unit quantities.
+- 🟢 **Components** — 6 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 12 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  Converter Excel v1.1.8
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.8
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.1.8.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 12
 
 - 🟢 **Ingest** — parsed after repairing bare NaN/Infinity.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 12 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 51 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 57 value+unit quantities.
+- 🟢 **Components** — 6 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 12 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  Converter Excel v1.1.11
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.11
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.1.11.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 14
 
 - 🟢 **Ingest** — parsed after repairing bare NaN/Infinity.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 14 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 51 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 61 value+unit quantities.
+- 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  Converter Excel v1.1.15
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.15
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.1.15.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 14
 
 - 🟢 **Ingest** — parsed after repairing bare NaN/Infinity.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 14 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 54 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 64 value+unit quantities.
+- 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  Converter Excel v1.1.17
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.17
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.1.17.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 14
 
 - 🟢 **Ingest** — parsed after repairing bare NaN/Infinity.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 14 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 54 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 64 value+unit quantities.
+- 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  EMPA converter sample
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  EMPA converter sample
 **Fixture:** `tests/fixtures/converter/coin-cell.converter.sample.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 2
+**Shape in:** `cell-root` · **records out:** 10
 
 - 🟢 **Ingest** — parsed as-is.
-- 🟢 **Normalize** — cell-root → 2 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 10 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 33 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 2 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 43 value+unit quantities.
+- 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 10 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟢🟡🟢  EMPA reference v3
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  EMPA reference v3
 **Fixture:** `tests/fixtures/converter/coincell_reference_v3.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
-**Shape in:** `cell-root` · **records out:** 6
+**Shape in:** `cell-root` · **records out:** 14
 
 - 🟢 **Ingest** — parsed as-is.
-- 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
+- 🟢 **Normalize** — cell-root → 14 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 54 value+unit quantities.
-- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
-- 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
+- 🟢 **Quantities** — 64 value+unit quantities.
+- 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
+- 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
 :::
 
-:::{dropdown} 🟢🟢🟢🟡🟢🟢  Discovery RO-Crate (.eln)
+:::{dropdown} 🟢🟢🟢🟢🟢🟢  Discovery RO-Crate (.eln)
 **Fixture:** `tests/fixtures/interop/discovery/ro-crate-metadata.sample.json`  
 **Importer:** `battinfo.interop.import_discovery_eln`  
 **Shape in:** `@graph[23]` · **records out:** 36
@@ -153,7 +153,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Ingest** — parsed as-is.
 - 🟢 **Normalize** — @graph[23] → 36 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟡 **Quantities** — 18 value+unit quantities (electrode/electrolyte level; cell- and material-level source quantities not yet mapped).
+- 🟢 **Quantities** — 30 value+unit quantities.
 - 🟢 **Components** — 16 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 36 records validate and emit canonical JSON-LD.
 :::

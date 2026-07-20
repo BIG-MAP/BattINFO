@@ -89,6 +89,27 @@ def test_eln_builds_linked_spec_graph() -> None:
         assert cell.dataset is not None  # cycling .xlsx referenced
 
 
+def test_eln_recovers_cell_mass_and_electrode_density() -> None:
+    """Cell- and electrode-level quantities the crate carries are recovered."""
+    pkg = import_discovery_eln(ELN, validate=True)
+    # at least one cell carries a mass property with a unit
+    masses = [
+        c.cell_spec["properties"]["mass"]
+        for c in pkg.cells
+        if isinstance(c.cell_spec.get("properties"), dict) and "mass" in c.cell_spec["properties"]
+    ]
+    assert masses, "expected cell mass to be recovered from the crate"
+    assert masses[0]["unit"] == "mg"
+    # the compaction density lands on the electrode coating
+    densities = [
+        r["electrode_spec"]["coating"]["property"]["density"]
+        for r in pkg.electrode_specs
+        if "density" in r["electrode_spec"]["coating"].get("property", {})
+    ]
+    assert densities, "expected electrode compaction density to be recovered"
+    assert densities[0]["unit"] == "g/cm3"
+
+
 def test_eln_electrode_links_material_and_electrolyte_is_parsed() -> None:
     pkg = import_discovery_eln(ELN, validate=True)
     mat_ids = {r["material_spec"]["id"] for r in pkg.material_specs}

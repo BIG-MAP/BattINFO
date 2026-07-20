@@ -95,9 +95,9 @@ def _converter_records(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]
     from battinfo.interop import import_converter_package
 
     doc, repaired = _tolerant_load(path)
-    package = import_converter_package(doc)
+    package = import_converter_package(doc, components=True)
     records: list[dict[str, Any]] = []
-    seen: set[tuple[str, str | None]] = set()
+    seen: set[tuple[str | None, str | None]] = set()
     for obj in package.objects():
         record = obj.to_record()
         kind = _kind_of(record)
@@ -106,6 +106,7 @@ def _converter_records(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]
             continue
         seen.add((kind, rid))
         records.append(record)
+    records.extend(package.component_records())
     return doc, records, repaired
 
 
