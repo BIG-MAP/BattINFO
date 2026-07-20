@@ -153,7 +153,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Ingest** — parsed as-is.
 - 🟢 **Normalize** — @graph[23] → 36 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟢 **Quantities** — 30 value+unit quantities.
+- 🟢 **Quantities** — 44 value+unit quantities.
 - 🟢 **Components** — 16 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 36 records validate and emit canonical JSON-LD.
 :::

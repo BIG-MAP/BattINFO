@@ -110,6 +110,25 @@ def test_eln_recovers_cell_mass_and_electrode_density() -> None:
     assert densities[0]["unit"] == "g/cm3"
 
 
+def test_eln_recovers_capacities_on_their_owning_entity() -> None:
+    """Areic capacity is an electrode property; specific capacity a material one."""
+    pkg = import_discovery_eln(ELN, validate=True)
+    areal = [
+        r["electrode_spec"]["property"]["rated_areal_discharge_capacity"]
+        for r in pkg.electrode_specs
+        if "rated_areal_discharge_capacity" in r["electrode_spec"].get("property", {})
+    ]
+    assert areal, "expected areic capacity on the electrode spec"
+    assert areal[0]["unit"] == "mAh/cm2"  # converted from C/cm2
+    specific = [
+        r["material_spec"]["property"]["specific_capacity"]
+        for r in pkg.material_specs
+        if "specific_capacity" in r["material_spec"].get("property", {})
+    ]
+    assert specific, "expected specific capacity on the active-material spec"
+    assert specific[0]["unit"] == "mAh/g"  # converted from C/kg
+
+
 def test_eln_electrode_links_material_and_electrolyte_is_parsed() -> None:
     pkg = import_discovery_eln(ELN, validate=True)
     mat_ids = {r["material_spec"]["id"] for r in pkg.material_specs}
