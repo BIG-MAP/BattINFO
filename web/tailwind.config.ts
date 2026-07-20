@@ -9,7 +9,12 @@ import type { Config } from "tailwindcss";
 //   brand-500 = Signal Teal 500 #12A394 (fills / large display only)
 //   brand-600 = Signal Teal 700 #0C7A6E (AA-safe links, buttons, teal text)
 // When the brand changes, update brand/tokens.css and mirror it here.
+// Neutral surfaces and text are CSS variables (RGB channels) so a single .dark
+// class on <html> flips the whole UI. Brand/volt/semantic hues stay fixed.
+const v = (name: string) => `rgb(var(${name}) / <alpha-value>)`;
+
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -47,20 +52,22 @@ const config: Config = {
           900: "#08301e",
         },
         ink: {
-          DEFAULT: "#102a43", // Ink — primary text, headers
-          muted: "#5a6570", // Muted — secondary text, captions
-          faint: "#8a877e", // tertiary labels / eyebrows
-          deep: "#0a1b2c", // Ink active — dark code surfaces
+          DEFAULT: v("--c-ink"), // primary text, headers
+          muted: v("--c-ink-muted"), // secondary text, captions
+          faint: v("--c-ink-faint"), // tertiary labels / eyebrows
+          deep: "#0a1b2c", // fixed dark surface (inverted accents)
         },
-        // Semantic states from brand/tokens.css — all AA-verified on white.
-        error: { DEFAULT: "#c8372d", tint: "#fbe7e4" },
-        warning: { DEFAULT: "#946007", tint: "#fbf0da" },
-        info: { DEFAULT: "#2563b8", tint: "#e5eefa" },
-        // Brand neutrals & surfaces (from brand/tokens.css).
-        paper: "#f3f2ee", // page background
-        surface: "#ffffff", // cards
-        border: "#e7e5df", // hairlines
-        tint: "#e4f4f1", // teal wash, tags
+        // Semantic states — hue fixed, tint flips for dark mode.
+        error: { DEFAULT: "#c8372d", tint: v("--c-error-tint") },
+        warning: { DEFAULT: "#946007", tint: v("--c-warning-tint") },
+        info: { DEFAULT: "#2563b8", tint: v("--c-info-tint") },
+        // Neutrals & surfaces — flip with the theme.
+        paper: v("--c-paper"), // page background
+        surface: v("--c-surface"), // cards
+        border: v("--c-border"), // hairlines
+        tint: v("--c-tint"), // teal wash, tags
+        // Code surfaces — light in light mode, dark in dark mode.
+        code: { bg: v("--c-code-bg"), fg: v("--c-code-fg") },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],

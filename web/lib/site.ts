@@ -42,7 +42,7 @@ export const site = {
 // Ordered along the workflow: make something, bring data in, check it, publish
 // it — then the reference material. "Why" is folded into About.
 export const primaryNav = [
-  { label: "Create", href: "/create" },
+  { label: "Playground", href: "/create" },
   { label: "Convert", href: "/convert" },
   { label: "Validate", href: "/validate" },
   { label: "Publish", href: "/publish" },

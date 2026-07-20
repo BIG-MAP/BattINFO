@@ -3,7 +3,7 @@
 // Interactive tree for a JSON-LD node. Collapsible; @type shown as badges,
 // @id as a short uid (full IRI on hover), w3id.org IRIs as links, terms shown
 // compact with their absolute IRI on hover, and value/unit quantities on one
-// line. Purely presentational — it renders whatever object it is handed (the
+// line. Purely presentational, it renders whatever object it is handed (the
 // raw document or the canonical framed view).
 
 import { useState } from "react";
@@ -230,7 +230,7 @@ export function JsonLdTree({ data, context }: { data: unknown; context: Record<s
   const root = data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, unknown>) : null;
   const rootId = root ? root["@id"] ?? root["id"] : undefined;
   return (
-    <div className="max-h-[34rem] overflow-auto rounded-xl border border-border bg-white p-3 text-sm">
+    <div className="max-h-[34rem] overflow-auto rounded-xl border border-border bg-surface p-3 text-sm">
       {root && (root["@type"] || rootId) ? (
         <div className="mb-2 flex flex-wrap items-center gap-2 border-b border-border pb-2">
           {root["@type"] ? <TypeBadges value={root["@type"]} map={map} /> : null}

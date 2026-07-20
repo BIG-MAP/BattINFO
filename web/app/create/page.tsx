@@ -8,10 +8,11 @@ import {
   type DraftProperty,
   type Values,
   OBJECT_TYPES,
+  draftStatus,
 } from "@/lib/create-model";
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20";
+  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -22,7 +23,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export default function CreatePage() {
+const STATUS = {
+  green: { text: "Looks valid against the schemas", cls: "border-volt-200 bg-volt-50 text-volt-700" },
+  yellow: { text: "Some warnings", cls: "border-warning/30 bg-warning-tint text-warning" },
+  red: { text: "Some fields need fixing", cls: "border-error/30 bg-error-tint text-error" },
+} as const;
+
+export default function PlaygroundPage() {
   const [typeKey, setTypeKey] = useState(OBJECT_TYPES[0].key);
   const type = OBJECT_TYPES.find((t) => t.key === typeKey) as ObjectDef;
   const [values, setValues] = useState<Values>(OBJECT_TYPES[0].defaults);
@@ -50,38 +57,65 @@ export default function CreatePage() {
     setProperties((ps) => [...ps, { key: next.key, value: "", unit: next.units[0] }]);
   }
 
+  const record = useMemo(() => type.toRecord(values, properties), [type, values, properties]);
+  const status = useMemo(() => draftStatus(record), [record]);
   const tabs = useMemo(
     () => [
       { label: "Python", blockLabel: "authoring code", code: type.toPython(values, properties) },
-      { label: "JSON", blockLabel: "canonical record", code: JSON.stringify(type.toRecord(values, properties), null, 2) },
+      { label: "JSON", blockLabel: "canonical record", code: JSON.stringify(record, null, 2) },
       { label: "JSON-LD", blockLabel: "published (compact)", code: JSON.stringify(type.toJsonLd(values, properties), null, 2) },
     ],
-    [type, values, properties],
+    [type, values, properties, record],
   );
+
+  function renderField(f: (typeof type.fields)[number]) {
+    if (f.kind === "select") {
+      return (
+        <select className={inputClass} value={values[f.key] ?? ""} onChange={(e) => setField(f.key, e.target.value)}>
+          {(f.options ?? []).map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    return (
+      <input
+        type={f.kind === "date" ? "date" : "text"}
+        className={inputClass}
+        value={values[f.key] ?? ""}
+        placeholder={f.placeholder}
+        onChange={(e) => setField(f.key, e.target.value)}
+      />
+    );
+  }
+
+  const groups = type.sections ?? [{ key: "", title: type.label, blurb: type.blurb }];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <header className="max-w-prose">
-        <h1 className="text-4xl font-bold tracking-tight text-ink">Create a record</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-ink">battinfo playground</h1>
         <p className="mt-4 text-lg text-ink-muted">
-          Build one of the core canonical objects on the left and watch it become the three forms you work with: the{" "}
-          <strong>Python</strong> that authors it, the <strong>canonical record</strong>, and the published{" "}
-          <strong>JSON-LD</strong>. Everything updates as you type — nothing leaves the page.
+          Build one of the core objects on the left. Watch it turn into the three forms you work with: the Python that
+          authors it, the canonical record, and the published JSON-LD. It updates as you type, and nothing leaves the
+          page.
         </p>
         <p className="mt-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-ink-muted">
-          A quick sketch, not the full model. The identifier is minted when you save;{" "}
+          This is a quick sketch, not the full model. Identifiers are added when you save. To check a finished record,
+          use{" "}
           <Link href="/validate" className="font-semibold text-brand-600 hover:text-brand-700">
-            check any record
-          </Link>{" "}
-          against the canonical schemas, or read the{" "}
+            Validate
+          </Link>
+          , or read the{" "}
           <Link href="/docs" className="font-semibold text-brand-600 hover:text-brand-700">
             authoring guide
-          </Link>{" "}
-          for the complete surface.
+          </Link>
+          .
         </p>
       </header>
 
-      {/* Object type selector */}
       <div className="mt-8 flex flex-wrap gap-2">
         {OBJECT_TYPES.map((t) => (
           <button
@@ -90,7 +124,7 @@ export default function CreatePage() {
             className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
               t.key === typeKey
                 ? "border-brand-300 bg-brand-50 text-brand-700"
-                : "border-border bg-white text-ink-muted hover:text-ink"
+                : "border-border bg-surface text-ink-muted hover:text-ink"
             }`}
           >
             {t.label}
@@ -101,35 +135,26 @@ export default function CreatePage() {
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         {/* Builder */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-border bg-white p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">{type.label}</h2>
-            <p className="mb-4 mt-1 text-xs text-ink-faint">{type.blurb}</p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {type.fields.map((f) => (
-                <Field key={f.key} label={f.label}>
-                  {f.kind === "select" ? (
-                    <select className={inputClass} value={values[f.key] ?? ""} onChange={(e) => setField(f.key, e.target.value)}>
-                      {(f.options ?? []).map((o) => (
-                        <option key={o} value={o}>
-                          {o}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      className={inputClass}
-                      value={values[f.key] ?? ""}
-                      placeholder={f.placeholder}
-                      onChange={(e) => setField(f.key, e.target.value)}
-                    />
-                  )}
-                </Field>
-              ))}
-            </div>
-          </div>
+          {groups.map((section) => {
+            const fields = type.fields.filter((f) => (f.section ?? "") === section.key);
+            if (fields.length === 0) return null;
+            return (
+              <div key={section.key || type.key} className="rounded-2xl border border-border bg-surface p-5">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">{section.title}</h2>
+                <p className="mb-4 mt-1 text-xs text-ink-faint">{section.blurb}</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {fields.map((f) => (
+                    <Field key={f.key} label={f.label}>
+                      {renderField(f)}
+                    </Field>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
 
           {type.properties ? (
-            <div className="rounded-2xl border border-border bg-white p-5">
+            <div className="rounded-2xl border border-border bg-surface p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">Properties</h2>
                 <button onClick={addProperty} className="text-xs font-semibold text-brand-600 hover:text-brand-700">
@@ -138,7 +163,7 @@ export default function CreatePage() {
               </div>
               <div className="space-y-3">
                 {properties.length === 0 ? (
-                  <p className="text-sm text-ink-faint">No properties yet — add one to see it appear as a quantity.</p>
+                  <p className="text-sm text-ink-faint">No properties yet. Add one to see it appear as a quantity.</p>
                 ) : null}
                 {properties.map((prop, i) => {
                   const catalog = type.properties!.find((c) => c.key === prop.key) ?? type.properties![0];
@@ -187,17 +212,38 @@ export default function CreatePage() {
           ) : null}
         </div>
 
-        {/* Live serializations */}
+        {/* Live output */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-ink-faint">Serializations</h2>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">Serializations</h2>
+            <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS[status.level].cls}`}>
+              {status.level === "green" ? "✓ " : ""}
+              {STATUS[status.level].text}
+            </span>
+          </div>
           <CodeTabs tabs={tabs} />
-          <p className="mt-3 text-xs text-ink-faint">
-            The JSON-LD carries a compact, self-contained <code className="text-xs">@context</code>. Open it in{" "}
-            <Link href="/validate" className="font-semibold text-brand-600 hover:text-brand-700">
-              the JSON-LD workbench
-            </Link>{" "}
-            to expand and check it.
-          </p>
+          {status.issues.length > 0 ? (
+            <ul className="mt-3 space-y-1.5">
+              {status.issues.slice(0, 6).map((issue, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs">
+                  <span
+                    className={`mt-px rounded px-1 py-0.5 font-mono text-[10px] font-bold uppercase ${
+                      issue.severity === "error" ? "bg-error-tint text-error" : "bg-warning-tint text-warning"
+                    }`}
+                  >
+                    {issue.severity}
+                  </span>
+                  <span className="text-ink-muted">
+                    <span className="font-mono text-ink-faint">{issue.path}</span> {issue.message}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-xs text-ink-faint">
+              Checked in the browser against the canonical schemas. The CLI runs the full check on save.
+            </p>
+          )}
         </div>
       </div>
     </div>

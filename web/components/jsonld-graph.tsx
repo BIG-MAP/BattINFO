@@ -2,7 +2,7 @@
 
 // A small node-edge-node view of the document's linked-data structure: the
 // record and the things it points at, with the relationship on each edge. It is
-// deliberately shallow and aggregates large quantity lists — it shows how the
+// deliberately shallow and aggregates large quantity lists, it shows how the
 // entities connect, not every number (the Summary and Table do the numbers).
 
 import { useMemo } from "react";
@@ -143,7 +143,7 @@ export function JsonLdGraph({ framed }: { framed: Record<string, unknown> }) {
   const height = PAD * 2 + (Math.max(...nodes.map((n) => n.y)) - PAD + NODE_H);
 
   return (
-    <div className="overflow-auto rounded-xl border border-border bg-white p-2">
+    <div className="overflow-auto rounded-xl border border-border bg-surface p-2">
       <svg
         width={width}
         height={height}

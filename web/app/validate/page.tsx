@@ -22,7 +22,7 @@ const JsonLdWorkbench = dynamic(() => import("@/components/jsonld-workbench"), {
 const SAMPLE = JSON.stringify(cellSpecCanonical, null, 2);
 
 // A deliberately broken variant of the sample: a typo'd field, a bare-number
-// quantity, and a non-IRI id — the three classic newcomer mistakes. Lets a
+// quantity, and a non-IRI id, the three classic newcomer mistakes. Lets a
 // visitor see the validator TEACH before pasting their own record.
 const BROKEN_SAMPLE = JSON.stringify(
   (() => {
@@ -42,7 +42,7 @@ const BROKEN_SAMPLE = JSON.stringify(
 function IssueRow({ issue }: { issue: Issue }) {
   const isError = issue.severity === "error";
   return (
-    <li className="flex items-start gap-3 rounded-lg border border-border bg-white p-3">
+    <li className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3">
       <span
         className={`mt-0.5 rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase ${
           isError ? "bg-error-tint text-error" : "bg-warning-tint text-warning"
@@ -82,7 +82,7 @@ function RecordValidator() {
   return (
     <>
       <p className="mb-6 max-w-prose text-sm text-ink-muted">
-        Paste the <em>canonical record JSON</em> — the object your authoring code produces. It is checked against the{" "}
+        Paste the <em>canonical record JSON</em>, the object your authoring code produces. It is checked against the{" "}
         same JSON Schemas the Python library and the registry&rsquo;s publish gate enforce, so the browser and{" "}
         <code className="text-sm">battinfo validate</code> give the same structural verdict.
       </p>
@@ -118,7 +118,7 @@ function RecordValidator() {
             }}
             onDragOver={(e) => e.preventDefault()}
             spellCheck={false}
-            className="h-[28rem] w-full resize-none rounded-xl border border-border bg-ink-deep p-4 font-mono text-sm text-paper focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            className="h-[28rem] w-full resize-none rounded-xl border border-border bg-code-bg p-4 font-mono text-sm text-code-fg focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           />
           <button
             onClick={() => run()}
@@ -181,14 +181,14 @@ function RecordValidator() {
       </div>
 
       {/* Reproduce canonically */}
-      <section className="mt-12 rounded-2xl border border-border bg-white p-6">
+      <section className="mt-12 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold text-ink">The full verdict, locally</h2>
         <p className="mt-2 max-w-prose text-sm text-ink-muted">
-          For the authoritative check — schema, references, semantics, and publication policies — run the same record
+          For the authoritative check, schema, references, semantics, and publication policies, run the same record
           through the CLI:
         </p>
-        <pre className="mt-4 overflow-x-auto rounded-lg bg-ink-deep p-4 text-sm">
-          <code className="font-mono text-paper">{`battinfo validate my-record.json --policy strict --format json`}</code>
+        <pre className="mt-4 overflow-x-auto rounded-lg bg-code-bg p-4 text-sm">
+          <code className="font-mono text-code-fg">{`battinfo validate my-record.json --policy strict --format json`}</code>
         </pre>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
           <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
@@ -219,7 +219,7 @@ export default function ValidatePage() {
         <h1 className="text-4xl font-bold tracking-tight text-ink">Validate and explore</h1>
         <p className="mt-4 text-lg text-ink-muted">
           Check a <strong>canonical record</strong> against the schemas the library enforces, or view and check a{" "}
-          <strong>published JSON-LD document</strong> as linked data — both in the browser, with nothing leaving the
+          <strong>published JSON-LD document</strong> as linked data, both in the browser, with nothing leaving the
           page.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
@@ -257,7 +257,7 @@ export default function ValidatePage() {
         ) : (
           <>
             <p className="mb-6 max-w-prose text-sm text-ink-muted">
-              Paste or drop the <em>published JSON-LD</em> — the linked-data form generated from a record. It is
+              Paste or drop the <em>published JSON-LD</em>, the linked-data form generated from a record. It is
               expanded and re-nested to our canonical shape in the browser, then checked in three independent layers.
               Nothing is sent anywhere.
             </p>

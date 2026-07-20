@@ -9,6 +9,36 @@
 :root {
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Neutral tokens as RGB channels (light theme). */
+  --c-paper: 243 242 238;
+  --c-surface: 255 255 255;
+  --c-border: 231 229 223;
+  --c-tint: 228 244 241;
+  --c-ink: 16 42 67;
+  --c-ink-muted: 90 101 112;
+  --c-ink-faint: 138 135 126;
+  --c-error-tint: 251 231 228;
+  --c-warning-tint: 251 240 218;
+  --c-info-tint: 229 238 250;
+  /* Code blocks: a light surface in light mode. */
+  --c-code-bg: 244 243 239;
+  --c-code-fg: 16 42 67;
+}
+
+.dark {
+  --c-paper: 11 21 32;
+  --c-surface: 20 33 46;
+  --c-border: 39 53 65;
+  --c-tint: 17 55 49;
+  --c-ink: 231 237 242;
+  --c-ink-muted: 154 167 179;
+  --c-ink-faint: 121 133 145;
+  --c-error-tint: 58 31 28;
+  --c-warning-tint: 52 40 16;
+  --c-info-tint: 22 35 58;
+  --c-code-bg: 10 20 32;
+  --c-code-fg: 231 237 242;
 }
 
 @layer base {

@@ -65,7 +65,7 @@ function EmptyView({ children }: { children: React.ReactNode }) {
 export function SummaryView({ model }: { model: SummaryModel }) {
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-white p-6">
+      <div className="rounded-2xl border border-border bg-surface p-6">
         <h3 className="text-2xl font-bold tracking-tight text-ink">{model.title ?? "Untitled record"}</h3>
         <p className="mt-1 text-sm text-ink-muted">
           {[model.model, model.manufacturer].filter(Boolean).join(" · ") || "no model or manufacturer stated"}
@@ -94,7 +94,7 @@ export function SummaryView({ model }: { model: SummaryModel }) {
           <h4 className="mb-2 text-sm font-semibold uppercase tracking-wider text-ink-faint">Properties</h4>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {model.properties.map((p, i) => (
-              <div key={`${p.label}-${i}`} className="rounded-xl border border-border bg-white p-3">
+              <div key={`${p.label}-${i}`} className="rounded-xl border border-border bg-surface p-3">
                 <p className="text-xs text-ink-muted">{p.label}</p>
                 <p className="mt-1 font-mono text-lg text-ink">
                   {p.value}
@@ -113,7 +113,7 @@ export function SummaryView({ model }: { model: SummaryModel }) {
             {model.components.map((c, i) => (
               <div
                 key={`${c.relation}-${i}`}
-                className="flex flex-wrap items-baseline gap-2 rounded-lg border border-border bg-white px-3 py-2"
+                className="flex flex-wrap items-baseline gap-2 rounded-lg border border-border bg-surface px-3 py-2"
               >
                 <span className="text-xs text-ink-faint">{c.relation}</span>
                 <span className="text-sm text-ink">{c.label}</span>

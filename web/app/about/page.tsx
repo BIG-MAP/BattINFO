@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About BattINFO",
   description:
-    "Where BattINFO comes from, what it is for, and the ecosystem it belongs to — the EMMO battery ontology, the Battery Genome, and open battery-data infrastructure.",
+    "Where BattINFO comes from, what it is for, and the ecosystem it belongs to, the EMMO battery ontology, the Battery Genome, and open battery-data infrastructure.",
 };
 
 const ecosystem = [
@@ -32,7 +32,7 @@ const ecosystem = [
   {
     name: "Battery Data Alliance",
     href: "https://pypi.org/project/batterydf/",
-    role: "Home of the Battery Data Format (BDF) — the tidy tabular layer BattINFO converts raw cycler files into.",
+    role: "Home of the Battery Data Format (BDF), the tidy tabular layer BattINFO converts raw cycler files into.",
   },
 ] as const;
 
@@ -48,14 +48,14 @@ export default function AboutPage() {
           locked in PDFs, spreadsheets with private column names, cycler
           exports whose meaning left the lab with the person who ran them.
           BattINFO&apos;s mission is to make battery data{" "}
-          <strong className="text-ink">machine-readable, linked, and reusable</strong> —
-          so that every cell, test, and dataset carries its own meaning, and
-          any tool or team can pick it up without asking.
+          <strong className="text-ink">machine-readable, linked, and reusable</strong>,
+          so that every cell, test, and dataset carries its own meaning and any
+          tool or team can pick it up without asking.
         </p>
         <p>
-          The approach is deliberately unoriginal: build on the best open
-          standards (EMMO, JSON-LD, JSON Schema, schema.org, DCAT, PROV) and
-          make them usable by someone with a datasheet and an afternoon.
+          We did not invent our own world. We build on open standards (EMMO,
+          JSON-LD, JSON Schema, schema.org, DCAT, PROV) and make them usable by
+          someone with a datasheet and an afternoon.
         </p>
         <p>
           <Link href="/federation" className="font-semibold text-brand-600 hover:text-brand-700">
@@ -82,7 +82,7 @@ export default function AboutPage() {
         </p>
         <p>
           This project is that answer: the implementation layer that turns the
-          ontology into everyday tools — canonical JSON records with schemas,
+          ontology into everyday tools, canonical JSON records with schemas,
           a Python library and CLI, automatic JSON-LD with persistent{" "}
           <code className="rounded bg-paper-deep px-1 py-0.5 font-mono text-sm">
             w3id.org/battinfo/…
@@ -123,7 +123,7 @@ export default function AboutPage() {
         <h2 className="text-2xl font-semibold tracking-tight text-ink">Get involved</h2>
         <p className="mt-3">
           Publish a dataset, register a cell spec, report a rough edge, or
-          bring your tool&apos;s format to the converter matrix — every record
+          bring your tool&apos;s format to the converter matrix, every record
           published makes the shared library more useful.{" "}
           <Link href="/publish" className="text-brand-600 hover:text-brand-700">
             Start with your own data

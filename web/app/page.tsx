@@ -22,7 +22,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
+              <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface px-3 py-1 text-xs font-medium text-brand-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-volt-500" />
                 Open standard · Beta
               </span>
@@ -31,10 +31,10 @@ export default function HomePage() {
                 <span className="text-brand-600">understand batteries</span>
               </h1>
               <p className="mt-5 max-w-prose text-lg text-ink-muted">
-                BattINFO extends the open EMMO ontology to make battery data
-                machine-readable and reusable across tools and teams — and turns
-                a folder of cycler exports into citable, findable records in
-                about fifteen minutes.
+                BattINFO extends the open EMMO ontology so battery data is
+                machine-readable and reusable across tools and teams. It turns a
+                folder of cycler exports into citable, findable records in about
+                fifteen minutes.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
@@ -45,7 +45,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/validate"
-                  className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
+                  className="rounded-lg border border-border bg-surface px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
                 >
                   Validate a record
                 </Link>
@@ -62,8 +62,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Standards strip — "we build on accepted foundations" */}
-      <section className="border-b border-border bg-white">
+      {/* Standards strip, "we build on accepted foundations" */}
+      <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <p className="text-center text-xs font-semibold uppercase tracking-wider text-ink-faint">
             Built on open, accepted standards
@@ -88,7 +88,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quickstart — near the top, because it is the quickstart */}
+      {/* Quickstart, near the top, because it is the quickstart */}
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-2">
           <div>
@@ -97,7 +97,7 @@ export default function HomePage() {
               title="From cycler files to a citable dataset."
             />
             <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
-              This is the real recipe — the same one <code>ws.quickstart()</code>{" "}
+              This is the real recipe, the same one <code>ws.quickstart()</code>{" "}
               prints, kept in sync by the test suite.{" "}
               <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
                 Every step explained →
@@ -113,11 +113,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it works — the four-verb pipeline */}
+      {/* How it works, the four-verb pipeline */}
       <section className="border-t border-border mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <SectionHeading
           kicker="How it works"
-          title="From datasheet to machine-readable Linked Data — in four steps."
+          title="From datasheet to machine-readable Linked Data, in four steps."
         />
         <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {pipeline.map((step, i) => (
@@ -141,7 +141,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <SectionHeading
             kicker="What BattINFO does"
-            title="Real semantics — without losing the data on the way."
+            title="Real semantics, without losing the data on the way."
           />
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             {features.map((f) => (
@@ -230,10 +230,10 @@ export default function HomePage() {
             record in the browser, or read the docs.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Link href="/publish" className="rounded-lg bg-white px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+            <Link href="/publish" className="rounded-lg bg-surface px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
               Publish your data
             </Link>
-            <Link href="/docs" className="rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+            <Link href="/docs" className="rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-surface/10">
               Read the docs
             </Link>
           </div>

@@ -17,25 +17,25 @@ export function CodeBlock({ code, language, label }: CodeBlockProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      /* clipboard unavailable — non-fatal */
+      /* clipboard unavailable, non-fatal */
     }
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-ink-deep">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
-        <span className="font-mono text-xs uppercase tracking-wider text-paper/60">
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-code-bg">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+        <span className="font-mono text-xs uppercase tracking-wider text-ink-faint">
           {label ?? language ?? "code"}
         </span>
         <button
           onClick={copy}
-          className="rounded-md px-2 py-1 text-xs font-medium text-paper/70 transition hover:bg-white/10 hover:text-white"
+          className="rounded-md px-2 py-1 text-xs font-medium text-ink-muted transition hover:bg-tint hover:text-ink"
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
-        <code className="font-mono text-paper">{code}</code>
+        <code className="font-mono text-code-fg">{code}</code>
       </pre>
     </div>
   );

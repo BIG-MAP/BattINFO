@@ -8,12 +8,12 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — ${site.tagline}`,
+    default: `${site.name}, ${site.tagline}`,
     template: `%s · ${site.name}`,
   },
   description: site.description,
   openGraph: {
-    title: `${site.name} — ${site.tagline}`,
+    title: `${site.name}, ${site.tagline}`,
     description: site.description,
     url: site.url,
     siteName: site.name,
@@ -21,19 +21,24 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} — ${site.tagline}`,
+    title: `${site.name}, ${site.tagline}`,
     description: site.description,
   },
   robots: { index: true, follow: true },
 };
 
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="flex min-h-screen flex-col">
-        {/* Prototype cue — set expectations site-wide while content + tools evolve. */}
-        <div className="bg-ink px-4 py-1.5 text-center text-xs font-medium text-white">
-          Prototype — BattINFO is in active development; content and tools are evolving.
+        {/* Prototype cue while content and tools are evolving. */}
+        <div className="bg-ink-deep px-4 py-1.5 text-center text-xs font-medium text-white">
+          Prototype. BattINFO is in active development, so content and tools are still changing.
         </div>
         <SiteHeader />
         <main className="flex-1">{children}</main>

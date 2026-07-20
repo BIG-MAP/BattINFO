@@ -10,7 +10,7 @@
 const NODES = [
   { id: "cell", label: "Cell", hint: "The physical cell on your bench", href: "/publish", x: 120, y: 80, r: 32, accent: false },
   { id: "test", label: "Test", hint: "What you did to it, linked forever", href: "/publish", x: 305, y: 70, r: 30, accent: false },
-  { id: "dataset", label: "Dataset", hint: "What it produced — citable, with a DOI", href: "/publish", x: 330, y: 245, r: 34, accent: false },
+  { id: "dataset", label: "Dataset", hint: "What it produced, citable, with a DOI", href: "/publish", x: 330, y: 245, r: 34, accent: false },
   { id: "semantics", label: "Semantics", hint: "Shared meaning every record carries", href: "/examples", x: 120, y: 245, r: 38, accent: true },
 ] as const;
 
@@ -102,7 +102,7 @@ export function Constellation() {
         ))}
       </svg>
       <p className="mt-2 text-center text-xs text-ink-faint">
-        Every record knows what it describes, what touched it, and what it produced — hover, then click through.
+        Every record knows what it describes, what touched it, and what it produced, hover, then click through.
       </p>
     </div>
   );

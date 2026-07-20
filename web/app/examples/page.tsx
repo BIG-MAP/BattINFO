@@ -5,16 +5,16 @@ import { showcase } from "@/lib/showcase.generated";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Examples — describe your thing",
+  title: "Examples, describe your thing",
   description:
-    "Materials, electrodes, electrolytes, cells, tests, datasets — real BattINFO authoring code for each, with the record and JSON-LD it produces. Every snippet is executed against the current library.",
+    "Materials, electrodes, electrolytes, cells, tests, datasets, real BattINFO authoring code for each, with the record and JSON-LD it produces. Every snippet is executed against the current library.",
 };
 
 /**
  * The showcase: for each thing you can describe, the literal source of a
  * snippet in scripts/gen_web_examples.py and the record executing it
  * produced, in a Python / JSON / JSON-LD tab set. Drift-checked by the test
- * suite — nothing here is illustrative.
+ * suite, nothing here is illustrative.
  */
 export default function ExamplesPage() {
   return (
@@ -24,8 +24,8 @@ export default function ExamplesPage() {
           Describe your thing
         </h1>
         <p className="mt-4 text-lg text-ink-muted">
-          Whatever is on your bench — a material, an electrode, a cell, a test,
-          the data it produced — there is a record for it. Each example below
+          Whatever is on your bench, a material, an electrode, a cell, a test,
+          the data it produced, there is a record for it. Each example below
           is real authoring code and the record it produces, executed against
           the current library and kept in sync by the test suite.
         </p>
@@ -52,14 +52,14 @@ export default function ExamplesPage() {
           },
           {
             label: "JSON",
-            blockLabel: `${entry.slug}.json — the validated record`,
+            blockLabel: `${entry.slug}.json, the validated record`,
             code: JSON.stringify(entry.record, null, 2),
           },
         ];
         if (entry.jsonld) {
           tabs.push({
             label: "JSON-LD",
-            blockLabel: `${entry.slug}.jsonld — EMMO Linked Data`,
+            blockLabel: `${entry.slug}.jsonld, EMMO Linked Data`,
             code: JSON.stringify(entry.jsonld, null, 2),
             extra: (
               <div className="flex flex-wrap gap-4 text-xs font-semibold">

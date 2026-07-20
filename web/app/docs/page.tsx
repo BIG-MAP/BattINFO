@@ -19,7 +19,7 @@ const guides = [
 ];
 
 const reference = [
-  { id: "schemas", title: "JSON Schemas", body: "Draft 2020-12 schemas for every record type — the canonical contract.", href: `${site.github}/tree/main/assets/schemas` },
+  { id: "schemas", title: "JSON Schemas", body: "Draft 2020-12 schemas for every record type, the canonical contract.", href: `${site.github}/tree/main/assets/schemas` },
   { id: "ontology", title: "Ontology (battinfo.ttl)", body: "OWL application ontology importing pinned EMMO domain-battery + domain-electrochemistry.", href: `${site.github}/blob/main/battinfo.ttl` },
   { id: "identifiers", title: "Identifier policy", body: "How w3id.org/battinfo IRIs are minted, governed, and kept stable.", href: `${site.github}/blob/main/IDENTIFIER_POLICY.md` },
   { id: "mappings", title: "Property & unit mappings", body: "Curated property→EMMO-IRI and unit→EMMO/QUDT-IRI tables driving the JSON-LD transform.", href: `${site.github}/tree/main/assets/mappings` },
@@ -41,7 +41,7 @@ export default function DocsPage() {
         <h1 className="text-4xl font-bold tracking-tight text-ink">Documentation</h1>
         <p className="mt-4 text-lg text-ink-muted">
           BattINFO is the implementation layer for the EMMO domain-battery
-          ontology — JSON Schemas, a Python library, a CLI, and curated mapping
+          ontology, JSON Schemas, a Python library, a CLI, and curated mapping
           tables for authoring, validating, and publishing battery metadata as
           Linked Data.
         </p>
@@ -133,7 +133,7 @@ export default function DocsPage() {
             <h3 className="text-lg font-semibold text-ink">Validate a record</h3>
             <p className="mt-1 text-sm text-ink-muted">
               An instant structural pre-check, mirroring the package&rsquo;s issue
-              model — with a one-line command to reproduce the canonical verdict.
+              model, with a one-line command to reproduce the canonical verdict.
             </p>
           </Link>
           <Link href="/convert" className="prose-card transition hover:border-brand-300 hover:shadow-md">
@@ -157,7 +157,7 @@ export default function DocsPage() {
               href={s.href}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-between rounded-lg border border-border bg-white px-4 py-3 transition hover:border-brand-300"
+              className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 transition hover:border-brand-300"
             >
               <span className="text-sm font-semibold text-ink">{s.name}</span>
               <span className="text-xs text-ink-faint">{s.role}</span>
@@ -181,7 +181,7 @@ export default function DocsPage() {
           </p>
           <p>
             Identifiers minted by BattINFO resolve through the community PURL
-            service at <span className="font-mono">w3id.org/battinfo</span> — this
+            service at <span className="font-mono">w3id.org/battinfo</span>, this
             website is documentation, not the resolver.
           </p>
         </div>

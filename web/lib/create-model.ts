@@ -8,6 +8,7 @@
 // document expands with no loose ends.
 
 import { recordsContext } from "./records-context.generated";
+import { validateRecord, type Issue } from "./validate";
 
 export interface DraftProperty {
   key: string;
@@ -213,9 +214,11 @@ function electrodeNode(basis: string): Record<string, unknown> | null {
 export interface FieldDef {
   key: string;
   label: string;
-  kind: "text" | "select";
+  kind: "text" | "select" | "date";
   options?: string[];
   placeholder?: string;
+  section?: string;
+  help?: string;
 }
 
 export interface PropDef {
@@ -224,17 +227,27 @@ export interface PropDef {
   units: string[];
 }
 
+export interface SectionDef {
+  key: string;
+  title: string;
+  blurb: string;
+}
+
+// A builder can emit one record or several (a cell emits its spec + instance).
+export type Emitted = Record<string, unknown> | Record<string, unknown>[];
+
 export interface ObjectDef {
   key: string;
   label: string;
   blurb: string;
   fields: FieldDef[];
+  sections?: SectionDef[];
   properties?: PropDef[];
   defaults: Values;
   defaultProperties?: DraftProperty[];
-  toRecord: (v: Values, props: DraftProperty[]) => Record<string, unknown>;
+  toRecord: (v: Values, props: DraftProperty[]) => Emitted;
   toPython: (v: Values, props: DraftProperty[]) => string;
-  toJsonLd: (v: Values, props: DraftProperty[]) => Record<string, unknown>;
+  toJsonLd: (v: Values, props: DraftProperty[]) => Emitted;
 }
 
 const CELL_PROPS: PropDef[] = [
@@ -254,66 +267,105 @@ const MATERIAL_PROPS: PropDef[] = [{ key: "specific_capacity", label: "Specific 
 
 export const OBJECT_TYPES: ObjectDef[] = [
   {
-    key: "cell_spec",
-    label: "Cell spec",
-    blurb: "A cell design: format, chemistry, electrodes, and rated properties.",
+    key: "cell",
+    label: "Cell",
+    blurb: "A cell design (spec) and a physical unit built to it (instance).",
+    sections: [
+      {
+        key: "spec",
+        title: "Cell spec",
+        blurb: "The reusable design of a cell: format, chemistry, electrodes, and rated properties. Many physical cells can share one spec.",
+      },
+      {
+        key: "instance",
+        title: "Cell instance",
+        blurb: "One physical cell built to the spec, with its own serial number and dates. On save it links back to the spec.",
+      },
+    ],
     fields: [
-      { key: "manufacturer", label: "Manufacturer", kind: "text" },
-      { key: "model", label: "Model", kind: "text" },
-      { key: "format", label: "Format", kind: "select", options: ["coin", "cylindrical", "pouch", "prismatic"] },
-      { key: "chemistry", label: "Chemistry", kind: "select", options: ["Li-ion", "Li-metal", "Na-ion", "Alkaline"] },
-      { key: "positiveBasis", label: "Positive electrode", kind: "text", placeholder: "e.g. LFP" },
-      { key: "negativeBasis", label: "Negative electrode", kind: "text", placeholder: "e.g. graphite" },
+      { key: "manufacturer", label: "Manufacturer", kind: "text", section: "spec" },
+      { key: "model", label: "Model", kind: "text", section: "spec" },
+      { key: "format", label: "Format", kind: "select", options: ["coin", "cylindrical", "pouch", "prismatic"], section: "spec" },
+      { key: "chemistry", label: "Chemistry", kind: "select", options: ["Li-ion", "Li-metal", "Na-ion", "Alkaline"], section: "spec" },
+      { key: "positiveBasis", label: "Positive electrode", kind: "text", placeholder: "e.g. LFP", section: "spec" },
+      { key: "negativeBasis", label: "Negative electrode", kind: "text", placeholder: "e.g. graphite", section: "spec" },
+      { key: "instanceName", label: "Name / label", kind: "text", placeholder: "e.g. Cell 001", section: "instance" },
+      { key: "serial_number", label: "Serial number", kind: "text", placeholder: "e.g. SN-0001", section: "instance" },
+      { key: "manufactured_at", label: "Production date", kind: "date", section: "instance" },
+      { key: "expires_at", label: "Expiration date", kind: "date", section: "instance" },
     ],
     properties: CELL_PROPS,
-    defaults: { manufacturer: "A123", model: "ANR26650M1-B", format: "cylindrical", chemistry: "Li-ion", positiveBasis: "LFP", negativeBasis: "graphite" },
+    defaults: {
+      manufacturer: "A123", model: "ANR26650M1-B", format: "cylindrical", chemistry: "Li-ion",
+      positiveBasis: "LFP", negativeBasis: "graphite",
+      instanceName: "Cell 001", serial_number: "SN-0001", manufactured_at: "2024-06-01", expires_at: "2034-06-01",
+    },
     defaultProperties: [
       { key: "nominal_capacity", value: "2.5", unit: "Ah" },
       { key: "nominal_voltage", value: "3.3", unit: "V" },
     ],
     toRecord: (v, props) => {
-      const cell: Record<string, unknown> = {};
-      const name = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
-      if (name) cell.name = name;
-      if (v.model) cell.model = v.model;
-      if (v.manufacturer) cell.manufacturer = { type: "Organization", name: v.manufacturer };
-      if (v.format) cell.cell_format = v.format;
-      if (v.chemistry) cell.chemistry = v.chemistry;
-      if (v.positiveBasis) cell.positive_electrode_basis = v.positiveBasis;
-      if (v.negativeBasis) cell.negative_electrode_basis = v.negativeBasis;
-      const record: Record<string, unknown> = { schema_version: "0.1.0", cell_spec: cell };
+      const spec: Record<string, unknown> = {};
+      const specName = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
+      if (specName) spec.name = specName;
+      if (v.model) spec.model = v.model;
+      if (v.manufacturer) spec.manufacturer = { type: "Organization", name: v.manufacturer };
+      if (v.format) spec.cell_format = v.format;
+      if (v.chemistry) spec.chemistry = v.chemistry;
+      if (v.positiveBasis) spec.positive_electrode_basis = v.positiveBasis;
+      if (v.negativeBasis) spec.negative_electrode_basis = v.negativeBasis;
+      const specRecord: Record<string, unknown> = { schema_version: "0.1.0", cell_spec: spec };
       const p = propBlock(props);
-      if (Object.keys(p).length) record.properties = p;
-      return record;
+      if (Object.keys(p).length) specRecord.properties = p;
+
+      const instance: Record<string, unknown> = {};
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.serial_number) instance.serial_number = v.serial_number;
+      if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
+      if (v.expires_at) instance.expires_at = v.expires_at;
+      const instanceRecord = { schema_version: "0.1.0", cell_instance: instance };
+      return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
-      const name = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
-      const lines = ["from battinfo import CellSpec", "", "spec = CellSpec("];
+      const specName = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
+      const lines = ["from battinfo import CellSpec, create_cell_instance", "", "spec = CellSpec("];
       lines.push(...pyKwargs([
-        ["name", name], ["manufacturer", v.manufacturer], ["model", v.model],
+        ["name", specName], ["manufacturer", v.manufacturer], ["model", v.model],
         ["format", v.format], ["chemistry", v.chemistry],
         ["positive_electrode_basis", v.positiveBasis], ["negative_electrode_basis", v.negativeBasis],
       ]));
-      lines.push(...pyProps(props), ")", "record = spec.to_record()");
+      lines.push(...pyProps(props), ")", "spec_record = spec.to_record()", "");
+      lines.push("# one physical cell built to the spec");
+      lines.push("instance = create_cell_instance(");
+      lines.push('    cell_spec_id=spec_record["cell_spec"]["id"],');
+      lines.push(...pyKwargs([
+        ["name", v.instanceName], ["serial_number", v.serial_number],
+        ["manufactured_at", v.manufactured_at], ["expires_at", v.expires_at],
+      ]));
+      lines.push(")");
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
-      const name = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
-      const doc: Record<string, unknown> = { "@type": ["BatteryCellSpecification", "schema:CreativeWork"] };
-      if (name) doc.name = name;
-      if (v.model) doc.model = v.model;
-      if (v.manufacturer) doc.manufacturer = { "@type": "schema:Organization", name: v.manufacturer };
+      const specName = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
+      const specDoc: Record<string, unknown> = { "@type": ["BatteryCellSpecification", "schema:CreativeWork"] };
+      if (specName) specDoc.name = specName;
+      if (v.model) specDoc.model = v.model;
+      if (v.manufacturer) specDoc.manufacturer = { "@type": "schema:Organization", name: v.manufacturer };
       const physical = ["BatteryCell"];
       if (FORMAT_CLASS[v.format]) physical.push(FORMAT_CLASS[v.format]);
       if (CHEMISTRY_CLASS[v.chemistry]) physical.push(CHEMISTRY_CLASS[v.chemistry]);
-      doc.isDescriptionFor = { "@type": physical };
+      specDoc.isDescriptionFor = { "@type": physical };
       const pos = electrodeNode(v.positiveBasis);
       const neg = electrodeNode(v.negativeBasis);
-      if (pos) doc.hasPositiveElectrode = pos;
-      if (neg) doc.hasNegativeElectrode = neg;
+      if (pos) specDoc.hasPositiveElectrode = pos;
+      if (neg) specDoc.hasNegativeElectrode = neg;
       const hp = jsonldProps(props);
-      if (hp.length) doc.hasProperty = hp;
-      return withContext(doc);
+      if (hp.length) specDoc.hasProperty = hp;
+
+      const instanceDoc: Record<string, unknown> = { "@type": "BatteryCell" };
+      if (v.instanceName) instanceDoc.name = v.instanceName;
+      if (v.serial_number) instanceDoc["schema:serialNumber"] = v.serial_number;
+      return [withContext(specDoc), withContext(instanceDoc)];
     },
   },
   {
@@ -460,37 +512,6 @@ export const OBJECT_TYPES: ObjectDef[] = [
     },
   },
   {
-    key: "cell_instance",
-    label: "Cell instance",
-    blurb: "One physical cell built to a spec, with its serial number.",
-    fields: [
-      { key: "name", label: "Name", kind: "text", placeholder: "e.g. Cell 001" },
-      { key: "cell_spec_id", label: "Cell spec IRI", kind: "text", placeholder: "https://w3id.org/battinfo/spec/…" },
-      { key: "serial_number", label: "Serial number", kind: "text", placeholder: "e.g. SN-0001" },
-    ],
-    defaults: { name: "Cell 001", cell_spec_id: "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5", serial_number: "SN-0001" },
-    toRecord: (v) => {
-      const body: Record<string, unknown> = {};
-      if (v.name) body.name = v.name;
-      if (v.cell_spec_id) body.cell_spec_id = v.cell_spec_id;
-      if (v.serial_number) body.serial_number = v.serial_number;
-      return { schema_version: "0.1.0", cell_instance: body };
-    },
-    toPython: (v) => [
-      "from battinfo import create_cell_instance",
-      "",
-      "record = create_cell_instance(",
-      ...pyKwargs([["cell_spec_id", v.cell_spec_id], ["serial_number", v.serial_number], ["name", v.name]]),
-      ")",
-    ].join("\n"),
-    toJsonLd: (v) => {
-      const doc: Record<string, unknown> = { "@type": "BatteryCell" };
-      if (v.name) doc.name = v.name;
-      if (v.serial_number) doc["schema:serialNumber"] = v.serial_number;
-      return withContext(doc);
-    },
-  },
-  {
     key: "test",
     label: "Test",
     blurb: "A measurement performed on a cell.",
@@ -527,14 +548,14 @@ export const OBJECT_TYPES: ObjectDef[] = [
     label: "Dataset",
     blurb: "The files a test produced, with where to get them.",
     fields: [
-      { key: "title", label: "Title", kind: "text", placeholder: "e.g. Cycling data for Cell 001" },
+      { key: "name", label: "Name", kind: "text", placeholder: "e.g. Cycling data for Cell 001" },
       { key: "access_url", label: "Access URL", kind: "text", placeholder: "https://…" },
       { key: "description", label: "Description", kind: "text" },
     ],
-    defaults: { title: "Cycling data for Cell 001", access_url: "https://example.org/data/cell-001.csv", description: "Galvanostatic cycling export." },
+    defaults: { name: "Cycling data for Cell 001", access_url: "https://example.org/data/cell-001.csv", description: "Galvanostatic cycling export." },
     toRecord: (v) => {
       const body: Record<string, unknown> = {};
-      if (v.title) body.title = v.title;
+      if (v.name) body.name = v.name;
       if (v.access_url) body.access_url = v.access_url;
       if (v.description) body.description = v.description;
       return { schema_version: "0.1.0", dataset: body };
@@ -543,15 +564,42 @@ export const OBJECT_TYPES: ObjectDef[] = [
       "from battinfo import Dataset",
       "",
       "record = Dataset(",
-      ...pyKwargs([["title", v.title], ["access_url", v.access_url], ["description", v.description]]),
+      ...pyKwargs([["title", v.name], ["access_url", v.access_url], ["description", v.description]]),
       ").to_record()",
     ].join("\n"),
     toJsonLd: (v) => {
       const doc: Record<string, unknown> = { "@type": "schema:Dataset" };
-      if (v.title) doc["schema:name"] = v.title;
+      if (v.name) doc["schema:name"] = v.name;
       if (v.access_url) doc["schema:url"] = v.access_url;
       if (v.description) doc["schema:description"] = v.description;
       return withContext(doc);
     },
   },
 ];
+
+export interface DraftStatus {
+  level: "green" | "yellow" | "red";
+  issues: Issue[];
+}
+
+// Live check of the emitted record(s) against the canonical schemas. Identifiers
+// and references are minted on save, so issues about them are set aside here.
+export function draftStatus(emitted: Emitted): DraftStatus {
+  const records = Array.isArray(emitted) ? emitted : [emitted];
+  const issues: Issue[] = [];
+  for (const record of records) {
+    for (const issue of validateRecord(JSON.stringify(record)).issues) {
+      const p = issue.path;
+      // Fields added by the library on save, not authored in the playground.
+      const saveTime =
+        p === "id" || p.endsWith(".id") || p.endsWith("_id") ||
+        p === "provenance" || p.endsWith(".provenance") ||
+        p === "identifier" || p.endsWith(".identifier") ||
+        /\bIRI\b/i.test(issue.message);
+      if (!saveTime) issues.push(issue);
+    }
+  }
+  const errors = issues.filter((i) => i.severity === "error").length;
+  const warnings = issues.filter((i) => i.severity === "warning").length;
+  return { level: errors ? "red" : warnings ? "yellow" : "green", issues };
+}

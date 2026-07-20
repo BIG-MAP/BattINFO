@@ -45,7 +45,7 @@ const VIEWS: { key: ViewKind; label: string; hint: string }[] = [
 function IssueRow({ issue }: { issue: LayeredIssue }) {
   const isError = issue.severity === "error";
   return (
-    <li className="flex items-start gap-2 rounded-lg border border-border bg-white p-3">
+    <li className="flex items-start gap-2 rounded-lg border border-border bg-surface p-3">
       <span className="mt-0.5 rounded bg-tint px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brand-700">
         {LAYER_LABEL[issue.layer]}
       </span>
@@ -153,7 +153,7 @@ export default function JsonLdWorkbench() {
     override !== "auto"
       ? `Forced record type: ${override}. This is a browser pre-check; the CLI is the canonical verdict.`
       : detected
-        ? `Canonical record detected (${detected}) — validated against the same JSON Schema battinfo validate uses. Browser pre-check.`
+        ? `Canonical record detected (${detected}), validated against the same JSON Schema battinfo validate uses. Browser pre-check.`
         : "Structural JSON Schema describes the canonical record form. Pick a type to force-check, or validate the record on the Record tab.";
 
   const summary = output?.framed ? extractSummary(output.framed) : null;
@@ -188,7 +188,7 @@ export default function JsonLdWorkbench() {
         onDragOver={(e) => e.preventDefault()}
         spellCheck={false}
         placeholder="Paste or drop a JSON-LD document, or load an example above."
-        className="h-72 w-full resize-y rounded-xl border border-border bg-ink-deep p-4 font-mono text-sm text-paper placeholder:text-ink-faint focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+        className="h-72 w-full resize-y rounded-xl border border-border bg-code-bg p-4 font-mono text-sm text-code-fg placeholder:text-ink-faint focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
       />
       <button
         onClick={() => run()}
@@ -241,9 +241,9 @@ export default function JsonLdWorkbench() {
         )}
       </div>
 
-      {/* Checks — a distinct panel so results never read as document content. */}
+      {/* Checks, a distinct panel so results never read as document content. */}
       {output ? (
-        <section className="mt-12 rounded-2xl border-2 border-border bg-white p-6">
+        <section className="mt-12 rounded-2xl border-2 border-border bg-surface p-6">
           {(() => {
             const all = [
               ...output.wellFormedness,
@@ -272,7 +272,7 @@ export default function JsonLdWorkbench() {
                   <select
                     value={override}
                     onChange={(e) => onOverride(e.target.value)}
-                    className="rounded-md border border-border bg-white px-2 py-1 font-mono text-xs text-ink"
+                    className="rounded-md border border-border bg-surface px-2 py-1 font-mono text-xs text-ink"
                   >
                     <option value="auto">auto-detect</option>
                     {Object.keys(DISCRIMINATORS).map((k) => (
@@ -286,23 +286,23 @@ export default function JsonLdWorkbench() {
             );
           })()}
           <p className="mb-4 text-sm text-ink-muted">
-            Three independent layers, each reporting on its own. This is a browser pre-check — the{" "}
+            Three independent layers, each reporting on its own. This is a browser pre-check, the{" "}
             <code className="text-xs">battinfo</code> package (or the publish gate) remains the canonical verdict, and
             runs the referential-integrity and shape checks that need your full record set.
           </p>
           <div className="space-y-3">
             <LayerSection
-              title="Layer 1 — JSON-LD well-formedness"
+              title="Layer 1, JSON-LD well-formedness"
               note="Parses, resolves a @context, and expands. Terms the context does not define are listed, never dropped."
               issues={output.wellFormedness}
             />
             <LayerSection
-              title="Layer 2 — Structural (canonical JSON Schema)"
+              title="Layer 2, Structural (canonical JSON Schema)"
               note={structuralNote}
               issues={structural ? structuralIssues(structural) : []}
             />
             <LayerSection
-              title="Layer 3 — Semantic sanity"
+              title="Layer 3, Semantic sanity"
               note="Identity IRIs, quantities carrying a value and a unit, and references shaped like our identifiers."
               issues={output.semantic}
             />
@@ -353,7 +353,7 @@ function ViewBody({
 function NoCanonical() {
   return (
     <div className="flex min-h-[12rem] items-center justify-center rounded-xl border border-dashed border-border bg-surface p-6 text-center text-sm text-ink-faint">
-      No canonical view — the document did not expand. See the well-formedness issues below.
+      No canonical view, the document did not expand. See the well-formedness issues below.
     </div>
   );
 }
@@ -366,7 +366,7 @@ function ExamplePicker({ onPick }: { onPick: (doc: string) => void }) {
         Load an example…
       </button>
       {open ? (
-        <div className="absolute right-0 z-10 mt-1 w-72 rounded-lg border border-border bg-white p-1 shadow-lg">
+        <div className="absolute right-0 z-10 mt-1 w-72 rounded-lg border border-border bg-surface p-1 shadow-lg">
           {jsonldGallery.map((entry) => (
             <button
               key={entry.slug}

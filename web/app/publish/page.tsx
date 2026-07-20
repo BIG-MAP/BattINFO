@@ -7,7 +7,7 @@ import { installSnippet } from "@/lib/examples";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Publish your data — BattINFO",
+  title: "Publish your data, BattINFO",
   description:
     "The exact procedure for turning raw cycler exports into validated, citable, machine-readable battery records: convert, identify, link, save, publish.",
 };
@@ -25,7 +25,7 @@ export default function PublishPage() {
         <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <SectionHeading
             kicker="The procedure"
-            title="From cycler export to citable dataset — five stages."
+            title="From cycler export to citable dataset, five stages."
           />
           <p className="mt-4 max-w-prose text-lg text-ink-muted">
             You bring a folder of instrument files. BattINFO walks them through
@@ -33,7 +33,7 @@ export default function PublishPage() {
             validated records with permanent identifiers, a DOI you can put in a
             paper, and data the whole field can find and read.
           </p>
-          <div className="mt-6 rounded-lg border border-border bg-white px-4 py-3">
+          <div className="mt-6 rounded-lg border border-border bg-surface px-4 py-3">
             <p className="font-mono text-sm text-brand-700">
               raw files → BDF tables → {provenanceChain} → JSON-LD → DOI + registry
             </p>
@@ -82,7 +82,7 @@ export default function PublishPage() {
           <SectionHeading kicker="Before you publish" title="Check your record here, in the browser." />
           <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
             Paste any record into the validator to see exactly what the library
-            and the registry will say about it — same schemas, same verdict. Or
+            and the registry will say about it, same schemas, same verdict. Or
             explore a finished example first to see where you are heading.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -94,7 +94,7 @@ export default function PublishPage() {
             </Link>
             <Link
               href="/examples"
-              className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
+              className="rounded-lg border border-border bg-surface px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
             >
               See a worked example
             </Link>
@@ -105,8 +105,8 @@ export default function PublishPage() {
       <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
         <SectionHeading kicker="Go deeper" title="The full tutorial and reference live in the docs." />
         <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
-          This page is the map. The step-by-step tutorial — with a sample
-          dataset, validation output, and the Zenodo sandbox — plus the complete
+          This page is the map. The step-by-step tutorial, with a sample
+          dataset, validation output, and the Zenodo sandbox, plus the complete
           Python API, CLI, and schema reference, live in the developer
           documentation.
         </p>
@@ -115,7 +115,7 @@ export default function PublishPage() {
             href={site.reference}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
+            className="rounded-lg border border-border bg-surface px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
           >
             Developer reference →
           </a>
@@ -123,7 +123,7 @@ export default function PublishPage() {
             href={site.genome}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-border bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
+            className="rounded-lg border border-border bg-surface px-5 py-3 text-sm font-semibold text-ink transition hover:bg-tint"
           >
             See published data on Battery Genome →
           </a>
