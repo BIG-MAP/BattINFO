@@ -61,6 +61,7 @@ class SourceScore:
     fixture: str
     dims: dict[str, tuple[str, str]] = field(default_factory=dict)
     metrics: dict[str, Any] = field(default_factory=dict)
+    comparison: list[tuple[str, str, str]] = field(default_factory=list)
     error: str | None = None
 
 
@@ -181,6 +182,92 @@ def _cell_spec_record(records: list[dict[str, Any]]) -> dict[str, Any] | None:
     return None
 
 
+# --- source-vs-canonical comparison (the per-source "before/after") -----------
+# Non-canonical unit tokens seen in these sources → the canonical unit text.
+_UNIT_DISPLAY = {
+    "PERCENT": "%", "Percent": "%",
+    "MilliGramPerSquareCentiMetre": "mg/cm2", "MilliGM-PER-CentiM2": "mg/cm2",
+    "MicroMetre": "um",
+    "GramPerCubicCentiMetre": "g/cm3",
+    "MilliGram": "mg",
+    "CoulombPerKilogram": "mAh/g", "CoulombPerSquareCentiMetre": "mAh/cm2",
+}
+_PROP_CONTAINERS = ("hasProperty", "hasMeasuredProperty", "hasConventionalProperty")
+
+
+def _source_property_count(node: Any) -> int:
+    n = 0
+    if isinstance(node, dict):
+        for key in _PROP_CONTAINERS:
+            value = node.get(key)
+            if isinstance(value, list):
+                n += len(value)
+            elif isinstance(value, dict):
+                n += 1
+        for value in node.values():
+            n += _source_property_count(value)
+    elif isinstance(node, list):
+        for value in node:
+            n += _source_property_count(value)
+    return n
+
+
+def _source_title(raw: dict[str, Any]) -> str:
+    graph = raw.get("@graph")
+    if isinstance(graph, list):
+        for node in graph:
+            if isinstance(node, dict):
+                types = node.get("@type")
+                types = types if isinstance(types, list) else [types]
+                if any(isinstance(t, str) and "Cell" in t for t in types) and node.get("name"):
+                    return str(node["name"])
+    for key in ("name", "schema:name", "@id"):
+        value = raw.get(key)
+        if isinstance(value, str):
+            return value
+    return "?"
+
+
+def _kind_summary(records: list[dict[str, Any]]) -> str:
+    from collections import Counter
+
+    counts = Counter(_kind_of(r) or "?" for r in records)
+    order = [
+        "cell_spec", "cell_instance", "electrode_spec", "material_spec",
+        "electrolyte_spec", "separator_spec", "test", "test_spec", "dataset",
+    ]
+    parts = [f"{counts[k]}× {k}" for k in order if counts.get(k)]
+    parts += [f"{c}× {k}" for k, c in counts.items() if k not in order]
+    return ", ".join(parts)
+
+
+def _unit_examples(raw: dict[str, Any]) -> tuple[list[str], list[str]]:
+    text = json.dumps(raw)
+    src: list[str] = []
+    canon: list[str] = []
+    for token, display in _UNIT_DISPLAY.items():
+        if token in text and display not in canon:
+            src.append(token)
+            canon.append(display)
+        if len(canon) >= 3:
+            break
+    return src, canon
+
+
+def _comparison(raw: dict[str, Any], records: list[dict[str, Any]], cs: dict[str, Any], fmt: str | None, quant: int) -> list[tuple[str, str, str]]:
+    graph = raw.get("@graph")
+    source_records = f"{len(graph)}-node crate" if isinstance(graph, list) else "1 document"
+    rows = [
+        ("Records", source_records, _kind_summary(records) or "—"),
+        ("Identity", f'"{_source_title(raw)}"', f'{cs.get("name", "?")} · format {fmt or "?"}'),
+        ("Quantities", f"{_source_property_count(raw)} property nodes", f"{quant} value+unit"),
+    ]
+    src_units, canon_units = _unit_examples(raw)
+    if canon_units:
+        rows.append(("Units", ", ".join(src_units), ", ".join(canon_units)))
+    return rows
+
+
 # --- scoring ------------------------------------------------------------------
 def _score(src: dict[str, Any]) -> SourceScore:
     from battinfo.transform import to_jsonld
@@ -282,6 +369,7 @@ def _score(src: dict[str, Any]) -> SourceScore:
         "records": n_records, "quantities": quant, "component_specs": comp_specs,
         "cell_format": fmt, "validate": f"{n_valid}/{n_records}", "jsonld": f"{n_jsonld}/{n_records}",
     }
+    score.comparison = _comparison(raw, records, cs, fmt, quant)
     return score
 
 
@@ -320,6 +408,11 @@ changes a cell here. This page is generated; regenerate it with
 
 def _summary_glyphs(score: SourceScore) -> str:
     return "".join(GLYPH[score.dims[dim][0]] for dim, _ in DIMENSIONS)
+
+
+def _cell(text: str) -> str:
+    """Escape a markdown table cell (pipes would break the row)."""
+    return text.replace("|", "\\|")
 
 
 def build() -> str:
@@ -366,6 +459,8 @@ def build() -> str:
     # Per-source detail.
     lines.append("## Per-source detail")
     lines.append("")
+    lines.append("Each source expands to its per-dimension result and a short source-to-canonical comparison.")
+    lines.append("")
     for s in scores:
         lines.append(f":::{{dropdown}} {_summary_glyphs(s)}  {s.label}")
         lines.append(f"**Fixture:** `{s.fixture}`  ")
@@ -378,6 +473,12 @@ def build() -> str:
         for dim, title in DIMENSIONS:
             rating, detail = s.dims[dim]
             lines.append(f"- {GLYPH[rating]} **{title}** — {detail}.")
+        if s.comparison:
+            lines.append("")
+            lines.append("| | Source file | Canonical output |")
+            lines.append("|---|---|---|")
+            for label, source, canonical in s.comparison:
+                lines.append(f"| **{label}** | {_cell(source)} | {_cell(canonical)} |")
         lines.append(":::")
         lines.append("")
 

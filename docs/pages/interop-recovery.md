@@ -41,6 +41,8 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 
 ## Per-source detail
 
+Each source expands to its per-dimension result and a short source-to-canonical comparison.
+
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.0.0
 **Fixture:** `tests/fixtures/interop/converter-versions/converter-v1.0.0.coincell.jsonld`  
 **Importer:** `battinfo.interop.import_converter_package`  
@@ -52,6 +54,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 51 value+unit quantities.
 - 🟢 **Components** — 6 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 12 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
+| **Quantities** | 44 property nodes | 51 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.2
@@ -65,6 +74,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 56 value+unit quantities.
 - 🟢 **Components** — 6 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 12 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
+| **Quantities** | 44 property nodes | 56 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.8
@@ -78,6 +94,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 57 value+unit quantities.
 - 🟢 **Components** — 6 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 12 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
+| **Quantities** | 44 property nodes | 57 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.11
@@ -91,6 +114,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 61 value+unit quantities.
 - 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
+| **Quantities** | 45 property nodes | 61 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.15
@@ -104,6 +134,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 64 value+unit quantities.
 - 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
+| **Quantities** | 46 property nodes | 64 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.17
@@ -117,6 +154,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 64 value+unit quantities.
 - 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "240616_bco_gr-NMC_01" | Empa empa__ccid_123456 · format coin |
+| **Quantities** | 46 property nodes | 64 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  EMPA converter sample
@@ -130,6 +174,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 43 value+unit quantities.
 - 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 10 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec |
+| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
+| **Quantities** | 35 property nodes | 43 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  EMPA reference v3
@@ -143,6 +194,13 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 64 value+unit quantities.
 - 🟢 **Components** — 8 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 14 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
+| **Identity** | "240616_bco_gr-NMC_01" | Empa empa__ccid_123456 · format coin |
+| **Quantities** | 46 property nodes | 64 value+unit |
+| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Discovery RO-Crate (.eln)
@@ -156,4 +214,11 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Quantities** — 44 value+unit quantities.
 - 🟢 **Components** — 16 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 36 records validate and emit canonical JSON-LD.
+
+| | Source file | Canonical output |
+|---|---|---|
+| **Records** | 23-node crate | 5× cell_spec, 5× cell_instance, 7× electrode_spec, 7× material_spec, 2× electrolyte_spec, 5× test, 5× dataset |
+| **Identity** | "CEL-1-NMC811-Graphite" | DIGIBAT Discovery-Benchmark CEL-1-NMC811-Graphite · format coin |
+| **Quantities** | 51 property nodes | 44 value+unit |
+| **Units** | MilliGramPerSquareCentiMetre, MicroMetre, GramPerCubicCentiMetre | mg/cm2, um, g/cm3 |
 :::
