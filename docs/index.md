@@ -6,7 +6,7 @@ BattINFO is the implementation layer for the EMMO domain-battery ontology — pr
 
 ## Getting started
 
-Lab work? **Start at the [cookbook](pages/cookbook.md)** — "I want to…" ×
+Lab work? **Start at the [how-to guides](pages/howto.md)** — "I want to…" ×
 twelve bench tasks, each linked to a runnable recipe. The
 [glossary](pages/glossary.md) and [troubleshooting](pages/troubleshooting.md)
 pages live next to it.
@@ -14,7 +14,7 @@ pages live next to it.
 | | |
 |---|---|
 | **[Quickstart](../QUICKSTART.md)** | Create and publish your first cell-spec record in 5 minutes |
-| **[Cookbook](pages/cookbook.md)** | Task-first index of the bench recipes: materials, cells, labels, tests, publishing |
+| **[How-to guides](pages/howto.md)** | Task-first index of the bench recipes: materials, cells, labels, tests, publishing |
 | **[1 — Concepts](guides/01-concepts.ipynb)** | The record model, IRIs, and the semantic layer |
 | **[2 — Describing a cell](guides/02-first-cell-type.ipynb)** | Author and publish a cell spec, with a taste of material-level depth |
 | **[3 — Linked records](guides/03-linked-records.ipynb)** | Cells, test specs, tests, and datasets with the workspace |
@@ -32,7 +32,7 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 |---|---|
 | **[Workspace authoring](workspace-authoring.md)** | The blessed authoring surface: `battinfo.workspace(".")` end-to-end, and which surface to use when |
 | **[Python API](pages/api-reference.rst)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
-| **[CLI spec](cli-spec.md)** | All CLI commands, options, and output formats |
+| **[CLI reference](pages/cli-reference.rst)** | All CLI commands, options, and output formats |
 | **[Validation contract](validation-contract.md)** | Validation policies, machine-readable issue output |
 | **[Identifier policy](../IDENTIFIER_POLICY.md)** | IRI minting, governance, and stability guarantees |
 
@@ -55,8 +55,7 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 
 | | |
 |---|---|
-| **[How-to guides](pages/cookbook.md)** | Task recipes: register materials, build a cell from components, label cells, register equipment and channels, find existing records, bulk ingest, fix validation errors, resume submissions, funding/ORCID |
-| **[Instance / test / dataset workflow](instance-test-dataset-workflow.md)** | Detailed workflow reference for linked records |
+| **[How-to guides](pages/howto.md)** | Task recipes: register materials, build a cell from components, label cells, register equipment and channels, find existing records, bulk ingest, fix validation errors, resume submissions, funding/ORCID |
 | **[Editorial cell-spec workflow](internal/editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
 | **[Ingest manifest contract](ingest-manifest-contract.md)** | Batch intake from a folder of raw data files |
 | **[Dataset registry intake spec](internal/dataset-registry-intake-spec.md)** | Submission package format for registry intake |
