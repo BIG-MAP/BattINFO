@@ -55,6 +55,11 @@ const SUPPLEMENT: Record<string, unknown> = {
   GraphiteElectrode: "electrochemistry:electrochemistry_c831d963_629a_41ab_850f_97fb6841b739",
   LithiumNickelManganeseCobaltOxideElectrode: "electrochemistry:electrochemistry_b3eb8c65_5644_45e3_9e17_0be6277c7962",
   SiliconGraphiteElectrode: "electrochemistry:electrochemistry_e8c39ecc_29d1_4172_996e_d5b05dc88015",
+  SiliconBasedElectrode: "electrochemistry:electrochemistry_79e12290_d1e5_4c41_916c_18f1e4d7fb51",
+  HardCarbonElectrode: "electrochemistry:electrochemistry_6235cc7c_2eee_432a_93af_47d7e05db007",
+  LithiumElectrode: "electrochemistry:electrochemistry_55775b50_b9d9_4d68_8cb5_38fcd7b9b54d",
+  LithiumCobaltOxideElectrode: "electrochemistry:electrochemistry_fd7caf39_0a43_4fbf_958e_a62067aa9007",
+  LithiumManganeseIronPhosphateElectrode: "electrochemistry:electrochemistry_9109b3f6_112b_456d_ae45_b82c271c656b",
   LithiumTitanateElectrode: "electrochemistry:electrochemistry_6d0fe07e_a629_479c_ab24_2846f209bb0b",
   LithiumIronPhosphate: "chemical:substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
   Graphite: "chemical:substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
@@ -165,12 +170,23 @@ const FORMAT_CLASS: Record<string, string> = {
 const CHEMISTRY_CLASS: Record<string, string> = {
   "Li-ion": "LithiumIonBattery", "Li-metal": "LithiumMetalBattery", "Na-ion": "SodiumIonBattery", Alkaline: "AlkalineCell",
 };
+// Basis label -> EMMO electrode class, mirroring the battinfo transform's
+// entity_type_map (keys matched case-insensitively, separators normalized).
 const BASIS_ELECTRODE: Record<string, string> = {
-  LFP: "LithiumIronPhosphateElectrode",
-  NMC: "LithiumNickelManganeseCobaltOxideElectrode",
+  lfp: "LithiumIronPhosphateElectrode",
+  nmc: "LithiumNickelManganeseCobaltOxideElectrode",
+  nmc811: "LithiumNickelManganeseCobaltOxideElectrode",
+  lco: "LithiumCobaltOxideElectrode",
+  lmfp: "LithiumManganeseIronPhosphateElectrode",
   graphite: "GraphiteElectrode",
-  "Si-graphite": "SiliconGraphiteElectrode",
-  LTO: "LithiumTitanateElectrode",
+  "silicon-graphite": "SiliconGraphiteElectrode",
+  silicon: "SiliconBasedElectrode",
+  si: "SiliconBasedElectrode",
+  "hard-carbon": "HardCarbonElectrode",
+  lithium: "LithiumElectrode",
+  "lithium-metal": "LithiumElectrode",
+  "li-metal": "LithiumElectrode",
+  lto: "LithiumTitanateElectrode",
 };
 const SUBSTANCE: Record<string, string> = {
   LFP: "LithiumIronPhosphate",
@@ -185,9 +201,12 @@ const MATERIAL_ROLE: Record<string, string> = {
 };
 
 function electrodeNode(basis: string): Record<string, unknown> | null {
-  if (!basis) return null;
-  if (BASIS_ELECTRODE[basis]) return { "@type": BASIS_ELECTRODE[basis] };
-  return { "@type": "Electrode", name: basis };
+  const label = basis.trim();
+  if (!label || label.toLowerCase() === "unknown") return null;
+  const key = label.toLowerCase().replace(/[\s_,/]+/g, "-");
+  if (BASIS_ELECTRODE[key]) return { "@type": BASIS_ELECTRODE[key] };
+  // Unrecognised basis: a labeled generic electrode, matching the transform.
+  return { "@type": "Electrode", "skos:prefLabel": label };
 }
 
 // --- field + object definitions ----------------------------------------------
