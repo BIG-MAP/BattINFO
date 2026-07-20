@@ -57,6 +57,11 @@ export default function AboutPage() {
           standards (EMMO, JSON-LD, JSON Schema, schema.org, DCAT, PROV) and
           make them usable by someone with a datasheet and an afternoon.
         </p>
+        <p>
+          <Link href="/federation" className="font-semibold text-brand-600 hover:text-brand-700">
+            Why linked, federated data changes what battery research can do →
+          </Link>
+        </p>
       </section>
 
       <section className="mt-12 space-y-4 text-ink-muted">

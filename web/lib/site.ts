@@ -39,13 +39,14 @@ export const site = {
   },
 } as const;
 
-// Publish first: the primary action a visitor with data should see.
+// Ordered along the workflow: make something, bring data in, check it, publish
+// it — then the reference material. "Why" is folded into About.
 export const primaryNav = [
-  { label: "Publish", href: "/publish" },
-  { label: "Validate", href: "/validate" },
+  { label: "Create", href: "/create" },
   { label: "Convert", href: "/convert" },
+  { label: "Validate", href: "/validate" },
+  { label: "Publish", href: "/publish" },
   { label: "Examples", href: "/examples" },
-  { label: "Why", href: "/federation" },
   { label: "About", href: "/about" },
   { label: "Docs", href: "/docs" },
 ] as const;
