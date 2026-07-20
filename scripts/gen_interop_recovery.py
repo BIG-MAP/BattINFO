@@ -234,16 +234,25 @@ def _score(src: dict[str, Any]) -> SourceScore:
     if quant >= 25:
         score.dims["quantities"] = (PASS, f"{quant} value+unit quantities")
     elif quant > 0:
-        score.dims["quantities"] = (PARTIAL, f"{quant} value+unit quantities (linked-graph subset embedded)")
+        score.dims["quantities"] = (
+            PARTIAL,
+            f"{quant} value+unit quantities (electrode/electrolyte level; cell- and "
+            "material-level source quantities not yet mapped)",
+        )
     else:
         score.dims["quantities"] = (FAIL, "no quantities recovered")
 
-    # Components — separate component specs vs folded into the cell.
+    # Components — standalone component specs vs. reduced to basis strings.
     comp_specs = sum(1 for r in records if _kind_of(r) in COMPONENT_KINDS)
+    basis = cs.get("positive_electrode_basis") or cs.get("negative_electrode_basis")
     if comp_specs > 0:
         score.dims["components"] = (PASS, f"{comp_specs} component specs (materials/electrodes/electrolytes)")
-    elif quant > 0:
-        score.dims["components"] = (PARTIAL, "component quantities folded into the cell; no standalone component specs")
+    elif basis:
+        score.dims["components"] = (
+            PARTIAL,
+            "reduced to electrode basis strings; the component tree and its composition "
+            "quantities are not extracted into component specs",
+        )
     else:
         score.dims["components"] = (FAIL, "no component data recovered")
 

@@ -50,7 +50,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 45 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -63,7 +63,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 50 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -76,7 +76,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 51 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -89,7 +89,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 51 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -102,7 +102,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 54 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -115,7 +115,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 54 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -128,7 +128,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 2 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 33 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 2 records validate and emit canonical JSON-LD.
 :::
 
@@ -141,7 +141,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Normalize** — cell-root → 6 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
 - 🟢 **Quantities** — 54 value+unit quantities.
-- 🟡 **Components** — component quantities folded into the cell; no standalone component specs.
+- 🟡 **Components** — reduced to electrode basis strings; the component tree and its composition quantities are not extracted into component specs.
 - 🟢 **Canonical JSON-LD** — all 6 records validate and emit canonical JSON-LD.
 :::
 
@@ -153,7 +153,7 @@ Legend: 🟢 full · 🟡 partial · 🔴 none.
 - 🟢 **Ingest** — parsed as-is.
 - 🟢 **Normalize** — @graph[23] → 36 canonical records; cell format 'coin'.
 - 🟢 **Identity** — id, name, format + manufacturer, chemistry, model.
-- 🟡 **Quantities** — 18 value+unit quantities (linked-graph subset embedded).
+- 🟡 **Quantities** — 18 value+unit quantities (electrode/electrolyte level; cell- and material-level source quantities not yet mapped).
 - 🟢 **Components** — 16 component specs (materials/electrodes/electrolytes).
 - 🟢 **Canonical JSON-LD** — all 36 records validate and emit canonical JSON-LD.
 :::
