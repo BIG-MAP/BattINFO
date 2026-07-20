@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS, _CONTEXT_INLINE  # noqa: E402
+from battinfo.jsonld import _CONTEXT_INLINE, TEST_METHOD_CONTEXT_TERMS  # noqa: E402
 from battinfo.transform.cell_spec_node import label_to_compact  # noqa: E402
 
 OUT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
