@@ -241,30 +241,189 @@ def _kind_summary(records: list[dict[str, Any]]) -> str:
     return ", ".join(parts)
 
 
-def _unit_examples(raw: dict[str, Any]) -> tuple[list[str], list[str]]:
-    text = json.dumps(raw)
-    src: list[str] = []
-    canon: list[str] = []
-    for token, display in _UNIT_DISPLAY.items():
-        if token in text and display not in canon:
-            src.append(token)
-            canon.append(display)
-        if len(canon) >= 3:
-            break
-    return src, canon
+# One electrode's worth of quantities, audited field-by-field on BOTH sides of
+# the SAME (positive) electrode so the values correspond. For each:
+#   (label, source EMMO type(s), source nodes to look on, canonical key,
+#    canonical record scope). Source nodes are tried in order — this keeps e.g.
+#    the coating thickness from picking up the current collector's thickness.
+_AUDIT: list[tuple[str, tuple[str, ...], tuple[str, ...], str, str]] = [
+    ("Active mass fraction", ("MassFraction",), ("active", "electrode"), "mass_fraction", "electrode"),
+    ("Areal mass loading", ("MassLoading",), ("active", "coating", "electrode"), "loading", "electrode"),
+    ("Coating thickness", ("CalenderedCoatingThickness", "Thickness"), ("coating",), "thickness", "electrode"),
+    ("Compaction density", ("Density",), ("coating", "electrode"), "density", "electrode"),
+    ("Areal capacity", ("AreicCapacity",), ("electrode",), "rated_areal_discharge_capacity", "electrode"),
+    ("Specific capacity", ("SpecificCapacity",), ("electrode", "active"), "specific_capacity", "material"),
+]
+_ROLE_TYPES = {"ActiveMaterial", "Electrode", "Coating", "ElectrodeCoating", "PositiveElectrode"}
 
 
-def _comparison(raw: dict[str, Any], records: list[dict[str, Any]], cs: dict[str, Any], fmt: str | None, quant: int) -> list[tuple[str, str, str]]:
+def _types(node: Any) -> list[str]:
+    if not isinstance(node, dict):
+        return []
+    t = node.get("@type", [])
+    if isinstance(t, str):
+        return [t]
+    return [x for x in t if isinstance(x, str)] if isinstance(t, list) else []
+
+
+def _resolve(ref: Any, index: dict[str, Any] | None) -> dict[str, Any] | None:
+    if isinstance(ref, list):
+        ref = ref[0] if ref else None
+    if isinstance(ref, dict):
+        if index and set(ref) == {"@id"} and ref["@id"] in index:
+            return index[ref["@id"]]
+        return ref
+    if isinstance(ref, str) and index and ref in index:
+        return index[ref]
+    return None
+
+
+def _coin_cell(raw: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    graph = raw.get("@graph")
+    if isinstance(graph, list):
+        index = {n["@id"]: n for n in graph if isinstance(n, dict) and "@id" in n}
+        # The importer sorts cells by @id and keys the first cell_spec off that;
+        # match it so the source and canonical sides describe the same cell.
+        cells = sorted(
+            (n for n in graph if isinstance(n, dict) and any("Cell" in t for t in _types(n))),
+            key=lambda n: n.get("@id", ""),
+        )
+        return (cells[0] if cells else None), index
+    if "BatteryTest" in _types(raw) and raw.get("hasTestObject"):
+        return _resolve(raw.get("hasTestObject"), None), None
+    return raw, None
+
+
+def _source_positive(raw: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]:
+    """The source positive electrode node, its coating, and its active material."""
+    cell, index = _coin_cell(raw)
+    if cell is None:
+        return None, None, None
+    electrode = _resolve(cell.get("hasPositiveElectrode"), index)
+    if electrode is None:
+        return None, None, None
+    coating = _resolve(electrode.get("hasCoating"), index)
+    active = _resolve((coating or electrode).get("hasActiveMaterial"), index)
+    return electrode, coating, active
+
+
+def _prop_here(node: dict[str, Any] | None, emmo_types: set[str]) -> tuple[Any, str] | None:
+    """A property of the given EMMO type on THIS node only (no recursion)."""
+    if not isinstance(node, dict):
+        return None
+    for key in _PROP_CONTAINERS:
+        value = node.get(key)
+        if value is None:
+            continue
+        for prop in value if isinstance(value, list) else [value]:
+            if not isinstance(prop, dict):
+                continue
+            types = prop.get("@type")
+            types = types if isinstance(types, list) else [types]
+            if any(t in emmo_types for t in types if isinstance(t, str)):
+                num = prop.get("hasNumericalPart")
+                raw_value = num.get("hasNumberValue", num.get("hasNumericalValue")) if isinstance(num, dict) else None
+                if raw_value is not None:
+                    return (raw_value, _unit_local(prop.get("hasMeasurementUnit")))
+    return None
+
+
+def _canonical_positive(records: list[dict[str, Any]], cell_record: dict[str, Any] | None) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    # The electrode/electrolyte references sit at the record top level, beside
+    # the cell_spec body — not inside it.
+    pe_id = (cell_record or {}).get("positive_electrode_spec_id")
+    if not pe_id:
+        return None, None
+    electrode = next((r for r in records if r.get("electrode_spec", {}).get("id") == pe_id), None)
+    material = None
+    if electrode is not None:
+        try:
+            mat_id = electrode["electrode_spec"]["coating"]["component"]["active_material"][0]["material_spec_id"]
+            material = next((r for r in records if r.get("material_spec", {}).get("id") == mat_id), None)
+        except (KeyError, IndexError, TypeError):
+            material = None
+    return electrode, material
+
+
+def _grade(node: dict[str, Any] | None) -> str | None:
+    if not node:
+        return None
+    grade = next((t for t in _types(node) if t not in _ROLE_TYPES), None)
+    return grade or (node.get("name") if isinstance(node.get("name"), str) else None)
+
+
+def _unit_local(token: Any) -> str:
+    if not isinstance(token, str):
+        return ""
+    if ":" in token and not token.startswith("http"):
+        token = token.split(":", 1)[1]
+    return token.rsplit("#", 1)[-1].rsplit("/", 1)[-1]
+
+
+def _fmt_num(value: Any) -> str:
+    if isinstance(value, float):
+        return str(int(value)) if value.is_integer() else str(round(value, 4))
+    return str(value)
+
+
+def _canonical_quantity(records: list[dict[str, Any]], key: str) -> tuple[Any, str] | None:
+    """First canonical {value, unit} stored under `key` across the records."""
+    found: list[tuple[Any, str]] = []
+
+    def walk(node: Any) -> None:
+        if found or not isinstance(node, (dict, list)):
+            return
+        if isinstance(node, list):
+            for item in node:
+                walk(item)
+            return
+        candidate = node.get(key)
+        if isinstance(candidate, dict) and "value" in candidate:
+            found.append((candidate["value"], candidate.get("unit", "")))
+            return
+        for child in node.values():
+            walk(child)
+
+    for record in records:
+        walk(record)
+    return found[0] if found else None
+
+
+def _comparison(raw: dict[str, Any], records: list[dict[str, Any]], cell_record: dict[str, Any] | None, cs: dict[str, Any], fmt: str | None, quant: int) -> list[tuple[str, str, str]]:
     graph = raw.get("@graph")
     source_records = f"{len(graph)}-node crate" if isinstance(graph, list) else "1 document"
-    rows = [
-        ("Records", source_records, _kind_summary(records) or "—"),
-        ("Identity", f'"{_source_title(raw)}"', f'{cs.get("name", "?")} · format {fmt or "?"}'),
-        ("Quantities", f"{_source_property_count(raw)} property nodes", f"{quant} value+unit"),
-    ]
-    src_units, canon_units = _unit_examples(raw)
-    if canon_units:
-        rows.append(("Units", ", ".join(src_units), ", ".join(canon_units)))
+    rows: list[tuple[str, str, str]] = []
+
+    # Audit ONE electrode end to end: the positive electrode of the first cell,
+    # navigated the same way on both sides so the numbers line up.
+    src_electrode, src_coating, src_active = _source_positive(raw)
+    can_electrode, can_material = _canonical_positive(records, cell_record)
+    src_nodes = {"electrode": src_electrode, "coating": src_coating, "active": src_active}
+    src_grade = _grade(src_active) or _grade(src_electrode)
+    can_grade = can_material and can_material.get("material_spec", {}).get("name")
+    if (src_grade or can_grade) and can_electrode is not None:
+        rows.append(("Positive active material", src_grade or "—", str(can_grade or "—")))
+    for label, source_types, source_scopes, key, canonical_scope in _AUDIT:
+        if src_electrode is None or can_electrode is None:
+            break
+        sv = None
+        for scope in source_scopes:
+            sv = _prop_here(src_nodes.get(scope), set(source_types))
+            if sv is not None:
+                break
+        scope_record = can_material if canonical_scope == "material" else can_electrode
+        cv = _canonical_quantity([scope_record], key) if scope_record else None
+        if sv is not None and cv is not None:
+            rows.append((label, f"{_fmt_num(sv[0])} {sv[1]}".strip(), f"{_fmt_num(cv[0])} {cv[1]}".strip()))
+
+    # Cell-level and structural rows.
+    src_cell, _ = _coin_cell(raw)
+    sm = _prop_here(src_cell, {"Mass"}) if src_cell else None
+    cm = _canonical_quantity([cell_record], "mass") if cell_record else None
+    if sm is not None and cm is not None:
+        rows.append(("Cell mass", f"{_fmt_num(sm[0])} {sm[1]}".strip(), f"{_fmt_num(cm[0])} {cm[1]}".strip()))
+    rows.append(("Records", source_records, _kind_summary(records) or "—"))
+    rows.append(("Quantities kept", f"{_source_property_count(raw)} property nodes", f"{quant} value+unit"))
     return rows
 
 
@@ -369,7 +528,7 @@ def _score(src: dict[str, Any]) -> SourceScore:
         "records": n_records, "quantities": quant, "component_specs": comp_specs,
         "cell_format": fmt, "validate": f"{n_valid}/{n_records}", "jsonld": f"{n_jsonld}/{n_records}",
     }
-    score.comparison = _comparison(raw, records, cs, fmt, quant)
+    score.comparison = _comparison(raw, records, cell, cs, fmt, quant)
     return score
 
 

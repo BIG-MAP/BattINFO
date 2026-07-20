@@ -525,13 +525,16 @@ def import_converter_package(
         package.electrolyte_specs = extraction.electrolyte_specs
         package.separator_specs = extraction.separator_specs
         package.warnings.extend(extraction.warnings)
-        # Link the recovered specs from the cell spec.
-        if extraction.positive_electrode_spec_id:
-            cell_spec.positive_electrode_spec_id = extraction.positive_electrode_spec_id
-        if extraction.negative_electrode_spec_id:
-            cell_spec.negative_electrode_spec_id = extraction.negative_electrode_spec_id
-        if extraction.electrolyte_spec_id:
-            cell_spec.electrolyte_spec_id = extraction.electrolyte_spec_id
+        # Link the recovered specs from the cell spec. specification and cell_spec
+        # are the same logical cell (same id); link both so whichever is
+        # serialized carries the references.
+        for target in (cell_spec, specification):
+            if extraction.positive_electrode_spec_id:
+                target.positive_electrode_spec_id = extraction.positive_electrode_spec_id
+            if extraction.negative_electrode_spec_id:
+                target.negative_electrode_spec_id = extraction.negative_electrode_spec_id
+            if extraction.electrolyte_spec_id:
+                target.electrolyte_spec_id = extraction.electrolyte_spec_id
 
     return package
 

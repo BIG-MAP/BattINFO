@@ -58,9 +58,7 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 | | Source file | Canonical output |
 |---|---|---|
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
-| **Quantities** | 44 property nodes | 51 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 44 property nodes | 51 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.2
@@ -78,9 +76,7 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 | | Source file | Canonical output |
 |---|---|---|
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
-| **Quantities** | 44 property nodes | 56 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 44 property nodes | 56 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.8
@@ -98,9 +94,7 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 | | Source file | Canonical output |
 |---|---|---|
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
-| **Quantities** | 44 property nodes | 57 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 44 property nodes | 57 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.11
@@ -117,10 +111,12 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 
 | | Source file | Canonical output |
 |---|---|---|
+| **Positive active material** | LithiumNickelManganeseCobaltOxide | NMC |
+| **Active mass fraction** | 96 PERCENT | 96 % |
+| **Areal mass loading** | 6.6 MilliGM-PER-CentiM2 | 6.6 mg/cm2 |
+| **Coating thickness** | 16 MicroMetre | 16 um |
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
-| **Quantities** | 45 property nodes | 61 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 45 property nodes | 61 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.15
@@ -137,10 +133,12 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 
 | | Source file | Canonical output |
 |---|---|---|
+| **Positive active material** | LithiumNickelManganeseCobaltOxide | NMC |
+| **Active mass fraction** | 96 PERCENT | 96 % |
+| **Areal mass loading** | 6.6 MilliGM-PER-CentiM2 | 6.6 mg/cm2 |
+| **Coating thickness** | 16 MicroMetre | 16 um |
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
-| **Quantities** | 46 property nodes | 64 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 46 property nodes | 64 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.17
@@ -157,10 +155,12 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 
 | | Source file | Canonical output |
 |---|---|---|
+| **Positive active material** | LithiumNickelManganeseCobaltOxide | NMC |
+| **Active mass fraction** | 96 PERCENT | 96 % |
+| **Areal mass loading** | 6.6 MilliGM-PER-CentiM2 | 6.6 mg/cm2 |
+| **Coating thickness** | 16 MicroMetre | 16 um |
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "240616_bco_gr-NMC_01" | Empa empa__ccid_123456 · format coin |
-| **Quantities** | 46 property nodes | 64 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 46 property nodes | 64 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  EMPA converter sample
@@ -177,10 +177,12 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 
 | | Source file | Canonical output |
 |---|---|---|
+| **Positive active material** | LithiumNickelManganeseCobaltOxide | NMC |
+| **Active mass fraction** | 96 PERCENT | 96 % |
+| **Areal mass loading** | 6.6 MilliGM-PER-CentiM2 | 6.6 mg/cm2 |
+| **Coating thickness** | 16 MicroMetre | 16 um |
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec |
-| **Identity** | "?" | Empa Empa-bco-000007 · format coin |
-| **Quantities** | 35 property nodes | 43 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 35 property nodes | 43 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  EMPA reference v3
@@ -197,10 +199,12 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 
 | | Source file | Canonical output |
 |---|---|---|
+| **Positive active material** | LithiumNickelManganeseCobaltOxide | NMC |
+| **Active mass fraction** | 96 PERCENT | 96 % |
+| **Areal mass loading** | 6.6 MilliGM-PER-CentiM2 | 6.6 mg/cm2 |
+| **Coating thickness** | 16 MicroMetre | 16 um |
 | **Records** | 1 document | 1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec |
-| **Identity** | "240616_bco_gr-NMC_01" | Empa empa__ccid_123456 · format coin |
-| **Quantities** | 46 property nodes | 64 value+unit |
-| **Units** | PERCENT, MilliGM-PER-CentiM2, MicroMetre | %, mg/cm2, um |
+| **Quantities kept** | 46 property nodes | 64 value+unit |
 :::
 
 :::{dropdown} 🟢🟢🟢🟢🟢🟢  Discovery RO-Crate (.eln)
@@ -217,8 +221,13 @@ Each source expands to its per-dimension result and a short source-to-canonical 
 
 | | Source file | Canonical output |
 |---|---|---|
+| **Positive active material** | LithiumNickelManganeseCobaltOxide | NMC811 |
+| **Active mass fraction** | 0.945 | 0.945 1 |
+| **Areal mass loading** | 20.3175 MilliGramPerSquareCentiMetre | 20.3175 mg/cm2 |
+| **Compaction density** | 2.8 GramPerCubicCentiMetre | 2.8 g/cm3 |
+| **Areal capacity** | 13.752 CoulombPerSquareCentiMetre | 3.82 mAh/cm2 |
+| **Specific capacity** | 676800 CoulombPerKilogram | 188 mAh/g |
+| **Cell mass** | 18.7729 MilliGram | 18.7729 mg |
 | **Records** | 23-node crate | 5× cell_spec, 5× cell_instance, 7× electrode_spec, 7× material_spec, 2× electrolyte_spec, 5× test, 5× dataset |
-| **Identity** | "CEL-1-NMC811-Graphite" | DIGIBAT Discovery-Benchmark CEL-1-NMC811-Graphite · format coin |
-| **Quantities** | 51 property nodes | 44 value+unit |
-| **Units** | MilliGramPerSquareCentiMetre, MicroMetre, GramPerCubicCentiMetre | mg/cm2, um, g/cm3 |
+| **Quantities kept** | 51 property nodes | 44 value+unit |
 :::
