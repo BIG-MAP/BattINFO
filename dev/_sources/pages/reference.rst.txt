@@ -13,4 +13,5 @@ drift-checked in CI, so they cannot rot.
    property-reference
    cli-reference
    schema-reference
+   interop-recovery
    ../validation-contract

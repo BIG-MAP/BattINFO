@@ -1,0 +1,1111 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Interop recovery scorecard &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=84b34183" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b3415309" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pages/interop-recovery';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="BattINFO Validation Contract" href="../validation-contract.html" />
+    <link rel="prev" title="JSON Schema reference" href="schema-reference.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="reference.html">
+    Reference
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cookbook.html">
+    Cookbook — I want to…
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Interop recovery scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="reference.html" class="nav-link">Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Interop recovery scorecard</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <!-- GENERATED by scripts/gen_interop_recovery.py — do not edit. -->
+<!-- Regenerate: uv run python scripts/gen_interop_recovery.py -->
+<section id="interop-recovery-scorecard">
+<h1>Interop recovery scorecard<a class="headerlink" href="#interop-recovery-scorecard" title="Link to this heading">#</a></h1>
+<p>These are <strong>real, non-canonical</strong> JSON-LD documents produced by external tools —
+the BattInfoConverter Excel export across six versions, two EMPA converter
+exports, and the Discovery RO-Crate — run through BattINFO’s interop importers.
+The scorecard measures how completely each one is normalized into canonical
+BattINFO records and JSON-LD. They are test inputs, not examples to copy.</p>
+<p>The scores come from <code class="docutils literal notranslate"><span class="pre">scripts/gen_interop_recovery.py</span></code> and are asserted by
+<code class="docutils literal notranslate"><span class="pre">tests/test_interop_recovery.py</span></code>, so a drop in recovery quality fails CI and
+changes a cell here. This page is generated; regenerate it with
+<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">scripts/gen_interop_recovery.py</span></code>.</p>
+<p>Across 9 sources and 6 dimensions: 🟢 54 full · 🟡 0 partial · 🔴 0 none, out of 54.</p>
+<p>Legend: 🟢 full · 🟡 partial · 🔴 none.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>Shape</p></th>
+<th class="head"><p>Ingest</p></th>
+<th class="head"><p>Normalize</p></th>
+<th class="head"><p>Identity</p></th>
+<th class="head"><p>Quantities</p></th>
+<th class="head"><p>Components</p></th>
+<th class="head"><p>Canonical JSON-LD</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Converter Excel v1.0.0</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Converter Excel v1.1.2</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Converter Excel v1.1.8</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Converter Excel v1.1.11</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Converter Excel v1.1.15</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Converter Excel v1.1.17</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>EMPA converter sample</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>EMPA reference v3</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-root</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Discovery RO-Crate (.eln)</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&#64;graph[23]</span></code></p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+<td><p>🟢</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="what-the-columns-mean">
+<h2>What the columns mean<a class="headerlink" href="#what-the-columns-mean" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Ingest</strong> — the file parses, tolerating the bare <code class="docutils literal notranslate"><span class="pre">NaN</span></code> some emitters write for empty ids.</p></li>
+<li><p><strong>Normalize</strong> — the document’s shape is recognised and a canonical cell spec comes out.</p></li>
+<li><p><strong>Identity</strong> — cell identity is recovered (id, name, format; manufacturer/chemistry/model where present).</p></li>
+<li><p><strong>Quantities</strong> — measured value+unit quantities are recovered into the canonical records.</p></li>
+<li><p><strong>Components</strong> — electrodes, materials, and electrolytes come out as standalone component specs.</p></li>
+<li><p><strong>Canonical JSON-LD</strong> — every record validates against the canonical schema and emits BattINFO JSON-LD.</p></li>
+</ul>
+</section>
+<section id="per-source-detail">
+<h2>Per-source detail<a class="headerlink" href="#per-source-detail" title="Link to this heading">#</a></h2>
+<p>Each source expands to its per-dimension result and a short source-to-canonical comparison.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Converter Excel v1.0.0</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/converter-versions/converter-v1.0.0.coincell.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 12</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed after repairing bare NaN/Infinity.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 12 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 51 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 6 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 12 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">44 property nodes</p></td>
+<td><p class="sd-card-text">51 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.2</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/converter-versions/converter-v1.1.2.coincell.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 12</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed after repairing bare NaN/Infinity.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 12 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 56 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 6 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 12 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">44 property nodes</p></td>
+<td><p class="sd-card-text">56 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.8</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/converter-versions/converter-v1.1.8.coincell.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 12</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed after repairing bare NaN/Infinity.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 12 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 57 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 6 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 12 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 1× electrode_spec, 3× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">44 property nodes</p></td>
+<td><p class="sd-card-text">57 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.11</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/converter-versions/converter-v1.1.11.coincell.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 14</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed after repairing bare NaN/Infinity.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 14 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 61 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 8 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 14 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Positive active material</strong></p></td>
+<td><p class="sd-card-text">LithiumNickelManganeseCobaltOxide</p></td>
+<td><p class="sd-card-text">NMC</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Active mass fraction</strong></p></td>
+<td><p class="sd-card-text">96 PERCENT</p></td>
+<td><p class="sd-card-text">96 %</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal mass loading</strong></p></td>
+<td><p class="sd-card-text">6.6 MilliGM-PER-CentiM2</p></td>
+<td><p class="sd-card-text">6.6 mg/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Coating thickness</strong></p></td>
+<td><p class="sd-card-text">16 MicroMetre</p></td>
+<td><p class="sd-card-text">16 um</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">45 property nodes</p></td>
+<td><p class="sd-card-text">61 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.15</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/converter-versions/converter-v1.1.15.coincell.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 14</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed after repairing bare NaN/Infinity.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 14 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 64 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 8 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 14 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Positive active material</strong></p></td>
+<td><p class="sd-card-text">LithiumNickelManganeseCobaltOxide</p></td>
+<td><p class="sd-card-text">NMC</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Active mass fraction</strong></p></td>
+<td><p class="sd-card-text">96 PERCENT</p></td>
+<td><p class="sd-card-text">96 %</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal mass loading</strong></p></td>
+<td><p class="sd-card-text">6.6 MilliGM-PER-CentiM2</p></td>
+<td><p class="sd-card-text">6.6 mg/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Coating thickness</strong></p></td>
+<td><p class="sd-card-text">16 MicroMetre</p></td>
+<td><p class="sd-card-text">16 um</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">46 property nodes</p></td>
+<td><p class="sd-card-text">64 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Converter Excel v1.1.17</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/converter-versions/converter-v1.1.17.coincell.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 14</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed after repairing bare NaN/Infinity.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 14 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 64 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 8 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 14 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Positive active material</strong></p></td>
+<td><p class="sd-card-text">LithiumNickelManganeseCobaltOxide</p></td>
+<td><p class="sd-card-text">NMC</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Active mass fraction</strong></p></td>
+<td><p class="sd-card-text">96 PERCENT</p></td>
+<td><p class="sd-card-text">96 %</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal mass loading</strong></p></td>
+<td><p class="sd-card-text">6.6 MilliGM-PER-CentiM2</p></td>
+<td><p class="sd-card-text">6.6 mg/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Coating thickness</strong></p></td>
+<td><p class="sd-card-text">16 MicroMetre</p></td>
+<td><p class="sd-card-text">16 um</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">46 property nodes</p></td>
+<td><p class="sd-card-text">64 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  EMPA converter sample</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/converter/coin-cell.converter.sample.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 10</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed as-is.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 10 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 43 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 8 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 10 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Positive active material</strong></p></td>
+<td><p class="sd-card-text">LithiumNickelManganeseCobaltOxide</p></td>
+<td><p class="sd-card-text">NMC</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Active mass fraction</strong></p></td>
+<td><p class="sd-card-text">96 PERCENT</p></td>
+<td><p class="sd-card-text">96 %</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal mass loading</strong></p></td>
+<td><p class="sd-card-text">6.6 MilliGM-PER-CentiM2</p></td>
+<td><p class="sd-card-text">6.6 mg/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Coating thickness</strong></p></td>
+<td><p class="sd-card-text">16 MicroMetre</p></td>
+<td><p class="sd-card-text">16 um</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">35 property nodes</p></td>
+<td><p class="sd-card-text">43 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  EMPA reference v3</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/converter/coincell_reference_v3.jsonld</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_converter_package</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">cell-root</span></code> · <strong>records out:</strong> 14</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed as-is.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — cell-root → 14 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 64 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 8 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 14 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Positive active material</strong></p></td>
+<td><p class="sd-card-text">LithiumNickelManganeseCobaltOxide</p></td>
+<td><p class="sd-card-text">NMC</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Active mass fraction</strong></p></td>
+<td><p class="sd-card-text">96 PERCENT</p></td>
+<td><p class="sd-card-text">96 %</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal mass loading</strong></p></td>
+<td><p class="sd-card-text">6.6 MilliGM-PER-CentiM2</p></td>
+<td><p class="sd-card-text">6.6 mg/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Coating thickness</strong></p></td>
+<td><p class="sd-card-text">16 MicroMetre</p></td>
+<td><p class="sd-card-text">16 um</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">1 document</p></td>
+<td><p class="sd-card-text">1× cell_spec, 1× cell_instance, 2× electrode_spec, 4× material_spec, 1× electrolyte_spec, 1× separator_spec, 2× test, 2× test_spec</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">46 property nodes</p></td>
+<td><p class="sd-card-text">64 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">🟢🟢🟢🟢🟢🟢  Discovery RO-Crate (.eln)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Fixture:</strong> <code class="docutils literal notranslate"><span class="pre">tests/fixtures/interop/discovery/ro-crate-metadata.sample.json</span></code><br />
+<strong>Importer:</strong> <code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_discovery_eln</span></code><br />
+<strong>Shape in:</strong> <code class="docutils literal notranslate"><span class="pre">&#64;graph[23]</span></code> · <strong>records out:</strong> 36</p>
+<ul class="simple">
+<li><p class="sd-card-text">🟢 <strong>Ingest</strong> — parsed as-is.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Normalize</strong> — &#64;graph[23] → 36 canonical records; cell format ‘coin’.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Identity</strong> — id, name, format + manufacturer, chemistry, model.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Quantities</strong> — 44 value+unit quantities.</p></li>
+<li><p class="sd-card-text">🟢 <strong>Components</strong> — 16 component specs (materials/electrodes/electrolytes).</p></li>
+<li><p class="sd-card-text">🟢 <strong>Canonical JSON-LD</strong> — all 36 records validate and emit canonical JSON-LD.</p></li>
+</ul>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text"></p></th>
+<th class="head"><p class="sd-card-text">Source file</p></th>
+<th class="head"><p class="sd-card-text">Canonical output</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Positive active material</strong></p></td>
+<td><p class="sd-card-text">LithiumNickelManganeseCobaltOxide</p></td>
+<td><p class="sd-card-text">NMC811</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Active mass fraction</strong></p></td>
+<td><p class="sd-card-text">0.945</p></td>
+<td><p class="sd-card-text">0.945 1</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal mass loading</strong></p></td>
+<td><p class="sd-card-text">20.3175 MilliGramPerSquareCentiMetre</p></td>
+<td><p class="sd-card-text">20.3175 mg/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Compaction density</strong></p></td>
+<td><p class="sd-card-text">2.8 GramPerCubicCentiMetre</p></td>
+<td><p class="sd-card-text">2.8 g/cm3</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Areal capacity</strong></p></td>
+<td><p class="sd-card-text">13.752 CoulombPerSquareCentiMetre</p></td>
+<td><p class="sd-card-text">3.82 mAh/cm2</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Specific capacity</strong></p></td>
+<td><p class="sd-card-text">676800 CoulombPerKilogram</p></td>
+<td><p class="sd-card-text">188 mAh/g</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Cell mass</strong></p></td>
+<td><p class="sd-card-text">18.7729 MilliGram</p></td>
+<td><p class="sd-card-text">18.7729 mg</p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text"><strong>Records</strong></p></td>
+<td><p class="sd-card-text">23-node crate</p></td>
+<td><p class="sd-card-text">5× cell_spec, 5× cell_instance, 7× electrode_spec, 7× material_spec, 2× electrolyte_spec, 5× test, 5× dataset</p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text"><strong>Quantities kept</strong></p></td>
+<td><p class="sd-card-text">51 property nodes</p></td>
+<td><p class="sd-card-text">44 value+unit</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="schema-reference.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">JSON Schema reference</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../validation-contract.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">BattINFO Validation Contract</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-columns-mean">What the columns mean</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#per-source-detail">Per-source detail</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>
