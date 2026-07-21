@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>How to read a published BattINFO record (battinfo.json) &#8212; BattINFO  documentation</title>
+    <title>Anatomy of a published BattINFO record (battinfo.json) &#8212; BattINFO  documentation</title>
   
   
   
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Reference" href="pages/reference.html" />
-    <link rel="prev" title="Tag your work with a grant and your ORCID" href="howto/tag-funding-and-orcid.html" />
+    <link rel="next" title="BattINFO / Domain-Battery Target Architecture" href="ontology-profile-architecture.html" />
+    <link rel="prev" title="Identifiers &amp; PURLs" href="identifiers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -159,20 +159,13 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="pages/cookbook.html">
-    Cookbook — I want to…
-  </a>
-</li>
-
-
-<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
 </li>
 
 
-<li class="nav-item current active">
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/howto.html">
     How-to guides
   </a>
@@ -185,6 +178,13 @@
   </a>
 </li>
 
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,13 +193,6 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
-
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -311,20 +304,13 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="pages/cookbook.html">
-    Cookbook — I want to…
-  </a>
-</li>
-
-
-<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/guides.html">
     Tutorials
   </a>
 </li>
 
 
-<li class="nav-item current active">
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="pages/howto.html">
     How-to guides
   </a>
@@ -338,7 +324,7 @@
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="pages/concepts.html">
     Concepts
   </a>
@@ -408,17 +394,11 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="workspace-authoring.html">Workspace authoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/register-materials.html">Register the materials in your lab</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/build-a-cell-from-components.html">Build a cell from components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/find-existing-records.html">Find what already exists</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/bulk-ingest.html">Bulk-ingest thousands of records</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-battinfo-is-built.html">How BattINFO is built</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifiers.html">Identifiers &amp; PURLs</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Anatomy of a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
 </ul>
 </div>
 </nav></div>
@@ -460,9 +440,9 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="pages/howto.html" class="nav-link">How-to guides</a></li>
+    <li class="breadcrumb-item"><a href="pages/concepts.html" class="nav-link">Concepts</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Anatomy of a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</span></li>
   </ul>
 </nav>
 </div>
@@ -479,11 +459,11 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="how-to-read-a-published-battinfo-record-battinfo-json">
-<h1>How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)<a class="headerlink" href="#how-to-read-a-published-battinfo-record-battinfo-json" title="Link to this heading">#</a></h1>
+  <section id="anatomy-of-a-published-battinfo-record-battinfo-json">
+<h1>Anatomy of a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)<a class="headerlink" href="#anatomy-of-a-published-battinfo-record-battinfo-json" title="Link to this heading">#</a></h1>
 <p>A published record is a single JSON-LD document: an inlined <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> plus a <code class="docutils literal notranslate"><span class="pre">&#64;graph</span></code>
 of typed nodes. It is designed so a consumer fluent in <strong>any one</strong> of schema.org, DCAT,
-PROV, EMMO, or DQV/EARL can traverse it end-to-end. This guide maps the vocabularies,
+PROV, EMMO, or DQV/EARL can traverse it end-to-end. This page maps the vocabularies,
 the node types, and how to follow the links.</p>
 <section id="the-node-graph-at-a-glance">
 <h2>The node graph at a glance<a class="headerlink" href="#the-node-graph-at-a-glance" title="Link to this heading">#</a></h2>
@@ -603,20 +583,20 @@ tracked enhancement.)</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="howto/tag-funding-and-orcid.html"
+       href="identifiers.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Tag your work with a grant and your ORCID</p>
+        <p class="prev-next-title">Identifiers &amp; PURLs</p>
       </div>
     </a>
     <a class="right-next"
-       href="pages/reference.html"
+       href="ontology-profile-architecture.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Reference</p>
+        <p class="prev-next-title">BattINFO / Domain-Battery Target Architecture</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -58,7 +58,7 @@ Every verb is a method on the returned `AuthoringWorkspace` (also importable as
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` — this page |
 | Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` — see the [Python API](pages/api-reference.rst) |
-| Register materials and component specs (electrodes, electrolytes, …) | **`battinfo.api` functions** | `create_*` / `save_*` — see the [cookbook](pages/cookbook.md) |
+| Register materials and component specs (electrodes, electrolytes, …) | **`battinfo.api` functions** | `create_*` / `save_*` — see the [how-to guides](pages/howto.md) |
 | Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo._workspace.Workspace` |
 
 ## What each surface can author today

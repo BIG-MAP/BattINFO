@@ -59,7 +59,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Cookbook — I want to…" href="cookbook.html" />
+    <link rel="next" title="Tutorials" href="guides.html" />
     <link rel="prev" title="BattINFO" href="../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -159,13 +159,6 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="cookbook.html">
-    Cookbook — I want to…
-  </a>
-</li>
-
-
-<li class="nav-item ">
   <a class="nav-link nav-internal" href="guides.html">
     Tutorials
   </a>
@@ -185,6 +178,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,13 +193,6 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="concepts.html">
-    Concepts
-  </a>
-</li>
-
-
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -306,13 +299,6 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#">
     Get Started
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="cookbook.html">
-    Cookbook — I want to…
   </a>
 </li>
 
@@ -472,27 +458,30 @@
 <li><p>Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology</p></li>
 <li><p>A reusable cell-spec library backed by canonical records in <code class="docutils literal notranslate"><span class="pre">battinfo-records</span></code></p></li>
 </ul>
-<p>Working at the bench? The <a class="reference internal" href="cookbook.html"><span class="doc">cookbook</span></a> maps twelve lab tasks —
+<p>Working at the bench? The <a class="reference internal" href="howto.html"><span class="doc">how-to guides</span></a> map twelve lab tasks —
 register materials, build a cell from components, label cells, publish — to
 short runnable recipes, and the <a class="reference internal" href="glossary.html"><span class="doc">glossary</span></a> decodes the
 vocabulary in plain language.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
 <p>BattINFO requires Python 3.11 or later.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>battinfo
-</pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The package is not on PyPI yet — it publishes with the 0.8 release. Until
+then, install from source.</p>
 </div>
-<p>Optional extras add features as you need them (each missing dependency raises
-an error naming the extra to install):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing]&quot;</span><span class="w">   </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span><span class="w">      </span><span class="c1"># CSV/Parquet/XLSX readers</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish]&quot;</span><span class="w">      </span><span class="c1"># RO-Crate validation for publishing</span>
-</pre></div>
-</div>
-<p>Or install from source for the latest development version:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BIG-MAP/BattINFO.git
 <span class="nb">cd</span><span class="w"> </span>BattINFO
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
+</pre></div>
+</div>
+<p>Once 0.8 is released, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">battinfo</span></code> will work, with optional extras
+that add features as you need them (each missing dependency raises an error
+naming the extra to install):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>battinfo<span class="w">                  </span><span class="c1"># core</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing]&quot;</span><span class="w">    </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span><span class="w">       </span><span class="c1"># CSV/Parquet/XLSX readers</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish]&quot;</span><span class="w">       </span><span class="c1"># RO-Crate validation for publishing</span>
 </pre></div>
 </div>
 </section>
@@ -631,11 +620,11 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
       </div>
     </a>
     <a class="right-next"
-       href="cookbook.html"
+       href="guides.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Cookbook — I want to…</p>
+        <p class="prev-next-title">Tutorials</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -4,27 +4,7 @@
    "cell_type": "markdown",
    "id": "1cb77488",
    "metadata": {},
-   "source": [
-    "# Guide 6 — Publish your first dataset\n",
-    "\n",
-    "**The tutorial version of the [publishing journey](https://battinfo.org/publish):** you start\n",
-    "with a raw cycler export and finish with validated, linked records, a citable archive, and a\n",
-    "place in the Battery Genome registry. Every code cell here executes in CI, against the sample\n",
-    "Neware CSV that ships with the repository — swap in your own files and the recipe is identical.\n",
-    "\n",
-    "The five stages:\n",
-    "\n",
-    "1. **Convert** — instrument files → tidy BDF tables\n",
-    "2. **Identify** — name the physical cells you tested\n",
-    "3. **Link** — attach each test and its data to its cell\n",
-    "4. **Save & validate** — canonical records with stable IRIs\n",
-    "5. **Publish** — a DOI on Zenodo + the registry review queue\n",
-    "\n",
-    "*Prerequisites: `pip install \"battinfo[processing]\"` — the `processing` extra brings the BDF converter (`batterydf`) that Stage 1 uses. Stage 5 needs\n",
-    "credentials and is guarded so the notebook runs fully offline without them.*\n",
-    "\n",
-    "*New words? The [plain-language glossary](../pages/glossary.md) decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.*"
-   ]
+   "source": "# Guide 6 — Publish your first dataset\n\n**The tutorial version of the [publishing journey](https://battinfo.org/publish):** you start\nwith a raw cycler export and finish with validated, linked records, a citable archive, and a\nplace in the Battery Genome registry. Every code cell here executes in CI, against the sample\nNeware CSV that ships with the repository — swap in your own files and the recipe is identical.\n\nThe five stages:\n\n1. **Convert** — instrument files → tidy BDF tables\n2. **Identify** — name the physical cells you tested\n3. **Link** — attach each test and its data to its cell\n4. **Save & validate** — canonical records with stable IRIs\n5. **Publish** — a DOI on Zenodo + the registry review queue\n\n**Prerequisites:** BattINFO installed with the `processing` extra — the `batterydf` BDF converter that Stage 1 uses. BattINFO is not on PyPI until the 0.8 release, so install from source: clone the repo, then `pip install -e \".[processing]\"` (see [Installation](../pages/getting-started.rst)). Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.\n\n*New words? The [plain-language glossary](../pages/glossary.md) decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.*"
   },
   {
    "cell_type": "code",

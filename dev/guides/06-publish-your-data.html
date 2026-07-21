@@ -161,13 +161,6 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../pages/cookbook.html">
-    Cookbook — I want to…
-  </a>
-</li>
-
-
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../pages/guides.html">
     Tutorials
@@ -188,6 +181,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -196,13 +196,6 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../pages/concepts.html">
-    Concepts
-  </a>
-</li>
-
-
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -309,13 +302,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../pages/getting-started.html">
     Get Started
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../pages/cookbook.html">
-    Cookbook — I want to…
   </a>
 </li>
 
@@ -488,7 +474,7 @@
 <li><p><strong>Save &amp; validate</strong> — canonical records with stable IRIs</p></li>
 <li><p><strong>Publish</strong> — a DOI on Zenodo + the registry review queue</p></li>
 </ol>
-<p><em>Prerequisites: ``pip install “battinfo[processing]”`` — the ``processing`` extra brings the BDF converter (``batterydf``) that Stage 1 uses. Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</em></p>
+<p><strong>Prerequisites:</strong> BattINFO installed with the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra — the <code class="docutils literal notranslate"><span class="pre">batterydf</span></code> BDF converter that Stage 1 uses. BattINFO is not on PyPI until the 0.8 release, so install from source: clone the repo, then <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">&quot;.[processing]&quot;</span></code> (see <a class="reference internal" href="../pages/getting-started.html"><span class="doc">Installation</span></a>). Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</p>
 <p><em>New words? The</em> <a class="reference internal" href="../pages/glossary.html"><span class="doc">plain-language glossary</span></a> <em>decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.</em></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:

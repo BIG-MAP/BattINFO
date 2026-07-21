@@ -159,13 +159,6 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="cookbook.html">
-    Cookbook — I want to…
-  </a>
-</li>
-
-
-<li class="nav-item ">
   <a class="nav-link nav-internal" href="guides.html">
     Tutorials
   </a>
@@ -185,6 +178,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="concepts.html">
+    Concepts
+  </a>
+</li>
+
             <li class="nav-item dropdown">
                 <button class="btn dropdown-toggle nav-item" type="button"
                 data-bs-toggle="dropdown" aria-expanded="false"
@@ -193,13 +193,6 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="concepts.html">
-    Concepts
-  </a>
-</li>
-
-
 <li class=" ">
   <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
     Home
@@ -273,6 +266,10 @@
   
 
   
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
 
     </header>
@@ -302,13 +299,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="getting-started.html">
     Get Started
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="cookbook.html">
-    Cookbook — I want to…
   </a>
 </li>
 
@@ -403,7 +393,8 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Recipes</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/register-materials.html">Register the materials in your lab</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/build-a-cell-from-components.html">Build a cell from components</a></li>
@@ -414,7 +405,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 </ul>
 </div>
 </nav></div>
@@ -474,13 +465,81 @@
                   
   <section id="how-to-guides">
 <h1>How-to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading">#</a></h1>
-<p>Short, task-shaped recipes for people who already know the basics: each one
-does a single job, states its ingredients up front, and gets out of your way.
-The code is executed in CI wherever it can run offline.</p>
-<p>New to BattINFO? Start with the <a class="reference internal" href="guides.html"><span class="doc">tutorials</span></a> instead — they teach
-the model that these recipes assume. Not sure which recipe you need? The
-<a class="reference internal" href="cookbook.html"><span class="doc">cookbook</span></a> maps twelve bench tasks to their recipes.</p>
+<p>Task-first recipes for people who already know the basics. Each link is a short
+recipe you can run today; none of them require reading the architecture pages
+first. New to BattINFO? The <a class="reference internal" href="guides.html"><span class="doc">tutorials</span></a> teach the model these
+recipes assume, and the <a class="reference internal" href="glossary.html"><span class="std std-doc">glossary</span></a> decodes the vocabulary.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>I want to…</p></th>
+<th class="head"><p>Recipe</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Register the materials</strong> in my lab (actives, binders, salts, solvents)</p></td>
+<td><p><a class="reference internal" href="../howto/register-materials.html"><span class="std std-doc">Register materials</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Describe an electrode recipe</strong> (96/2/2 coating, loading, thickness)</p></td>
+<td><p><a class="reference internal" href="../howto/build-a-cell-from-components.html#electrode-recipe"><span class="std std-ref">Build a cell from components, electrodes</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Describe a cell I built</strong> from its parts (electrodes, electrolyte, separator, housing)</p></td>
+<td><p><a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">Build a cell from components</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Log the cells on my bench</strong> (lab names, no serial numbers)</p></td>
+<td><p><a class="reference internal" href="../howto/label-your-cells.html"><span class="std std-doc">Label your cells</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Register my cycler and its channels</strong></p></td>
+<td><p><a class="reference internal" href="../howto/register-equipment.html"><span class="std std-doc">Register equipment</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Define a test protocol</strong> (CC-CV cycling, capacity check, EIS, …)</p></td>
+<td><p><a class="reference internal" href="../test-specs.html"><span class="std std-doc">Test specs</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Log a test run</strong> linked to a cell, a protocol, and a channel</p></td>
+<td><p><a class="reference internal" href="../workspace-authoring.html"><span class="std std-doc">Workspace authoring</span></a> · <a class="reference internal" href="../guides/03-linked-records.html"><span class="std std-doc">Tutorial 3, Linked records</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Convert a cycler export</strong> to a tidy table (NEWARE, Biologic, Maccor CSV, …)</p></td>
+<td><p><a class="reference internal" href="../guides/06-publish-your-data.html"><span class="std std-doc">Tutorial 6, Stage 1: Convert</span></a> · unmapped columns? see <a class="reference internal" href="troubleshooting.html#converted-file-is-missing-columns"><span class="std std-ref">troubleshooting</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Validate my records and fix what’s wrong</strong></p></td>
+<td><p><a class="reference internal" href="../howto/fix-validation-errors.html"><span class="std std-doc">Fix validation errors</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Publish, and get a DOI</strong></p></td>
+<td><p><a class="reference internal" href="../guides/06-publish-your-data.html"><span class="std std-doc">Tutorial 6, Publish your first dataset</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Put labels / QR codes on my cells</strong></p></td>
+<td><p><a class="reference internal" href="../howto/label-your-cells.html"><span class="std std-doc">Label your cells</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Find out what already exists</strong> (my session, my library, the registry)</p></td>
+<td><p><a class="reference internal" href="../howto/find-existing-records.html"><span class="std std-doc">Find existing records</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Ingest a whole folder</strong> of raw data files at once</p></td>
+<td><p><a class="reference internal" href="../howto/bulk-ingest.html"><span class="std std-doc">Bulk ingest</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Resume a submission</strong> I started earlier</p></td>
+<td><p><a class="reference internal" href="../howto/resume-a-submission.html"><span class="std std-doc">Resume a submission</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Tag records with funding and my ORCID</strong></p></td>
+<td><p><a class="reference internal" href="../howto/tag-funding-and-orcid.html"><span class="std std-doc">Tag funding and ORCID</span></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="when-something-doesn-t-work">
+<h2>When something doesn’t work<a class="headerlink" href="#when-something-doesn-t-work" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="troubleshooting.html"><span class="std std-doc">troubleshooting page</span></a> covers the classic surprises:
+empty search results, template files that will not load, columns that vanish
+in conversion, IRIs that open a sign-in page, and validation errors about
+dates.</p>
+</section>
+<section id="the-30-second-orientation">
+<h2>The 30-second orientation<a class="headerlink" href="#the-30-second-orientation" title="Link to this heading">#</a></h2>
+<p>Everything in BattINFO is a <strong>spec</strong> (a reusable description: a material
+grade, a cell product, a test protocol) or an <strong>instance</strong> (a physical thing
+or event: this cell, this test run). You register specs once, point instances
+at them, and every saved record gets a permanent IRI you can print on a label
+or cite in a paper. The <a class="reference internal" href="guides.html"><span class="doc">tutorials</span></a> build this up properly.</p>
 <div class="toctree-wrapper compound">
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Recipes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/register-materials.html">Register the materials in your lab</a></li>
@@ -492,9 +551,10 @@ the model that these recipes assume. Not sure which recipe you need? The
 <li class="toctree-l1"><a class="reference internal" href="../howto/fix-validation-errors.html">Fix the five classic validation errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/resume-a-submission.html">Resume an interrupted bulk submission</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../howto/tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../reading-a-record.html">How to read a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 </ul>
 </div>
+</section>
 </section>
 
 
@@ -531,6 +591,25 @@ the model that these recipes assume. Not sure which recipe you need? The
             </div>
             
             
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#when-something-doesn-t-work">When something doesn’t work</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-30-second-orientation">The 30-second orientation</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

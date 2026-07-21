@@ -1,8 +1,8 @@
-# How to read a published BattINFO record (`battinfo.json`)
+# Anatomy of a published BattINFO record (`battinfo.json`)
 
 A published record is a single JSON-LD document: an inlined `@context` plus a `@graph`
 of typed nodes. It is designed so a consumer fluent in **any one** of schema.org, DCAT,
-PROV, EMMO, or DQV/EARL can traverse it end-to-end. This guide maps the vocabularies,
+PROV, EMMO, or DQV/EARL can traverse it end-to-end. This page maps the vocabularies,
 the node types, and how to follow the links.
 
 ## The node graph at a glance

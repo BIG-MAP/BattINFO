@@ -42,5 +42,5 @@ and linked by IRI into one queryable graph that no single organization owns.
 
 - [Ontology / profile architecture](ontology-profile-architecture.md) — the source-of-truth hierarchy behind the shared vocabulary
 - [04 — Semantic layer](guides/04-semantic-layer.ipynb) — JSON-LD, RDF, and SPARQL in depth
-- [Instance / test / dataset workflow](instance-test-dataset-workflow.md) — how linked records are published in practice
+- [Workspace authoring](workspace-authoring.md) — the end-to-end flow for publishing linked records
 
