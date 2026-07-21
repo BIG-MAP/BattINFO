@@ -30,9 +30,8 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 
 | | |
 |---|---|
-| **[Workspace authoring](workspace-authoring.md)** | The blessed authoring surface: `battinfo.workspace(".")` end-to-end, and which surface to use when |
 | **[Python API](pages/api-reference.rst)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
-| **[CLI reference](pages/cli-reference.rst)** | All CLI commands, options, and output formats |
+| **[CLI reference](pages/cli-reference.md)** | All CLI commands, options, and output formats |
 | **[Validation contract](validation-contract.md)** | Validation policies, machine-readable issue output |
 | **[Identifier policy](../IDENTIFIER_POLICY.md)** | IRI minting, governance, and stability guarantees |
 
@@ -55,6 +54,7 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 
 | | |
 |---|---|
+| **[Workspace authoring](workspace-authoring.md)** | The everyday authoring surface: `battinfo.workspace(".")` end-to-end, and which surface to use when |
 | **[How-to guides](pages/howto.md)** | Task recipes: register materials, build a cell from components, label cells, register equipment and channels, find existing records, bulk ingest, fix validation errors, resume submissions, funding/ORCID |
 | **[Editorial cell-spec workflow](internal/editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
 | **[Ingest manifest contract](ingest-manifest-contract.md)** | Batch intake from a folder of raw data files |

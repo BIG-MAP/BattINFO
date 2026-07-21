@@ -9,14 +9,13 @@ in CI, so they cannot rot.
 Surfaces
 --------
 
-Start here: the Python API and the CLI, plus the workspace, the everyday way most
-people author records.
+The two generated surfaces you call against: the Python API and the CLI. For the
+workspace, the everyday way most people author records, see the how-to guides.
 
 .. toctree::
    :maxdepth: 1
 
    api-reference
-   ../workspace-authoring
    cli-reference
 
 Record types

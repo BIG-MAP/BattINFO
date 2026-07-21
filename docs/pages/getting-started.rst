@@ -8,7 +8,7 @@ BattINFO is the semantic data layer for battery technology. It gives you:
 - Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology
 - A reusable cell-spec library backed by canonical records in ``battinfo-records``
 
-Working at the bench? The :doc:`how-to guides <howto>` maps twelve lab tasks —
+Working at the bench? The :doc:`how-to guides <howto>` map twelve lab tasks —
 register materials, build a cell from components, label cells, publish — to
 short runnable recipes, and the :doc:`glossary <glossary>` decodes the
 vocabulary in plain language.

@@ -19,6 +19,9 @@ recipes assume, and the [glossary](glossary.md) decodes the vocabulary.
 | **Publish, and get a DOI** | [Tutorial 6, Publish your first dataset](../guides/06-publish-your-data.ipynb) |
 | **Put labels / QR codes on my cells** | [Label your cells](../howto/label-your-cells.md) |
 | **Find out what already exists** (my session, my library, the registry) | [Find existing records](../howto/find-existing-records.md) |
+| **Ingest a whole folder** of raw data files at once | [Bulk ingest](../howto/bulk-ingest.md) |
+| **Resume a submission** I started earlier | [Resume a submission](../howto/resume-a-submission.md) |
+| **Tag records with funding and my ORCID** | [Tag funding and ORCID](../howto/tag-funding-and-orcid.md) |
 
 ## When something doesn't work
 
@@ -39,6 +42,7 @@ or cite in a paper. The {doc}`tutorials <guides>` build this up properly.
 :maxdepth: 1
 :caption: Recipes
 
+../workspace-authoring
 ../howto/register-materials
 ../howto/build-a-cell-from-components
 ../howto/label-your-cells
