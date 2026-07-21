@@ -186,7 +186,15 @@ def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
     key = _normalize_term(value)
     if key is None:
         return None
-    return _entity_type_map().get(field, {}).get(key)
+    field_map = _entity_type_map().get(field, {})
+    hit = field_map.get(key)
+    if hit is not None:
+        return hit
+    # The map keys use hyphens ("hard-carbon", "silicon-graphite", "li-metal");
+    # accept the same term written with spaces, underscores, commas or slashes
+    # ("hard carbon", "silicon, graphite", "silicon/graphite").
+    variant = re.sub(r"[\s_,/]+", "-", key)
+    return field_map.get(variant) if variant != key else None
 
 
 def _load_mapping_file(*parts: str) -> dict[str, Any]:
@@ -1463,11 +1471,21 @@ def _apply_specification_composition(battery: dict[str, Any], specification: dic
             prop_nodes = _descriptor_property_nodes(electrode_data.get("property"))
             if prop_nodes:
                 electrode_node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+        basis = specification.get(basis_field)
+        basis_label = basis.strip() if isinstance(basis, str) else ""
         if isinstance(node_type, str) and node_type:
             electrode_node["@type"] = node_type
         elif electrode_node:
             # Composition present but the basis has no specific EMMO electrode class.
             electrode_node["@type"] = "Electrode"
+        elif basis_label and basis_label.lower() != "unknown" and not mapping:
+            # An unrecognised basis string (no entity mapping at all): emit a
+            # generic labeled electrode so it is never dropped from the linked
+            # data (it survives in the record's *_electrode_basis field). Bases
+            # that map only to a battery class (e.g. NCA) already carry that
+            # information in the cell @type, so they need no electrode node.
+            electrode_node["@type"] = "Electrode"
+            electrode_node["skos:prefLabel"] = basis_label
         if electrode_node:
             battery[relation] = electrode_node
 

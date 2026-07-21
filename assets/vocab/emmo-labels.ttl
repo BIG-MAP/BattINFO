@@ -182,6 +182,7 @@
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_74459386_875c_4303_b774_60125b599d06> skos:prefLabel "PouchCase"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87> skos:prefLabel "ChargingVoltage"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261> skos:prefLabel "ActiveMaterial"@en .
+<https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79e12290_d1e5_4c41_916c_18f1e4d7fb51> skos:prefLabel "SiliconBasedElectrode"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3> skos:prefLabel "DCInternalResistance"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7df82c48_b599_4b02_bef0_9facc9c39410> skos:prefLabel "hasAdditive"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_808e94df_e002_4e64_a6db_182ed75078c6> skos:prefLabel "hasSolvent"@en .
