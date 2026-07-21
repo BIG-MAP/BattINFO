@@ -36,7 +36,7 @@ export default function ExamplesPage() {
           <a
             key={entry.slug}
             href={`#${entry.slug}`}
-            className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-sm font-semibold text-brand-700 hover:bg-brand-100"
+            className="rounded-full border border-brand-200 bg-tint px-3 py-1.5 text-sm font-semibold text-brandtext hover:bg-brand-100"
           >
             {entry.title}
           </a>
@@ -67,7 +67,7 @@ export default function ExamplesPage() {
                   href={`https://json-ld.org/playground/#startTab=tab-expanded&json-ld=${encodeURIComponent(`${site.url}/jsonld/showcase-${entry.slug}.jsonld`)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-brand-600 hover:text-brand-700"
+                  className="text-brandtext hover:text-brandtext"
                 >
                   Open in the JSON-LD Playground →
                 </a>
@@ -96,13 +96,22 @@ export default function ExamplesPage() {
         );
       })}
 
-      <div className="mt-16 flex flex-wrap gap-4 text-sm">
-        <Link href="/validate" className="font-semibold text-brand-600 hover:text-brand-700">
-          Validate your own record →
-        </Link>
-        <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
-          Publish your data →
-        </Link>
+      <div className="mt-16 border-t border-border pt-8">
+        <p className="max-w-prose text-sm text-ink-muted">
+          Want to build one of these yourself? The Playground starts you from a working template and
+          checks it as you type; Validate gives a finished record a pass/fail verdict.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-4 text-sm">
+          <Link href="/create" className="font-semibold text-brandtext hover:text-brandtext">
+            Build one in the Playground →
+          </Link>
+          <Link href="/validate" className="font-semibold text-brandtext hover:text-brandtext">
+            Validate your own record →
+          </Link>
+          <Link href="/publish" className="font-semibold text-brandtext hover:text-brandtext">
+            Publish your data →
+          </Link>
+        </div>
       </div>
     </div>
   );

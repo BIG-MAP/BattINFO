@@ -58,7 +58,12 @@ export default function ConvertPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <header className="max-w-prose">
-        <h1 className="text-4xl font-bold tracking-tight text-ink">Convert your cycler data</h1>
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
+          <Link href="/publish" className="text-brandtext hover:text-brandtext">
+            Step 1 of publishing your data →
+          </Link>
+        </p>
+        <h1 className="mt-2 text-4xl font-bold tracking-tight text-ink">Convert your cycler data</h1>
         <p className="mt-4 text-lg text-ink-muted">
           Every instrument speaks its own format, the first wall between your
           data and anyone else&rsquo;s tools. <code className="text-sm">ws.convert()</code>{" "}
@@ -108,7 +113,7 @@ export default function ConvertPage() {
           time, voltage, current, and capacity columns under one documented
           schema (run <code className="text-xs">ws.bdf_columns()</code> for the
           full list). From there,{" "}
-          <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/publish" className="font-semibold text-brandtext hover:text-brandtext">
             the publishing journey
           </Link>{" "}
           attaches the converted file to a linked test record with provenance
@@ -127,17 +132,17 @@ export default function ConvertPage() {
           Python transform, drift-checked in CI, never mocked in the browser.
         </p>
         <div className="mt-5 flex flex-wrap gap-4 text-sm">
-          <Link href="/examples" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/examples" className="font-semibold text-brandtext hover:text-brandtext">
             Open the JSON-LD gallery →
           </Link>
-          <Link href="/properties" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/properties" className="font-semibold text-brandtext hover:text-brandtext">
             Browse properties &amp; units →
           </Link>
           <a
             href={site.reference}
             target="_blank"
             rel="noreferrer"
-            className="font-semibold text-brand-600 hover:text-brand-700"
+            className="font-semibold text-brandtext hover:text-brandtext"
           >
             Developer reference →
           </a>

@@ -6,6 +6,19 @@ import { publishJourney, provenanceChain } from "@/lib/content";
 import { installSnippet } from "@/lib/examples";
 import { site } from "@/lib/site";
 
+const CREDIT_SNIPPET = `# credit every author by ORCID, once per workspace
+ws.contributor("0000-0002-1825-0097", name="Ada Lovelace")
+ws.contributor("0000-0001-5109-3700", name="Alan Turing")
+
+# publish with a data license; the authors become the Zenodo creators
+ws.zenodo(
+    license="cc-by-4.0",
+    creators=[
+        {"name": "Lovelace, Ada", "orcid": "0000-0002-1825-0097"},
+        {"name": "Turing, Alan",  "orcid": "0000-0001-5109-3700"},
+    ],
+)`;
+
 export const metadata: Metadata = {
   title: "Publish your data, BattINFO",
   description:
@@ -21,7 +34,7 @@ export const metadata: Metadata = {
 export default function PublishPage() {
   return (
     <>
-      <section className="border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
+      <section className="border-b border-border bg-paper">
         <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <SectionHeading
             kicker="The procedure"
@@ -34,7 +47,7 @@ export default function PublishPage() {
             paper, and data the whole field can find and read.
           </p>
           <div className="mt-6 rounded-lg border border-border bg-surface px-4 py-3">
-            <p className="font-mono text-sm text-brand-700">
+            <p className="font-mono text-sm text-brandtext">
               raw files → BDF tables → {provenanceChain} → JSON-LD → DOI + registry
             </p>
           </div>
@@ -53,7 +66,7 @@ export default function PublishPage() {
                   {i + 1}
                 </span>
                 <h2 className="text-xl font-semibold text-ink">{stage.stage}</h2>
-                <code className="ml-1 hidden rounded bg-tint px-2 py-0.5 text-xs text-brand-700 sm:inline">
+                <code className="ml-1 hidden rounded bg-tint px-2 py-0.5 text-xs text-brandtext sm:inline">
                   {stage.verb}
                 </code>
               </div>
@@ -70,11 +83,47 @@ export default function PublishPage() {
                     <span className="font-semibold text-ink">Why this stage exists: </span>
                     <span className="text-ink-muted">{stage.why}</span>
                   </p>
+                  {stage.stage === "Convert" ? (
+                    <p>
+                      <Link href="/convert" className="font-semibold text-brandtext hover:text-brandtext">
+                        Every supported instrument format →
+                      </Link>
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
+        <SectionHeading kicker="Before the DOI" title="Credit your co-authors, and pick a license." />
+        <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
+          A DOI is a citation, so the metadata your co-authors and reviewers care about goes on
+          <em> before</em> you publish: every contributor by ORCID, and a data license (CC-BY-4.0 is the usual choice
+          for open research data). These become the Zenodo record&rsquo;s authors and license.
+        </p>
+        <div className="mt-6">
+          <CodeBlock label="python" code={CREDIT_SNIPPET} />
+        </div>
+        <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
+          The result is a citable dataset you can paste into a Data Availability statement:{" "}
+          <span className="italic text-ink">
+            Lovelace, A., &amp; Turing, A. (2026). [dataset title]. Zenodo. https://doi.org/10.5281/zenodo.XXXXX
+          </span>
+          .
+        </p>
+        <div className="mt-6">
+          <a
+            href={`${site.reference}/howto/tag-funding-and-orcid.html`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm font-semibold text-brandtext hover:text-brandtext"
+          >
+            How to tag funding and ORCID →
+          </a>
+        </div>
       </section>
 
       <section className="border-t border-border bg-surface">
@@ -88,7 +137,7 @@ export default function PublishPage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/validate"
-              className="rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
+              className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-fg shadow-sm transition hover:opacity-90"
             >
               Validate a record
             </Link>

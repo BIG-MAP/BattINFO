@@ -3,7 +3,7 @@ import { CodeBlock } from "@/components/code-block";
 import { Constellation } from "@/components/constellation";
 import { ProofStrip } from "@/components/proof-strip";
 import { SectionHeading } from "@/components/section-heading";
-import { standards } from "@/lib/site";
+import { site, standards } from "@/lib/site";
 import {
   audiences,
   features,
@@ -18,28 +18,37 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
+      <section className="relative overflow-hidden border-b border-border bg-paper">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface px-3 py-1 text-xs font-medium text-brand-700">
+              <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface px-3 py-1 text-xs font-medium text-brandtext">
                 <span className="h-1.5 w-1.5 rounded-full bg-volt-500" />
                 Open standard · Beta
               </span>
               <h1 className="mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
                 The language machines use to{" "}
-                <span className="text-brand-600">understand batteries</span>
+                <span className="text-brandtext">understand batteries</span>
               </h1>
               <p className="mt-5 max-w-prose text-lg text-ink-muted">
-                BattINFO extends the open EMMO ontology so battery data is
+                BattINFO builds on the open EMMO ontology — a shared, standardized
+                vocabulary for materials and battery science — so battery data is
                 machine-readable and reusable across tools and teams. It turns a
                 folder of cycler exports into citable, findable records in about
-                fifteen minutes.
+                fifteen minutes.{" "}
+                <a
+                  href={`${site.reference}/pages/glossary.html`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-brandtext hover:text-brandtext"
+                >
+                  New to the terms? The glossary.
+                </a>
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/publish"
-                  className="rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
+                  className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-fg shadow-sm transition hover:opacity-90"
                 >
                   Publish your data
                 </Link>
@@ -78,7 +87,7 @@ export default function HomePage() {
                 className="group text-center"
                 title={s.role}
               >
-                <span className="text-sm font-semibold text-ink transition group-hover:text-brand-600">
+                <span className="text-sm font-semibold text-ink transition group-hover:text-brandtext">
                   {s.name}
                 </span>
                 <span className="block text-[11px] text-ink-faint">{s.role}</span>
@@ -99,7 +108,7 @@ export default function HomePage() {
             <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
               This is the real recipe, the same one <code>ws.quickstart()</code>{" "}
               prints, kept in sync by the test suite.{" "}
-              <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
+              <Link href="/publish" className="font-semibold text-brandtext hover:text-brandtext">
                 Every step explained →
               </Link>
             </p>
@@ -161,7 +170,7 @@ export default function HomePage() {
             kicker="One coherent model"
             title="Linked record types with a shared provenance chain."
           />
-          <p className="mt-4 font-mono text-sm text-brand-700">{provenanceChain}</p>
+          <p className="mt-4 font-mono text-sm text-brandtext">{provenanceChain}</p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recordModel.map((r) => (
               <div key={r.type} className="prose-card">
@@ -174,7 +183,7 @@ export default function HomePage() {
           </div>
           <p className="mt-6 text-sm text-ink-muted">
             Each type has a canonical JSON Schema and an EMMO mapping.{" "}
-            <Link href="/examples" className="font-semibold text-brand-600 hover:text-brand-700">
+            <Link href="/examples" className="font-semibold text-brandtext hover:text-brandtext">
               See a worked example →
             </Link>
           </p>
@@ -191,7 +200,7 @@ export default function HomePage() {
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">{a.body}</p>
               <Link
                 href={a.cta.href}
-                className="mt-4 text-sm font-semibold text-brand-600 hover:text-brand-700"
+                className="mt-4 text-sm font-semibold text-brandtext hover:text-brandtext"
               >
                 {a.cta.label} →
               </Link>
@@ -230,7 +239,7 @@ export default function HomePage() {
             record in the browser, or read the docs.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Link href="/publish" className="rounded-lg bg-surface px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+            <Link href="/publish" className="rounded-lg bg-surface px-5 py-3 text-sm font-semibold text-brandtext transition hover:bg-tint">
               Publish your data
             </Link>
             <Link href="/docs" className="rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-surface/10">

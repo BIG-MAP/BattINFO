@@ -91,13 +91,13 @@ function RecordValidator() {
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">Record JSON</h2>
             <div className="flex gap-3 text-xs font-medium">
-              <button onClick={() => run(SAMPLE)} className="text-brand-600 hover:text-brand-700">
+              <button onClick={() => run(SAMPLE)} className="text-brandtext hover:text-brandtext">
                 Load a valid record
               </button>
-              <button onClick={() => run(BROKEN_SAMPLE)} className="text-brand-600 hover:text-brand-700">
+              <button onClick={() => run(BROKEN_SAMPLE)} className="text-brandtext hover:text-brandtext">
                 See it catch mistakes
               </button>
-              <button onClick={() => fileInput.current?.click()} className="text-brand-600 hover:text-brand-700">
+              <button onClick={() => fileInput.current?.click()} className="text-brandtext hover:text-brandtext">
                 Open a file…
               </button>
               <input
@@ -122,7 +122,7 @@ function RecordValidator() {
           />
           <button
             onClick={() => run()}
-            className="mt-4 w-full rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="mt-4 w-full rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-fg transition hover:opacity-90"
           >
             Validate
           </button>
@@ -191,14 +191,14 @@ function RecordValidator() {
           <code className="font-mono text-code-fg">{`battinfo validate my-record.json --policy strict --format json`}</code>
         </pre>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          <Link href="/publish" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/publish" className="font-semibold text-brandtext hover:text-brandtext">
             Ready? Publish your data →
           </Link>
           <a
             href={`${site.github}/blob/main/docs/validation-contract.md`}
             target="_blank"
             rel="noreferrer"
-            className="font-semibold text-brand-600 hover:text-brand-700"
+            className="font-semibold text-brandtext hover:text-brandtext"
           >
             Read the validation contract →
           </a>
@@ -223,13 +223,20 @@ export default function ValidatePage() {
           page.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
+          <span className="rounded-full border border-brand-200 bg-tint px-2.5 py-1 font-medium text-brandtext">
             canonical JSON Schemas · drift-checked in CI
           </span>
           <span className="text-ink-faint">
             domain-battery {site.versions.domainBattery} · {site.versions.schema}
           </span>
         </div>
+        <p className="mt-4 text-sm text-ink-muted">
+          Building a new record from scratch? Start in the{" "}
+          <Link href="/create" className="font-semibold text-brandtext hover:text-brandtext">
+            Playground
+          </Link>
+          , which gives you a working template and checks it as you type.
+        </p>
       </header>
 
       <div className="mt-8 inline-flex rounded-lg border border-border p-1">
@@ -243,7 +250,7 @@ export default function ValidatePage() {
             key={value}
             onClick={() => setMode(value)}
             className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-              mode === value ? "bg-tint text-brand-700" : "text-ink-muted hover:text-ink"
+              mode === value ? "bg-tint text-brandtext" : "text-ink-muted hover:text-ink"
             }`}
           >
             {label}
