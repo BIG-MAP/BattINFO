@@ -78,3 +78,27 @@ def test_converter_version_builds_linked_package(fixture: Path) -> None:
     assert package.specification.id == package.cell_spec.id
     assert package.cell_instance is not None
     assert package.cell_instance.cell_spec_id == package.cell_spec.id
+    # Default import does not extract component specs.
+    assert package.component_records() == []
+
+
+@pytest.mark.parametrize("fixture", FIXTURES, ids=lambda p: p.name.replace(".coincell.jsonld", ""))
+def test_converter_components_extract_to_valid_specs(fixture: Path) -> None:
+    """components=True recovers the component tree as standalone canonical specs."""
+    from battinfo.validate import validate_record
+
+    package = import_converter_package(_load(fixture), components=True)
+    specs = package.component_records()
+    assert specs, "expected recovered component specs"
+    assert package.electrode_specs, "expected at least one electrode spec"
+    assert package.material_specs, "expected active-material specs"
+    for record in specs:
+        assert validate_record(record).ok, record
+        to_jsonld(record, target="domain-battery")  # raises on unmapped @type
+    # The recovered specs are linked from the cell spec.
+    linked = {
+        package.cell_spec.positive_electrode_spec_id,
+        package.cell_spec.negative_electrode_spec_id,
+        package.cell_spec.electrolyte_spec_id,
+    }
+    assert any(linked), "expected the cell spec to reference a recovered component"

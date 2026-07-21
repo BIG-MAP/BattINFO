@@ -156,6 +156,13 @@ class ConverterImportPackage:
     tests: list[Test] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     record: dict[str, Any] | None = None
+    # Populated only when import_converter_package(..., components=True): the
+    # component tree recovered from the CoinCell node as standalone canonical
+    # records (dicts, already validated), linked from the cell spec.
+    material_specs: list[dict[str, Any]] = field(default_factory=list)
+    electrode_specs: list[dict[str, Any]] = field(default_factory=list)
+    electrolyte_specs: list[dict[str, Any]] = field(default_factory=list)
+    separator_specs: list[dict[str, Any]] = field(default_factory=list)
 
     def objects(self) -> list[Any]:
         objects: list[Any] = [self.specification, self.cell_spec]
@@ -164,6 +171,10 @@ class ConverterImportPackage:
         objects.extend(self.test_specs)
         objects.extend(self.tests)
         return objects
+
+    def component_records(self) -> list[dict[str, Any]]:
+        """The extracted component specs as canonical record dicts (specs first)."""
+        return [*self.material_specs, *self.electrode_specs, *self.electrolyte_specs, *self.separator_specs]
 
     def add_to_workspace(self, workspace: "Workspace") -> "Workspace":
         workspace.add(*self.objects())
@@ -440,6 +451,7 @@ def import_converter_package(
     chemistry: str | None = None,
     schema_version: str = SCHEMA_VERSION,
     validate: bool = True,
+    components: bool = False,
 ) -> ConverterImportPackage:
     imported = import_converter_jsonld_record(
         source,
@@ -490,7 +502,7 @@ def import_converter_package(
         if test.protocol_id is not None and test.protocol_id in protocols_by_id:
             test.protocol_entity = protocols_by_id[test.protocol_id]
 
-    return ConverterImportPackage(
+    package = ConverterImportPackage(
         specification=specification,
         cell_spec=cell_spec,
         cell_instance=cell_instance,
@@ -499,6 +511,32 @@ def import_converter_package(
         warnings=list(imported.warnings),
         record=imported.record,
     )
+
+    if components:
+        # Recover the component tree the base import reduces to basis strings.
+        from battinfo.interop._converter_components import extract_component_specs  # noqa: PLC0415
+
+        payload, _name = _load_source(source)
+        coin_cell, _test = _normalize_to_coin_cell(payload)
+        seed = specification.id or model or "converter"
+        extraction = extract_component_specs(coin_cell, seed=str(seed), validate=validate)
+        package.material_specs = extraction.material_specs
+        package.electrode_specs = extraction.electrode_specs
+        package.electrolyte_specs = extraction.electrolyte_specs
+        package.separator_specs = extraction.separator_specs
+        package.warnings.extend(extraction.warnings)
+        # Link the recovered specs from the cell spec. specification and cell_spec
+        # are the same logical cell (same id); link both so whichever is
+        # serialized carries the references.
+        for target in (cell_spec, specification):
+            if extraction.positive_electrode_spec_id:
+                target.positive_electrode_spec_id = extraction.positive_electrode_spec_id
+            if extraction.negative_electrode_spec_id:
+                target.negative_electrode_spec_id = extraction.negative_electrode_spec_id
+            if extraction.electrolyte_spec_id:
+                target.electrolyte_spec_id = extraction.electrolyte_spec_id
+
+    return package
 
 
 def _load_source(source: Mapping[str, Any] | str | Path) -> tuple[dict[str, Any], str]:
