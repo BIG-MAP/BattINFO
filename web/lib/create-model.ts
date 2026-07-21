@@ -2,6 +2,11 @@
 // core canonical objects becomes its three working forms: the Python authoring
 // call, the canonical record JSON, and the published JSON-LD. Pure, no network.
 //
+// Most objects are a spec (a reusable design, its properties conventional) plus
+// an instance (a physical thing built to it, its properties measured). The
+// builder shows the two as stacked containers and emits the two records they
+// serialize to.
+//
 // The JSON-LD carries a self-contained inline @context assembled from the terms
 // the document actually uses (the hosted records context is cell-property
 // focused and does not define the composition/material terms), so every
@@ -14,6 +19,9 @@ export interface DraftProperty {
   key: string;
   value: string;
   unit: string;
+  // Which container the property belongs to: "spec" (conventional) or
+  // "instance" (measured). Empty for single-container types.
+  section?: string;
 }
 
 export type Values = Record<string, string>;
@@ -79,9 +87,11 @@ const ECHEM = "https://w3id.org/emmo/domain/electrochemistry#";
 const UNIT_IRI: Record<string, string> = {
   Ah: EMMO + "AmpereHour", mAh: EMMO + "MilliAmpereHour",
   V: EMMO + "Volt", mV: EMMO + "MilliVolt",
+  A: EMMO + "Ampere", mA: EMMO + "MilliAmpere",
   g: EMMO + "Gram", kg: EMMO + "Kilogram", mg: EMMO + "MilliGram",
   mm: EMMO + "MilliMetre", cm: EMMO + "CentiMetre", um: EMMO + "MicroMetre",
   "Ω": EMMO + "Ohm", "mΩ": EMMO + "MilliOhm", "%": EMMO + "Percent",
+  degC: EMMO + "DegreeCelsius",
   "Wh/kg": EMMO + "WattHourPerKilogram", "Wh/L": EMMO + "WattHourPerLitre",
   "mg/cm2": EMMO + "MilliGramPerSquareCentiMetre",
   "g/cm3": EMMO + "GramPerCubicCentiMetre",
@@ -133,6 +143,11 @@ function activeProps(props: DraftProperty[]): DraftProperty[] {
   return props.filter((p) => p.key && p.value.trim() !== "");
 }
 
+// Split a live property list by container.
+function inSection(props: DraftProperty[], section: string): DraftProperty[] {
+  return props.filter((p) => (p.section ?? "") === section);
+}
+
 function propBlock(props: DraftProperty[]): Record<string, unknown> {
   return Object.fromEntries(activeProps(props).map((p) => [p.key, { value: num(p.value), unit: p.unit }]));
 }
@@ -141,13 +156,24 @@ function pyKwargs(pairs: [string, string][]): string[] {
   return pairs.filter(([, v]) => v).map(([k, v]) => `    ${k}=${JSON.stringify(v)},`);
 }
 
-function pyProps(props: DraftProperty[]): string[] {
+// A keyword whose value is a property map: `name={ "key": {"value": …, "unit": …} }`.
+function pyNamedBlock(props: DraftProperty[], name: string): string[] {
   const list = activeProps(props);
   if (!list.length) return [];
-  const lines = ["    properties={"];
+  const lines = [`    ${name}={`];
   for (const p of list) lines.push(`        "${p.key}": {"value": ${JSON.stringify(num(p.value))}, "unit": ${JSON.stringify(p.unit)}},`);
   lines.push("    },");
   return lines;
+}
+
+// The instance record a spec+instance builder produces, shown as a literal so
+// the snippet stays honest without guessing a create_* helper for every type.
+function pyInstanceRecord(varName: string, record: Record<string, unknown>): string[] {
+  return [
+    "",
+    "# the physical thing you then save; ws.save mints its IRI and links the spec",
+    `${varName} = ${JSON.stringify(record, null, 4)}`,
+  ];
 }
 
 function jsonldProps(props: DraftProperty[]): Record<string, unknown>[] {
@@ -225,15 +251,24 @@ export interface PropDef {
   key: string;
   label: string;
   units: string[];
+  section?: string;
+  // Only offer this property when the record's `format` field is one of these
+  // (e.g. diameter only for cylindrical/coin) — the cell schema forbids the
+  // wrong-format dimensions. Undefined means "any format".
+  formats?: string[];
 }
 
 export interface SectionDef {
   key: string;
   title: string;
   blurb: string;
+  // Heading for this container's property list. Spec containers hold
+  // conventional (rated / declared) properties; instance containers hold
+  // measured ones.
+  propsLabel?: string;
 }
 
-// A builder can emit one record or several (a cell emits its spec + instance).
+// A builder can emit one record or several (a spec plus the instance built to it).
 export type Emitted = Record<string, unknown> | Record<string, unknown>[];
 
 export interface ObjectDef {
@@ -250,36 +285,108 @@ export interface ObjectDef {
   toJsonLd: (v: Values, props: DraftProperty[]) => Emitted;
 }
 
-const CELL_PROPS: PropDef[] = [
-  { key: "nominal_capacity", label: "Nominal capacity", units: ["Ah", "mAh"] },
-  { key: "nominal_voltage", label: "Nominal voltage", units: ["V", "mV"] },
-  { key: "mass", label: "Mass", units: ["g", "kg"] },
-  { key: "energy_density", label: "Energy density", units: ["Wh/kg", "Wh/L"] },
-  { key: "internal_resistance", label: "Internal resistance", units: ["mΩ", "Ω"] },
-  { key: "diameter", label: "Diameter", units: ["mm", "cm"] },
-  { key: "height", label: "Height", units: ["mm", "cm"] },
+// Properties split by container. Spec-side entries are conventional (rated /
+// declared on the design); instance-side entries are measured on the physical
+// thing. Cell keys are drawn from the canonical SpecSet vocabulary (a fixed set
+// shared by the spec's `properties` and the instance's `measured` block); the
+// component property blocks accept any snake_case key.
+const CELL_SPEC_PROPS: PropDef[] = [
+  // Ratings
+  { key: "nominal_capacity", label: "Nominal capacity", units: ["Ah", "mAh"], section: "spec" },
+  { key: "nominal_voltage", label: "Nominal voltage", units: ["V", "mV"], section: "spec" },
+  { key: "charging_voltage", label: "Charge voltage (upper)", units: ["V", "mV"], section: "spec" },
+  { key: "discharging_cutoff_voltage", label: "Discharge cutoff (lower)", units: ["V", "mV"], section: "spec" },
+  { key: "specific_energy", label: "Specific energy", units: ["Wh/kg"], section: "spec" },
+  { key: "energy_density", label: "Energy density", units: ["Wh/L"], section: "spec" },
+  // Current ratings
+  { key: "continuous_charging_current", label: "Max continuous charge current", units: ["A", "mA"], section: "spec" },
+  { key: "continuous_discharging_current", label: "Max continuous discharge current", units: ["A", "mA"], section: "spec" },
+  // Life, resistance, mass
+  { key: "cycle_life", label: "Cycle life", units: ["cycles"], section: "spec" },
+  { key: "internal_resistance", label: "Internal resistance", units: ["mΩ", "Ω"], section: "spec" },
+  { key: "mass", label: "Mass", units: ["g", "kg"], section: "spec" },
+  // Dimensions — the schema ties these to cell_format: diameter for round cells,
+  // width/length/thickness for prismatic & pouch. Height applies to all.
+  { key: "diameter", label: "Diameter", units: ["mm", "cm"], section: "spec", formats: ["cylindrical", "coin"] },
+  { key: "height", label: "Height", units: ["mm", "cm"], section: "spec" },
+  { key: "width", label: "Width", units: ["mm", "cm"], section: "spec", formats: ["prismatic", "pouch"] },
+  { key: "length", label: "Length", units: ["mm", "cm"], section: "spec", formats: ["prismatic", "pouch"] },
+  { key: "thickness", label: "Thickness", units: ["mm", "cm"], section: "spec", formats: ["prismatic", "pouch"] },
 ];
-const ELECTRODE_PROPS: PropDef[] = [
-  { key: "loading", label: "Areal mass loading", units: ["mg/cm2"] },
-  { key: "thickness", label: "Coating thickness", units: ["um"] },
+const CELL_MEASURED_PROPS: PropDef[] = [
+  { key: "mass", label: "Mass", units: ["g"], section: "instance" },
+  { key: "dc_internal_resistance", label: "DC internal resistance", units: ["mΩ", "Ω"], section: "instance" },
+  { key: "impedance", label: "AC impedance", units: ["mΩ", "Ω"], section: "instance" },
+  { key: "state_of_health", label: "State of health", units: ["%"], section: "instance" },
+  { key: "initial_coulombic_efficiency", label: "Initial coulombic efficiency", units: ["%"], section: "instance" },
 ];
-const MATERIAL_PROPS: PropDef[] = [{ key: "specific_capacity", label: "Specific capacity", units: ["mAh/g"] }];
+const CELL_PROPS: PropDef[] = [...CELL_SPEC_PROPS, ...CELL_MEASURED_PROPS];
+
+const MATERIAL_SPEC_PROPS: PropDef[] = [
+  { key: "specific_capacity", label: "Specific capacity", units: ["mAh/g"], section: "spec" },
+  { key: "density", label: "Density", units: ["g/cm3"], section: "spec" },
+];
+const MATERIAL_MEASURED_PROPS: PropDef[] = [
+  { key: "specific_capacity", label: "Measured specific capacity", units: ["mAh/g"], section: "instance" },
+  { key: "density", label: "Measured density", units: ["g/cm3"], section: "instance" },
+];
+const MATERIAL_PROPS: PropDef[] = [...MATERIAL_SPEC_PROPS, ...MATERIAL_MEASURED_PROPS];
+
+const ELECTRODE_SPEC_PROPS: PropDef[] = [
+  { key: "loading", label: "Target areal loading", units: ["mg/cm2"], section: "spec" },
+  { key: "thickness", label: "Target coating thickness", units: ["um"], section: "spec" },
+];
+const ELECTRODE_MEASURED_PROPS: PropDef[] = [
+  { key: "loading", label: "Measured areal loading", units: ["mg/cm2"], section: "instance" },
+  { key: "thickness", label: "Measured coating thickness", units: ["um"], section: "instance" },
+];
+const ELECTRODE_PROPS: PropDef[] = [...ELECTRODE_SPEC_PROPS, ...ELECTRODE_MEASURED_PROPS];
+
+const ELECTROLYTE_SPEC_PROPS: PropDef[] = [
+  { key: "density", label: "Density", units: ["g/cm3"], section: "spec" },
+];
+const ELECTROLYTE_MEASURED_PROPS: PropDef[] = [
+  { key: "density", label: "Measured density", units: ["g/cm3"], section: "instance" },
+];
+const ELECTROLYTE_PROPS: PropDef[] = [...ELECTROLYTE_SPEC_PROPS, ...ELECTROLYTE_MEASURED_PROPS];
+
+const TEST_SPEC_PROPS: PropDef[] = [
+  { key: "temperature", label: "Temperature", units: ["degC"], section: "spec" },
+  { key: "upper_voltage", label: "Upper voltage", units: ["V"], section: "spec" },
+  { key: "lower_voltage", label: "Lower voltage", units: ["V"], section: "spec" },
+];
+const TEST_MEASURED_PROPS: PropDef[] = [
+  { key: "temperature", label: "Temperature", units: ["degC"], section: "instance" },
+  { key: "discharge_capacity", label: "Discharge capacity", units: ["mAh", "Ah"], section: "instance" },
+];
+const TEST_PROPS: PropDef[] = [...TEST_SPEC_PROPS, ...TEST_MEASURED_PROPS];
+
+const SPEC_SECTION: SectionDef = {
+  key: "spec",
+  title: "Specification",
+  blurb: "The reusable design. Its properties are conventional: rated or declared values that hold for every unit built to it.",
+  propsLabel: "Conventional properties (rated / declared)",
+};
+const INSTANCE_SECTION: SectionDef = {
+  key: "instance",
+  title: "Instances",
+  blurb: "One physical thing built to the spec. Its properties are measured: values observed on this particular unit. On save it links back to the spec.",
+  propsLabel: "Measured properties",
+};
 
 export const OBJECT_TYPES: ObjectDef[] = [
   {
     key: "cell",
-    label: "Cell",
+    label: "Battery Cell",
     blurb: "A cell design (spec) and a physical unit built to it (instance).",
     sections: [
       {
-        key: "spec",
-        title: "Cell spec",
+        ...SPEC_SECTION,
         blurb: "The reusable design of a cell: format, chemistry, electrodes, and rated properties. Many physical cells can share one spec.",
       },
       {
-        key: "instance",
-        title: "Cell instance",
-        blurb: "One physical cell built to the spec, with its own serial number and dates. On save it links back to the spec.",
+        ...INSTANCE_SECTION,
+        blurb: "One physical cell built to the spec, with its own label, dates, and measured values. On save it links back to the spec.",
       },
     ],
     fields: [
@@ -301,8 +408,9 @@ export const OBJECT_TYPES: ObjectDef[] = [
       instanceName: "Cell 001", serial_number: "SN-0001", manufactured_at: "2024-06-01", expires_at: "2034-06-01",
     },
     defaultProperties: [
-      { key: "nominal_capacity", value: "2.5", unit: "Ah" },
-      { key: "nominal_voltage", value: "3.3", unit: "V" },
+      { key: "nominal_capacity", value: "2.5", unit: "Ah", section: "spec" },
+      { key: "nominal_voltage", value: "3.3", unit: "V", section: "spec" },
+      { key: "state_of_health", value: "100", unit: "%", section: "instance" },
     ],
     toRecord: (v, props) => {
       const spec: Record<string, unknown> = {};
@@ -315,15 +423,17 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.positiveBasis) spec.positive_electrode_basis = v.positiveBasis;
       if (v.negativeBasis) spec.negative_electrode_basis = v.negativeBasis;
       const specRecord: Record<string, unknown> = { schema_version: "0.1.0", cell_spec: spec };
-      const p = propBlock(props);
-      if (Object.keys(p).length) specRecord.properties = p;
+      const sp = propBlock(inSection(props, "spec"));
+      if (Object.keys(sp).length) specRecord.properties = sp;
 
       const instance: Record<string, unknown> = {};
       if (v.instanceName) instance.name = v.instanceName;
       if (v.serial_number) instance.serial_number = v.serial_number;
       if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
       if (v.expires_at) instance.expires_at = v.expires_at;
-      const instanceRecord = { schema_version: "0.1.0", cell_instance: instance };
+      const instanceRecord: Record<string, unknown> = { schema_version: "0.1.0", cell_instance: instance };
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instanceRecord.measured = mp;
       return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
@@ -334,7 +444,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
         ["format", v.format], ["chemistry", v.chemistry],
         ["positive_electrode_basis", v.positiveBasis], ["negative_electrode_basis", v.negativeBasis],
       ]));
-      lines.push(...pyProps(props), ")", "spec_record = spec.to_record()", "");
+      lines.push(...pyNamedBlock(inSection(props, "spec"), "properties"), ")", "spec_record = spec.to_record()", "");
       lines.push("# one physical cell built to the spec");
       lines.push("instance = create_cell_instance(");
       lines.push('    cell_spec_id=spec_record["cell_spec"]["id"],');
@@ -342,6 +452,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
         ["name", v.instanceName], ["serial_number", v.serial_number],
         ["manufactured_at", v.manufactured_at], ["expires_at", v.expires_at],
       ]));
+      lines.push(...pyNamedBlock(inSection(props, "instance"), "measured"));
       lines.push(")");
       return lines.join("\n");
     },
@@ -359,91 +470,161 @@ export const OBJECT_TYPES: ObjectDef[] = [
       const neg = electrodeNode(v.negativeBasis);
       if (pos) specDoc.hasPositiveElectrode = pos;
       if (neg) specDoc.hasNegativeElectrode = neg;
-      const hp = jsonldProps(props);
+      const hp = jsonldProps(inSection(props, "spec"));
       if (hp.length) specDoc.hasProperty = hp;
 
       const instanceDoc: Record<string, unknown> = { "@type": "BatteryCell" };
       if (v.instanceName) instanceDoc.name = v.instanceName;
       if (v.serial_number) instanceDoc["schema:serialNumber"] = v.serial_number;
+      const mp = jsonldProps(inSection(props, "instance"));
+      if (mp.length) instanceDoc.hasProperty = mp;
       return [withContext(specDoc), withContext(instanceDoc)];
     },
   },
   {
-    key: "material_spec",
-    label: "Material spec",
-    blurb: "A reusable substance: an active material, binder, or additive.",
+    key: "material",
+    label: "Material",
+    blurb: "A material grade (spec) and a received lot of it (instance).",
+    sections: [
+      {
+        ...SPEC_SECTION,
+        blurb: "A material grade as its maker defines it: class, formula, and declared properties. Reused by every lot of that grade.",
+      },
+      {
+        ...INSTANCE_SECTION,
+        blurb: "One received lot or batch of that grade, with its own identifiers and the properties measured on it.",
+      },
+    ],
     fields: [
-      { key: "name", label: "Name", kind: "text", placeholder: "e.g. NMC811" },
-      { key: "material_class", label: "Material class", kind: "select", options: ["active_material", "binder", "conductive_additive"] },
-      { key: "formula", label: "Formula", kind: "text", placeholder: "e.g. LiNi0.8Mn0.1Co0.1O2" },
-      { key: "chemistry_family", label: "Chemistry family", kind: "text", placeholder: "e.g. lithium nickel manganese cobalt oxide" },
+      { key: "name", label: "Name", kind: "text", placeholder: "e.g. NMC811", section: "spec" },
+      { key: "material_class", label: "Material class", kind: "select", options: ["active_material", "binder", "conductive_additive"], section: "spec" },
+      { key: "formula", label: "Formula", kind: "text", placeholder: "e.g. LiNi0.8Mn0.1Co0.1O2", section: "spec" },
+      { key: "chemistry_family", label: "Chemistry family", kind: "text", placeholder: "e.g. lithium nickel manganese cobalt oxide", section: "spec" },
+      { key: "instanceName", label: "Name / label", kind: "text", placeholder: "e.g. NMC811 lot 2406", section: "instance" },
+      { key: "lot_id", label: "Lot", kind: "text", placeholder: "e.g. LOT-2406", section: "instance" },
+      { key: "batch_id", label: "Batch", kind: "text", section: "instance" },
+      { key: "received_date", label: "Received date", kind: "date", section: "instance" },
     ],
     properties: MATERIAL_PROPS,
-    defaults: { name: "NMC811", material_class: "active_material", formula: "LiNi0.8Mn0.1Co0.1O2", chemistry_family: "lithium nickel manganese cobalt oxide" },
-    defaultProperties: [{ key: "specific_capacity", value: "188", unit: "mAh/g" }],
+    defaults: {
+      name: "NMC811", material_class: "active_material", formula: "LiNi0.8Mn0.1Co0.1O2", chemistry_family: "lithium nickel manganese cobalt oxide",
+      instanceName: "NMC811 lot 2406", lot_id: "LOT-2406", batch_id: "", received_date: "2024-06-15",
+    },
+    defaultProperties: [
+      { key: "specific_capacity", value: "188", unit: "mAh/g", section: "spec" },
+      { key: "specific_capacity", value: "185", unit: "mAh/g", section: "instance" },
+    ],
     toRecord: (v, props) => {
-      const body: Record<string, unknown> = {};
-      if (v.name) body.name = v.name;
-      if (v.material_class) body.material_class = v.material_class;
-      if (v.formula) body.formula = v.formula;
-      if (v.chemistry_family) body.chemistry_family = v.chemistry_family;
-      const p = propBlock(props);
-      if (Object.keys(p).length) body.property = p;
-      return { schema_version: "0.1.0", material_spec: body };
+      const spec: Record<string, unknown> = {};
+      if (v.name) spec.name = v.name;
+      if (v.material_class) spec.material_class = v.material_class;
+      if (v.formula) spec.formula = v.formula;
+      if (v.chemistry_family) spec.chemistry_family = v.chemistry_family;
+      const sp = propBlock(inSection(props, "spec"));
+      if (Object.keys(sp).length) spec.property = sp;
+      const specRecord = { schema_version: "0.1.0", material_spec: spec };
+
+      const instance: Record<string, unknown> = {};
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.lot_id) instance.lot_id = v.lot_id;
+      if (v.batch_id) instance.batch_id = v.batch_id;
+      if (v.received_date) instance.received_date = v.received_date;
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instance.property = mp;
+      const instanceRecord = { schema_version: "0.1.0", material: instance };
+      return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
       const lines = ["from battinfo import create_material_spec", "", "record = create_material_spec("];
       lines.push(...pyKwargs([["name", v.name], ["material_class", v.material_class], ["formula", v.formula], ["chemistry_family", v.chemistry_family]]));
-      const list = activeProps(props);
-      if (list.length) {
-        lines.push("    property={");
-        for (const p of list) lines.push(`        "${p.key}": {"value": ${JSON.stringify(num(p.value))}, "unit": ${JSON.stringify(p.unit)}},`);
-        lines.push("    },");
-      }
+      lines.push(...pyNamedBlock(inSection(props, "spec"), "property"));
       lines.push(")");
+      const instance: Record<string, unknown> = { material_spec_id: '<minted on save>' };
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.lot_id) instance.lot_id = v.lot_id;
+      if (v.batch_id) instance.batch_id = v.batch_id;
+      if (v.received_date) instance.received_date = v.received_date;
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instance.property = mp;
+      lines.push(...pyInstanceRecord("material_lot", { schema_version: "0.1.0", material: instance }));
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
       const types: string[] = [];
       if (SUBSTANCE[v.name]) types.push(SUBSTANCE[v.name]);
       if (MATERIAL_ROLE[v.material_class]) types.push(MATERIAL_ROLE[v.material_class]);
-      const doc: Record<string, unknown> = {};
-      if (types.length) doc["@type"] = types.length === 1 ? types[0] : types;
-      if (v.name) doc.name = v.name;
-      const hp = jsonldProps(props);
-      if (hp.length) doc.hasProperty = hp;
-      return withContext(doc);
+      const specDoc: Record<string, unknown> = {};
+      if (types.length) specDoc["@type"] = types.length === 1 ? types[0] : types;
+      if (v.name) specDoc.name = v.name;
+      const sp = jsonldProps(inSection(props, "spec"));
+      if (sp.length) specDoc.hasProperty = sp;
+
+      const instanceDoc: Record<string, unknown> = {};
+      if (types.length) instanceDoc["@type"] = types.length === 1 ? types[0] : types;
+      instanceDoc.name = v.instanceName || v.name;
+      const mp = jsonldProps(inSection(props, "instance"));
+      if (mp.length) instanceDoc.hasProperty = mp;
+      return [withContext(specDoc), withContext(instanceDoc)];
     },
   },
   {
-    key: "electrode_spec",
-    label: "Electrode spec",
-    blurb: "A coated electrode: an active material on a current collector.",
+    key: "electrode",
+    label: "Electrode",
+    blurb: "An electrode design (spec) and a coated electrode built to it (instance).",
+    sections: [
+      {
+        ...SPEC_SECTION,
+        blurb: "An electrode design: the coating recipe, current collector, and target coating properties.",
+        propsLabel: "Conventional properties (design targets)",
+      },
+      {
+        ...INSTANCE_SECTION,
+        blurb: "One coated electrode built to the design, with the coating properties measured on it.",
+      },
+    ],
     fields: [
-      { key: "name", label: "Name", kind: "text", placeholder: "e.g. NMC cathode" },
-      { key: "polarity", label: "Polarity", kind: "select", options: ["positive", "negative"] },
-      { key: "active", label: "Active material", kind: "text", placeholder: "e.g. NMC" },
-      { key: "collector", label: "Current collector", kind: "text", placeholder: "e.g. Aluminium foil" },
+      { key: "name", label: "Name", kind: "text", placeholder: "e.g. NMC cathode", section: "spec" },
+      { key: "polarity", label: "Polarity", kind: "select", options: ["positive", "negative"], section: "spec" },
+      { key: "active", label: "Active material", kind: "text", placeholder: "e.g. NMC", section: "spec" },
+      { key: "collector", label: "Current collector", kind: "text", placeholder: "e.g. Aluminium foil", section: "spec" },
+      { key: "instanceName", label: "Name / label", kind: "text", placeholder: "e.g. NMC cathode lot 07", section: "instance" },
+      { key: "lot_id", label: "Lot", kind: "text", placeholder: "e.g. EL-07", section: "instance" },
+      { key: "batch_id", label: "Batch", kind: "text", section: "instance" },
+      { key: "manufactured_at", label: "Coating date", kind: "date", section: "instance" },
     ],
     properties: ELECTRODE_PROPS,
-    defaults: { name: "NMC cathode", polarity: "positive", active: "NMC", collector: "Aluminium foil" },
+    defaults: {
+      name: "NMC cathode", polarity: "positive", active: "NMC", collector: "Aluminium foil",
+      instanceName: "NMC cathode lot 07", lot_id: "EL-07", batch_id: "", manufactured_at: "2024-06-20",
+    },
     defaultProperties: [
-      { key: "loading", value: "6.6", unit: "mg/cm2" },
-      { key: "thickness", value: "16", unit: "um" },
+      { key: "loading", value: "6.6", unit: "mg/cm2", section: "spec" },
+      { key: "thickness", value: "16", unit: "um", section: "spec" },
+      { key: "loading", value: "6.5", unit: "mg/cm2", section: "instance" },
     ],
     toRecord: (v, props) => {
       const coating: Record<string, unknown> = { component: { active_material: [{ name: v.active }] } };
-      const p = propBlock(props);
-      if (Object.keys(p).length) coating.property = p;
-      const body: Record<string, unknown> = { coating };
-      if (v.name) body.name = v.name;
-      if (v.polarity) body.polarity = v.polarity;
-      if (v.collector) body.current_collector = { name: v.collector };
-      return { schema_version: "0.1.0", electrode_spec: body };
+      const sp = propBlock(inSection(props, "spec"));
+      if (Object.keys(sp).length) coating.property = sp;
+      const spec: Record<string, unknown> = { coating };
+      if (v.name) spec.name = v.name;
+      if (v.polarity) spec.polarity = v.polarity;
+      if (v.collector) spec.current_collector = { name: v.collector };
+      const specRecord = { schema_version: "0.1.0", electrode_spec: spec };
+
+      const instance: Record<string, unknown> = {};
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.lot_id) instance.lot_id = v.lot_id;
+      if (v.batch_id) instance.batch_id = v.batch_id;
+      if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instance.property = mp;
+      const instanceRecord = { schema_version: "0.1.0", electrode: instance };
+      return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
-      const body = { coating: { component: { active_material: [{ name: v.active }] }, property: propBlock(props) }, current_collector: { name: v.collector } };
-      return [
+      const body = { coating: { component: { active_material: [{ name: v.active }] }, property: propBlock(inSection(props, "spec")) }, current_collector: { name: v.collector } };
+      const lines = [
         "from battinfo import create_component_spec",
         "",
         'record = create_component_spec(',
@@ -451,43 +632,90 @@ export const OBJECT_TYPES: ObjectDef[] = [
         ...pyKwargs([["name", v.name], ["polarity", v.polarity]]),
         `    body=${JSON.stringify(body, null, 4).replace(/\n/g, "\n    ")},`,
         ")",
-      ].join("\n");
+      ];
+      const instance: Record<string, unknown> = { electrode_spec_id: '<minted on save>' };
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.lot_id) instance.lot_id = v.lot_id;
+      if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instance.property = mp;
+      lines.push(...pyInstanceRecord("electrode_unit", { schema_version: "0.1.0", electrode: instance }));
+      return lines.join("\n");
     },
     toJsonLd: (v, props) => {
-      const doc: Record<string, unknown> = { "@type": "Electrode" };
-      if (v.name) doc.name = v.name;
+      const specDoc: Record<string, unknown> = { "@type": "Electrode" };
+      if (v.name) specDoc.name = v.name;
       const active: Record<string, unknown> = SUBSTANCE[v.active] ? { "@type": SUBSTANCE[v.active], name: v.active } : { "@type": "ActiveMaterial", name: v.active };
-      doc.hasActiveMaterial = active;
-      if (v.collector) doc.hasCurrentCollector = { "@type": "CurrentCollector", name: v.collector };
-      const hp = jsonldProps(props);
-      if (hp.length) doc.hasProperty = hp;
-      return withContext(doc);
+      specDoc.hasActiveMaterial = active;
+      if (v.collector) specDoc.hasCurrentCollector = { "@type": "CurrentCollector", name: v.collector };
+      const sp = jsonldProps(inSection(props, "spec"));
+      if (sp.length) specDoc.hasProperty = sp;
+
+      const instanceDoc: Record<string, unknown> = { "@type": "Electrode" };
+      instanceDoc.name = v.instanceName || v.name;
+      const mp = jsonldProps(inSection(props, "instance"));
+      if (mp.length) instanceDoc.hasProperty = mp;
+      return [withContext(specDoc), withContext(instanceDoc)];
     },
   },
   {
-    key: "electrolyte_spec",
-    label: "Electrolyte spec",
-    blurb: "A salt-in-solvent electrolyte recipe.",
-    fields: [
-      { key: "name", label: "Name", kind: "text", placeholder: "e.g. 1M LiPF6 EC:DMC" },
-      { key: "family", label: "Family", kind: "select", options: ["organic", "aqueous", "ionic liquid", "polymer", "solid"] },
-      { key: "salt", label: "Salt", kind: "text", placeholder: "e.g. LiPF6" },
-      { key: "solvents", label: "Solvents (comma-separated)", kind: "text", placeholder: "e.g. EC, DMC" },
+    key: "electrolyte",
+    label: "Electrolyte",
+    blurb: "An electrolyte recipe (spec) and a mixed batch of it (instance).",
+    sections: [
+      {
+        ...SPEC_SECTION,
+        blurb: "An electrolyte recipe: salt, solvents, and declared properties. Reused by every batch mixed to it.",
+      },
+      {
+        ...INSTANCE_SECTION,
+        blurb: "One mixed batch of that recipe, with its own identifiers and the properties measured on it.",
+      },
     ],
-    defaults: { name: "1M LiPF6 EC:DMC", family: "organic", salt: "LiPF6", solvents: "EC, DMC" },
-    toRecord: (v) => {
-      const body: Record<string, unknown> = {};
-      if (v.family) body.family = v.family;
-      if (v.name) body.name = v.name;
-      if (v.salt) body.salt = { name: v.salt };
-      const solvents = v.solvents.split(",").map((s) => s.trim()).filter(Boolean);
-      if (solvents.length) body.solvent_mixture = { component: solvents.map((name) => ({ name })) };
-      return { schema_version: "0.1.0", electrolyte_spec: body };
+    fields: [
+      { key: "name", label: "Name", kind: "text", placeholder: "e.g. 1M LiPF6 EC:DMC", section: "spec" },
+      { key: "family", label: "Family", kind: "select", options: ["organic", "aqueous", "ionic liquid", "polymer", "solid"], section: "spec" },
+      { key: "salt", label: "Salt", kind: "text", placeholder: "e.g. LiPF6", section: "spec" },
+      { key: "solvents", label: "Solvents (comma-separated)", kind: "text", placeholder: "e.g. EC, DMC", section: "spec" },
+      { key: "instanceName", label: "Name / label", kind: "text", placeholder: "e.g. 1M LiPF6 EC:DMC batch 3", section: "instance" },
+      { key: "lot_id", label: "Lot", kind: "text", placeholder: "e.g. ELY-3", section: "instance" },
+      { key: "batch_id", label: "Batch", kind: "text", section: "instance" },
+      { key: "manufactured_at", label: "Mixing date", kind: "date", section: "instance" },
+    ],
+    properties: ELECTROLYTE_PROPS,
+    defaults: {
+      name: "1M LiPF6 EC:DMC", family: "organic", salt: "LiPF6", solvents: "EC, DMC",
+      instanceName: "1M LiPF6 EC:DMC batch 3", lot_id: "ELY-3", batch_id: "", manufactured_at: "2024-06-18",
     },
-    toPython: (v) => {
+    defaultProperties: [
+      { key: "density", value: "1.29", unit: "g/cm3", section: "spec" },
+      { key: "density", value: "1.29", unit: "g/cm3", section: "instance" },
+    ],
+    toRecord: (v, props) => {
+      const spec: Record<string, unknown> = {};
+      if (v.family) spec.family = v.family;
+      if (v.name) spec.name = v.name;
+      if (v.salt) spec.salt = { name: v.salt };
       const solvents = v.solvents.split(",").map((s) => s.trim()).filter(Boolean);
-      const body = { family: v.family, salt: { name: v.salt }, solvent_mixture: { component: solvents.map((name) => ({ name })) } };
-      return [
+      if (solvents.length) spec.solvent_mixture = { component: solvents.map((name) => ({ name })) };
+      const sp = propBlock(inSection(props, "spec"));
+      if (Object.keys(sp).length) spec.property = sp;
+      const specRecord = { schema_version: "0.1.0", electrolyte_spec: spec };
+
+      const instance: Record<string, unknown> = {};
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.lot_id) instance.lot_id = v.lot_id;
+      if (v.batch_id) instance.batch_id = v.batch_id;
+      if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instance.property = mp;
+      const instanceRecord = { schema_version: "0.1.0", electrolyte: instance };
+      return [specRecord, instanceRecord];
+    },
+    toPython: (v, props) => {
+      const solvents = v.solvents.split(",").map((s) => s.trim()).filter(Boolean);
+      const body = { family: v.family, salt: { name: v.salt }, solvent_mixture: { component: solvents.map((name) => ({ name })) }, property: propBlock(inSection(props, "spec")) };
+      const lines = [
         "from battinfo import create_component_spec",
         "",
         'record = create_component_spec(',
@@ -495,52 +723,127 @@ export const OBJECT_TYPES: ObjectDef[] = [
         ...pyKwargs([["name", v.name]]),
         `    body=${JSON.stringify(body, null, 4).replace(/\n/g, "\n    ")},`,
         ")",
-      ].join("\n");
+      ];
+      const instance: Record<string, unknown> = { electrolyte_spec_id: '<minted on save>' };
+      if (v.instanceName) instance.name = v.instanceName;
+      if (v.lot_id) instance.lot_id = v.lot_id;
+      if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
+      const mp = propBlock(inSection(props, "instance"));
+      if (Object.keys(mp).length) instance.property = mp;
+      lines.push(...pyInstanceRecord("electrolyte_batch", { schema_version: "0.1.0", electrolyte: instance }));
+      return lines.join("\n");
     },
-    toJsonLd: (v) => {
-      const doc: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
-      if (v.name) doc.name = v.name;
-      if (v.salt) doc.hasSolute = SUBSTANCE[v.salt] ? { "@type": SUBSTANCE[v.salt], name: v.salt } : { "@type": "Solute", name: v.salt };
+    toJsonLd: (v, props) => {
+      const specDoc: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
+      if (v.name) specDoc.name = v.name;
+      if (v.salt) specDoc.hasSolute = SUBSTANCE[v.salt] ? { "@type": SUBSTANCE[v.salt], name: v.salt } : { "@type": "Solute", name: v.salt };
       const solvents = v.solvents.split(",").map((s) => s.trim()).filter(Boolean);
       if (solvents.length) {
-        doc.hasSolvent = {
+        specDoc.hasSolvent = {
           "@type": "Solvent",
           hasConstituent: solvents.map((name) => (SUBSTANCE[name] ? { "@type": SUBSTANCE[name], name } : { name })),
         };
       }
-      return withContext(doc);
+      const sp = jsonldProps(inSection(props, "spec"));
+      if (sp.length) specDoc.hasProperty = sp;
+
+      const instanceDoc: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
+      instanceDoc.name = v.instanceName || v.name;
+      const mp = jsonldProps(inSection(props, "instance"));
+      if (mp.length) instanceDoc.hasProperty = mp;
+      return [withContext(specDoc), withContext(instanceDoc)];
     },
   },
   {
     key: "test",
     label: "Test",
-    blurb: "A measurement performed on a cell.",
-    fields: [
-      { key: "name", label: "Name", kind: "text", placeholder: "e.g. Rate capability" },
-      { key: "cell_id", label: "Cell IRI", kind: "text", placeholder: "https://w3id.org/battinfo/cell/…" },
-      { key: "kind", label: "Kind", kind: "select", options: ["cycling", "eis", "dcir", "quasi_ocv", "capacity_check"] },
-      { key: "status", label: "Status", kind: "select", options: ["completed", "planned", "running"] },
+    blurb: "A test protocol (spec) and one run of it on a cell (instance).",
+    sections: [
+      {
+        ...SPEC_SECTION,
+        blurb: "A reusable test protocol: what is run and the conditions it defines. Many runs can share one protocol.",
+        propsLabel: "Defined conditions",
+      },
+      {
+        ...INSTANCE_SECTION,
+        blurb: "One run of the protocol on a specific cell, with the conditions actually applied and results measured.",
+        propsLabel: "Measured conditions and results",
+      },
     ],
-    defaults: { name: "Rate capability", cell_id: "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5", kind: "cycling", status: "completed" },
-    toRecord: (v) => {
-      const body: Record<string, unknown> = {};
-      if (v.name) body.name = v.name;
-      if (v.cell_id) body.cell_id = v.cell_id;
-      if (v.kind) body.kind = v.kind;
-      if (v.status) body.status = v.status;
-      return { schema_version: "0.1.0", test: body };
+    fields: [
+      { key: "name", label: "Protocol name", kind: "text", placeholder: "e.g. CC-CV cycling", section: "spec" },
+      { key: "kind", label: "Kind", kind: "select", options: ["cycling", "eis", "dcir", "quasi_ocv", "capacity_check"], section: "spec" },
+      { key: "version", label: "Version", kind: "text", placeholder: "e.g. 1", section: "spec" },
+      { key: "runName", label: "Run name", kind: "text", placeholder: "e.g. CC-CV cycling of Cell 001", section: "instance" },
+      { key: "cell_id", label: "Cell IRI", kind: "text", placeholder: "https://w3id.org/battinfo/cell/…", section: "instance" },
+      { key: "status", label: "Status", kind: "select", options: ["completed", "planned", "running"], section: "instance" },
+    ],
+    properties: TEST_PROPS,
+    defaults: {
+      name: "CC-CV cycling", kind: "cycling", version: "1",
+      runName: "CC-CV cycling of Cell 001", cell_id: "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5", status: "completed",
     },
-    toPython: (v) => [
-      "from battinfo import Test",
-      "",
-      "record = Test(",
-      ...pyKwargs([["name", v.name], ["cell_id", v.cell_id], ["kind", v.kind], ["status", v.status]]),
-      ").to_record()",
-    ].join("\n"),
-    toJsonLd: (v) => {
-      const doc: Record<string, unknown> = { "@type": "BatteryTest" };
-      if (v.name) doc.name = v.name;
-      return withContext(doc);
+    defaultProperties: [
+      { key: "temperature", value: "25", unit: "degC", section: "spec" },
+      { key: "upper_voltage", value: "3.6", unit: "V", section: "spec" },
+      { key: "lower_voltage", value: "2.0", unit: "V", section: "spec" },
+      { key: "temperature", value: "25", unit: "degC", section: "instance" },
+      { key: "discharge_capacity", value: "2.48", unit: "Ah", section: "instance" },
+    ],
+    toRecord: (v, props) => {
+      const spec: Record<string, unknown> = {};
+      if (v.name) spec.name = v.name;
+      if (v.kind) spec.kind = v.kind;
+      if (v.version) spec.version = v.version;
+      const specRecord: Record<string, unknown> = { schema_version: "0.1.0", test_spec: spec };
+      const sc = propBlock(inSection(props, "spec"));
+      if (Object.keys(sc).length) specRecord.conditions = sc;
+
+      const run: Record<string, unknown> = {};
+      if (v.runName) run.name = v.runName;
+      if (v.cell_id) run.cell_id = v.cell_id;
+      if (v.kind) run.kind = v.kind;
+      if (v.status) run.status = v.status;
+      const mc = propBlock(inSection(props, "instance"));
+      if (Object.keys(mc).length) run.conditions = mc;
+      const runRecord = { schema_version: "0.1.0", test: run };
+      return [specRecord, runRecord];
+    },
+    toPython: (v, props) => {
+      const spec: Record<string, unknown> = {};
+      if (v.name) spec.name = v.name;
+      if (v.kind) spec.kind = v.kind;
+      if (v.version) spec.version = v.version;
+      const protocol: Record<string, unknown> = { schema_version: "0.1.0", test_spec: spec };
+      const sc = propBlock(inSection(props, "spec"));
+      if (Object.keys(sc).length) protocol.conditions = sc;
+      const lines = [
+        "# a reusable test protocol",
+        `protocol = ${JSON.stringify(protocol, null, 4)}`,
+        "",
+        "from battinfo import Test",
+        "",
+        "# one run of the protocol on a cell",
+        "record = Test(",
+        ...pyKwargs([["name", v.runName], ["cell_id", v.cell_id], ["kind", v.kind], ["status", v.status]]),
+      ];
+      lines.push(").to_record()");
+      const mc = propBlock(inSection(props, "instance"));
+      if (Object.keys(mc).length) {
+        lines.push(`record["test"]["conditions"] = ${JSON.stringify(mc, null, 4)}  # measured conditions & results`);
+      }
+      return lines.join("\n");
+    },
+    toJsonLd: (v, props) => {
+      const protocolDoc: Record<string, unknown> = { "@type": "schema:CreativeWork" };
+      if (v.name) protocolDoc.name = v.name;
+      const sp = jsonldProps(inSection(props, "spec"));
+      if (sp.length) protocolDoc.hasProperty = sp;
+      const runDoc: Record<string, unknown> = { "@type": "BatteryTest" };
+      if (v.runName) runDoc.name = v.runName;
+      const mp = jsonldProps(inSection(props, "instance"));
+      if (mp.length) runDoc.hasProperty = mp;
+      return [withContext(protocolDoc), withContext(runDoc)];
     },
   },
   {
