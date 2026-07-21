@@ -19,26 +19,27 @@ Installation
 
 BattINFO requires Python 3.11 or later.
 
-.. code-block:: bash
+.. note::
 
-   pip install battinfo
-
-Optional extras add features as you need them (each missing dependency raises
-an error naming the extra to install):
-
-.. code-block:: bash
-
-   pip install "battinfo[processing]"   # cycler-file conversion (ws.convert) + plotting
-   pip install "battinfo[tabular]"      # CSV/Parquet/XLSX readers
-   pip install "battinfo[publish]"      # RO-Crate validation for publishing
-
-Or install from source for the latest development version:
+   The package is not on PyPI yet — it publishes with the 0.8 release. Until
+   then, install from source.
 
 .. code-block:: bash
 
    git clone https://github.com/BIG-MAP/BattINFO.git
    cd BattINFO
    pip install -e ".[dev]"
+
+Once 0.8 is released, ``pip install battinfo`` will work, with optional extras
+that add features as you need them (each missing dependency raises an error
+naming the extra to install):
+
+.. code-block:: bash
+
+   pip install battinfo                  # core
+   pip install "battinfo[processing]"    # cycler-file conversion (ws.convert) + plotting
+   pip install "battinfo[tabular]"       # CSV/Parquet/XLSX readers
+   pip install "battinfo[publish]"       # RO-Crate validation for publishing
 
 
 If you have data: the workspace
