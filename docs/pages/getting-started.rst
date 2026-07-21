@@ -8,7 +8,7 @@ BattINFO is the semantic data layer for battery technology. It gives you:
 - Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology
 - A reusable cell-spec library backed by canonical records in ``battinfo-records``
 
-Working at the bench? The :doc:`cookbook <cookbook>` maps twelve lab tasks —
+Working at the bench? The :doc:`how-to guides <howto>` map twelve lab tasks —
 register materials, build a cell from components, label cells, publish — to
 short runnable recipes, and the :doc:`glossary <glossary>` decodes the
 vocabulary in plain language.
@@ -19,26 +19,27 @@ Installation
 
 BattINFO requires Python 3.11 or later.
 
-.. code-block:: bash
+.. note::
 
-   pip install battinfo
-
-Optional extras add features as you need them (each missing dependency raises
-an error naming the extra to install):
-
-.. code-block:: bash
-
-   pip install "battinfo[processing]"   # cycler-file conversion (ws.convert) + plotting
-   pip install "battinfo[tabular]"      # CSV/Parquet/XLSX readers
-   pip install "battinfo[publish]"      # RO-Crate validation for publishing
-
-Or install from source for the latest development version:
+   The package is not on PyPI yet — it publishes with the 0.8 release. Until
+   then, install from source.
 
 .. code-block:: bash
 
    git clone https://github.com/BIG-MAP/BattINFO.git
    cd BattINFO
    pip install -e ".[dev]"
+
+Once 0.8 is released, ``pip install battinfo`` will work, with optional extras
+that add features as you need them (each missing dependency raises an error
+naming the extra to install):
+
+.. code-block:: bash
+
+   pip install battinfo                  # core
+   pip install "battinfo[processing]"    # cycler-file conversion (ws.convert) + plotting
+   pip install "battinfo[tabular]"       # CSV/Parquet/XLSX readers
+   pip install "battinfo[publish]"       # RO-Crate validation for publishing
 
 
 If you have data: the workspace

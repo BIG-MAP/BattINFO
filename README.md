@@ -35,7 +35,7 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 
 [**Quickstart**](QUICKSTART.md) ·
 [**Documentation**](docs/index.md) ·
-[**Cookbook**](docs/pages/cookbook.md) ·
+[**How-to guides**](docs/pages/howto.md) ·
 [**Tutorials**](#tutorials) ·
 [**Contributing**](#contributing) ·
 [**Cite**](#citation)
@@ -135,7 +135,7 @@ ws = battinfo.workspace(".")
 ws.quickstart()   # prints a copy-pasteable end-to-end example
 ```
 
-**Lab work?** Start at the [cookbook](docs/pages/cookbook.md) — twelve bench
+**Lab work?** Start at the [how-to guides](docs/pages/howto.md) — twelve bench
 tasks (register materials, build a cell from components, label cells, convert
 cycler exports, publish) each mapped to a runnable recipe. The
 [capability table](docs/workspace-authoring.md#what-each-surface-can-author-today)

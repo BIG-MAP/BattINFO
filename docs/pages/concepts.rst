@@ -1,47 +1,15 @@
 Concepts
 ========
 
-The design, in reading order: the big picture first, then the record model
-built up from materials to datasets, then the contracts the infrastructure
-holds.
-
-The big picture
----------------
+The design, in reading order. Start with the big picture, then how identifiers
+work, how a published record reads as linked data, the ontology architecture, and
+finally how records find each other across repositories.
 
 .. toctree::
    :maxdepth: 1
 
    ../how-battinfo-is-built
-   ../ontology-profile-architecture
    ../identifiers
+   ../reading-a-record
+   ../ontology-profile-architecture
    ../data-federation
-
-The record model — spec and instance, from materials up
---------------------------------------------------------
-
-Everything in BattINFO is a *spec* (the reusable description) or an
-*instance* (the physical thing or event it describes). These pages walk the
-model bottom-up:
-
-.. toctree::
-   :maxdepth: 1
-
-   ../material-spec
-   ../component-specs
-   ../cell-type-library
-   ../cell-fleet
-   ../test-specs
-   ../instance-test-dataset-workflow
-
-The contracts
--------------
-
-What the infrastructure guarantees, and the interface specifications
-consumers can build against:
-
-.. toctree::
-   :maxdepth: 1
-
-   contract
-   ../ingest-manifest-contract
-   ../cli-spec

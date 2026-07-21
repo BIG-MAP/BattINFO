@@ -3,7 +3,6 @@
    :hidden:
 
    pages/getting-started
-   pages/cookbook
    pages/guides
    pages/howto
    pages/reference
@@ -124,11 +123,4 @@ states the facts, and **concepts** explain the design.
 
         :octicon:`gear;1em;sd-text-info`  Concepts
         ^^^^^^^^
-        Ontology architecture, the spec-and-instance model, and how BattINFO is built.
-
-    .. grid-item-card::
-        :link: how-battinfo-is-built.html
-
-        :octicon:`stack;1em;sd-text-info`  How BattINFO is built
-        ^^^^^^^^^^^^^^^^^^^^^
-        The orientation roadmap: layers, data flow, and where each module fits.
+        How records read as linked data, the ontology architecture, and how BattINFO is built.
