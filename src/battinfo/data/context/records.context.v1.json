@@ -36,7 +36,7 @@
     "model": "schema:model",
     "manufacturer": "schema:manufacturer",
     "hasProperty": {
-      "@id": "emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204",
+      "@id": "https://w3id.org/emmo#EMMO_e1097637_70d2_4895_973f_2396f04fa204",
       "@type": "@id"
     },
     "hasNumericalPart": {
@@ -197,7 +197,7 @@
     "Mass": "emmo:EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405",
     "CapacityFade": "electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6",
     "NominalEnergy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "UpperVoltageLimit": "electrochemistry:electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88",
+    "UpperVoltageLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88",
     "MaximumChargingTemperature": "electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260",
     "MinimumChargingTemperature": "electrochemistry:electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49",
     "ChargingVoltage": "electrochemistry:electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87",
@@ -207,7 +207,7 @@
     "D50ParticleSize": "electrochemistry:electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c",
     "DCInternalResistance": "electrochemistry:electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3",
     "Diameter": "emmo:EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6",
-    "LowerVoltageLimit": "electrochemistry:electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
+    "LowerVoltageLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
     "MaximumDischargingTemperature": "electrochemistry:electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d",
     "MinimumDischargingTemperature": "electrochemistry:electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b",
     "MassLoading": "electrochemistry:electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
@@ -301,7 +301,7 @@
     "LithiumIonTitanateBattery": "battery:battery_fd811dc3_8c37_4741_a099_78e26e4110ef",
     "LithiumTitanateElectrode": "electrochemistry:electrochemistry_6d0fe07e_a629_479c_ab24_2846f209bb0b",
     "RealData": "emmo:EMMO_18d180e4_5e3e_42f7_820c_e08951223486",
-    "ConventionalProperty": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456",
+    "ConventionalProperty": "https://w3id.org/emmo#EMMO_d8aa8e1f_b650_416d_88a0_5118de945456",
     "MeasuredProperty": "emmo:EMMO_873b0ab3_88e6_4054_b901_5531e01f14a4",
     "NominalProperty": "emmo:EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66",
     "hasMeasurementParameter": {
@@ -434,240 +434,35 @@
     "Density": "emmo:EMMO_06448f64_8db6_4304_8b2c_e785dba82044",
     "CelsiusTemperature": "emmo:EMMO_66bc9029_f473_45ff_bab9_c3509ff37a22",
     "ActiveMassLoading": "electrochemistry:electrochemistry_1eeb0e2a_229a_43f1_b197_348d475067ff",
-    "CalenderedCoatingThickness": "electrochemistry:electrochemistry_f9e1c862_c510_4b11_9141_bc91045df817"
-  },
-  "@type": [
-    "BatteryCellSpecification",
-    "schema:CreativeWork"
-  ],
-  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-  "schema:identifier": "7d9k-2m4p-8t3x-6nq5",
-  "schema:name": "A123 ANR26650M1-B",
-  "schema:model": "ANR26650M1-B",
-  "schema:manufacturer": {
-    "@type": "schema:Organization",
-    "schema:name": "A123"
-  },
-  "schema:url": "https://www.battery-genome.org/registry/spec/7d9k-2m4p-8t3x-6nq5",
-  "isDescriptionFor": {
-    "@type": [
-      "BatteryCell",
-      "CylindricalBattery",
-      "LithiumIonBattery",
-      "LithiumIonIronPhosphateBattery"
-    ],
-    "skos:prefLabel": "A123 ANR26650M1-B"
-  },
-  "schema:size": "R26650",
-  "schema:productID": "IFpR26650",
-  "schema:brand": {
-    "@type": "schema:Brand",
-    "schema:name": "A123"
-  },
-  "schema:category": "battery cell",
-  "schema:countryOfOrigin": {
-    "@type": "schema:Country",
-    "schema:name": "United States"
-  },
-  "schema:releaseDate": "2012-01-01",
-  "schema:schemaVersion": "0.1.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+    "CalenderedCoatingThickness": "electrochemistry:electrochemistry_f9e1c862_c510_4b11_9141_bc91045df817",
+    "hasTask": {
+      "@id": "https://w3id.org/emmo#EMMO_70da982d_1810_4b01_9630_a28e216ecd9a",
+      "@type": "@id"
     },
-    {
-      "@type": [
-        "MinimumCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.4
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+    "NumberOfIterations": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
+    "hasControlParameter": {
+      "@id": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e55f2798_55c8_4fc5_9abb_2f8ac101f3b8",
+      "@type": "@id"
     },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.3
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+    "hasTerminationParameter": {
+      "@id": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e6a7d617_a581_4782_8374_37d3305e0258",
+      "@type": "@id"
     },
-    {
-      "@type": [
-        "InternalResistance",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "InternalResistance",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 6.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
-    },
-    {
-      "@type": [
-        "Mass",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Mass",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 76.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-    },
-    {
-      "@type": [
-        "Diameter",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Diameter",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 26.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-    },
-    {
-      "@type": [
-        "Height",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Height",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 65.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-    },
-    {
-      "@type": [
-        "MaximumPulseChargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumPulseChargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 10.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "NominalContinuousChargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalContinuousChargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "MaximumContinuousChargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumContinuousChargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "MaximumContinuousDischargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumContinuousDischargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 50.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "MinimumDischargingTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumDischargingTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": -30
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "MaximumDischargingTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumDischargingTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 55
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "MinimumStorageTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumStorageTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": -40
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "MaximumStorageTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumStorageTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 60
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "CycleLife",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "CycleLife",
-      "schema:value": ">1000",
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "LithiumIronPhosphateElectrode"
-  },
-  "dcterms:source": {
-    "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
-    "prov:generatedAtTime": "2026-01-28T07:33:04+00:00"
+    "ConstantCurrentCharging": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_83f2b1e9_cb67_4dbf_977f_ba54bbae374f",
+    "ConstantCurrentDischarging": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_53fe3f58_0802_41cf_af69_4784fc42cc30",
+    "ConstantCurrentConstantVoltageCharging": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0cc8f231_0ce5_467e_9c76_29b2c80349ad",
+    "ConstantPowerCharging": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_dcd4a15d_52cf_44fb_b826_df18e4baa89c",
+    "ConstantPowerDischarging": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a2f65954_1ed8_4faf_9efe_597018d03e8d",
+    "VoltageHold": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f07be701_9d6a_415b_ac6d_63202297a7a1",
+    "OpenCircuitHold": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#OpenCircuitHold",
+    "IterativeWorkflow": "https://w3id.org/emmo#EMMO_ddecfff6_d3a1_4972_b9e9_3d0ca11a3a0b",
+    "ElectrochemicalImpedanceSpectroscopy": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#ElectrochemicalImpedanceSpectroscopy",
+    "LinearScanVoltammetry": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#LinearScanVoltammetry",
+    "TerminationQuantity": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_44a67eb4_52e8_433c_aef7_a928c2b9906c",
+    "CRate": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
+    "ElectricCurrent": "https://w3id.org/emmo#EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
+    "Voltage": "https://w3id.org/emmo#EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee",
+    "Power": "https://w3id.org/emmo#EMMO_09b9021b_f97b_43eb_b83d_0a764b472bc2",
+    "Duration": "https://w3id.org/emmo#EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3"
   }
 }

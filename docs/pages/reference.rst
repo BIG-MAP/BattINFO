@@ -54,6 +54,7 @@ What the infrastructure guarantees, and the interfaces you can build against.
    ../validation-contract
    contract
    ../ingest-manifest-contract
+   interop-recovery
 
 Glossary
 --------

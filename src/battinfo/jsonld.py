@@ -554,7 +554,7 @@ def _epoch_to_iso(value):
     )
 
 
-def record_to_jsonld(record: dict, record_type: str) -> dict:
+def record_to_jsonld(record: dict, record_type: str, *, context: str = "inline") -> dict:
     """Transform a BattINFO plain-JSON record to a JSON-LD document.
 
     Parameters
@@ -563,6 +563,13 @@ def record_to_jsonld(record: dict, record_type: str) -> dict:
         The plain-JSON record dict (as loaded from ``.battinfo/records/``).
     record_type:
         One of ``"cell-spec"``, ``"cell-instance"``, ``"test"``, ``"dataset"``.
+    context:
+        ``"inline"`` (default) embeds the full records ``@context`` so the
+        document is self-contained (archival/offline). ``"url"`` references the
+        hosted context (``_CONTEXT_URL``) instead — a compact document for
+        interchange, resolved offline by the bundled copy. Both expand to the
+        same graph. Records that emit a domain-battery (EMMO) context — materials
+        and components — are unaffected by ``"url"``.
 
     Returns
     -------
@@ -597,4 +604,9 @@ def record_to_jsonld(record: dict, record_type: str) -> dict:
         people = contributor_to_jsonld(record.get("contributor"))
         if people is not None:
             node["schema:contributor"] = people
+    if context == "url" and isinstance(node.get("@context"), dict):
+        # Swap the inline records context for the hosted reference. Only the
+        # records-context nodes (a dict @context) are affected; material/component
+        # nodes carry a domain-battery context and are left as-is.
+        node = {"@context": _CONTEXT_URL, **{k: v for k, v in node.items() if k != "@context"}}
     return node

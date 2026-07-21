@@ -216,9 +216,12 @@ class _Builder:
 
     # -- specs (deduped) --
     def material_spec(self, name: str, *, polarity: str, emmo_type: str | None,
-                      citation: str | None) -> str:
+                      citation: str | None, specific_capacity: dict[str, Any] | None = None) -> str:
         if name not in self._materials:
             family = _EMMO_MATERIAL_FAMILY.get(emmo_type or "", None)
+            # Specific capacity is a property of the active material, not the
+            # electrode, so it lives on the material spec.
+            prop = {"specific_capacity": specific_capacity} if specific_capacity is not None else None
             rec = create_material_spec(
                 validate=self.validate,
                 uid=_uid("discovery", "material", name),
@@ -229,6 +232,7 @@ class _Builder:
                 emmo_type=emmo_type,
                 source_type="literature",
                 citation=citation,
+                **({"property": prop} if prop else {}),
             )
             self._materials[name] = rec
         return self._materials[name]["material_spec"]["id"]
@@ -236,16 +240,25 @@ class _Builder:
     def electrode_spec(self, key: str, *, name: str, polarity: str, active_name: str,
                        active_id: str, loading: dict[str, Any] | None,
                        mass_fraction: float | None, citation: str | None,
-                       notes: list[str]) -> str:
+                       notes: list[str], density: dict[str, Any] | None = None,
+                       areal_capacity: dict[str, Any] | None = None) -> str:
         if key not in self._electrodes:
             active: dict[str, Any] = {"name": active_name, "material_spec_id": active_id}
             if mass_fraction is not None:
                 active["property"] = {"mass_fraction": _qty(mass_fraction, "1")}
             coating: dict[str, Any] = {"component": {"active_material": [active]}}
+            coating_props: dict[str, Any] = {}
             if loading is not None:
-                coating["property"] = {"loading": loading}
+                coating_props["loading"] = loading
+            if density is not None:
+                coating_props["density"] = density
+            if coating_props:
+                coating["property"] = coating_props
             cc = "Aluminium foil" if polarity == "positive" else "Copper foil"
-            body = {"coating": coating, "current_collector": {"name": cc}}
+            body: dict[str, Any] = {"coating": coating, "current_collector": {"name": cc}}
+            # Areal (areic) capacity is a property of the electrode.
+            if areal_capacity is not None:
+                body["property"] = {"rated_areal_discharge_capacity": areal_capacity}
             rec = create_component_spec(
                 "electrode", validate=self.validate,
                 uid=_uid("discovery", "electrode", key),
@@ -288,10 +301,11 @@ class _Builder:
                  positive_electrode_spec_id: str | None = None,
                  negative_electrode_spec_id: str | None = None,
                  electrolyte_spec_id: str | None = None,
+                 cell_properties: dict[str, Any] | None = None,
                  test_name: str | None = None, test_description: str | None = None,
                  dataset_file: str | None = None) -> DiscoveryCell:
         seed = refcode or cell_id
-        cell_spec = self._check(_record_from_cell_spec(CellSpec(
+        cell_record = _record_from_cell_spec(CellSpec(
             uid=_uid("discovery", "cell-spec", seed),
             model_name=model_name,
             manufacturer={"type": "Organization", "name": manufacturer},
@@ -306,7 +320,10 @@ class _Builder:
             source_file=self.source_file,
             citation=citation,
             notes=notes,
-        )))
+        ))
+        if cell_properties:
+            cell_record["properties"] = {**cell_record.get("properties", {}), **cell_properties}
+        cell_spec = self._check(cell_record)
         cell_spec_id = cell_spec["cell_spec"]["id"]
 
         cell_instance = self._check(_record_from_cell_instance(Cell(
@@ -409,6 +426,33 @@ def _find_property(node: Mapping[str, Any], emmo_type: str, name: str | None = N
     return None
 
 
+# Capacity properties arrive in Coulomb units; convert to the mAh convention the
+# canonical records use. (factor, canonical unit) keyed by the source unit.
+_CAPACITY_UNIT = {
+    "CoulombPerSquareCentiMetre": (1 / 3.6, "mAh/cm2"),
+    "CoulombPerKilogram": (1 / 3600, "mAh/g"),
+    "MilliAmpereHourPerSquareCentiMetre": (1.0, "mAh/cm2"),
+    "MilliAmpereHourPerGram": (1.0, "mAh/g"),
+    "AmpereHourPerKilogram": (1.0, "mAh/g"),  # Ah/kg is numerically mAh/g
+}
+
+
+def _find_capacity(node: Mapping[str, Any], emmo_type: str) -> dict[str, Any] | None:
+    """Read a capacity property and normalize it to the mAh convention."""
+    for prop in node.get("hasProperty", []) or []:
+        if not isinstance(prop, Mapping) or emmo_type not in _node_types(prop):
+            continue
+        num = prop.get("hasNumericalPart")
+        raw = num.get("hasNumericalValue") if isinstance(num, Mapping) else None
+        value = _num(raw)
+        conv = _CAPACITY_UNIT.get(prop.get("hasMeasurementUnit", ""))
+        if value is None or conv is None:
+            continue
+        factor, unit = conv
+        return {"value": round(value * factor, 4), "unit": unit}
+    return None
+
+
 def import_discovery_eln(
     source: PathLike,
     *,
@@ -477,14 +521,23 @@ def import_discovery_eln(
             if active_node is not None:
                 emmo_type = next((t for t in _node_types(active_node) if t != "ActiveMaterial"), None)
             emmo_type = emmo_type or _GRADE_EMMO.get(grade)
-            mat_id = builder.material_spec(grade, polarity=polarity, emmo_type=emmo_type, citation=url)
+            # Specific capacity is an active-material property → onto the material spec.
+            specific = _find_capacity(eld, "SpecificCapacity")
+            mat_id = builder.material_spec(
+                grade, polarity=polarity, emmo_type=emmo_type, citation=url,
+                specific_capacity=specific,
+            )
             loading = _find_property(eld, "MassLoading")
             mass_fraction = _find_property(eld, "MassFraction")
+            density = _find_property(eld, "Density")
+            # Areal (areic) capacity is an electrode property → onto the electrode spec.
+            areal = _find_capacity(eld, "AreicCapacity")
             spec_id = builder.electrode_spec(
                 eld.get("@id", grade), name=ename, polarity=polarity,
                 active_name=grade, active_id=mat_id, loading=loading,
                 mass_fraction=(mass_fraction or {}).get("value"), citation=url,
                 notes=[f"Discovery electrode {eld.get('@id','').strip('./')}"],
+                density=density, areal_capacity=areal,
             )
             return spec_id, grade
 
@@ -500,6 +553,11 @@ def import_discovery_eln(
         vol = _find_property(node, "Volume", "Electrolyte volume")
         if vol is not None:
             notes.append(f"electrolyte volume: {round(vol['value'] * 1e6, 1)} uL")
+
+        cell_properties: dict[str, Any] = {}
+        mass = _find_property(node, "Mass")
+        if mass is not None and mass.get("unit"):
+            cell_properties["mass"] = mass
         if not cathode:
             builder.warnings.append(f"{cell_id}: no positive electrode resolved")
         if not anode:
@@ -523,6 +581,7 @@ def import_discovery_eln(
             positive_electrode_spec_id=pos_spec_id,
             negative_electrode_spec_id=neg_spec_id,
             electrolyte_spec_id=ely_spec_id,
+            cell_properties=cell_properties or None,
             test_name="Galvanostatic cycling", test_description="Rate-performance galvanostatic cycling.",
             dataset_file=dataset_file,
         )

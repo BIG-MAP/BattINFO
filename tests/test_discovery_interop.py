@@ -89,6 +89,46 @@ def test_eln_builds_linked_spec_graph() -> None:
         assert cell.dataset is not None  # cycling .xlsx referenced
 
 
+def test_eln_recovers_cell_mass_and_electrode_density() -> None:
+    """Cell- and electrode-level quantities the crate carries are recovered."""
+    pkg = import_discovery_eln(ELN, validate=True)
+    # at least one cell carries a mass property with a unit
+    masses = [
+        c.cell_spec["properties"]["mass"]
+        for c in pkg.cells
+        if isinstance(c.cell_spec.get("properties"), dict) and "mass" in c.cell_spec["properties"]
+    ]
+    assert masses, "expected cell mass to be recovered from the crate"
+    assert masses[0]["unit"] == "mg"
+    # the compaction density lands on the electrode coating
+    densities = [
+        r["electrode_spec"]["coating"]["property"]["density"]
+        for r in pkg.electrode_specs
+        if "density" in r["electrode_spec"]["coating"].get("property", {})
+    ]
+    assert densities, "expected electrode compaction density to be recovered"
+    assert densities[0]["unit"] == "g/cm3"
+
+
+def test_eln_recovers_capacities_on_their_owning_entity() -> None:
+    """Areic capacity is an electrode property; specific capacity a material one."""
+    pkg = import_discovery_eln(ELN, validate=True)
+    areal = [
+        r["electrode_spec"]["property"]["rated_areal_discharge_capacity"]
+        for r in pkg.electrode_specs
+        if "rated_areal_discharge_capacity" in r["electrode_spec"].get("property", {})
+    ]
+    assert areal, "expected areic capacity on the electrode spec"
+    assert areal[0]["unit"] == "mAh/cm2"  # converted from C/cm2
+    specific = [
+        r["material_spec"]["property"]["specific_capacity"]
+        for r in pkg.material_specs
+        if "specific_capacity" in r["material_spec"].get("property", {})
+    ]
+    assert specific, "expected specific capacity on the active-material spec"
+    assert specific[0]["unit"] == "mAh/g"  # converted from C/kg
+
+
 def test_eln_electrode_links_material_and_electrolyte_is_parsed() -> None:
     pkg = import_discovery_eln(ELN, validate=True)
     mat_ids = {r["material_spec"]["id"] for r in pkg.material_specs}
