@@ -6,7 +6,16 @@ This is the canonical brand reference for BattINFO. It is the single source of
 truth for the docs site and any future web property. Color/spacing/type values
 live as code in [`tokens.css`](tokens.css); this file explains *how* to use them.
 
-Asset pack version: **v1.0**.
+Asset pack version: **v1.1** (dual-mode). The pack now ships a full **light + dark**
+token system. Two companion files govern implementation and take precedence for
+any front-end work:
+
+- [`AGENTS.md`](AGENTS.md) — the hard rules a coding agent must follow (read first).
+- [`tokens.css`](tokens.css) — the semantic `--bi-*` tokens, with a light **and** a
+  dark value each. Build every surface from these; never hard-code a hex.
+
+The color tables below summarise the **light** palette. Dark values live in
+`tokens.css`; the essentials are in [Dark mode](#dark-mode) below.
 
 ---
 
@@ -77,7 +86,8 @@ Full values and CSS variables are in [`tokens.css`](tokens.css). Summary:
 | Muted | `#5A6570` | Tertiary text / captions |
 | Surface | `#FFFFFF` | Cards |
 | Paper | `#F3F2EE` | Page background |
-| Border | `#E7E5DF` | Hairlines |
+| Border | `#E2E0D9` | Hairlines |
+| Border strong | `#CBD3DA` | Inputs, ghost-button edges |
 | Tint | `#E4F4F1` | Teal wash, tags |
 
 A surface card pairs Paper-tinted background with a hairline border and a 14px radius.
@@ -95,6 +105,24 @@ Pair each solid with its tint for banners, badges, and inline alerts.
 ### Interaction
 Primary button hover `#1D3A57` · active `#0A1B2C` · disabled surface `#C2C8CE` ·
 2px focus ring `#0C7A6E`.
+
+### Dark mode
+
+Toggle one attribute on `<html>`: `data-theme="dark"` (a `.dark` class also works).
+The `--bi-*` tokens flip to their dark values automatically — never restyle by hand.
+The rules that trip up implementations (see [`AGENTS.md`](AGENTS.md)):
+
+- **Elevate by getting lighter, not darker.** Base `#0B1622` → Surface `#13212F`
+  → Raised `#1A2A3A`. Code blocks recede to the inset well `#0E1B27`. Cards must
+  never be the same value as the page.
+- **Text is near-white, never ink navy.** Primary text `#EAF1F6`, secondary
+  `#AEBDC9`, muted `#7A8996`. Ink navy on a dark background is invisible (1.24:1).
+- **Teal brightens on dark.** Fill `#2DD4BF`, text/links `#2DCAB6` (AA 8.9:1). The
+  light teals are too dark to read on a dark surface.
+- **Primary button flips:** ink fill + white text in light; **teal fill + dark-ink
+  text** (`#06231E`) in dark. An ink button vanishes on a dark page.
+- **State colors brighten too:** success `#4ADE9E`, warning `#F0B429`, error
+  `#F87171`, info `#6BA8F5`, over low-opacity tinted backgrounds.
 
 ---
 
@@ -149,18 +177,24 @@ Two typefaces, both on Google Fonts:
 
 ## 6. Using the tokens
 
-Import the canonical token file rather than re-typing hex values:
+Import the canonical token file rather than re-typing hex values. Prefer the
+component recipes it ships (`.bi-card`, `.bi-btn` + `.bi-btn-primary` /
+`.bi-btn-secondary`, `.bi-code`, `.bi-badge`, `.bi-input`), or compose from the
+semantic `--bi-*` tokens — which resolve to the right value in each mode:
 
 ```css
 @import url("../../../brand/tokens.css");   /* path relative to your stylesheet */
 
-a            { color: var(--bi-teal-700); }
-.card        { background: var(--bi-surface); border: 1px solid var(--bi-border);
-               border-radius: var(--bi-radius-card); box-shadow: var(--bi-shadow-sm); }
-body         { font-family: var(--bi-font); color: var(--bi-ink);
-               background: var(--bi-paper); }
-code, pre    { font-family: var(--bi-font-mono); }
+a            { color: var(--bi-brand-text); }              /* AA-safe, brightens on dark */
+.card        { background: var(--bi-bg-surface); border: 1px solid var(--bi-border);
+               border-radius: 14px; box-shadow: var(--bi-shadow-sm); }
+body         { color: var(--bi-text-primary); background: var(--bi-bg-base); }
+code, pre    { font-family: "JetBrains Mono", ui-monospace, monospace; }
 ```
+
+> Tailwind/utility frameworks that need RGB channels for opacity modifiers should
+> mirror these tokens as channel triples in one documented place (see the web
+> app's `globals.css`) rather than hard-coding hexes in components.
 
 Web fonts (add to the page `<head>`):
 ```html

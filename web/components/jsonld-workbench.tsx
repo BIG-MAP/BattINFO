@@ -46,7 +46,7 @@ function IssueRow({ issue }: { issue: LayeredIssue }) {
   const isError = issue.severity === "error";
   return (
     <li className="flex items-start gap-2 rounded-lg border border-border bg-surface p-3">
-      <span className="mt-0.5 rounded bg-tint px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brand-700">
+      <span className="mt-0.5 rounded bg-tint px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brandtext">
         {LAYER_LABEL[issue.layer]}
       </span>
       <span
@@ -166,7 +166,7 @@ export default function JsonLdWorkbench() {
         <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">JSON-LD document</h2>
         <div className="flex flex-wrap gap-3 text-xs font-medium">
           <ExamplePicker onPick={(doc) => run(doc)} />
-          <button onClick={() => fileInput.current?.click()} className="text-brand-600 hover:text-brand-700">
+          <button onClick={() => fileInput.current?.click()} className="text-brandtext hover:text-brandtext">
             Open a file…
           </button>
           <input
@@ -193,7 +193,7 @@ export default function JsonLdWorkbench() {
       <button
         onClick={() => run()}
         disabled={busy}
-        className="mt-4 w-full rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
+        className="mt-4 w-full rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-fg transition hover:opacity-90 disabled:opacity-60"
       >
         {busy ? "Working…" : "View and check"}
       </button>
@@ -207,7 +207,7 @@ export default function JsonLdWorkbench() {
                 key={v.key}
                 onClick={() => setView(v.key)}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                  view === v.key ? "bg-tint text-brand-700" : "text-ink-muted hover:text-ink"
+                  view === v.key ? "bg-tint text-brandtext" : "text-ink-muted hover:text-ink"
                 }`}
               >
                 {v.label}
@@ -221,7 +221,7 @@ export default function JsonLdWorkbench() {
                   key={f}
                   onClick={() => setForm(f)}
                   className={`rounded-md px-2.5 py-1 font-medium transition ${
-                    form === f ? "bg-tint text-brand-700" : "text-ink-muted hover:text-ink"
+                    form === f ? "bg-tint text-brandtext" : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   {f === "canonical" ? "Canonical" : "Raw"}
@@ -362,7 +362,7 @@ function ExamplePicker({ onPick }: { onPick: (doc: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="text-brand-600 hover:text-brand-700">
+      <button onClick={() => setOpen((o) => !o)} className="text-brandtext hover:text-brandtext">
         Load an example…
       </button>
       {open ? (

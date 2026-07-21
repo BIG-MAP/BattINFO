@@ -8,7 +8,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <span className="text-lg font-semibold tracking-tight text-ink">
-              Batt<span className="text-brand-600">INFO</span>
+              Batt<span className="text-brandtext">INFO</span>
             </span>
             <p className="mt-2 max-w-xs text-sm text-ink-muted">
               The semantic data layer for battery technology. Built on{" "}

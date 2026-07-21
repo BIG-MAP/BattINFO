@@ -33,7 +33,7 @@ export default function PropertiesPage() {
           href={`${site.reference}/pages/property-reference.html`}
           target="_blank"
           rel="noreferrer"
-          className="rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700"
+          className="rounded-lg bg-primary px-5 py-2.5 font-semibold text-primary-fg hover:opacity-90"
         >
           Open the property &amp; unit reference →
         </a>

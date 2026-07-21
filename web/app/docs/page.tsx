@@ -28,7 +28,7 @@ const reference = [
 function SectionHeading({ id, kicker, title }: { id?: string; kicker: string; title: string }) {
   return (
     <div id={id} className="scroll-mt-24">
-      <h2 className="text-sm font-semibold uppercase tracking-wider text-brand-600">{kicker}</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-brandtext">{kicker}</h2>
       <p className="mt-2 text-2xl font-semibold tracking-tight text-ink">{title}</p>
     </div>
   );
@@ -53,7 +53,7 @@ export default function DocsPage() {
         href={site.reference}
         target="_blank"
         rel="noreferrer"
-        className="mt-8 flex flex-col gap-1 rounded-2xl border border-brand-200 bg-brand-50/50 p-6 transition hover:border-brand-300 sm:flex-row sm:items-center sm:justify-between"
+        className="mt-8 flex flex-col gap-1 rounded-2xl border border-brand-200 bg-tint/50 p-6 transition hover:border-brand-300 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
           <h2 className="text-base font-semibold text-ink">
@@ -78,7 +78,7 @@ export default function DocsPage() {
         </div>
         <p className="mt-4 text-sm text-ink-muted">
           Full notebook walkthroughs are rendered in the{" "}
-          <a href={`${site.reference}/guides/01-concepts.html`} className="text-brand-600 underline" target="_blank" rel="noreferrer">
+          <a href={`${site.reference}/guides/01-concepts.html`} className="text-brandtext underline" target="_blank" rel="noreferrer">
             documentation guides
           </a>
           .
@@ -172,7 +172,7 @@ export default function DocsPage() {
         <div className="mt-4 max-w-prose space-y-3 text-sm leading-relaxed text-ink-muted">
           <p>
             The normative semantics live in{" "}
-            <a href={site.emmo} className="text-brand-600 underline" target="_blank" rel="noreferrer">
+            <a href={site.emmo} className="text-brandtext underline" target="_blank" rel="noreferrer">
               EMMO domain-battery
             </a>
             . BattINFO is the non-normative, operational layer: schemas,
@@ -186,7 +186,7 @@ export default function DocsPage() {
           </p>
         </div>
         <div className="mt-6">
-          <Link href="/examples" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/examples" className="text-sm font-semibold text-brandtext hover:text-brandtext">
             See a worked example →
           </Link>
         </div>

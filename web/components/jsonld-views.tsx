@@ -80,7 +80,7 @@ export function SummaryView({ model }: { model: SummaryModel }) {
             {model.types.map((t) => (
               <span
                 key={t}
-                className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700"
+                className="rounded-full border border-brand-200 bg-tint px-2.5 py-1 text-xs font-medium text-brandtext"
               >
                 {t}
               </span>

@@ -29,7 +29,7 @@ export function CodeTabs({ tabs }: { tabs: CodeTab[] }) {
             onClick={() => setActive(i)}
             className={
               i === active
-                ? "rounded-t-lg border border-b-0 border-border bg-surface px-4 py-2 text-sm font-semibold text-brand-700"
+                ? "rounded-t-lg border border-b-0 border-border bg-surface px-4 py-2 text-sm font-semibold text-brandtext"
                 : "rounded-t-lg px-4 py-2 text-sm font-medium text-ink-faint hover:text-ink"
             }
           >

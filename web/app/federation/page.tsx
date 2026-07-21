@@ -43,15 +43,15 @@ export default function FederationPage() {
   return (
     <>
       {/* Hero */}
-      <section className="border-b border-border bg-gradient-to-b from-brand-50/60 to-white">
+      <section className="border-b border-border bg-paper">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface px-3 py-1 text-xs font-medium text-brand-700">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-surface px-3 py-1 text-xs font-medium text-brandtext">
             <span className="h-1.5 w-1.5 rounded-full bg-volt-500" />
             Concept
           </span>
           <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-ink sm:text-5xl">
             Data federation, and why{" "}
-            <span className="text-brand-600">battery data needs it</span>
+            <span className="text-brandtext">battery data needs it</span>
           </h1>
           <p className="mt-5 max-w-prose text-lg text-ink-muted">
             Battery knowledge is scattered across datasheets, lab notebooks,
@@ -83,12 +83,12 @@ export default function FederationPage() {
             <div
               key={c.label}
               className={`prose-card ${
-                c.tone === "brand" ? "border-brand-200 bg-brand-50/40" : ""
+                c.tone === "brand" ? "border-brand-200 bg-tint/40" : ""
               }`}
             >
               <h3
                 className={`text-sm font-semibold uppercase tracking-wider ${
-                  c.tone === "brand" ? "text-brand-700" : "text-ink-faint"
+                  c.tone === "brand" ? "text-brandtext" : "text-ink-faint"
                 }`}
               >
                 {c.label}
@@ -136,7 +136,7 @@ export default function FederationPage() {
             linkable by everyone else.{" "}
             <Link
               href="/docs#identifiers"
-              className="font-semibold text-brand-600 hover:text-brand-700"
+              className="font-semibold text-brandtext hover:text-brandtext"
             >
               How identifiers work →
             </Link>
@@ -207,7 +207,7 @@ export default function FederationPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/docs"
-              className="rounded-lg bg-surface px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
+              className="rounded-lg bg-surface px-5 py-3 text-sm font-semibold text-brandtext transition hover:bg-tint"
             >
               Read the docs
             </Link>

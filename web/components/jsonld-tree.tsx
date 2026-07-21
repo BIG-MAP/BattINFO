@@ -68,7 +68,7 @@ function IriValue({ iri }: { iri: string }) {
         target="_blank"
         rel="noreferrer"
         title={iri}
-        className="font-mono text-xs text-brand-600 underline decoration-dotted hover:text-brand-700"
+        className="font-mono text-xs text-brandtext underline decoration-dotted hover:text-brandtext"
       >
         {shortLabel(iri)}
       </a>
@@ -91,7 +91,7 @@ function TypeBadges({ value, map }: { value: unknown; map: TermMap }) {
           <span
             key={t}
             title={iri ?? t}
-            className="rounded bg-tint px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brand-700"
+            className="rounded bg-tint px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brandtext"
           >
             {shortLabel(t)}
           </span>

@@ -58,7 +58,7 @@ export default function AboutPage() {
           someone with a datasheet and an afternoon.
         </p>
         <p>
-          <Link href="/federation" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/federation" className="font-semibold text-brandtext hover:text-brandtext">
             Why linked, federated data changes what battery research can do →
           </Link>
         </p>
@@ -69,12 +69,12 @@ export default function AboutPage() {
         <p>
           BattINFO began as an ontology: the <em>Battery INterFace Ontology</em>,
           developed in the European{" "}
-          <a href="https://www.big-map.eu/" className="text-brand-600 hover:text-brand-700">
+          <a href="https://www.big-map.eu/" className="text-brandtext hover:text-brandtext">
             BIG-MAP
           </a>{" "}
           project (part of the Battery 2030+ initiative) and now maintained as
           the{" "}
-          <a href={site.emmo} className="text-brand-600 hover:text-brand-700">
+          <a href={site.emmo} className="text-brandtext hover:text-brandtext">
             EMMO battery domain
           </a>
           . The ontology answered <em>what battery concepts mean</em>; what
@@ -90,7 +90,7 @@ export default function AboutPage() {
           identifiers, and a publishing pipeline that ends in a citable DOI
           and a registry entry. It is open source (Apache-2.0) and developed
           in the open on{" "}
-          <a href={site.github} className="text-brand-600 hover:text-brand-700">
+          <a href={site.github} className="text-brandtext hover:text-brandtext">
             GitHub
           </a>
           .
@@ -109,7 +109,7 @@ export default function AboutPage() {
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className="font-semibold text-brand-600 hover:text-brand-700"
+                className="font-semibold text-brandtext hover:text-brandtext"
               >
                 {item.name} →
               </a>
@@ -125,11 +125,11 @@ export default function AboutPage() {
           Publish a dataset, register a cell spec, report a rough edge, or
           bring your tool&apos;s format to the converter matrix, every record
           published makes the shared library more useful.{" "}
-          <Link href="/publish" className="text-brand-600 hover:text-brand-700">
+          <Link href="/publish" className="text-brandtext hover:text-brandtext">
             Start with your own data
           </Link>
           , or open an issue on{" "}
-          <a href={site.github} className="text-brand-600 hover:text-brand-700">
+          <a href={site.github} className="text-brandtext hover:text-brandtext">
             GitHub
           </a>
           .

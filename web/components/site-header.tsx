@@ -7,9 +7,12 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center">
-          {/* Canonical horizontal lockup from the brand pack (brand/assets/logo). */}
+          {/* Canonical horizontal lockup from the brand pack (brand/assets/logo).
+              Swap the file for dark mode rather than recoloring it (brand rule). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo-horizontal.svg" alt="BattINFO" className="h-7 w-auto dark:brightness-0 dark:invert" />
+          <img src="/brand/logo-horizontal.svg" alt="BattINFO" className="h-7 w-auto dark:hidden" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-horizontal-on-dark.svg" alt="BattINFO" className="hidden h-7 w-auto dark:block" />
         </Link>
 
         <nav className="flex items-center gap-1 sm:gap-2">

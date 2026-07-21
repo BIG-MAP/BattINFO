@@ -14,7 +14,7 @@ export function SectionHeading({
 }) {
   return (
     <div id={id} className={`scroll-mt-24 ${className}`}>
-      <h2 className="text-sm font-semibold uppercase tracking-wider text-brand-600">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-brandtext">
         {kicker}
       </h2>
       <p className="mt-2 max-w-prose text-2xl font-semibold tracking-tight text-ink">
