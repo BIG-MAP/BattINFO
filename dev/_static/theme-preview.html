@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BattINFO — Theme Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 32px 96px; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:16px 0; border-bottom:1px solid var(--bi-border); }
+  .brandrow { display:flex; align-items:center; gap:12px; font-weight:700; font-size:20px; letter-spacing:-.02em; }
+  .hero { padding:56px 0 40px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--bi-text-muted); }
+  h1.display { font-size:52px; font-weight:800; letter-spacing:-.03em; line-height:1.04;
+    color:var(--bi-text-primary); margin:16px 0 0; max-width:640px; }
+  h1.display em { font-style:normal; color:var(--bi-brand-text); }
+  .lede { font-size:18px; line-height:1.55; color:var(--bi-text-secondary); max-width:560px; margin:18px 0 0; font-weight:500; }
+  .btnrow { display:flex; gap:14px; margin-top:28px; flex-wrap:wrap; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:40px; }
+  .sectlabel { font:700 12px 'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--bi-text-muted); margin:40px 0 16px; }
+  .cardpad { padding:24px; }
+  .cardpad h3 { margin:0 0 8px; font-size:17px; font-weight:700; color:var(--bi-text-primary); }
+  .cardpad p { margin:0; font-size:14px; line-height:1.5; color:var(--bi-text-secondary); }
+  pre.bi-code { margin:0; padding:18px 20px; font-size:13px; line-height:1.6; overflow:auto; }
+  .tok { color:var(--bi-brand-text); }
+  .states { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .state { border-radius:10px; padding:12px 14px; font:600 13px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:8px; }
+  .dot { width:9px; height:9px; border-radius:50%; }
+  .fields { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  label.fl { display:block; font:600 11px 'JetBrains Mono',monospace; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--bi-text-muted); margin-bottom:6px; }
+  .toggle { font:600 13px 'Plus Jakarta Sans',sans-serif; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brandrow">
+      <img id="logo" src="./logo-horizontal.svg" alt="BattINFO" height="30">
+    </div>
+    <button class="bi-btn bi-btn-secondary toggle" onclick="toggleTheme()">Toggle light / dark</button>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">Open standard · Beta</div>
+    <h1 class="display">The language machines use to <em>understand batteries</em></h1>
+    <p class="lede">Every text string, surface, and control on this page is driven by the same <code style="color:var(--bi-brand-text)">--bi-*</code> tokens. Flip the theme — nothing washes out, nothing disappears.</p>
+    <div class="btnrow">
+      <button class="bi-btn bi-btn-primary">Publish your data</button>
+      <button class="bi-btn bi-btn-secondary">Validate a record</button>
+      <span class="bi-badge"><span class="dot" style="background:var(--bi-brand-text)"></span>CI passing</span>
+    </div>
+  </div>
+
+  <div class="sectlabel">Surfaces & elevation</div>
+  <div class="grid">
+    <div class="bi-card cardpad">
+      <h3>Card on surface</h3>
+      <p>Cards read as elevated in both modes — lighter than the page in dark, white-on-paper in light. Never the same value as the base.</p>
+    </div>
+    <div class="bi-code">
+      <pre class="bi-code" style="border:none">import battinfo
+ws = battinfo.<span class="tok">workspace</span>(<span class="tok">"."</span>)
+ws.<span class="tok">convert</span>()      <span style="color:var(--bi-text-muted)"># cycler files → tidy</span>
+ws.<span class="tok">publish</span>(zenodo=<span class="tok">True</span>)</pre>
+    </div>
+  </div>
+
+  <div class="sectlabel">Semantic states</div>
+  <div class="states">
+    <div class="state" style="background:var(--bi-success-bg);color:var(--bi-success)"><span class="dot" style="background:var(--bi-success)"></span>Success</div>
+    <div class="state" style="background:var(--bi-warning-bg);color:var(--bi-warning)"><span class="dot" style="background:var(--bi-warning)"></span>Warning</div>
+    <div class="state" style="background:var(--bi-error-bg);color:var(--bi-error)"><span class="dot" style="background:var(--bi-error)"></span>Error</div>
+    <div class="state" style="background:var(--bi-info-bg);color:var(--bi-info)"><span class="dot" style="background:var(--bi-info)"></span>Info</div>
+  </div>
+
+  <div class="sectlabel">Form controls</div>
+  <div class="bi-card cardpad">
+    <div class="fields">
+      <div><label class="fl">Manufacturer</label><input class="bi-input" style="width:100%" value="A123"></div>
+      <div><label class="fl">Model</label><input class="bi-input" style="width:100%" value="ANR26650M1-B"></div>
+    </div>
+    <p style="margin-top:14px"><a href="#">Read the authoring guide →</a></p>
+  </div>
+
+</div>
+
+<script>
+function toggleTheme(){
+  const h = document.documentElement;
+  const dark = h.getAttribute('data-theme') === 'dark';
+  h.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('logo').src = dark ? './logo-horizontal.svg' : './logo-horizontal-on-dark.svg';
+}
+</script>
+</body>
+</html>
