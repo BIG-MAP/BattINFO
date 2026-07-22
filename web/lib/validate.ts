@@ -179,8 +179,8 @@ export function validateRecord(raw: string): ValidationResult {
         path: "(root)",
         message:
           "This is a JSON-LD document (it carries @context/@graph) — the published form, generated from a canonical record. " +
-          "Paste the canonical record JSON to validate it here; for JSON-LD-level checks (RDF parse, term resolution), " +
-          "run battinfo.validate_record_report / the publish pipeline locally, which validates both layers.",
+          "Switch to the JSON-LD document tab to view and check it, or paste the canonical record JSON to validate it here. " +
+          "For the full JSON-LD checks (RDF parse, term resolution), run battinfo.validate_record_report / the publish pipeline locally.",
       }],
       parsed: doc,
     };
@@ -214,6 +214,43 @@ export function validateRecord(raw: string): ValidationResult {
     };
   }
 
+  return runSchema(doc, recordType);
+}
+
+/**
+ * Validate a parsed record against a caller-chosen record type, skipping
+ * auto-detection. Backs the workbench's manual "validate as…" override, where a
+ * user asserts the record type instead of relying on the discriminator key.
+ */
+export function validateRecordAs(raw: string, recordType: string): ValidationResult {
+  if (!(recordType in DISCRIMINATORS)) {
+    return {
+      ok: false,
+      recordType: null,
+      issues: [{ severity: "error", path: "(root)", message: `Unknown record type \`${recordType}\`.` }],
+    };
+  }
+  let doc: unknown;
+  try {
+    doc = JSON.parse(raw);
+  } catch (e) {
+    return {
+      ok: false,
+      recordType,
+      issues: [{ severity: "error", path: "(root)", message: `Invalid JSON: ${(e as Error).message}` }],
+    };
+  }
+  if (typeof doc !== "object" || doc === null || Array.isArray(doc)) {
+    return {
+      ok: false,
+      recordType,
+      issues: [{ severity: "error", path: "(root)", message: "A record must be a JSON object." }],
+    };
+  }
+  return runSchema(doc, recordType);
+}
+
+function runSchema(doc: unknown, recordType: string): ValidationResult {
   const validate = validatorFor(DISCRIMINATORS[recordType]);
   const valid = validate(doc) as boolean;
   const issues = (validate.errors ?? []).map(toIssue);

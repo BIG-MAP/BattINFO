@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { primaryNav, site } from "@/lib/site";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center">
-          {/* Canonical horizontal lockup from the brand pack (brand/assets/logo). */}
+          {/* Canonical horizontal lockup from the brand pack (brand/assets/logo).
+              Swap the file for dark mode rather than recoloring it (brand rule). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo-horizontal.svg" alt="BattINFO" className="h-7 w-auto" />
+          <img src="/brand/logo-horizontal.svg" alt="BattINFO" className="h-7 w-auto dark:hidden" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-horizontal-on-dark.svg" alt="BattINFO" className="hidden h-7 w-auto dark:block" />
         </Link>
 
         <nav className="flex items-center gap-1 sm:gap-2">
@@ -21,11 +25,12 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <ThemeToggle />
           <a
             href={site.github}
             target="_blank"
             rel="noreferrer"
-            className="ml-1 rounded-md bg-ink px-3 py-2 text-sm font-medium text-white transition hover:bg-ink/90"
+            className="ml-1 rounded-md bg-ink-deep px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
           >
             GitHub
           </a>

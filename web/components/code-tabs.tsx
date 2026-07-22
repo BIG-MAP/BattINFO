@@ -29,7 +29,7 @@ export function CodeTabs({ tabs }: { tabs: CodeTab[] }) {
             onClick={() => setActive(i)}
             className={
               i === active
-                ? "rounded-t-lg border border-b-0 border-border bg-white px-4 py-2 text-sm font-semibold text-brand-700"
+                ? "rounded-t-lg border border-b-0 border-border bg-surface px-4 py-2 text-sm font-semibold text-brandtext"
                 : "rounded-t-lg px-4 py-2 text-sm font-medium text-ink-faint hover:text-ink"
             }
           >
@@ -37,7 +37,7 @@ export function CodeTabs({ tabs }: { tabs: CodeTab[] }) {
           </button>
         ))}
       </div>
-      <div className="rounded-b-xl border border-t-0 border-border bg-white p-3">
+      <div className="rounded-b-xl border border-t-0 border-border bg-surface p-3">
         {tab.extra ? <div className="mb-3">{tab.extra}</div> : null}
         <div className="max-h-[28rem] overflow-y-auto rounded-xl">
           <CodeBlock label={tab.blockLabel ?? tab.label} code={tab.code} />

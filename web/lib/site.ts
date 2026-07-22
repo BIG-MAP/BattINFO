@@ -39,13 +39,15 @@ export const site = {
   },
 } as const;
 
-// Publish first: the primary action a visitor with data should see.
+// Every primary item is either a browser tool you USE (Playground, Validate) or
+// a guide/reference you READ (Publish, About, Docs) — split by user intent, not
+// by mechanism. Convert folds into Publish (it is Publish's first stage) and
+// Examples into the tools' presets plus the docs gallery; both stay reachable
+// (footer, deep links, cross-links), just not as top-level peers.
 export const primaryNav = [
-  { label: "Publish", href: "/publish" },
+  { label: "Playground", href: "/create" },
   { label: "Validate", href: "/validate" },
-  { label: "Convert", href: "/convert" },
-  { label: "Examples", href: "/examples" },
-  { label: "Why", href: "/federation" },
+  { label: "Publish", href: "/publish" },
   { label: "About", href: "/about" },
   { label: "Docs", href: "/docs" },
 ] as const;
@@ -85,7 +87,7 @@ export const footerNav = [
     heading: "Get started",
     links: [
       { label: "Publish your data", href: "/publish" },
-      { label: "Documentation", href: "/docs" },
+      { label: "Convert cycler data", href: "/convert" },
       { label: "Quickstart", href: "/docs#quickstart" },
       { label: "Examples", href: "/examples" },
     ],
@@ -93,8 +95,8 @@ export const footerNav = [
   {
     heading: "Tools",
     links: [
+      { label: "Playground", href: "/create" },
       { label: "Validate a record", href: "/validate" },
-      { label: "Convert cycler data", href: "/convert" },
       { label: "Properties & units", href: "/properties" },
       { label: "About BattINFO", href: "/about" },
     ],
@@ -102,6 +104,7 @@ export const footerNav = [
   {
     heading: "Reference",
     links: [
+      { label: "Glossary", href: `${site.reference}/pages/glossary.html`, external: true },
       { label: "Ontology (battinfo.ttl)", href: "/docs#ontology" },
       { label: "JSON Schemas", href: "/docs#schemas" },
       { label: "Identifier policy", href: "/docs#identifiers" },

@@ -1,0 +1,33 @@
+# BattINFO
+
+> The semantic data layer for battery technology: a shared EMMO-aligned vocabulary, ready-to-use JSON Schemas, JSON-LD output, persistent identifiers, and a Python library + CLI for authoring, validating, and publishing machine-readable battery records.
+
+A BattINFO record is a canonical JSON object carrying exactly one top-level
+discriminator key — `cell_spec`, `cell_instance`, `material`, `electrode`,
+`electrolyte`, `test`, `dataset` (and more) — plus `schema_version`. It is
+validated against canonical JSON Schemas and publishes to EMMO-aligned JSON-LD.
+Every published record gets a persistent `w3id.org/battinfo/` IRI that content-
+negotiates: `Accept: application/ld+json` or `text/turtle` returns machine data,
+a browser gets HTML.
+
+## Contracts
+- JSON-LD @context (records): https://w3id.org/battinfo/context/records/v1.json
+- Vocabulary (Turtle): https://w3id.org/battinfo/ns
+- JSON Schemas (draft 2020-12): https://github.com/BIG-MAP/BattINFO/tree/main/assets/schemas — each declares `$id: https://w3id.org/battinfo/schema/{name}.schema.json`
+- Validation contract (policies, structured issue codes, CLI/JSON output): https://big-map.github.io/BattINFO/dev/validation-contract.html
+- Identifier policy (IRI minting, content negotiation, tombstones): https://big-map.github.io/BattINFO/dev/identifiers.html
+- Schema + version reference: https://big-map.github.io/BattINFO/dev/pages/reference.html
+
+## Examples
+- Worked records (Python / canonical JSON / JSON-LD): https://battinfo.org/examples
+- Raw JSON-LD artifacts: https://battinfo.org/jsonld/showcase-{slug}.jsonld (Content-Type: application/ld+json)
+
+## Authoring and consumption
+- The Python package is the SDK: https://github.com/BIG-MAP/BattINFO
+- CLI verdicts match the browser and the registry gate (same schemas, drift-checked in CI): `battinfo validate --format json`
+- Registry submission + listing API exposes an OpenAPI document at the service's `/openapi.json`.
+
+## Notes for autonomous agents
+- Type a record by its top-level discriminator key + `schema_version`; accept `0.1.0`, `1.0.0`, and `0.2.0`.
+- Quantities are typed, never strings: `{"@type": [...], "hasNumericalPart": {"hasNumberValue": N}, "hasMeasurementUnit": "<EMMO unit IRI>"}`.
+- During the soft launch, some record IRIs resolve to an auth-gated HTML landing page for browsers; machine content negotiation (`application/ld+json`, `text/turtle`) is unauthenticated.

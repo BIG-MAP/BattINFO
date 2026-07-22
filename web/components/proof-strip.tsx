@@ -1,7 +1,7 @@
 import { site } from "@/lib/site";
 
 /**
- * Trust markers under the hero: live badges (CI, PyPI — they update themselves,
+ * Trust markers under the hero: live badges (CI, PyPI, they update themselves,
  * so they can never go stale) plus the claims that need no counter: license,
  * pinned ontology versions, and the projects funding the work. A DOI badge
  * appears automatically once `site.doi` is set at the 0.8 archive step.

@@ -2,7 +2,7 @@
   "name": "battinfo-org",
   "version": "0.0.1",
   "private": true,
-  "description": "Website for BattINFO \u00e2\u20ac\u201d the semantic data layer for battery technology (battinfo.org)",
+  "description": "Website for BattINFO â€” the semantic data layer for battery technology (battinfo.org)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,17 +10,21 @@
     "lint": "next lint",
     "sync:examples": "node scripts/sync-examples.mjs",
     "sync:schemas": "node scripts/sync-schemas.mjs",
-    "check:agreement": "tsx scripts/check-agreement.ts"
+    "sync:context": "node scripts/sync-context.mjs",
+    "check:agreement": "tsx scripts/check-agreement.ts",
+    "check:workbench": "tsx scripts/check-jsonld-workbench.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.3.1",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "jsonld": "^9.0.0",
     "next": "^14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@types/jsonld": "^1.5.15",
     "@types/node": "20.14.10",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",

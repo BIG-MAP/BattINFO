@@ -1,31 +1,95 @@
-# BattINFO — Brand assets
+# BattINFO — Brand Asset Pack v1.1
 
-Canonical home of the BattINFO visual identity. Single source of truth for the
-docs site and the future web property.
+The semantic data layer for battery technology.
 
-- **[`BRAND.md`](BRAND.md)** — the visual identity guide (logo, color, type, usage).
-- **[`tokens.css`](tokens.css)** — design tokens as CSS variables. Import this; don't fork the values.
-- **`assets/`** — logo, icon, favicon, and social image files.
+## ⭐ Start here (front-end / coding agent)
 
+1. **`AGENTS.md`** — implementation rules the coding agent MUST follow.
+   Read it first; it explains the light/dark failures and how to avoid them.
+2. **`tokens.css`** — the dual-mode design-token system. Import once at the app
+   root; build every surface from its `--bi-*` semantic tokens. This is the
+   fix for the light/dark coherency problems: one contract, two value sets,
+   all contrast-verified.
+
+```css
+@import "./brand-assets/tokens.css";
 ```
-brand/
-├── BRAND.md            visual identity guide (read this first)
-├── tokens.css          design tokens — single source of truth
-└── assets/
-    ├── logo/           horizontal, horizontal-on-dark, stacked lockups
-    ├── icon/           symbol: full-color, mono, reversed, knockout
-    ├── favicon/        favicon.svg + PNG fallbacks, apple-touch, app-icon-512
-    └── social/         og-image.png (1200×630)
+```html
+<html data-theme="light"> … </html>   <!-- or data-theme="dark" -->
 ```
 
-## Consumers
+## Files
 
-| Consumer | How it uses these assets |
-|----------|--------------------------|
-| **Sphinx docs** (`docs/`) | `conf.py` points `html_logo`/`html_favicon` here; `_static/css/custom.css` imports `tokens.css` and maps the values onto pydata-sheet theme variables. |
-| **Future web** (`web/`) | Imports `tokens.css` directly and serves `assets/favicon/*` + `assets/social/og-image.png`. |
+| File | Use |
+|------|-----|
+| `AGENTS.md` | **Front-end implementation rules — read first.** |
+| `tokens.css` | **Dual-mode design tokens (light + dark). Import at app root.** |
+| `icon.svg` | Primary symbol (full color). App mark, avatar, favicon source. |
+| `icon-mono.svg` | Single-color Ink version. Faxes, engraving, low-color contexts. |
+| `icon-reversed.svg` | White battery + teal graph, for dark backgrounds. |
+| `icon-knockout.svg` | All-white, for photos / colored fills. |
+| `favicon.svg` | 32×32 rounded-square app tile (brighter teal for small-size legibility). |
+| `logo-horizontal.svg` | Primary lockup: symbol + wordmark, side by side. |
+| `logo-horizontal-on-dark.svg` | Horizontal lockup for dark backgrounds. |
+| `logo-stacked.svg` | Vertical lockup: symbol above centered wordmark. |
+| `favicon.svg` `favicon-16/32/48.png` | Browser favicon (SVG + PNG fallbacks). |
+| `apple-touch-icon-180.png` | iOS home-screen icon. |
+| `app-icon-512.png` | PWA / Android maskable source. |
+| `og-image.png` | 1200×630 social / Open Graph share card. |
 
-When the identity changes, edit `tokens.css` / `assets/` **here** and let consumers
-pick up the change — never hardcode brand values downstream.
+## HTML head snippet
 
-Asset pack version: **v1.0**.
+```html
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<meta property="og:image" content="/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+```
+
+## Colors — quick reference
+
+Full token definitions (light **and** dark values) live in `tokens.css`.
+Use the semantic `--bi-*` tokens in code, never these raw hexes directly.
+
+**Light mode**
+- **Ink** `#102A43` — primary text, "Batt", battery outline
+- **Signal Teal 500** `#12A394` — brand fills, "INFO", ≥24px display only
+- **Signal Teal 700** `#0C7A6E` — teal text, links, buttons (AA 5.2:1)
+
+**Dark mode** (the part the code agent kept getting wrong)
+- Base `#0B1622` · Surface `#13212F` · Inset `#0E1B27` (elevate = lighter)
+- Primary text `#EAF1F6` — **near-white, NOT ink navy** (ink navy = 1.24:1, invisible)
+- Brand fill `#2DD4BF` · Teal text/links `#2DCAB6` (AA 8.9:1) — teal brightens on dark
+- Primary button = teal fill w/ dark ink text (an ink button disappears on dark)
+
+## Semantic state colors (all AA-verified on white)
+- **Success** `#178050` (4.95) · tint `#E4F4EC`
+- **Warning** `#946007` (5.34) · tint `#FBF0DA`
+- **Error** `#C8372D` (5.20) · tint `#FBE7E4`
+- **Info** `#2563B8` (5.91) · tint `#E5EEFA`
+
+## ⚠ Before external distribution — outline the wordmark
+
+The lockup SVGs style the wordmark with **inline font attributes** targeting
+**Plus Jakarta Sans (700)** with a `system-ui → sans-serif` fallback stack, so
+they always render at the correct size and weight — even when embedded via
+`<img>` (which blocks external webfont loading) or opened offline. The fallback
+is a close geometric sans, but it is not the exact brand face.
+
+For pixel-exact brand rendering in **print, email signatures, or any context
+where Plus Jakarta Sans may be absent**, open a lockup in Figma/Illustrator and
+**Type → Create Outlines** (~30s) so the wordmark becomes vector paths with no
+font dependency at all.
+
+The `icon*.svg` files are pure geometry — resolution-independent, no font, no
+outlining needed.
+
+## Minimum sizes
+- Full lockup: 120px wide
+- Symbol alone: 24px
+- Favicon: 16px
+
+## Clear space
+Keep clear space ≥ the height of the symbol's terminal cap on all sides.

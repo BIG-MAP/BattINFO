@@ -6,9 +6,93 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   Design tokens.
+   These RGB-channel variables MIRROR the semantic tokens in ../../brand/tokens.css
+   (the brand pack, v1.1, the single source of truth). Tailwind's opacity
+   modifiers (`bg-surface/80`) need channel triples, which a hex token file
+   cannot provide — so each `--c-*` below is the channel form of a specific
+   `--bi-*` token, noted inline. If the brand palette changes, edit
+   brand/tokens.css first, then regenerate these triples. Do not invent values.
+   Elevation (dark): base darkest -> surface -> raised; code recedes to inset. */
 :root {
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
+
+  /* Surfaces */
+  --c-paper: 243 242 238;        /* --bi-bg-base    #F3F2EE */
+  --c-surface: 255 255 255;      /* --bi-bg-surface #FFFFFF */
+  --c-raised: 255 255 255;       /* --bi-bg-raised  #FFFFFF */
+  --c-code-bg: 236 234 228;      /* --bi-bg-inset   #ECEAE4 */
+  --c-tint: 228 244 241;         /* --bi-bg-brand-subtle #E4F4F1 */
+
+  /* Text */
+  --c-ink: 16 42 67;             /* --bi-text-primary   #102A43 */
+  --c-ink-muted: 46 66 87;       /* --bi-text-secondary #2E4257 */
+  --c-ink-faint: 90 101 112;     /* --bi-text-muted     #5A6570 */
+  --c-code-fg: 16 42 67;         /* --bi-text-primary   #102A43 */
+
+  /* Borders */
+  --c-border: 226 224 217;       /* --bi-border         #E2E0D9 */
+  --c-border-strong: 203 211 218;/* --bi-border-strong  #CBD3DA */
+
+  /* Brand — teal text (AA-safe) vs teal fill (display only), and the
+     primary-button pair, which flips ink<->teal between modes. */
+  --c-brand-text: 12 122 110;    /* --bi-brand-text  #0C7A6E */
+  --c-brand-fill: 18 163 148;    /* --bi-brand       #12A394 */
+  --c-primary: 16 42 67;         /* --bi-brand-strong (light = ink) #102A43 */
+  --c-primary-fg: 255 255 255;   /* --bi-text-on-brand (light) #FFFFFF */
+
+  /* Semantic states (solid). Tints below. */
+  --c-error: 200 55 45;          /* --bi-error   #C8372D */
+  --c-warning: 148 96 7;         /* --bi-warning #946007 */
+  --c-info: 37 99 184;           /* --bi-info    #2563B8 */
+  --c-error-tint: 251 231 228;   /* --bi-error-bg   #FBE7E4 */
+  --c-warning-tint: 251 240 218; /* --bi-warning-bg #FBF0DA */
+  --c-info-tint: 229 238 250;    /* --bi-info-bg    #E5EEFA */
+
+  /* On-brand text selection. */
+  --c-select-bg: 18 163 148;
+  --c-select-alpha: 0.18;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces — elevate by getting LIGHTER; code recedes to the inset well. */
+  --c-paper: 11 22 34;           /* --bi-bg-base    #0B1622 */
+  --c-surface: 19 33 47;         /* --bi-bg-surface #13212F */
+  --c-raised: 26 42 58;          /* --bi-bg-raised  #1A2A3A */
+  --c-code-bg: 14 27 39;         /* --bi-bg-inset   #0E1B27 */
+  --c-tint: 15 45 53;            /* --bi-bg-brand-subtle (teal 12% over base) */
+
+  /* Text — near-white, never ink navy on dark. */
+  --c-ink: 234 241 246;          /* --bi-text-primary   #EAF1F6 */
+  --c-ink-muted: 174 189 201;    /* --bi-text-secondary #AEBDC9 */
+  --c-ink-faint: 122 137 150;    /* --bi-text-muted     #7A8996 */
+  --c-code-fg: 234 241 246;      /* --bi-text-primary   #EAF1F6 */
+
+  /* Borders */
+  --c-border: 35 50 63;          /* --bi-border         #23323F */
+  --c-border-strong: 51 71 90;   /* --bi-border-strong  #33475A */
+
+  /* Brand — teal brightens on dark; primary button = teal fill, dark-ink text. */
+  --c-brand-text: 45 202 182;    /* --bi-brand-text  #2DCAB6 */
+  --c-brand-fill: 45 212 191;    /* --bi-brand       #2DD4BF */
+  --c-primary: 45 212 191;       /* --bi-brand-strong (dark = teal) #2DD4BF */
+  --c-primary-fg: 6 35 30;       /* --bi-text-on-brand (dark) #06231E */
+
+  /* Semantic states — brighter solids, low-lightness tints. */
+  --c-error: 248 113 113;        /* --bi-error   #F87171 */
+  --c-warning: 240 180 41;       /* --bi-warning #F0B429 */
+  --c-info: 107 168 245;         /* --bi-info    #6BA8F5 */
+  --c-error-tint: 47 36 46;      /* --bi-error-bg   (dark) */
+  --c-warning-tint: 43 44 35;    /* --bi-warning-bg (dark) */
+  --c-info-tint: 25 44 66;       /* --bi-info-bg    (dark) */
+
+  --c-select-bg: 45 212 191;
+  --c-select-alpha: 0.30;
 }
 
 @layer base {
@@ -17,6 +101,9 @@
   }
   body {
     @apply bg-paper text-ink antialiased;
+  }
+  ::selection {
+    background: rgb(var(--c-select-bg) / var(--c-select-alpha));
   }
 }
 
