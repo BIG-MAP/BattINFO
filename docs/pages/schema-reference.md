@@ -12,145 +12,145 @@ registry's publish gate, and the [browser validator](https://battinfo.org/valida
 - **Record key (discriminator):** `cell_spec`
 - **Required top-level:** `schema_version`, `cell_spec`, `provenance`
 - **Required in `cell_spec`:** `id`, `name`, `model`, `manufacturer`, `cell_format`, `chemistry`
-- **Schema:** [`cell-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/cell-spec.schema.json)
+- **Schema:** [`cell-spec.schema.json`](https://w3id.org/battinfo/schema/cell-spec.schema.json)
 
 ## cell
 
 - **Record key (discriminator):** `cell_instance`
 - **Required top-level:** `schema_version`, `cell_instance`, `provenance`
 - **Required in `cell_instance`:** `id`, `cell_spec_id`
-- **Schema:** [`cell-instance.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/cell-instance.schema.json)
+- **Schema:** [`cell-instance.schema.json`](https://w3id.org/battinfo/schema/cell-instance.schema.json)
 
 ## test-protocol
 
 - **Record key (discriminator):** `test_spec`
 - **Required top-level:** `schema_version`, `test_spec`, `provenance`
 - **Required in `test_spec`:** `id`, `name`, `kind`
-- **Schema:** [`test-protocol.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/test-protocol.schema.json)
+- **Schema:** [`test-protocol.schema.json`](https://w3id.org/battinfo/schema/test-protocol.schema.json)
 
 ## test
 
 - **Record key (discriminator):** `test`
 - **Required top-level:** `schema_version`, `test`, `provenance`
 - **Required in `test`:** `id`, `cell_id`, `name`, `kind`
-- **Schema:** [`test.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/test.schema.json)
+- **Schema:** [`test.schema.json`](https://w3id.org/battinfo/schema/test.schema.json)
 
 ## dataset
 
 - **Record key (discriminator):** `dataset`
 - **Required top-level:** `schema_version`, `dataset`, `provenance`
 - **Required in `dataset`:** `id`, `identifier`, `name`, `access_url`
-- **Schema:** [`dataset.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/dataset.schema.json)
+- **Schema:** [`dataset.schema.json`](https://w3id.org/battinfo/schema/dataset.schema.json)
 
 ## material-spec
 
 - **Record key (discriminator):** `material_spec`
 - **Required top-level:** `schema_version`, `material_spec`, `provenance`
 - **Required in `material_spec`:** `id`, `name`
-- **Schema:** [`material-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/material-spec.schema.json)
+- **Schema:** [`material-spec.schema.json`](https://w3id.org/battinfo/schema/material-spec.schema.json)
 
 ## material
 
 - **Record key (discriminator):** `material`
 - **Required top-level:** `schema_version`, `material`, `provenance`
 - **Required in `material`:** `id`, `material_spec_id`
-- **Schema:** [`material.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/material.schema.json)
+- **Schema:** [`material.schema.json`](https://w3id.org/battinfo/schema/material.schema.json)
 
 ## electrode-spec
 
 - **Record key (discriminator):** `electrode_spec`
 - **Required top-level:** `schema_version`, `electrode_spec`, `provenance`
 - **Required in `electrode_spec`:** `id`, `name`
-- **Schema:** [`electrode-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/electrode-spec.schema.json)
+- **Schema:** [`electrode-spec.schema.json`](https://w3id.org/battinfo/schema/electrode-spec.schema.json)
 
 ## electrode
 
 - **Record key (discriminator):** `electrode`
 - **Required top-level:** `schema_version`, `electrode`, `provenance`
 - **Required in `electrode`:** `id`, `electrode_spec_id`
-- **Schema:** [`electrode.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/electrode.schema.json)
+- **Schema:** [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.schema.json)
 
 ## separator-spec
 
 - **Record key (discriminator):** `separator_spec`
 - **Required top-level:** `schema_version`, `separator_spec`, `provenance`
 - **Required in `separator_spec`:** `id`, `name`
-- **Schema:** [`separator-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/separator-spec.schema.json)
+- **Schema:** [`separator-spec.schema.json`](https://w3id.org/battinfo/schema/separator-spec.schema.json)
 
 ## separator
 
 - **Record key (discriminator):** `separator`
 - **Required top-level:** `schema_version`, `separator`, `provenance`
 - **Required in `separator`:** `id`, `separator_spec_id`
-- **Schema:** [`separator.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/separator.schema.json)
+- **Schema:** [`separator.schema.json`](https://w3id.org/battinfo/schema/separator.schema.json)
 
 ## current-collector-spec
 
 - **Record key (discriminator):** `current_collector_spec`
 - **Required top-level:** `schema_version`, `current_collector_spec`, `provenance`
 - **Required in `current_collector_spec`:** `id`, `name`
-- **Schema:** [`current-collector-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/current-collector-spec.schema.json)
+- **Schema:** [`current-collector-spec.schema.json`](https://w3id.org/battinfo/schema/current-collector-spec.schema.json)
 
 ## current-collector
 
 - **Record key (discriminator):** `current_collector`
 - **Required top-level:** `schema_version`, `current_collector`, `provenance`
 - **Required in `current_collector`:** `id`, `current_collector_spec_id`
-- **Schema:** [`current-collector.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/current-collector.schema.json)
+- **Schema:** [`current-collector.schema.json`](https://w3id.org/battinfo/schema/current-collector.schema.json)
 
 ## electrolyte-spec
 
 - **Record key (discriminator):** `electrolyte_spec`
 - **Required top-level:** `schema_version`, `electrolyte_spec`, `provenance`
 - **Required in `electrolyte_spec`:** `id`, `name`, `family`
-- **Schema:** [`electrolyte-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/electrolyte-spec.schema.json)
+- **Schema:** [`electrolyte-spec.schema.json`](https://w3id.org/battinfo/schema/electrolyte-spec.schema.json)
 
 ## electrolyte
 
 - **Record key (discriminator):** `electrolyte`
 - **Required top-level:** `schema_version`, `electrolyte`, `provenance`
 - **Required in `electrolyte`:** `id`, `electrolyte_spec_id`
-- **Schema:** [`electrolyte.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/electrolyte.schema.json)
+- **Schema:** [`electrolyte.schema.json`](https://w3id.org/battinfo/schema/electrolyte.schema.json)
 
 ## housing-spec
 
 - **Record key (discriminator):** `housing_spec`
 - **Required top-level:** `schema_version`, `housing_spec`, `provenance`
 - **Required in `housing_spec`:** `id`, `name`
-- **Schema:** [`housing-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/housing-spec.schema.json)
+- **Schema:** [`housing-spec.schema.json`](https://w3id.org/battinfo/schema/housing-spec.schema.json)
 
 ## housing
 
 - **Record key (discriminator):** `housing`
 - **Required top-level:** `schema_version`, `housing`, `provenance`
 - **Required in `housing`:** `id`, `housing_spec_id`
-- **Schema:** [`housing.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/housing.schema.json)
+- **Schema:** [`housing.schema.json`](https://w3id.org/battinfo/schema/housing.schema.json)
 
 ## equipment-spec
 
 - **Record key (discriminator):** `equipment_spec`
 - **Required top-level:** `schema_version`, `equipment_spec`, `provenance`
 - **Required in `equipment_spec`:** `id`, `name`
-- **Schema:** [`equipment-spec.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/equipment-spec.schema.json)
+- **Schema:** [`equipment-spec.schema.json`](https://w3id.org/battinfo/schema/equipment-spec.schema.json)
 
 ## equipment
 
 - **Record key (discriminator):** `equipment`
 - **Required top-level:** `schema_version`, `equipment`, `provenance`
 - **Required in `equipment`:** `id`, `equipment_spec_id`
-- **Schema:** [`equipment.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/equipment.schema.json)
+- **Schema:** [`equipment.schema.json`](https://w3id.org/battinfo/schema/equipment.schema.json)
 
 ## channel
 
 - **Record key (discriminator):** `channel`
 - **Required top-level:** `schema_version`, `channel`, `provenance`
 - **Required in `channel`:** `id`, `equipment_id`, `index`
-- **Schema:** [`channel.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/channel.schema.json)
+- **Schema:** [`channel.schema.json`](https://w3id.org/battinfo/schema/channel.schema.json)
 
 ## organization
 
 - **Record key (discriminator):** `organization`
-- **Schema:** [`organization.schema.json`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/organization.schema.json)
+- **Schema:** [`organization.schema.json`](https://w3id.org/battinfo/schema/organization.schema.json)
 
 Shared building blocks (quantities, provenance, component modules) live in
-[`modules/`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas/modules).
+[`modules/`](https://w3id.org/battinfo/schema/modules).
