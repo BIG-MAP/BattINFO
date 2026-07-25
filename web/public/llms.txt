@@ -13,7 +13,7 @@ a browser gets HTML.
 ## Contracts
 - JSON-LD @context (records): https://w3id.org/battinfo/context/records/v1.json
 - Vocabulary (Turtle): https://w3id.org/battinfo/ns
-- JSON Schemas (draft 2020-12): https://github.com/BIG-MAP/BattINFO/tree/main/assets/schemas — each declares `$id: https://w3id.org/battinfo/schema/{name}.schema.json`
+- JSON Schemas (draft 2020-12): resolvable at their declared `$id`s, e.g. https://w3id.org/battinfo/schema/cell-spec.schema.json (nested modules/ serve too, so `$ref` chains resolve); source at https://github.com/BIG-MAP/BattINFO/tree/main/assets/schemas
 - Validation contract (policies, structured issue codes, CLI/JSON output): https://big-map.github.io/BattINFO/dev/validation-contract.html
 - Identifier policy (IRI minting, content negotiation, tombstones): https://big-map.github.io/BattINFO/dev/identifiers.html
 - Schema + version reference: https://big-map.github.io/BattINFO/dev/pages/reference.html

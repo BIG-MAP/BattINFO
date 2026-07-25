@@ -20,7 +20,11 @@ from battinfo.entities import ENTITY_KINDS  # noqa: E402
 
 SCHEMAS = ROOT / "src" / "battinfo" / "data" / "schemas"
 OUT = ROOT / "docs" / "pages" / "schema-reference.md"
-GITHUB = "https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/schemas"
+# Canonical, resolvable schema URLs — each file's declared $id, served by the
+# registry behind the w3id front door (battinfo-registry#30). Prefer these
+# over GitHub blob links: they are the identity JSON-Schema resolvers use,
+# and they are pinnable in pipelines.
+SCHEMA_BASE = "https://w3id.org/battinfo/schema"
 
 
 def build() -> str:
@@ -48,17 +52,17 @@ def build() -> str:
             f"- **Record key (discriminator):** `{kind.record_key}`",
             f"- **Required top-level:** {', '.join(f'`{r}`' for r in required) or '—'}",
             f"- **Required in `{kind.record_key}`:** {', '.join(f'`{r}`' for r in body_required) or '—'}",
-            f"- **Schema:** [`{kind.schema_file}`]({GITHUB}/{kind.schema_file})",
+            f"- **Schema:** [`{kind.schema_file}`]({SCHEMA_BASE}/{kind.schema_file})",
             "",
         ]
     lines += [
         "## organization",
         "",
         "- **Record key (discriminator):** `organization`",
-        f"- **Schema:** [`organization.schema.json`]({GITHUB}/organization.schema.json)",
+        f"- **Schema:** [`organization.schema.json`]({SCHEMA_BASE}/organization.schema.json)",
         "",
         "Shared building blocks (quantities, provenance, component modules) live in",
-        f"[`modules/`]({GITHUB}/modules).",
+        f"[`modules/`]({SCHEMA_BASE}/modules).",
         "",
     ]
     return "\n".join(lines)
