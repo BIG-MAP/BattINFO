@@ -554,7 +554,7 @@ def _epoch_to_iso(value):
     )
 
 
-def record_to_jsonld(record: dict, record_type: str, *, context: str = "inline") -> dict:
+def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") -> dict:
     """Transform a BattINFO plain-JSON record to a JSON-LD document.
 
     Parameters
@@ -564,12 +564,14 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "inline")
     record_type:
         One of ``"cell-spec"``, ``"cell-instance"``, ``"test"``, ``"dataset"``.
     context:
-        ``"inline"`` (default) embeds the full records ``@context`` so the
-        document is self-contained (archival/offline). ``"url"`` references the
-        hosted context (``_CONTEXT_URL``) instead — a compact document for
-        interchange, resolved offline by the bundled copy. Both expand to the
-        same graph. Records that emit a domain-battery (EMMO) context — materials
-        and components — are unaffected by ``"url"``.
+        ``"url"`` (default) references the hosted context (``_CONTEXT_URL``)
+        with a one-line ``@context`` — the hosted document carries the full
+        vocabulary, so the record a reader sees stays simple. Resolved offline
+        by the bundled copy. ``"inline"`` embeds the full records ``@context``
+        so the document is self-contained — use it for archival exports that
+        must validate with no network (Zenodo packages inline). Both expand to
+        the same graph. Records that emit a domain-battery (EMMO) context —
+        materials and components — are unaffected by ``"url"``.
 
     Returns
     -------

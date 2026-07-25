@@ -5847,7 +5847,13 @@ class AuthoringWorkspace:
             for src in sorted(src_dir.glob("*.json")):
                 try:
                     raw = json.loads(src.read_text(encoding="utf-8"))
-                    doc = record_to_jsonld(raw, jsonld_type)
+                    # JSON-LD files carry the one-line hosted-context URL (the
+                    # default); RDF conversions must inline, or rdflib would
+                    # fetch the context URL over the network at parse time.
+                    doc = record_to_jsonld(
+                        raw, jsonld_type,
+                        context="url" if rdflib_fmt == "json-ld" else "inline",
+                    )
                     dst = dst_dir / src.with_suffix(ext).name
                     if rdflib_fmt == "json-ld":
                         # Write directly — preserves compact IRIs and context

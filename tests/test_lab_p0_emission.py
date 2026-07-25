@@ -208,12 +208,27 @@ def test_record_to_jsonld_emits_composition_and_refs() -> None:
 
 
 def test_record_to_jsonld_composition_terms_resolve_in_inline_context() -> None:
-    doc = record_to_jsonld(_composed_record(), "cell-spec")
+    doc = record_to_jsonld(_composed_record(), "cell-spec", context="inline")
     context = doc["@context"]
     terms: set[str] = set()
     _collect_bare_terms({k: v for k, v in doc.items() if k != "@context"}, terms)
     unresolved = {t for t in terms if t not in context}
     assert not unresolved, f"terms missing from the inline context: {sorted(unresolved)}"
+
+
+def test_record_to_jsonld_composition_terms_resolve_in_hosted_context() -> None:
+    # The default emission references the hosted context by URL; every bare
+    # term the document carries must therefore resolve in the hosted v1 file.
+    doc = record_to_jsonld(_composed_record(), "cell-spec")  # default: "url"
+    v1_path = (
+        Path(__file__).resolve().parents[1]
+        / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
+    )
+    hosted = json.loads(v1_path.read_text(encoding="utf-8"))["@context"]
+    terms: set[str] = set()
+    _collect_bare_terms({k: v for k, v in doc.items() if k != "@context"}, terms)
+    unresolved = {t for t in terms if t not in hosted}
+    assert not unresolved, f"terms missing from the hosted context: {sorted(unresolved)}"
 
 
 # ── 2. Publish / resolver artifact builder ───────────────────────────────────
