@@ -61,8 +61,8 @@ def test_hosted_context_resolves_offline() -> None:
 
 def test_url_mode_is_compact_and_equivalent_to_inline() -> None:
     record = json.loads(A123.read_text(encoding="utf-8"))
-    inline = record_to_jsonld(record, "cell-spec")  # default
-    referenced = record_to_jsonld(record, "cell-spec", context="url")
+    inline = record_to_jsonld(record, "cell-spec", context="inline")
+    referenced = record_to_jsonld(record, "cell-spec")  # "url" is the default
 
     assert isinstance(inline["@context"], dict)
     assert referenced["@context"] == _CONTEXT_URL

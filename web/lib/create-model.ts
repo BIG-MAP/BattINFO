@@ -7,12 +7,14 @@
 // builder shows the two as stacked containers and emits the two records they
 // serialize to.
 //
-// The JSON-LD carries a self-contained inline @context assembled from the terms
-// the document actually uses (the hosted records context is cell-property
-// focused and does not define the composition/material terms), so every
-// document expands with no loose ends.
+// The JSON-LD references the hosted records context by URL (one line): the
+// hosted document is the COMPLETE generated context, so every term this file
+// emits resolves there — the workbench resolves the URL offline against the
+// vendored copy. Terms follow the Python transform's vocabulary (PascalCase
+// EMMO classes for component properties; the snake_case cell-property terms
+// of the records context; battinfo:CamelCase for unmapped keys).
 
-import { recordsContext } from "./records-context.generated";
+import { RECORDS_CONTEXT_URL } from "./records-context.generated";
 import { validateRecord, type Issue } from "./validate";
 
 export interface DraftProperty {
@@ -25,60 +27,6 @@ export interface DraftProperty {
 }
 
 export type Values = Record<string, string>;
-
-// --- JSON-LD @context assembly -----------------------------------------------
-const PREFIXES: Record<string, string> = {
-  battery: "https://w3id.org/emmo/domain/battery#",
-  electrochemistry: "https://w3id.org/emmo/domain/electrochemistry#",
-  emmo: "https://w3id.org/emmo#",
-  chemical: "https://w3id.org/emmo/domain/chemical-substance#",
-  battinfo: "https://w3id.org/battinfo/",
-  schema: "https://schema.org/",
-  dcterms: "http://purl.org/dc/terms/",
-  skos: "http://www.w3.org/2004/02/skos/core#",
-  xsd: "http://www.w3.org/2001/XMLSchema#",
-};
-
-// Composition/material/relation terms not in the base records context, taken
-// verbatim from the EMMO domain contexts the transform emits.
-const SUPPLEMENT: Record<string, unknown> = {
-  hasPositiveElectrode: { "@id": "electrochemistry:electrochemistry_8e9cf965_9f92_46e8_b678_b50410ce3616", "@type": "@id" },
-  hasNegativeElectrode: { "@id": "electrochemistry:electrochemistry_5d299271_3f68_494f_ab96_3db9acdd3138", "@type": "@id" },
-  hasElectrolyte: { "@id": "electrochemistry:electrochemistry_3bd08946_4e81_455d_9fca_dc7a5ead9315", "@type": "@id" },
-  hasSeparator: { "@id": "electrochemistry:electrochemistry_9317be62_e602_4343_a72d_02c87201b9f6", "@type": "@id" },
-  hasActiveMaterial: { "@id": "electrochemistry:electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee", "@type": "@id" },
-  hasCurrentCollector: { "@id": "electrochemistry:electrochemistry_cc8c2c5d_cf3d_444d_a7e8_44ec4c06a88e", "@type": "@id" },
-  hasSolute: { "@id": "electrochemistry:electrochemistry_8784ef24_320b_4a3d_b200_654aec6c271c", "@type": "@id" },
-  hasSolvent: { "@id": "electrochemistry:electrochemistry_808e94df_e002_4e64_a6db_182ed75078c6", "@type": "@id" },
-  hasConstituent: { "@id": "emmo:EMMO_dba27ca1_33c9_4443_a912_1519ce4c39ec", "@type": "@id" },
-  Electrode: "electrochemistry:electrochemistry_0f007072_a8dd_4798_b865_1bf9363be627",
-  ActiveMaterial: "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
-  Binder: "electrochemistry:electrochemistry_68eb5e35_5bd8_47b1_9b7f_f67224fa291e",
-  ConductiveAdditive: "electrochemistry:electrochemistry_82fef384_8eec_4765_b707_5397054df594",
-  CurrentCollector: "electrochemistry:electrochemistry_212af058_3bbb_419f_a9c6_90ba9ebb3706",
-  Separator: "electrochemistry:electrochemistry_331e6cca_f260_4bf8_af55_35304fe1bbe0",
-  ElectrolyteSolution: "electrochemistry:electrochemistry_fa22874b_76a9_4043_8b8f_6086c88746de",
-  Solute: "chemical:substance_3899a9c9_9b34_443e_8ce6_0257589bb38a",
-  Solvent: "chemical:substance_0f2f65a7_5cc4_4c86_a4d0_676771c646f1",
-  LithiumIronPhosphateElectrode: "electrochemistry:electrochemistry_1d0f15cb_d6b5_4c27_89ca_fe78adc1ce5b",
-  GraphiteElectrode: "electrochemistry:electrochemistry_c831d963_629a_41ab_850f_97fb6841b739",
-  LithiumNickelManganeseCobaltOxideElectrode: "electrochemistry:electrochemistry_b3eb8c65_5644_45e3_9e17_0be6277c7962",
-  SiliconGraphiteElectrode: "electrochemistry:electrochemistry_e8c39ecc_29d1_4172_996e_d5b05dc88015",
-  SiliconBasedElectrode: "electrochemistry:electrochemistry_79e12290_d1e5_4c41_916c_18f1e4d7fb51",
-  HardCarbonElectrode: "electrochemistry:electrochemistry_6235cc7c_2eee_432a_93af_47d7e05db007",
-  LithiumElectrode: "electrochemistry:electrochemistry_55775b50_b9d9_4d68_8cb5_38fcd7b9b54d",
-  LithiumCobaltOxideElectrode: "electrochemistry:electrochemistry_fd7caf39_0a43_4fbf_958e_a62067aa9007",
-  LithiumManganeseIronPhosphateElectrode: "electrochemistry:electrochemistry_9109b3f6_112b_456d_ae45_b82c271c656b",
-  LithiumTitanateElectrode: "electrochemistry:electrochemistry_6d0fe07e_a629_479c_ab24_2846f209bb0b",
-  LithiumIronPhosphate: "chemical:substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
-  Graphite: "chemical:substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
-  LithiumNickelManganeseCobaltOxide: "chemical:substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
-  LithiumHexafluorophosphate: "chemical:substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771",
-  EthyleneCarbonate: "chemical:substance_57339d90_0553_4a96_8da9_ff6c3684e226",
-  specific_capacity: "electrochemistry:electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee",
-  loading: "electrochemistry:electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
-  thickness: "emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656",
-};
 
 // Units are emitted as full EMMO IRIs (hasMeasurementUnit is @type:@id), so they
 // need no @context term — and unit tokens with a slash cannot be context terms.
@@ -101,36 +49,6 @@ const UNIT_IRI: Record<string, string> = {
 
 function unitIri(token: string): string {
   return UNIT_IRI[token] ?? token;
-}
-
-const TERM_SOURCE: Record<string, unknown> = {
-  ...(recordsContext["@context"] as Record<string, unknown>),
-  ...SUPPLEMENT,
-};
-
-function collectTerms(node: unknown, out: Set<string>): void {
-  if (Array.isArray(node)) {
-    for (const item of node) collectTerms(item, out);
-    return;
-  }
-  if (!node || typeof node !== "object") return;
-  for (const [key, value] of Object.entries(node)) {
-    if (!key.startsWith("@")) out.add(key);
-    if (key === "@type") for (const t of Array.isArray(value) ? value : [value]) if (typeof t === "string") out.add(t);
-    if (key === "hasMeasurementUnit" && typeof value === "string") out.add(value);
-    collectTerms(value, out);
-  }
-}
-
-/** A minimal inline @context that defines exactly the terms this body uses. */
-function assembleContext(body: Record<string, unknown>): Record<string, unknown> {
-  const used = new Set<string>();
-  collectTerms(body, used);
-  const context: Record<string, unknown> = { ...PREFIXES };
-  for (const term of used) {
-    if (term in TERM_SOURCE) context[term] = TERM_SOURCE[term];
-  }
-  return context;
 }
 
 // --- shared helpers ----------------------------------------------------------
@@ -176,18 +94,26 @@ function pyInstanceRecord(varName: string, record: Record<string, unknown>): str
   ];
 }
 
-function jsonldProps(props: DraftProperty[]): Record<string, unknown>[] {
-  // snake_case property term resolves to the same IRI as its PascalCase class;
-  // the unit is a full EMMO IRI so it needs no context term.
+function jsonldProps(props: DraftProperty[], terms?: Record<string, string>): Record<string, unknown>[] {
+  // The @type term must resolve in the hosted context: cell properties use
+  // their snake_case records-context terms (the default), component and test
+  // properties the transform's PascalCase classes via the catalog's `term`.
+  // The unit is a full EMMO IRI so it needs no context term.
   return activeProps(props).map((p) => ({
-    "@type": p.key,
+    "@type": terms?.[p.key] ?? p.key,
     hasNumericalPart: { hasNumberValue: num(p.value) },
     hasMeasurementUnit: unitIri(p.unit),
   }));
 }
 
+// key -> JSON-LD term map for a property catalog.
+function termMap(catalog: PropDef[]): Record<string, string> {
+  return Object.fromEntries(catalog.filter((c) => c.term).map((c) => [c.key, c.term as string]));
+}
+
 function withContext(body: Record<string, unknown>): Record<string, unknown> {
-  return { "@context": assembleContext(body), ...body };
+  // One-line context: the hosted (and vendored) document carries the vocabulary.
+  return { "@context": RECORDS_CONTEXT_URL, ...body };
 }
 
 // --- vocab maps --------------------------------------------------------------
@@ -256,6 +182,11 @@ export interface PropDef {
   // (e.g. diameter only for cylindrical/coin) — the cell schema forbids the
   // wrong-format dimensions. Undefined means "any format".
   formats?: string[];
+  // JSON-LD class term for the emitted quantity node, matching the Python
+  // transform's vocabulary (e.g. loading -> ActiveMassLoading). Defaults to
+  // the key itself — correct for the cell properties, whose snake_case terms
+  // are part of the records context.
+  term?: string;
 }
 
 export interface SectionDef {
@@ -299,8 +230,8 @@ const CELL_SPEC_PROPS: PropDef[] = [
   { key: "specific_energy", label: "Specific energy", units: ["Wh/kg"], section: "spec" },
   { key: "energy_density", label: "Energy density", units: ["Wh/L"], section: "spec" },
   // Current ratings
-  { key: "continuous_charging_current", label: "Max continuous charge current", units: ["A", "mA"], section: "spec" },
-  { key: "continuous_discharging_current", label: "Max continuous discharge current", units: ["A", "mA"], section: "spec" },
+  { key: "continuous_charging_current", label: "Max continuous charge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousChargingCurrent" },
+  { key: "continuous_discharging_current", label: "Max continuous discharge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousDischargingCurrent" },
   // Life, resistance, mass
   { key: "cycle_life", label: "Cycle life", units: ["cycles"], section: "spec" },
   { key: "internal_resistance", label: "Internal resistance", units: ["mΩ", "Ω"], section: "spec" },
@@ -323,41 +254,41 @@ const CELL_MEASURED_PROPS: PropDef[] = [
 const CELL_PROPS: PropDef[] = [...CELL_SPEC_PROPS, ...CELL_MEASURED_PROPS];
 
 const MATERIAL_SPEC_PROPS: PropDef[] = [
-  { key: "specific_capacity", label: "Specific capacity", units: ["mAh/g"], section: "spec" },
-  { key: "density", label: "Density", units: ["g/cm3"], section: "spec" },
+  { key: "specific_capacity", label: "Specific capacity", units: ["mAh/g"], section: "spec", term: "DischargingSpecificCapacity" },
+  { key: "density", label: "Density", units: ["g/cm3"], section: "spec", term: "Density" },
 ];
 const MATERIAL_MEASURED_PROPS: PropDef[] = [
-  { key: "specific_capacity", label: "Measured specific capacity", units: ["mAh/g"], section: "instance" },
-  { key: "density", label: "Measured density", units: ["g/cm3"], section: "instance" },
+  { key: "specific_capacity", label: "Measured specific capacity", units: ["mAh/g"], section: "instance", term: "DischargingSpecificCapacity" },
+  { key: "density", label: "Measured density", units: ["g/cm3"], section: "instance", term: "Density" },
 ];
 const MATERIAL_PROPS: PropDef[] = [...MATERIAL_SPEC_PROPS, ...MATERIAL_MEASURED_PROPS];
 
 const ELECTRODE_SPEC_PROPS: PropDef[] = [
-  { key: "loading", label: "Target areal loading", units: ["mg/cm2"], section: "spec" },
-  { key: "thickness", label: "Target coating thickness", units: ["um"], section: "spec" },
+  { key: "loading", label: "Target areal loading", units: ["mg/cm2"], section: "spec", term: "ActiveMassLoading" },
+  { key: "thickness", label: "Target coating thickness", units: ["um"], section: "spec", term: "CalenderedCoatingThickness" },
 ];
 const ELECTRODE_MEASURED_PROPS: PropDef[] = [
-  { key: "loading", label: "Measured areal loading", units: ["mg/cm2"], section: "instance" },
-  { key: "thickness", label: "Measured coating thickness", units: ["um"], section: "instance" },
+  { key: "loading", label: "Measured areal loading", units: ["mg/cm2"], section: "instance", term: "ActiveMassLoading" },
+  { key: "thickness", label: "Measured coating thickness", units: ["um"], section: "instance", term: "CalenderedCoatingThickness" },
 ];
 const ELECTRODE_PROPS: PropDef[] = [...ELECTRODE_SPEC_PROPS, ...ELECTRODE_MEASURED_PROPS];
 
 const ELECTROLYTE_SPEC_PROPS: PropDef[] = [
-  { key: "density", label: "Density", units: ["g/cm3"], section: "spec" },
+  { key: "density", label: "Density", units: ["g/cm3"], section: "spec", term: "Density" },
 ];
 const ELECTROLYTE_MEASURED_PROPS: PropDef[] = [
-  { key: "density", label: "Measured density", units: ["g/cm3"], section: "instance" },
+  { key: "density", label: "Measured density", units: ["g/cm3"], section: "instance", term: "Density" },
 ];
 const ELECTROLYTE_PROPS: PropDef[] = [...ELECTROLYTE_SPEC_PROPS, ...ELECTROLYTE_MEASURED_PROPS];
 
 const TEST_SPEC_PROPS: PropDef[] = [
-  { key: "temperature", label: "Temperature", units: ["degC"], section: "spec" },
-  { key: "upper_voltage", label: "Upper voltage", units: ["V"], section: "spec" },
-  { key: "lower_voltage", label: "Lower voltage", units: ["V"], section: "spec" },
+  { key: "temperature", label: "Temperature", units: ["degC"], section: "spec", term: "CelsiusTemperature" },
+  { key: "upper_voltage", label: "Upper voltage", units: ["V"], section: "spec", term: "UpperVoltageLimit" },
+  { key: "lower_voltage", label: "Lower voltage", units: ["V"], section: "spec", term: "LowerVoltageLimit" },
 ];
 const TEST_MEASURED_PROPS: PropDef[] = [
-  { key: "temperature", label: "Temperature", units: ["degC"], section: "instance" },
-  { key: "discharge_capacity", label: "Discharge capacity", units: ["mAh", "Ah"], section: "instance" },
+  { key: "temperature", label: "Temperature", units: ["degC"], section: "instance", term: "CelsiusTemperature" },
+  { key: "discharge_capacity", label: "Discharge capacity", units: ["mAh", "Ah"], section: "instance", term: "battinfo:DischargeCapacity" },
 ];
 const TEST_PROPS: PropDef[] = [...TEST_SPEC_PROPS, ...TEST_MEASURED_PROPS];
 
@@ -470,13 +401,13 @@ export const OBJECT_TYPES: ObjectDef[] = [
       const neg = electrodeNode(v.negativeBasis);
       if (pos) specDoc.hasPositiveElectrode = pos;
       if (neg) specDoc.hasNegativeElectrode = neg;
-      const hp = jsonldProps(inSection(props, "spec"));
+      const hp = jsonldProps(inSection(props, "spec"), termMap(CELL_PROPS));
       if (hp.length) specDoc.hasProperty = hp;
 
       const instanceDoc: Record<string, unknown> = { "@type": "BatteryCell" };
       if (v.instanceName) instanceDoc.name = v.instanceName;
       if (v.serial_number) instanceDoc["schema:serialNumber"] = v.serial_number;
-      const mp = jsonldProps(inSection(props, "instance"));
+      const mp = jsonldProps(inSection(props, "instance"), termMap(CELL_PROPS));
       if (mp.length) instanceDoc.hasProperty = mp;
       return [withContext(specDoc), withContext(instanceDoc)];
     },
@@ -556,13 +487,13 @@ export const OBJECT_TYPES: ObjectDef[] = [
       const specDoc: Record<string, unknown> = {};
       if (types.length) specDoc["@type"] = types.length === 1 ? types[0] : types;
       if (v.name) specDoc.name = v.name;
-      const sp = jsonldProps(inSection(props, "spec"));
+      const sp = jsonldProps(inSection(props, "spec"), termMap(MATERIAL_PROPS));
       if (sp.length) specDoc.hasProperty = sp;
 
       const instanceDoc: Record<string, unknown> = {};
       if (types.length) instanceDoc["@type"] = types.length === 1 ? types[0] : types;
       instanceDoc.name = v.instanceName || v.name;
-      const mp = jsonldProps(inSection(props, "instance"));
+      const mp = jsonldProps(inSection(props, "instance"), termMap(MATERIAL_PROPS));
       if (mp.length) instanceDoc.hasProperty = mp;
       return [withContext(specDoc), withContext(instanceDoc)];
     },
@@ -648,12 +579,12 @@ export const OBJECT_TYPES: ObjectDef[] = [
       const active: Record<string, unknown> = SUBSTANCE[v.active] ? { "@type": SUBSTANCE[v.active], name: v.active } : { "@type": "ActiveMaterial", name: v.active };
       specDoc.hasActiveMaterial = active;
       if (v.collector) specDoc.hasCurrentCollector = { "@type": "CurrentCollector", name: v.collector };
-      const sp = jsonldProps(inSection(props, "spec"));
+      const sp = jsonldProps(inSection(props, "spec"), termMap(ELECTRODE_PROPS));
       if (sp.length) specDoc.hasProperty = sp;
 
       const instanceDoc: Record<string, unknown> = { "@type": "Electrode" };
       instanceDoc.name = v.instanceName || v.name;
-      const mp = jsonldProps(inSection(props, "instance"));
+      const mp = jsonldProps(inSection(props, "instance"), termMap(ELECTRODE_PROPS));
       if (mp.length) instanceDoc.hasProperty = mp;
       return [withContext(specDoc), withContext(instanceDoc)];
     },
@@ -744,12 +675,12 @@ export const OBJECT_TYPES: ObjectDef[] = [
           hasConstituent: solvents.map((name) => (SUBSTANCE[name] ? { "@type": SUBSTANCE[name], name } : { name })),
         };
       }
-      const sp = jsonldProps(inSection(props, "spec"));
+      const sp = jsonldProps(inSection(props, "spec"), termMap(ELECTROLYTE_PROPS));
       if (sp.length) specDoc.hasProperty = sp;
 
       const instanceDoc: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
       instanceDoc.name = v.instanceName || v.name;
-      const mp = jsonldProps(inSection(props, "instance"));
+      const mp = jsonldProps(inSection(props, "instance"), termMap(ELECTROLYTE_PROPS));
       if (mp.length) instanceDoc.hasProperty = mp;
       return [withContext(specDoc), withContext(instanceDoc)];
     },
@@ -837,11 +768,11 @@ export const OBJECT_TYPES: ObjectDef[] = [
     toJsonLd: (v, props) => {
       const protocolDoc: Record<string, unknown> = { "@type": "schema:CreativeWork" };
       if (v.name) protocolDoc.name = v.name;
-      const sp = jsonldProps(inSection(props, "spec"));
+      const sp = jsonldProps(inSection(props, "spec"), termMap(TEST_PROPS));
       if (sp.length) protocolDoc.hasProperty = sp;
       const runDoc: Record<string, unknown> = { "@type": "BatteryTest" };
       if (v.runName) runDoc.name = v.runName;
-      const mp = jsonldProps(inSection(props, "instance"));
+      const mp = jsonldProps(inSection(props, "instance"), termMap(TEST_PROPS));
       if (mp.length) runDoc.hasProperty = mp;
       return [withContext(protocolDoc), withContext(runDoc)];
     },
