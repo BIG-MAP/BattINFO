@@ -109,7 +109,7 @@ Example commands:
 ```powershell
 battinfo validate examples/cell-spec/research/a123-anr26650m1-b.detailed.example.json
 
-battinfo save cell-instance --cell-spec-id https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5 --uid 3m6k9t2p7x4h9nq8 --source-type lab
+battinfo save cell-instance --cell-spec-id https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0 --uid 3m6k9t2p7x4h9nq8 --source-type lab
 
 battinfo save test --cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8 --name "Baseline cycling" --kind cycling --uid 5p7v2n8k4m3t6q9r
 
@@ -119,7 +119,7 @@ battinfo save dataset --title "Baseline cycling dataset" --related-cell-id https
 Query commands over the linked chain:
 
 ```powershell
-battinfo query cell-instance --cell-spec-id https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5 --has-dataset true --format json
+battinfo query cell-instance --cell-spec-id https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0 --has-dataset true --format json
 
 battinfo query tests --cell-id https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8 --format json
 

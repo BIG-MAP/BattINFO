@@ -4,11 +4,11 @@
 
 // The full canonical record, verbatim from examples/**.
 export const cellSpecCanonical = {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "cell_spec": {
-    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-    "short_id": "7d9k2m",
-    "identifier": "cell-spec:7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
+    "short_id": "pge5we",
+    "identifier": "cell-spec:pge5-wer6-2q82-v9k0",
     "name": "A123 ANR26650M1-B",
     "model": "ANR26650M1-B",
     "manufacturer": {
@@ -103,15 +103,6 @@ export const cellSpecCanonical = {
         "confidence": 0.8
       }
     },
-    "nominal_continuous_charging_current": {
-      "value": 2.5,
-      "unit": "A",
-      "raw": {
-        "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
-        "page": 1,
-        "confidence": 0.8
-      }
-    },
     "maximum_continuous_charging_current": {
       "value": 2.5,
       "unit": "A",
@@ -188,7 +179,7 @@ export const cellSpecCanonical = {
 // A friendly authored-input teaser derived from the canonical record, so its
 // values can never drift from the source record.
 export const cellSpecInput = {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "cell_spec": {
     "name": "A123 ANR26650M1-B",
     "model": "ANR26650M1-B",

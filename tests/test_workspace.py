@@ -144,7 +144,7 @@ def test_workspace_loads_cell_spec_from_validated_json_record(tmp_path: Path) ->
     assert len(workspace.cell_specs) == 1
     assert cell_spec.manufacturer == "A123"
     assert cell_spec.model == "ANR26650M1-B"
-    assert cell_spec.id == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+    assert cell_spec.id == "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
     assert cell_spec.iec_code == "IFpR26650"
     assert cell_spec.country_of_origin == "United States"
     assert cell_spec.year == 2012

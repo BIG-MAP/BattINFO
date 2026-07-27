@@ -50,7 +50,7 @@ result = publish(
     destination="local",
 )
 print(result.canonical_iri)
-# https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5`;
+# https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`;
 
 export const installSnippet = `python -m venv .venv
 # until the 0.8 release lands on PyPI, install from source:

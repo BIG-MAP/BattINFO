@@ -156,10 +156,10 @@ def test_template_cell_spec_and_create_cell_instance(tmp_path: Path) -> None:
         iec_code="IFpR26650",
         country_of_origin="United States",
         year=2012,
-        uid="7d9k2m4p8t3x6nq5",
+        uid="pge5wer62q82v9k0",
         source_file="A123__ANR26650M1-B.pdf",
     )
-    assert cell_spec["cell_spec"]["id"] == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+    assert cell_spec["cell_spec"]["id"] == "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
     assert cell_spec["cell_spec"]["model"] == "ANR26650M1-B"
     assert cell_spec["cell_spec"]["iec_code"] == "IFpR26650"
     assert cell_spec["cell_spec"]["country_of_origin"] == "United States"
@@ -188,7 +188,7 @@ def test_query_cell_specs_exposes_iec_code(tmp_path: Path) -> None:
         iec_code="IFpR26650",
         country_of_origin="United States",
         year=2012,
-        uid="7d9k2m4p8t3x6nq5",
+        uid="pge5wer62q82v9k0",
         source_file="A123__ANR26650M1-B.pdf",
     )
     save_cell_spec(record, source_root=tmp_path)
@@ -593,7 +593,7 @@ def test_promote_staging_cell_spec_preserves_double_hyphen_record_id(tmp_path: P
 def test_save_test_protocol_and_test_with_protocol_reference(tmp_path: Path) -> None:
     cell_spec = save_cell_spec(
         CellSpec(
-            uid="7d9k2m4p8t3x6nq5",
+            uid="pge5wer62q82v9k0",
             manufacturer="A123",
             model_name="ANR26650M1-B",
             chemistry="Li-ion",

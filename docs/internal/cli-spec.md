@@ -174,7 +174,7 @@ JSON mode (`--format json`) for all query commands:
   "offset": 0,
   "items": [
     {
-      "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+      "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
       "short_id": "7d9k2m",
       "manufacturer": "A123",
       "model_name": "ANR26650M1-B"
@@ -208,7 +208,7 @@ Output contract:
 {
   "status": "created",
   "id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8",
-  "cell_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "cell_spec_id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
   "path": "examples/cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json"
 }
 ```
