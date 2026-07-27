@@ -154,3 +154,58 @@ def test_semantic_validation_rejects_size_code_prefix_mismatch_for_format() -> N
     assert not report.ok
     assert any(issue.code == "semantic.size_code_prefix_mismatch" for issue in report.errors)
 
+# ── #299: unmapped property keys surface on COMPONENT records too ─────────────
+
+
+def test_component_property_unmapped_key_warns() -> None:
+    rec = {
+        "schema_version": "0.2.0",
+        "material_spec": {
+            "id": "https://w3id.org/battinfo/material-spec/aaaa-bbbb-cccc-dddd",
+            "name": "X",
+            "property": {
+                "made_up_prop": {"value": 1.0, "unit": "g"},
+                "density": {"value": 1.2, "unit": "g/cm3"},
+                "porosity": {"value": 40, "unit": "%"},
+            },
+        },
+        "provenance": {"source_type": "datasheet"},
+    }
+    report = validate_semantic_report(rec, policy=STRICT_SEMANTIC)
+    hits = [(i.severity, i.path) for i in report.issues if i.code == "semantic.property_unmapped"]
+    # density/porosity resolve through the transform's descriptor/fraction
+    # tables and must NOT warn; the invented key must.
+    assert hits == [("warning", "material_spec.property.made_up_prop")]
+
+
+def test_coating_property_unmapped_key_warns_with_coating_path() -> None:
+    rec = {
+        "schema_version": "0.2.0",
+        "electrode_spec": {
+            "id": "https://w3id.org/battinfo/electrode-spec/aaaa-bbbb-cccc-dddd",
+            "name": "E",
+            "coating": {
+                "property": {
+                    "loading": {"value": 6.6, "unit": "mg/cm2"},
+                    "thickness": {"value": 16, "unit": "um"},
+                    "junk_key": {"value": 1, "unit": "g"},
+                }
+            },
+        },
+        "provenance": {"source_type": "datasheet"},
+    }
+    report = validate_semantic_report(rec, policy=STRICT_SEMANTIC)
+    hits = [i.path for i in report.issues if i.code == "semantic.property_unmapped"]
+    assert hits == ["electrode_spec.coating.property.junk_key"]
+
+
+def test_property_unmapped_message_matches_transform_reality() -> None:
+    # The transform emits unmapped keys under a battinfo: fallback term — it
+    # does not omit them. The warning must say what actually happens.
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["properties"]["frobnication_index"] = {"value": 1.0, "unit": "%"}
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    issue = next(i for i in report.issues if i.code == "semantic.property_unmapped")
+    assert "fallback" in issue.message
+    assert "OMITTED" not in issue.message
+

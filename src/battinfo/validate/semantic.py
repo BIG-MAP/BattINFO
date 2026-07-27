@@ -427,10 +427,36 @@ def _curated_property_map() -> dict[str, str]:
     return {m["key"]: m.get("class_iri", "") for m in doc.get("mappings", [])}
 
 
+@lru_cache(maxsize=1)
+def _component_property_terms() -> frozenset[str]:
+    """Property keys the component emitters resolve WITHOUT the curated map.
+
+    Imported from the transform itself (fraction keys and the descriptor /
+    coating term tables), so this set can never drift from what the JSON-LD
+    emitters actually accept.
+    """
+    from battinfo.transform.json_to_jsonld import (
+        _DESCRIPTOR_COATING_PROPERTY_TERMS,
+        _DESCRIPTOR_PROPERTY_TERMS,
+        _FRACTION_PROPERTY_TERMS,
+    )
+
+    return frozenset(
+        {
+            *_FRACTION_PROPERTY_TERMS,
+            *_DESCRIPTOR_PROPERTY_TERMS,
+            *_DESCRIPTOR_COATING_PROPERTY_TERMS,
+        }
+    )
+
+
 def _validate_property_mappability(
     specs: Mapping[str, Any],
     issues: list[ValidationIssue],
     resource_type: str | None,
+    *,
+    path_prefix: str = "properties",
+    extra_known: frozenset[str] = frozenset(),
 ) -> None:
     """Warn where a schema-valid property will not survive the JSON-LD export.
 
@@ -444,16 +470,20 @@ def _validate_property_mappability(
         if not isinstance(value, Mapping):
             continue
         class_iri = prop_map.get(key)
+        if class_iri is None and key in extra_known:
+            continue
         if class_iri is None:
             _append_issue(
                 issues,
                 code="semantic.property_unmapped",
                 severity="warning",
-                path=f"properties.{key}",
+                path=f"{path_prefix}.{key}",
                 message=(
                     f"'{key}' is schema-valid but has no curated EMMO mapping - "
-                    "it will be OMITTED from the exported JSON-LD. File a mapping "
-                    "in assets/mappings/domain-battery/property_map.curated.json."
+                    "the JSON-LD export emits it under a non-canonical fallback "
+                    "term, which other tools will not recognize and which will "
+                    "not survive a round-trip import. File a mapping in "
+                    "assets/mappings/domain-battery/property_map.curated.json."
                 ),
                 resource_type=resource_type,
             )
@@ -469,7 +499,7 @@ def _validate_property_mappability(
                 issues,
                 code="semantic.value_text_only",
                 severity="warning",
-                path=f"properties.{key}",
+                path=f"{path_prefix}.{key}",
                 message=(
                     f"'{key}' carries only value_text - the JSON-LD export emits "
                     "numeric quantities, so this property will be OMITTED there."
@@ -482,7 +512,7 @@ def _validate_property_mappability(
                 issues,
                 code="semantic.property_alias_collision",
                 severity="warning",
-                path=f"properties.{keys[1]}",
+                path=f"{path_prefix}.{keys[1]}",
                 message=(
                     f"{keys} all map to the same EMMO class ({class_iri.rsplit('#', 1)[-1]}); "
                     "only one quantity node survives in JSON-LD - keep a single alias."
@@ -788,6 +818,36 @@ def validate_semantic_report(
         body = doc.get(body_key)
         if isinstance(body, Mapping) and isinstance(body.get("property"), Mapping):
             _validate_specs(body["property"], issues, resource_type, hard_issue_severity)
+
+    # Every component body's property block gets the mappability check, with
+    # the transform's descriptor/fraction keys treated as known (they resolve
+    # without the curated map). Coating properties resolve through the coating
+    # term table, so electrode coatings are checked too.
+    for body_key in (
+        "material_spec", "material",
+        "electrode_spec", "electrode",
+        "electrolyte_spec", "electrolyte",
+        "separator_spec", "separator",
+        "current_collector_spec", "current_collector",
+        "housing_spec", "housing",
+        "equipment_spec", "equipment", "channel",
+    ):
+        body = doc.get(body_key)
+        if not isinstance(body, Mapping):
+            continue
+        if isinstance(body.get("property"), Mapping):
+            _validate_property_mappability(
+                body["property"], issues, resource_type,
+                path_prefix=f"{body_key}.property",
+                extra_known=_component_property_terms(),
+            )
+        coating = body.get("coating")
+        if isinstance(coating, Mapping) and isinstance(coating.get("property"), Mapping):
+            _validate_property_mappability(
+                coating["property"], issues, resource_type,
+                path_prefix=f"{body_key}.coating.property",
+                extra_known=_component_property_terms(),
+            )
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):
