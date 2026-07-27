@@ -406,9 +406,9 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
             {
                 "schema_version": "0.1.0",
                 "cell_spec": {
-                    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-                    "short_id": "7d9k2m",
-                    "identifier": "cell-spec:7d9k-2m4p-8t3x-6nq5",
+                    "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
+                    "short_id": "pge5we",
+                    "identifier": "cell-spec:pge5-wer6-2q82-v9k0",
                     "name": "A123 ANR26650M1-B",
                     "model": "ANR26650M1-B",
                     "manufacturer": {
@@ -441,7 +441,7 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
             "save",
             "cell-instance",
             "--cell-spec-id",
-            "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+            "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
             "--uid",
             "3m6k9t2p7x4h9nq8",
             "--source-root",

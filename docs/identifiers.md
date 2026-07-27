@@ -9,7 +9,7 @@ https://w3id.org/battinfo/<namespace>/<uid>
                            namespace  (Crockford Base32)
 ```
 
-Example: `https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5`
+Example: `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
 
 ## The three promises
 
@@ -30,7 +30,7 @@ Example: `https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5`
 The 16-character UID uses the **Crockford Base32 alphabet**
 (`0-9 a-h j k m n p-t v-z`) — no `i`, `l`, `o`, or `u`, so a UID survives
 being read aloud, handwritten on a cell wrapper, or retyped from a photo. It
-is displayed in four dash-separated groups (`7d9k-2m4p-8t3x-6nq5`); the first
+is displayed in four dash-separated groups (`pge5-wer6-2q82-v9k0`); the first
 six characters form the `short_id` used in filenames and for matching data
 files to cells (`ws.add("test", datasets="glob")`).
 

@@ -41,9 +41,9 @@ def test_semantic_validation_rejects_unit_mismatch_for_specs() -> None:
     assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
 
 
-def test_semantic_validation_rejects_unit_mismatch_for_nominal_continuous_current_specs() -> None:
+def test_semantic_validation_rejects_unit_mismatch_for_continuous_current_specs() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
-    doc["properties"]["nominal_continuous_charging_current"]["unit"] = "V"
+    doc["properties"]["maximum_continuous_charging_current"]["unit"] = "V"
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)

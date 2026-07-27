@@ -75,7 +75,7 @@ A record is one JSON file: a `schema_version`, one discriminator key holding
 the body (`"cell_spec": {...}`), and a `provenance` block (which also carries
 `battinfo_version`, stamping which library build wrote it). Files live under a
 *source root* (`examples/<type>/…` in this repo; `.battinfo/records/…` in a
-workspace). IRIs like `https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq8`
+workspace). IRIs like `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
 are minted **deterministically** from each record's natural identity
 (manufacturer :: model :: … for a spec), so re-running an identical ingest
 lands on the same files instead of duplicating them.
