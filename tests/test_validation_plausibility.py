@@ -219,7 +219,9 @@ class TestPropertyMappability:
         )
         issues = [i for i in report.issues if i.code == "semantic.property_unmapped"]
         assert len(issues) == 1 and issues[0].severity == "warning"
-        assert "OMITTED" in issues[0].message
+        # The message states what actually happens: a non-canonical fallback
+        # term is emitted (the property is not silently omitted).
+        assert "fallback" in issues[0].message
 
     def test_value_text_only_warns(self) -> None:
         report = validate_semantic_report(
