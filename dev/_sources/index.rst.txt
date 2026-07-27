@@ -42,7 +42,7 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
          {
            "schema_version": "0.1.0",
            "cell_spec": {
-             "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+             "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
              "name": "A123 ANR26650M1-B",
              "model": "ANR26650M1-B",
              "manufacturer": { "type": "Organization", "name": "A123" },
@@ -63,7 +63,7 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
 
          {
            "@context": "https://w3id.org/battinfo/context/domain-battery.jsonld",
-           "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+           "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
            "@type": ["BatteryCell", "CylindricalBattery", "LithiumIonBattery"],
            "skos:prefLabel": "A123 ANR26650M1-B",
            "manufacturer": { "@type": "Organization", "name": "A123" },
