@@ -114,6 +114,19 @@ export default function PublishPage() {
           </span>
           .
         </p>
+        <p className="mt-4 max-w-prose text-sm leading-relaxed text-ink-muted">
+          The DOI needs only a Zenodo token. Submitting to the Battery Genome registry additionally needs an API key;
+          during the soft launch, keys are granted by the operators —{" "}
+          <a
+            href="https://github.com/battery-genome/battinfo-registry/issues/new?template=api-key-request.md"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-brandtext hover:text-brandtext"
+          >
+            request one here
+          </a>
+          .
+        </p>
         <div className="mt-6">
           <a
             href={`${site.reference}/howto/tag-funding-and-orcid.html`}
