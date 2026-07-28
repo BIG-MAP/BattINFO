@@ -665,25 +665,46 @@ provenance: {
 </section>
 <section id="Stage-5-—-Publish">
 <h2>Stage 5 — Publish<a class="headerlink" href="#Stage-5-—-Publish" title="Link to this heading">#</a></h2>
-<p>The payoff: <code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> submits the records to the registry’s review queue (staged — a curator promotes them to the public index), and <code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code> archives the dataset with a citable DOI. Both need credentials, so this cell is a guarded no-op until you provide them:</p>
+<p>The payoff — and the two halves are independent:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code> — key for the Battery Genome registry (battery-genome.org). During the soft launch keys are granted by the registry operators; there is no self-service key page yet</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ZENODO_SANDBOX_TOKEN</span></code> — a <a class="reference external" href="https://sandbox.zenodo.org">Zenodo sandbox</a> token for a dry-run DOI (use <code class="docutils literal notranslate"><span class="pre">sandbox=True</span></code>); drop it for the real thing</p></li>
+<li><p><strong>A citable DOI (Zenodo)</strong> needs only a Zenodo token, no registry account. <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> archives the records and data files and returns the DOI. Use a <a class="reference external" href="https://sandbox.zenodo.org">Zenodo sandbox</a> token for a dry run (<code class="docutils literal notranslate"><span class="pre">sandbox=True</span></code>); drop it for the real thing.</p></li>
+<li><p><strong>The Battery Genome registry</strong> (<code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code>) submits your records to the review queue — a curator promotes them to the public index. This needs a registry API key (<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code>). During the soft launch keys are granted by the operators: <a class="reference external" href="https://github.com/battery-genome/battinfo-registry/issues/new?template=api-key-request.md">request one here</a> (say who you are and what you plan to publish).</p></li>
 </ul>
+<p>Both cells are guarded no-ops until you provide the credential, so the notebook runs fully offline without them.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
-    <span class="n">outcomes</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span>
-        <span class="n">note</span><span class="o">=</span><span class="s2">&quot;My first BattINFO dataset&quot;</span><span class="p">,</span>
-        <span class="n">zenodo</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ZENODO_SANDBOX_TOKEN&quot;</span><span class="p">)),</span>
-        <span class="n">sandbox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DOI path — Zenodo only, no registry key needed.</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ZENODO_SANDBOX_TOKEN&quot;</span><span class="p">):</span>
+    <span class="n">deposit</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">zenodo</span><span class="p">(</span><span class="n">sandbox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">license</span><span class="o">=</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DOI:&quot;</span><span class="p">,</span> <span class="n">deposit</span><span class="o">.</span><span class="n">doi</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Get a token at https://sandbox.zenodo.org, then re-run this cell.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.
+Get a token at https://sandbox.zenodo.org, then re-run this cell.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Registry path — needs the API key granted by the operators (link above).</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
+    <span class="n">outcomes</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="s2">&quot;My first BattINFO dataset&quot;</span><span class="p">)</span>
     <span class="n">ws</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Records are saved and validated locally.&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;To publish: ws.login(api_key=&#39;...&#39;) then re-run — see ws.quickstart().&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;To submit to the registry: ws.login(api_key=&#39;bk_...&#39;) then re-run.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -693,7 +714,7 @@ provenance: {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Records are saved and validated locally.
-To publish: ws.login(api_key=&#39;...&#39;) then re-run — see ws.quickstart().
+To submit to the registry: ws.login(api_key=&#39;bk_...&#39;) then re-run.
 </pre></div></div>
 </div>
 </section>

@@ -289,19 +289,26 @@
    "source": [
     "## Stage 5 — Publish\n",
     "\n",
-    "The payoff: `ws.publish()` submits the records to the registry's review queue\n",
-    "(staged — a curator promotes them to the public index), and `zenodo=True` archives\n",
-    "the dataset with a citable DOI. Both need credentials, so this cell is a guarded\n",
-    "no-op until you provide them:\n",
+    "The payoff — and the two halves are independent:\n",
     "\n",
-    "- `ws.login(api_key=\"bk_...\")` — key for the Battery Genome registry (battery-genome.org). During the soft launch keys are granted by the registry operators; there is no self-service key page yet\n",
-    "- `ZENODO_SANDBOX_TOKEN` — a [Zenodo sandbox](https://sandbox.zenodo.org) token for a\n",
-    "  dry-run DOI (use `sandbox=True`); drop it for the real thing"
+    "- **A citable DOI (Zenodo)** needs only a Zenodo token, no registry account.\n",
+    "  `ws.zenodo()` archives the records and data files and returns the DOI. Use a\n",
+    "  [Zenodo sandbox](https://sandbox.zenodo.org) token for a dry run\n",
+    "  (`sandbox=True`); drop it for the real thing.\n",
+    "- **The Battery Genome registry** (`ws.publish()`) submits your records to the\n",
+    "  review queue — a curator promotes them to the public index. This needs a\n",
+    "  registry API key (`ws.login(api_key=\"bk_...\")`). During the soft launch keys\n",
+    "  are granted by the operators:\n",
+    "  [request one here](https://github.com/battery-genome/battinfo-registry/issues/new?template=api-key-request.md)\n",
+    "  (say who you are and what you plan to publish).\n",
+    "\n",
+    "Both cells are guarded no-ops until you provide the credential, so the\n",
+    "notebook runs fully offline without them."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": null,
    "id": "5e115f9a",
    "metadata": {
     "execution": {
@@ -316,22 +323,36 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Records are saved and validated locally.\n",
-      "To publish: ws.login(api_key='...') then re-run — see ws.quickstart().\n"
+      "No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.\n",
+      "Get a token at https://sandbox.zenodo.org, then re-run this cell.\n"
      ]
     }
    ],
    "source": [
-    "if os.environ.get(\"BATTINFO_API_KEY\"):\n",
-    "    outcomes = ws.publish(\n",
-    "        note=\"My first BattINFO dataset\",\n",
-    "        zenodo=bool(os.environ.get(\"ZENODO_SANDBOX_TOKEN\")),\n",
-    "        sandbox=True,\n",
-    "    )\n",
-    "    ws.status()\n",
+    "# DOI path — Zenodo only, no registry key needed.\n",
+    "if os.environ.get(\"ZENODO_SANDBOX_TOKEN\"):\n",
+    "    deposit = ws.zenodo(sandbox=True, license=\"cc-by-4.0\")\n",
+    "    print(\"DOI:\", deposit.doi)\n",
     "else:\n",
-    "    print(\"Records are saved and validated locally.\")\n",
-    "    print(\"To publish: ws.login(api_key='...') then re-run — see ws.quickstart().\")"
+    "    print(\"No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.\")\n",
+    "    print(\"Get a token at https://sandbox.zenodo.org, then re-run this cell.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "id": "7f208a76",
+   "source": "# Registry path — needs the API key granted by the operators (link above).\nif os.environ.get(\"BATTINFO_API_KEY\"):\n    outcomes = ws.publish(note=\"My first BattINFO dataset\")\n    ws.status()\nelse:\n    print(\"Records are saved and validated locally.\")\n    print(\"To submit to the registry: ws.login(api_key='bk_...') then re-run.\")",
+   "metadata": {},
+   "execution_count": null,
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Records are saved and validated locally.\n",
+      "To submit to the registry: ws.login(api_key='bk_...') then re-run.\n"
+     ]
+    }
    ]
   },
   {
