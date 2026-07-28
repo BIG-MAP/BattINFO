@@ -43,19 +43,19 @@ Validate a BattINFO record (JSON Schema + semantic + SHACL) or a raw JSON profil
 **Usage**:
 
 ```console
-$ battinfo validate [OPTIONS] INPUT_PATH
+$ battinfo validate [OPTIONS] {input_path}
 ```
 
 **Arguments**:
 
-* `INPUT_PATH`: [required]
+* `input_path`: [required]
 
 **Options**:
 
-* `--profile TEXT`: JSON Schema profile (used only for raw JSON, not full records).  [default: cell-spec]
-* `--policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: text|json.  [default: text]
-* `--source-root DIRECTORY`: Canonical source root for cross-reference validation.
+* `--profile <str>`: JSON Schema profile (used only for raw JSON, not full records).  [default: cell-spec]
+* `--policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: text|json.  [default: text]
+* `--source-root <directory>`: Canonical source root for cross-reference validation.
 * `--shacl / --no-shacl`: Run SHACL shapes validation (cell-spec records only).  [default: shacl]
 * `--help`: Show this message and exit.
 
@@ -66,16 +66,16 @@ Create a minimal workspace scaffold with an example JSON file.
 **Usage**:
 
 ```console
-$ battinfo init [OPTIONS] WORKSPACE_DIR
+$ battinfo init [OPTIONS] {workspace_dir}
 ```
 
 **Arguments**:
 
-* `WORKSPACE_DIR`: [required]
+* `workspace_dir`: [required]
 
 **Options**:
 
-* `--profile TEXT`: Profile to scaffold.  [default: cell-spec]
+* `--profile <str>`: Profile to scaffold.  [default: cell-spec]
 * `--help`: Show this message and exit.
 
 ## `battinfo map`
@@ -85,17 +85,17 @@ Map canonical JSON to JSON-LD for a target.
 **Usage**:
 
 ```console
-$ battinfo map [OPTIONS] INPUT_PATH
+$ battinfo map [OPTIONS] {input_path}
 ```
 
 **Arguments**:
 
-* `INPUT_PATH`: [required]
+* `input_path`: [required]
 
 **Options**:
 
-* `--target TEXT`: Mapping target (&#x27;domain-battery&#x27; or &#x27;batterypass&#x27;).  [default: batterypass]
-* `--out PATH`: Output JSON-LD path.  [required]
+* `--target <str>`: Mapping target (&#x27;domain-battery&#x27; or &#x27;batterypass&#x27;).  [default: batterypass]
+* `--out <path>`: Output JSON-LD path.  [required]
 * `--help`: Show this message and exit.
 
 ## `battinfo push`
@@ -116,28 +116,28 @@ One-time setup:
 **Usage**:
 
 ```console
-$ battinfo push [OPTIONS] FOLDER
+$ battinfo push [OPTIONS] {folder}
 ```
 
 **Arguments**:
 
-* `FOLDER`: Folder containing raw data files or an existing batch.  [required]
+* `folder`: Folder containing raw data files or an existing batch.  [required]
 
 **Options**:
 
-* `-t, --cell-spec TEXT`: Cell type, e.g. &#x27;Energizer CR2032&#x27;. Required for unstructured folders.
-* `-n, --cells INTEGER`: Number of cells (auto-detected from filenames if omitted).
-* `--batch-id TEXT`: Batch / lot identifier.
-* `--lab TEXT`: Lab name.
-* `--operator TEXT`: Operator name.
-* `-c, --creator TEXT`: Creator: &quot;Family, Given; Affiliation&quot;. Falls back to config.
-* `--token TEXT`: Zenodo API token. Falls back to config / ZENODO_API_TOKEN.
+* `-t, --cell-spec <str>`: Cell type, e.g. &#x27;Energizer CR2032&#x27;. Required for unstructured folders.
+* `-n, --cells <int>`: Number of cells (auto-detected from filenames if omitted).
+* `--batch-id <str>`: Batch / lot identifier.
+* `--lab <str>`: Lab name.
+* `--operator <str>`: Operator name.
+* `-c, --creator <str>`: Creator: &quot;Family, Given; Affiliation&quot;. Falls back to config.
+* `--token <str>`: Zenodo API token. Falls back to config / ZENODO_API_TOKEN.
 * `--sandbox`: Upload to sandbox.zenodo.org instead of production.
-* `--community TEXT`: Zenodo community. Default: from config.
+* `--community <str>`: Zenodo community. Default: from config.
 * `--no-community`: Skip community submission.
 * `-y, --yes`: Skip confirmation prompt.
 * `--dry-run`: Package only — do not upload.
-* `--staging PATH`: Override staging directory.
+* `--staging <path>`: Override staging directory.
 * `--json`: Emit machine-readable JSON to stdout.
 * `--help`: Show this message and exit.
 
@@ -176,20 +176,20 @@ $ battinfo query cell-spec [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by canonical cell-spec IRI.
-* `--manufacturer TEXT`: Filter by manufacturer.
-* `--chemistry TEXT`: Filter by chemistry.
-* `--cell-format TEXT`: Filter by cell form factor.
-* `--model-name-contains TEXT`: Filter by model name substring.
-* `--nominal-capacity-min FLOAT`: Filter minimum nominal capacity.
-* `--nominal-capacity-max FLOAT`: Filter maximum nominal capacity.
-* `--nominal-voltage-min FLOAT`: Filter minimum nominal voltage.
-* `--nominal-voltage-max FLOAT`: Filter maximum nominal voltage.
-* `--source-root PATH`: Records root to search (default: ./examples).
+* `--id <str>`: Filter by canonical cell-spec IRI.
+* `--manufacturer <str>`: Filter by manufacturer.
+* `--chemistry <str>`: Filter by chemistry.
+* `--cell-format <str>`: Filter by cell form factor.
+* `--model-name-contains <str>`: Filter by model name substring.
+* `--nominal-capacity-min <float>`: Filter minimum nominal capacity.
+* `--nominal-capacity-max <float>`: Filter maximum nominal capacity.
+* `--nominal-voltage-min <float>`: Filter minimum nominal voltage.
+* `--nominal-voltage-max <float>`: Filter maximum nominal voltage.
+* `--source-root <path>`: Records root to search (default: ./examples).
 * `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo query cell-instance`
@@ -204,18 +204,18 @@ $ battinfo query cell-instance [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by canonical cell IRI.
-* `--cell-spec-id TEXT`: Filter by canonical cell-spec IRI.
-* `--short-id TEXT`: Filter by short-id prefix.
-* `--serial-number TEXT`: Filter by serial metadata.
-* `--has-dataset TEXT`: Filter by dataset presence: true|false.
-* `--dataset-id TEXT`: Filter by linked dataset IRI.
-* `--source-type TEXT`: Filter by source type.
-* `--source-root PATH`: Records root to search (default: ./examples).
+* `--id <str>`: Filter by canonical cell IRI.
+* `--cell-spec-id <str>`: Filter by canonical cell-spec IRI.
+* `--short-id <str>`: Filter by short-id prefix.
+* `--serial-number <str>`: Filter by serial metadata.
+* `--has-dataset <str>`: Filter by dataset presence: true|false.
+* `--dataset-id <str>`: Filter by linked dataset IRI.
+* `--source-type <str>`: Filter by source type.
+* `--source-root <path>`: Records root to search (default: ./examples).
 * `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo query dataset`
@@ -230,18 +230,18 @@ $ battinfo query dataset [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by canonical dataset IRI.
-* `--title-contains TEXT`: Filter by title substring.
-* `--related-cell-id TEXT`: Filter by related cell IRI.
-* `--related-test-id TEXT`: Filter by related test IRI.
-* `--source-type TEXT`: Filter by source type.
-* `--data-format TEXT`: Filter by dataset format.
-* `--license TEXT`: Filter by license.
-* `--source-root PATH`: Records root to search (default: ./examples).
+* `--id <str>`: Filter by canonical dataset IRI.
+* `--title-contains <str>`: Filter by title substring.
+* `--related-cell-id <str>`: Filter by related cell IRI.
+* `--related-test-id <str>`: Filter by related test IRI.
+* `--source-type <str>`: Filter by source type.
+* `--data-format <str>`: Filter by dataset format.
+* `--license <str>`: Filter by license.
+* `--source-root <path>`: Records root to search (default: ./examples).
 * `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo query test-protocol`
@@ -256,15 +256,15 @@ $ battinfo query test-protocol [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by canonical test-protocol IRI.
-* `--kind TEXT`: Filter by protocol kind.
-* `--name-contains TEXT`: Case-insensitive substring filter on protocol name.
-* `--source-type TEXT`: Filter by source type.
-* `--source-root PATH`: Records root to search (default: ./examples).
+* `--id <str>`: Filter by canonical test-protocol IRI.
+* `--kind <str>`: Filter by protocol kind.
+* `--name-contains <str>`: Case-insensitive substring filter on protocol name.
+* `--source-type <str>`: Filter by source type.
+* `--source-root <path>`: Records root to search (default: ./examples).
 * `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo query test-spec`
@@ -279,15 +279,15 @@ $ battinfo query test-spec [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by canonical test-protocol IRI.
-* `--kind TEXT`: Filter by protocol kind.
-* `--name-contains TEXT`: Case-insensitive substring filter on protocol name.
-* `--source-type TEXT`: Filter by source type.
-* `--source-root PATH`: Records root to search (default: ./examples).
+* `--id <str>`: Filter by canonical test-protocol IRI.
+* `--kind <str>`: Filter by protocol kind.
+* `--name-contains <str>`: Case-insensitive substring filter on protocol name.
+* `--source-type <str>`: Filter by source type.
+* `--source-root <path>`: Records root to search (default: ./examples).
 * `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo query tests`
@@ -302,16 +302,16 @@ $ battinfo query tests [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by canonical test IRI.
-* `--cell-id TEXT`: Filter by related cell-instance IRI.
-* `--dataset-id TEXT`: Filter by linked dataset IRI.
-* `--kind TEXT`: Filter by test kind.
-* `--source-type TEXT`: Filter by source type.
-* `--source-root PATH`: Records root to search (default: ./examples).
+* `--id <str>`: Filter by canonical test IRI.
+* `--cell-id <str>`: Filter by related cell-instance IRI.
+* `--dataset-id <str>`: Filter by linked dataset IRI.
+* `--kind <str>`: Filter by test kind.
+* `--source-type <str>`: Filter by source type.
+* `--source-root <path>`: Records root to search (default: ./examples).
 * `--include-packaged-examples`: Also search BattINFO&#x27;s bundled example records.
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ## `battinfo create`
@@ -344,21 +344,21 @@ $ battinfo create cell-instance [OPTIONS]
 
 **Options**:
 
-* `--cell-spec-id TEXT`: Canonical cell-spec IRI.
-* `--cell-spec FILE`: Path to cell-spec JSON (alternative to --cell-spec-id).
-* `--model-name TEXT`: Resolve type by model name.
-* `--manufacturer TEXT`: Resolve type by manufacturer.
-* `--chemistry TEXT`: Resolve type by chemistry.
-* `--cell-format TEXT`: Resolve type by cell format.
-* `--serial-number TEXT`: Optional serial metadata.
-* `--dataset-id TEXT`: Optional linked dataset IRI.
-* `--source-type TEXT`: Source type: measurement|lab|bms|other.  [default: measurement]
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--source-root PATH`: Records root for metadata type resolution (default: ./examples).
+* `--cell-spec-id <str>`: Canonical cell-spec IRI.
+* `--cell-spec <file>`: Path to cell-spec JSON (alternative to --cell-spec-id).
+* `--model-name <str>`: Resolve type by model name.
+* `--manufacturer <str>`: Resolve type by manufacturer.
+* `--chemistry <str>`: Resolve type by chemistry.
+* `--cell-format <str>`: Resolve type by cell format.
+* `--serial-number <str>`: Optional serial metadata.
+* `--dataset-id <str>`: Optional linked dataset IRI.
+* `--source-type <str>`: Source type: measurement|lab|bms|other.  [default: measurement]
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--source-root <path>`: Records root for metadata type resolution (default: ./examples).
 * `--include-packaged-examples`: Also match BattINFO&#x27;s bundled example records during type resolution.
-* `--out PATH`: Optional output JSON path.
+* `--out <path>`: Optional output JSON path.
 * `--validate / --no-validate`: Validate against schema.  [default: validate]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo publish`
@@ -393,30 +393,30 @@ $ battinfo publish cell-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Optional JSON draft or canonical cell-spec record to load.
-* `--manufacturer TEXT`: Cell manufacturer.
-* `--model TEXT`: Cell model.
-* `--cell-format TEXT`: Cell format, for example cylindrical or pouch.
-* `--chemistry TEXT`: Cell chemistry.
-* `--name TEXT`: Optional display name.
-* `--size-code TEXT`: Optional size code.
-* `--iec-code TEXT`: Optional IEC code.
-* `--country-of-origin TEXT`: Optional country of origin.
-* `--year INTEGER`: Optional release or production year.
-* `--source-type TEXT`: Optional provenance source type.
-* `--source-file TEXT`: Optional provenance source file.
-* `--destination TEXT`: Publish destination: local|registry|battery-genome|staging|production.  [default: local]
-* `--root PATH`: Optional workspace root for generated artifacts.
+* `--input <file>`: Optional JSON draft or canonical cell-spec record to load.
+* `--manufacturer <str>`: Cell manufacturer.
+* `--model <str>`: Cell model.
+* `--cell-format <str>`: Cell format, for example cylindrical or pouch.
+* `--chemistry <str>`: Cell chemistry.
+* `--name <str>`: Optional display name.
+* `--size-code <str>`: Optional size code.
+* `--iec-code <str>`: Optional IEC code.
+* `--country-of-origin <str>`: Optional country of origin.
+* `--year <int>`: Optional release or production year.
+* `--source-type <str>`: Optional provenance source type.
+* `--source-file <str>`: Optional provenance source file.
+* `--destination <str>`: Publish destination: local|registry|battery-genome|staging|production.  [default: local]
+* `--root <path>`: Optional workspace root for generated artifacts.
 * `--force`: Replace an existing generated workspace root.
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: strict]
-* `--registry-url TEXT`: Optional registry base URL override.
-* `--api-key TEXT`: Optional registry API key override.
-* `--api-key-header TEXT`: Optional registry API key header.
-* `--platform-url TEXT`: Optional Battery Genome base URL override.
-* `--workspace-id TEXT`: Optional workspace id override.
-* `--publisher-id TEXT`: Optional publisher id override.
-* `--source-version TEXT`: Optional source version override.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: strict]
+* `--registry-url <str>`: Optional registry base URL override.
+* `--api-key <str>`: Optional registry API key override.
+* `--api-key-header <str>`: Optional registry API key header.
+* `--platform-url <str>`: Optional Battery Genome base URL override.
+* `--workspace-id <str>`: Optional workspace id override.
+* `--publisher-id <str>`: Optional publisher id override.
+* `--source-version <str>`: Optional source version override.
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo publish record`
@@ -431,13 +431,13 @@ $ battinfo publish record [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: [required]
-* `--target-root PATH`: Output artifact root directory.  [default: .battinfo/resolver-site]
+* `--input <file>`: [required]
+* `--target-root <path>`: Output artifact root directory.  [default: .battinfo/resolver-site]
 * `--build-jsonld / --no-build-jsonld`: Generate JSON-LD output.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Generate HTML output.  [default: build-html]
 * `--validate / --no-validate`: Validate records before publishing.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo publish batch`
@@ -452,14 +452,14 @@ $ battinfo publish batch [OPTIONS]
 
 **Options**:
 
-* `--source-dir DIRECTORY`: One or more source directories. If omitted, API defaults are used.
-* `--target-root PATH`: Output artifact root directory.  [default: .battinfo/resolver-site]
-* `--glob TEXT`: File glob for batch inputs.  [default: *.json]
+* `--source-dir <directory>`: One or more source directories. If omitted, API defaults are used.
+* `--target-root <path>`: Output artifact root directory.  [default: .battinfo/resolver-site]
+* `--glob <str>`: File glob for batch inputs.  [default: *.json]
 * `--build-jsonld / --no-build-jsonld`: Generate JSON-LD output.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Generate HTML output.  [default: build-html]
 * `--validate / --no-validate`: Validate records before publishing.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo index`
@@ -493,12 +493,12 @@ $ battinfo index build [OPTIONS]
 
 **Options**:
 
-* `--source-root DIRECTORY`: Root directory containing cell-spec, cell-instances, and dataset subdirectories.  [default: examples]
-* `--out PATH`: Output index JSON path.  [default: .battinfo/index.json]
-* `--glob TEXT`: File glob to include in index build.  [default: *.json]
+* `--source-root <directory>`: Root directory containing cell-spec, cell-instances, and dataset subdirectories.  [default: examples]
+* `--out <path>`: Output index JSON path.  [default: .battinfo/index.json]
+* `--glob <str>`: File glob to include in index build.  [default: *.json]
 * `--validate / --no-validate`: Validate records while indexing.  [default: no-validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo index stats`
@@ -513,8 +513,8 @@ $ battinfo index stats [OPTIONS]
 
 **Options**:
 
-* `--index FILE`: Path to index JSON built by `battinfo index build`.  [default: .battinfo/index.json]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--index <file>`: Path to index JSON built by `battinfo index build`.  [default: .battinfo/index.json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo save`
@@ -554,19 +554,19 @@ $ battinfo save record [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: [required]
-* `--source-root PATH`: Root directory containing cell-spec, cell-instances, and dataset.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: [required]
+* `--source-root <path>`: Root directory containing cell-spec, cell-instances, and dataset.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Best-effort reference checks at save time; full link integrity is enforced by batch/index validation.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--build-jsonld / --no-build-jsonld`: Publish JSON-LD artifact.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Publish HTML artifact.  [default: build-html]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save batch`
@@ -581,20 +581,20 @@ $ battinfo save batch [OPTIONS]
 
 **Options**:
 
-* `--source-dir DIRECTORY`: One or more source directories. If omitted, API defaults are used.
-* `--source-root PATH`: Root directory containing canonical resources for save targets.  [default: examples]
-* `--glob TEXT`: File glob for batch inputs.  [default: *.json]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--source-dir <directory>`: One or more source directories. If omitted, API defaults are used.
+* `--source-root <path>`: Root directory containing canonical resources for save targets.  [default: examples]
+* `--glob <str>`: File glob for batch inputs.  [default: *.json]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Allow deferred writes, then validate the resulting source tree as a set.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--build-jsonld / --no-build-jsonld`: Publish JSON-LD artifact.  [default: build-jsonld]
 * `--build-html / --no-build-html`: Publish HTML artifact.  [default: build-html]
 * `--validate / --no-validate`: Validate records before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save cell-spec`
@@ -609,27 +609,27 @@ $ battinfo save cell-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical JSON.
-* `--manufacturer TEXT`: Manufacturer name (required when --input omitted).
-* `--model-name TEXT`: Model name (required when --input omitted).
-* `--chemistry TEXT`: Chemistry label.  [default: unknown]
-* `--cell-format TEXT`: Cell format.  [default: unknown]
-* `--size-code TEXT`: Optional size code.
-* `--country-of-origin TEXT`: Optional country of origin.
-* `--year INTEGER`: Optional model or release year.
-* `--source-file TEXT`: Source file label for provenance (recorded only when given).
-* `--source-url TEXT`: Optional source URL.
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--specs FILE`: Optional specs JSON object.
-* `--source-root PATH`: Save source root.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical JSON.
+* `--manufacturer <str>`: Manufacturer name (required when --input omitted).
+* `--model-name <str>`: Model name (required when --input omitted).
+* `--chemistry <str>`: Chemistry label.  [default: unknown]
+* `--cell-format <str>`: Cell format.  [default: unknown]
+* `--size-code <str>`: Optional size code.
+* `--country-of-origin <str>`: Optional country of origin.
+* `--year <int>`: Optional model or release year.
+* `--source-file <str>`: Source file label for provenance (recorded only when given).
+* `--source-url <str>`: Optional source URL.
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--specs <file>`: Optional specs JSON object.
+* `--source-root <path>`: Save source root.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save cell-instance`
@@ -644,22 +644,22 @@ $ battinfo save cell-instance [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical JSON.
-* `--cell-spec-id TEXT`: Canonical cell-spec IRI (required when --input omitted).
-* `--serial-number TEXT`: Optional serial metadata.
-* `--dataset-id TEXT`: Optional linked dataset IRI. Repeat for multiple.
-* `--source-type TEXT`: Source type: measurement|lab|bms|other.  [default: measurement]
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--source-root PATH`: Save source root.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical JSON.
+* `--cell-spec-id <str>`: Canonical cell-spec IRI (required when --input omitted).
+* `--serial-number <str>`: Optional serial metadata.
+* `--dataset-id <str>`: Optional linked dataset IRI. Repeat for multiple.
+* `--source-type <str>`: Source type: measurement|lab|bms|other.  [default: measurement]
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--source-root <path>`: Save source root.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save dataset`
@@ -674,28 +674,28 @@ $ battinfo save dataset [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical JSON.
-* `--title TEXT`: Dataset title (required when --input omitted).
-* `--description TEXT`: Dataset description.
-* `--license TEXT`: Dataset license.
-* `--data-format TEXT`: Dataset format string.
-* `--access-url TEXT`: Dataset access URL.
-* `--source-type TEXT`: Source type: measurement|lab|simulation|external|other.  [default: other]
-* `--related-cell-id TEXT`: Related cell IRI. Repeat for multiple.
-* `--related-test-id TEXT`: Related test IRI. Repeat for multiple.
-* `--checksum-algorithm TEXT`: Checksum algorithm (sha256|sha512|md5|other).
-* `--checksum-value TEXT`: Checksum value.
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--source-root PATH`: Save source root.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical JSON.
+* `--title <str>`: Dataset title (required when --input omitted).
+* `--description <str>`: Dataset description.
+* `--license <str>`: Dataset license.
+* `--data-format <str>`: Dataset format string.
+* `--access-url <str>`: Dataset access URL.
+* `--source-type <str>`: Source type: measurement|lab|simulation|external|other.  [default: other]
+* `--related-cell-id <str>`: Related cell IRI. Repeat for multiple.
+* `--related-test-id <str>`: Related test IRI. Repeat for multiple.
+* `--checksum-algorithm <str>`: Checksum algorithm (sha256|sha512|md5|other).
+* `--checksum-value <str>`: Checksum value.
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--source-root <path>`: Save source root.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save test-protocol`
@@ -710,24 +710,24 @@ $ battinfo save test-protocol [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical JSON.
-* `--name TEXT`: Protocol name (required when --input omitted).
-* `--kind TEXT`: Test kind.  [default: other]
-* `--description TEXT`: Optional protocol description.
-* `--version TEXT`: Optional protocol version.
-* `--protocol-url TEXT`: Optional protocol URL.
-* `--source-type TEXT`: Source type: manual|lab|simulation|other.  [default: manual]
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--source-root PATH`: Save source root.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical JSON.
+* `--name <str>`: Protocol name (required when --input omitted).
+* `--kind <str>`: Test kind.  [default: other]
+* `--description <str>`: Optional protocol description.
+* `--version <str>`: Optional protocol version.
+* `--protocol-url <str>`: Optional protocol URL.
+* `--source-type <str>`: Source type: manual|lab|simulation|other.  [default: manual]
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--source-root <path>`: Save source root.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save test-spec`
@@ -742,24 +742,24 @@ $ battinfo save test-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical JSON.
-* `--name TEXT`: Protocol name (required when --input omitted).
-* `--kind TEXT`: Test kind.  [default: other]
-* `--description TEXT`: Optional protocol description.
-* `--version TEXT`: Optional protocol version.
-* `--protocol-url TEXT`: Optional protocol URL.
-* `--source-type TEXT`: Source type: manual|lab|simulation|other.  [default: manual]
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--source-root PATH`: Save source root.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical JSON.
+* `--name <str>`: Protocol name (required when --input omitted).
+* `--kind <str>`: Test kind.  [default: other]
+* `--description <str>`: Optional protocol description.
+* `--version <str>`: Optional protocol version.
+* `--protocol-url <str>`: Optional protocol URL.
+* `--source-type <str>`: Source type: manual|lab|simulation|other.  [default: manual]
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--source-root <path>`: Save source root.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo save test`
@@ -774,28 +774,28 @@ $ battinfo save test [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical JSON.
-* `--cell-id TEXT`: Canonical cell-instance IRI (required when --input omitted).
-* `--name TEXT`: Test name (required when --input omitted).
-* `--kind TEXT`: Test kind.  [default: other]
-* `--protocol-id TEXT`: Optional reusable test-protocol IRI.
-* `--status TEXT`: Optional test status.
-* `--protocol-name TEXT`: Optional protocol name.
-* `--protocol-url TEXT`: Optional protocol URL.
-* `--instrument-name TEXT`: Optional instrument name.
-* `--dataset-id TEXT`: Linked dataset IRI. Repeat for multiple.
-* `--source-type TEXT`: Source type: measurement|lab|simulation|manual|other.  [default: measurement]
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--source-root PATH`: Save source root.  [default: examples]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical JSON.
+* `--cell-id <str>`: Canonical cell-instance IRI (required when --input omitted).
+* `--name <str>`: Test name (required when --input omitted).
+* `--kind <str>`: Test kind.  [default: other]
+* `--protocol-id <str>`: Optional reusable test-protocol IRI.
+* `--status <str>`: Optional test status.
+* `--protocol-name <str>`: Optional protocol name.
+* `--protocol-url <str>`: Optional protocol URL.
+* `--instrument-name <str>`: Optional instrument name.
+* `--dataset-id <str>`: Linked dataset IRI. Repeat for multiple.
+* `--source-type <str>`: Source type: measurement|lab|simulation|manual|other.  [default: measurement]
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--source-root <path>`: Save source root.  [default: examples]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--resolve-references / --no-resolve-references`: Resolve linked IDs against source_root.  [default: resolve-references]
 * `--publish / --no-publish`: Publish resolver artifacts after saving.  [default: no-publish]
-* `--publish-root PATH`: Resolver artifact root.  [default: .battinfo/resolver-site]
+* `--publish-root <path>`: Resolver artifact root.  [default: .battinfo/resolver-site]
 * `--validate / --no-validate`: Validate record before saving.  [default: validate]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo template`
@@ -834,15 +834,15 @@ $ battinfo template cell-spec [OPTIONS]
 
 **Options**:
 
-* `--manufacturer TEXT`: Manufacturer name.  [default: ExampleManufacturer]
-* `--model-name TEXT`: Model name.  [default: MODEL-001]
-* `--chemistry TEXT`: Chemistry label.  [default: unknown]
-* `--cell-format TEXT`: Cell format.  [default: unknown]
-* `--country-of-origin TEXT`: Optional country of origin.
-* `--year INTEGER`: Optional model or release year.
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--manufacturer <str>`: Manufacturer name.  [default: ExampleManufacturer]
+* `--model-name <str>`: Model name.  [default: MODEL-001]
+* `--chemistry <str>`: Chemistry label.  [default: unknown]
+* `--cell-format <str>`: Cell format.  [default: unknown]
+* `--country-of-origin <str>`: Optional country of origin.
+* `--year <int>`: Optional model or release year.
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo template cell-spec-draft`
@@ -857,19 +857,19 @@ $ battinfo template cell-spec-draft [OPTIONS]
 
 **Options**:
 
-* `--manufacturer TEXT`: Manufacturer name placeholder.  [default: ExampleManufacturer]
-* `--model-name TEXT`: Model name placeholder.  [default: MODEL-001]
-* `--chemistry TEXT`: Chemistry label placeholder.  [default: unknown]
-* `--cell-format TEXT`: Cell format placeholder.  [default: unknown]
-* `--size-code TEXT`: Optional size code placeholder.
-* `--iec-code TEXT`: Optional IEC code placeholder.
-* `--country-of-origin TEXT`: Optional country of origin placeholder.
-* `--year INTEGER`: Optional model or release year placeholder.
-* `--positive-electrode-basis TEXT`: Optional positive electrode basis placeholder.
-* `--negative-electrode-basis TEXT`: Optional negative electrode basis placeholder.
-* `--datasheet-revision TEXT`: Optional datasheet revision placeholder.
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--manufacturer <str>`: Manufacturer name placeholder.  [default: ExampleManufacturer]
+* `--model-name <str>`: Model name placeholder.  [default: MODEL-001]
+* `--chemistry <str>`: Chemistry label placeholder.  [default: unknown]
+* `--cell-format <str>`: Cell format placeholder.  [default: unknown]
+* `--size-code <str>`: Optional size code placeholder.
+* `--iec-code <str>`: Optional IEC code placeholder.
+* `--country-of-origin <str>`: Optional country of origin placeholder.
+* `--year <int>`: Optional model or release year placeholder.
+* `--positive-electrode-basis <str>`: Optional positive electrode basis placeholder.
+* `--negative-electrode-basis <str>`: Optional negative electrode basis placeholder.
+* `--datasheet-revision <str>`: Optional datasheet revision placeholder.
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo template cell-instance`
@@ -884,11 +884,11 @@ $ battinfo template cell-instance [OPTIONS]
 
 **Options**:
 
-* `--cell-spec-id TEXT`: Canonical cell-spec IRI.  [default: https://w3id.org/battinfo/spec/0000-0000-0000-0000]
-* `--source-type TEXT`: Source type: measurement|lab|bms|other.  [default: measurement]
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--cell-spec-id <str>`: Canonical cell-spec IRI.  [default: https://w3id.org/battinfo/spec/0000-0000-0000-0000]
+* `--source-type <str>`: Source type: measurement|lab|bms|other.  [default: measurement]
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo template dataset`
@@ -903,13 +903,13 @@ $ battinfo template dataset [OPTIONS]
 
 **Options**:
 
-* `--title TEXT`: Dataset title.  [default: Example Dataset]
-* `--source-type TEXT`: Source type: measurement|lab|simulation|external|other.  [default: other]
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--related-cell-id TEXT`: Related cell IRI. Repeat for multiple.  [default: https://w3id.org/battinfo/cell/0000-0000-0000-0000]
-* `--related-test-id TEXT`: Related test IRI. Repeat for multiple.
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--title <str>`: Dataset title.  [default: Example Dataset]
+* `--source-type <str>`: Source type: measurement|lab|simulation|external|other.  [default: other]
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--related-cell-id <str>`: Related cell IRI. Repeat for multiple.  [default: https://w3id.org/battinfo/cell/0000-0000-0000-0000]
+* `--related-test-id <str>`: Related test IRI. Repeat for multiple.
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo template test-protocol`
@@ -924,12 +924,12 @@ $ battinfo template test-protocol [OPTIONS]
 
 **Options**:
 
-* `--name TEXT`: Human-readable protocol name.  [default: Example Test Protocol]
-* `--kind TEXT`: Test kind.  [default: other]
-* `--source-type TEXT`: Source type: manual|lab|simulation|other.  [default: manual]
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--name <str>`: Human-readable protocol name.  [default: Example Test Protocol]
+* `--kind <str>`: Test kind.  [default: other]
+* `--source-type <str>`: Source type: manual|lab|simulation|other.  [default: manual]
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo template test-spec`
@@ -944,12 +944,12 @@ $ battinfo template test-spec [OPTIONS]
 
 **Options**:
 
-* `--name TEXT`: Human-readable protocol name.  [default: Example Test Protocol]
-* `--kind TEXT`: Test kind.  [default: other]
-* `--source-type TEXT`: Source type: manual|lab|simulation|other.  [default: manual]
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--name <str>`: Human-readable protocol name.  [default: Example Test Protocol]
+* `--kind <str>`: Test kind.  [default: other]
+* `--source-type <str>`: Source type: manual|lab|simulation|other.  [default: manual]
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo template test`
@@ -964,14 +964,14 @@ $ battinfo template test [OPTIONS]
 
 **Options**:
 
-* `--cell-id TEXT`: Canonical cell-instance IRI under test.  [default: https://w3id.org/battinfo/cell/0000-0000-0000-0000]
-* `--name TEXT`: Human-readable test name.  [default: Example Test]
-* `--kind TEXT`: Test kind.  [default: other]
-* `--source-type TEXT`: Source type: measurement|lab|simulation|manual|other.  [default: measurement]
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--dataset-id TEXT`: Linked dataset IRI. Repeat for multiple.
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--cell-id <str>`: Canonical cell-instance IRI under test.  [default: https://w3id.org/battinfo/cell/0000-0000-0000-0000]
+* `--name <str>`: Human-readable test name.  [default: Example Test]
+* `--kind <str>`: Test kind.  [default: other]
+* `--source-type <str>`: Source type: measurement|lab|simulation|manual|other.  [default: measurement]
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--dataset-id <str>`: Linked dataset IRI. Repeat for multiple.
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo library`
@@ -1007,13 +1007,13 @@ $ battinfo library build-rdf [OPTIONS]
 
 **Options**:
 
-* `--input-dir DIRECTORY`: Directory containing reusable library cell-specification JSON files.  [default: .battinfo/library/cell-spec]
-* `--output-jsonld-dir PATH`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
-* `--aggregate-jsonld PATH`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
-* `--manifest-json PATH`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
-* `--glob TEXT`: File glob used to select library cell specifications.  [default: *.json]
+* `--input-dir <directory>`: Directory containing reusable library cell-specification JSON files.  [default: .battinfo/library/cell-spec]
+* `--output-jsonld-dir <path>`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
+* `--aggregate-jsonld <path>`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
+* `--manifest-json <path>`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
+* `--glob <str>`: File glob used to select library cell specifications.  [default: *.json]
 * `--clean-output`: Remove existing JSON-LD outputs before writing.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo library query`
@@ -1046,22 +1046,22 @@ $ battinfo library query cell-spec [OPTIONS]
 
 **Options**:
 
-* `--id TEXT`: Filter by reusable cell-spec IRI.
-* `--manufacturer TEXT`: Filter by manufacturer.
-* `--model-contains TEXT`: Filter by model substring.
-* `--chemistry TEXT`: Filter by chemistry.
-* `--cell-format TEXT`: Filter by cell form factor.
-* `--size-code TEXT`: Filter by size code.
-* `--positive-electrode-basis TEXT`: Filter by positive electrode basis.
-* `--negative-electrode-basis TEXT`: Filter by negative electrode basis.
-* `--nominal-capacity-min FLOAT`: Filter minimum nominal capacity.
-* `--nominal-capacity-max FLOAT`: Filter maximum nominal capacity.
-* `--nominal-voltage-min FLOAT`: Filter minimum nominal voltage.
-* `--nominal-voltage-max FLOAT`: Filter maximum nominal voltage.
-* `--library-dir PATH`: Reusable library cell-specification directory.  [default: .battinfo/library/cell-spec]
-* `--limit INTEGER RANGE`: Maximum rows.  [default: 50; x&gt;=1]
-* `--offset INTEGER RANGE`: Start offset.  [default: 0; x&gt;=0]
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--id <str>`: Filter by reusable cell-spec IRI.
+* `--manufacturer <str>`: Filter by manufacturer.
+* `--model-contains <str>`: Filter by model substring.
+* `--chemistry <str>`: Filter by chemistry.
+* `--cell-format <str>`: Filter by cell form factor.
+* `--size-code <str>`: Filter by size code.
+* `--positive-electrode-basis <str>`: Filter by positive electrode basis.
+* `--negative-electrode-basis <str>`: Filter by negative electrode basis.
+* `--nominal-capacity-min <float>`: Filter minimum nominal capacity.
+* `--nominal-capacity-max <float>`: Filter maximum nominal capacity.
+* `--nominal-voltage-min <float>`: Filter minimum nominal voltage.
+* `--nominal-voltage-max <float>`: Filter maximum nominal voltage.
+* `--library-dir <path>`: Reusable library cell-specification directory.  [default: .battinfo/library/cell-spec]
+* `--limit <int range>`: Maximum rows.  [default: 50; x&gt;=1]
+* `--offset <int range>`: Start offset.  [default: 0; x&gt;=0]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo library save`
@@ -1094,33 +1094,33 @@ $ battinfo library save cell-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Draft or canonical cell-specification JSON.
-* `--manufacturer TEXT`: Manufacturer name (required when --input omitted).
-* `--model TEXT`: Model name (required when --input omitted).
-* `--chemistry TEXT`: Chemistry label.  [default: unknown]
-* `--cell-format TEXT`: Cell format.  [default: unknown]
-* `--positive-electrode-basis TEXT`: Positive electrode basis (required when --input omitted).
-* `--negative-electrode-basis TEXT`: Negative electrode basis (required when --input omitted).
-* `--size-code TEXT`: Optional size code.
-* `--source-type TEXT`: Source type label.  [default: datasheet]
-* `--source-name TEXT`: Optional source name.
-* `--source-file TEXT`: Source file label for provenance (recorded only when given).
-* `--source-url TEXT`: Optional source URL.
-* `--uid TEXT`: Optional 16-char UID (dashed or undashed).
-* `--property FILE`: Optional JSON object for cell-specification specification.property.
-* `--library-dir PATH`: Reusable library cell-specification directory.  [default: .battinfo/library/cell-spec]
-* `--packaged-dir PATH`: Packaged reusable library cell-specification directory.  [default: src/battinfo/data/library/cell-spec]
-* `--mode TEXT`: Save mode: create_only|upsert.  [default: create_only]
-* `--duplicate-policy TEXT`: Duplicate handling: error|return_existing.  [default: error]
+* `--input <file>`: Draft or canonical cell-specification JSON.
+* `--manufacturer <str>`: Manufacturer name (required when --input omitted).
+* `--model <str>`: Model name (required when --input omitted).
+* `--chemistry <str>`: Chemistry label.  [default: unknown]
+* `--cell-format <str>`: Cell format.  [default: unknown]
+* `--positive-electrode-basis <str>`: Positive electrode basis (required when --input omitted).
+* `--negative-electrode-basis <str>`: Negative electrode basis (required when --input omitted).
+* `--size-code <str>`: Optional size code.
+* `--source-type <str>`: Source type label.  [default: datasheet]
+* `--source-name <str>`: Optional source name.
+* `--source-file <str>`: Source file label for provenance (recorded only when given).
+* `--source-url <str>`: Optional source URL.
+* `--uid <str>`: Optional 16-char UID (dashed or undashed).
+* `--property <file>`: Optional JSON object for cell-specification specification.property.
+* `--library-dir <path>`: Reusable library cell-specification directory.  [default: .battinfo/library/cell-spec]
+* `--packaged-dir <path>`: Packaged reusable library cell-specification directory.  [default: src/battinfo/data/library/cell-spec]
+* `--mode <str>`: Save mode: create_only|upsert.  [default: create_only]
+* `--duplicate-policy <str>`: Duplicate handling: error|return_existing.  [default: error]
 * `--validate / --no-validate`: Validate cell specification before saving.  [default: validate]
 * `--sync-packaged-copy / --no-sync-packaged-copy`: Sync the saved cell specification into package data.  [default: sync-packaged-copy]
 * `--build-rdf / --no-build-rdf`: Build JSON-LD library artifacts after saving.  [default: no-build-rdf]
-* `--output-jsonld-dir PATH`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
-* `--aggregate-jsonld PATH`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
-* `--manifest-json PATH`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
+* `--output-jsonld-dir <path>`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
+* `--aggregate-jsonld <path>`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
+* `--manifest-json <path>`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
 * `--clean-output`: Clean existing JSON-LD outputs before rebuilding.
 * `--dry-run`: Preview save without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo library template`
@@ -1153,15 +1153,15 @@ $ battinfo library template cell-spec [OPTIONS]
 
 **Options**:
 
-* `--manufacturer TEXT`: Manufacturer name.  [default: ExampleManufacturer]
-* `--model TEXT`: Model name.  [default: MODEL-001]
-* `--chemistry TEXT`: Chemistry label.  [default: unknown]
-* `--cell-format TEXT`: Cell format.  [default: unknown]
-* `--positive-electrode-basis TEXT`: Positive electrode basis.  [default: unknown]
-* `--negative-electrode-basis TEXT`: Negative electrode basis.  [default: unknown]
-* `--uid TEXT`: Optional 16-char UID.  [default: 0000000000000000]
-* `--out PATH`: Optional output JSON path.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--manufacturer <str>`: Manufacturer name.  [default: ExampleManufacturer]
+* `--model <str>`: Model name.  [default: MODEL-001]
+* `--chemistry <str>`: Chemistry label.  [default: unknown]
+* `--cell-format <str>`: Cell format.  [default: unknown]
+* `--positive-electrode-basis <str>`: Positive electrode basis.  [default: unknown]
+* `--negative-electrode-basis <str>`: Negative electrode basis.  [default: unknown]
+* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--out <path>`: Optional output JSON path.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo editorial`
@@ -1203,9 +1203,9 @@ $ battinfo editorial validate-staging-cell-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Staging JSON draft.  [required]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--input <file>`: Staging JSON draft.  [required]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial validate-staging-cell-spec-batch`
@@ -1220,10 +1220,10 @@ $ battinfo editorial validate-staging-cell-spec-batch [OPTIONS]
 
 **Options**:
 
-* `--input-dir DIRECTORY`: Directory of staging JSON drafts.  [required]
-* `--glob TEXT`: Glob for staging drafts.  [default: *.json]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--input-dir <directory>`: Directory of staging JSON drafts.  [required]
+* `--glob <str>`: Glob for staging drafts.  [default: *.json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial promote-staging-cell-spec`
@@ -1238,12 +1238,12 @@ $ battinfo editorial promote-staging-cell-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Staging JSON draft.  [required]
-* `--curated-root PATH`: Curated cell-spec root.  [default: records/cell-spec]
-* `--record-id TEXT`: Override the curated record id.
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--input <file>`: Staging JSON draft.  [required]
+* `--curated-root <path>`: Curated cell-spec root.  [default: records/cell-spec]
+* `--record-id <str>`: Override the curated record id.
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial promote-staging-cell-spec-batch`
@@ -1258,12 +1258,12 @@ $ battinfo editorial promote-staging-cell-spec-batch [OPTIONS]
 
 **Options**:
 
-* `--input-dir DIRECTORY`: Directory of staging JSON drafts.  [required]
-* `--curated-root PATH`: Curated cell-spec root.  [default: records/cell-spec]
-* `--glob TEXT`: Glob for staging drafts.  [default: *.json]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--input-dir <directory>`: Directory of staging JSON drafts.  [required]
+* `--curated-root <path>`: Curated cell-spec root.  [default: records/cell-spec]
+* `--glob <str>`: Glob for staging drafts.  [default: *.json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial validate-staging-dataset`
@@ -1278,9 +1278,9 @@ $ battinfo editorial validate-staging-dataset [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Staging dataset JSON record.  [required]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--input <file>`: Staging dataset JSON record.  [required]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial validate-staging-dataset-batch`
@@ -1295,10 +1295,10 @@ $ battinfo editorial validate-staging-dataset-batch [OPTIONS]
 
 **Options**:
 
-* `--input-dir DIRECTORY`: Directory of staging dataset records.  [required]
-* `--glob TEXT`: Glob for staging records.  [default: *.json]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--input-dir <directory>`: Directory of staging dataset records.  [required]
+* `--glob <str>`: Glob for staging records.  [default: *.json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial promote-staging-dataset`
@@ -1313,12 +1313,12 @@ $ battinfo editorial promote-staging-dataset [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Staging dataset JSON record.  [required]
-* `--curated-root PATH`: Curated dataset root.  [default: records/dataset]
-* `--record-id TEXT`: Override the curated record id.
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--input <file>`: Staging dataset JSON record.  [required]
+* `--curated-root <path>`: Curated dataset root.  [default: records/dataset]
+* `--record-id <str>`: Override the curated record id.
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial promote-staging-dataset-batch`
@@ -1333,12 +1333,12 @@ $ battinfo editorial promote-staging-dataset-batch [OPTIONS]
 
 **Options**:
 
-* `--input-dir DIRECTORY`: Directory of staging dataset records.  [required]
-* `--curated-root PATH`: Curated dataset root.  [default: records/dataset]
-* `--glob TEXT`: Glob for staging records.  [default: *.json]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--input-dir <directory>`: Directory of staging dataset records.  [required]
+* `--curated-root <path>`: Curated dataset root.  [default: records/dataset]
+* `--glob <str>`: Glob for staging records.  [default: *.json]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
 * `--dry-run`: Preview promotion without writing files.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial build-curated-cell-spec-submission`
@@ -1353,18 +1353,18 @@ $ battinfo editorial build-curated-cell-spec-submission [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Curated cell-spec record.json or equivalent canonical JSON.  [required]
-* `--workspace-id TEXT`: Registry workspace id.  [required]
-* `--publisher-id TEXT`: Registry publisher id.  [required]
-* `--source-version TEXT`: Registry source_version for this publication run.  [required]
-* `--source-local-id TEXT`: Override source_local_id; defaults to the curated record id inferred from the path.
-* `--title TEXT`: Override submission title.
-* `--publication-mode TEXT`: Publication intent mode.  [default: canonical-publication]
-* `--source-system TEXT`: Submission provenance source_system.  [default: battinfo-records]
-* `--workflow-name TEXT`: Submission provenance workflow_name.  [default: curated-cell-spec-publication]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--out PATH`: Optional path to write the generated submission package JSON.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--input <file>`: Curated cell-spec record.json or equivalent canonical JSON.  [required]
+* `--workspace-id <str>`: Registry workspace id.  [required]
+* `--publisher-id <str>`: Registry publisher id.  [required]
+* `--source-version <str>`: Registry source_version for this publication run.  [required]
+* `--source-local-id <str>`: Override source_local_id; defaults to the curated record id inferred from the path.
+* `--title <str>`: Override submission title.
+* `--publication-mode <str>`: Publication intent mode.  [default: canonical-publication]
+* `--source-system <str>`: Submission provenance source_system.  [default: battinfo-records]
+* `--workflow-name <str>`: Submission provenance workflow_name.  [default: curated-cell-spec-publication]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--out <path>`: Optional path to write the generated submission package JSON.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo editorial publish-curated-cell-spec`
@@ -1379,22 +1379,22 @@ $ battinfo editorial publish-curated-cell-spec [OPTIONS]
 
 **Options**:
 
-* `--input FILE`: Curated cell-spec record.json or equivalent canonical JSON.  [required]
-* `--workspace-id TEXT`: Registry workspace id.  [required]
-* `--publisher-id TEXT`: Registry publisher id.  [required]
-* `--source-version TEXT`: Registry source_version for this publication run.  [required]
-* `--registry-url TEXT`: Registry base URL, for example http://127.0.0.1:8000.  [required]
-* `--api-key TEXT`: Registry submission API key.  [required]
-* `--api-key-header TEXT`: Registry submission API key header.  [default: X-Battinfo-API-Key]
-* `--source-local-id TEXT`: Override source_local_id; defaults to the curated record id inferred from the path.
-* `--title TEXT`: Override submission title.
-* `--publication-mode TEXT`: Publication intent mode.  [default: canonical-publication]
-* `--source-system TEXT`: Submission provenance source_system.  [default: battinfo-records]
-* `--workflow-name TEXT`: Submission provenance workflow_name.  [default: curated-cell-spec-publication]
-* `--validation-policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: default]
-* `--timeout-sec FLOAT`: HTTP timeout in seconds.  [default: 30.0]
-* `--out PATH`: Optional path to write the generated submission package JSON before posting.
-* `--format TEXT`: Output format: table|json.  [default: json]
+* `--input <file>`: Curated cell-spec record.json or equivalent canonical JSON.  [required]
+* `--workspace-id <str>`: Registry workspace id.  [required]
+* `--publisher-id <str>`: Registry publisher id.  [required]
+* `--source-version <str>`: Registry source_version for this publication run.  [required]
+* `--registry-url <str>`: Registry base URL, for example http://127.0.0.1:8000.  [required]
+* `--api-key <str>`: Registry submission API key.  [required]
+* `--api-key-header <str>`: Registry submission API key header.  [default: X-Battinfo-API-Key]
+* `--source-local-id <str>`: Override source_local_id; defaults to the curated record id inferred from the path.
+* `--title <str>`: Override submission title.
+* `--publication-mode <str>`: Publication intent mode.  [default: canonical-publication]
+* `--source-system <str>`: Submission provenance source_system.  [default: battinfo-records]
+* `--workflow-name <str>`: Submission provenance workflow_name.  [default: curated-cell-spec-publication]
+* `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: default]
+* `--timeout-sec <float>`: HTTP timeout in seconds.  [default: 30.0]
+* `--out <path>`: Optional path to write the generated submission package JSON before posting.
+* `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo workspace`
@@ -1424,17 +1424,17 @@ Initialize a disk-backed BattINFO workspace scaffold.
 **Usage**:
 
 ```console
-$ battinfo workspace init [OPTIONS] WORKSPACE_DIR
+$ battinfo workspace init [OPTIONS] {workspace_dir}
 ```
 
 **Arguments**:
 
-* `WORKSPACE_DIR`: [required]
+* `workspace_dir`: [required]
 
 **Options**:
 
 * `--force`: Overwrite an existing non-empty workspace directory.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo workspace validate`
@@ -1444,17 +1444,17 @@ Validate a disk-backed BattINFO workspace and write dist/validation-report.json.
 **Usage**:
 
 ```console
-$ battinfo workspace validate [OPTIONS] WORKSPACE_DIR
+$ battinfo workspace validate [OPTIONS] {workspace_dir}
 ```
 
 **Arguments**:
 
-* `WORKSPACE_DIR`: [required]
+* `workspace_dir`: [required]
 
 **Options**:
 
-* `--policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: strict]
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: strict]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo workspace bundle`
@@ -1464,17 +1464,17 @@ Bundle a disk-backed BattINFO workspace into dist artifacts.
 **Usage**:
 
 ```console
-$ battinfo workspace bundle [OPTIONS] WORKSPACE_DIR
+$ battinfo workspace bundle [OPTIONS] {workspace_dir}
 ```
 
 **Arguments**:
 
-* `WORKSPACE_DIR`: [required]
+* `workspace_dir`: [required]
 
 **Options**:
 
-* `--policy TEXT`: Validation policy: default|strict|publisher|ingest.  [default: strict]
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: strict]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo notebook`
@@ -1507,11 +1507,11 @@ $ battinfo notebook recover [OPTIONS]
 
 **Options**:
 
-* `--workspace-root DIRECTORY`: [default: .]
-* `--venv-path PATH`: Relative or absolute venv root.  [default: .venv]
+* `--workspace-root <directory>`: [default: .]
+* `--venv-path <path>`: Relative or absolute venv root.  [default: .venv]
 * `--clear-local-runtime / --keep-local-runtime`: Remove local .jupyter-runtime-test state after stopping kernels.  [default: clear-local-runtime]
 * `--force-kill / --no-force-kill`: Force-kill repo-local notebook kernels that do not exit after terminate().  [default: force-kill]
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo demo`
@@ -1540,20 +1540,20 @@ Author a BattINFO demo environment from Python objects and write a submission pa
 **Usage**:
 
 ```console
-$ battinfo demo setup [OPTIONS] [ROOT]
+$ battinfo demo setup [OPTIONS] [root]
 ```
 
 **Arguments**:
 
-* `[ROOT]`: [default: .battinfo/demo-e2e]
+* `root`: [default: .battinfo/demo-e2e]
 
 **Options**:
 
-* `--registry TEXT`: Registry tenant/workspace slug.  [default: digibatt/hello-world]
-* `--publisher-id TEXT`: Publisher id used for the generated submission package.  [default: demo-lab]
-* `--version TEXT`: Release version and submission source_version.  [default: 1.0.0]
+* `--registry <str>`: Registry tenant/workspace slug.  [default: digibatt/hello-world]
+* `--publisher-id <str>`: Publisher id used for the generated submission package.  [default: demo-lab]
+* `--version <str>`: Release version and submission source_version.  [default: 1.0.0]
 * `--force`: Replace the existing demo root before regenerating it.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo demo verify`
@@ -1563,26 +1563,26 @@ Run the BattINFO demo pipeline through registry publication and optional platfor
 **Usage**:
 
 ```console
-$ battinfo demo verify [OPTIONS] [ROOT]
+$ battinfo demo verify [OPTIONS] [root]
 ```
 
 **Arguments**:
 
-* `[ROOT]`: [default: .battinfo/demo-e2e]
+* `root`: [default: .battinfo/demo-e2e]
 
 **Options**:
 
-* `--registry-url TEXT`: Registry base URL, for example http://127.0.0.1:8000.  [required]
-* `--api-key TEXT`: Registry submission API key.  [required]
-* `--platform-url TEXT`: Optional Battery Genome base URL, for example https://www.battery-genome.org.
-* `--registry TEXT`: Registry tenant/workspace slug.  [default: digibatt/hello-world]
-* `--publisher-id TEXT`: Publisher id used for the generated submission package.  [default: demo-lab]
-* `--version TEXT`: Release version and submission source_version.  [default: 1.0.0]
-* `--api-key-header TEXT`: Registry submission API key header.  [default: X-Battinfo-API-Key]
-* `--timeout-sec FLOAT`: Timeout window for registry and platform checks.  [default: 30.0]
-* `--poll-interval-sec FLOAT`: Polling interval while waiting for responses.  [default: 1.0]
+* `--registry-url <str>`: Registry base URL, for example http://127.0.0.1:8000.  [required]
+* `--api-key <str>`: Registry submission API key.  [required]
+* `--platform-url <str>`: Optional Battery Genome base URL, for example https://www.battery-genome.org.
+* `--registry <str>`: Registry tenant/workspace slug.  [default: digibatt/hello-world]
+* `--publisher-id <str>`: Publisher id used for the generated submission package.  [default: demo-lab]
+* `--version <str>`: Release version and submission source_version.  [default: 1.0.0]
+* `--api-key-header <str>`: Registry submission API key header.  [default: X-Battinfo-API-Key]
+* `--timeout-sec <float>`: Timeout window for registry and platform checks.  [default: 30.0]
+* `--poll-interval-sec <float>`: Polling interval while waiting for responses.  [default: 1.0]
 * `--force`: Replace the existing demo root before regenerating it.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo ingest`
@@ -1613,25 +1613,25 @@ Inspect one ingest folder and infer tests/datasets without writing any records.
 **Usage**:
 
 ```console
-$ battinfo ingest inspect [OPTIONS] INGEST_ROOT
+$ battinfo ingest inspect [OPTIONS] {ingest_root}
 ```
 
 **Arguments**:
 
-* `INGEST_ROOT`: [required]
+* `ingest_root`: [required]
 
 **Options**:
 
-* `--resource-type TEXT`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
-* `--type-record PATH`: Curated type record path.
-* `--manifest PATH`: Optional battinfo.ingest.json path.
-* `--resource-iri TEXT`: Existing BattINFO resource IRI to preserve.
-* `--resource-name TEXT`: Human-facing instance label.
-* `--workspace-id TEXT`: Workspace id used for bundling/publication.
-* `--publisher-id TEXT`: Publisher id used for bundling/publication.
-* `--source-version TEXT`: Submission source version.
-* `--license TEXT`: Dataset license to apply.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--resource-type <str>`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
+* `--type-record <path>`: Curated type record path.
+* `--manifest <path>`: Optional battinfo.ingest.json path.
+* `--resource-iri <str>`: Existing BattINFO resource IRI to preserve.
+* `--resource-name <str>`: Human-facing instance label.
+* `--workspace-id <str>`: Workspace id used for bundling/publication.
+* `--publisher-id <str>`: Publisher id used for bundling/publication.
+* `--source-version <str>`: Submission source version.
+* `--license <str>`: Dataset license to apply.
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo ingest init`
@@ -1641,26 +1641,26 @@ Write battinfo.ingest.json so later build/publish commands only need the folder 
 **Usage**:
 
 ```console
-$ battinfo ingest init [OPTIONS] INGEST_ROOT
+$ battinfo ingest init [OPTIONS] {ingest_root}
 ```
 
 **Arguments**:
 
-* `INGEST_ROOT`: [required]
+* `ingest_root`: [required]
 
 **Options**:
 
-* `--resource-type TEXT`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
-* `--type-record PATH`: Curated type record path.
-* `--manifest PATH`: Where to write battinfo.ingest.json.
-* `--resource-iri TEXT`: Existing BattINFO resource IRI to preserve.
-* `--resource-name TEXT`: Human-facing instance label.
-* `--workspace-id TEXT`: Workspace id used for bundling/publication.
-* `--publisher-id TEXT`: Publisher id used for bundling/publication.
-* `--source-version TEXT`: Submission source version.
-* `--license TEXT`: Dataset license to apply.
+* `--resource-type <str>`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
+* `--type-record <path>`: Curated type record path.
+* `--manifest <path>`: Where to write battinfo.ingest.json.
+* `--resource-iri <str>`: Existing BattINFO resource IRI to preserve.
+* `--resource-name <str>`: Human-facing instance label.
+* `--workspace-id <str>`: Workspace id used for bundling/publication.
+* `--publisher-id <str>`: Publisher id used for bundling/publication.
+* `--source-version <str>`: Submission source version.
+* `--license <str>`: Dataset license to apply.
 * `--force`: Overwrite an existing manifest.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo ingest build`
@@ -1670,31 +1670,31 @@ Create the linked ingest workspace from one evidence folder.
 **Usage**:
 
 ```console
-$ battinfo ingest build [OPTIONS] INGEST_ROOT
+$ battinfo ingest build [OPTIONS] {ingest_root}
 ```
 
 **Arguments**:
 
-* `INGEST_ROOT`: [required]
+* `ingest_root`: [required]
 
 **Options**:
 
-* `--resource-type TEXT`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
-* `--type-record PATH`: Curated type record path.
-* `--manifest PATH`: Optional battinfo.ingest.json path.
-* `--workspace-root PATH`: Where to write the authored workspace.
-* `--resource-iri TEXT`: Existing BattINFO resource IRI to preserve.
-* `--resource-name TEXT`: Human-facing instance label.
-* `--workspace-id TEXT`: Workspace id used for bundling/publication.
-* `--tenant TEXT`: Optional tenant id recorded in the workspace manifest.
-* `--publisher-id TEXT`: Publisher id used for bundling/publication.
-* `--source-version TEXT`: Submission source version.
-* `--license TEXT`: Dataset license to apply.
-* `--artifact-base-url TEXT`: Optional public base URL for packaged artifact files.
+* `--resource-type <str>`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
+* `--type-record <path>`: Curated type record path.
+* `--manifest <path>`: Optional battinfo.ingest.json path.
+* `--workspace-root <path>`: Where to write the authored workspace.
+* `--resource-iri <str>`: Existing BattINFO resource IRI to preserve.
+* `--resource-name <str>`: Human-facing instance label.
+* `--workspace-id <str>`: Workspace id used for bundling/publication.
+* `--tenant <str>`: Optional tenant id recorded in the workspace manifest.
+* `--publisher-id <str>`: Publisher id used for bundling/publication.
+* `--source-version <str>`: Submission source version.
+* `--license <str>`: Dataset license to apply.
+* `--artifact-base-url <str>`: Optional public base URL for packaged artifact files.
 * `--force`: Replace the existing workspace root before regenerating it.
 * `--bundle / --no-bundle`: Also build the submission package after authoring the workspace.  [default: bundle]
-* `--validation-policy TEXT`: Validation policy: strict|set|quick.  [default: strict]
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--validation-policy <str>`: Validation policy: strict|set|quick.  [default: strict]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ### `battinfo ingest publish`
@@ -1716,36 +1716,36 @@ variables when not supplied as flags:
 **Usage**:
 
 ```console
-$ battinfo ingest publish [OPTIONS] INGEST_ROOT
+$ battinfo ingest publish [OPTIONS] {ingest_root}
 ```
 
 **Arguments**:
 
-* `INGEST_ROOT`: [required]
+* `ingest_root`: [required]
 
 **Options**:
 
-* `--registry-url TEXT`: Registry base URL. Env: BATTINFO_REGISTRY_URL.
-* `--api-key TEXT`: Registry submission API key. Env: BATTINFO_API_KEY.
-* `--resource-type TEXT`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
-* `--type-record PATH`: Curated type record path.
-* `--manifest PATH`: Optional battinfo.ingest.json path.
-* `--workspace-root PATH`: Where to write the authored workspace.
-* `--resource-iri TEXT`: Existing BattINFO resource IRI to preserve.
-* `--resource-name TEXT`: Human-facing instance label.
-* `--workspace-id TEXT`: Workspace id used for bundling/publication.
-* `--tenant TEXT`: Optional tenant id recorded in the workspace manifest.
-* `--publisher-id TEXT`: Publisher id used for publication.
-* `--source-version TEXT`: Submission source version.
-* `--license TEXT`: Dataset license to apply.
-* `--artifact-base-url TEXT`: Public base URL for packaged artifact files. Env: BATTINFO_STORAGE_PUBLIC_BASE_URL.
-* `--platform-url TEXT`: Optional Battery Genome base URL.
-* `--api-key-header TEXT`: Registry API key header.  [default: X-Battinfo-API-Key]
-* `--timeout-sec FLOAT`: Registry submission timeout in seconds.  [default: 300.0]
+* `--registry-url <str>`: Registry base URL. Env: BATTINFO_REGISTRY_URL.
+* `--api-key <str>`: Registry submission API key. Env: BATTINFO_API_KEY.
+* `--resource-type <str>`: Typed ingest subject. Today: cell-instance.  [default: cell-instance]
+* `--type-record <path>`: Curated type record path.
+* `--manifest <path>`: Optional battinfo.ingest.json path.
+* `--workspace-root <path>`: Where to write the authored workspace.
+* `--resource-iri <str>`: Existing BattINFO resource IRI to preserve.
+* `--resource-name <str>`: Human-facing instance label.
+* `--workspace-id <str>`: Workspace id used for bundling/publication.
+* `--tenant <str>`: Optional tenant id recorded in the workspace manifest.
+* `--publisher-id <str>`: Publisher id used for publication.
+* `--source-version <str>`: Submission source version.
+* `--license <str>`: Dataset license to apply.
+* `--artifact-base-url <str>`: Public base URL for packaged artifact files. Env: BATTINFO_STORAGE_PUBLIC_BASE_URL.
+* `--platform-url <str>`: Optional Battery Genome base URL.
+* `--api-key-header <str>`: Registry API key header.  [default: X-Battinfo-API-Key]
+* `--timeout-sec <float>`: Registry submission timeout in seconds.  [default: 300.0]
 * `--force`: Replace the existing workspace root before regenerating it.
-* `--validation-policy TEXT`: Validation policy: strict|set|quick.  [default: strict]
+* `--validation-policy <str>`: Validation policy: strict|set|quick.  [default: strict]
 * `--process-artifacts`: Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo.
-* `--format TEXT`: Output format: json|text.  [default: json]
+* `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
 ## `battinfo registry`
@@ -1787,16 +1787,16 @@ $ battinfo registry bootstrap [OPTIONS]
 
 **Options**:
 
-* `--tenant-id TEXT`: Tenant id to create or verify.  [default: battinfo]
-* `--tenant-name TEXT`: Tenant display name.  [default: BattINFO]
-* `--workspace-id TEXT`: Workspace id to create or verify.  [required]
-* `--workspace-name TEXT`: Workspace display name (defaults to workspace-id).
-* `--publisher-id TEXT`: Publisher id to create or verify.  [required]
-* `--publisher-name TEXT`: Publisher display name (defaults to publisher-id).
-* `--api-key-file PATH`: File to write the publisher API key to. Env: BATTINFO_API_KEY_FILE.
-* `--registry-url TEXT`: Registry base URL. Env: BATTINFO_REGISTRY_URL.
-* `--admin-token TEXT`: Registry admin token. Env: BATTINFO_ADMIN_TOKEN.
-* `--format TEXT`: Output format: json|text.  [default: text]
+* `--tenant-id <str>`: Tenant id to create or verify.  [default: battinfo]
+* `--tenant-name <str>`: Tenant display name.  [default: BattINFO]
+* `--workspace-id <str>`: Workspace id to create or verify.  [required]
+* `--workspace-name <str>`: Workspace display name (defaults to workspace-id).
+* `--publisher-id <str>`: Publisher id to create or verify.  [required]
+* `--publisher-name <str>`: Publisher display name (defaults to publisher-id).
+* `--api-key-file <path>`: File to write the publisher API key to. Env: BATTINFO_API_KEY_FILE.
+* `--registry-url <str>`: Registry base URL. Env: BATTINFO_REGISTRY_URL.
+* `--admin-token <str>`: Registry admin token. Env: BATTINFO_ADMIN_TOKEN.
+* `--format <str>`: Output format: json|text.  [default: text]
 * `--help`: Show this message and exit.
 
 ## `battinfo dataset`
@@ -1834,19 +1834,19 @@ After running this command:
 **Usage**:
 
 ```console
-$ battinfo dataset init [OPTIONS] OUTPUT
+$ battinfo dataset init [OPTIONS] {output}
 ```
 
 **Arguments**:
 
-* `OUTPUT`: Path for the new contribution folder.  [required]
+* `output`: Path for the new contribution folder.  [required]
 
 **Options**:
 
-* `-n, --cell-name TEXT`: Short label for this cell (e.g. serial number).
-* `--cell-spec-iri TEXT`: BattINFO cell-spec IRI.
-* `--lab TEXT`: Your institution or lab name.
-* `--license TEXT`: Data licence identifier.  [default: CC-BY-4.0]
+* `-n, --cell-name <str>`: Short label for this cell (e.g. serial number).
+* `--cell-spec-iri <str>`: BattINFO cell-spec IRI.
+* `--lab <str>`: Your institution or lab name.
+* `--license <str>`: Data licence identifier.  [default: CC-BY-4.0]
 * `--force`: Overwrite an existing folder.
 * `--help`: Show this message and exit.
 
@@ -1861,17 +1861,17 @@ sub-folders are processed automatically.
 **Usage**:
 
 ```console
-$ battinfo dataset process [OPTIONS] FOLDER
+$ battinfo dataset process [OPTIONS] {folder}
 ```
 
 **Arguments**:
 
-* `FOLDER`: [required]
+* `folder`: [required]
 
 **Options**:
 
 * `--force`: Rebuild from scratch.
-* `--validation-policy TEXT`: strict|set|quick  [default: strict]
+* `--validation-policy <str>`: strict|set|quick  [default: strict]
 * `--json`: Emit machine-readable JSON to stdout.
 * `--help`: Show this message and exit.
 
@@ -1893,19 +1893,19 @@ Get a Zenodo token at:
 **Usage**:
 
 ```console
-$ battinfo dataset publish [OPTIONS] FOLDER
+$ battinfo dataset publish [OPTIONS] {folder}
 ```
 
 **Arguments**:
 
-* `FOLDER`: [required]
+* `folder`: [required]
 
 **Options**:
 
 * `--zenodo`: Publish to Zenodo (creates a draft deposit).
 * `--sandbox`: Use the Zenodo sandbox (for testing).
-* `--token TEXT`: Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN).
-* `--community TEXT`: Zenodo community identifier.  [default: battery-genome]
+* `--token <str>`: Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN).
+* `--community <str>`: Zenodo community identifier.  [default: battery-genome]
 * `--no-community`: Skip community submission.
 * `--help`: Show this message and exit.
 
@@ -1952,24 +1952,24 @@ After running this command:
 **Usage**:
 
 ```console
-$ battinfo batch init [OPTIONS] OUTPUT_DIR
+$ battinfo batch init [OPTIONS] {output_dir}
 ```
 
 **Arguments**:
 
-* `OUTPUT_DIR`: Directory to create for this batch.  [required]
+* `output_dir`: Directory to create for this batch.  [required]
 
 **Options**:
 
-* `-t, --cell-spec TEXT`: Cell type IRI or name, e.g. &quot;Energizer CR2032&quot;.  [required]
-* `-n, --count INTEGER`: Number of cells received.  [required]
-* `--batch-id TEXT`: Batch / lot identifier.
-* `--lab TEXT`: Institution or lab name.
-* `--operator TEXT`: Person who operated the test equipment.
-* `--project TEXT`: Project name or ID this batch belongs to.
-* `--license TEXT`: SPDX licence identifier.  [default: CC-BY-4.0]
-* `--iris TEXT`: Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).
-* `--serials TEXT`: Comma-separated serial numbers (one per cell, used as folder names).
+* `-t, --cell-spec <str>`: Cell type IRI or name, e.g. &quot;Energizer CR2032&quot;.  [required]
+* `-n, --count <int>`: Number of cells received.  [required]
+* `--batch-id <str>`: Batch / lot identifier.
+* `--lab <str>`: Institution or lab name.
+* `--operator <str>`: Person who operated the test equipment.
+* `--project <str>`: Project name or ID this batch belongs to.
+* `--license <str>`: SPDX licence identifier.  [default: CC-BY-4.0]
+* `--iris <str>`: Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).
+* `--serials <str>`: Comma-separated serial numbers (one per cell, used as folder names).
 * `--force`: Overwrite an existing output directory.
 * `--help`: Show this message and exit.
 
@@ -1986,23 +1986,23 @@ Updates the count in batch.yaml automatically.
 **Usage**:
 
 ```console
-$ battinfo batch add [OPTIONS] BATCH_DIR
+$ battinfo batch add [OPTIONS] {batch_dir}
 ```
 
 **Arguments**:
 
-* `BATCH_DIR`: Existing batch directory.  [required]
+* `batch_dir`: Existing batch directory.  [required]
 
 **Options**:
 
-* `-n, --count INTEGER`: Number of additional cells to add.  [required]
-* `--batch-id TEXT`: Override batch / lot ID for the new cells.
-* `--lab TEXT`: Override lab name for the new cells.
-* `--operator TEXT`: Override operator for the new cells.
-* `--project TEXT`: Override project for the new cells.
-* `--license TEXT`: Override SPDX licence for the new cells.
-* `--iris TEXT`: Comma-separated pre-assigned BattINFO cell IRIs for the new cells.
-* `--serials TEXT`: Comma-separated serial numbers for the new cells.
+* `-n, --count <int>`: Number of additional cells to add.  [required]
+* `--batch-id <str>`: Override batch / lot ID for the new cells.
+* `--lab <str>`: Override lab name for the new cells.
+* `--operator <str>`: Override operator for the new cells.
+* `--project <str>`: Override project for the new cells.
+* `--license <str>`: Override SPDX licence for the new cells.
+* `--iris <str>`: Comma-separated pre-assigned BattINFO cell IRIs for the new cells.
+* `--serials <str>`: Comma-separated serial numbers for the new cells.
 * `--help`: Show this message and exit.
 
 ### `battinfo batch status`
@@ -2015,12 +2015,12 @@ status, and what to run next.
 **Usage**:
 
 ```console
-$ battinfo batch status [OPTIONS] BATCH_DIR
+$ battinfo batch status [OPTIONS] {batch_dir}
 ```
 
 **Arguments**:
 
-* `BATCH_DIR`: Batch directory.  [required]
+* `batch_dir`: Batch directory.  [required]
 
 **Options**:
 
@@ -2048,20 +2048,20 @@ After packaging, upload with:
 **Usage**:
 
 ```console
-$ battinfo batch package [OPTIONS] BATCH_DIR
+$ battinfo batch package [OPTIONS] {batch_dir}
 ```
 
 **Arguments**:
 
-* `BATCH_DIR`: Batch directory created by `batch init`.  [required]
+* `batch_dir`: Batch directory created by `batch init`.  [required]
 
 **Options**:
 
-* `-s, --staging PATH`: Output directory for the Zenodo package. Default: &lt;batch-dir&gt;/staging/.
-* `-c, --creator TEXT`: Creator: &quot;Family, Given; Affiliation&quot;. Repeat for multiple. Falls back to `battinfo config set creator`.
-* `--community TEXT`: Zenodo community. Default: value from config or battinfo-reference.
+* `-s, --staging <path>`: Output directory for the Zenodo package. Default: &lt;batch-dir&gt;/staging/.
+* `-c, --creator <str>`: Creator: &quot;Family, Given; Affiliation&quot;. Repeat for multiple. Falls back to `battinfo config set creator`.
+* `--community <str>`: Zenodo community. Default: value from config or battinfo-reference.
 * `--no-community`: Skip community submission.
-* `--placeholder TEXT`: Placeholder token for Zenodo record ID in URLs.  [default: ZENODO_RECORD_ID]
+* `--placeholder <str>`: Placeholder token for Zenodo record ID in URLs.  [default: ZENODO_RECORD_ID]
 * `--json`: Emit machine-readable JSON to stdout.
 * `--help`: Show this message and exit.
 
@@ -2083,22 +2083,22 @@ The deposit URL is printed at the end -- open it to review and publish.
 **Usage**:
 
 ```console
-$ battinfo batch upload [OPTIONS] STAGING_DIR
+$ battinfo batch upload [OPTIONS] {staging_dir}
 ```
 
 **Arguments**:
 
-* `STAGING_DIR`: Staging directory produced by `batch package`.  [required]
+* `staging_dir`: Staging directory produced by `batch package`.  [required]
 
 **Options**:
 
-* `--token TEXT`: Zenodo API token. Env: ZENODO_API_TOKEN.
+* `--token <str>`: Zenodo API token. Env: ZENODO_API_TOKEN.
 * `--sandbox`: Use Zenodo sandbox (sandbox.zenodo.org).
-* `--community TEXT`: Zenodo community. Default: value from config or battinfo-reference.
+* `--community <str>`: Zenodo community. Default: value from config or battinfo-reference.
 * `--no-community`: Skip community submission.
-* `-c, --creator TEXT`: Creator: &quot;Family, Given; Affiliation&quot;. Repeat for multiple. Falls back to `battinfo config set creator`.
+* `-c, --creator <str>`: Creator: &quot;Family, Given; Affiliation&quot;. Repeat for multiple. Falls back to `battinfo config set creator`.
 * `--publish`: Publish immediately (default: leave as draft).
-* `--placeholder TEXT`: Placeholder token used in package.  [default: ZENODO_RECORD_ID]
+* `--placeholder <str>`: Placeholder token used in package.  [default: ZENODO_RECORD_ID]
 * `--json`: Emit machine-readable JSON to stdout.
 * `--help`: Show this message and exit.
 
@@ -2135,13 +2135,13 @@ Examples:
 **Usage**:
 
 ```console
-$ battinfo config set [OPTIONS] KEY VALUE
+$ battinfo config set [OPTIONS] {key} {value}
 ```
 
 **Arguments**:
 
-* `KEY`: Config key: creator, license, community, zenodo_token.  [required]
-* `VALUE`: Value to store.  [required]
+* `key`: Config key: creator, license, community, zenodo_token.  [required]
+* `value`: Value to store.  [required]
 
 **Options**:
 
@@ -2192,8 +2192,8 @@ $ battinfo properties list [OPTIONS]
 
 **Options**:
 
-* `--category TEXT`: Filter by category (e.g. capacity, voltage, current).
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--category <str>`: Filter by category (e.g. capacity, voltage, current).
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
 
 ### `battinfo properties show`
@@ -2203,14 +2203,14 @@ Show valid units and an example entry for a single spec property.
 **Usage**:
 
 ```console
-$ battinfo properties show [OPTIONS] NAME
+$ battinfo properties show [OPTIONS] {name}
 ```
 
 **Arguments**:
 
-* `NAME`: Spec property name (e.g. nominal_capacity).  [required]
+* `name`: Spec property name (e.g. nominal_capacity).  [required]
 
 **Options**:
 
-* `--format TEXT`: Output format: table|json.  [default: table]
+* `--format <str>`: Output format: table|json.  [default: table]
 * `--help`: Show this message and exit.
