@@ -17,6 +17,13 @@
 import { RECORDS_CONTEXT_URL } from "./records-context.generated";
 import { validateRecord, type Issue } from "./validate";
 
+// The canonical schema_version every emitted record is stamped with. Single
+// source so the playground never teaches a version the package has moved past;
+// scripts/check-create-model-terms.ts pins it to the synced example corpus
+// (lib/examples.generated.ts, in turn synced from examples/** = the package
+// SSoT), so a corpus re-stamp fails CI until this is bumped too.
+export const SCHEMA_VERSION = "0.2.0";
+
 export interface DraftProperty {
   key: string;
   value: string;
@@ -117,15 +124,19 @@ function withContext(body: Record<string, unknown>): Record<string, unknown> {
 }
 
 // --- vocab maps --------------------------------------------------------------
-const FORMAT_CLASS: Record<string, string> = {
+// These class maps and the property `term`s below are all @type tokens the
+// emitter puts into JSON-LD; every one must resolve in the hosted records
+// context. scripts/check-create-model-terms.ts audits them against the
+// vendored context so this table cannot drift from the package silently.
+export const FORMAT_CLASS: Record<string, string> = {
   coin: "CoinCell", cylindrical: "CylindricalBattery", pouch: "PouchCell", prismatic: "PrismaticBattery",
 };
-const CHEMISTRY_CLASS: Record<string, string> = {
+export const CHEMISTRY_CLASS: Record<string, string> = {
   "Li-ion": "LithiumIonBattery", "Li-metal": "LithiumMetalBattery", "Na-ion": "SodiumIonBattery", Alkaline: "AlkalineCell",
 };
 // Basis label -> EMMO electrode class, mirroring the battinfo transform's
 // entity_type_map (keys matched case-insensitively, separators normalized).
-const BASIS_ELECTRODE: Record<string, string> = {
+export const BASIS_ELECTRODE: Record<string, string> = {
   lfp: "LithiumIronPhosphateElectrode",
   nmc: "LithiumNickelManganeseCobaltOxideElectrode",
   nmc811: "LithiumNickelManganeseCobaltOxideElectrode",
@@ -141,7 +152,7 @@ const BASIS_ELECTRODE: Record<string, string> = {
   "li-metal": "LithiumElectrode",
   lto: "LithiumTitanateElectrode",
 };
-const SUBSTANCE: Record<string, string> = {
+export const SUBSTANCE: Record<string, string> = {
   LFP: "LithiumIronPhosphate",
   NMC: "LithiumNickelManganeseCobaltOxide",
   graphite: "Graphite",
@@ -149,7 +160,7 @@ const SUBSTANCE: Record<string, string> = {
   LiPF6: "LithiumHexafluorophosphate",
   EC: "EthyleneCarbonate",
 };
-const MATERIAL_ROLE: Record<string, string> = {
+export const MATERIAL_ROLE: Record<string, string> = {
   active_material: "ActiveMaterial", binder: "Binder", conductive_additive: "ConductiveAdditive",
 };
 
@@ -229,9 +240,11 @@ const CELL_SPEC_PROPS: PropDef[] = [
   { key: "discharging_cutoff_voltage", label: "Discharge cutoff (lower)", units: ["V", "mV"], section: "spec" },
   { key: "specific_energy", label: "Specific energy", units: ["Wh/kg"], section: "spec" },
   { key: "energy_density", label: "Energy density", units: ["Wh/L"], section: "spec" },
-  // Current ratings
-  { key: "continuous_charging_current", label: "Max continuous charge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousChargingCurrent" },
-  { key: "continuous_discharging_current", label: "Max continuous discharge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousDischargingCurrent" },
+  // Current ratings. The canonical key and the JSON-LD term must denote the
+  // same EMMO concept: maximum_continuous_charging_current <-> the PascalCase
+  // MaximumContinuousChargingCurrent class, both defined in the records context.
+  { key: "maximum_continuous_charging_current", label: "Max continuous charge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousChargingCurrent" },
+  { key: "maximum_continuous_discharging_current", label: "Max continuous discharge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousDischargingCurrent" },
   // Life, resistance, mass
   { key: "cycle_life", label: "Cycle life", units: ["cycles"], section: "spec" },
   { key: "internal_resistance", label: "Internal resistance", units: ["mΩ", "Ω"], section: "spec" },
@@ -353,7 +366,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.chemistry) spec.chemistry = v.chemistry;
       if (v.positiveBasis) spec.positive_electrode_basis = v.positiveBasis;
       if (v.negativeBasis) spec.negative_electrode_basis = v.negativeBasis;
-      const specRecord: Record<string, unknown> = { schema_version: "0.1.0", cell_spec: spec };
+      const specRecord: Record<string, unknown> = { schema_version: SCHEMA_VERSION, cell_spec: spec };
       const sp = propBlock(inSection(props, "spec"));
       if (Object.keys(sp).length) specRecord.properties = sp;
 
@@ -362,7 +375,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.serial_number) instance.serial_number = v.serial_number;
       if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
       if (v.expires_at) instance.expires_at = v.expires_at;
-      const instanceRecord: Record<string, unknown> = { schema_version: "0.1.0", cell_instance: instance };
+      const instanceRecord: Record<string, unknown> = { schema_version: SCHEMA_VERSION, cell_instance: instance };
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instanceRecord.measured = mp;
       return [specRecord, instanceRecord];
@@ -453,7 +466,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.chemistry_family) spec.chemistry_family = v.chemistry_family;
       const sp = propBlock(inSection(props, "spec"));
       if (Object.keys(sp).length) spec.property = sp;
-      const specRecord = { schema_version: "0.1.0", material_spec: spec };
+      const specRecord = { schema_version: SCHEMA_VERSION, material_spec: spec };
 
       const instance: Record<string, unknown> = {};
       if (v.instanceName) instance.name = v.instanceName;
@@ -462,7 +475,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.received_date) instance.received_date = v.received_date;
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instance.property = mp;
-      const instanceRecord = { schema_version: "0.1.0", material: instance };
+      const instanceRecord = { schema_version: SCHEMA_VERSION, material: instance };
       return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
@@ -477,7 +490,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.received_date) instance.received_date = v.received_date;
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instance.property = mp;
-      lines.push(...pyInstanceRecord("material_lot", { schema_version: "0.1.0", material: instance }));
+      lines.push(...pyInstanceRecord("material_lot", { schema_version: SCHEMA_VERSION, material: instance }));
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
@@ -541,7 +554,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.name) spec.name = v.name;
       if (v.polarity) spec.polarity = v.polarity;
       if (v.collector) spec.current_collector = { name: v.collector };
-      const specRecord = { schema_version: "0.1.0", electrode_spec: spec };
+      const specRecord = { schema_version: SCHEMA_VERSION, electrode_spec: spec };
 
       const instance: Record<string, unknown> = {};
       if (v.instanceName) instance.name = v.instanceName;
@@ -550,7 +563,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instance.property = mp;
-      const instanceRecord = { schema_version: "0.1.0", electrode: instance };
+      const instanceRecord = { schema_version: SCHEMA_VERSION, electrode: instance };
       return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
@@ -570,7 +583,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instance.property = mp;
-      lines.push(...pyInstanceRecord("electrode_unit", { schema_version: "0.1.0", electrode: instance }));
+      lines.push(...pyInstanceRecord("electrode_unit", { schema_version: SCHEMA_VERSION, electrode: instance }));
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
@@ -631,7 +644,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (solvents.length) spec.solvent_mixture = { component: solvents.map((name) => ({ name })) };
       const sp = propBlock(inSection(props, "spec"));
       if (Object.keys(sp).length) spec.property = sp;
-      const specRecord = { schema_version: "0.1.0", electrolyte_spec: spec };
+      const specRecord = { schema_version: SCHEMA_VERSION, electrolyte_spec: spec };
 
       const instance: Record<string, unknown> = {};
       if (v.instanceName) instance.name = v.instanceName;
@@ -640,7 +653,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instance.property = mp;
-      const instanceRecord = { schema_version: "0.1.0", electrolyte: instance };
+      const instanceRecord = { schema_version: SCHEMA_VERSION, electrolyte: instance };
       return [specRecord, instanceRecord];
     },
     toPython: (v, props) => {
@@ -661,7 +674,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.manufactured_at) instance.manufactured_at = v.manufactured_at;
       const mp = propBlock(inSection(props, "instance"));
       if (Object.keys(mp).length) instance.property = mp;
-      lines.push(...pyInstanceRecord("electrolyte_batch", { schema_version: "0.1.0", electrolyte: instance }));
+      lines.push(...pyInstanceRecord("electrolyte_batch", { schema_version: SCHEMA_VERSION, electrolyte: instance }));
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
@@ -726,7 +739,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.name) spec.name = v.name;
       if (v.kind) spec.kind = v.kind;
       if (v.version) spec.version = v.version;
-      const specRecord: Record<string, unknown> = { schema_version: "0.1.0", test_spec: spec };
+      const specRecord: Record<string, unknown> = { schema_version: SCHEMA_VERSION, test_spec: spec };
       const sc = propBlock(inSection(props, "spec"));
       if (Object.keys(sc).length) specRecord.conditions = sc;
 
@@ -737,7 +750,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.status) run.status = v.status;
       const mc = propBlock(inSection(props, "instance"));
       if (Object.keys(mc).length) run.conditions = mc;
-      const runRecord = { schema_version: "0.1.0", test: run };
+      const runRecord = { schema_version: SCHEMA_VERSION, test: run };
       return [specRecord, runRecord];
     },
     toPython: (v, props) => {
@@ -745,7 +758,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.name) spec.name = v.name;
       if (v.kind) spec.kind = v.kind;
       if (v.version) spec.version = v.version;
-      const protocol: Record<string, unknown> = { schema_version: "0.1.0", test_spec: spec };
+      const protocol: Record<string, unknown> = { schema_version: SCHEMA_VERSION, test_spec: spec };
       const sc = propBlock(inSection(props, "spec"));
       if (Object.keys(sc).length) protocol.conditions = sc;
       const lines = [
@@ -792,7 +805,7 @@ export const OBJECT_TYPES: ObjectDef[] = [
       if (v.name) body.name = v.name;
       if (v.access_url) body.access_url = v.access_url;
       if (v.description) body.description = v.description;
-      return { schema_version: "0.1.0", dataset: body };
+      return { schema_version: SCHEMA_VERSION, dataset: body };
     },
     toPython: (v) => [
       "from battinfo import Dataset",

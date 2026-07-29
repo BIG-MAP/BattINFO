@@ -95,19 +95,19 @@ def snippet_cell_spec():
     from battinfo import CellSpec
 
     spec = CellSpec(
-        # In the workspace flow the IRI is minted for you at ws.save();
-        # standalone, you set it (or let publish() mint it).
-        id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-        manufacturer="Samsung SDI",
-        model="INR21700-50E",
+        # The published flagship IRI: dereference it (Accept: application/ld+json)
+        # to get this exact record. In the workspace flow the IRI is minted for
+        # you at ws.save(); standalone, you set it (or let publish() mint it).
+        id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
+        manufacturer="A123",
+        model="ANR26650M1-B",
         format="cylindrical",
         chemistry="Li-ion",
-        positive_electrode_basis="NMC",
-        negative_electrode_basis="graphite",
+        positive_electrode_basis="LFP",
         properties={
-            "nominal_capacity": {"value": 5.0, "unit": "Ah"},
-            "nominal_voltage": {"value": 3.6, "unit": "V"},
-            "mass": {"value": 68.0, "unit": "g"},
+            "nominal_capacity": {"value": 2.5, "unit": "Ah"},
+            "nominal_voltage": {"value": 3.3, "unit": "V"},
+            "mass": {"value": 76.0, "unit": "g"},
         },
         source={"type": "datasheet", "retrieved_at": 1750000000},
     )
@@ -330,11 +330,18 @@ TIME_KEYS = {
 }
 FIXED_TIME = 1750000000
 
+# Real, published IRIs to preserve verbatim through normalization: these
+# dereference today, so an example that shows one must keep it (the cell-spec
+# showcase is the flagship, not a placeholder).
+KEEP_UIDS = {"pge5-wer6-2q82-v9k0"}
+
 
 def normalize(record: dict) -> dict:
     text = json.dumps(record, ensure_ascii=False)
     seen: dict[str, str] = {}
     for uid in UID_RE.findall(text):
+        if uid in KEEP_UIDS:
+            continue
         if uid not in seen:
             if len(seen) >= len(PLACEHOLDER_UIDS):
                 raise RuntimeError("placeholder uid pool exhausted")

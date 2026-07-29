@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
@@ -8,7 +9,22 @@ export const metadata: Metadata = {
     "Where BattINFO comes from, what it is for, and the ecosystem it belongs to, the EMMO battery ontology, the Battery Genome, and open battery-data infrastructure.",
 };
 
-const ecosystem = [
+// Glossary link on a term's first on-page use, matching the landing page.
+const glossaryHref = `${site.reference}/pages/glossary.html`;
+function G({ children }: { children: ReactNode }) {
+  return (
+    <a
+      href={glossaryHref}
+      target="_blank"
+      rel="noreferrer"
+      className="text-brandtext underline hover:text-brandtext"
+    >
+      {children}
+    </a>
+  );
+}
+
+const ecosystem: { name: string; href: string; role: ReactNode }[] = [
   {
     name: "EMMO domain-battery",
     href: site.emmo,
@@ -32,9 +48,14 @@ const ecosystem = [
   {
     name: "Battery Data Alliance",
     href: "https://pypi.org/project/batterydf/",
-    role: "Home of the Battery Data Format (BDF), the tidy tabular layer BattINFO converts raw cycler files into.",
+    role: (
+      <>
+        Home of the Battery Data Format (<G>BDF</G>), the tidy tabular layer
+        BattINFO converts raw cycler files into.
+      </>
+    ),
   },
-] as const;
+];
 
 export default function AboutPage() {
   return (
@@ -53,9 +74,9 @@ export default function AboutPage() {
           tool or team can pick it up without asking.
         </p>
         <p>
-          We did not invent our own world. We build on open standards (EMMO,
-          JSON-LD, JSON Schema, schema.org, DCAT, PROV) and make them usable by
-          someone with a datasheet and an afternoon.
+          We did not invent our own world. We build on open standards (<G>EMMO</G>,
+          JSON-LD, JSON Schema, schema.org, <G>DCAT</G>, <G>PROV</G>) and make
+          them usable by someone with a datasheet and an afternoon.
         </p>
         <p>
           <Link href="/federation" className="font-semibold text-brandtext hover:text-brandtext">

@@ -180,35 +180,34 @@ export const showcase: {
     "title": "A cell spec",
     "tagline": "The product datasheet, as data: identity, format, chemistry, and rated properties with units that resolve to EMMO.",
     "recordType": "cell-spec",
-    "code": "from battinfo import CellSpec\n\nspec = CellSpec(\n    # In the workspace flow the IRI is minted for you at ws.save();\n    # standalone, you set it (or let publish() mint it).\n    id=\"https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\",\n    manufacturer=\"Samsung SDI\",\n    model=\"INR21700-50E\",\n    format=\"cylindrical\",\n    chemistry=\"Li-ion\",\n    positive_electrode_basis=\"NMC\",\n    negative_electrode_basis=\"graphite\",\n    properties={\n        \"nominal_capacity\": {\"value\": 5.0, \"unit\": \"Ah\"},\n        \"nominal_voltage\": {\"value\": 3.6, \"unit\": \"V\"},\n        \"mass\": {\"value\": 68.0, \"unit\": \"g\"},\n    },\n    source={\"type\": \"datasheet\", \"retrieved_at\": 1750000000},\n)\nrecord = spec.to_record()",
+    "code": "from battinfo import CellSpec\n\nspec = CellSpec(\n    # The published flagship IRI: dereference it (Accept: application/ld+json)\n    # to get this exact record. In the workspace flow the IRI is minted for\n    # you at ws.save(); standalone, you set it (or let publish() mint it).\n    id=\"https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0\",\n    manufacturer=\"A123\",\n    model=\"ANR26650M1-B\",\n    format=\"cylindrical\",\n    chemistry=\"Li-ion\",\n    positive_electrode_basis=\"LFP\",\n    properties={\n        \"nominal_capacity\": {\"value\": 2.5, \"unit\": \"Ah\"},\n        \"nominal_voltage\": {\"value\": 3.3, \"unit\": \"V\"},\n        \"mass\": {\"value\": 76.0, \"unit\": \"g\"},\n    },\n    source={\"type\": \"datasheet\", \"retrieved_at\": 1750000000},\n)\nrecord = spec.to_record()",
     "record": {
       "schema_version": "0.2.0",
       "cell_spec": {
-        "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-        "short_id": "7d9k2m",
-        "identifier": "cell-spec:7d9k-2m4p-8t3x-6nq5",
-        "name": "Samsung SDI INR21700-50E",
-        "model": "INR21700-50E",
+        "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
+        "short_id": "pge5we",
+        "identifier": "cell-spec:pge5-wer6-2q82-v9k0",
+        "name": "A123 ANR26650M1-B",
+        "model": "ANR26650M1-B",
         "manufacturer": {
           "type": "Organization",
-          "name": "Samsung SDI"
+          "name": "A123"
         },
         "cell_format": "cylindrical",
         "chemistry": "Li-ion",
-        "positive_electrode_basis": "NMC",
-        "negative_electrode_basis": "graphite"
+        "positive_electrode_basis": "LFP"
       },
       "properties": {
         "nominal_capacity": {
-          "value": 5.0,
+          "value": 2.5,
           "unit": "Ah"
         },
         "nominal_voltage": {
-          "value": 3.6,
+          "value": 3.3,
           "unit": "V"
         },
         "mass": {
-          "value": 68.0,
+          "value": 76.0,
           "unit": "g"
         }
       },
@@ -224,24 +223,23 @@ export const showcase: {
         "BatteryCellSpecification",
         "schema:CreativeWork"
       ],
-      "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-      "schema:identifier": "7d9k-2m4p-8t3x-6nq5",
-      "schema:name": "Samsung SDI INR21700-50E",
-      "schema:model": "INR21700-50E",
+      "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
+      "schema:identifier": "pge5-wer6-2q82-v9k0",
+      "schema:name": "A123 ANR26650M1-B",
+      "schema:model": "ANR26650M1-B",
       "schema:manufacturer": {
         "@type": "schema:Organization",
-        "schema:name": "Samsung SDI"
+        "schema:name": "A123"
       },
-      "schema:url": "https://www.battery-genome.org/registry/spec/7d9k-2m4p-8t3x-6nq5",
+      "schema:url": "https://www.battery-genome.org/registry/spec/pge5-wer6-2q82-v9k0",
       "isDescriptionFor": {
         "@type": [
           "BatteryCell",
           "CylindricalBattery",
           "LithiumIonBattery",
-          "LithiumIonNickelManganeseCobaltOxideBattery",
-          "LithiumIonGraphiteBattery"
+          "LithiumIonIronPhosphateBattery"
         ],
-        "skos:prefLabel": "Samsung SDI INR21700-50E"
+        "skos:prefLabel": "A123 ANR26650M1-B"
       },
       "schema:schemaVersion": "0.2.0",
       "hasProperty": [
@@ -253,7 +251,7 @@ export const showcase: {
           "skos:prefLabel": "NominalCapacity",
           "hasNumericalPart": {
             "@type": "RealData",
-            "hasNumberValue": 5.0
+            "hasNumberValue": 2.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
         },
@@ -265,7 +263,7 @@ export const showcase: {
           "skos:prefLabel": "NominalVoltage",
           "hasNumericalPart": {
             "@type": "RealData",
-            "hasNumberValue": 3.6
+            "hasNumberValue": 3.3
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
         },
@@ -277,16 +275,13 @@ export const showcase: {
           "skos:prefLabel": "Mass",
           "hasNumericalPart": {
             "@type": "RealData",
-            "hasNumberValue": 68.0
+            "hasNumberValue": 76.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
         }
       ],
       "hasPositiveElectrode": {
-        "@type": "LithiumNickelManganeseCobaltOxideElectrode"
-      },
-      "hasNegativeElectrode": {
-        "@type": "GraphiteElectrode"
+        "@type": "LithiumIronPhosphateElectrode"
       },
       "dcterms:source": {
         "@type": "prov:Entity",

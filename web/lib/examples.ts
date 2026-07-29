@@ -54,4 +54,7 @@ print(result.canonical_iri)
 
 export const installSnippet = `python -m venv .venv
 # until the 0.8 release lands on PyPI, install from source:
-.venv/bin/pip install git+https://github.com/BIG-MAP/BattINFO.git`;
+# macOS / Linux:
+.venv/bin/pip install git+https://github.com/BIG-MAP/BattINFO.git
+# Windows (PowerShell / cmd):
+.venv\\Scripts\\pip install git+https://github.com/BIG-MAP/BattINFO.git`;
