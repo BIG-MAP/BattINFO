@@ -48,7 +48,16 @@ export default function PublishPage() {
           </p>
           <div className="mt-6 rounded-lg border border-border bg-surface px-4 py-3">
             <p className="font-mono text-sm text-brandtext">
-              raw files → BDF tables → {provenanceChain} → JSON-LD → DOI + registry
+              raw files →{" "}
+              <a
+                href={`${site.reference}/pages/glossary.html`}
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-brandtext"
+              >
+                BDF
+              </a>{" "}
+              tables → {provenanceChain} → JSON-LD → DOI + registry
             </p>
           </div>
           <div className="mt-6">
