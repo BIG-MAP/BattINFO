@@ -512,7 +512,8 @@ def _agent_from_record_contributor(c: dict) -> dict:
     ORCID and a plain affiliation name.
     """
     same_as = str(c.get("same_as") or "")
-    orcid = same_as.rsplit("/", 1)[-1] if "orcid.org" in same_as else None
+    tail = same_as.rstrip("/").rsplit("/", 1)[-1]
+    orcid = tail if _ORCID_RE.match(tail) else None
     affiliation = c.get("affiliation")
     if isinstance(affiliation, dict):
         affiliation = affiliation.get("name")
