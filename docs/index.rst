@@ -40,7 +40,7 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
       .. code-block:: json
 
          {
-           "schema_version": "0.1.0",
+           "schema_version": "0.2.0",
            "cell_spec": {
              "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
              "name": "A123 ANR26650M1-B",

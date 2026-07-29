@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "test_spec": {
     "id": "https://w3id.org/battinfo/spec/wh05-wy9s-3f37-5tvv",
     "short_id": "wh05wy",

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "0.2.0",
   "cell_spec": {
     "id": "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r",
     "name": "ExampleLab COIN-LFP-2032",

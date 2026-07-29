@@ -423,7 +423,7 @@ export const jsonldGallery: {
     "sourceFile": "examples/test/test-5p7v-2n8k-4m3t-6q9r.json",
     "highlight": "The test points at the physical cell it ran on (prov:used), so every number stays attached to its subject.",
     "record": {
-      "schema_version": "0.1.0",
+      "schema_version": "0.2.0",
       "test": {
         "id": "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r",
         "short_id": "5p7v2n",

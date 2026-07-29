@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "separator_spec": {
     "id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
     "short_id": "wgym4x",

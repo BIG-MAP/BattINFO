@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "0.2.0",
   "cell_spec": {
     "id": "https://w3id.org/battinfo/spec/3f7k-2m9r-4t6p-8v5q",
     "name": "ExampleLab POUCH-SL-LFP-001",

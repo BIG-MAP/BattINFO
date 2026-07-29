@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "0.2.0",
   "cell_spec": {
     "id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m",
     "name": "ExampleLab CYL-LFP-18650",
