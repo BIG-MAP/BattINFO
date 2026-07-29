@@ -369,3 +369,54 @@ def test_test_protocol_safety_schema_accepts_temperature() -> None:
     assert "min_temperature_degC" in safety_props
     # A temperature limit now validates against the safety sub-schema.
     jsonschema.validate({"max_temperature_degC": 60}, schema["properties"]["safety"])
+
+
+# ── Item 7: an identical re-save reads as [unchanged], not [updated] ─────────────
+
+def test_identical_resave_reports_unchanged(tmp_path: Path, capsys) -> None:
+    ws = _new_ws(tmp_path)
+    ws.save()
+    capsys.readouterr()  # drop the first save's output
+    ws.save()  # byte-identical re-save
+    out = capsys.readouterr().out
+    assert "[unchanged]" in out
+    assert "[updated]" not in out
+
+
+# ── Item 8: error-text fixes (phantom command + key-request URL) ────────────────
+
+def test_save_gate_message_uses_real_command() -> None:
+    from jsonschema import ValidationError
+
+    from battinfo.validate.schema import _enhance_message
+
+    err = ValidationError(
+        "Additional properties are not allowed",
+        validator="additionalProperties",
+        path=["properties"],
+    )
+    msg = _enhance_message(err)
+    assert "battinfo properties list" in msg
+    assert "battinfo specs list" not in msg
+
+
+def test_no_phantom_specs_list_command_in_source() -> None:
+    src = ROOT / "src" / "battinfo"
+    offenders = [
+        p
+        for p in src.rglob("*.py")
+        if "battinfo specs list" in p.read_text(encoding="utf-8")
+    ]
+    assert not offenders, f"phantom command 'battinfo specs list' still referenced in {offenders}"
+
+
+def test_publish_no_key_error_points_at_battinfo_publish(tmp_path: Path, monkeypatch) -> None:
+    for var in ("BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID",
+                "BATTINFO_REGISTRY_URL"):
+        monkeypatch.delenv(var, raising=False)
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    with pytest.raises(RuntimeError) as exc:
+        ws.submit(registry_url="https://registry.example")
+    msg = str(exc.value)
+    assert "https://battinfo.org/publish" in msg
+    assert "battery-genome.org" not in msg

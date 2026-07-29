@@ -2468,6 +2468,10 @@ class AuthoringWorkspace:
                 rid = item.get("id", "") or ""
                 name = name_by_id.get(rid) or (rid.rsplit("/", 1)[-1] if rid else "?")
                 status = item.get("status", "")
+                # A same-IRI upsert whose content is unchanged is a no-op, not an
+                # update: report it honestly so an identical re-save reads as such.
+                if status == "updated" and item.get("content_changed") is False:
+                    status = "unchanged"
                 rel = self._rel_to_root(item.get("path", ""))
                 print(f"  {label:11} {name[:36]:36} [{status}]  {rel}")
             if len(items) > 10:
@@ -3242,8 +3246,8 @@ class AuthoringWorkspace:
         if not key:
             raise RuntimeError(
                 "api_key is required. Run ws.login(api_key=...) first, or set "
-                "BATTINFO_API_KEY. No self-service key page exists yet - request "
-                "a key from the registry operator (https://www.battery-genome.org)."
+                "BATTINFO_API_KEY. No self-service key page exists yet - see "
+                "https://battinfo.org/publish for how to request one."
             )
         if not wid:
             raise RuntimeError(

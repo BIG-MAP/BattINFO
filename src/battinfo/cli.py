@@ -3996,7 +3996,7 @@ def specs_show(
     rows = _all_specs_data()
     match = next((r for r in rows if r["name"] == name), None)
     if match is None:
-        typer.echo(f"Unknown spec '{name}'. Run 'battinfo specs list' to see all valid names.")
+        typer.echo(f"Unknown spec '{name}'. Run 'battinfo properties list' to see all valid names.")
         raise typer.Exit(code=1)
 
     units = SPEC_UNIT_COMPATIBILITY.get(name)

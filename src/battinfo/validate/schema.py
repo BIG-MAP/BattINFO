@@ -119,7 +119,7 @@ def _validator_code(error: ValidationError) -> str:
 def _enhance_message(error: ValidationError) -> str:
     msg = error.message
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
-        msg += " Run 'battinfo specs list' to see all valid property names."
+        msg += " Run 'battinfo properties list' to see all valid property names."
     return msg
 
 
