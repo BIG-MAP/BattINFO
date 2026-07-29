@@ -1,0 +1,89 @@
+# Verifies that the install commands documented for end users (README.md,
+# QUICKSTART.md, docs/pages/getting-started.rst) still succeed in a clean
+# virtual environment with stock pip against live PyPI. This complements the
+# uv.lock-based CI, which never exercises the plain-pip resolver a first-time
+# user hits.
+name: install-smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - pyproject.toml
+      - README.md
+      - QUICKSTART.md
+      - docs/pages/getting-started.rst
+      - .github/workflows/install-smoke.yml
+  pull_request:
+    paths:
+      - pyproject.toml
+      - README.md
+      - QUICKSTART.md
+      - docs/pages/getting-started.rst
+      - .github/workflows/install-smoke.yml
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: pip install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: pip install -e .
+        shell: bash
+        run: |
+          set -euxo pipefail
+          v="$RUNNER_TEMP/venv-core"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install -e .
+          "$py" -c "import battinfo; print(battinfo.__version__)"
+
+      - name: pip install -e ".[dev]"
+        shell: bash
+        run: |
+          set -euxo pipefail
+          v="$RUNNER_TEMP/venv-dev"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install -e ".[dev]"
+          "$py" -c "import battinfo; print(battinfo.__version__)"
+
+      # Allowed to fail until batterydf 0.2 is published on PyPI. The processing
+      # extra pins batterydf>=0.2,<0.3 (see pyproject.toml); PyPI currently ships
+      # only 0.1.0, so plain pip cannot resolve this extra. README.md and
+      # QUICKSTART.md document the git-source stopgap in the meantime. Remove
+      # continue-on-error once batterydf 0.2.x is on PyPI.
+      - name: pip install -e ".[processing]"
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -euxo pipefail
+          v="$RUNNER_TEMP/venv-processing"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install -e ".[processing]"
+          "$py" -c "import battinfo; print(battinfo.__version__)"
+
+      - name: pip install git+https://github.com/BIG-MAP/BattINFO.git
+        shell: bash
+        run: |
+          set -euxo pipefail
+          v="$RUNNER_TEMP/venv-git"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install "git+https://github.com/BIG-MAP/BattINFO.git"
+          "$py" -c "import battinfo; print(battinfo.__version__)"

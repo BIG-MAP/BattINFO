@@ -23,12 +23,24 @@ the guided tour is on the same page.
 - Python 3.11+
 - A terminal
 
+BattINFO is not on PyPI until the 0.8 release. Until then, install from source
+into a virtual environment:
+
 ```bash
-pip install battinfo
+python -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
+pip install "git+https://github.com/BIG-MAP/BattINFO.git"
 ```
 
-> Converting raw cycler files (`ws.convert()`) needs the BDF converter:
-> `pip install "battinfo[processing]"`.
+<!-- 0.8 release: replace the block above with  pip install battinfo -->
+
+> Converting raw cycler files (`ws.convert()`) needs the BDF converter,
+> distributed as `batterydf`. It is not yet on PyPI, so the `battinfo[processing]`
+> extra cannot resolve; install the converter and plotting libraries directly:
+>
+> ```bash
+> pip install "git+https://github.com/battery-data-alliance/battery-data-format.git" matplotlib plotly
+> ```
 
 ---
 
@@ -89,15 +101,26 @@ jsonld = json.loads(
     Path(output["output_dir"], "index.jsonld").read_text()
 )
 print(jsonld["@type"])
-# ["BatteryCell", "CylindricalBattery", "LithiumIonBattery", "schema:ProductModel"]
+# ['BatteryCellSpecification', 'schema:CreativeWork']
 
 print(jsonld["schema:name"])     # Panasonic NCR18650B
 print(jsonld["schema:size"])     # R18650
 ```
 
-BattINFO automatically stacks EMMO types based on the cell's format and chemistry. A cylindrical Li-ion cell is simultaneously `BatteryCell`, `CylindricalBattery`, and `LithiumIonBattery` — no manual annotation needed.
+A cell spec is an *information entity* — a datasheet as data — not the physical
+cell it describes. So its `@type` is `BatteryCellSpecification` (an EMMO
+information object) stacked with `schema:CreativeWork`, and an `isDescriptionFor`
+link points from the spec to the cell type it specifies. The EMMO type stacking
+that describes the physical cell itself — `BatteryCell`, `CylindricalBattery`,
+`LithiumIonBattery`, and friends — lives on the cell node inside the full
+publication package, not on this resolver document. See
+[Tutorial 4](docs/guides/04-semantic-layer.ipynb) for how the spec, the cell type,
+and their EMMO types relate.
 
-The resolver JSON-LD is the lightweight document served at the cell's IRI. The full EMMO-aligned publication package — with `hasProperty` nodes for each quantitative specification — is produced when you publish (see [Tutorial 3](docs/guides/03-linked-records.ipynb)).
+The resolver JSON-LD is the lightweight document served at the cell spec's IRI.
+The full EMMO-aligned publication package — with `hasProperty` nodes for each
+quantitative specification — is produced when you publish (see
+[Tutorial 3](docs/guides/03-linked-records.ipynb)).
 
 ---
 
@@ -114,10 +137,42 @@ Canonical cell-spec records are validated with `--source-root`:
 {
   "ok": true,
   "mode": "record",
+  "policy": "default",
+  "profile": null,
+  "source_root": "examples",
+  "issue_count": 2,
   "error_count": 0,
-  "warning_count": 0
+  "warning_count": 2,
+  "errors": [],
+  "issues": [
+    {
+      "code": "semantic.value_text_only",
+      "severity": "warning",
+      "path": "properties.cycle_life",
+      "message": "'cycle_life' carries only value_text - the JSON-LD export emits numeric quantities, so this property will be OMITTED there.",
+      "hint": null,
+      "validator": "semantic",
+      "resource_type": "cell-spec",
+      "profile": null
+    },
+    {
+      "code": "shacl.unavailable",
+      "severity": "warning",
+      "path": "",
+      "message": "pyshacl is not installed; SHACL validation skipped. Install with: pip install pyshacl",
+      "hint": null,
+      "validator": "shacl",
+      "resource_type": null,
+      "profile": null
+    }
+  ]
 }
 ```
+
+The record is valid (`error_count: 0`). The two warnings are expected on a core
+install: one flags that `cycle_life` carries only free text so it is omitted from
+the numeric JSON-LD export, and the other notes that optional SHACL validation is
+skipped because `pyshacl` is not installed (it ships with `battinfo[dev]`).
 
 ---
 

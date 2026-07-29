@@ -85,14 +85,27 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 Requires **Python 3.11+**.
 
+BattINFO is not on PyPI until the 0.8 release. Until then, install from source
+into a virtual environment:
+
 ```bash
-pip install battinfo
+python -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
+pip install "git+https://github.com/BIG-MAP/BattINFO.git"
 ```
+
+<!-- 0.8 release: replace the block above with  pip install battinfo -->
 
 Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()`
 + plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]`
 (RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and
-`battinfo[dev]` (full test/lint/build toolchain).
+`battinfo[dev]` (full test/lint/build toolchain). The `processing` extra also needs
+`batterydf`, which is not yet on PyPI. Until it ships, `pip install "battinfo[processing]"`
+cannot resolve; install the processing dependencies directly instead:
+
+```bash
+pip install "git+https://github.com/battery-data-alliance/battery-data-format.git" matplotlib plotly
+```
 
 **Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
 
