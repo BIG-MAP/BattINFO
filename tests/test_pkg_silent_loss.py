@@ -231,3 +231,38 @@ def test_contributors_appear_in_preview_bundle_without_recreators(tmp_path: Path
     # emitter used to drop both while printing "Gold-standard: PASS").
     blob = json.dumps(jsonld)
     assert ORCID_A in blob and "schema:Person" in blob
+
+
+# ── Item 4: the unmapped-property walker reaches every property holder ──────────
+
+def test_unmapped_property_warns_at_every_nested_holder() -> None:
+    from battinfo.validate.semantic import validate_semantic_report
+
+    qty = {"value": 1.0, "unit": "1"}
+    doc = {
+        "cell_spec": {"id": "https://w3id.org/battinfo/spec/x"},
+        "positive_electrode": {
+            "property": {"bogus_electrode_prop": qty},
+            "coating": {
+                "property": {"bogus_coating_prop": qty},
+                "component": {
+                    "active_material": [{"name": "LFP", "property": {"bogus_component_prop": qty}}],
+                },
+            },
+        },
+        "housing": {
+            "case": {"property": {"bogus_case_prop": qty}},
+            "seals": [{"property": {"bogus_seal_prop": qty}}],
+            "parts": [{"type": "can", "property": {"bogus_part_prop": qty}}],
+        },
+    }
+    report = validate_semantic_report(doc, policy="publisher")
+    warned = {i.path for i in report.issues if i.code == "semantic.property_unmapped"}
+    assert warned == {
+        "positive_electrode.property.bogus_electrode_prop",
+        "positive_electrode.coating.property.bogus_coating_prop",
+        "positive_electrode.coating.component.active_material[0].property.bogus_component_prop",
+        "housing.case.property.bogus_case_prop",
+        "housing.seals[0].property.bogus_seal_prop",
+        "housing.parts[0].property.bogus_part_prop",
+    }

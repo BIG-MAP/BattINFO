@@ -823,9 +823,23 @@ def validate_semantic_report(
     # the transform's descriptor/fraction keys treated as known (they resolve
     # without the curated map). Coating properties resolve through the coating
     # term table, so electrode coatings are checked too.
+    _component_known = _component_property_terms()
+
+    def _check_props(block: Any, prefix: str) -> None:
+        """Run the mappability check on ``block['property']`` when present."""
+        if isinstance(block, Mapping) and isinstance(block.get("property"), Mapping):
+            _validate_property_mappability(
+                block["property"], issues, resource_type,
+                path_prefix=f"{prefix}.property",
+                extra_known=_component_known,
+            )
+
     for body_key in (
         "material_spec", "material",
         "electrode_spec", "electrode",
+        # Inline electrode bodies carried directly on a cell spec (not just the
+        # standalone electrode records) emit fallback terms too, so check them.
+        "positive_electrode", "negative_electrode",
         "electrolyte_spec", "electrolyte",
         "separator_spec", "separator",
         "current_collector_spec", "current_collector",
@@ -835,19 +849,27 @@ def validate_semantic_report(
         body = doc.get(body_key)
         if not isinstance(body, Mapping):
             continue
-        if isinstance(body.get("property"), Mapping):
-            _validate_property_mappability(
-                body["property"], issues, resource_type,
-                path_prefix=f"{body_key}.property",
-                extra_known=_component_property_terms(),
-            )
+        _check_props(body, body_key)
         coating = body.get("coating")
-        if isinstance(coating, Mapping) and isinstance(coating.get("property"), Mapping):
-            _validate_property_mappability(
-                coating["property"], issues, resource_type,
-                path_prefix=f"{body_key}.coating.property",
-                extra_known=_component_property_terms(),
-            )
+        if isinstance(coating, Mapping):
+            _check_props(coating, f"{body_key}.coating")
+            # Material-component nesting: coating.component.<group>[].property
+            # (active_material, binder, additive, ...). Each item is a holder whose
+            # property block rides the same generic emitter.
+            component = coating.get("component")
+            if isinstance(component, Mapping):
+                for group, items in component.items():
+                    if not isinstance(items, list):
+                        continue
+                    for idx, item in enumerate(items):
+                        _check_props(item, f"{body_key}.coating.component.{group}[{idx}]")
+        # Housing sub-parts each carry an independent property block that would
+        # otherwise emit unlabeled fallback terms with no warning.
+        _check_props(body.get("case"), f"{body_key}.case")
+        for idx, seal in enumerate(body.get("seals") or []):
+            _check_props(seal, f"{body_key}.seals[{idx}]")
+        for idx, part in enumerate(body.get("parts") or []):
+            _check_props(part, f"{body_key}.parts[{idx}]")
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):
