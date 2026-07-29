@@ -5118,6 +5118,12 @@ class AuthoringWorkspace:
                             _fallback.append(_property_value(_name, _val, "conditions"))
                     if _props:
                         snode["hasProperty"] = _props
+                    # Global safety limits (max_voltage_V, max_temperature_degC, ...)
+                    # are part of the protocol; emit each as a labelled PropertyValue
+                    # so they are not dropped from the publication graph.
+                    for _sk, _sv in (raw.get("safety") or {}).items():
+                        if _sv is not None:
+                            _fallback.append(_property_value(str(_sk), _sv, "safety"))
                     if _fallback:
                         snode["schema:additionalProperty"] = _fallback
                     # Actionable layer: link runnable protocol files as distributions.

@@ -606,6 +606,13 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         people = contributor_to_jsonld(record.get("contributor"))
         if people is not None:
             node["schema:contributor"] = people
+        # Record-level free-text notes were never emitted; carry them as
+        # schema:comment so authored context is not silently dropped.
+        notes = record.get("notes")
+        if isinstance(notes, list):
+            note_texts = [str(n) for n in notes if isinstance(n, str) and n.strip()]
+            if note_texts:
+                node["schema:comment"] = note_texts[0] if len(note_texts) == 1 else note_texts
     if context == "url" and isinstance(node.get("@context"), dict):
         # Swap the inline records context for the hosted reference. Only the
         # records-context nodes (a dict @context) are affected; material/component

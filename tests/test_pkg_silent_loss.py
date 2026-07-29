@@ -266,3 +266,106 @@ def test_unmapped_property_warns_at_every_nested_holder() -> None:
         "housing.seals[0].property.bogus_seal_prop",
         "housing.parts[0].property.bogus_part_prop",
     }
+
+
+# ── Item 5: out-of-vocabulary hardware part keeps its label ─────────────────────
+
+def test_unknown_hardware_part_preserves_label_and_warns() -> None:
+    import warnings
+
+    from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
+
+    housing = {"parts": [{"type": "vent", "material": "Al"},
+                         {"type": "wave spring", "material": "steel"}]}
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        relations = _descriptor_housing_to_jsonld(housing, "cylindrical")
+
+    blob = json.dumps(relations)
+    # The authored strings survive (regression: they used to vanish under schema:Thing).
+    assert "vent" in blob and "wave spring" in blob
+    assert '"skos:prefLabel": "vent"' in blob
+    assert '"schema:additionalType": "wave spring"' in blob
+    # And an unmapped warning fires for each.
+    messages = [str(w.message) for w in caught]
+    assert sum("semantic.hardware_part_unmapped" in m for m in messages) == 2
+
+
+# ── Item 6: close the audited silent drops ──────────────────────────────────────
+
+def test_separator_manufacturer_and_product_id_are_emitted() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_separator_to_jsonld
+
+    node = _descriptor_separator_to_jsonld(
+        {"material": "PE", "manufacturer": "Celgard", "product_id": "2500"}
+    )
+    blob = json.dumps(node)
+    assert "Celgard" in blob  # supplier traceability, previously dropped
+    assert node["schema:productID"] == "2500"
+
+
+def test_record_notes_are_emitted_as_comment() -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    rec = {
+        "schema_version": "0.2.0",
+        "cell_spec": {"id": "https://w3id.org/battinfo/spec/x", "name": "n",
+                      "kind": "BatteryCellSpecification"},
+        "notes": ["handled in a dry room", "second note"],
+    }
+    node = record_to_jsonld(rec, "cell-spec")
+    assert node["schema:comment"] == ["handled in a dry room", "second note"]
+
+
+def test_protocol_safety_reaches_publication_graph(tmp_path: Path) -> None:
+    ws = _new_ws(tmp_path)
+    tp = TestSpec(name="CCCV", kind="cycling", experiment=["Charge at 0.5C until 4.2V"],
+                  cycles=10, safety={"max_voltage_V": 4.3, "max_temperature_degC": 60})
+    ws.add("test", cell="SN-1", data="f.csv", spec=tp)
+    ws.save()
+
+    jsonld = ws._build_zenodo_jsonld(
+        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.X",
+        record_url="https://zenodo.org/records/X", data_filenames=[], title="t", description="d",
+    )
+    proto = next(n for n in jsonld["@graph"] if "prov:Plan" in (n.get("@type") or []))
+    safety = {
+        p["schema:name"]: p["schema:value"]
+        for p in proto.get("schema:additionalProperty", [])
+        if p.get("schema:propertyID") == "safety"
+    }
+    assert safety == {"max_voltage_V": 4.3, "max_temperature_degC": 60}
+
+
+def test_conformance_deviation_step_is_preserved(tmp_path: Path) -> None:
+    from battinfo.bundle import Deviation
+
+    # `step` (the generated-model field name) is preserved as the canonical step_index.
+    assert Deviation.from_record({"category": "other", "step": 4}).step_index == 4
+    assert Deviation.from_record({"category": "other", "step": "7"}).step_index == 7
+
+    # End-to-end through ws.add(..., conformance=...): the step survives the save.
+    ws = _new_ws(tmp_path)
+    ws.add(
+        "test", type="cycling", cell="SN-1", data="f.csv",
+        conformance={"status": "non-conformant",
+                     "deviations": [{"category": "operator_intervention", "step": 3}]},
+    )
+    ws.save()
+    test = _read_one(ws, "test")["test"]
+    dev = test["conformance"]["deviations"][0]
+    assert dev["step_index"] == 3
+
+
+def test_test_protocol_safety_schema_accepts_temperature() -> None:
+    import jsonschema
+
+    schema = json.loads(
+        (ROOT / "src" / "battinfo" / "data" / "schemas" / "test-protocol.schema.json")
+        .read_text(encoding="utf-8")
+    )
+    safety_props = schema["properties"]["safety"]["properties"]
+    assert "max_temperature_degC" in safety_props
+    assert "min_temperature_degC" in safety_props
+    # A temperature limit now validates against the safety sub-schema.
+    jsonschema.validate({"max_temperature_degC": 60}, schema["properties"]["safety"])
