@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "dataset": {
     "id": "https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17",
     "short_id": "nns1gh",

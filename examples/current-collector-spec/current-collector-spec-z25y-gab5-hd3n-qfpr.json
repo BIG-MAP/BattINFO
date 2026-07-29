@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "current_collector_spec": {
     "id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr",
     "short_id": "z25yga",

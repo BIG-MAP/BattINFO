@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "electrode_spec": {
     "id": "https://w3id.org/battinfo/spec/a86t-cxgj-c8h4-2y7b",
     "short_id": "a86tcx",

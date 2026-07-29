@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "electrode_spec": {
     "id": "https://w3id.org/battinfo/spec/ck8b-r1dz-h8my-3k05",
     "short_id": "ck8br1",
