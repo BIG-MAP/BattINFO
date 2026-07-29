@@ -19,7 +19,6 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo import TestSpec, quantity  # noqa: E402
 from battinfo.ws import AuthoringWorkspace  # noqa: E402
 
-
 # ── shared authoring helpers ───────────────────────────────────────────────────
 
 def _new_ws(tmp_path: Path) -> AuthoringWorkspace:
@@ -304,16 +303,23 @@ def test_separator_manufacturer_and_product_id_are_emitted() -> None:
     assert node["schema:productID"] == "2500"
 
 
-def test_record_notes_are_emitted_as_comment() -> None:
-    from battinfo.jsonld import record_to_jsonld
+def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
+    ws = _new_ws(tmp_path)
+    ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")
+    ws.save()
 
-    rec = {
-        "schema_version": "0.2.0",
-        "cell_spec": {"id": "https://w3id.org/battinfo/spec/x", "name": "n",
-                      "kind": "BatteryCellSpecification"},
-        "notes": ["handled in a dry room", "second note"],
-    }
-    node = record_to_jsonld(rec, "cell-spec")
+    # Plant notes on the saved cell-spec record, then re-emit the publication graph.
+    spec_path = next((ws._ws.source_root / "cell-spec").glob("*.json"))
+    rec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec_id = rec["cell_spec"]["id"]
+    rec["notes"] = ["handled in a dry room", "second note"]
+    spec_path.write_text(json.dumps(rec), encoding="utf-8")
+
+    jsonld = ws._build_zenodo_jsonld(
+        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.X",
+        record_url="https://zenodo.org/records/X", data_filenames=[], title="t", description="d",
+    )
+    node = next(n for n in jsonld["@graph"] if n.get("@id") == spec_id)
     assert node["schema:comment"] == ["handled in a dry room", "second note"]
 
 
