@@ -1581,7 +1581,7 @@ class AuthoringWorkspace:
         name: str | None = None,
         affiliation: str | None = None,
         clear: bool = False,
-    ) -> dict | None:
+    ) -> dict | list[dict] | None:
         """Credit a contributor (by ORCID) on everything this workspace publishes.
 
         Contributors accumulate: call this once per author and each is added, in

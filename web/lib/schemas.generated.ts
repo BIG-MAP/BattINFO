@@ -7342,6 +7342,18 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "null"
               ]
             },
+            "max_temperature_degC": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "min_temperature_degC": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
             "delay_s": {
               "type": [
                 "number",
