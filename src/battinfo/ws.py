@@ -7409,6 +7409,47 @@ def _journaled_submit(
     return outcome
 
 
+def _registry_conflict_detail(exc: Exception) -> dict | None:
+    """Detect a registry 409 conflict, returning its structured detail (or ``{}``).
+
+    Prefers the parsed HTTP status code and JSON body carried by
+    ``RegistryClientError`` (``status_code`` + ``response_body``); the registry
+    declares the 409 body with ``keys`` / ``existing_id`` / ``existing_status`` /
+    ``context``. Falls back to a bare ``"409"`` substring match only when neither
+    the status code nor a parseable body is available (a plain ``RuntimeError``).
+
+    Returns:
+        the parsed conflict detail dict (``{}`` when the status says 409 but the
+        body is absent/opaque), or ``None`` when this is not a conflict.
+    """
+    status = getattr(exc, "status_code", None)
+    body = getattr(exc, "response_body", None)
+    detail: dict | None = None
+    if isinstance(body, str) and body.strip():
+        try:
+            parsed = json.loads(body)
+        except (ValueError, TypeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            # FastAPI wraps HTTPException(detail=...) under a "detail" key; accept
+            # either the wrapped or the bare shape (declared registry-side).
+            inner = parsed.get("detail")
+            candidate = inner if isinstance(inner, dict) else parsed
+            if isinstance(candidate, dict) and any(
+                candidate.get(k) is not None
+                for k in ("existing_id", "existing_status", "keys")
+            ):
+                detail = candidate
+    if status == 409:
+        return detail if detail is not None else {}
+    if detail is not None:
+        return detail
+    # Last-resort fallback: status code and structured body both unavailable.
+    if "409" in str(exc):
+        return {}
+    return None
+
+
 def _do_submit(
     payload: dict,
     url: str,
@@ -7456,10 +7497,10 @@ def _do_submit(
                     "status": status, "iri": iri, "error": None, "result": result,
                     "version_bumped": bumped_version}
         except RuntimeError as exc:
-            # Prefer the structured status code (RegistryClientError.status_code) over matching
-            # the string "409", which could appear anywhere in an error/response body.
-            is_conflict = getattr(exc, "status_code", None) == 409 or "409" in str(exc)
-            if attempt == 0 and is_conflict:
+            # Parse the structured 409 (status code + JSON body) over matching the
+            # string "409", which could appear anywhere in an error/response body.
+            conflict = _registry_conflict_detail(exc)
+            if attempt == 0 and conflict is not None:
                 # The registry already holds a record for this identity. It de-duplicates an
                 # identical re-submission on its side, so a 409 here means the content genuinely
                 # differs — bump source_version and retry as a new version. This is surfaced
@@ -7470,7 +7511,10 @@ def _do_submit(
                 payload["source_version"] = bumped_version
                 if "resource" in payload:
                     payload["resource"]["source_version"] = bumped_version  # type: ignore[index]
-                print(f"  {title}  [conflict -- retrying as version {bumped_version}]")
+                # Name the conflicting record when the registry says which one.
+                _existing = conflict.get("existing_id") or conflict.get("existing_status")
+                _hint = f" (conflicts with {_existing})" if _existing else ""
+                print(f"  {title}  [conflict{_hint} -- retrying as version {bumped_version}]")
                 continue
             print(f"  ERROR: {title} -- {exc}")
             return {"title": title, "source_local_id": source_local_id, "ok": False,

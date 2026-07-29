@@ -420,3 +420,55 @@ def test_publish_no_key_error_points_at_battinfo_publish(tmp_path: Path, monkeyp
     msg = str(exc.value)
     assert "https://battinfo.org/publish" in msg
     assert "battery-genome.org" not in msg
+
+
+# ── Item 9: registry conflict is detected from the structured 409, not a string ─
+
+def test_registry_conflict_detail_parses_status_and_body() -> None:
+    from battinfo.api._registry import RegistryClientError
+    from battinfo.ws import _registry_conflict_detail
+
+    body = json.dumps({"detail": {"keys": {"model": "Y"}, "existing_id": "spec/abc",
+                                  "existing_status": "validated", "context": "cell_spec"}})
+    exc = RegistryClientError("Registry returned HTTP 409", status_code=409, response_body=body)
+    detail = _registry_conflict_detail(exc)
+    assert detail is not None
+    assert detail["existing_id"] == "spec/abc"
+    assert detail["existing_status"] == "validated"
+
+    # A non-conflict client error is not treated as a conflict.
+    other = RegistryClientError("bad request", status_code=400, response_body='{"detail": "nope"}')
+    assert _registry_conflict_detail(other) is None
+
+    # String fallback still works when neither status nor body is available.
+    assert _registry_conflict_detail(RuntimeError("boom 409 boom")) == {}
+    assert _registry_conflict_detail(RuntimeError("all good")) is None
+
+
+def test_do_submit_retries_on_structured_409(monkeypatch) -> None:
+    import battinfo.ws as ws_module
+    from battinfo.api._registry import RegistryClientError
+
+    attempts = {"n": 0}
+    seen_versions: list = []
+
+    def fake(payload, *, registry_base_url, api_key, **kw):
+        attempts["n"] += 1
+        seen_versions.append(payload.get("source_version"))
+        if attempts["n"] == 1:
+            raise RegistryClientError(
+                "Registry returned HTTP 409",
+                status_code=409,
+                response_body=json.dumps({"detail": {"existing_id": "spec/abc",
+                                                      "existing_status": "validated"}}),
+            )
+        return {"response": {"status": "validated", "resources": [{"canonical_iri": "spec/xyz"}]}}
+
+    monkeypatch.setattr("battinfo.api.submit_publication_package", fake)
+    outcome = ws_module._do_submit(
+        {"source_version": "v1", "resource": {"source_version": "v1"}},
+        "https://r", "k", "T",
+    )
+    assert attempts["n"] == 2  # retried after the structured 409
+    assert outcome["ok"] and outcome["version_bumped"] == "v1-v2"
+    assert seen_versions == ["v1", "v1-v2"]  # bumped on the retry
