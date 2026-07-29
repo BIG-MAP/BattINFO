@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from datetime import datetime, timezone
 from functools import lru_cache
 from importlib import resources
@@ -706,8 +707,23 @@ def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
     relations: dict[str, Any] = {}
 
     def _part_node(part: dict[str, Any]) -> dict[str, Any]:
-        type_name = _HARDWARE_PART_TYPE.get(str(part.get("type")), "schema:Thing")
-        node: dict[str, Any] = {"@type": type_name}
+        raw_type = str(part.get("type") or "").strip()
+        mapped = _HARDWARE_PART_TYPE.get(raw_type)
+        node: dict[str, Any] = {"@type": mapped or "schema:Thing"}
+        if mapped is None and raw_type:
+            # An out-of-vocabulary part (e.g. "vent", "wave spring") has no EMMO
+            # class yet. Preserve the authored label instead of erasing it, and
+            # warn - matching the ConventionalProperty fallback pattern.
+            node["skos:prefLabel"] = raw_type
+            node["schema:additionalType"] = raw_type
+            warnings.warn(
+                f"semantic.hardware_part_unmapped: housing part type {raw_type!r} has "
+                "no curated EMMO class - it is emitted as schema:Thing carrying the "
+                "authored label (skos:prefLabel / schema:additionalType) and will not "
+                "survive a round-trip as a typed part. File a mapping in "
+                "assets/mappings/domain-battery.",
+                stacklevel=2,
+            )
         if part.get("material"):
             node["schema:material"] = part["material"]
         if part.get("coating"):
@@ -1419,6 +1435,9 @@ def _descriptor_separator_to_jsonld(separator: dict[str, Any] | None) -> dict[st
     node: dict[str, Any] = {"@type": sep_type}
     if mat_name:
         node["schema:name"] = mat_name
+    # Supplier traceability: emit manufacturer / supplier / product_id, which were
+    # otherwise dropped from the separator node.
+    _converter_component_metadata(node, separator)
     prop_nodes = _descriptor_property_nodes(separator.get("property"))
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes

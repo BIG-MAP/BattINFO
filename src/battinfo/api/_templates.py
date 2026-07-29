@@ -86,7 +86,7 @@ def template_cell_spec_draft(
         "comment": (
             "Template-generated cell-spec authoring draft. "
             "Edit values and remove entries that don't apply. "
-            "Run 'battinfo specs list' to see all available properties and their valid units."
+            "Run 'battinfo properties list' to see all available properties and their valid units."
         ),
     }
     if size_code is not None:

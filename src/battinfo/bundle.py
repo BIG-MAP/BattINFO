@@ -1921,13 +1921,25 @@ class Deviation(BaseModel):
         # Back-compat: a legacy `type` that names a known category becomes the category.
         if category is None and type_ in DEVIATION_CATEGORIES:
             category, type_ = type_, None
+        # `step` is the field name the generated (LinkML) model advertises for the
+        # protocol step where a deviation occurred; accept it as an alias for the
+        # canonical `step_index` so an authored step is not silently dropped.
+        step_index = data.get("step_index")
+        if step_index is None:
+            _step = data.get("step")
+            if isinstance(_step, bool):
+                _step = None
+            if isinstance(_step, int):
+                step_index = _step
+            elif isinstance(_step, str) and _step.strip().lstrip("-").isdigit():
+                step_index = int(_step)
         return cls(
             category=str(category or "other"),
             type=type_,
             description=data.get("description"),
             occurred_at=data.get("occurred_at"),
             duration_s=data.get("duration_s"),
-            step_index=data.get("step_index"),
+            step_index=step_index,
             impact=data.get("impact"),
         )
 

@@ -70,8 +70,8 @@ def test_set_contributor_persists(tmp_path: Path) -> None:
     block = ws.contributor(ORCID, name="Jane Researcher")
     assert block["same_as"] == ORCID_URL
     state = json.loads((tmp_path / ".battinfo" / "workspace.json").read_text())
-    assert state["contributor"]["orcid"] == ORCID
-    assert state["contributor"]["name"] == "Jane Researcher"
+    # Contributors persist as a list (accumulating model), one entry per author.
+    assert state["contributor"] == [{"orcid": ORCID, "name": "Jane Researcher"}]
 
 
 def test_contributor_reloads_from_disk(tmp_path: Path) -> None:

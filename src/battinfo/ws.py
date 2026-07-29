@@ -503,6 +503,28 @@ def _ror_url(ror: str) -> str:
     return ror if ror.startswith("http") else f"https://ror.org/{ror.rsplit('/', 1)[-1]}"
 
 
+def _agent_from_record_contributor(c: dict) -> dict:
+    """Map a record's stamped ``contributor`` Person dict to the ``_agent_node``
+    input shape ``{name, orcid, affiliation}``.
+
+    Record contributors carry the ORCID in ``same_as`` and the affiliation as a
+    nested ``Organization``; the publication emitter's agent builder wants the bare
+    ORCID and a plain affiliation name.
+    """
+    same_as = str(c.get("same_as") or "")
+    tail = same_as.rstrip("/").rsplit("/", 1)[-1]
+    orcid = tail if _ORCID_RE.match(tail) else None
+    affiliation = c.get("affiliation")
+    if isinstance(affiliation, dict):
+        affiliation = affiliation.get("name")
+    out: dict = {"name": c.get("name", "")}
+    if orcid:
+        out["orcid"] = orcid
+    if affiliation:
+        out["affiliation"] = affiliation
+    return out
+
+
 # ── Funding / project provenance ─────────────────────────────────────────────
 # A workspace may be tagged with one funding project (e.g. an EU grant agreement
 # number such as 101103997).  The grant *identifier* is authoritative and stored
@@ -1140,10 +1162,10 @@ class AuthoringWorkspace:
         # .battinfo/workspace.json on first access via _get_project()
         self._project_ref: ProjectRef | None = None
         self._project_loaded = False
-        # workspace-level contributor (ORCID); lazily loaded from
-        # .battinfo/workspace.json on first access via _get_contributor()
-        self._contributor_ref: ContributorRef | None = None
-        self._contributor_loaded = False
+        # workspace-level contributors (ORCID), in call order; lazily loaded from
+        # .battinfo/workspace.json on first access via _get_contributors().
+        self._contributors: builtins.list[ContributorRef] = []
+        self._contributors_loaded = False
 
     def _make_engine(self) -> "Workspace":
         """Construct the record engine, choosing the on-disk workspace layout.
@@ -1560,104 +1582,142 @@ class AuthoringWorkspace:
         name: str | None = None,
         affiliation: str | None = None,
         clear: bool = False,
-    ) -> dict | None:
-        """Tag this workspace with the contributor's ORCID for attribution.
+    ) -> dict | list[dict] | None:
+        """Credit a contributor (by ORCID) on everything this workspace publishes.
 
-        Once set, the contributor is added to every dataset you ``save()`` (as a
-        ``creators`` entry carrying the ORCID), so platform contributions can be
-        traced back to a person. The ORCID is the durable key; ``name`` is shown
-        in the record.
+        Contributors accumulate: call this once per author and each is added, in
+        call order, to every record you ``save()`` (as a ``Person`` carrying the
+        ORCID) and to the publication bundle. The ORCID is the durable key; a
+        second call with the same ORCID updates that person's fields in place
+        rather than adding a duplicate. ``name`` is shown in the record.
 
-        Returns the record-level ``creators`` entry (or ``None`` when cleared or
-        unset).
+        Returns the added/updated contributor's ``Person`` block, or the full list
+        of contributor blocks for the pure getter (``None`` when none are set or
+        after ``clear=True``).
 
         Examples
         --------
         ::
 
             ws.contributor("0000-0002-1825-0097", name="Jane Researcher")
-            ws.contributor()                       # show the current contributor
-            ws.contributor(affiliation="SINTEF")   # fill in / update a field
-            ws.contributor(clear=True)             # remove the contributor tag
+            ws.contributor("0000-0001-5109-3700", name="Alex Coauthor")  # both kept
+            ws.contributor()                       # show the current contributors
+            ws.contributor(affiliation="SINTEF")   # patch the most recent one
+            ws.contributor(clear=True)             # remove all contributor tags
         """
         if clear:
-            self._set_contributor(None)
-            print("Workspace contributor cleared.")
+            self._set_contributors([])
+            print("Workspace contributor(s) cleared.")
             return None
 
-        current = self._get_contributor()
+        contributors = list(self._get_contributors())
 
-        # Getter (no ORCID supplied): optionally patch name/affiliation in place.
+        # Getter (no ORCID supplied): optionally patch the most recent contributor.
         if orcid is None:
-            if current is None:
+            if not contributors:
                 print('No contributor set. Tag this workspace with your ORCID, e.g.:\n'
                       '    ws.contributor("0000-0002-1825-0097", name="Your Name")')
                 return None
             if name is not None or affiliation is not None:
-                current = ContributorRef(
-                    orcid=current.orcid,
-                    name=name if name is not None else current.name,
-                    affiliation=affiliation if affiliation is not None else current.affiliation,
+                last = contributors[-1]
+                contributors[-1] = ContributorRef(
+                    orcid=last.orcid,
+                    name=name if name is not None else last.name,
+                    affiliation=affiliation if affiliation is not None else last.affiliation,
                 )
-                self._set_contributor(current)
-            self._print_contributor(current)
-            return current.person_block()
+                self._set_contributors(contributors)
+            self._print_contributors(contributors)
+            return [c.person_block() for c in contributors]
 
-        # Setter: ORCID supplied. Preserve unspecified fields when re-setting the same id.
+        # Setter: ORCID supplied. A repeat ORCID updates in place (order preserved);
+        # a new ORCID is appended. Unspecified fields are preserved on update.
         ref = ContributorRef(orcid=_normalize_orcid(orcid), name=name, affiliation=affiliation)
-        if current is not None and current.orcid == ref.orcid:
+        existing_ix = next(
+            (i for i, c in enumerate(contributors) if c.orcid == ref.orcid), None
+        )
+        if existing_ix is not None:
+            prev = contributors[existing_ix]
             if ref.name is None:
-                ref.name = current.name
+                ref.name = prev.name
             if ref.affiliation is None:
-                ref.affiliation = current.affiliation
+                ref.affiliation = prev.affiliation
         if not ref.name:
             raise ValueError(
                 'contributor name is required, e.g. '
                 'ws.contributor("0000-0002-1825-0097", name="Your Name").'
             )
-        self._set_contributor(ref)
-        self._print_contributor(ref)
+        if existing_ix is not None:
+            contributors[existing_ix] = ref
+        else:
+            contributors.append(ref)
+        self._set_contributors(contributors)
+        self._print_contributors(contributors)
         return ref.person_block()
 
-    def _get_contributor(self) -> "ContributorRef | None":
-        """Current workspace contributor, loaded from disk on first access."""
-        if not self._contributor_loaded:
-            data = self._load_workspace_state().get("contributor")
-            self._contributor_ref = ContributorRef.from_dict(data) if data else None
-            self._contributor_loaded = True
-        return self._contributor_ref
+    def _get_contributors(self) -> builtins.list["ContributorRef"]:
+        """All workspace contributors in call order, loaded from disk on first access.
 
-    def _set_contributor(self, ref: "ContributorRef | None") -> None:
+        Accepts both the current list form and a legacy scalar ``contributor``
+        entry in workspace.json (upgraded to a single-element list on load).
+        """
+        if not self._contributors_loaded:
+            raw = self._load_workspace_state().get("contributor")
+            if isinstance(raw, list):
+                entries = raw
+            elif isinstance(raw, dict):
+                entries = [raw]  # migrate a legacy scalar entry
+            else:
+                entries = []
+            self._contributors = [
+                ContributorRef.from_dict(e) for e in entries if isinstance(e, dict)
+            ]
+            self._contributors_loaded = True
+        return self._contributors
+
+    def _get_contributor(self) -> "ContributorRef | None":
+        """The most recent workspace contributor, or ``None`` (backward-compat helper)."""
+        contributors = self._get_contributors()
+        return contributors[-1] if contributors else None
+
+    def _set_contributors(self, refs: builtins.list["ContributorRef"]) -> None:
         state = self._load_workspace_state()
-        if ref is None:
+        if not refs:
             state.pop("contributor", None)
         else:
             state.setdefault("schema_version", "0.1.0")
-            state["contributor"] = ref.to_dict()
+            state["contributor"] = [r.to_dict() for r in refs]
         self._save_workspace_state(state)
-        self._contributor_ref = ref
-        self._contributor_loaded = True
+        self._contributors = list(refs)
+        self._contributors_loaded = True
 
-    def _print_contributor(self, ref: "ContributorRef") -> None:
-        print(f"Workspace contributor: {ref.summary()}")
-        if ref.affiliation:
-            print(f"  affiliation: {ref.affiliation}")
+    def _print_contributors(self, refs: builtins.list["ContributorRef"]) -> None:
+        if len(refs) == 1:
+            print(f"Workspace contributor: {refs[0].summary()}")
+        else:
+            print(f"Workspace contributors ({len(refs)}):")
+            for r in refs:
+                print(f"  - {r.summary()}")
+        for r in refs:
+            if r.affiliation:
+                print(f"    {r.summary()} affiliation: {r.affiliation}")
         print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
 
     def _stamp_contributor(self, result: dict) -> int:
-        """Stamp the workspace contributor onto every record's ``contributor`` list.
+        """Stamp every workspace contributor onto each record's ``contributor`` list.
 
-        Mirrors :meth:`_stamp_project_funding`: the contributor (a ``Person`` with
-        the ORCID in ``same_as``) is added to the top-level ``contributor`` array of
-        every record written, so contributions of any kind are attributable.
-        Idempotent (a record already listing the ORCID is skipped, so re-saving
-        never duplicates) and back-fills records authored before the contributor was
-        set. No-op when no contributor is set.
+        Mirrors :meth:`_stamp_project_funding`: each contributor (a ``Person`` with
+        the ORCID in ``same_as``) is added, in call order, to the top-level
+        ``contributor`` array of every record written, so contributions of any kind
+        are attributable. Idempotent (a record already listing an ORCID is not
+        re-added, so re-saving never duplicates) and back-fills records authored
+        before the contributor was set. No-op when no contributor is set.
+
+        Returns the count of record files modified.
         """
-        ref = self._get_contributor()
-        if ref is None:
+        refs = self._get_contributors()
+        if not refs:
             return 0
-        person = ref.person_block()
+        people = [(r.orcid_url, r.person_block()) for r in refs]
         stamped = 0
         for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
             for item in result.get(key, []):
@@ -1671,9 +1731,18 @@ class AuthoringWorkspace:
                 contributors = record.get("contributor")
                 if not isinstance(contributors, list):
                     contributors = []
-                if any(isinstance(c, dict) and c.get("same_as") == ref.orcid_url for c in contributors):
+                present = {
+                    c.get("same_as") for c in contributors if isinstance(c, dict)
+                }
+                added = False
+                for orcid_url, person in people:
+                    if orcid_url in present:
+                        continue
+                    contributors.append(person)
+                    present.add(orcid_url)
+                    added = True
+                if not added:
                     continue
-                contributors.append(person)
                 record["contributor"] = contributors
                 _atomic_write_text(p, json.dumps(record, indent=2, ensure_ascii=False) + "\n")
                 stamped += 1
@@ -2400,6 +2469,10 @@ class AuthoringWorkspace:
                 rid = item.get("id", "") or ""
                 name = name_by_id.get(rid) or (rid.rsplit("/", 1)[-1] if rid else "?")
                 status = item.get("status", "")
+                # A same-IRI upsert whose content is unchanged is a no-op, not an
+                # update: report it honestly so an identical re-save reads as such.
+                if status == "updated" and item.get("content_changed") is False:
+                    status = "unchanged"
                 rel = self._rel_to_root(item.get("path", ""))
                 print(f"  {label:11} {name[:36]:36} [{status}]  {rel}")
             if len(items) > 10:
@@ -3174,8 +3247,8 @@ class AuthoringWorkspace:
         if not key:
             raise RuntimeError(
                 "api_key is required. Run ws.login(api_key=...) first, or set "
-                "BATTINFO_API_KEY. No self-service key page exists yet - request "
-                "a key from the registry operator (https://www.battery-genome.org)."
+                "BATTINFO_API_KEY. No self-service key page exists yet - see "
+                "https://battinfo.org/publish for how to request one."
             )
         if not wid:
             raise RuntimeError(
@@ -4591,6 +4664,29 @@ class AuthoringWorkspace:
             if _funding_grant is not None:
                 break
 
+        # Workspace contributors stamped onto the records (ws.contributor) are
+        # carried into the publication graph so the archived record credits authors
+        # without requiring creators= to be re-passed at deposit time. Merged with
+        # any explicit contributors= (which win), deduped by ORCID then by name,
+        # preserving order.
+        contributors = list(contributors or [])
+        _contrib_present = {
+            (c.get("orcid") or c.get("name")) for c in contributors if isinstance(c, dict)
+        }
+        for _recs in record_sets.values():
+            for _rec in _recs:
+                if not isinstance(_rec, dict):
+                    continue
+                for _c in _rec.get("contributor") or []:
+                    if not isinstance(_c, dict):
+                        continue
+                    _agent = _agent_from_record_contributor(_c)
+                    _key = _agent.get("orcid") or _agent.get("name")
+                    if not _key or _key in _contrib_present:
+                        continue
+                    _contrib_present.add(_key)
+                    contributors.append(_agent)
+
         _DATA_DIR = Path(__file__).parent / "data"
 
         # Shared canonical builders (also used by the resolver artifact path, so
@@ -5027,6 +5123,12 @@ class AuthoringWorkspace:
                             _fallback.append(_property_value(_name, _val, "conditions"))
                     if _props:
                         snode["hasProperty"] = _props
+                    # Global safety limits (max_voltage_V, max_temperature_degC, ...)
+                    # are part of the protocol; emit each as a labelled PropertyValue
+                    # so they are not dropped from the publication graph.
+                    for _sk, _sv in (raw.get("safety") or {}).items():
+                        if _sv is not None:
+                            _fallback.append(_property_value(str(_sk), _sv, "safety"))
                     if _fallback:
                         snode["schema:additionalProperty"] = _fallback
                     # Actionable layer: link runnable protocol files as distributions.
@@ -5427,6 +5529,28 @@ class AuthoringWorkspace:
             + [equipment_nodes[k] for k in sorted(equipment_nodes)]
             + [channel_nodes[k] for k in sorted(channel_nodes)]
         )
+
+        # ── Record-level free-text notes → schema:comment ─────────────────────
+        # Each record's top-level notes[] were dropped from the publication graph;
+        # attach them to the node carrying that record's id so authored context
+        # survives the deposit. Additive: nodes with an existing comment are left.
+        _notes_by_id: dict[str, builtins.list[str]] = {}
+        for _recs in record_sets.values():
+            for _rec in _recs:
+                if not isinstance(_rec, dict):
+                    continue
+                _notes = [n for n in (_rec.get("notes") or []) if isinstance(n, str) and n.strip()]
+                if not _notes:
+                    continue
+                for _body in _rec.values():
+                    if isinstance(_body, dict) and _body.get("id"):
+                        _notes_by_id[_body["id"]] = _notes
+                        break
+        for _node in graph:
+            _nid = _node.get("@id")
+            if _nid in _notes_by_id and "schema:comment" not in _node:
+                _texts = _notes_by_id[_nid]
+                _node["schema:comment"] = _texts[0] if len(_texts) == 1 else _texts
 
         # ── Inline context: load from records.context.json + dynamic prefLabel terms ─
         # _RECORDS_CONTEXT is generated by `python scripts/assemble_context.py`
@@ -6585,6 +6709,36 @@ class AuthoringWorkspace:
             "or 'unit/CHn'.\n" + hint
         )
 
+    def _register_test_spec(self, spec: Any) -> None:
+        """Register a ``TestSpec`` object so its protocol record is saved and its
+        minted IRI links back to the tests that reference it.
+
+        Idempotent by identity: passing the same spec object to several tests
+        registers one protocol record, and the finalizer maps the linked test's
+        ``protocol_entity`` back to it by object identity.
+        """
+        specs = self._ws.test_specs
+        if not any(existing is spec for existing in specs):
+            specs.append(spec)
+
+    def _resolve_test_protocol_ref(self, iri: str) -> tuple[str | None, str | None]:
+        """Look up a saved test-protocol record by IRI → ``(name, test_kind)``.
+
+        Both are ``None`` when no record with that IRI exists in this workspace;
+        the IRI is still accepted as a reference to a protocol published elsewhere.
+        """
+        proto_dir = self._ws.source_root / "test-protocol"
+        for path in sorted(proto_dir.glob("*.json")) if proto_dir.exists() else []:
+            try:
+                body = _read_json(path).get("test_spec") or {}
+            except (OSError, ValueError):
+                continue
+            if body.get("id") == iri:
+                return body.get("name"), (
+                    body.get("kind") or body.get("test_kind") or body.get("test_type")
+                )
+        return None, None
+
     def _add_tests(
         self,
         type: str | None = None,
@@ -6627,12 +6781,47 @@ class AuthoringWorkspace:
         test_type = type or kind
         test_spec = spec if spec is not None else protocol
         protocol_name = protocol_url = None
+        # An IRI reference (spec=<test-protocol IRI>) links the test to an
+        # already-saved protocol; stamped onto every test built below.
+        protocol_id_ref: str | None = None
+        # A TestSpec object is registered for save so its protocol record is
+        # written and its minted IRI links back to this test (same outcome as
+        # the ws.load(<draft>) path). Never reduce a spec to a name string.
+        protocol_ref = None
         if test_spec is not None:
             if isinstance(test_spec, str):
-                protocol_name = test_spec
+                # A bare string is meaningful only as a reference to a saved
+                # test-protocol (its IRI). Treating it as a display name would
+                # drop the protocol entirely and mint a test with protocol_id
+                # null, so require an IRI (resolved here) and reject anything else.
+                if test_spec.startswith(("http://", "https://")):
+                    protocol_id_ref = test_spec
+                    protocol_name, resolved_kind = self._resolve_test_protocol_ref(test_spec)
+                    if resolved_kind and not test_type:
+                        test_type = resolved_kind
+                else:
+                    raise ValueError(
+                        f"spec={test_spec!r} is not a test-protocol reference. Pass a "
+                        "battinfo.TestSpec (authored inline or via ws.load(<draft file>)), "
+                        "or the IRI of a test-protocol saved in this workspace "
+                        "(https://w3id.org/battinfo/test-protocol/...). A plain string is "
+                        "not accepted as a protocol name: it would leave the run unlinked "
+                        "to any saved protocol."
+                    )
             else:
-                protocol_name = getattr(test_spec, "name", None)
-                protocol_url = getattr(test_spec, "id", None)
+                from battinfo.bundle import TestSpec as _TestSpec  # noqa: PLC0415
+                if not isinstance(test_spec, _TestSpec):
+                    # NB: the `type` parameter shadows the builtin here, so read the
+                    # class name off the object rather than calling type().
+                    raise TypeError(
+                        f"spec= must be a battinfo.TestSpec or a test-protocol IRI, got "
+                        f"{test_spec.__class__.__name__}. Author one inline "
+                        "(battinfo.TestSpec(...)) or via ws.load(<draft file>)."
+                    )
+                protocol_ref = test_spec
+                self._register_test_spec(test_spec)
+                protocol_name = test_spec.name
+                protocol_url = test_spec.protocol_url
                 spec_kind = getattr(test_spec, "test_type", None)
                 if spec_kind is not None and not test_type:
                     test_type = spec_kind.value if hasattr(spec_kind, "value") else str(spec_kind)
@@ -6643,8 +6832,6 @@ class AuthoringWorkspace:
             )
         test_type = _normalize_test_kind(test_type)
         protocol_name = protocol_name or test_type.replace("_", " ")
-        # Link the test to its spec object so conformance binds to that spec's IRI.
-        protocol_ref = test_spec if (test_spec is not None and not isinstance(test_spec, str)) else None
 
         # Normalise / validate the conformance flag (status + optional deviations).
         conformance = _coerce_conformance(conformance)
@@ -6685,6 +6872,9 @@ class AuthoringWorkspace:
                 started_at=min(s for s, _ in _spans) if _spans else None,
                 ended_at=max(e for _, e in _spans) if _spans else None,
             )
+            if protocol_id_ref is not None:
+                # Reference by IRI: link the run to the already-saved protocol.
+                test.protocol_id = protocol_id_ref
             if channel_id is not None:
                 # The engine constructor predates equipment support; the Test
                 # model already declares the fields, so stamp them on the
@@ -6729,6 +6919,9 @@ class AuthoringWorkspace:
                 test_type, datasets, protocol_name, protocol_url, protocol_ref,
                 instrument, license, description, status,
             )
+            if protocol_id_ref is not None:
+                for t in tests:
+                    t.protocol_id = protocol_id_ref
             if channel_id is not None:
                 for t in tests:
                     t.equipment_id = equipment_id
@@ -7239,6 +7432,47 @@ def _journaled_submit(
     return outcome
 
 
+def _registry_conflict_detail(exc: Exception) -> dict | None:
+    """Detect a registry 409 conflict, returning its structured detail (or ``{}``).
+
+    Prefers the parsed HTTP status code and JSON body carried by
+    ``RegistryClientError`` (``status_code`` + ``response_body``); the registry
+    declares the 409 body with ``keys`` / ``existing_id`` / ``existing_status`` /
+    ``context``. Falls back to a bare ``"409"`` substring match only when neither
+    the status code nor a parseable body is available (a plain ``RuntimeError``).
+
+    Returns:
+        the parsed conflict detail dict (``{}`` when the status says 409 but the
+        body is absent/opaque), or ``None`` when this is not a conflict.
+    """
+    status = getattr(exc, "status_code", None)
+    body = getattr(exc, "response_body", None)
+    detail: dict | None = None
+    if isinstance(body, str) and body.strip():
+        try:
+            parsed = json.loads(body)
+        except (ValueError, TypeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            # FastAPI wraps HTTPException(detail=...) under a "detail" key; accept
+            # either the wrapped or the bare shape (declared registry-side).
+            inner = parsed.get("detail")
+            candidate = inner if isinstance(inner, dict) else parsed
+            if isinstance(candidate, dict) and any(
+                candidate.get(k) is not None
+                for k in ("existing_id", "existing_status", "keys")
+            ):
+                detail = candidate
+    if status == 409:
+        return detail if detail is not None else {}
+    if detail is not None:
+        return detail
+    # Last-resort fallback: status code and structured body both unavailable.
+    if "409" in str(exc):
+        return {}
+    return None
+
+
 def _do_submit(
     payload: dict,
     url: str,
@@ -7286,10 +7520,10 @@ def _do_submit(
                     "status": status, "iri": iri, "error": None, "result": result,
                     "version_bumped": bumped_version}
         except RuntimeError as exc:
-            # Prefer the structured status code (RegistryClientError.status_code) over matching
-            # the string "409", which could appear anywhere in an error/response body.
-            is_conflict = getattr(exc, "status_code", None) == 409 or "409" in str(exc)
-            if attempt == 0 and is_conflict:
+            # Parse the structured 409 (status code + JSON body) over matching the
+            # string "409", which could appear anywhere in an error/response body.
+            conflict = _registry_conflict_detail(exc)
+            if attempt == 0 and conflict is not None:
                 # The registry already holds a record for this identity. It de-duplicates an
                 # identical re-submission on its side, so a 409 here means the content genuinely
                 # differs — bump source_version and retry as a new version. This is surfaced
@@ -7300,7 +7534,10 @@ def _do_submit(
                 payload["source_version"] = bumped_version
                 if "resource" in payload:
                     payload["resource"]["source_version"] = bumped_version  # type: ignore[index]
-                print(f"  {title}  [conflict -- retrying as version {bumped_version}]")
+                # Name the conflicting record when the registry says which one.
+                _existing = conflict.get("existing_id") or conflict.get("existing_status")
+                _hint = f" (conflicts with {_existing})" if _existing else ""
+                print(f"  {title}  [conflict{_hint} -- retrying as version {bumped_version}]")
                 continue
             print(f"  ERROR: {title} -- {exc}")
             return {"title": title, "source_local_id": source_local_id, "ok": False,
