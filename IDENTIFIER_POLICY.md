@@ -28,15 +28,15 @@ Canonical entity IRIs use the pattern:
 https://w3id.org/battinfo/{entity-type}/{uid}
 ```
 
-Example:
+Example (the flagship cell-spec record):
 
 ```text
-https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8
+https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0
 ```
 
 Where:
 
-- `{entity-type}` is a registered BattINFO entity class (for example `cell`, `test`, `dataset`)
+- `{entity-type}` is a registered BattINFO entity class (for example `spec`, `cell`, `test`, `dataset`; see §6.1 for how the segment encodes the spec/instance duality)
 - `{uid}` is a 16-character Base32 token formatted as 4-4-4-4 (with dashes)
 
 ### 3.2 Canonical vs Accepted Forms
@@ -288,6 +288,30 @@ If versioning is required:
 - Use separate versioned resources
 - Maintain a stable base entity identifier
 
+### 11.1 Served-Artifact Immutability
+
+The shared documents served under `https://w3id.org/battinfo/` — the records
+JSON-LD context and the JSON Schemas — are versioned resources and are
+**immutable once published**:
+
+- `https://w3id.org/battinfo/context/records/v1.json`
+- `https://w3id.org/battinfo/schema/*`
+
+Once a version of these artifacts is published, its content MUST NOT change in
+place. The 373 terms defined by the `v1` records context, and each published
+schema, are frozen: consumers may cache them indefinitely and rely on their
+meaning being stable for the lifetime of that URL.
+
+A change that alters, removes, or repurposes any term — anything that could
+change how an already-published record expands or validates — MUST be shipped
+as a **new version at a new URL** (`context/records/v2.json`,
+`schema/.../v2/...`), never by editing `v1` in place. Purely additive,
+backward-compatible clarifications MAY be made within a version only when they
+cannot change the interpretation of any record already published against it;
+when in doubt, mint a new version. Existing versioned URLs remain served and
+unchanged so records that reference them keep resolving to the exact document
+they were authored against.
+
 ## 12. Governance Scope
 
 This policy applies to:
@@ -364,19 +388,19 @@ The 16-character Base32 UID:
 - Avoids semantic fragility
 - Aligns with modern infrastructure practice
 
-## 16. Cell-Type Identifier Usability Decision (v1.0)
+## 16. Cell-Spec Identifier Usability Decision (v1.0)
 
-BattINFO `cell-type` identifiers MUST remain opaque and policy-compliant:
+BattINFO cell-spec identifiers MUST remain opaque and policy-compliant:
 
-- `https://w3id.org/battinfo/cell/{uid}`
+- `https://w3id.org/battinfo/spec/{uid}` (a cell spec is a reusable description; per §6.1 every spec mints under the shared `spec/` segment, e.g. the flagship `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`)
 
 Human-readable model/manufacturer semantics MUST NOT be encoded in the canonical identifier.
 
 To make instantiation practical:
 
-- Users SHOULD resolve `cell-type` IDs via metadata queries (`manufacturer`, `model_name`, `chemistry`, `format`, properties).
+- Users SHOULD resolve cell-spec IDs via metadata queries (`manufacturer`, `model_name`, `chemistry`, `format`, properties).
 - User interfaces SHOULD display metadata labels plus canonical IRI (and optional `short_id`).
-- APIs and tooling SHOULD support lookup-first workflows that return a single canonical `cell-type` IRI before instance creation.
+- APIs and tooling SHOULD support lookup-first workflows that return a single canonical cell-spec IRI before instance creation.
 
 Rationale:
 

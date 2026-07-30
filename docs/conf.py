@@ -53,10 +53,10 @@ exclude_patterns = [
     # Maintainer-only working notes (see docs/internal/README.md) — kept in-repo
     # but never rendered into the site.
     "internal/**",
-    # GitHub-facing docs landing (the rendered site uses index.rst) and the
-    # scope note, both linked from README.md but not part of the toctree.
+    # GitHub-facing docs landing (the rendered site uses index.rst), linked
+    # from README.md but not part of the toctree. (scope.md IS rendered — it is
+    # reachable from the Reference nav.)
     "index.md",
-    "scope.md",
 ]
 
 pygments_style = "sphinx"

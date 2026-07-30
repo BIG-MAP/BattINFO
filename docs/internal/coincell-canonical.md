@@ -61,7 +61,7 @@ routed through the curated property map.
 
 > **Note (2026-06):** the legacy `coin_hardware` dict has been **retired** in favour of
 > the format-neutral `housing` model (see
-> [engineering-cell-description.md](engineering-cell-description.md)). A `coin_hardware`
+> [engineering-cell-description.md](../engineering-cell-description.md)). A `coin_hardware`
 > input is still accepted and auto-migrated into `housing` on load for back-compat.
 
 ## 4. Property-placement table (the contract)
@@ -179,7 +179,7 @@ the bundle stores a format-neutral `housing` model (coin case/spring/spacer are
 `Case` + `HardwarePart` parts; the legacy `coin_hardware` dict is auto-migrated into
 it). The importer accepts all shapes; the descriptor emits `hasCase`+`hasConstituent`,
 the converter view emits `hasCase→hasComponent`+cell `hasComponent`. See
-[engineering-cell-description.md](engineering-cell-description.md).
+[engineering-cell-description.md](../engineering-cell-description.md).
 
 ### 5.4 Measured vs conventional — **resolved by D2** (co-type when clear, else omit).
 
