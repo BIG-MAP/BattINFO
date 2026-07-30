@@ -245,3 +245,65 @@ def test_coin_housing_still_emits_case_and_hardware() -> None:
     battery = _battery_node(spec)
     assert battery["hasCase"]["schema:size"] == "R2032"
     assert battery.get("hasConstituent") is not None
+
+
+def test_cell_spec_record_with_inline_housing_classifies_as_record() -> None:
+    """A cell_spec record carrying an inline housing must emit as the record, not
+    misroute to the standalone-component (housing) emitter.
+
+    Regression: the dispatch sniffed component families (housing/electrode/...)
+    before the record's own cell_spec key, so a fully-loaded cell_spec got the
+    invalid fallback @type 'Case' and JSON-LD validation failed.
+    """
+    import warnings
+
+    from battinfo.jsonld import record_to_jsonld
+    from battinfo.validate.jsonld import validate_jsonld_report
+
+    record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {
+            "id": "https://w3id.org/battinfo/spec/eng-inline-0001",
+            "name": "Inline", "model": "M",
+            "manufacturer": {"type": "Organization", "name": "A"},
+            "cell_format": "cylindrical", "chemistry": "Li-ion",
+        },
+        "housing": {
+            "cell_format": "cylindrical",
+            "case": {"material": "steel", "size_code": "18650"},
+            "parts": [{"type": "can", "material": "steel"}, {"type": "vent"}],
+        },
+        "properties": {"nominal_capacity": {"value": 2.5, "unit": "Ah"}},
+        "provenance": {"source_type": "datasheet", "source_file": "x.pdf"},
+    }
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        out = record_to_jsonld(record, "cell-spec")
+    types = out["@type"] if isinstance(out["@type"], list) else [out["@type"]]
+    assert "BatteryCellSpecification" in types, types
+    errors = [i.message for i in validate_jsonld_report(out).issues if i.severity == "error"]
+    assert not errors, errors
+
+
+def test_housing_spec_save_gate_accepts_vent_part() -> None:
+    """A safety vent is standard cylindrical hardware; the housing-spec save gate
+    must accept parts[].type == 'vent' (previously only expressible as 'other')."""
+    from battinfo.validate.schema import schema_for_rel_path, validate_schema_data
+
+    schema = schema_for_rel_path("housing-spec.schema.json")
+    enum = schema["$defs"]["HardwarePart"]["properties"]["type"]["enum"]
+    assert "vent" in enum
+
+    record = {
+        "schema_version": "0.2.0",
+        "housing_spec": {
+            "id": "https://w3id.org/battinfo/housing-spec/aaaa-bbbb-cccc-dddd",
+            "name": "vented can", "cell_format": "cylindrical",
+            "case": {"material": "steel"},
+            "parts": [{"type": "vent"}],
+        },
+        "provenance": {"source_type": "datasheet", "source_file": "x.pdf"},
+    }
+    report = validate_schema_data(record, schema)
+    errors = [i.message for i in report.issues if i.severity == "error"]
+    assert not errors, errors

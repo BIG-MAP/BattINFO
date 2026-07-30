@@ -4833,6 +4833,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "can",
                 "spring",
                 "spacer",
+                "vent",
                 "other"
               ]
             },
