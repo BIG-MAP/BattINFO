@@ -262,6 +262,13 @@ def test_specset_keys_are_mapped_or_consciously_deferred() -> None:
         "nominal_continuous_charging_current", "nominal_continuous_discharging_current",
         "power_capability", "power_energy_ratio",
         "round_trip_energy_efficiency", "round_trip_energy_efficiency_50pct",
+        # Exposed through the save gate when it was aligned with bundle.SpecSet
+        # (Phase 3.4): these keys were already advertised (and already
+        # fallback-emitted) by the model; curating an EMMO mapping in
+        # property_map.curated.json is the follow-up that removes them here.
+        "maximum_pulse_charging_current", "maximum_pulse_discharging_current",
+        "operating_temperature_min", "operating_temperature_max",
+        "typical_capacity",
     }
     spec_set = set(_json.loads(
         (ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json")

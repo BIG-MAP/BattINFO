@@ -307,7 +307,9 @@ def build_context(schema_dir: Path) -> dict:
             "Define such units/terms by a slash-free alias instead."
         )
 
-    return {"@context": ctx}
+    # Apache-2.0 claim as a top-level sibling of @context (context processors
+    # read only the @context member, so this is documentation, not a term).
+    return {"license": "https://www.apache.org/licenses/LICENSE-2.0", "@context": ctx}
 
 
 def main() -> int:

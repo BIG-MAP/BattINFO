@@ -5,6 +5,7 @@
 export const RECORDS_CONTEXT_URL = "https://w3id.org/battinfo/context/records/v1.json";
 
 export const recordsContext: Record<string, unknown> = {
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "@context": {
     "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
     "@version": 1.1,

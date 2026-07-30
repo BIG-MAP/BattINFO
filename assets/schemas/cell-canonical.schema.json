@@ -1,4 +1,5 @@
 {
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/cell-canonical.schema.json",
   "title": "BattINFO Canonical Cell Instance",
@@ -162,6 +163,27 @@
           "$ref": "#/$defs/SpecItem"
         },
         "discharging_cutoff_voltage": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "charging_cutoff_voltage": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "upper_voltage_limit": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "typical_capacity": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "maximum_pulse_charging_current": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "maximum_pulse_discharging_current": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "operating_temperature_min": {
+          "$ref": "#/$defs/SpecItem"
+        },
+        "operating_temperature_max": {
           "$ref": "#/$defs/SpecItem"
         },
         "specific_energy": {

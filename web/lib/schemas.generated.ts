@@ -6,6 +6,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "battinfo.base.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/battinfo.base.schema.json",
       "title": "BattINFO Canonical Battery Metadata",
@@ -248,6 +249,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "cell-canonical.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/cell-canonical.schema.json",
       "title": "BattINFO Canonical Cell Instance",
@@ -411,6 +413,27 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/SpecItem"
             },
             "discharging_cutoff_voltage": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "charging_cutoff_voltage": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "upper_voltage_limit": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "typical_capacity": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "maximum_pulse_charging_current": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "maximum_pulse_discharging_current": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "operating_temperature_min": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "operating_temperature_max": {
               "$ref": "#/$defs/SpecItem"
             },
             "specific_energy": {
@@ -744,6 +767,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "cell-instance.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/cell-instance.schema.json",
       "title": "BattINFO Cell Instance",
@@ -1190,6 +1214,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "cell-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/cell-spec.schema.json",
       "title": "BattINFO Cell Type (Schema.org-Aligned Product)",
@@ -1885,6 +1910,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "channel.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/channel.schema.json",
       "title": "BattINFO Channel Instance",
@@ -2029,6 +2055,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "current-collector-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/current-collector-spec.schema.json",
       "title": "BattINFO Current Collector Spec",
@@ -2204,6 +2231,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "current-collector.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/current-collector.schema.json",
       "title": "BattINFO Current Collector Instance",
@@ -2427,6 +2455,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "dataset.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/dataset.schema.json",
       "title": "BattINFO Dataset (Schema.org-Aligned)",
@@ -3332,6 +3361,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "electrode-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/electrode-spec.schema.json",
       "title": "BattINFO Electrode Spec",
@@ -3522,6 +3552,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "electrode.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/electrode.schema.json",
       "title": "BattINFO Electrode Instance",
@@ -3745,6 +3776,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "electrolyte-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/electrolyte-spec.schema.json",
       "title": "BattINFO Electrolyte Spec",
@@ -3929,6 +3961,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "electrolyte.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/electrolyte.schema.json",
       "title": "BattINFO Electrolyte Instance",
@@ -4152,6 +4185,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "equipment-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/equipment-spec.schema.json",
       "title": "BattINFO Equipment Spec",
@@ -4342,6 +4376,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "equipment.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/equipment.schema.json",
       "title": "BattINFO Equipment Instance",
@@ -4500,6 +4535,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "housing-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/housing-spec.schema.json",
       "title": "BattINFO Housing Spec",
@@ -4829,6 +4865,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "housing.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/housing.schema.json",
       "title": "BattINFO Housing Instance",
@@ -5052,6 +5089,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "ingest-manifest.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/ingest-manifest.schema.json",
       "title": "BattINFO Ingest Manifest",
@@ -5182,6 +5220,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "material-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/material-spec.schema.json",
       "title": "BattINFO Material Spec",
@@ -5489,6 +5528,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "material.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/material.schema.json",
       "title": "BattINFO Material Instance",
@@ -5730,6 +5770,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/common/provenance.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/common/provenance.schema.json",
       "title": "Provenance",
@@ -5792,6 +5833,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/common/quantitative-properties.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/common/quantitative-properties.schema.json",
       "title": "Quantitative Properties",
@@ -5808,6 +5850,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/common/quantity.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/common/quantity.schema.json",
       "title": "Quantity",
@@ -5919,6 +5962,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/cell-instance-reference.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/cell-instance-reference.schema.json",
       "title": "Cell Instance Reference",
@@ -5949,6 +5993,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/current-collector.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/current-collector.schema.json",
       "title": "Current Collector",
@@ -5986,6 +6031,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/electrode-coating.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/electrode-coating.schema.json",
       "title": "Electrode Coating",
@@ -6041,6 +6087,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/electrode.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json",
       "title": "Electrode",
@@ -6097,6 +6144,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/electrolyte.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/electrolyte.schema.json",
       "title": "Electrolyte",
@@ -6188,6 +6236,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/material-component.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/material-component.schema.json",
       "title": "Material Component",
@@ -6232,6 +6281,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/material-mixture.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/material-mixture.schema.json",
       "title": "Material Mixture",
@@ -6270,6 +6320,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/separator.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/separator.schema.json",
       "title": "Separator",
@@ -6334,6 +6385,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "modules/components/specification.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/modules/components/specification.schema.json",
       "title": "Cell Type Specification",
@@ -6511,6 +6563,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "organization.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/organization.schema.json",
       "title": "BattINFO Organization",
@@ -6730,6 +6783,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "profiles/batterypass.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/profiles/batterypass.schema.json",
       "title": "BattINFO Battery Pass Profile",
@@ -6790,6 +6844,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "separator-spec.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/separator-spec.schema.json",
       "title": "BattINFO Separator Spec",
@@ -6982,6 +7037,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "separator.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/separator.schema.json",
       "title": "BattINFO Separator Instance",
@@ -7205,6 +7261,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "test-protocol.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/test-protocol.schema.json",
       "title": "BattINFO Test Protocol",
@@ -7808,6 +7865,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
   {
     "path": "test.schema.json",
     "schema": {
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/test.schema.json",
       "title": "BattINFO Test",
