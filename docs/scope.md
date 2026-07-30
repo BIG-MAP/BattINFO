@@ -3,6 +3,12 @@
 This document maps the BattINFO surface by maturity, so you know what you can
 rely on today, what is available but still evolving, and what is in development.
 
+## Modeling scope
+
+BattINFO models the cell level and below — materials, electrodes, electrolytes,
+cells, tests, and datasets. Module and pack modeling is on the roadmap; it is
+not yet part of the record model or the validated surface described here.
+
 Tested runtime support:
 
 - Python 3.11

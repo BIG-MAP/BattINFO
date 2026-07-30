@@ -30,6 +30,7 @@ One page per record family: the fields each carries, and how they link.
    ../component-specs
    ../cell-fleet
    ../test-specs
+   ../engineering-cell-description
 
 Schemas and properties
 ----------------------
@@ -55,6 +56,17 @@ What the infrastructure guarantees, and the interfaces you can build against.
    contract
    ../ingest-manifest-contract
    interop-recovery
+
+Scope and support
+-----------------
+
+The capability map: what is supported today, what is preview, what is in
+development, and the modeling boundary (cell level and below).
+
+.. toctree::
+   :maxdepth: 1
+
+   ../scope
 
 Glossary
 --------

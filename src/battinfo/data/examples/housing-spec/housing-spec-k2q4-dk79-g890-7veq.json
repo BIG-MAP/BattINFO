@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.2.0",
+  "housing_spec": {
+    "id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq",
+    "short_id": "k2q4dk",
+    "name": "21700 cylindrical housing",
+    "cell_format": "cylindrical",
+    "case": {
+      "material": "Nickel-plated steel",
+      "property": {
+        "wall_thickness": {
+          "value": 0.25,
+          "unit": "mm"
+        },
+        "weight": {
+          "value": 15.0,
+          "unit": "g"
+        }
+      }
+    },
+    "terminals": [
+      {
+        "polarity": "positive",
+        "material": "Aluminium",
+        "property": {
+          "width": {
+            "value": 6.0,
+            "unit": "mm"
+          },
+          "thickness": {
+            "value": 0.1,
+            "unit": "mm"
+          }
+        }
+      },
+      {
+        "polarity": "negative",
+        "material": "Nickel",
+        "property": {
+          "width": {
+            "value": 5.0,
+            "unit": "mm"
+          },
+          "thickness": {
+            "value": 0.1,
+            "unit": "mm"
+          }
+        }
+      }
+    ],
+    "parts": [
+      {
+        "type": "other",
+        "material": "Aluminium",
+        "comment": "Safety vent (CID / burst membrane) in the top cap. No dedicated part type / EMMO class yet; carried as 'other'."
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1781768181,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "21700 cylindrical housing: nickel-plated steel can, Al/Ni current-collector tabs, and a top-cap safety vent."
+  ]
+}
