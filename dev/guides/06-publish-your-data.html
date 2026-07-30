@@ -474,7 +474,8 @@
 <li><p><strong>Save &amp; validate</strong> — canonical records with stable IRIs</p></li>
 <li><p><strong>Publish</strong> — a DOI on Zenodo + the registry review queue</p></li>
 </ol>
-<p><strong>Prerequisites:</strong> BattINFO installed with the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra — the <code class="docutils literal notranslate"><span class="pre">batterydf</span></code> BDF converter that Stage 1 uses. BattINFO is not on PyPI until the 0.8 release, so install from source: clone the repo, then <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">&quot;.[processing]&quot;</span></code> (see <a class="reference internal" href="../pages/getting-started.html"><span class="doc">Installation</span></a>). Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</p>
+<p><strong>Prerequisites:</strong> Stage 1 uses the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra — the <code class="docutils literal notranslate"><span class="pre">batterydf</span></code> BDF converter. BattINFO is not on PyPI until the 0.8 release, so install from source (see <a class="reference internal" href="../pages/getting-started.html"><span class="doc">Installation</span></a>); <code class="docutils literal notranslate"><span class="pre">batterydf</span></code> is not on PyPI yet either, so <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;battinfo[processing]&quot;</span></code> cannot resolve it. Clone the repo and run <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--all-extras</span></code> (how this notebook is executed in CI), or <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> plus the processing dependencies directly:
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;git+https://github.com/battery-data-alliance/battery-data-format.git&quot;</span> <span class="pre">matplotlib</span> <span class="pre">plotly</span></code>. Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</p>
 <p><em>New words? The</em> <a class="reference internal" href="../pages/glossary.html"><span class="doc">plain-language glossary</span></a> <em>decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.</em></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -522,8 +523,13 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
   neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB, via neware_csv)
+  WARNING: 1 source column(s) were NOT mapped to BDF and are missing from neware-sample.bdf.csv:
+    - Record
+    (reader plugin: neware_csv -- if that looks wrong, the file was likely detected as the wrong instrument format)
+    Fix: ws.bdf_columns() lists the canonical names, then ws.convert_csv(&#39;neware-sample.csv&#39;, hints={&#39;&lt;source column&gt;&#39;: &#39;&lt;bdf name&gt;&#39;}).
 
 Converted 1 file(s) -&gt; &lt;repo&gt;\docs\guides\_scratch\guide-06\bdf
+  DATA-LOSS WARNING: 1 file(s) had unmapped source columns (details above) -- the converted files do NOT contain those columns.
 
 BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle_count,step_id,step_time_second,step_charging_capacity_ah,step_discharging_capacity_ah
 </pre></div></div>
@@ -597,12 +603,17 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </section>
 <section id="Stage-4-—-Save-&amp;-validate">
 <h2>Stage 4 — Save &amp; validate<a class="headerlink" href="#Stage-4-—-Save-&-validate" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> validates every record against the canonical JSON Schemas and writes them with stable <code class="docutils literal notranslate"><span class="pre">w3id.org/battinfo/...</span></code> IRIs, minted deterministically from each record’s identity — re-running an identical save is a no-op, never a duplicate.</p>
+<p>Before saving, credit the authors. <code class="docutils literal notranslate"><span class="pre">ws.contributor(orcid,</span> <span class="pre">name=...)</span></code> tags the workspace with a person by ORCID; contributors <strong>accumulate</strong>, so call it once per author. Each is written onto every record you save (as a <code class="docutils literal notranslate"><span class="pre">Person</span></code> carrying the ORCID) and into the publication bundle — so a two-author dataset credits both, not just the last one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> then validates every record against the canonical JSON Schemas and writes them with stable <code class="docutils literal notranslate"><span class="pre">w3id.org/battinfo/...</span></code> IRIs, minted deterministically from each record’s identity — re-running an identical save is a no-op, never a duplicate.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Credit both authors by ORCID — contributors accumulate across calls.</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ada Lovelace&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0001-5109-3700&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Alan Turing&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
 <span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records&quot;</span>
 <span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">records_root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
@@ -615,16 +626,22 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Workspace contributor: Ada Lovelace (https://orcid.org/0000-0002-1825-0097)
+  Saved to .battinfo/workspace.json; stamped onto records on ws.save().
+Workspace contributors (2):
+  - Ada Lovelace (https://orcid.org/0000-0002-1825-0097)
+  - Alan Turing (https://orcid.org/0000-0001-5109-3700)
+  Saved to .battinfo/workspace.json; stamped onto records on ws.save().
 Saved 4 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-06\.battinfo\records:
   cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
   cell        S1                                   [created]  .battinfo\records\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
   test        S1 cycling                           [created]  .battinfo\records\test\test-9f4c-mxny-yhym-2zh4.json
-  dataset     S1 data                              [created]  .battinfo\records\dataset\dataset-6p2d-cy0w-25h0-2820.json
+  dataset     S1 data                              [created]  .battinfo\records\dataset\dataset-4pkb-x4v6-mqb9-tq2w.json
 
   Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
 cell-instance/cell-d6tp-jgqy-a3s9-4qem.json
 cell-spec/cell-spec-fpdr-z1qt-23v0-stzx.json
-dataset/dataset-6p2d-cy0w-25h0-2820.json
+dataset/dataset-4pkb-x4v6-mqb9-tq2w.json
 test/test-9f4c-mxny-yhym-2zh4.json
 </pre></div></div>
 </div>
@@ -657,7 +674,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1783617421,
+  &#34;retrieved_at&#34;: 1785428066,
   &#34;battinfo_version&#34;: &#34;0.7.0&#34;
 }
 </pre></div></div>
@@ -665,20 +682,30 @@ provenance: {
 </section>
 <section id="Stage-5-—-Publish">
 <h2>Stage 5 — Publish<a class="headerlink" href="#Stage-5-—-Publish" title="Link to this heading">#</a></h2>
-<p>The payoff — and the two halves are independent:</p>
+<p>The payoff. The two halves are independent, and the DOI needs no registry account — so it is the primary path here:</p>
 <ul class="simple">
-<li><p><strong>A citable DOI (Zenodo)</strong> needs only a Zenodo token, no registry account. <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> archives the records and data files and returns the DOI. Use a <a class="reference external" href="https://sandbox.zenodo.org">Zenodo sandbox</a> token for a dry run (<code class="docutils literal notranslate"><span class="pre">sandbox=True</span></code>); drop it for the real thing.</p></li>
-<li><p><strong>The Battery Genome registry</strong> (<code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code>) submits your records to the review queue — a curator promotes them to the public index. This needs a registry API key (<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code>). During the soft launch keys are granted by the operators: <a class="reference external" href="https://github.com/battery-genome/battinfo-registry/issues/new?template=api-key-request.md">request one here</a> (say who you are and what you plan to publish).</p></li>
+<li><p><strong>A citable DOI (Zenodo) — primary.</strong> Needs only a Zenodo token, no registry account. <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> archives the records and data files; pass <code class="docutils literal notranslate"><span class="pre">creators=[...]</span></code> to credit the authors on the deposit itself, and the ORCIDs you tagged in Stage 4 travel into the archived metadata too. It leaves a reviewable draft by default — click Publish on Zenodo (or pass <code class="docutils literal notranslate"><span class="pre">publish=True</span></code>) to mint the DOI. Use a <a class="reference external" href="https://sandbox.zenodo.org">Zenodo sandbox</a> token for a dry run (<code class="docutils literal notranslate"><span class="pre">sandbox=True</span></code>); drop it
+for the real thing.</p></li>
+<li><p><strong>The Battery Genome registry (``ws.publish()``) — optional.</strong> Submits your records to the review queue, where a curator promotes them to the public index. This needs a registry API key (<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code>). During the soft launch keys are granted by the operators — start from <a class="reference external" href="https://battinfo.org/publish">battinfo.org/publish</a> and say who you are and what you plan to publish.</p></li>
 </ul>
 <p>Both cells are guarded no-ops until you provide the credential, so the notebook runs fully offline without them.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DOI path — Zenodo only, no registry key needed.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DOI path (primary) — Zenodo only, no registry key needed.</span>
+<span class="c1"># creators credit the authors on the deposit; a click on Zenodo (or publish=True)</span>
+<span class="c1"># mints the DOI. Here we leave a reviewable draft.</span>
 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ZENODO_SANDBOX_TOKEN&quot;</span><span class="p">):</span>
-    <span class="n">deposit</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">zenodo</span><span class="p">(</span><span class="n">sandbox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">license</span><span class="o">=</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DOI:&quot;</span><span class="p">,</span> <span class="n">deposit</span><span class="o">.</span><span class="n">doi</span><span class="p">)</span>
+    <span class="n">deposit</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">zenodo</span><span class="p">(</span>
+        <span class="n">sandbox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">license</span><span class="o">=</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">,</span>
+        <span class="n">creators</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lovelace, Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;orcid&quot;</span><span class="p">:</span> <span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Turing, Alan&quot;</span><span class="p">,</span> <span class="s2">&quot;orcid&quot;</span><span class="p">:</span> <span class="s2">&quot;0000-0001-5109-3700&quot;</span><span class="p">},</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Zenodo draft:&quot;</span><span class="p">,</span> <span class="n">deposit</span><span class="o">.</span><span class="n">draft_url</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Get a token at https://sandbox.zenodo.org, then re-run this cell.&quot;</span><span class="p">)</span>
@@ -695,7 +722,7 @@ Get a token at https://sandbox.zenodo.org, then re-run this cell.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Registry path — needs the API key granted by the operators (link above).</span>

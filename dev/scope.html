@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Ingest Manifest Contract &#8212; BattINFO  documentation</title>
+    <title>BattINFO Scope &amp; Capabilities &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'ingest-manifest-contract';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'scope';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Interop recovery scorecard" href="pages/interop-recovery.html" />
-    <link rel="prev" title="The infrastructure contract" href="pages/contract.html" />
+    <link rel="next" title="Glossary — the vocabulary, in plain language" href="pages/glossary.html" />
+    <link rel="prev" title="Interop recovery scorecard" href="pages/interop-recovery.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -408,14 +408,14 @@
 <li class="toctree-l1"><a class="reference internal" href="pages/schema-reference.html">JSON Schema reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/property-reference.html">Property &amp; unit reference</a></li>
 </ul>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="validation-contract.html">BattINFO Validation Contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Ingest Manifest Contract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pages/interop-recovery.html">Interop recovery scorecard</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="scope.html">BattINFO Scope &amp; Capabilities</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">BattINFO Scope &amp; Capabilities</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="pages/glossary.html">Glossary — the vocabulary, in plain language</a></li>
@@ -462,7 +462,7 @@
     
     <li class="breadcrumb-item"><a href="pages/reference.html" class="nav-link">Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Ingest Manifest Contract</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">BattINFO Scope &amp; Capabilities</span></li>
   </ul>
 </nav>
 </div>
@@ -479,187 +479,80 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="ingest-manifest-contract">
-<h1>Ingest Manifest Contract<a class="headerlink" href="#ingest-manifest-contract" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code> is the folder-local manifest for the <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">ingest</span> <span class="pre">...</span></code>
-workflow.</p>
-<p>Purpose:</p>
+  <section id="battinfo-scope-capabilities">
+<h1>BattINFO Scope &amp; Capabilities<a class="headerlink" href="#battinfo-scope-capabilities" title="Link to this heading">#</a></h1>
+<p>This document maps the BattINFO surface by maturity, so you know what you can
+rely on today, what is available but still evolving, and what is in development.</p>
+<section id="modeling-scope">
+<h2>Modeling scope<a class="headerlink" href="#modeling-scope" title="Link to this heading">#</a></h2>
+<p>BattINFO models the cell level and below — materials, electrodes, electrolytes,
+cells, tests, and datasets. Module and pack modeling is on the roadmap; it is
+not yet part of the record model or the validated surface described here.</p>
+<p>Tested runtime support:</p>
 <ul class="simple">
-<li><p>declare the typed subject being ingested</p></li>
-<li><p>point that subject to a curated reusable type record</p></li>
-<li><p>provide the minimum publication metadata needed for repeatable ingest</p></li>
-<li><p>configure folder scanning rules for attached files</p></li>
-</ul>
-<p>Normative schema: <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code></p>
-<p>Packaged runtime copy: <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/schemas/ingest-manifest.schema.json</span></code></p>
-<section id="scope">
-<h2>Scope<a class="headerlink" href="#scope" title="Link to this heading">#</a></h2>
-<p>This manifest is not the source of truth for reusable type definitions.</p>
-<p>Use it for:</p>
-<ul class="simple">
-<li><p>one operational ingest folder</p></li>
-<li><p>one typed instance-like resource</p></li>
-<li><p>file discovery and publication defaults</p></li>
-</ul>
-<p>Do not use it for:</p>
-<ul class="simple">
-<li><p>curated <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code> authoring</p></li>
-<li><p>editing canonical registry output</p></li>
-<li><p>replacing the source folder itself</p></li>
+<li><p>Python 3.11</p></li>
+<li><p>Python 3.12</p></li>
 </ul>
 </section>
-<section id="required-fields">
-<h2>Required fields<a class="headerlink" href="#required-fields" title="Link to this heading">#</a></h2>
+<section id="supported">
+<h2>Supported<a class="headerlink" href="#supported" title="Link to this heading">#</a></h2>
+<p>These capabilities are covered by tests in CI, documented as supported, and are
+the primary target for feedback:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">resource_type</span></code></p>
-<ul>
-<li><p>current allowed value: <code class="docutils literal notranslate"><span class="pre">cell-instance</span></code></p></li>
+<li><p>cell-descriptor validation for the stable integration subset</p></li>
+<li><p>cell-descriptor to JSON-LD mapping</p></li>
+<li><p>canonical record workflows for <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">cell-instance</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code>, and <code class="docutils literal notranslate"><span class="pre">dataset</span></code></p></li>
+<li><p>CLI/API query, save, publish, and index flows for canonical records</p></li>
+<li><p>JSON-LD-first publication with <code class="docutils literal notranslate"><span class="pre">publish(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">load_publication(...)</span></code></p></li>
+<li><p>validation policies <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">strict</span></code>, <code class="docutils literal notranslate"><span class="pre">publisher</span></code>, and <code class="docutils literal notranslate"><span class="pre">ingest</span></code></p></li>
+<li><p>resolver artifact generation for canonical records</p></li>
 </ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">type_record</span></code></p>
-<ul>
-<li><p>path to the curated reusable type record</p></li>
-</ul>
-</li>
+<p>Representative cases exercised end-to-end:</p>
+<ul class="simple">
+<li><p>commercial battery cell records with simple specification-sheet metadata</p></li>
+<li><p>detailed battery cell descriptors for coin, cylindrical, single-layer pouch, multilayer pouch, and prismatic formats</p></li>
+<li><p>explicit canonical <code class="docutils literal notranslate"><span class="pre">test</span></code> records for common battery test workflows</p></li>
+<li><p>explicit canonical <code class="docutils literal notranslate"><span class="pre">dataset</span></code> records linked to a tested cell and optionally to a test</p></li>
+<li><p>repository notebooks that walk through the supported cases</p></li>
 </ul>
 </section>
-<section id="optional-fields">
-<h2>Optional fields<a class="headerlink" href="#optional-fields" title="Link to this heading">#</a></h2>
+<section id="preview">
+<h2>Preview<a class="headerlink" href="#preview" title="Link to this heading">#</a></h2>
+<p>Available and expected to work, but interfaces may still be refined:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">resource_iri</span></code></p>
-<ul>
-<li><p>preserved canonical IRI for the ingested resource when already assigned</p></li>
+<li><p>reusable cell-spec library workflows beyond the descriptor fixtures</p></li>
+<li><p>curated datasheet validation examples included in the repository</p></li>
 </ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">resource_name</span></code></p>
-<ul>
-<li><p>human-facing instance label used as the default generated serial/name</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">workspace_id</span></code></p>
-<ul>
-<li><p>registry workspace id used during bundle/publish</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">publisher_id</span></code></p>
-<ul>
-<li><p>publisher id used during bundle/publish</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">source_version</span></code></p>
-<ul>
-<li><p>submission version string written into generated workspace/package state</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">license</span></code></p>
-<ul>
-<li><p>default dataset license</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">rules</span></code></p>
-<ul>
-<li><p>file discovery and filename-to-test-kind inference overrides</p></li>
-</ul>
-</li>
+<p>Feedback is welcome; regressions here do not block a release unless they break a
+supported capability.</p>
+</section>
+<section id="in-development">
+<h2>In development<a class="headerlink" href="#in-development" title="Link to this heading">#</a></h2>
+<p>Present but with no stability promise — documented as draft, experimental, or
+internal:</p>
+<ul class="simple">
+<li><p>datasheet authoring as a public, frozen contract</p></li>
+<li><p>ingestion pipelines and other external-source normalization workflows</p></li>
+<li><p>semantic mapping candidate generation and review workflows</p></li>
+<li><p>reference validation strategies for larger external corpora beyond repository-scale source trees</p></li>
 </ul>
 </section>
-<section id="rules-object">
-<h2>Rules object<a class="headerlink" href="#rules-object" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">rules</span></code> currently supports:</p>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
+<p>A release is considered ready when:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">photo_glob</span></code></p>
-<ul>
-<li><p>string or string array</p></li>
-<li><p>default:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">image/photo/*.jpg</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">image/photo/*.jpeg</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">image/photo/*.png</span></code></p></li>
+<li><p>all supported workflows install and run from a clean environment</p></li>
+<li><p>supported validation behavior is documented and machine-readable</p></li>
+<li><p>CI proves the supported Python versions for the supported surface</p></li>
+<li><p>top-level docs do not over-promise preview or in-development features</p></li>
 </ul>
-</li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">timeseries_glob</span></code></p>
-<ul>
-<li><p>string or string array</p></li>
-<li><p>default:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">timeseries/raw/*.csv</span></code></p></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">test_kind_from_filename</span></code></p>
-<ul>
-<li><p>object mapping lowercase filename tokens to BattINFO test kinds</p></li>
-<li><p>default:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">rate</span> <span class="pre">-&gt;</span> <span class="pre">rate_capability</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ici</span> <span class="pre">-&gt;</span> <span class="pre">ici</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">capacity</span> <span class="pre">-&gt;</span> <span class="pre">capacity_check</span></code></p></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</section>
-<section id="minimal-example">
-<h2>Minimal example<a class="headerlink" href="#minimal-example" title="Link to this heading">#</a></h2>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type_record&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;battinfo-records/records/cell-spec/google--g20m7--2025/record.json&quot;</span>
-<span class="p">}</span>
+<p>Bootstrap and run the verification gate:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.</span><span class="n">venv</span>
+<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="p">-</span><span class="n">-upgrade</span> <span class="n">pip</span> <span class="n">setuptools</span> <span class="n">wheel</span>
+<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-e</span> <span class="p">.</span><span class="no">[dev]</span>
+<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">python</span> <span class="p">.</span><span class="n">tools</span><span class="p">/</span><span class="n">quality</span><span class="p">/</span><span class="n">run_verification</span><span class="p">.</span><span class="n">py</span>
 </pre></div>
 </div>
-</section>
-<section id="practical-example">
-<h2>Practical example<a class="headerlink" href="#practical-example" title="Link to this heading">#</a></h2>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type_record&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;battinfo-records/records/cell-spec/google--g20m7--2025/record.json&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource_iri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;resource_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;google--g20m7--2025--15qnrp&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;workspace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;google-g20m7-instance-demo&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;publisher_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo-lab&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;source_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-10&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;license&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CC-BY-4.0&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;rules&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;photo_glob&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;image/photo/*.jpg&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;image/photo/*.jpeg&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;image/photo/*.png&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;timeseries_glob&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;timeseries/raw/*.csv&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;test_kind_from_filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;rate_capability&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;ici&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ici&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;capacity_check&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</section>
-<section id="operational-rule">
-<h2>Operational rule<a class="headerlink" href="#operational-rule" title="Link to this heading">#</a></h2>
-<p>For routine use:</p>
-<ul class="simple">
-<li><p>users edit the ingest folder and <code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code></p></li>
-<li><p>BattINFO generates the <code class="docutils literal notranslate"><span class="pre">Workspace</span></code></p></li>
-<li><p>users do not treat the generated workspace as the primary long-term source by default</p></li>
-</ul>
-</section>
-<section id="current-implementation-boundary">
-<h2>Current implementation boundary<a class="headerlink" href="#current-implementation-boundary" title="Link to this heading">#</a></h2>
-<p>The manifest contract is designed to expand to other typed resource kinds, but the
-current ingest engine only implements:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">cell-instance</span></code></p></li>
-</ul>
-<p>Additional <code class="docutils literal notranslate"><span class="pre">resource_type</span></code> values should only be added when the ingest engine and
-its downstream record-generation logic actually support them.</p>
 </section>
 </section>
 
@@ -674,20 +567,20 @@ its downstream record-generation logic actually support them.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pages/contract.html"
+       href="pages/interop-recovery.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">The infrastructure contract</p>
+        <p class="prev-next-title">Interop recovery scorecard</p>
       </div>
     </a>
     <a class="right-next"
-       href="pages/interop-recovery.html"
+       href="pages/glossary.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Interop recovery scorecard</p>
+        <p class="prev-next-title">Glossary — the vocabulary, in plain language</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -710,14 +603,11 @@ its downstream record-generation logic actually support them.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scope">Scope</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#required-fields">Required fields</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-fields">Optional fields</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rules-object">Rules object</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#minimal-example">Minimal example</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-example">Practical example</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#operational-rule">Operational rule</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#current-implementation-boundary">Current implementation boundary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modeling-scope">Modeling scope</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported">Supported</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preview">Preview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#in-development">In development</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
 </ul>
   </nav></div>
 
