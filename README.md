@@ -133,6 +133,20 @@ print(result.canonical_iri)
 # https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx
 ```
 
+That IRI is **permanent, but not yet resolvable on the web** — opening it in a
+browser returns 404 for a record published locally. A local publish mints the
+identity; it becomes dereferenceable once you publish the record to the
+registry (`ws.publish()`, see [Tutorial 6](docs/guides/06-publish-your-data.ipynb)).
+
+`destination="local"` writes to a `.battinfo/` directory (a dot-directory —
+`ls -a` to see it):
+
+```text
+.battinfo/my-library/
+├── index.json
+└── examples/cell-spec/cell-spec-<id>.json   # the canonical record JSON
+```
+
 Or from the command line:
 
 ```powershell
