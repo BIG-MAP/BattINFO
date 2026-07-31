@@ -76,7 +76,7 @@ dev = [
   "build>=1.2",
   "setuptools>=83.0.0",   # build backend, needed in-env for `build --no-isolation` (verification gate)
   "wheel",
-  "twine>=5.0",       # dist metadata validation (`twine check`) before publishing
+  "twine>=7.0.0",       # dist metadata validation (`twine check`) before publishing
   "datamodel-code-generator>=0.71.0",
   "linkml>=1.8",
   "nbformat>=5.9",
