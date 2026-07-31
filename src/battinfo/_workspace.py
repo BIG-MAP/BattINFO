@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import mimetypes
 import shutil
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
@@ -1577,6 +1577,7 @@ class Workspace:
         resolve_references: bool = False,
         validation_policy: str = "strict",
         build_index: bool = True,
+        stamp: Callable[[dict[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
         target_root = _as_path(source_root) if source_root is not None else self.source_root
         finalized = self._finalize()
@@ -1590,6 +1591,7 @@ class Workspace:
                 mode=mode,
                 resolve_references=resolve_references,
                 validation_policy=validation_policy,
+                stamp=stamp,
             )
 
         if build_index:
@@ -1609,6 +1611,7 @@ class Workspace:
         mode: str,
         resolve_references: bool,
         validation_policy: str,
+        stamp: Callable[[dict[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
         return {
             "cell_specs": [
@@ -1618,6 +1621,7 @@ class Workspace:
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
+                    stamp=stamp,
                 )
                 for item in finalized["cell_specs"]
             ],
@@ -1628,6 +1632,7 @@ class Workspace:
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
+                    stamp=stamp,
                 )
                 for item in finalized["cells"]
             ],
@@ -1638,6 +1643,7 @@ class Workspace:
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
+                    stamp=stamp,
                 )
                 for item in finalized["test_specs"]
             ],
@@ -1648,6 +1654,7 @@ class Workspace:
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
+                    stamp=stamp,
                 )
                 for item in finalized["tests"]
             ],
@@ -1658,6 +1665,7 @@ class Workspace:
                     mode=mode,
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
+                    stamp=stamp,
                 )
                 for item in finalized["datasets"]
             ],

@@ -6,6 +6,7 @@ import the public surface from ``battinfo.api``, not from this module.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -1331,6 +1332,7 @@ def save_record(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save one canonical BattINFO resource into local source storage and optional resolver artifacts.
 
@@ -1358,6 +1360,15 @@ def save_record(
 
     if resolve_references:
         _resolve_references_for_save(doc, source_root_path)
+
+    # Apply any caller-supplied stamp (e.g. workspace contributor/funding) to the
+    # candidate BEFORE the content comparison and write, so a byte-identical
+    # re-save of an already-stamped record is correctly seen as unchanged (and is
+    # not needlessly rewritten). Applying it here — rather than rewriting the file
+    # after the fact — keeps the content_changed decision and the on-disk bytes in
+    # agreement.
+    if stamp is not None:
+        stamp(doc)
 
     if existing_path is not None and mode_normalized == REGISTER_MODE_CREATE_ONLY:
         if duplicate_policy_normalized == DUPLICATE_POLICY_RETURN_EXISTING:
@@ -1398,7 +1409,13 @@ def save_record(
     # Inside a bulk session the per-file fsync is skipped: the batch is
     # re-runnable (identical re-saves are no-ops), so a power loss is repaired
     # by re-running the ingest, not by 6 ms of fsync per record.
-    _write_json(target_path, doc, durable=cache is None)
+    #
+    # An in-place upsert whose content did not change (ignoring volatile
+    # timestamps) is a genuine no-op: leave the file — and its mtime — untouched
+    # rather than churning identical bytes on every save. The record is still
+    # registered with the bulk cache so the index is rebuilt as usual.
+    if not (existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT and not content_changed):
+        _write_json(target_path, doc, durable=cache is None)
     if cache is not None:
         cache.record_saved(entity_id, target_path, entity_type)
 
@@ -1431,6 +1448,7 @@ def save_cell_spec(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a cell-spec from either draft payload or canonical record.
 
@@ -1456,6 +1474,7 @@ def save_cell_spec(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_spec"), Mapping):
         return save_record(
@@ -1471,6 +1490,7 @@ def save_cell_spec(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     spec = draft if isinstance(draft, CellSpecificationBundle) else CellSpecificationBundle(**dict(draft))
     record = _record_from_cell_spec(spec)
@@ -1487,6 +1507,7 @@ def save_cell_spec(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -1504,6 +1525,7 @@ def save_cell_instance(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a cell-instance from either draft payload or canonical record.
 
@@ -1529,6 +1551,7 @@ def save_cell_instance(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_instance"), Mapping):
         return save_record(
@@ -1544,6 +1567,7 @@ def save_cell_instance(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     instance = draft if isinstance(draft, CellInstanceBundle) else CellInstanceBundle(**dict(draft))
     record = _record_from_cell_instance(instance)
@@ -1560,6 +1584,7 @@ def save_cell_instance(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -1577,6 +1602,7 @@ def save_dataset(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a dataset from either draft payload or canonical record."""
     from battinfo.bundle import Dataset as DatasetBundle
@@ -1596,6 +1622,7 @@ def save_dataset(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("dataset"), Mapping):
         return save_record(
@@ -1611,6 +1638,7 @@ def save_dataset(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     dataset = draft if isinstance(draft, DatasetBundle) else DatasetBundle(**dict(draft))
     record = _record_from_dataset(dataset)
@@ -1627,6 +1655,7 @@ def save_dataset(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -1644,6 +1673,7 @@ def save_test(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a test from either draft payload or canonical record."""
     from battinfo.bundle import Test as TestBundle
@@ -1663,6 +1693,7 @@ def save_test(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("test"), Mapping):
         return save_record(
@@ -1678,6 +1709,7 @@ def save_test(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     test = draft if isinstance(draft, TestBundle) else TestBundle(**dict(draft))
     record = _record_from_test(test)
@@ -1694,6 +1726,7 @@ def save_test(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -1711,6 +1744,7 @@ def save_test_spec(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a test protocol from either draft payload or canonical record."""
     from battinfo.bundle import TestSpec
@@ -1730,6 +1764,7 @@ def save_test_spec(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("test_spec"), Mapping):
         return save_record(
@@ -1745,6 +1780,7 @@ def save_test_spec(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     spec = draft if isinstance(draft, TestSpec) else TestSpec(**dict(draft))
     record = _record_from_test_protocol(spec)
@@ -1761,6 +1797,7 @@ def save_test_spec(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 

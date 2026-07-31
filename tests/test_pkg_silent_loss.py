@@ -389,6 +389,62 @@ def test_identical_resave_reports_unchanged(tmp_path: Path, capsys) -> None:
     assert "[updated]" not in out
 
 
+def _record_files(ws: AuthoringWorkspace) -> list[Path]:
+    root = ws._ws.source_root
+    return sorted(p for p in root.rglob("*.json") if "index" not in p.name)
+
+
+def test_identical_resave_with_contributor_reports_unchanged(tmp_path: Path, capsys) -> None:
+    # Regression: a contributor (ORCID) stamped on every record used to make a
+    # byte-identical re-save print [updated] and needlessly rewrite each file,
+    # because the stamp was applied after the content comparison. The stamp is now
+    # applied to the candidate before the comparison, so the re-save is a true
+    # no-op: [unchanged], identical bytes, and untouched mtimes.
+    ws = _new_ws(tmp_path)
+    ws.contributor("0000-0002-1825-0097", name="Jane Researcher")
+    ws.save()
+    files = _record_files(ws)
+    assert files
+    before = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in files}
+
+    capsys.readouterr()  # drop the first save's output
+    ws.save()  # byte-identical re-save
+    out = capsys.readouterr().out
+    assert "[unchanged]" in out
+    assert "[updated]" not in out
+
+    after = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in files}
+    assert after == before, "an unchanged re-save must not rewrite record files"
+
+
+def test_resave_with_contributor_and_real_change_reports_updated(tmp_path: Path, capsys) -> None:
+    # A genuine edit to an already-stamped record still reports [updated].
+    ws = _new_ws(tmp_path)
+    ws.contributor("0000-0002-1825-0097", name="Jane Researcher")
+    ws.save()
+
+    ws._ws.cell_specs[0].name = "Renamed cell spec"  # genuine content change
+    capsys.readouterr()
+    ws.save()
+    out = capsys.readouterr().out
+    assert "[updated]" in out
+
+
+def test_adding_second_contributor_reports_updated(tmp_path: Path, capsys) -> None:
+    # Adding a contributor between saves legitimately changes the record bytes, so
+    # the re-save must report [updated], not [unchanged].
+    ws = _new_ws(tmp_path)
+    ws.contributor("0000-0002-1825-0097", name="Jane Researcher")
+    ws.save()
+
+    ws.contributor("0000-0001-5109-3700", name="Second Author")
+    capsys.readouterr()
+    ws.save()
+    out = capsys.readouterr().out
+    assert "[updated]" in out
+    assert "[unchanged]" not in out
+
+
 # ── Item 8: error-text fixes (phantom command + key-request URL) ────────────────
 
 def test_save_gate_message_uses_real_command() -> None:

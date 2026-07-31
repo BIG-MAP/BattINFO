@@ -107,9 +107,10 @@ grounded in the DIGIBAT Discovery-Benchmark and the Cell Design Tool:
 The cylindrical example is authored through `create_component_spec("housing", …)`,
 passes `battinfo validate`, emits a `CylindricalCase` node, and is stamped at the
 current `schema_version`. Its case `@type` is derived from `cell_format`
-(`cylindrical` → `CylindricalCase`). The safety vent has no dedicated part type or
-EMMO class yet, so it is carried as an `other` part with its role in the comment —
-the label is preserved, pending an upstream `SafetyVent` term.
+(`cylindrical` → `CylindricalCase`). The safety vent is carried as a `vent`
+part — a dedicated `parts[].type` value. It has no EMMO class yet, so it is
+emitted with its authored label and a `semantic.hardware_part_unmapped` warning,
+pending an upstream `SafetyVent` term.
 
 The **jelly-roll** geometry of a wound cell is authored on the cell-spec's
 `construction` block (the `CellConstruction` fields above: `winding_turns`,
