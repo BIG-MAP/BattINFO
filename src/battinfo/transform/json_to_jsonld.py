@@ -1946,7 +1946,16 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("material_spec"), dict) or isinstance(data.get("material"), dict):
         return _to_domain_battery_jsonld_material(data)
-    if _component_family_of(data) is not None:
+    # Record-level classification wins over component-family sniffing: a cell_spec
+    # (or descriptor) record carries inline component blocks (housing, electrodes,
+    # separator, ...) as fields, and those keys collide with the standalone
+    # component families. Route by the record's own primary key first, and fall to
+    # component classification only for a genuinely standalone component record.
+    is_record_level = (
+        (isinstance(data.get("specification"), dict) or isinstance(data.get("cell_spec"), dict))
+        and data.get("schema_version") is not None
+    )
+    if not is_record_level and _component_family_of(data) is not None:
         return _to_domain_battery_jsonld_component(data)
     if isinstance(data.get("specification"), dict) and data.get("schema_version") is not None:
         return _to_domain_battery_jsonld_descriptor(data)

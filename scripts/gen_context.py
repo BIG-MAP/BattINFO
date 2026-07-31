@@ -29,13 +29,20 @@ from battinfo.transform.cell_spec_node import label_to_compact  # noqa: E402
 
 OUT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
 
+# The repository (and thus every generated artifact it serves) is Apache-2.0.
+# The claim rides as a top-level sibling of ``@context`` — JSON-LD context
+# processors read only the ``@context`` member, so this neither changes the
+# term count nor affects expansion, it just makes the served document
+# self-describing.
+LICENSE = "https://www.apache.org/licenses/LICENSE-2.0"
+
 
 def build() -> dict:
     """The complete records context: base conveniences + class table + method terms."""
     context: dict = dict(_CONTEXT_INLINE)
     context.update(label_to_compact())
     context.update(TEST_METHOD_CONTEXT_TERMS)
-    return {"@context": context}
+    return {"license": LICENSE, "@context": context}
 
 
 def render() -> str:

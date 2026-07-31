@@ -1,4 +1,5 @@
 {
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/housing-spec.schema.json",
   "title": "BattINFO Housing Spec",
@@ -296,6 +297,7 @@
             "can",
             "spring",
             "spacer",
+            "vent",
             "other"
           ]
         },
