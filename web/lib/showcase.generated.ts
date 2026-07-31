@@ -508,16 +508,16 @@ export const showcase: {
     "title": "A test",
     "tagline": "One execution of a procedure on one cell: instrument, status, and the link every dataset hangs off.",
     "recordType": "test",
-    "code": "from battinfo import Cell, CellSpec, Test\n\ncell = Cell(\n    id=\"https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7\",\n    cell_spec=CellSpec(\n        id=\"https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\",\n        manufacturer=\"Samsung SDI\", model=\"INR21700-50E\",\n        format=\"cylindrical\", chemistry=\"Li-ion\",\n    ),\n    serial_number=\"LAB-2026-0001\",\n)\ntest = Test(\n    id=\"https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt\",\n    cell=cell,                         # what you did, to which cell\n    kind=\"capacity_check\",\n    protocol=\"C/10 constant-current discharge\",\n    instrument=\"Biologic VMP-300\",\n    status=\"completed\",\n)\nrecord = test.to_record()",
+    "code": "from battinfo import Cell, CellSpec, Test\n\ncell = Cell(\n    id=\"https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7\",\n    cell_spec=CellSpec(\n        id=\"https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\",\n        manufacturer=\"Samsung SDI\", model=\"INR21700-50E\",\n        format=\"cylindrical\", chemistry=\"Li-ion\",\n    ),\n    serial_number=\"LAB-2026-0001\",\n)\ntest = Test(\n    # A live IRI: dereference it (Accept: application/ld+json) and it\n    # resolves. Its archived payload predates this emission dialect; the\n    # showcase body below is the current gold-standard form.\n    id=\"https://w3id.org/battinfo/test/ygnc-b2j3-bc55-rbn1\",\n    cell=cell,                         # what you did, to which cell\n    kind=\"capacity_check\",\n    protocol=\"C/10 constant-current discharge\",\n    instrument=\"Biologic VMP-300\",\n    status=\"completed\",\n)\nrecord = test.to_record()",
     "record": {
       "schema_version": "0.2.0",
       "test": {
-        "id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
-        "short_id": "7d9k2m",
-        "identifier": "test:7d9k-2m4p-8t3x-6nq5",
+        "id": "https://w3id.org/battinfo/test/ygnc-b2j3-bc55-rbn1",
+        "short_id": "ygncb2",
+        "identifier": "test:ygnc-b2j3-bc55-rbn1",
         "name": "LAB-2026-0001 C/10 constant-current discharge",
         "kind": "capacity_check",
-        "cell_id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
+        "cell_id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
         "status": "completed",
         "protocol_name": "C/10 constant-current discharge",
         "instrument_name": "Biologic VMP-300"
@@ -533,14 +533,14 @@ export const showcase: {
         "schema:Action",
         "prov:Activity"
       ],
-      "@id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+      "@id": "https://w3id.org/battinfo/test/ygnc-b2j3-bc55-rbn1",
       "schema:name": "LAB-2026-0001 C/10 constant-current discharge",
       "schema:additionalType": "capacity_check",
       "schema:instrument": "Biologic VMP-300",
       "schema:measurementTechnique": "C/10 constant-current discharge",
       "schema:actionStatus": "completed",
       "hasTestObject": {
-        "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
+        "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
       }
     }
   },
@@ -549,19 +549,19 @@ export const showcase: {
     "title": "A dataset",
     "tagline": "The measured files, linked to the cell and test that produced them — the shape data portals understand (DCAT).",
     "recordType": "dataset",
-    "code": "from battinfo import Cell, CellSpec, Dataset, Test\n\ncell = Cell(\n    id=\"https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7\",\n    cell_spec=CellSpec(\n        id=\"https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\",\n        manufacturer=\"Samsung SDI\", model=\"INR21700-50E\",\n        format=\"cylindrical\", chemistry=\"Li-ion\",\n    ),\n    serial_number=\"LAB-2026-0001\",\n)\ntest = Test(\n    id=\"https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt\",\n    cell=cell, kind=\"cycling\", status=\"completed\",\n)\ndataset = Dataset(\n    id=\"https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd\",\n    path=\"data/cycle-life-run\",        # the folder with your measured files\n    cell=cell,\n    test=test,\n    name=\"INR21700-50E cycle-life dataset\",\n    license=\"CC-BY-4.0\",\n    access_url=\"https://doi.org/10.5281/zenodo.1234567\",  # where the data lives\n)\nrecord = dataset.to_record()",
+    "code": "from battinfo import Cell, CellSpec, Dataset, Test\n\ncell = Cell(\n    id=\"https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7\",\n    cell_spec=CellSpec(\n        id=\"https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5\",\n        manufacturer=\"Samsung SDI\", model=\"INR21700-50E\",\n        format=\"cylindrical\", chemistry=\"Li-ion\",\n    ),\n    serial_number=\"LAB-2026-0001\",\n)\ntest = Test(\n    id=\"https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt\",\n    cell=cell, kind=\"cycling\", status=\"completed\",\n)\ndataset = Dataset(\n    # A live IRI: dereference it (Accept: application/ld+json) and it\n    # resolves. Its archived payload predates this emission dialect; the\n    # showcase body below is the current gold-standard form.\n    id=\"https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q\",\n    path=\"data/cycle-life-run\",        # the folder with your measured files\n    cell=cell,\n    test=test,\n    name=\"INR21700-50E cycle-life dataset\",\n    license=\"CC-BY-4.0\",\n    access_url=\"https://doi.org/10.5281/zenodo.1234567\",  # where the data lives\n)\nrecord = dataset.to_record()",
     "record": {
       "schema_version": "0.2.0",
       "dataset": {
-        "id": "https://w3id.org/battinfo/dataset/7d9k-2m4p-8t3x-6nq5",
-        "short_id": "7d9k2m",
-        "identifier": "dataset:7d9k-2m4p-8t3x-6nq5",
+        "id": "https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
+        "short_id": "ysszkc",
+        "identifier": "dataset:yssz-kccw-16g6-s21q",
         "name": "INR21700-50E cycle-life dataset",
         "license": "CC-BY-4.0",
         "access_url": "https://doi.org/10.5281/zenodo.1234567",
         "about": [
-          "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
-          "https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe"
+          "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
+          "https://w3id.org/battinfo/test/y9xy-kr0v-y5tn-dfj7"
         ]
       },
       "provenance": {
@@ -571,7 +571,7 @@ export const showcase: {
     "jsonld": {
       "@context": "https://w3id.org/battinfo/context/records/v1.json",
       "@type": "http://www.w3.org/ns/dcat#Dataset",
-      "@id": "https://w3id.org/battinfo/dataset/7d9k-2m4p-8t3x-6nq5",
+      "@id": "https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
       "dcterms:title": "INR21700-50E cycle-life dataset",
       "dcterms:license": {
         "@id": "CC-BY-4.0"
@@ -581,10 +581,10 @@ export const showcase: {
       },
       "dcterms:subject": [
         {
-          "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
+          "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
         },
         {
-          "@id": "https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe"
+          "@id": "https://w3id.org/battinfo/test/y9xy-kr0v-y5tn-dfj7"
         }
       ]
     }

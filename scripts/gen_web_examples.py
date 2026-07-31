@@ -201,7 +201,10 @@ def snippet_test():
         serial_number="LAB-2026-0001",
     )
     test = Test(
-        id="https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt",
+        # A live IRI: dereference it (Accept: application/ld+json) and it
+        # resolves. Its archived payload predates this emission dialect; the
+        # showcase body below is the current gold-standard form.
+        id="https://w3id.org/battinfo/test/ygnc-b2j3-bc55-rbn1",
         cell=cell,                         # what you did, to which cell
         kind="capacity_check",
         protocol="C/10 constant-current discharge",
@@ -229,7 +232,10 @@ def snippet_dataset():
         cell=cell, kind="cycling", status="completed",
     )
     dataset = Dataset(
-        id="https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
+        # A live IRI: dereference it (Accept: application/ld+json) and it
+        # resolves. Its archived payload predates this emission dialect; the
+        # showcase body below is the current gold-standard form.
+        id="https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
         path="data/cycle-life-run",        # the folder with your measured files
         cell=cell,
         test=test,
@@ -332,8 +338,14 @@ FIXED_TIME = 1750000000
 
 # Real, published IRIs to preserve verbatim through normalization: these
 # dereference today, so an example that shows one must keep it (the cell-spec
-# showcase is the flagship, not a placeholder).
-KEEP_UIDS = {"pge5-wer6-2q82-v9k0"}
+# showcase is the flagship, not a placeholder). The test/dataset IRIs resolve
+# too; their archived payloads predate the current emission dialect, but the
+# showcase bodies remain the gold-standard form.
+KEEP_UIDS = {
+    "pge5-wer6-2q82-v9k0",   # flagship cell-spec
+    "ygnc-b2j3-bc55-rbn1",   # showcase-test @id
+    "yssz-kccw-16g6-s21q",   # showcase-dataset @id
+}
 
 
 def normalize(record: dict) -> dict:
