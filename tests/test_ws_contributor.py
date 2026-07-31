@@ -157,8 +157,10 @@ def test_save_stamps_contributor_on_every_record(tmp_path: Path) -> None:
 def test_interrupted_contributor_stamp_leaves_records_valid(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # The contributor stamp rewrites canonical record files in place; an
-    # interrupted stamp must never leave a truncated/half-written record (R-5).
+    # The contributor stamp is applied to each record as it is written; an
+    # interrupted write must never leave a truncated/half-written record (R-5).
+    # A no-op re-save writes nothing, so force a genuine change (a second
+    # contributor) to exercise the write path.
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _populate(ws, tmp_path)
     ws.contributor(ORCID, name="Jane Researcher")
@@ -168,13 +170,14 @@ def test_interrupted_contributor_stamp_leaves_records_valid(
     assert record_files
 
     def boom(*args, **kwargs):
-        raise OSError("simulated crash during contributor stamp")
+        raise OSError("simulated crash while writing a stamped record")
 
-    monkeypatch.setattr("battinfo.ws._atomic_write_text", boom)
+    ws.contributor("0000-0001-5109-3700", name="Second Author")  # forces a rewrite
+    monkeypatch.setattr("battinfo._jsonio.atomic_write_text", boom)
     with pytest.raises(OSError):
         ws.save(validation_policy="strict")
 
-    # Every record on disk is still valid JSON — never truncated by the failed stamp.
+    # Every record on disk is still valid JSON — never truncated by the failed write.
     for p in record_files:
         json.loads(p.read_text(encoding="utf-8"))
 
@@ -182,7 +185,9 @@ def test_interrupted_contributor_stamp_leaves_records_valid(
 def test_interrupted_funding_stamp_leaves_records_valid(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Same R-5 guarantee for the funding (project) stamp path (ws.py:_stamp_project_funding).
+    # Same R-5 guarantee for the funding (project) stamp, which shares the record
+    # write path. A no-op re-save writes nothing, so change the funding block to
+    # force every record to be rewritten.
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _populate(ws, tmp_path)
     ws._set_project(ProjectRef(identifier="101103997", name="DigiBatt", funder="EU"))
@@ -192,9 +197,10 @@ def test_interrupted_funding_stamp_leaves_records_valid(
     assert record_files
 
     def boom(*args, **kwargs):
-        raise OSError("simulated crash during funding stamp")
+        raise OSError("simulated crash while writing a stamped record")
 
-    monkeypatch.setattr("battinfo.ws._atomic_write_text", boom)
+    ws._set_project(ProjectRef(identifier="999999", name="Other", funder="EU"))  # forces a rewrite
+    monkeypatch.setattr("battinfo._jsonio.atomic_write_text", boom)
     with pytest.raises(OSError):
         ws.save(validation_policy="strict")
 

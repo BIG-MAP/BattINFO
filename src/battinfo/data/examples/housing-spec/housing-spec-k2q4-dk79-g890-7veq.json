@@ -50,9 +50,9 @@
     ],
     "parts": [
       {
-        "type": "other",
+        "type": "vent",
         "material": "Aluminium",
-        "comment": "Safety vent (CID / burst membrane) in the top cap. No dedicated part type / EMMO class yet; carried as 'other'."
+        "comment": "Safety vent (CID / burst membrane) in the top cap."
       }
     ]
   },

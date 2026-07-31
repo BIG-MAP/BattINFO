@@ -22,6 +22,7 @@ import json
 import os
 import re
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -1547,33 +1548,50 @@ class AuthoringWorkspace:
         ref = self._get_project()
         return ref.funding_block() if ref else None
 
-    def _stamp_project_funding(self, result: dict) -> int:
-        """Stamp the workspace's ``funding`` block onto every record just written.
+    def _record_stamp(self) -> tuple[Callable[[dict], None] | None, dict[str, int]]:
+        """Build the callback that stamps funding + contributors onto a candidate record.
 
-        Called by :meth:`save` after the records are serialized.  Re-stamps the
-        full set each save, so records authored before the project was assigned
-        are back-filled on the next save.  No-op when no project is set (existing
-        records are left untouched — clearing the project does not strip them).
+        The callback mutates a record document in place and is applied by
+        :meth:`save` *before* each record is written (via ``save_record``'s
+        ``stamp`` hook), rather than rewriting the file afterwards.  Doing it on
+        the candidate keeps the content-change decision and the on-disk bytes in
+        agreement: a re-save whose stamped result is byte-identical is reported as
+        ``unchanged`` and is not rewritten.
+
+        The funding block is set when absent; each contributor (a ``Person``
+        carrying the ORCID in ``same_as``) is appended if its ORCID is not already
+        listed.  Both are idempotent and back-fill records authored before the
+        project/contributor was set.  Returns ``(None, counters)`` when neither a
+        project nor a contributor is set.  ``counters`` is updated as the callback
+        runs so :meth:`save` can report how many records the funding block reached.
         """
         block = self._funding_block()
-        if block is None:
-            return 0
-        stamped = 0
-        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
-            for item in result.get(key, []):
-                path = item.get("path") if isinstance(item, dict) else str(item)
-                if not path:
-                    continue
-                p = Path(path)
-                if not p.exists():
-                    continue
-                record = json.loads(p.read_text(encoding="utf-8"))
-                if record.get("funding") == block:
-                    continue
-                record["funding"] = block
-                _atomic_write_text(p, json.dumps(record, indent=2, ensure_ascii=False) + "\n")
-                stamped += 1
-        return stamped
+        people = [(r.orcid_url, r.person_block()) for r in self._get_contributors()]
+        counters = {"funding": 0, "contributor": 0}
+        if block is None and not people:
+            return None, counters
+
+        def stamp(doc: dict) -> None:
+            if block is not None and doc.get("funding") != block:
+                doc["funding"] = block
+                counters["funding"] += 1
+            if people:
+                contributors = doc.get("contributor")
+                if not isinstance(contributors, list):
+                    contributors = []
+                present = {c.get("same_as") for c in contributors if isinstance(c, dict)}
+                added = False
+                for orcid_url, person in people:
+                    if orcid_url in present:
+                        continue
+                    contributors.append(person)
+                    present.add(orcid_url)
+                    added = True
+                if added:
+                    doc["contributor"] = contributors
+                    counters["contributor"] += 1
+
+        return stamp, counters
 
     def contributor(
         self,
@@ -1701,52 +1719,6 @@ class AuthoringWorkspace:
             if r.affiliation:
                 print(f"    {r.summary()} affiliation: {r.affiliation}")
         print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
-
-    def _stamp_contributor(self, result: dict) -> int:
-        """Stamp every workspace contributor onto each record's ``contributor`` list.
-
-        Mirrors :meth:`_stamp_project_funding`: each contributor (a ``Person`` with
-        the ORCID in ``same_as``) is added, in call order, to the top-level
-        ``contributor`` array of every record written, so contributions of any kind
-        are attributable. Idempotent (a record already listing an ORCID is not
-        re-added, so re-saving never duplicates) and back-fills records authored
-        before the contributor was set. No-op when no contributor is set.
-
-        Returns the count of record files modified.
-        """
-        refs = self._get_contributors()
-        if not refs:
-            return 0
-        people = [(r.orcid_url, r.person_block()) for r in refs]
-        stamped = 0
-        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
-            for item in result.get(key, []):
-                path = item.get("path") if isinstance(item, dict) else str(item)
-                if not path:
-                    continue
-                p = Path(path)
-                if not p.exists():
-                    continue
-                record = json.loads(p.read_text(encoding="utf-8"))
-                contributors = record.get("contributor")
-                if not isinstance(contributors, list):
-                    contributors = []
-                present = {
-                    c.get("same_as") for c in contributors if isinstance(c, dict)
-                }
-                added = False
-                for orcid_url, person in people:
-                    if orcid_url in present:
-                        continue
-                    contributors.append(person)
-                    present.add(orcid_url)
-                    added = True
-                if not added:
-                    continue
-                record["contributor"] = contributors
-                _atomic_write_text(p, json.dumps(record, indent=2, ensure_ascii=False) + "\n")
-                stamped += 1
-        return stamped
 
     def convert(self, pattern: str | None = None, fmt: str = "csv") -> builtins.list[Path]:
         """Convert raw cycler files to BDF (Battery Data Format).
@@ -2424,11 +2396,29 @@ class AuthoringWorkspace:
         any record that already exists, so a fresh authoring run cannot silently
         overwrite records left by a previous session.
         """
+        # Stamp the workspace's funding project (grant) and every contributor
+        # (ORCID) onto each record as it is written, for attribution. Applying the
+        # stamp to the candidate before it is saved — rather than rewriting the
+        # file afterwards — lets an unchanged, already-stamped re-save report
+        # [unchanged] and skip the write entirely.
+        stamp_fn, stamp_counts = self._record_stamp()
         result = self._ws.save(
             mode=mode,
             resolve_references=False,
             validation_policy=validation_policy,
+            stamp=stamp_fn,
         )
+        # How many records the funding block actually reached this save: every
+        # candidate is stamped, but only newly-created or genuinely-changed records
+        # are written — an unchanged re-save reaches zero, so it prints nothing.
+        stamped = 0
+        if stamp_counts["funding"]:
+            for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
+                for item in result.get(key, []):
+                    if isinstance(item, dict) and (
+                        item.get("status") == "created" or item.get("content_changed")
+                    ):
+                        stamped += 1
         # Track the exact files written so submit() only sends this session's work.
         self._session_paths = set()
         for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
@@ -2436,11 +2426,6 @@ class AuthoringWorkspace:
                 p = item.get("path") if isinstance(item, dict) else str(item)
                 if p:
                     self._session_paths.add(Path(p))
-
-        # Stamp the workspace's funding project (grant) onto every record written,
-        # and the contributor (ORCID) onto every dataset, for attribution.
-        stamped = self._stamp_project_funding(result)
-        self._stamp_contributor(result)
 
         # Build id -> human name from the finalized in-memory objects so the
         # confirmation shows what was written, not just counts.
