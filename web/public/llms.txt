@@ -20,7 +20,7 @@ a browser gets HTML.
 
 ## Examples
 - Worked records (Python / canonical JSON / JSON-LD): https://battinfo.org/examples
-- Raw JSON-LD artifacts: https://battinfo.org/jsonld/showcase-{slug}.jsonld (Content-Type: application/ld+json)
+- Raw JSON-LD artifacts: https://battinfo.org/jsonld/showcase-{slug}.jsonld (Content-Type: application/ld+json). Each artifact's top-level `@id` is a live persistent IRI you can dereference; the showcase bodies show the current EMMO emission dialect, while some of those archived records predate it.
 - Live record to bootstrap from (a persistent IRI you can dereference today): https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0
 
 ## Authoring and consumption

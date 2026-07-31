@@ -1,7 +1,7 @@
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": "http://www.w3.org/ns/dcat#Dataset",
-  "@id": "https://w3id.org/battinfo/dataset/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
   "dcterms:title": "INR21700-50E cycle-life dataset",
   "dcterms:license": {
     "@id": "CC-BY-4.0"
@@ -11,10 +11,10 @@
   },
   "dcterms:subject": [
     {
-      "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
+      "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
     },
     {
-      "@id": "https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe"
+      "@id": "https://w3id.org/battinfo/test/y9xy-kr0v-y5tn-dfj7"
     }
   ]
 }

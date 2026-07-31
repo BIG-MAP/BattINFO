@@ -5,13 +5,13 @@
     "schema:Action",
     "prov:Activity"
   ],
-  "@id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/test/ygnc-b2j3-bc55-rbn1",
   "schema:name": "LAB-2026-0001 C/10 constant-current discharge",
   "schema:additionalType": "capacity_check",
   "schema:instrument": "Biologic VMP-300",
   "schema:measurementTechnique": "C/10 constant-current discharge",
   "schema:actionStatus": "completed",
   "hasTestObject": {
-    "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
+    "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
   }
 }
