@@ -643,9 +643,10 @@ grounded in the DIGIBAT Discovery-Benchmark and the Cell Design Tool:</p>
 <p>The cylindrical example is authored through <code class="docutils literal notranslate"><span class="pre">create_component_spec(&quot;housing&quot;,</span> <span class="pre">…)</span></code>,
 passes <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code>, emits a <code class="docutils literal notranslate"><span class="pre">CylindricalCase</span></code> node, and is stamped at the
 current <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>. Its case <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> is derived from <code class="docutils literal notranslate"><span class="pre">cell_format</span></code>
-(<code class="docutils literal notranslate"><span class="pre">cylindrical</span></code> → <code class="docutils literal notranslate"><span class="pre">CylindricalCase</span></code>). The safety vent has no dedicated part type or
-EMMO class yet, so it is carried as an <code class="docutils literal notranslate"><span class="pre">other</span></code> part with its role in the comment —
-the label is preserved, pending an upstream <code class="docutils literal notranslate"><span class="pre">SafetyVent</span></code> term.</p>
+(<code class="docutils literal notranslate"><span class="pre">cylindrical</span></code> → <code class="docutils literal notranslate"><span class="pre">CylindricalCase</span></code>). The safety vent is carried as a <code class="docutils literal notranslate"><span class="pre">vent</span></code>
+part — a dedicated <code class="docutils literal notranslate"><span class="pre">parts[].type</span></code> value. It has no EMMO class yet, so it is
+emitted with its authored label and a <code class="docutils literal notranslate"><span class="pre">semantic.hardware_part_unmapped</span></code> warning,
+pending an upstream <code class="docutils literal notranslate"><span class="pre">SafetyVent</span></code> term.</p>
 <p>The <strong>jelly-roll</strong> geometry of a wound cell is authored on the cell-spec’s
 <code class="docutils literal notranslate"><span class="pre">construction</span></code> block (the <code class="docutils literal notranslate"><span class="pre">CellConstruction</span></code> fields above: <code class="docutils literal notranslate"><span class="pre">winding_turns</span></code>,
 <code class="docutils literal notranslate"><span class="pre">cathode_sheet_count</span></code> / <code class="docutils literal notranslate"><span class="pre">anode_sheet_count</span></code> / <code class="docutils literal notranslate"><span class="pre">separator_sheet_count</span></code>,
