@@ -445,6 +445,42 @@ def test_adding_second_contributor_reports_updated(tmp_path: Path, capsys) -> No
     assert "[unchanged]" not in out
 
 
+def test_identical_resave_with_license_reports_unchanged(tmp_path: Path, capsys) -> None:
+    # The workspace-default license is stamped through the same pre-compare path as
+    # funding/contributor (PR #324), so a byte-identical re-save with the license
+    # already set must be a true no-op: [unchanged], identical bytes, no rewrite.
+    ws = _new_ws(tmp_path)
+    ws.license("cc-by-4.0")
+    ws.save()
+    files = _record_files(ws)
+    assert files
+    before = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in files}
+
+    capsys.readouterr()
+    ws.save()
+    out = capsys.readouterr().out
+    assert "[unchanged]" in out
+    assert "[updated]" not in out
+
+    after = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in files}
+    assert after == before, "an unchanged re-save must not rewrite record files"
+
+
+def test_changing_workspace_license_reports_updated(tmp_path: Path, capsys) -> None:
+    # Changing the workspace default license between saves re-stamps every record,
+    # so the re-save must report [updated].
+    ws = _new_ws(tmp_path)
+    ws.license("cc-by-4.0")
+    ws.save()
+
+    ws.license("mit")
+    capsys.readouterr()
+    ws.save()
+    out = capsys.readouterr().out
+    assert "[updated]" in out
+    assert "[unchanged]" not in out
+
+
 # ── Item 8: error-text fixes (phantom command + key-request URL) ────────────────
 
 def test_save_gate_message_uses_real_command() -> None:

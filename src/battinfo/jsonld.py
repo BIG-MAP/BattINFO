@@ -606,6 +606,13 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         people = contributor_to_jsonld(record.get("contributor"))
         if people is not None:
             node["schema:contributor"] = people
+        # Record-level license (FAIR R1.1) → dcterms:license, the same convention
+        # the dataset emitter uses. Cell specs/instances/tests carry it at the
+        # record top level (stamped from the workspace default); datasets carry it
+        # on the dataset body and emit it from dataset_to_jsonld, so this only
+        # reaches the non-dataset record kinds.
+        if record.get("license") and "dcterms:license" not in node:
+            node["dcterms:license"] = {"@id": record["license"]}
     if context == "url" and isinstance(node.get("@context"), dict):
         # Swap the inline records context for the hosted reference. Only the
         # records-context nodes (a dict @context) are affected; material/component
