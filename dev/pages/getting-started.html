@@ -533,7 +533,22 @@ record class and the <code class="docutils literal notranslate"><span class="pre
 </pre></div>
 </div>
 <p>This validates the record, assigns it a stable BattINFO IRI, and writes the
-canonical JSON file to <code class="docutils literal notranslate"><span class="pre">.battinfo/</span></code>.</p>
+canonical JSON to a local <code class="docutils literal notranslate"><span class="pre">.battinfo/</span></code> tree.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The printed IRI is <strong>permanent, but not yet resolvable on the web</strong> —
+opening <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/...</span></code> in a browser returns 404 for
+a record published locally. It becomes resolvable once you publish the
+record to the registry (see <a class="reference internal" href="../guides/06-publish-your-data.html"><span class="doc">Tutorial 6 — Publish your first dataset</span></a>). A local publish mints the identity; the
+registry makes it dereferenceable.</p>
+</div>
+<p><strong>What you just created.</strong> <code class="docutils literal notranslate"><span class="pre">destination=&quot;local&quot;</span></code> writes to a <code class="docutils literal notranslate"><span class="pre">.battinfo/</span></code>
+directory. It is a dot-directory, so a plain <code class="docutils literal notranslate"><span class="pre">ls</span></code> hides it — use <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-a</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>.battinfo/publish/energizer-cr2032/          # one folder per record, named from the spec
+├── index.json
+└── examples/cell-spec/cell-spec-&lt;id&gt;.json   # the canonical record JSON
+</pre></div>
+</div>
 </section>
 <section id="cli-quick-reference">
 <h2>CLI quick reference<a class="headerlink" href="#cli-quick-reference" title="Link to this heading">#</a></h2>
