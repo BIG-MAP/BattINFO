@@ -1024,6 +1024,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "type": "string"
           }
         },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License under which this record and its data are released, as an SPDX license identifier (e.g. \"cc-by-4.0\") or a license URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
+        },
         "funding": {
           "$ref": "#/$defs/Funding"
         },
@@ -1620,6 +1625,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "extinguishing_agent": {
           "type": "string",
           "description": "Usable extinguishing agent for the battery (EU Battery Regulation Annex VI Part A)."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License under which this record and its data are released, as an SPDX license identifier (e.g. \"cc-by-4.0\") or a license URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
         },
         "funding": {
           "$ref": "#/$defs/Funding"
@@ -7514,6 +7524,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "type": "string"
           }
         },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License under which this record and its data are released, as an SPDX license identifier (e.g. \"cc-by-4.0\") or a license URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
+        },
         "funding": {
           "$ref": "#/$defs/Funding"
         },
@@ -8149,6 +8164,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "items": {
             "type": "string"
           }
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License under which this record and its data are released, as an SPDX license identifier (e.g. \"cc-by-4.0\") or a license URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
         },
         "funding": {
           "$ref": "#/$defs/Funding"

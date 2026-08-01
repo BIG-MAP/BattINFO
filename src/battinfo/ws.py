@@ -621,6 +621,39 @@ def _normalize_orcid(value: str) -> str:
     return token
 
 
+# A pragmatic set of the license identifiers Zenodo accepts most often (open
+# data + common software licenses), lower-cased for comparison. This is a
+# recognition list, not a hard allowlist: an unknown identifier is kept verbatim
+# with a warning (see _normalize_license) so a valid-but-unlisted SPDX id is
+# never rejected.
+_KNOWN_LICENSES: frozenset[str] = frozenset({
+    "cc-by-4.0", "cc-by-sa-4.0", "cc-by-nc-4.0", "cc-by-nc-sa-4.0",
+    "cc-by-nd-4.0", "cc-by-nc-nd-4.0", "cc-by-3.0", "cc-by-sa-3.0",
+    "cc0-1.0", "cc-pddc", "pddl-1.0", "odbl-1.0", "odc-by-1.0",
+    "mit", "apache-2.0", "bsd-2-clause", "bsd-3-clause",
+    "gpl-2.0", "gpl-2.0-only", "gpl-3.0", "gpl-3.0-only", "gpl-3.0-or-later",
+    "lgpl-2.1", "lgpl-3.0", "agpl-3.0", "mpl-2.0",
+})
+
+
+def _normalize_license(value: str) -> tuple[str, bool]:
+    """Return ``(license, known)`` for a user-supplied license string.
+
+    A recognised identifier (case-insensitively in :data:`_KNOWN_LICENSES`) is
+    normalised to its canonical lower-cased SPDX-style form; anything else —
+    including a license URL — is kept verbatim so a valid-but-unlisted license is
+    never rejected. ``known`` is False for the kept-verbatim case so the caller
+    can warn.
+    """
+    token = str(value).strip()
+    if not token:
+        raise ValueError("license must be a non-empty string, e.g. ws.license('cc-by-4.0').")
+    lowered = token.lower()
+    if lowered in _KNOWN_LICENSES:
+        return lowered, True
+    return token, False
+
+
 @dataclass
 class ContributorRef:
     """The person contributing records from this workspace, identified by ORCID.
@@ -1147,6 +1180,10 @@ class AuthoringWorkspace:
         self._session_credentials: dict[str, str] = {}
         # name -> Cell, keyed by short_id for test matching
         self._cells_by_short_id: dict[str, Any] = {}
+        # True once cell instances saved in a previous session have been lazily
+        # loaded from .battinfo/records/cell-instance/ into the index above, so a
+        # fresh process can still resolve a cell by serial (day-2 rehydration).
+        self._cells_rehydrated = False
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
@@ -1167,6 +1204,11 @@ class AuthoringWorkspace:
         # .battinfo/workspace.json on first access via _get_contributors().
         self._contributors: builtins.list[ContributorRef] = []
         self._contributors_loaded = False
+        # workspace-level default license (SPDX id or URL), stamped onto every
+        # record at save; lazily loaded from .battinfo/workspace.json via
+        # _get_license().
+        self._license: str | None = None
+        self._license_loaded = False
 
     def _make_engine(self) -> "Workspace":
         """Construct the record engine, choosing the on-disk workspace layout.
@@ -1560,15 +1602,20 @@ class AuthoringWorkspace:
 
         The funding block is set when absent; each contributor (a ``Person``
         carrying the ORCID in ``same_as``) is appended if its ORCID is not already
-        listed.  Both are idempotent and back-fill records authored before the
-        project/contributor was set.  Returns ``(None, counters)`` when neither a
-        project nor a contributor is set.  ``counters`` is updated as the callback
-        runs so :meth:`save` can report how many records the funding block reached.
+        listed; the workspace default license is set to reflect the current value.
+        All are idempotent and back-fill records authored before the
+        project/contributor/license was set — a re-save whose stamped result is
+        byte-identical is reported ``unchanged``, while changing the workspace
+        license re-stamps the new value (reported ``updated``).  Returns
+        ``(None, counters)`` when none of project/contributor/license is set.
+        ``counters`` is updated as the callback runs so :meth:`save` can report
+        how many records each stamp reached.
         """
         block = self._funding_block()
         people = [(r.orcid_url, r.person_block()) for r in self._get_contributors()]
-        counters = {"funding": 0, "contributor": 0}
-        if block is None and not people:
+        lic = self._get_license()
+        counters = {"funding": 0, "contributor": 0, "license": 0}
+        if block is None and not people and not lic:
             return None, counters
 
         def stamp(doc: dict) -> None:
@@ -1590,6 +1637,20 @@ class AuthoringWorkspace:
                 if added:
                     doc["contributor"] = contributors
                     counters["contributor"] += 1
+            if lic:
+                # Datasets carry the license on the dataset body (the existing
+                # slot the emitter reads and where an explicit ws.add(license=)
+                # lands); other record types carry it at the top level. An
+                # explicit per-record dataset license is left untouched — the
+                # workspace default only back-fills records that have none.
+                ds_body = doc.get("dataset")
+                if isinstance(ds_body, dict):
+                    if not ds_body.get("license"):
+                        ds_body["license"] = lic
+                        counters["license"] += 1
+                elif doc.get("license") != lic:
+                    doc["license"] = lic
+                    counters["license"] += 1
 
         return stamp, counters
 
@@ -1719,6 +1780,85 @@ class AuthoringWorkspace:
             if r.affiliation:
                 print(f"    {r.summary()} affiliation: {r.affiliation}")
         print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
+
+    def license(
+        self,
+        license: str | None = None,
+        *,
+        clear: bool = False,
+    ) -> str | None:
+        """Set (or show) the default license stamped onto every record you save.
+
+        Mirrors :meth:`contributor` and :meth:`project`: the value is persisted in
+        ``.battinfo/workspace.json`` and stamped onto each record at ``save()``, so
+        the license travels with the record itself (FAIR R1.1) rather than existing
+        only on the Zenodo deposit. Pass an SPDX license identifier (e.g.
+        ``"cc-by-4.0"``) or a license URL; a recognised identifier is normalised to
+        canonical lower-case, anything else is kept verbatim with a warning.
+
+        Precedence when a record is published: an explicit ``ws.zenodo(license=...)``
+        wins over an explicit ``ws.add(..., license=...)``, which wins over this
+        workspace default.
+
+        Returns the current default (``None`` when unset or after ``clear=True``).
+
+        Examples
+        --------
+        ::
+
+            ws.license("cc-by-4.0")      # set the workspace default
+            ws.license()                  # show the current default
+            ws.license(clear=True)        # remove the default
+        """
+        if clear:
+            self._set_license(None)
+            print("Workspace license cleared.")
+            return None
+
+        # Getter: no license supplied.
+        if license is None:
+            current = self._get_license()
+            if current is None:
+                print('No license set. Set a default license for every record, e.g.:\n'
+                      '    ws.license("cc-by-4.0")')
+                return None
+            print(f"Workspace license: {current}")
+            print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
+            return current
+
+        # Setter.
+        normalized, known = _normalize_license(license)
+        if not known:
+            import warnings  # noqa: PLC0415
+            msg = (
+                f"license {normalized!r} is not a recognised SPDX identifier; keeping it "
+                "verbatim. If this is a typo, use a known id such as 'cc-by-4.0'."
+            )
+            warnings.warn(msg, stacklevel=2)
+            print(f"  WARNING: {msg}")
+        self._set_license(normalized)
+        print(f"Workspace license: {normalized}")
+        print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
+        return normalized
+
+    def _get_license(self) -> str | None:
+        """Current workspace default license, loaded from disk on first access."""
+        if not self._license_loaded:
+            raw = self._load_workspace_state().get("license")
+            self._license = raw if isinstance(raw, str) and raw.strip() else None
+            self._license_loaded = True
+        return self._license
+
+    def _set_license(self, value: str | None) -> None:
+        state = self._load_workspace_state()
+        if not value:
+            state.pop("license", None)
+        else:
+            state.setdefault("schema_version", "0.1.0")
+            state["license"] = value
+        self._save_workspace_state(state)
+        self._license = value or None
+        self._license_loaded = True
 
     def convert(self, pattern: str | None = None, fmt: str = "csv") -> builtins.list[Path]:
         """Convert raw cycler files to BDF (Battery Data Format).
@@ -2696,11 +2836,27 @@ class AuthoringWorkspace:
             ws.save()
             ws.submit()
         """
-        from battinfo.bundle import Cell
-
         ci_dir = self._ws.source_root / "cell-instance"
         if not ci_dir.exists():
             print("  No saved cell instances found.")
+            return 0
+        count = self._index_saved_cells()
+        print(f"  Loaded {count} cell instance(s) into matching index.")
+        return count
+
+    def _index_saved_cells(self) -> int:
+        """Load cell instances saved on disk into the serial → cell index (quiet).
+
+        Shared core of :meth:`reload_cells` and :meth:`_rehydrate_cell_index`;
+        scans ``.battinfo/records/cell-instance/`` and returns the count loaded.
+        Marks the index as rehydrated so :meth:`_rehydrate_cell_index` becomes a
+        no-op afterwards.
+        """
+        from battinfo.bundle import Cell
+
+        self._cells_rehydrated = True
+        ci_dir = self._ws.source_root / "cell-instance"
+        if not ci_dir.exists():
             return 0
 
         count = 0
@@ -2728,8 +2884,20 @@ class AuthoringWorkspace:
             except Exception as exc:
                 print(f"  WARNING: could not load {src.name} -- {exc}")
 
-        print(f"  Loaded {count} cell instance(s) into matching index.")
         return count
+
+    def _rehydrate_cell_index(self) -> None:
+        """Lazily populate the serial → cell index from records saved on disk.
+
+        Cells authored in a previous session live under
+        ``.battinfo/records/cell-instance/`` but are absent from this process's
+        in-memory index, so ``ws.add("test", cell="S1")`` in a fresh session
+        would otherwise fail to resolve them. Runs the disk scan at most once per
+        workspace instance; a no-op when nothing is saved.
+        """
+        if self._cells_rehydrated:
+            return
+        self._index_saved_cells()
 
     def _registry_resources(self, resource_type: str, q: str | None = None) -> builtins.list[dict]:
         """GET /resources?resource_type=... [&q=...] — raw summaries, [] if unreachable."""
@@ -4045,7 +4213,7 @@ class AuthoringWorkspace:
         description: str | None = None,
         creators: builtins.list[dict] | None = None,
         contributors: builtins.list[dict] | None = None,
-        license: str = "cc-by-4.0",
+        license: str | None = None,
         keywords: builtins.list[str] | None = None,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
@@ -4095,11 +4263,19 @@ class AuthoringWorkspace:
 
             result = ws.zenodo(record_id=result.record_id, publish=True)
             ws.submit(doi=result.doi)
+
+        License precedence: an explicit ``license=`` here is authoritative for the
+        deposit; otherwise the workspace default (``ws.license(...)``) is used; if
+        neither is set, ``cc-by-4.0`` is applied (Zenodo requires a license).
         """
         import shutil
         import tempfile
 
         from battinfo.zenodo import ZenodoClient
+
+        # License precedence: explicit arg > workspace default > cc-by-4.0.
+        if license is None:
+            license = self._get_license() or "cc-by-4.0"
 
         # ── Resolve token ──────────────────────────────────────────────────────
         tok = token or os.environ.get(
@@ -4414,6 +4590,12 @@ class AuthoringWorkspace:
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
+
+        # Fall back to the workspace default license (ws.license) when none is
+        # passed, so the preview reflects what publishing would embed. Left empty
+        # when neither is set, which the gold-standard panel then nudges on.
+        if not license:
+            license = self._get_license() or ""
 
         # Collect data filenames using same logic as the real upload (dry run)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-preview-"))
@@ -6761,6 +6943,10 @@ class AuthoringWorkspace:
         string (``"conformant"`` / ``"non-conformant"``; ``"unknown"`` = not assessed)
         or a dict ``{"status": ..., "note": ..., "deviations": [...]}``. Pass the spec
         via ``spec=`` so the conformance binds to it.
+
+        ``license`` sets the license on the dataset(s) produced here, overriding the
+        workspace default (``ws.license``) for these records. Precedence at publish:
+        an explicit ``ws.zenodo(license=...)`` > this ``license=`` > workspace default.
         """
         # Resolve the test type (type=, legacy kind=, or from a linked spec).
         test_type = type or kind
@@ -6930,10 +7116,13 @@ class AuthoringWorkspace:
         return out
 
     def _resolve_cell(self, ref: Any) -> Any:
-        """Resolve a cell reference: this session, then local index, then the registry.
+        """Resolve a cell reference: this session, then records saved on disk, then the registry.
 
         Accepts a ``Cell``, a search result, a serial / short ID, or an IRI.
-        An instance found only in the registry is referenced (not re-published).
+        Serials authored in a previous session are rehydrated from
+        ``.battinfo/records/cell-instance/`` (so resolution works in a fresh
+        process). An instance found only in the registry is referenced (not
+        re-published).
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
         if isinstance(ref, Cell):
@@ -6944,17 +7133,31 @@ class AuthoringWorkspace:
             s = ref.strip()
             if s.startswith("http"):  # an IRI
                 return self._reference_cell({"id": s, "type": "cell"})
-            hit = self._cells_by_short_id.get(s)
             sid = _short_id(s)
-            if hit is None and sid:
-                hit = self._cells_by_short_id.get(sid)
+
+            def _lookup() -> Any:
+                hit = self._cells_by_short_id.get(s)
+                if hit is None and sid:
+                    hit = self._cells_by_short_id.get(sid)
+                return hit
+
+            hit = _lookup()
+            if hit is None:
+                # Day-2: this fresh process has an empty index; load cells saved
+                # to disk in a previous session before falling back to the registry.
+                self._rehydrate_cell_index()
+                hit = _lookup()
             if hit is not None:
                 return hit
             found = self._query_registry_cells(serials=[s])
             if found:
                 return self._reference_cell({**found[0], "type": "cell"})
+            searched = "this session, the records saved under {root}".format(
+                root=self._ws.source_root
+            )
+            searched += ", or the registry" if self._registry_url else " (registry not configured)"
             raise ValueError(
-                f"Could not resolve cell {ref!r} in this session, locally, or the registry. "
+                f"Could not resolve cell {ref!r} in {searched}. "
                 "Create it with ws.add('cell', ...), or check the serial."
             )
         raise TypeError("cell= must be a serial, IRI, Cell, or search result.")

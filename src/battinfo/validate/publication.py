@@ -176,6 +176,33 @@ def _test_condition_issues(data: dict[str, Any], policy: ValidationPolicy) -> Va
     return ValidationReport(issues=tuple(issues), policy=policy)
 
 
+def _license_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
+    """Warn (never block) when the published catalog carries no license — a FAIR R1.1
+    nudge to set one so every served record states its reuse terms. Mirrors the
+    contributor/attribution nudge in tone: a warning pointing at ``ws.license(...)``,
+    not a publish blocker. Only the top catalog node is checked; per-member licenses
+    are propagated from it by the builder."""
+    issues: list[ValidationIssue] = []
+    for path, node in _graph_nodes(data):
+        types = _type_values(node)
+        if "dcat:Catalog" not in types and "schema:DataCatalog" not in types:
+            continue
+        if node.get("schema:license") or node.get("dcterms:license"):
+            continue
+        _append_issue(
+            issues,
+            code="publication.license_missing",
+            severity="warning",  # explicit: a nudge, not a publish blocker
+            path=path,
+            message=(
+                "No license on the published record; consumers cannot tell how they "
+                "may reuse the data (FAIR R1.1). Set a default with "
+                'ws.license("cc-by-4.0") before publishing.'
+            ),
+        )
+    return ValidationReport(issues=tuple(issues), policy=policy)
+
+
 def _is_absolute_uri(value: Any) -> bool:
     if not isinstance(value, str) or not value:
         return False
@@ -379,6 +406,7 @@ def validate_publication_report(
         _shape_issues(data, resolved_policy),
         _shacl_publication_report(data, resolved_policy),
         _test_condition_issues(data, resolved_policy),
+        _license_issues(data, resolved_policy),
         policy=resolved_policy,
     )
 
