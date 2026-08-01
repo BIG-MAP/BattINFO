@@ -99,7 +99,25 @@ record class and the ``publish`` shortcut:
    print(result.canonical_iri)
 
 This validates the record, assigns it a stable BattINFO IRI, and writes the
-canonical JSON file to ``.battinfo/``.
+canonical JSON to a local ``.battinfo/`` tree.
+
+.. note::
+
+   The printed IRI is **permanent, but not yet resolvable on the web** —
+   opening ``https://w3id.org/battinfo/spec/...`` in a browser returns 404 for
+   a record published locally. It becomes resolvable once you publish the
+   record to the registry (see :doc:`Tutorial 6 — Publish your first dataset
+   <../guides/06-publish-your-data>`). A local publish mints the identity; the
+   registry makes it dereferenceable.
+
+**What you just created.** ``destination="local"`` writes to a ``.battinfo/``
+directory. It is a dot-directory, so a plain ``ls`` hides it — use ``ls -a``:
+
+.. code-block:: text
+
+   .battinfo/publish/energizer-cr2032/          # one folder per record, named from the spec
+   ├── index.json
+   └── examples/cell-spec/cell-spec-<id>.json   # the canonical record JSON
 
 
 CLI quick reference

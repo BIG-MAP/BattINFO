@@ -69,6 +69,20 @@ print(result.canonical_iri)
 
 BattINFO mints a stable, opaque IRI for the record and writes it to disk.
 
+That IRI is **permanent, but not yet resolvable on the web** — opening
+`https://w3id.org/battinfo/spec/...` in a browser returns 404 for a record
+published locally. A local publish mints the identity; it becomes
+dereferenceable once you publish the record to the registry (Tutorial 6 below).
+
+The `root=".battinfo/quickstart"` above is a dot-directory, so a plain `ls`
+hides it — use `ls -a`. The record you just created lives here:
+
+```text
+.battinfo/quickstart/
+├── index.json
+└── examples/cell-spec/cell-spec-<id>.json   # the canonical record (read in step 2)
+```
+
 ---
 
 ## 2. See what was produced

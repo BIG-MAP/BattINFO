@@ -77,6 +77,16 @@ export default function DocsPage() {
           <CodeBlock label="python" code={quickstartPython} />
         </div>
         <p className="mt-4 text-sm text-ink-muted">
+          The printed IRI is <strong>permanent, but not yet resolvable on the
+          web</strong> — opening it in a browser returns 404 for a record
+          published locally. A local publish mints the identity; it becomes
+          dereferenceable once you publish the record to the{" "}
+          <Link href="/publish" className="text-brandtext underline">registry</Link>.
+          {" "}<code>destination=&quot;local&quot;</code> writes the record to a{" "}
+          <code>.battinfo/</code> dot-directory (<code>ls -a</code> to see it):{" "}
+          <code>.battinfo/publish/&lt;slug&gt;/examples/cell-spec/cell-spec-&lt;id&gt;.json</code>.
+        </p>
+        <p className="mt-4 text-sm text-ink-muted">
           Full notebook walkthroughs are rendered in the{" "}
           <a href={`${site.reference}/guides/01-concepts.html`} className="text-brandtext underline" target="_blank" rel="noreferrer">
             documentation guides
