@@ -100,9 +100,9 @@ grounded in the DIGIBAT Discovery-Benchmark and the Cell Design Tool:
 
 | Format | Example | Engineering content |
 | --- | --- | --- |
-| coin | `housing-spec-38af-bpnv-1zmm-32hs.json` | CR2032 case + spring + spacer |
-| prismatic | `housing-spec-ypyh-v38v-r276-snmk.json` | LFP 100 Ah aluminium case + Al/Cu terminals + PP seals |
-| cylindrical | `housing-spec-k2q4-dk79-g890-7veq.json` | 21700 nickel-plated steel can + Al/Ni current-collector tabs + top-cap safety vent |
+| coin | `housing-spec/38af-bpnv-1zmm-32hs.json` | CR2032 case + spring + spacer |
+| prismatic | `housing-spec/ypyh-v38v-r276-snmk.json` | LFP 100 Ah aluminium case + Al/Cu terminals + PP seals |
+| cylindrical | `housing-spec/k2q4-dk79-g890-7veq.json` | 21700 nickel-plated steel can + Al/Ni current-collector tabs + top-cap safety vent |
 
 The cylindrical example is authored through `create_component_spec("housing", …)`,
 passes `battinfo validate`, emits a `CylindricalCase` node, and is stamped at the
