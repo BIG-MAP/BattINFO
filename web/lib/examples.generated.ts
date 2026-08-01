@@ -14,7 +14,7 @@ export const cellSpecCanonical = {
     "manufacturer": {
       "type": "Organization",
       "name": "A123",
-      "id": "https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd"
+      "id": "https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7"
     },
     "brand": {
       "type": "Brand",
@@ -186,7 +186,7 @@ export const cellSpecInput = {
     "manufacturer": {
       "type": "Organization",
       "name": "A123",
-      "id": "https://w3id.org/battinfo/organization/9k3e-absq-8131-vyjd"
+      "id": "https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7"
     },
     "category": "battery cell",
     "cell_format": "cylindrical",
