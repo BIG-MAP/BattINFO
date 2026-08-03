@@ -30,7 +30,7 @@ from __future__ import annotations
 import re
 from typing import Any, Optional, Sequence
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 __all__ = [
     "Quantity",
@@ -42,7 +42,37 @@ __all__ = [
     "render_method",
     "compute_facets",
     "ExperimentSyntaxError",
+    "STEP_MODES",
+    "STEP_DIRECTIONS",
+    "TERMINATION_QUANTITIES",
+    "TERMINATION_DIRECTIONS",
 ]
+
+# Controlled vocabularies enforced at construction. These MUST match the enums
+# the save-time JSON Schema (data/schemas/test-protocol.schema.json) applies to a
+# step/termination, so a model that constructs cannot later be rejected at save
+# (the "fail at construction, not at save" principle — see M1 in the 0.8
+# readiness report).
+STEP_MODES: tuple[str, ...] = ("cc", "cv", "cccv", "cp", "cr", "rest", "eis", "scan", "group")
+STEP_DIRECTIONS: tuple[str, ...] = ("charge", "discharge", "hold", "rest", "none")
+TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "duration")
+TERMINATION_DIRECTIONS: tuple[str, ...] = ("below", "above", "elapsed")
+
+
+def _require_member(value: Any, allowed: tuple[str, ...], field: str) -> Any:
+    """Validate ``value`` against a controlled vocabulary at construction time.
+
+    ``None`` passes through (the field is optional); any other value must be one
+    of ``allowed`` or a ``ValueError`` naming the valid values is raised. This is
+    what makes the model reject a bad enum where it is authored instead of at
+    ``ws.save()``."""
+    if value is None:
+        return value
+    if value not in allowed:
+        raise ValueError(
+            f"{field} must be one of {list(allowed)}; got {value!r}."
+        )
+    return value
 
 
 class ExperimentSyntaxError(ValueError):
@@ -98,6 +128,16 @@ class Termination(BaseModel):
     unit: str
     direction: Optional[str] = None    # below | above | elapsed (None for duration)
 
+    @field_validator("quantity")
+    @classmethod
+    def _check_quantity(cls, value: Any) -> Any:
+        return _require_member(value, TERMINATION_QUANTITIES, "Termination.quantity")
+
+    @field_validator("direction")
+    @classmethod
+    def _check_direction(cls, value: Any) -> Any:
+        return _require_member(value, TERMINATION_DIRECTIONS, "Termination.direction")
+
 
 class Step(BaseModel):
     """One segment of a test method — a charge/discharge/hold/rest/scan step with
@@ -115,6 +155,16 @@ class Step(BaseModel):
     # group-only
     count: Optional[int] = None
     steps: list["Step"] = Field(default_factory=list)
+
+    @field_validator("mode")
+    @classmethod
+    def _check_mode(cls, value: Any) -> Any:
+        return _require_member(value, STEP_MODES, "Step.mode")
+
+    @field_validator("direction")
+    @classmethod
+    def _check_direction(cls, value: Any) -> Any:
+        return _require_member(value, STEP_DIRECTIONS, "Step.direction")
 
 
 Step.model_rebuild()

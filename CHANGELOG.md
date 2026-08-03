@@ -24,6 +24,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`Test.conditions`**: the `Test` model now carries the open, snake_case
+  per-execution conditions map (temperature, voltage window, C-rate, frequency
+  range, ...) that the test JSON Schema already defined but the model could not
+  express, so conditions can be authored through the model and
+  `Workspace.test(conditions=...)`. Values may be scalars, strings, or
+  `{value, unit}` quantities; they round-trip through `to_record`/`from_record`
+  and export to JSON-LD as `schema:PropertyValue` nodes under
+  `schema:additionalProperty`.
+
 - **EMMO label companion (`assets/vocab/emmo-labels.ttl`)**: a generated
   `skos:prefLabel` triple for every EMMO-family term the record emitters use
   (curated property classes, units, entity-map battery classes, quantity-node
@@ -137,6 +146,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Bare string assigned to a `str | list[str]` field no longer explodes into
+  characters (M2)**: `spec.specification_comment = "R2032"` used to serialise as
+  `["R","2","0","3","2"]` and pass strict validation; `dataset.same_as =
+  "https://doi.org/..."` produced one `not a 'uri'` error per character. A
+  shared `_StrList` coercion (BeforeValidator + a `BundleJsonModel.__setattr__`
+  guard) now wraps a bare string as `[value]` at construction and on assignment
+  across every such field (CellSpec, Cell, TestSpec, Test, Dataset, Artifact).
+- **Model enums now fail at construction, not late at `ws.save()` (M1)**: the
+  `Step`, `Termination`, `Test`, conformance (`Conformance`/`Deviation`) and
+  `Artifact` models validate their controlled vocabularies where a value is
+  authored, with an error naming the valid values, and are drift-guarded against
+  the save-time JSON Schemas. Previously `Step(mode="discharge")`,
+  `Conformance(status="non_conformant")`, and others constructed fine but were
+  rejected only at save. Affected fields: `Step.mode`, `Step.direction`,
+  `Termination.quantity`, `Termination.direction`, `Test.status`,
+  `Conformance.status`, `Deviation.category`, `Artifact.role`.
 - **The site's own /docs quickstart crashed verbatim** (`cell_format=`, which
   `CellSpec` rejects) — fixed, and the snippet drift suite now EXECUTES every
   self-contained Python snippet on the site, so a non-running example fails CI.

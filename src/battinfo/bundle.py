@@ -4,9 +4,9 @@ import copy
 import difflib
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, ClassVar, Mapping, Self
+from typing import Annotated, Any, ClassVar, Mapping, Self
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field, field_validator, model_validator
 
 from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
@@ -587,6 +587,17 @@ def _string_list(value: Any) -> list[str]:
     if isinstance(value, list):
         return [str(item) for item in value if isinstance(item, (str, int, float))]
     return []
+
+
+# A ``str | list[str]``-shaped field: a bare string is wrapped as ``[value]``
+# rather than iterated into a list of single characters. Applied to every list
+# field authors might set to a single string (M2 in the 0.8 readiness report:
+# ``spec.specification_comment = "R2032"`` used to serialise as
+# ``["R","2","0","3","2"]`` and pass validation). The BeforeValidator fires at
+# construction; on assignment ``BundleJsonModel.__setattr__`` performs the same
+# wrap (and Artifact, which sets ``validate_assignment=True``, gets it for free),
+# so the character-explosion footgun is closed everywhere.
+_StrList = Annotated[list[str], BeforeValidator(_string_list)]
 
 
 def _copy_identifier(value: Any) -> Any:
@@ -1210,6 +1221,20 @@ class BundleJsonModel(BaseModel):
     schema_version: str = SCHEMA_VERSION
     kind: str
 
+    def __setattr__(self, name: str, value: Any) -> None:
+        # M2: wrap a bare string assigned to a ``list[str]``/``_StrList`` field as
+        # ``[value]`` instead of letting the eventual ``list(...)`` serialize it as
+        # a list of single characters (``spec.specification_comment = "R2032"`` ->
+        # ``["R","2","0","3","2"]``). Construction is already covered by the
+        # ``_StrList`` BeforeValidator; this closes the same footgun on assignment
+        # without turning on ``validate_assignment`` (which would re-run the
+        # None-guard-free after-validators and recurse).
+        if isinstance(value, str):
+            field = type(self).model_fields.get(name)
+            if field is not None and field.annotation == list[str]:
+                value = [value]
+        super().__setattr__(name, value)
+
     def to_json(self) -> dict[str, Any]:
         return self.model_dump(mode="json", exclude_none=True)
 
@@ -1274,10 +1299,10 @@ class CellSpec(BundleJsonModel):
     electrolyte_spec_id: str | None = Field(default=None, description="IRI of a standalone electrolyte-spec record.")
     separator_spec_id: str | None = Field(default=None, description="IRI of a standalone separator-spec record.")
     housing_spec_id: str | None = Field(default=None, description="IRI of a standalone housing-spec record.")
-    specification_comment: list[str] = Field(default_factory=list, description="Free-text notes attached to the library specification block (distinct from record-level comment).")
+    specification_comment: _StrList = Field(default_factory=list, description="Free-text notes attached to the library specification block (distinct from record-level comment).")
     bibliography: dict[str, Any] = Field(default_factory=dict, description="Bibliographic links for this product (e.g. subject_of article references).")
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, source_file=, citation=, retrieved_at=, ...).")
-    comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
     # Audit note (model-as-source-of-truth): the cell-spec schema also permits `brand`,
     # `battery_category`, `category`, `url`, `additional_type`, `manufacturing_place`, `editorial`,
     # `hazardous_substances`, `critical_raw_materials`, `extinguishing_agent`, `funding`, and
@@ -1737,9 +1762,9 @@ class Cell(BundleJsonModel):
     expires_at: int | str | None = Field(default=None, description="Use-by / expiry time: Unix seconds, ISO 8601 string, or datetime/date.")
     measured: dict[str, Any] = Field(default_factory=dict, description="Per-cell measured values as name -> {value, unit} quantity objects (e.g. mass, initial capacity).")
     conformance: Conformance | None = Field(default=None, description="Conformance verdict of this cell against its spec (EARL-mapped status plus deviations).")
-    dataset_ids: list[str] = Field(default_factory=list, description="IRIs of datasets recorded on this cell (authoring alias: dataset_id= for a single one).")
+    dataset_ids: _StrList = Field(default_factory=list, description="IRIs of datasets recorded on this cell (authoring alias: dataset_id= for a single one).")
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
-    comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
     def __init__(self, cell_spec: CellSpec | None = None, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly CellInstanceInput).
@@ -1898,6 +1923,33 @@ DEVIATION_CATEGORIES = (
     "other",
 )
 
+# Controlled vocabularies the save-time JSON Schemas enforce. Mirroring them on
+# the models makes an invalid enum fail where it is authored (construction) with
+# a clear message, not late at ``ws.save()`` (M1 in the 0.8 readiness report).
+CONFORMANCE_STATUSES = ("conformant", "non-conformant", "unknown")
+TEST_STATUSES = ("planned", "running", "completed", "aborted", "other")
+ARTIFACT_ROLES = (
+    "source_protocol",
+    "executed_protocol",
+    "vendor_export",
+    "simulation_input",
+    "other",
+)
+
+
+def _require_enum(value: Any, allowed: tuple[str, ...], field: str) -> Any:
+    """Validate ``value`` against a controlled vocabulary at construction time.
+
+    ``None`` passes through; any other value must be in ``allowed`` or a
+    ``ValueError`` naming the valid values is raised."""
+    if value is None:
+        return value
+    if value not in allowed:
+        raise ValueError(
+            f"{field} must be one of {list(allowed)}; got {value!r}."
+        )
+    return value
+
 
 class Deviation(BaseModel):
     """A single way a thing departed from the spec that governs it.
@@ -1913,6 +1965,11 @@ class Deviation(BaseModel):
     duration_s: int | None = None
     step_index: int | None = None
     impact: str | None = None
+
+    @field_validator("category")
+    @classmethod
+    def _check_category(cls, value: Any) -> Any:
+        return _require_enum(value, DEVIATION_CATEGORIES, "Deviation.category")
 
     @classmethod
     def from_record(cls, data: Mapping[str, Any]) -> "Deviation":
@@ -1970,6 +2027,11 @@ class Conformance(BaseModel):
     note: str | None = None
     deviations: list[Deviation] = Field(default_factory=list)
 
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, value: Any) -> Any:
+        return _require_enum(value, CONFORMANCE_STATUSES, "Conformance.status")
+
     @classmethod
     def from_record(cls, data: Mapping[str, Any]) -> "Conformance":
         deviations = [
@@ -2016,7 +2078,7 @@ class Artifact(BaseModel):
 
     BattINFO carries and references the file but does not interpret it as
     authority; ``conforms_to`` points downstream tooling at the format spec."""
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     role: str                              # source_protocol | executed_protocol | vendor_export | simulation_input | other
     format: str                            # key in data/vocab/test-method/artifact-formats.json
@@ -2025,8 +2087,13 @@ class Artifact(BaseModel):
     sha256: str | None = None
     byte_size: int | None = None
     conforms_to: str | None = None
-    generated: list[str] = Field(default_factory=list)
+    generated: _StrList = Field(default_factory=list)
     generated_from: str | None = None
+
+    @field_validator("role")
+    @classmethod
+    def _check_role(cls, value: Any) -> Any:
+        return _require_enum(value, ARTIFACT_ROLES, "Artifact.role")
 
     @classmethod
     def from_record(cls, data: Mapping[str, Any]) -> "Artifact":
@@ -2061,7 +2128,7 @@ class TestSpec(BundleJsonModel):
     # Actionable layer.
     artifacts: list[Artifact] = Field(default_factory=list, description="Machine-actionable protocol artifacts (e.g. cycler programs, PyBaMM experiments) attached to this spec.")
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
-    comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
     def __init__(self, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly TestSpecInput). The discriminator
@@ -2252,18 +2319,19 @@ class Test(BundleJsonModel):
     cell_instance_id: str | None = Field(default=None, description="IRI of the physical cell under test (authoring alias: cell_id=; required at save).")
     cell: Cell | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id; may also be passed positionally).")
     description: str | None = Field(default=None, description="Free-text description of this execution.")
-    status: str | None = Field(default=None, description="Execution status (e.g. 'running', 'completed', 'aborted').")
+    status: str | None = Field(default=None, description="Execution status: planned, running, completed, aborted, or other.")
+    conditions: dict[str, Any] = Field(default_factory=dict, description="Per-execution test conditions and parameters as open snake_case name -> value (e.g. temperature, voltage window, C-rate, frequency range); values may be scalars, strings, or {value, unit} quantities.")
     protocol: ProtocolInfo = Field(default_factory=ProtocolInfo, description="Name and optional URL of the protocol followed (authoring aliases: protocol_name=, protocol_url=).")
     instrument: str | None = Field(default=None, description="Instrument/cycler the test ran on (authoring alias: instrument_name=).")
     equipment_id: str | None = Field(default=None, description="IRI of the equipment unit the test ran on (https://w3id.org/battinfo/equipment/{uid}).")
     channel_id: str | None = Field(default=None, description="IRI of the equipment channel the test ran on (https://w3id.org/battinfo/channel/{uid}).")
     started_at: int | str | None = Field(default=None, description="When the test started: Unix seconds, ISO 8601 string, or datetime/date.")
     ended_at: int | str | None = Field(default=None, description="When the test ended: Unix seconds, ISO 8601 string, or datetime/date.")
-    dataset_ids: list[str] = Field(default_factory=list, description="IRIs of datasets produced by this test.")
+    dataset_ids: _StrList = Field(default_factory=list, description="IRIs of datasets produced by this test.")
     conformance: TestConformance | None = Field(default=None, description="Conformance of the execution against its test spec (status plus deviations).")
     artifacts: list[Artifact] = Field(default_factory=list, description="Machine-actionable artifacts used in this execution (e.g. the cycler program as run).")
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
-    comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
     def __init__(self, cell: Cell | None = None, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly TestInput).
@@ -2312,6 +2380,11 @@ class Test(BundleJsonModel):
         if isinstance(value, str):
             return {"name": value}
         return value
+
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, value: Any) -> Any:
+        return _require_enum(value, TEST_STATUSES, "Test.status")
 
     @model_validator(mode="after")
     def _populate_links(self) -> Self:
@@ -2378,6 +2451,9 @@ class Test(BundleJsonModel):
         artifacts = record.get("artifacts")
         if not isinstance(artifacts, list):
             artifacts = []
+        conditions = test.get("conditions")
+        if not isinstance(conditions, Mapping):
+            conditions = {}
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(test["id"]),
@@ -2387,6 +2463,7 @@ class Test(BundleJsonModel):
             cell_instance_id=str(test["cell_id"]),
             description=test.get("description"),
             status=test.get("status"),
+            conditions=dict(conditions),
             protocol=ProtocolInfo(
                 name=test.get("protocol_name"),
                 url=test.get("protocol_url"),
@@ -2428,6 +2505,8 @@ class Test(BundleJsonModel):
             record["test"]["protocol_id"] = self.protocol_id
         if self.status is not None:
             record["test"]["status"] = self.status
+        if self.conditions:
+            record["test"]["conditions"] = dict(self.conditions)
         if self.protocol.name is not None:
             record["test"]["protocol_name"] = self.protocol.name
         if self.protocol.url is not None:
@@ -2465,16 +2544,16 @@ class Dataset(BundleJsonModel):
     name: str | None = Field(default=None, description="Dataset title (authoring alias: title=).")
     description: str | None = Field(default=None, description="Free-text description of the dataset contents.")
     license: str | None = Field(default=None, description="License URL (e.g. a creativecommons.org license).")
-    same_as: list[str] = Field(default_factory=list, validation_alias=AliasChoices("same_as", "sameAs"), description="URLs of other representations of this same dataset.")
-    additional_type: list[str] = Field(default_factory=list, validation_alias=AliasChoices("additional_type", "additionalType"), description="Additional schema.org/ontology type IRIs for discovery.")
+    same_as: _StrList = Field(default_factory=list, validation_alias=AliasChoices("same_as", "sameAs"), description="URLs of other representations of this same dataset.")
+    additional_type: _StrList = Field(default_factory=list, validation_alias=AliasChoices("additional_type", "additionalType"), description="Additional schema.org/ontology type IRIs for discovery.")
     version: str | None = Field(default=None, description="Dataset version label.")
-    keywords: list[str] = Field(default_factory=list, description="Free-text discovery keywords.")
+    keywords: _StrList = Field(default_factory=list, description="Free-text discovery keywords.")
     creators: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("creators", "creator"), description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation.")
     publisher: dict[str, Any] | None = Field(default=None, description="Publishing agent (name plus optional url/ROR sameAs).")
     funders: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("funders", "funder"), description="Funding agents (name plus optional ROR sameAs).")
     citations: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("citations", "citation"), description="Bibliographic references describing this dataset (list; a flat string citation= is routed to provenance instead).")
-    measurement_techniques: list[str] = Field(default_factory=list, validation_alias=AliasChoices("measurement_techniques", "measurementTechnique"), description="Measurement techniques used (e.g. 'electrochemical cycling').")
-    measurement_methods: list[str] = Field(default_factory=list, validation_alias=AliasChoices("measurement_methods", "measurementMethod"), description="Measurement methods used (e.g. 'constant current').")
+    measurement_techniques: _StrList = Field(default_factory=list, validation_alias=AliasChoices("measurement_techniques", "measurementTechnique"), description="Measurement techniques used (e.g. 'electrochemical cycling').")
+    measurement_methods: _StrList = Field(default_factory=list, validation_alias=AliasChoices("measurement_methods", "measurementMethod"), description="Measurement methods used (e.g. 'constant current').")
     variable_measured: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("variable_measured", "variableMeasured"), description="Measured variables; dicts with name, unit_text, and optional QUDT sameAs.")
     is_accessible_for_free: bool | None = Field(default=None, validation_alias=AliasChoices("is_accessible_for_free", "isAccessibleForFree"), description="Whether the data is accessible without payment.")
     conditions_of_access: str | None = Field(default=None, validation_alias=AliasChoices("conditions_of_access", "conditionsOfAccess"), description="Access conditions statement (e.g. 'open', 'on request').")
@@ -2488,19 +2567,19 @@ class Dataset(BundleJsonModel):
     published_at: int | str | None = Field(default=None, validation_alias=AliasChoices("published_at", "datePublished"), description="Publication time; defaults to created_at.")
     temporal_coverage: str | None = Field(default=None, validation_alias=AliasChoices("temporal_coverage", "temporalCoverage"), description="Time interval the data covers (ISO 8601 interval, e.g. '2026-01-01/2026-01-31').")
     spatial_coverage: str | None = Field(default=None, validation_alias=AliasChoices("spatial_coverage", "spatialCoverage"), description="Place the data was collected (free text).")
-    is_based_on: list[str] = Field(default_factory=list, validation_alias=AliasChoices("is_based_on", "isBasedOn"), description="URLs of resources this dataset derives from (e.g. a protocol).")
+    is_based_on: _StrList = Field(default_factory=list, validation_alias=AliasChoices("is_based_on", "isBasedOn"), description="URLs of resources this dataset derives from (e.g. a protocol).")
     included_in_data_catalog: str | dict[str, Any] | None = Field(default=None, validation_alias=AliasChoices("included_in_data_catalog", "includedInDataCatalog"), description="Catalog this dataset is listed in (URL or DataCatalog object).")
     main_entity: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("main_entity", "mainEntity"), description="Primary content entities (e.g. a CSVW Table with its tableSchema).")
     distributions: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("distributions", "distribution"), description="DataDownload entries (content_url, encoding_format, checksum); synthesized from download_url/data_format/checksum when omitted.")
     checksum: ChecksumInfo = Field(default_factory=ChecksumInfo, description="Checksum of the primary distribution (authoring aliases: checksum_algorithm=, checksum_value=).")
     cell_instance_id: str | None = Field(default=None, description="IRI of the primary cell this data was measured on (emitted first in the record's about list).")
     test_id: str | None = Field(default=None, description="IRI of the primary test that produced this data (emitted first in the record's about list).")
-    related_cell_ids: list[str] = Field(default_factory=list, description="IRIs of additional related cells beyond the primary one.")
-    related_test_ids: list[str] = Field(default_factory=list, description="IRIs of additional related tests beyond the primary one.")
+    related_cell_ids: _StrList = Field(default_factory=list, description="IRIs of additional related cells beyond the primary one.")
+    related_test_ids: _StrList = Field(default_factory=list, description="IRIs of additional related tests beyond the primary one.")
     test: Test | None = Field(default=None, exclude=True, repr=False, description="Linked test object (alternative to test_id).")
     cell: Cell | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id).")
     source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, curated_by=, ...).")
-    comment: list[str] = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
 
     def __init__(self, path: str | Path | None = None, /, **data: Any) -> None:
         if path is not None and "dataset_path" not in data and "path" not in data:
@@ -2553,19 +2632,6 @@ class Dataset(BundleJsonModel):
     @classmethod
     def _coerce_identifier(cls, value: Any) -> Any:
         return _copy_identifier(value)
-
-    @field_validator(
-        "same_as",
-        "additional_type",
-        "keywords",
-        "measurement_techniques",
-        "measurement_methods",
-        "is_based_on",
-        mode="before",
-    )
-    @classmethod
-    def _coerce_string_lists(cls, value: Any) -> list[str]:
-        return _string_list(value)
 
     @field_validator("creators", mode="before")
     @classmethod
@@ -2907,7 +2973,7 @@ class BattinfoBundle(BundleJsonModel):
     cell_instance: Cell
     test: Test
     dataset: Dataset
-    comment: list[str] = Field(default_factory=list)
+    comment: _StrList = Field(default_factory=list)
 
     def manifest_json(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
