@@ -9,10 +9,96 @@ referenced from many cells (dedup), without rewiring the cell-spec fleet.
 
 from __future__ import annotations
 
+import json
 import warnings
+from functools import lru_cache
+from importlib import resources
+from pathlib import Path
 from typing import Any, Mapping
 
 from battinfo._workspace import _stable_uid
+
+# ── Level 1: MaterialKind vocabulary ────────────────────────────────────────────
+#
+# Kinds are a shipped, versioned, curated vocabulary (governed by PR), NOT a
+# user-authored record type — the genome's cross-dataset promise requires every
+# publisher to converge on ONE identifier for "graphite". A material-spec's
+# required ``kind`` resolves through here (aliases included); an unresolvable kind
+# is a save-time error listing the valid keys, the same UX as any controlled field.
+
+
+def _load_material_kinds_file() -> dict[str, Any]:
+    packaged_path = resources.files("battinfo").joinpath("data", "vocab", "material_kinds.json")
+    if packaged_path.is_file():
+        with packaged_path.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+    repo_root = Path(__file__).resolve().parents[2]
+    asset_path = repo_root.joinpath("src", "battinfo", "data", "vocab", "material_kinds.json")
+    if asset_path.is_file():
+        with asset_path.open("r", encoding="utf-8") as handle:
+            return json.load(handle)
+    return {"version": "0", "families": [], "kinds": {}}
+
+
+@lru_cache(maxsize=1)
+def _material_kinds_data() -> dict[str, Any]:
+    return _load_material_kinds_file()
+
+
+@lru_cache(maxsize=1)
+def _material_kind_alias_index() -> dict[str, str]:
+    """Map every lowercased key/label/alias to its canonical kind key."""
+    index: dict[str, str] = {}
+    kinds = _material_kinds_data().get("kinds", {})
+    for key, entry in kinds.items():
+        index[key.lower()] = key
+        label = entry.get("label")
+        if isinstance(label, str) and label.strip():
+            index.setdefault(label.strip().lower(), key)
+        for alias in entry.get("aliases", []) or []:
+            if isinstance(alias, str) and alias.strip():
+                index.setdefault(alias.strip().lower(), key)
+    return index
+
+
+def material_kinds() -> dict[str, Any]:
+    """Return the curated MaterialKind vocabulary (Level 1), as a deep copy.
+
+    Shape: ``{"version", "families": [...], "kinds": {"<key>": {"label",
+    "family", "formula"?, "chemsub"?, "emmo"?, "aliases": [...],
+    "reference_properties"?}}}``. ``chemsub`` is the material's canonical
+    semantic identity — its chemical-substance domain-ontology class IRI.
+    """
+    import copy
+
+    return copy.deepcopy(_material_kinds_data())
+
+
+def material_kind_keys() -> list[str]:
+    """Sorted list of canonical MaterialKind keys (the valid ``kind`` values)."""
+    return sorted(_material_kinds_data().get("kinds", {}))
+
+
+def resolve_material_kind(value: Any) -> str | None:
+    """Resolve a kind key / label / alias to its canonical key, or ``None``.
+
+    Case-insensitive; tolerant of the aliases in the vocabulary ("NMC 811",
+    "LiNi0.8Mn0.1Co0.1O2", "Si/Gr"). Returns ``None`` for an unknown value so
+    callers can raise a helpful save-time error.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return _material_kind_alias_index().get(value.strip().lower())
+
+
+def material_kind(value: Any) -> dict[str, Any] | None:
+    """Return the vocabulary entry for a kind key/alias (with its canonical key), or ``None``."""
+    key = resolve_material_kind(value)
+    if key is None:
+        return None
+    entry = dict(_material_kinds_data()["kinds"][key])
+    entry["key"] = key
+    return entry
 
 # Cell-cell-specific composition fractions are not intrinsic material properties,
 # so they are dropped when lifting an embedded holder to a standalone spec.

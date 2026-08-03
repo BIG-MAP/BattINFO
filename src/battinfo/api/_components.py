@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import functools
 from pathlib import Path
-from typing import Any, Literal, Mapping
+from typing import Any, Callable, Literal, Mapping
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
@@ -54,6 +54,8 @@ class MaterialSpecInput(BaseModel):
     id: str | None = None
     uid: str | None = None
     name: str
+    kind: str | None = None
+    grade: str | None = None
     material_class: str | None = None
     electrode_polarity: str | None = None
     formula: str | None = None
@@ -83,10 +85,15 @@ class MaterialInput(BaseModel):
     uid: str | None = None
     material_spec_id: str
     name: str | None = None
-    lot_id: str | None = None
+    lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
     batch_id: str | None = None
     supplier: str | dict[str, Any] | None = None
     received_date: int | str | None = None
+    opened_date: int | str | None = None
+    expires_at: int | str | None = None
+    amount: dict[str, Any] | None = None
+    storage: str | None = None
+    processing: dict[str, Any] | None = None
     dataset_ids: list[str] = Field(default_factory=list)
     property: dict[str, Any] = Field(default_factory=dict)
     source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = "lab"
@@ -112,7 +119,62 @@ def _org_value(value: str | dict[str, Any] | None) -> dict[str, Any] | None:
     return None
 
 
+def _resolve_kind_or_raise(explicit: str | None, *fallback_names: str | None) -> str | None:
+    """Resolve a material ``kind`` to its canonical key.
+
+    An explicit kind that does not resolve is a hard error listing the valid
+    keys (the same UX as any controlled field). When no kind is given, fall back
+    to resolving the material name/product through the alias table (tolerant
+    authoring: ``create_material_spec(name="LFP")`` derives ``kind="lfp"``).
+    Returns ``None`` when nothing resolves, so the required-field schema check
+    reports the missing kind with the standard message.
+    """
+    from battinfo.materials import material_kind_keys, resolve_material_kind
+
+    if explicit is not None and str(explicit).strip():
+        resolved = resolve_material_kind(explicit)
+        if resolved is None:
+            raise ValueError(
+                f"Unknown material kind {explicit!r}. Valid kinds: "
+                f"{', '.join(material_kind_keys())}. "
+                "See battinfo.material_kind_keys() / battinfo.material_kinds()."
+            )
+        return resolved
+    for candidate in fallback_names:
+        resolved = resolve_material_kind(candidate)
+        if resolved is not None:
+            return resolved
+    return None
+
+
+def _material_spec_identity_uid(draft: MaterialSpecInput, kind_key: str | None) -> str:
+    """Deterministic content-derived uid for a material spec (fixes H1).
+
+    Mirrors the engine's other five types: the IRI is minted from the spec's
+    identity — normalized (manufacturer, product, grade) — so re-authoring the
+    same product is a no-op, never a duplicate. Lab-synthesized materials use the
+    lab as manufacturer and the recipe/batch-family name as product. Processing
+    is NOT part of identity. There is no random-id path.
+    """
+    from battinfo.entities import stable_uid
+
+    org = _org_value(draft.manufacturer)
+    manufacturer = (org or {}).get("name") if org else None
+    product = draft.product_id or draft.name
+    seed = "::".join(
+        [
+            "material-spec",
+            (manufacturer or "unknown-manufacturer").strip().lower(),
+            (product or "unknown-product").strip().lower(),
+            (draft.grade or "").strip().lower(),
+            kind_key or "",
+        ]
+    )
+    return stable_uid(seed)
+
+
 def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
+    kind_key = _resolve_kind_or_raise(draft.kind, draft.name, draft.product_id)
     if draft.id is not None:
         if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.id):
             raise ValueError("material spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -121,7 +183,13 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         entity_id = draft.id
         _, dashed_uid = _iri_tail(entity_id)
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
+        # Deterministic identity: an explicit uid is honored; otherwise the uid is
+        # derived from the spec's content so a re-run lands on the same IRI.
+        dashed_uid = (
+            _normalized_dashed_uid(draft.uid)
+            if draft.uid is not None
+            else _material_spec_identity_uid(draft, kind_key)
+        )
         entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
     spec: dict[str, Any] = {
@@ -129,6 +197,10 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         "short_id": dashed_uid.replace("-", "")[:6],
         "name": draft.name,
     }
+    if kind_key is not None:
+        spec["kind"] = kind_key
+    if draft.grade is not None:
+        spec["grade"] = draft.grade
     for field_name in (
         "material_class",
         "electrode_polarity",
@@ -180,7 +252,17 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
         entity_id = draft.id
         _, dashed_uid = _iri_tail(entity_id)
     else:
-        dashed_uid = _normalized_dashed_uid(draft.uid)
+        # Deterministic identity from (spec_id, lot): re-authoring the same lot is
+        # a no-op. An explicit uid is honored; there is no random-id path.
+        if draft.uid is not None:
+            dashed_uid = _normalized_dashed_uid(draft.uid)
+        else:
+            from battinfo.entities import stable_uid
+
+            lot = draft.lot_id or draft.batch_id or draft.name or ""
+            dashed_uid = stable_uid(
+                "::".join(["material", draft.material_spec_id.strip(), lot.strip()])
+            )
         entity_id = f"https://w3id.org/battinfo/material/{dashed_uid}"
 
     material: dict[str, Any] = {
@@ -188,16 +270,22 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
         "material_spec_id": draft.material_spec_id,
         "short_id": dashed_uid.replace("-", "")[:6],
     }
-    for field_name in ("name", "lot_id", "batch_id"):
+    for field_name in ("name", "lot_id", "batch_id", "storage"):
         value = getattr(draft, field_name)
         if value is not None:
             material[field_name] = value
     supplier = _org_value(draft.supplier)
     if supplier is not None:
         material["supplier"] = supplier
-    if draft.received_date is not None:
-        received = _to_unix_time(draft.received_date)
-        material["received_date"] = received if received is not None else draft.received_date
+    for date_field in ("received_date", "opened_date", "expires_at"):
+        raw = getattr(draft, date_field)
+        if raw is not None:
+            converted = _to_unix_time(raw)
+            material[date_field] = converted if converted is not None else raw
+    if draft.amount is not None:
+        material["amount"] = draft.amount
+    if draft.processing:
+        material["processing"] = draft.processing
     if draft.dataset_ids:
         for dataset_id in draft.dataset_ids:
             if not DATASET_IRI_RE.fullmatch(dataset_id):
@@ -276,6 +364,7 @@ def save_material_spec(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a material-spec from either draft payload or canonical record."""
     if isinstance(draft, (str, Path)):
@@ -288,6 +377,7 @@ def save_material_spec(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, MaterialSpecInput):
         record = _record_from_material_spec(draft)
@@ -306,6 +396,7 @@ def save_material_spec(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -319,6 +410,7 @@ def save_material(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Save a material (instance) from either draft payload or canonical record."""
     if isinstance(draft, (str, Path)):
@@ -331,6 +423,7 @@ def save_material(
             validate=validate,
             validation_policy=validation_policy,
             dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, MaterialInput):
         record = _record_from_material(draft)
@@ -349,6 +442,7 @@ def save_material(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        stamp=stamp,
     )
 
 

@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/kg0e-vqce-3439-bnfk",
     "short_id": "kg0evq",
     "name": "Zinc",
+    "kind": "zinc",
     "material_class": "metal_electrode",
     "electrode_polarity": "negative",
     "formula": "Zn",

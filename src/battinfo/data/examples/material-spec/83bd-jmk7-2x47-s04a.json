@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
     "short_id": "83bdjm",
     "name": "LNMO",
+    "kind": "lnmo",
     "material_class": "active_material",
     "electrode_polarity": "positive",
     "formula": "LiNi0.5Mn1.5O4",

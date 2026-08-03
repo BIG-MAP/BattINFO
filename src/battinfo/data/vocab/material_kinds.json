@@ -1,0 +1,279 @@
+{
+  "version": "0.1.0",
+  "description": "Curated, shipped vocabulary of generic material kinds (Level 1 of the three-level materials model). A kind is the universal reference identity of a material (graphite, LFP, NMC811, ...): the aggregation axis of the Battery Genome. Every material-spec carries a required `kind`; every material instance links a spec. Each kind's canonical semantic identity is its chemical-substance domain-ontology class IRI (`chemsub`); the battinfo `key` is the ergonomic handle. Kinds missing an ontology class omit `chemsub` and go on the ontology-additions backlog (labeled ns# fallback until upstreamed). This is a governance-by-PR vocabulary, NOT a user-authored record type. Curation to the full set (electrolytes, binders, separators, current collectors, further actives) is a follow-up PR; this file bootstraps the contract and seeds it. `chemsub` values use the domain-chemical-substance namespace (https://w3id.org/emmo/domain/chemical-substance#). `emmo` values are the domain-battery class local-name used to type JSON-LD nodes (must resolve in the bundled domain-battery context). `reference_properties` carry curated, citable generic anchors (value/unit/citation) that the genome compares datasheet- and measurement-reported distributions against; present only where a citable source exists.",
+  "families": [
+    "active_anode",
+    "active_cathode",
+    "binder",
+    "conductive_additive",
+    "electrolyte_solvent",
+    "electrolyte_salt",
+    "separator_material",
+    "current_collector_material",
+    "other"
+  ],
+  "kinds": {
+    "graphite": {
+      "label": "Graphite",
+      "family": "active_anode",
+      "formula": "C",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+      "emmo": "Graphite",
+      "aliases": ["graphite", "natural graphite", "synthetic graphite", "mesocarbon microbead", "mcmb", "gr", "c"],
+      "reference_properties": {
+        "specific_capacity": {"value": 372, "unit": "mAh/g", "citation": "https://doi.org/10.1039/D0SE00175A"},
+        "density": {"value": 2.26, "unit": "g/cm3", "citation": "https://doi.org/10.1039/D0SE00175A"}
+      }
+    },
+    "silicon": {
+      "label": "Silicon",
+      "family": "active_anode",
+      "formula": "Si",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_68c0876b_cb62_41cd_846d_95cc9d9a8733",
+      "emmo": "Silicon",
+      "aliases": ["silicon", "si", "nano-silicon", "silicon nanoparticles"],
+      "reference_properties": {
+        "specific_capacity": {"value": 3579, "unit": "mAh/g", "citation": "https://doi.org/10.1149/1.1652421"}
+      }
+    },
+    "silicon_graphite": {
+      "label": "Silicon-graphite composite",
+      "family": "active_anode",
+      "formula": "Si/C",
+      "aliases": ["silicon graphite", "silicon-graphite", "si/gr", "si-gr", "silicon/graphite", "sigr", "graphite-silicon"]
+    },
+    "lithium_metal": {
+      "label": "Lithium metal",
+      "family": "active_anode",
+      "formula": "Li",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f",
+      "aliases": ["lithium metal", "lithium", "li metal", "li", "metallic lithium", "lithium foil"],
+      "reference_properties": {
+        "specific_capacity": {"value": 3862, "unit": "mAh/g", "citation": "https://doi.org/10.1038/nnano.2017.16"}
+      }
+    },
+    "zinc": {
+      "label": "Zinc metal",
+      "family": "active_anode",
+      "formula": "Zn",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_9bd78e1c_a4dc_41b6_8013_adb51df1ffdc",
+      "emmo": "Zinc",
+      "aliases": ["zinc", "zn", "zinc metal", "zinc foil"]
+    },
+    "lfp": {
+      "label": "Lithium iron phosphate (LFP)",
+      "family": "active_cathode",
+      "formula": "LiFePO4",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
+      "emmo": "LithiumIronPhosphate",
+      "aliases": ["lfp", "lifepo4", "lithium iron phosphate", "lithium iron phosphate (lfp)", "olivine lfp"],
+      "reference_properties": {
+        "specific_capacity": {"value": 170, "unit": "mAh/g", "citation": "https://doi.org/10.1149/1.1837571"}
+      }
+    },
+    "lmfp": {
+      "label": "Lithium manganese iron phosphate (LMFP)",
+      "family": "active_cathode",
+      "formula": "LiMnxFe1-xPO4",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_40c605fd_4e47_4e90_a055_185f749d834c",
+      "emmo": "LithiumManganeseIronPhosphate",
+      "aliases": ["lmfp", "lithium manganese iron phosphate", "limnfepo4"]
+    },
+    "lco": {
+      "label": "Lithium cobalt oxide (LCO)",
+      "family": "active_cathode",
+      "formula": "LiCoO2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_4c62d334_a124_40b3_9fd1_fe713d01a6af",
+      "emmo": "LithiumCobaltOxide",
+      "aliases": ["lco", "licoo2", "lithium cobalt oxide"]
+    },
+    "lnmo": {
+      "label": "Lithium nickel manganese oxide (LNMO)",
+      "family": "active_cathode",
+      "formula": "LiNi0.5Mn1.5O4",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_f3e7979a_e3ef_450a_8762_7d8778afe478",
+      "emmo": "LithiumNickelManganeseOxide",
+      "aliases": ["lnmo", "lithium nickel manganese oxide", "high-voltage spinel", "lini0.5mn1.5o4", "spinel lnmo"]
+    },
+    "nmc111": {
+      "label": "NMC111 (LiNi1/3Mn1/3Co1/3O2)",
+      "family": "active_cathode",
+      "formula": "LiNi0.33Mn0.33Co0.33O2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
+      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "aliases": ["nmc111", "nmc 111", "nmc333", "ncm111", "lini0.33mn0.33co0.33o2", "lini1/3mn1/3co1/3o2"]
+    },
+    "nmc532": {
+      "label": "NMC532 (LiNi0.5Mn0.3Co0.2O2)",
+      "family": "active_cathode",
+      "formula": "LiNi0.5Mn0.3Co0.2O2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
+      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "aliases": ["nmc532", "nmc 532", "ncm532", "lini0.5mn0.3co0.2o2"]
+    },
+    "nmc622": {
+      "label": "NMC622 (LiNi0.6Mn0.2Co0.2O2)",
+      "family": "active_cathode",
+      "formula": "LiNi0.6Mn0.2Co0.2O2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
+      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "aliases": ["nmc622", "nmc 622", "ncm622", "lini0.6mn0.2co0.2o2"]
+    },
+    "nmc811": {
+      "label": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
+      "family": "active_cathode",
+      "formula": "LiNi0.8Mn0.1Co0.1O2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
+      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "aliases": ["nmc811", "nmc 811", "ncm811", "lini0.8mn0.1co0.1o2"]
+    },
+    "nca": {
+      "label": "NCA (lithium nickel cobalt aluminium oxide)",
+      "family": "active_cathode",
+      "formula": "LiNixCoyAlzO2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_cd17ca33_ae3d_4738_8930_547673bf6c1f",
+      "emmo": "LithiumNickelCobaltAluminiumOxide",
+      "aliases": ["nca", "lithium nickel cobalt aluminium oxide", "lithium nickel cobalt aluminum oxide"]
+    },
+    "mno2": {
+      "label": "Manganese dioxide",
+      "family": "active_cathode",
+      "formula": "MnO2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_dcdbdbed_2e20_40d1_a7a5_5761de7f0618",
+      "aliases": ["mno2", "manganese dioxide", "manganese(iv) oxide", "emd"]
+    },
+    "pvdf": {
+      "label": "Polyvinylidene fluoride (PVDF)",
+      "family": "binder",
+      "formula": "(C2H2F2)n",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_f2e48e9e_f774_4f42_939f_1fe522efb7c8",
+      "emmo": "PolyvinylideneFluoride",
+      "aliases": ["pvdf", "polyvinylidene fluoride", "polyvinylidene difluoride", "kynar"]
+    },
+    "cmc": {
+      "label": "Carboxymethyl cellulose (CMC)",
+      "family": "binder",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_d36fbe2f_6b0a_4178_b6ca_7373bdefcb51",
+      "emmo": "CarboxymethylCellulose",
+      "aliases": ["cmc", "carboxymethyl cellulose", "carboxymethylcellulose", "sodium cmc"]
+    },
+    "sbr": {
+      "label": "Styrene-butadiene rubber (SBR)",
+      "family": "binder",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_210edf30_ad63_438c_97db_f817942db49b",
+      "emmo": "StyreneButadiene",
+      "aliases": ["sbr", "styrene butadiene rubber", "styrene-butadiene", "styrene-butadiene rubber"]
+    },
+    "carbon_black": {
+      "label": "Carbon black",
+      "family": "conductive_additive",
+      "formula": "C",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0a5cb747_60cf_4929_a54a_712c54b49f3b",
+      "emmo": "CarbonBlack",
+      "aliases": ["carbon black", "cb", "super p", "super c65", "c65", "c45", "ketjenblack", "acetylene black"]
+    },
+    "lipf6": {
+      "label": "Lithium hexafluorophosphate (LiPF6)",
+      "family": "electrolyte_salt",
+      "formula": "LiPF6",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771",
+      "emmo": "LithiumHexafluorophosphate",
+      "aliases": ["lipf6", "lithium hexafluorophosphate"]
+    },
+    "koh": {
+      "label": "Potassium hydroxide (KOH)",
+      "family": "electrolyte_salt",
+      "formula": "KOH",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_ccdce7d4_b695_4871_84c2_13679807d077",
+      "emmo": "PotassiumHydroxide",
+      "aliases": ["koh", "potassium hydroxide"]
+    },
+    "ec": {
+      "label": "Ethylene carbonate (EC)",
+      "family": "electrolyte_solvent",
+      "formula": "C3H4O3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226",
+      "emmo": "EthyleneCarbonate",
+      "aliases": ["ec", "ethylene carbonate"]
+    },
+    "emc": {
+      "label": "Ethyl methyl carbonate (EMC)",
+      "family": "electrolyte_solvent",
+      "formula": "C4H8O3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_bb20bdea_343c_4911_8c45_37fc1077d22f",
+      "emmo": "EthylMethylCarbonate",
+      "aliases": ["emc", "ethyl methyl carbonate", "ethylmethyl carbonate"]
+    },
+    "dmc": {
+      "label": "Dimethyl carbonate (DMC)",
+      "family": "electrolyte_solvent",
+      "formula": "C3H6O3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c4a7d7bd_497e_457e_b858_ff73254266d0",
+      "emmo": "DimethylCarbonate",
+      "aliases": ["dmc", "dimethyl carbonate", "dimethylcarbonate"]
+    },
+    "pc": {
+      "label": "Propylene carbonate (PC)",
+      "family": "electrolyte_solvent",
+      "formula": "C4H6O3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_46e9f253_40cb_4b48_b8d0_0b976ea4e156",
+      "emmo": "PropyleneCarbonate",
+      "aliases": ["pc", "propylene carbonate"]
+    },
+    "fec": {
+      "label": "Fluoroethylene carbonate (FEC)",
+      "family": "electrolyte_solvent",
+      "formula": "C3H3FO3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_20004d19_02cf_4667_a09f_b5c595b44b1f",
+      "emmo": "FluoroethyleneCarbonate",
+      "aliases": ["fec", "fluoroethylene carbonate"]
+    },
+    "vc": {
+      "label": "Vinylene carbonate (VC)",
+      "family": "electrolyte_solvent",
+      "formula": "C3H2O3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_31d0d139_7b45_4d1e_8603_92cc12da2fad",
+      "emmo": "VinyleneCarbonate",
+      "aliases": ["vc", "vinylene carbonate"]
+    },
+    "polypropylene": {
+      "label": "Polypropylene (PP) separator",
+      "family": "separator_material",
+      "formula": "(C3H6)n",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c5cff8c2_581e_4341_a3e6_8ba8c8ce2d2b",
+      "emmo": "Polypropylene",
+      "aliases": ["polypropylene", "pp", "pp separator"]
+    },
+    "polyethylene": {
+      "label": "Polyethylene (PE) separator",
+      "family": "separator_material",
+      "formula": "(C2H4)n",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_79220ea3_3426_47a0_9b41_33012d565fc2",
+      "emmo": "Polyethylene",
+      "aliases": ["polyethylene", "pe", "pe separator"]
+    },
+    "aluminium": {
+      "label": "Aluminium current collector",
+      "family": "current_collector_material",
+      "formula": "Al",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_8f7dd877_5ad0_48f1_bbec_84153d8215f4",
+      "emmo": "Aluminium",
+      "aliases": ["aluminium", "aluminum", "al", "aluminium foil", "aluminum foil", "al foil"]
+    },
+    "copper": {
+      "label": "Copper current collector",
+      "family": "current_collector_material",
+      "formula": "Cu",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0993cbab_ff7f_4ec3_8a6c_cd67497d54d9",
+      "emmo": "Copper",
+      "aliases": ["copper", "cu", "copper foil", "cu foil"]
+    },
+    "alumina": {
+      "label": "Alumina (Al2O3) coating",
+      "family": "other",
+      "formula": "Al2O3",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_a2b46543_4d0f_488a_b51a_7ed3a4149170",
+      "aliases": ["alumina", "aluminium oxide", "aluminum oxide", "al2o3", "al2o3 particles"]
+    }
+  }
+}

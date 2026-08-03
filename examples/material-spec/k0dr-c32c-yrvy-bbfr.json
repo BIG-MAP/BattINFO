@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/k0dr-c32c-yrvy-bbfr",
     "short_id": "k0drc3",
     "name": "Alumina",
+    "kind": "alumina",
     "material_class": "coating",
     "formula": "Al2O3",
     "chemistry_family": "ceramic-oxide",

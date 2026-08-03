@@ -24,6 +24,7 @@ export const showcase: {
         "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         "short_id": "7d9k2m",
         "name": "NMC811",
+        "kind": "nmc811",
         "material_class": "active_material",
         "formula": "LiNi0.8Mn0.1Co0.1O2"
       },

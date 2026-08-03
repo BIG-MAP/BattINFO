@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
     "short_id": "gwckk5",
     "name": "Graphite",
+    "kind": "graphite",
     "material_class": "active_material",
     "electrode_polarity": "negative",
     "formula": "C",

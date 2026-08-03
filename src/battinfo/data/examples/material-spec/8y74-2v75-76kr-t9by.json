@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/8y74-2v75-76kr-t9by",
     "short_id": "8y742v",
     "name": "Al2O3-coated NMC811",
+    "kind": "nmc811",
     "material_class": "active_material",
     "electrode_polarity": "positive",
     "formula": "LiNi0.8Mn0.1Co0.1O2",

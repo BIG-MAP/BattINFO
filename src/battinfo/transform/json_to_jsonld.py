@@ -1868,13 +1868,36 @@ _MATERIAL_PROPERTY_TERMS: dict[str, str] = {
 
 
 def _material_node(body: dict[str, Any]) -> dict[str, Any]:
-    """Build a domain-battery JSON-LD node for a material spec/instance body."""
+    """Build a domain-battery JSON-LD node for a material spec/instance body.
+
+    A material-spec's ``kind`` is the authoritative semantic anchor: it types the
+    node from the curated vocabulary (kind -> EMMO class) and links the kind's
+    chemical-substance class IRI via ``schema:sameAs``. Where the kind carries no
+    EMMO class (an ontology-additions gap), fall back to a labeled
+    ``schema:ChemicalSubstance`` node still carrying the chemsub link. When no
+    kind is present (e.g. an embedded/imported material), fall back to resolving
+    the name through the alias table, preserving prior behaviour.
+    """
     node: dict[str, Any] = {}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     name = body.get("name")
-    emmo_class = _material_emmo_class(name) if isinstance(name, str) and name else None
+    kind_entry = None
+    kind = body.get("kind")
+    if isinstance(kind, str) and kind:
+        from battinfo.materials import material_kind
+
+        kind_entry = material_kind(kind)
+    emmo_class = None
+    same_as = None
+    if kind_entry is not None:
+        emmo_class = kind_entry.get("emmo")
+        same_as = kind_entry.get("chemsub")
+    if emmo_class is None and isinstance(name, str) and name:
+        emmo_class = _material_emmo_class(name)
     node["@type"] = emmo_class or "schema:ChemicalSubstance"
+    if same_as:
+        node["schema:sameAs"] = {"@id": same_as}
     if isinstance(name, str) and name:
         node["schema:name"] = name
     if isinstance(body.get("formula"), str) and body["formula"]:

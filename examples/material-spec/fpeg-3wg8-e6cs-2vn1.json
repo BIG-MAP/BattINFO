@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1",
     "short_id": "fpeg3w",
     "name": "LiPF6",
+    "kind": "lipf6",
     "material_class": "electrolyte_salt",
     "formula": "LiPF6",
     "chemistry_family": "lithium-salt",

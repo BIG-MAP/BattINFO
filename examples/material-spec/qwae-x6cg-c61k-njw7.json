@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/qwae-x6cg-c61k-njw7",
     "short_id": "qwaex6",
     "name": "LMFP",
+    "kind": "lmfp",
     "material_class": "active_material",
     "electrode_polarity": "positive",
     "formula": "LiMn0.7Fe0.3PO4",

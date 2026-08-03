@@ -19,8 +19,10 @@ A reusable material specification. Top-level key `material_spec`.
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `id` | ✓ | `https://w3id.org/battinfo/spec/{uid}` |
+| `id` | ✓ | `https://w3id.org/battinfo/spec/{uid}` — content-derived from (manufacturer, product, grade); re-authoring the same product is a no-op |
 | `name` | ✓ | Material grade, e.g. `"LFP"`, `"Graphite"`, `"NMC811"` |
+| `kind` | ✓ (at save) | Level-1 [MaterialKind](materials-model.md) key from the curated vocabulary (`graphite`, `lfp`, `nmc811`, …). The genome's aggregation axis; resolves to the kind's chemical-substance class IRI. Aliases resolve on input; an unknown kind is rejected at save. See `battinfo.materials.material_kind_keys()` |
+| `grade` | | Manufacturer grade / product version; part of spec identity |
 | `material_class` | | `active_material`, `binder`, `conductive_additive`, `current_collector`, `separator_material`, `electrolyte_salt`, `electrolyte_solvent`, `electrolyte_additive`, `metal_electrode`, `coating`, `other` |
 | `electrode_polarity` | | `positive` / `negative` / `none` (for active materials) |
 | `formula` | | Idealized composition, e.g. `LiFePO4`, `C`, `Zn`, `(C2H2F2)n` |
@@ -73,10 +75,28 @@ All `*_material_id` references are existence-checked against material-spec recor
 
 ### `material`
 
-A physical lot/batch realizing a spec. Top-level key `material`. Links to its spec via
-`material_spec_id`; carries lot facts (`lot_id`, `supplier`, `received_date`, measured
-`property`) and a `datasets[]` array linking the lot to its characterization data
-(XRD/SEM/ICP/PSD), each `{id, role}` existence-checked against `dataset` records.
+A physical lot/batch realizing a spec. Top-level key `material`. Its `id`
+(`https://w3id.org/battinfo/material/{uid}`) is content-derived from (spec_id, lot).
+Links to its spec via `material_spec_id` (required); carries lot facts (`lot_id`,
+`supplier`, `received_date`, `opened_date`, `expires_at`, `amount`, `storage`), a
+`processing` block, an OPEN measured `property` block for as-received
+characterisation (unmapped keys get the standard labeled-fallback + warning, not a
+closed vocabulary), and a `datasets[]` array linking the lot to its characterization
+data (XRD/SEM/ICP/PSD), each `{id, role}` existence-checked against `dataset` records.
+
+Processing lives HERE, never on the spec: aqueous vs NMP is not a distinct product.
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `material_spec_id` | ✓ | Level-2 spec IRI |
+| `lot_id` | | Lot / batch number (accepts `lot=` in `ws.add`); part of instance identity |
+| `processing` | | `{route: aqueous\|nmp\|dry\|other, solvent, detail}` |
+| `amount` | | Quantity on hand/consumed, `{value, unit}` |
+| `storage` | | Storage conditions, free text |
+| `property` | | OPEN as-received measurement map |
+
+Both `material-spec` and `material` carry record-level `contributor` / `license` /
+`funding`, stamped by `ws.save` exactly like every other record type.
 
 ## Bridge: embedded ↔ standalone
 
