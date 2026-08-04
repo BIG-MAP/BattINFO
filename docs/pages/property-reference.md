@@ -9,7 +9,7 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (66)
+## Properties (71)
 
 The keys accepted in `properties={...}` on a cell spec, and the EMMO
 class each becomes in JSON-LD:
@@ -48,6 +48,8 @@ class each becomes in JSON-LD:
 | `maximum_continuous_charging_current` | [MaximumContinuousChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78) |
 | `maximum_continuous_discharging_current` | [MaximumContinuousDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5) |
 | `maximum_discharging_temperature` | [MaximumDischargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d) |
+| `maximum_pulse_charging_current` | [MaximumPulseChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da) |
+| `maximum_pulse_discharging_current` | [MaximumPulseDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b) |
 | `maximum_storage_temperature` | [MaximumStorageTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7) |
 | `min_capacity` | [MinimumCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5) |
 | `minimum_capacity` | [MinimumCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5) |
@@ -58,6 +60,8 @@ class each becomes in JSON-LD:
 | `nominal_capacity` | [NominalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100) |
 | `nominal_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `nominal_voltage` | [NominalVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6) |
+| `operating_temperature_max` | [MaximumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553) |
+| `operating_temperature_min` | [MinimumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51) |
 | `power_density` | [PowerDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a) |
 | `press_density` | [CalenderedDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379) |
 | `pulse_charging_current` | [MaximumPulseChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da) |
@@ -76,6 +80,7 @@ class each becomes in JSON-LD:
 | `theoretical_capacity` | [TheoreticalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23) |
 | `thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `tortuosity` | [Tortuosity](https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8) |
+| `typical_capacity` | [TypicalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68) |
 | `typical_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `upper_voltage_limit` | [UpperVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88) |
 | `volume` | [Volume](https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed) |
@@ -101,7 +106,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `h` | [Hour](https://w3id.org/emmo#Hour) |
 | `K` | [Kelvin](https://w3id.org/emmo#Kelvin) |
 | `kg` | [Kilogram](https://w3id.org/emmo#Kilogram) |
-| `kWh` | [KiloWattHour](https://w3id.org/emmo#KiloWattHour) |
+| `kWh` | [KiloWattHour](https://w3id.org/emmo#KiloWatthour) |
 | `L` | [Litre](https://w3id.org/emmo#Litre) |
 | `m` | [Metre](https://w3id.org/emmo#Metre) |
 | `mA` | [MilliAmpere](https://w3id.org/emmo#MilliAmpere) |
@@ -119,7 +124,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `W` | [Watt](https://w3id.org/emmo#Watt) |
 | `W/kg` | [WattPerKilogram](https://w3id.org/emmo#WattPerKilogram) |
 | `W/L` | [WattPerLitre](http://qudt.org/vocab/unit/W-PER-L) |
-| `Wh` | [WattHour](https://w3id.org/emmo#WattHour) |
+| `Wh` | [WattHour](https://w3id.org/emmo#Watthour) |
 | `Wh/kg` | [WattHourPerKilogram](https://w3id.org/emmo#WattHourPerKilogram) |
 | `Wh/L` | [WattHourPerLitre](https://w3id.org/emmo#WattHourPerLitre) |
 | `°C` | [DegreeCelsius](https://w3id.org/emmo#DegreeCelsius) |

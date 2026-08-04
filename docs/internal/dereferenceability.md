@@ -46,10 +46,13 @@ battinfo:chargingTime                 battinfo:powerEnergyRatio
 battinfo:citationDOI                  battinfo:retrievedAt
 battinfo:cycleLifeCRate               battinfo:roundTripEnergyEfficiency
 battinfo:maximumPower                 battinfo:roundTripEnergyEfficiency50Pct
-battinfo:operatingTemperatureMax      battinfo:sourceFile
-battinfo:operatingTemperatureMin      battinfo:sourceType / sourceURL
-battinfo:specificPower                battinfo:workflowVersion
+battinfo:specificPower                battinfo:sourceFile
+battinfo:sourceType / sourceURL       battinfo:workflowVersion
 ```
+
+`battinfo:operatingTemperatureMin` / `Max` left this list at
+domain-electrochemistry 0.36.0, which published `MinimumOperatingTemperature` /
+`MaximumOperatingTemperature`.
 
 ## Unit IRI verification (Tier 2 follow-up)
 

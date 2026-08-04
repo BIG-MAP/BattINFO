@@ -179,7 +179,7 @@ def test_stacked_construction_emits_electrode_stack() -> None:
     assert counts.get("Separator Sheet Count") == 258
 
 
-def test_wound_construction_emits_jellyroll() -> None:
+def test_wound_construction_emits_wound_stack() -> None:
     spec = cell_description(
         id="https://w3id.org/battinfo/spec/eng-roll", manufacturer="EngCo", model="roll", format="cylindrical",
         chemistry="li-ion", positive_electrode_basis="nca", negative_electrode_basis="graphite",
@@ -187,8 +187,9 @@ def test_wound_construction_emits_jellyroll() -> None:
                                   jellyroll_volume={"value": 663, "unit": "cm3"}),
     )
     battery = _battery_node(spec)
-    roll = _assembly_node(battery, "JellyRoll")
-    assert roll is not None, "expected a JellyRoll constituent"
+    # WoundStack is the EMMO prefLabel; JellyRoll / SwissRoll are its altLabels.
+    roll = _assembly_node(battery, "WoundStack")
+    assert roll is not None, "expected a WoundStack constituent"
     assert "Volume" in _prop_types(roll)
 
 

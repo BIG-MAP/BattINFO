@@ -1,6 +1,6 @@
 {
-  "version": "0.2.0",
-  "description": "Curated mapping from common battery material names/abbreviations to EMMO class terms. Used to type constituent nodes in electrode coating and electrolyte JSON-LD. All class terms must resolve in the bundled domain-battery context.",
+  "version": "0.3.0",
+  "description": "Curated mapping from common battery material names/abbreviations to EMMO class terms. Used to type constituent nodes in electrode coating and electrolyte JSON-LD. All class terms must resolve in the bundled domain-battery context (verified against EMMO domain-battery 0.20.1, domain-electrochemistry 0.36.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2).",
   "mappings": [
     {
       "symbol": "LFP",
@@ -18,14 +18,54 @@
         "nmc",
         "lithium nickel manganese cobalt oxide",
         "linimnco2",
-        "nmc811",
-        "nmc 811",
-        "nmc622",
-        "nmc 622",
-        "lini0.8mn0.1co0.1o2",
-        "lini0.6mn0.2co0.2o2"
+        "ncm"
       ],
       "emmo_class": "LithiumNickelManganeseCobaltOxide"
+    },
+    {
+      "symbol": "NMC111",
+      "aliases": [
+        "nmc111",
+        "nmc 111",
+        "nmc-111",
+        "ncm111",
+        "lini1/3mn1/3co1/3o2"
+      ],
+      "emmo_class": "LithiumNickelManganeseCobaltOxide111"
+    },
+    {
+      "symbol": "NMC532",
+      "aliases": [
+        "nmc532",
+        "nmc 532",
+        "nmc-532",
+        "ncm532",
+        "nmc523",
+        "nmc 523"
+      ],
+      "emmo_class": "LithiumNickelManganeseCobaltOxide532"
+    },
+    {
+      "symbol": "NMC622",
+      "aliases": [
+        "nmc622",
+        "nmc 622",
+        "nmc-622",
+        "ncm622",
+        "lini0.6mn0.2co0.2o2"
+      ],
+      "emmo_class": "LithiumNickelManganeseCobaltOxide622"
+    },
+    {
+      "symbol": "NMC811",
+      "aliases": [
+        "nmc811",
+        "nmc 811",
+        "nmc-811",
+        "ncm811",
+        "lini0.8mn0.1co0.1o2"
+      ],
+      "emmo_class": "LithiumNickelManganeseCobaltOxide811"
     },
     {
       "symbol": "NCA",
@@ -251,6 +291,46 @@
         "potassium hydroxide"
       ],
       "emmo_class": "PotassiumHydroxide"
+    },
+    {
+      "symbol": "SiGr",
+      "aliases": [
+        "si-gr",
+        "sigr",
+        "silicon graphite",
+        "silicon-graphite",
+        "silicon/graphite",
+        "graphite-silicon"
+      ],
+      "emmo_class": "SiliconGraphite"
+    },
+    {
+      "symbol": "LiTFSI",
+      "aliases": [
+        "litfsi",
+        "lithium bis(trifluoromethanesulfonyl)imide",
+        "lithium bistrifluoromethanesulfonylimide"
+      ],
+      "emmo_class": "LithiumBistrifluoromethanesulfonylimide"
+    },
+    {
+      "symbol": "LiFSI",
+      "aliases": [
+        "lifsi",
+        "lithium bis(fluorosulfonyl)imide",
+        "lithium bisfluorosulfonylimide"
+      ],
+      "emmo_class": "LithiumBisfluorosulfonylimide"
+    },
+    {
+      "symbol": "NMP",
+      "aliases": [
+        "nmp",
+        "n-methyl-2-pyrrolidone",
+        "n methyl 2 pyrrolidone",
+        "1-methyl-2-pyrrolidone"
+      ],
+      "emmo_class": "NMethyl2Pyrrolidone"
     }
   ]
 }

@@ -88,7 +88,9 @@ _STATIC_LABEL_TO_COMPACT: dict[str, str] = {
     "BatteryCell":             "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
     "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
     "CylindricalBattery":      "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
-    "PrismaticBattery":        "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    # Upstream spells this one local name with hyphens, not underscores. Copied as
+    # published so the term expands to an IRI that exists in domain-battery.
+    "PrismaticBattery":        "battery:battery_86c9ca80-de6f-417f-afdc-a7e52fa6322d",
     "PouchCell":               "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
     "CoinCell":                "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
     "LithiumIonBattery":                   "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
@@ -126,8 +128,8 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
 # and the equipment provenance nodes. Relations + fixed classes; the per-map
 # class values (materials, cases, electrolyte families, …) are appended in
 # label_to_compact(). Terms absent from the bundled domain-battery context
-# (pending ontology additions, e.g. Seal / JellyRoll) are skipped there — the
-# same resolution gap the descriptor path has against the remote context.
+# are skipped there — the same resolution gap the descriptor path has against
+# the remote context.
 _COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
     # relations
     "hasPositiveElectrode",
@@ -161,9 +163,19 @@ _COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
     "ElectrolyteAdditive",
     "Case",
     "Terminal",
-    "Seal",
     "ElectrodeStack",
-    "JellyRoll",
+    # Housing hardware + electrode assembly (domain-electrochemistry 0.36.0)
+    "Seal",
+    "Gasket",
+    "SafetyVent",
+    "CurrentInterruptDevice",
+    "InsulatorRing",
+    "WaveSpring",
+    "Spring",
+    "CellCan",
+    "CellLid",
+    "CeramicCoating",
+    "WoundStack",
     # equipment provenance classes (test nodes)
     "BatteryCycler",
     "Potentiostat",
@@ -247,16 +259,25 @@ def label_to_compact() -> dict[str, Any]:
 def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
     """domain-battery class prefLabels describing the physical cell for a spec.
 
-    entity_type_map-driven: format, chemistry, positive/negative electrode basis
-    and IEC code each contribute their ``battery_types``; ``rechargeable`` maps to
-    SecondaryBattery / PrimaryBattery. Only classes that are context-mappable
-    (present in :func:`label_to_compact`) are kept, so every emitted ``@type``
-    resolves in both the remote and the inline publication contexts.
+    entity_type_map-driven: format, cell configuration, chemistry, positive/negative
+    electrode basis and IEC code each contribute their ``battery_types``;
+    ``rechargeable`` maps to SecondaryBattery / PrimaryBattery. Only classes that are
+    context-mappable (present in :func:`label_to_compact`) are kept, so every emitted
+    ``@type`` resolves in both the remote and the inline publication contexts.
+
+    ``reference_electrode`` is the schema's half-cell marker ("counter/reference
+    electrode for half-cell configurations"), so a spec carrying one stacks the device
+    classes BatteryHalfCell + HalfCellDevice. An explicit ``cell_configuration`` value
+    wins when present.
     """
     table = label_to_compact()
     types: list[str] = []
+    configuration = cell_spec.get("cell_configuration")
+    if not configuration and cell_spec.get("reference_electrode"):
+        configuration = "half-cell"
     for section, key in (
         ("format", cell_spec.get("cell_format")),
+        ("cell_configuration", configuration),
         ("chemistry", cell_spec.get("chemistry")),
         ("positive_electrode_basis", cell_spec.get("positive_electrode_basis")),
         ("negative_electrode_basis", cell_spec.get("negative_electrode_basis")),

@@ -309,9 +309,9 @@ slots:
       - "Rated capacity [Ah]"
 
   typical_capacity:
-    # Intentionally shares NominalCapacity: domain-electrochemistry has no distinct
-    # "typical capacity" class, and datasheets use typical/nominal interchangeably.
-    slot_uri: electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
+    # TypicalCapacity landed in domain-electrochemistry 0.36.0; before that this
+    # slot shared NominalCapacity because no distinct class existed.
+    slot_uri: electrochemistry:electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68
     range: SpecValue
     description: Typical capacity as manufactured.
     aliases:
@@ -625,14 +625,14 @@ slots:
       - "Minimum storage temperature [degC]"
 
   operating_temperature_min:
-    slot_uri: battinfo:operatingTemperatureMin
+    slot_uri: electrochemistry:electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51
     range: SpecValue
     description: Overall minimum operating temperature (discharge + charge).
     aliases:
       - "Minimum operating temperature [degC]"
 
   operating_temperature_max:
-    slot_uri: battinfo:operatingTemperatureMax
+    slot_uri: electrochemistry:electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553
     range: SpecValue
     description: Overall maximum operating temperature (discharge + charge).
     aliases:

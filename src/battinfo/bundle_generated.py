@@ -428,7 +428,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26'} })
     typical_capacity: Optional[SpecValue] = Field(default=None, description="""Typical capacity as manufactured.""", json_schema_extra = { "linkml_meta": {'aliases': ['Typical capacity [Ah]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100'} })
+         'slot_uri': 'electrochemistry:electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68'} })
     nominal_voltage: Optional[SpecValue] = Field(default=None, description="""Nominal operating voltage.""", json_schema_extra = { "linkml_meta": {'aliases': ['Nominal voltage [V]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_639b844a_e801_436b_985d_28926129ead6'} })
@@ -557,10 +557,10 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302'} })
     operating_temperature_min: Optional[SpecValue] = Field(default=None, description="""Overall minimum operating temperature (discharge + charge).""", json_schema_extra = { "linkml_meta": {'aliases': ['Minimum operating temperature [degC]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:operatingTemperatureMin'} })
+         'slot_uri': 'electrochemistry:electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51'} })
     operating_temperature_max: Optional[SpecValue] = Field(default=None, description="""Overall maximum operating temperature (discharge + charge).""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum operating temperature [degC]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:operatingTemperatureMax'} })
+         'slot_uri': 'electrochemistry:electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553'} })
     cycle_life: Optional[SpecValue] = Field(default=None, description="""Number of cycles to rated end-of-life criterion.""", json_schema_extra = { "linkml_meta": {'aliases': ['Cycle life [1]', 'Cycle count'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937'} })

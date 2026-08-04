@@ -274,20 +274,40 @@ def test_unknown_hardware_part_preserves_label_and_warns() -> None:
 
     from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
 
-    housing = {"parts": [{"type": "vent", "material": "Al"},
-                         {"type": "wave spring", "material": "steel"}]}
+    housing = {"parts": [{"type": "pressure relief disc", "material": "Al"},
+                         {"type": "anti-vibration pad", "material": "rubber"}]}
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         relations = _descriptor_housing_to_jsonld(housing, "cylindrical")
 
     blob = json.dumps(relations)
     # The authored strings survive (regression: they used to vanish under schema:Thing).
-    assert "vent" in blob and "wave spring" in blob
-    assert '"skos:prefLabel": "vent"' in blob
-    assert '"schema:additionalType": "wave spring"' in blob
+    assert "pressure relief disc" in blob and "anti-vibration pad" in blob
+    assert '"skos:prefLabel": "pressure relief disc"' in blob
+    assert '"schema:additionalType": "anti-vibration pad"' in blob
     # And an unmapped warning fires for each.
     messages = [str(w.message) for w in caught]
     assert sum("semantic.hardware_part_unmapped" in m for m in messages) == 2
+
+
+def test_housing_parts_landed_in_electrochemistry_0_36_are_typed() -> None:
+    """Seal / vent / CID / insulator ring / gasket / wave spring stopped being
+    schema:Thing fallbacks when domain-electrochemistry 0.36.0 published them."""
+    import warnings
+
+    from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
+
+    housing = {"parts": [{"type": part} for part in
+                         ("seal", "gasket", "vent", "cid", "insulator ring", "wave spring")]}
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        relations = _descriptor_housing_to_jsonld(housing, "cylindrical")
+
+    blob = json.dumps(relations)
+    for term in ("Seal", "Gasket", "SafetyVent", "CurrentInterruptDevice",
+                 "InsulatorRing", "WaveSpring"):
+        assert f'"{term}"' in blob, f"{term} not emitted: {blob}"
+    assert not [w for w in caught if "hardware_part_unmapped" in str(w.message)]
 
 
 # ── Item 6: close the audited silent drops ──────────────────────────────────────

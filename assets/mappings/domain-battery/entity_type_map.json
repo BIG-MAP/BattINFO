@@ -1,12 +1,13 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "status": "curated",
   "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
   "notes": [
     "Normative mapping table for descriptor entity-type enrichment.",
     "Keys are normalized to lower-case for deterministic lookup in the JSON-LD renderer.",
-    "IRIs verified against EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0.",
-    "0.3.0: added zn-mno2/alkaline chemistry entries and iec_code section."
+    "IRIs verified against EMMO domain-battery 0.20.1, domain-electrochemistry 0.36.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
+    "0.3.0: added zn-mno2/alkaline chemistry entries and iec_code section.",
+    "0.4.0: added the cell_configuration section. A battery half-cell types as the DEVICE classes BatteryHalfCell (domain-battery, a BatteryCell) and HalfCellDevice (domain-electrochemistry) - never as ElectrochemicalHalfCell, which upstream annotates with an explicit warning against that conflation (it is one electrode plus one electrolyte, not an experimental setup)."
   ],
   "mappings": {
     "format": {
@@ -42,6 +43,22 @@
       "unknown": {
         "battery_types": [
           "BatteryCell"
+        ]
+      }
+    },
+    "cell_configuration": {
+      "full-cell": {
+        "battery_types": []
+      },
+      "half-cell": {
+        "battery_types": [
+          "BatteryHalfCell",
+          "HalfCellDevice"
+        ]
+      },
+      "three-electrode": {
+        "battery_types": [
+          "ThreeElectrodeCellDevice"
         ]
       }
     },
