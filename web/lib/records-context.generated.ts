@@ -493,6 +493,15 @@ export const recordsContext: Record<string, unknown> = {
     "ElectricCurrent": "https://w3id.org/emmo#EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
     "Voltage": "https://w3id.org/emmo#EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee",
     "Power": "https://w3id.org/emmo#EMMO_09b9021b_f97b_43eb_b83d_0a764b472bc2",
-    "Duration": "https://w3id.org/emmo#EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3"
+    "Duration": "https://w3id.org/emmo#EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
+    "GalvanostaticIntermittentTitrationTechnique": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#GalvanostaticIntermittentTitrationTechnique",
+    "PseudoOpenCircuitVoltageMethod": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#PseudoOpenCircuitVoltageMethod",
+    "HPPC": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#HPPC",
+    "CyclingTest": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_435b22d4_c441_45ea_8c79_0cbec11fd287",
+    "CRateTest": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_99b2b3ad_8efc_48ee_a630_6d805a47efdc",
+    "CapacityTest": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_137dc19f_a3af_49af_971f_743d27e09f43",
+    "FormationCycling": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cb223440_51bd_4f16_a536_96ec408e7de4",
+    "ControlProperty": "electrochemistry:electrochemistry_33e6986c_b35a_4cae_9a94_acb23248065c",
+    "AmperePerAmpereHour": "electrochemistry:AmperePerAmpereHour"
   }
 };

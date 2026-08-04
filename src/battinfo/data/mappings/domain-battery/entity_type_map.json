@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.4.1",
   "status": "curated",
   "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
   "notes": [
@@ -7,7 +7,8 @@
     "Keys are normalized to lower-case for deterministic lookup in the JSON-LD renderer.",
     "IRIs verified against EMMO domain-battery 0.20.1, domain-electrochemistry 0.36.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
     "0.3.0: added zn-mno2/alkaline chemistry entries and iec_code section.",
-    "0.4.0: added the cell_configuration section. A battery half-cell types as the DEVICE classes BatteryHalfCell (domain-battery, a BatteryCell) and HalfCellDevice (domain-electrochemistry) - never as ElectrochemicalHalfCell, which upstream annotates with an explicit warning against that conflation (it is one electrode plus one electrolyte, not an experimental setup)."
+    "0.4.0: added the cell_configuration section. A battery half-cell types as the DEVICE classes BatteryHalfCell (domain-battery, a BatteryCell) and HalfCellDevice (domain-electrochemistry) - never as ElectrochemicalHalfCell, which upstream annotates with an explicit warning against that conflation (it is one electrode plus one electrolyte, not an experimental setup).",
+    "0.4.1: cell_configuration gained the three-electrode-cell key, the normalized form of the cell-spec schema's three_electrode_cell enum value; three-electrode stays as the tolerant-import spelling."
   ],
   "mappings": {
     "format": {
@@ -57,6 +58,11 @@
         ]
       },
       "three-electrode": {
+        "battery_types": [
+          "ThreeElectrodeCellDevice"
+        ]
+      },
+      "three-electrode-cell": {
         "battery_types": [
           "ThreeElectrodeCellDevice"
         ]

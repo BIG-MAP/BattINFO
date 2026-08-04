@@ -1,8 +1,8 @@
 """Serialize BattINFO records as JSON-LD.
 
-Each record type (cell-spec, cell-instance, test, dataset) is transformed into
-valid JSON-LD using the curated property/unit mappings and the BattINFO records
-context at ``data/context/records.context.json``.
+Each record type (cell-spec, cell-instance, test, test-protocol, dataset) is
+transformed into valid JSON-LD using the curated property/unit mappings and the
+BattINFO records context at ``data/context/records.context.json``.
 
 The output is immediately usable by any JSON-LD processor (e.g. ``pyld``,
 ``rdflib`` + ``rdflib-jsonld``) to expand into RDF triples.
@@ -18,9 +18,10 @@ Usage::
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 _DATA = Path(__file__).parent / "data"
 _CONTEXT_PATH = _DATA / "context" / "records.context.json"
@@ -79,11 +80,47 @@ def _load_test_method_context_terms() -> dict:
         "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
         "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
         "Duration", "ConventionalProperty",
+        # Characterisation-method classes a test protocol types itself with
+        # (see TEST_METHOD_CLASS). Pulled from the same bundled context, so the
+        # emitter, the hosted context and the validator allowlist cannot drift.
+        *TEST_METHOD_CLASS.values(),
     )
     return {t: db[t] for t in wanted if t in db}
 
 
+# Test-protocol ``kind`` -> characterisation-method class prefLabel. Only kinds whose
+# method has a published class are mapped; anything else keeps the untyped plan node.
+# Every prefLabel below is verified against domain-electrochemistry 0.36.0 (which
+# imports chameo) and resolves in the bundled domain-battery context.
+TEST_METHOD_CLASS: dict[str, str] = {
+    "gitt":            "GalvanostaticIntermittentTitrationTechnique",
+    "quasi_ocv":       "PseudoOpenCircuitVoltageMethod",
+    "eis":             "ElectrochemicalImpedanceSpectroscopy",
+    "impedance":       "ElectrochemicalImpedanceSpectroscopy",
+    "hppc":            "HPPC",
+    "cycling":         "CyclingTest",
+    "rate_capability": "CRateTest",
+    "capacity_check":  "CapacityTest",
+    "formation":       "FormationCycling",
+}
+
+
 TEST_METHOD_CONTEXT_TERMS = _load_test_method_context_terms()
+
+
+def test_method_class(kind: Any) -> str | None:
+    """A protocol/test ``kind`` -> its EMMO characterisation-method class, or ``None``.
+
+    Tolerant of the spellings importers produce ("GITT", "rate-capability",
+    "quasi OCV"); an unmapped kind returns ``None`` and the caller emits an
+    untyped plan node rather than inventing a class.
+    """
+    if not isinstance(kind, str) or not kind.strip():
+        return None
+    key = re.sub(r"[\s\-]+", "_", kind.strip().lower())
+    cls = TEST_METHOD_CLASS.get(key)
+    # Only offer a class the bundled context can actually resolve.
+    return cls if cls in TEST_METHOD_CONTEXT_TERMS else None
 
 
 def step_emmo_class(mode: str, direction: str | None) -> str | None:
@@ -184,6 +221,288 @@ TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
     "NumberOfIterations":   "electrochemistry:electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
     "AmperePerAmpereHour":  "electrochemistry:AmperePerAmpereHour",
 }
+
+
+# ── Test-protocol node builder ────────────────────────────────────────────────
+# One implementation, two consumers: ``test_protocol_to_jsonld`` (a standalone
+# record document) and the publication graph builder in ``ws.py`` (the same node
+# as a graph member). Keeping it here is what keeps the two in parity — the
+# publication path had the only implementation, which is why record_to_jsonld
+# had no test-protocol emitter at all (readiness finding M5).
+
+
+def _unit_pref_labels() -> dict[str, tuple[str, str]]:
+    """{unit symbol -> (unit IRI, prefLabel)} from the curated unit map."""
+    path = _DATA / "mappings" / "domain-battery" / "unit_map.curated.json"
+    out: dict[str, tuple[str, str]] = {}
+    if not path.exists():
+        return out
+    for m in json.loads(path.read_text(encoding="utf-8")).get("mappings", []):
+        if m.get("symbol") and m.get("unit_iri") and m.get("unit_pref_label"):
+            out[m["symbol"]] = (m["unit_iri"], m["unit_pref_label"])
+    return out
+
+
+_UNIT_PREF_LABELS = _unit_pref_labels()
+
+
+def resolve_unit_iri(unit_symbol: str) -> str | None:
+    """Unit symbol -> compact unit IRI, across the curated maps, the records
+    context (V, mA, degC, ...) and the test-condition extras (A/Ah for C-rate)."""
+    if not unit_symbol:
+        return None
+    labelled = _UNIT_PREF_LABELS.get(unit_symbol)
+    if labelled:
+        return _compact_iri(labelled[0])
+    if unit_symbol in _UNIT_MAP:
+        return _compact_iri(_UNIT_MAP[unit_symbol])
+    ctx_val = _CONTEXT_INLINE.get(unit_symbol)
+    if isinstance(ctx_val, str) and (":" in ctx_val or ctx_val.startswith("http")):
+        return ctx_val
+    return TEST_CONDITION_UNIT_IRI.get(unit_symbol)
+
+
+def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
+    """A test condition -> EMMO quantity node (the ``@type`` comes from the
+    controlled vocabulary), or ``None`` if the key is unmapped — the caller then
+    falls back to ``schema:PropertyValue``."""
+    cls = TEST_CONDITION_CLASS.get(str(key).lower())
+    if not cls:
+        return None
+    node: dict = {"@type": cls, "hasNumericalPart": {"hasNumberValue": value}}
+    # A generic class (e.g. ConventionalProperty for temperature) needs a human
+    # label to say *which* property it is.
+    if cls in TEST_CONDITION_GENERIC_CLASSES:
+        node["rdfs:label"] = str(key).replace("_", " ")
+    unit_iri = resolve_unit_iri(unit_symbol) if unit_symbol else (
+        # C-rate is dimensionless-by-symbol; default to AmperePerAmpereHour.
+        TEST_CONDITION_UNIT_IRI["A/Ah"] if cls == "CRate" else None
+    )
+    if unit_iri:
+        node["hasMeasurementUnit"] = {"@id": unit_iri}
+    return node
+
+
+def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
+    """An EMMO quantity node with an explicit ``@type`` (used for method steps)."""
+    node: dict = {"@type": emmo_class, "hasNumericalPart": {"hasNumberValue": value}}
+    unit_iri = resolve_unit_iri(unit_symbol) if unit_symbol else None
+    if unit_iri:
+        node["hasMeasurementUnit"] = {"@id": unit_iri}
+    return node
+
+
+def method_step_node(step: Mapping[str, Any]) -> dict:
+    """A descriptive method step -> EMMO process node.
+
+    Groups become an ``IterativeWorkflow`` with ``NumberOfIterations`` + nested
+    ``hasTask``; leaf steps carry ``hasControlParameter`` /
+    ``hasTerminationParameter`` / ``hasProperty``.
+    """
+    mode = step.get("mode")
+    if mode == "group":
+        gnode: dict = {"@type": step_emmo_class("group", None) or "IterativeWorkflow"}
+        count = step.get("count")
+        if isinstance(count, int):
+            gnode["NumberOfIterations"] = {"hasNumericalPart": {"hasNumberValue": count}}
+        gnode["hasTask"] = [method_step_node(s) for s in (step.get("steps") or []) if isinstance(s, Mapping)]
+        return gnode
+
+    node: dict = {"@type": step_emmo_class(str(mode or ""), step.get("direction")) or "ElectrochemicalProcess"}
+    if step.get("description"):
+        node["rdfs:label"] = step["description"]
+    controls: list = []
+    for key, qty in (step.get("setpoints") or {}).items():
+        qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(str(key).lower())
+        if qcls and isinstance(qty, Mapping) and qty.get("value") is not None:
+            controls.append(typed_quantity_node(qcls, qty["value"], qty.get("unit", "")))
+    if controls:
+        node["hasControlParameter"] = controls
+    terminations: list = []
+    for term in (step.get("termination") or []):
+        if not isinstance(term, Mapping):
+            continue
+        tcls = termination_emmo_class(str(term.get("quantity") or ""), term.get("direction"))
+        if tcls and term.get("value") is not None:
+            terminations.append(typed_quantity_node(tcls, term["value"], term.get("unit", "")))
+    duration = step.get("duration")
+    if isinstance(duration, Mapping) and duration.get("value") is not None:
+        dcls = termination_emmo_class("duration", "elapsed") or "Duration"
+        terminations.append(typed_quantity_node(dcls, duration["value"], duration.get("unit", "")))
+    if terminations:
+        node["hasTerminationParameter"] = terminations
+    temperature = step.get("temperature")
+    if isinstance(temperature, Mapping) and temperature.get("value") is not None:
+        tnode = condition_quantity_node("temperature", temperature["value"], temperature.get("unit", ""))
+        if tnode is not None:
+            node["hasProperty"] = [tnode]
+    return node
+
+
+def protocol_property_value(name: str, value: Any, group: str = "") -> dict:
+    """Labelled ``schema:PropertyValue`` fallback for anything outside the
+    controlled condition vocabulary. ``group`` rides ``schema:propertyID`` so a
+    consumer can still tell a safety limit from an ambient condition."""
+    node: dict = {"@type": "schema:PropertyValue", "schema:name": name}
+    if group:
+        node["schema:propertyID"] = group
+    if isinstance(value, Mapping):
+        if value.get("value") is not None:
+            node["schema:value"] = value["value"]
+            if value.get("unit"):
+                node["schema:unitText"] = value["unit"]
+        else:
+            node["schema:value"] = json.dumps(dict(value), ensure_ascii=False, sort_keys=True)
+    else:
+        node["schema:value"] = value
+    return node
+
+
+def artifact_distribution_node(art: Mapping[str, Any], *, locator_url: Callable[[str], Any] | None = None) -> dict:
+    """An actionable artifact link -> a ``dcat:Distribution`` node, so the runnable
+    protocol file is machine-discoverable alongside the descriptive method.
+
+    *locator_url* resolves a workspace-relative locator to its hosted URL; the
+    publication path injects one (files being uploaded resolve to the deposit),
+    and the standalone record path leaves the locator as authored.
+    """
+    node: dict = {"@type": "dcat:Distribution"}
+    role = art.get("role")
+    fmt = art.get("format")
+    title = (role or "").replace("_", " ")
+    if fmt:
+        title = f"{title} ({fmt})".strip()
+    if title:
+        node["dcterms:title"] = title
+    loc = art.get("locator")
+    if loc:
+        if locator_url is not None:
+            node["dcat:downloadURL"] = locator_url(str(loc))
+        else:
+            node["dcat:downloadURL"] = (
+                {"@id": str(loc)} if str(loc).startswith(("http://", "https://")) else str(loc)
+            )
+    if art.get("media_type"):
+        node["dcat:mediaType"] = art["media_type"]
+    ct = art.get("conforms_to")
+    if ct:
+        node["dcterms:conformsTo"] = (
+            {"@id": ct} if str(ct).startswith(("http://", "https://")) else ct
+        )
+    if isinstance(art.get("byte_size"), int):
+        node["dcat:byteSize"] = art["byte_size"]
+    # Standard vocabulary (no custom battinfo: terms): the artifact role is a
+    # dcterms:type, the format token a dcterms:format, the checksum an spdx:Checksum.
+    if role:
+        node["dcterms:type"] = role
+    if fmt:
+        node["dcterms:format"] = fmt
+    if art.get("sha256"):
+        node["spdx:checksum"] = {
+            "@type": "spdx:Checksum",
+            "spdx:algorithm": "spdx:checksumAlgorithm_sha256",
+            "spdx:checksumValue": art["sha256"],
+        }
+    return node
+
+
+def test_protocol_node(
+    record: Mapping[str, Any],
+    *,
+    locator_url: Callable[[str], Any] | None = None,
+) -> dict | None:
+    """A test-protocol record -> its publication-graph node (no ``@context``).
+
+    PROV-O: the thing a ``prov:used`` plan-link targets is a ``prov:Plan``;
+    ``schema:HowTo`` is the schema.org analog for a procedure. Where the
+    protocol's kind names a published characterisation method (GITT, pseudo-OCV,
+    EIS, ...), that class joins the ``@type`` so the plan is queryable as the
+    method it is. Returns ``None`` when the record carries no protocol IRI.
+    """
+    raw_spec = record.get("test_spec")
+    spec: Mapping[str, Any] = raw_spec if isinstance(raw_spec, Mapping) else {}
+    iri = spec.get("id")
+    if not isinstance(iri, str) or not iri:
+        return None
+
+    types: list = ["prov:Plan", "schema:HowTo"]
+    method_class = test_method_class(spec.get("kind"))
+    if method_class:
+        types.append(method_class)
+    node: dict = {"@type": types, "@id": iri}
+    if spec.get("name"):
+        node["schema:name"] = spec["name"]
+    if spec.get("kind"):
+        node["schema:additionalType"] = spec["kind"]
+    if spec.get("description"):
+        node["schema:description"] = spec["description"]
+
+    # ── Descriptive method -> EMMO process graph (queryable) ──────────────────
+    # The ordered method becomes a hasTask chain of typed step nodes, each
+    # carrying hasControlParameter / hasTerminationParameter / hasProperty.
+    method = record.get("method") or []
+    if isinstance(method, list) and method:
+        node["hasTask"] = [method_step_node(s) for s in method if isinstance(s, Mapping)]
+
+    props: list = []
+    fallback: list = []
+    conditions = record.get("conditions")
+    if isinstance(conditions, Mapping):
+        for name, raw_value in conditions.items():
+            value = raw_value.get("value") if isinstance(raw_value, Mapping) else raw_value
+            unit = raw_value.get("unit", "") if isinstance(raw_value, Mapping) else ""
+            qnode = condition_quantity_node(name, value, unit) if value is not None else None
+            if qnode is not None:
+                props.append(qnode)
+            else:
+                fallback.append(protocol_property_value(name, raw_value, "conditions"))
+    if props:
+        node["hasProperty"] = props
+    # Global safety limits (max_voltage_V, max_temperature_degC, ...) are part of
+    # the protocol; emit each as a labelled PropertyValue so none is dropped.
+    safety = record.get("safety")
+    if isinstance(safety, Mapping):
+        for key, value in safety.items():
+            if value is not None:
+                fallback.append(protocol_property_value(str(key), value, "safety"))
+    if fallback:
+        node["schema:additionalProperty"] = fallback
+
+    # Actionable layer: link runnable protocol files as distributions.
+    artifacts = record.get("artifacts")
+    if isinstance(artifacts, list) and artifacts:
+        node["dcat:distribution"] = [
+            artifact_distribution_node(a, locator_url=locator_url) for a in artifacts if isinstance(a, Mapping)
+        ]
+    return node
+
+
+def test_protocol_context() -> dict:
+    """The ``@context`` a standalone test-protocol document needs.
+
+    The records context plus the prefLabel -> compact-IRI class table and the
+    method/protocol vocabulary — the same layering the publication graph uses, so
+    a protocol resolves identically standalone and inside a deposit.
+    """
+    from battinfo.transform.cell_spec_node import label_to_compact  # noqa: PLC0415
+
+    context: dict = dict(_CONTEXT_INLINE)
+    context.update(label_to_compact())
+    for term, value in TEST_PROTOCOL_CONTEXT_TERMS.items():
+        context.setdefault(term, value)
+    for term, value in TEST_METHOD_CONTEXT_TERMS.items():
+        context.setdefault(term, value)
+    return context
+
+
+def test_protocol_to_jsonld(record: dict) -> dict:
+    """Transform a test-protocol (test-spec) record dict to JSON-LD."""
+    node = test_protocol_node(record) or {"@type": ["prov:Plan", "schema:HowTo"], "@id": ""}
+    prov = record.get("provenance") or {}
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return {"@context": test_protocol_context(), **node}
+
 
 # EMMO battery-type IRIs (from domain-battery.context.json)
 _BATTERY_TYPE_IRIS: dict[str, str] = {
@@ -534,6 +853,10 @@ _TRANSFORMERS = {
     "cell-instance":  cell_instance_to_jsonld,
     "cell_instance":  cell_instance_to_jsonld,
     "test":           test_to_jsonld,
+    "test-protocol":  test_protocol_to_jsonld,
+    "test_protocol":  test_protocol_to_jsonld,
+    "test-spec":      test_protocol_to_jsonld,
+    "test_spec":      test_protocol_to_jsonld,
     "dataset":        dataset_to_jsonld,
     "material-spec":  _material_to_jsonld,
     "material_spec":  _material_to_jsonld,
@@ -581,7 +904,9 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
     record:
         The plain-JSON record dict (as loaded from ``.battinfo/records/``).
     record_type:
-        One of ``"cell-spec"``, ``"cell-instance"``, ``"test"``, ``"dataset"``.
+        One of ``"cell-spec"``, ``"cell-instance"``, ``"test"``,
+        ``"test-protocol"``, ``"dataset"``, ``"material-spec"``/``"material"``,
+        or a component spec/instance type.
     context:
         ``"url"`` (default) references the hosted context (``_CONTEXT_URL``)
         with a one-line ``@context`` — the hosted document carries the full

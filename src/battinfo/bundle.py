@@ -66,6 +66,23 @@ class CellProductType(StrEnum):
     PROTOTYPE = "prototype"
 
 
+class CellConfiguration(StrEnum):
+    """Electrode configuration of the cell as built.
+
+    Absent means unstated, which the JSON-LD emitter reads as a full cell unless
+    a ``reference_electrode`` is present. Stated explicitly, the value beats that
+    heuristic in both directions: ``half_cell`` types the node as
+    BatteryHalfCell + HalfCellDevice, ``three_electrode_cell`` as
+    ThreeElectrodeCellDevice, and ``full_cell`` suppresses the heuristic even when
+    a reference electrode is recorded (three-electrode full cells, potential
+    monitoring on a commercial cell).
+    """
+
+    FULL_CELL = "full_cell"
+    HALF_CELL = "half_cell"
+    THREE_ELECTRODE_CELL = "three_electrode_cell"
+
+
 def _short_id(entity_id: str) -> str:
     tail = entity_id.rstrip("/").split("/")[-1].replace("-", "")
     return tail[:6]
@@ -1280,6 +1297,8 @@ class CellSpec(BundleJsonModel):
     size_code: str | None = Field(default=None, description="Standardised size code (e.g. '18650', '21700', 'AA').")
     iec_code: str | None = Field(default=None, description="IEC 60086 or IEC 61960 code string (e.g. 'LR6', 'ICR18650').")
     country_of_origin: str | None = Field(default=None, description="Country where the cell is manufactured.")
+    cell_configuration: CellConfiguration | None = Field(default=None, description="Electrode configuration as built: full_cell, half_cell, or three_electrode_cell. Absent means unstated; when stated it overrides the reference_electrode half-cell heuristic in the JSON-LD emitter.")
+    reference_electrode: str | None = Field(default=None, description="Counter/reference electrode used in a half-cell or three-electrode build (e.g. 'lithium', 'NHE').")
     rechargeable: bool | None = Field(default=None, description="True for secondary (rechargeable) cells; false for primary.")
     year: int | None = Field(default=None, description="Year the product or its datasheet was released.")
     datasheet_revision: str | None = Field(default=None, description="Revision label of the source datasheet this spec was taken from.")
@@ -1456,6 +1475,12 @@ class CellSpec(BundleJsonModel):
             notes = []
         raw_pt = product.get("product_type")
         product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
+        raw_cfg = product.get("cell_configuration")
+        cell_configuration = (
+            CellConfiguration(raw_cfg)
+            if isinstance(raw_cfg, str) and raw_cfg in CellConfiguration._value2member_map_
+            else None
+        )
         return cls(
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(product["id"]),
@@ -1471,6 +1496,8 @@ class CellSpec(BundleJsonModel):
             size_code=product.get("size_code"),
             iec_code=product.get("iec_code"),
             country_of_origin=product.get("country_of_origin"),
+            cell_configuration=cell_configuration,
+            reference_electrode=product.get("reference_electrode"),
             rechargeable=product.get("rechargeable"),
             year=_year_value(product.get("year")),
             datasheet_revision=product.get("datasheet_revision"),
@@ -1608,6 +1635,10 @@ class CellSpec(BundleJsonModel):
             record["cell_spec"]["iec_code"] = self.iec_code
         if self.country_of_origin is not None:
             record["cell_spec"]["country_of_origin"] = self.country_of_origin
+        if self.cell_configuration is not None:
+            record["cell_spec"]["cell_configuration"] = str(self.cell_configuration)
+        if self.reference_electrode is not None:
+            record["cell_spec"]["reference_electrode"] = self.reference_electrode
         if self.rechargeable is not None:
             record["cell_spec"]["rechargeable"] = self.rechargeable
         if self.year is not None:

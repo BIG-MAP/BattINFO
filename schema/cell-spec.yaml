@@ -42,6 +42,7 @@ classes:
       - ct_year
       - ct_country_of_origin
       - ct_battery_category
+      - ct_cell_configuration
       - ct_specs
 
   Organization:
@@ -258,6 +259,16 @@ slots:
       (LMT, EV, Industrial, Stationary, Portable, SLI).
     aliases:
       - battery_category
+
+  ct_cell_configuration:
+    slot_uri: battinfo:cellConfiguration
+    range: CellConfiguration
+    description: >-
+      Electrode configuration as built (full_cell, half_cell,
+      three_electrode_cell). Optional; absent means unstated, which the emitter
+      reads as a full cell unless a reference_electrode is present.
+    aliases:
+      - cell_configuration
 
   ct_specs:
     slot_uri: battinfo:specs

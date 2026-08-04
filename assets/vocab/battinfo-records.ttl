@@ -1760,6 +1760,15 @@ ns:category a rdf:Property ;
     rdfs:label "Category"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
+ns:cell_configuration a rdf:Property ;
+    rdfs:label "Cell configuration"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cellConfiguration a rdf:Property ;
+    rdfs:label "Cell Configuration"@en ;
+    owl:equivalentProperty ns:cell_configuration ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
 ns:cell_format a rdf:Property ;
     rdfs:label "Cell format"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .

@@ -789,28 +789,6 @@ def _resolve_project_openaire(identifier: str, *, timeout: float = 15.0) -> dict
         return {}
 
 
-def _property_value(name: str, value: Any, group: str = "") -> dict:
-    """Build a schema:PropertyValue for a structured test condition/setpoint.
-
-    Handles scalars, ``{value, unit}`` quantity dicts, and other mappings (stringified).
-    ``group`` (conditions/setpoints/termination_criteria) is recorded as schema:propertyID
-    so consumers can tell a setpoint from a termination criterion.
-    """
-    node: dict = {"@type": "schema:PropertyValue", "schema:name": name}
-    if group:
-        node["schema:propertyID"] = group
-    if isinstance(value, dict):
-        if value.get("value") is not None:
-            node["schema:value"] = value["value"]
-            if value.get("unit"):
-                node["schema:unitText"] = value["unit"]
-        else:
-            node["schema:value"] = json.dumps(value, ensure_ascii=False, sort_keys=True)
-    else:
-        node["schema:value"] = value
-    return node
-
-
 def _provider(creators: list[dict] | None, contributors: list[dict] | None) -> tuple[str, str]:
     """Best-effort publishing organisation: the first affiliation (name, ror) among agents."""
     for c in (creators or []) + (contributors or []):
@@ -2352,6 +2330,11 @@ class AuthoringWorkspace:
             "size_code": kwargs.get("size_code", None),
             "iec_code": kwargs.get("iec_code", None),
             "country_of_origin": kwargs.get("country_of_origin", None),
+            # Electrode configuration: full_cell | half_cell | three_electrode_cell.
+            # Leave null unless you know it; null is read as a full cell unless a
+            # reference_electrode is present.
+            "cell_configuration": kwargs.get("cell_configuration", None),
+            "reference_electrode": kwargs.get("reference_electrode", None),
             "rechargeable": kwargs.get("rechargeable", None),
             "year": kwargs.get("year", None),
             "source_file": kwargs.get("source_file", None),
@@ -4890,14 +4873,8 @@ class AuthoringWorkspace:
         any JSON-LD tool that resolves the embedded context.
         """
         from battinfo.jsonld import (
-            _UNIT_MAP,
-            TEST_CONDITION_CLASS,
-            TEST_CONDITION_GENERIC_CLASSES,
-            TEST_CONDITION_UNIT_IRI,
             funding_to_jsonld,
-            setpoint_emmo_class,
-            step_emmo_class,
-            termination_emmo_class,
+            test_protocol_node,
         )
 
         # Workspace funding project (grant) → schema:funding/Grant. The grant is
@@ -4937,8 +4914,6 @@ class AuthoringWorkspace:
                     _contrib_present.add(_key)
                     contributors.append(_agent)
 
-        _DATA_DIR = Path(__file__).parent / "data"
-
         # Shared canonical builders (also used by the resolver artifact path, so
         # both emitters produce byte-identical cell-spec nodes) plus the
         # prefLabel → compact-IRI table used for inline context terms.
@@ -4946,103 +4921,6 @@ class AuthoringWorkspace:
             build_cell_spec_node,
             label_to_compact,
         )
-        from battinfo.transform.cell_spec_node import (
-            compact_iri as _compact_iri,
-        )
-
-        # {unit_symbol → (unit_iri, prefLabel)} for test-condition / method-step units.
-        _unit_json = _DATA_DIR / "mappings" / "domain-battery" / "unit_map.curated.json"
-        _unit_label: dict[str, tuple[str, str]] = {}
-        if _unit_json.exists():
-            for m in json.loads(_unit_json.read_text(encoding="utf-8")).get("mappings", []):
-                if m.get("symbol") and m.get("unit_iri") and m.get("unit_pref_label"):
-                    _unit_label[m["symbol"]] = (m["unit_iri"], m["unit_pref_label"])
-
-        def _resolve_unit_iri(unit_symbol: str) -> str | None:
-            """Symbol → compact unit IRI, across curated maps, the records context
-            (V, mA, degC, …) and the test-condition extras (A/Ah for C-rate)."""
-            if not unit_symbol:
-                return None
-            ul = _unit_label.get(unit_symbol)
-            if ul:
-                return _compact_iri(ul[0])
-            if unit_symbol in _UNIT_MAP:
-                return _compact_iri(_UNIT_MAP[unit_symbol])
-            ctx_val = _RECORDS_CONTEXT.get(unit_symbol)
-            if isinstance(ctx_val, str) and (":" in ctx_val or ctx_val.startswith("http")):
-                return ctx_val
-            return TEST_CONDITION_UNIT_IRI.get(unit_symbol)
-
-        def _condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
-            """A test condition → EMMO quantity node (the @type comes from the
-            controlled vocabulary), or None if the key is unmapped (caller falls
-            back to schema:PropertyValue and emits a warning)."""
-            cls = TEST_CONDITION_CLASS.get(str(key).lower())
-            if not cls:
-                return None
-            node: dict = {"@type": cls, "hasNumericalPart": {"hasNumberValue": value}}
-            # A generic class (e.g. ConventionalProperty for temperature) needs a
-            # human label to say *which* property it is.
-            if cls in TEST_CONDITION_GENERIC_CLASSES:
-                node["rdfs:label"] = str(key).replace("_", " ")
-            unit_iri = _resolve_unit_iri(unit_symbol) if unit_symbol else (
-                # C-rate is dimensionless-by-symbol; default to AmperePerAmpereHour.
-                TEST_CONDITION_UNIT_IRI["A/Ah"] if cls == "CRate" else None
-            )
-            if unit_iri:
-                node["hasMeasurementUnit"] = {"@id": unit_iri}
-            return node
-
-        def _typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
-            """An EMMO quantity node with an explicit @type (used for method steps)."""
-            node: dict = {"@type": emmo_class, "hasNumericalPart": {"hasNumberValue": value}}
-            unit_iri = _resolve_unit_iri(unit_symbol) if unit_symbol else None
-            if unit_iri:
-                node["hasMeasurementUnit"] = {"@id": unit_iri}
-            return node
-
-        def _method_step_node(step: dict) -> dict:
-            """A descriptive method step → EMMO process node. Groups become an
-            IterativeWorkflow with NumberOfIterations + nested hasTask; leaf steps
-            carry hasControlParameter / hasTerminationParameter / hasProperty."""
-            mode = step.get("mode")
-            if mode == "group":
-                gnode: dict = {"@type": step_emmo_class("group", None) or "IterativeWorkflow"}
-                count = step.get("count")
-                if isinstance(count, int):
-                    gnode["NumberOfIterations"] = {"hasNumericalPart": {"hasNumberValue": count}}
-                gnode["hasTask"] = [_method_step_node(s) for s in (step.get("steps") or [])]
-                return gnode
-
-            node: dict = {"@type": step_emmo_class(str(mode or ""), step.get("direction")) or "ElectrochemicalProcess"}
-            if step.get("description"):
-                node["rdfs:label"] = step["description"]
-            controls: list = []
-            for key, qty in (step.get("setpoints") or {}).items():
-                qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(str(key).lower())
-                if qcls and isinstance(qty, dict) and qty.get("value") is not None:
-                    controls.append(_typed_quantity_node(qcls, qty["value"], qty.get("unit", "")))
-            if controls:
-                node["hasControlParameter"] = controls
-            terminations: list = []
-            for term in (step.get("termination") or []):
-                if not isinstance(term, dict):
-                    continue
-                tcls = termination_emmo_class(str(term.get("quantity") or ""), term.get("direction"))
-                if tcls and term.get("value") is not None:
-                    terminations.append(_typed_quantity_node(tcls, term["value"], term.get("unit", "")))
-            duration = step.get("duration")
-            if isinstance(duration, dict) and duration.get("value") is not None:
-                dcls = termination_emmo_class("duration", "elapsed") or "Duration"
-                terminations.append(_typed_quantity_node(dcls, duration["value"], duration.get("unit", "")))
-            if terminations:
-                node["hasTerminationParameter"] = terminations
-            temperature = step.get("temperature")
-            if isinstance(temperature, dict) and temperature.get("value") is not None:
-                tnode = _condition_quantity_node("temperature", temperature["value"], temperature.get("unit", ""))
-                if tnode is not None:
-                    node["hasProperty"] = [tnode]
-            return node
 
         def _artifact_download_url(loc: str) -> Any:
             """Resolve an artifact locator to its download URL. An http(s) locator is
@@ -5060,41 +4938,11 @@ class AuthoringWorkspace:
             return text
 
         def _artifact_distribution(art: dict) -> dict:
-            """An actionable artifact link → a dcat:Distribution node, so the runnable
-            protocol file is machine-discoverable alongside the descriptive method."""
-            node: dict = {"@type": "dcat:Distribution"}
-            role = art.get("role")
-            fmt = art.get("format")
-            title = (role or "").replace("_", " ")
-            if fmt:
-                title = f"{title} ({fmt})".strip()
-            if title:
-                node["dcterms:title"] = title
-            loc = art.get("locator")
-            if loc:
-                node["dcat:downloadURL"] = _artifact_download_url(loc)
-            if art.get("media_type"):
-                node["dcat:mediaType"] = art["media_type"]
-            ct = art.get("conforms_to")
-            if ct:
-                node["dcterms:conformsTo"] = (
-                    {"@id": ct} if str(ct).startswith(("http://", "https://")) else ct
-                )
-            if isinstance(art.get("byte_size"), int):
-                node["dcat:byteSize"] = art["byte_size"]
-            # Standard vocabulary (no custom battinfo: terms): the artifact role is a
-            # dcterms:type, the format token a dcterms:format, the checksum an spdx:Checksum.
-            if role:
-                node["dcterms:type"] = role
-            if fmt:
-                node["dcterms:format"] = fmt
-            if art.get("sha256"):
-                node["spdx:checksum"] = {
-                    "@type": "spdx:Checksum",
-                    "spdx:algorithm": "spdx:checksumAlgorithm_sha256",
-                    "spdx:checksumValue": art["sha256"],
-                }
-            return node
+            """An actionable artifact link → a dcat:Distribution node, resolving the
+            locator against the files being uploaded with this deposit."""
+            from battinfo.jsonld import artifact_distribution_node  # noqa: PLC0415
+
+            return artifact_distribution_node(art, locator_url=_artifact_download_url)
 
         # ── Load cell specs ────────────────────────────────────────────────────
         # One canonical builder (shared with the resolver path): the physical
@@ -5329,66 +5177,21 @@ class AuthoringWorkspace:
         # Each test activity's ``prov:used`` points at the spec it followed. Emit a
         # described node for that spec so the link resolves to a real node in the
         # graph instead of a dangling IRI — mirroring how cell specs and datasets
-        # are inlined above. PROV-O: the thing a ``prov:used`` plan-link targets is a
-        # ``prov:Plan``; ``schema:HowTo`` is the schema.org analog for a procedure.
+        # are inlined above. The node itself is built by the shared emitter in
+        # battinfo.jsonld, so a protocol published in a deposit and one emitted
+        # standalone by record_to_jsonld are the same graph.
         # The importer keys off ``BatteryTest``/``BatteryCellSpecification`` types
         # (see import_), so these nodes are ignored on round-trip — safe to add.
         test_spec_nodes: list[dict] = []
-        _tspec_recs = record_sets.get("test-protocol", [])
-        if _tspec_recs:
-            for raw in _tspec_recs:
-                try:
-                    spec = raw.get("test_spec", {})
-                    iri  = spec.get("id", "")
-                    if not iri:
-                        continue
-                    snode: dict = {
-                        "@type": ["prov:Plan", "schema:HowTo"],
-                        "@id":   iri,
-                    }
-                    if spec.get("name"):
-                        snode["schema:name"] = spec["name"]
-                    if spec.get("kind"):
-                        snode["schema:additionalType"] = spec["kind"]
-                    if spec.get("description"):
-                        snode["schema:description"] = spec["description"]
-                    # ── Descriptive method → EMMO process graph (queryable) ───────
-                    # The ordered method becomes a hasTask chain of typed step nodes,
-                    # each carrying hasControlParameter / hasTerminationParameter /
-                    # hasProperty quantities. Protocol-level ambient conditions attach
-                    # as hasProperty; names outside the controlled vocabulary fall back
-                    # to schema:PropertyValue (and trigger a publication warning).
-                    method = raw.get("method") or []
-                    if method:
-                        snode["hasTask"] = [_method_step_node(s) for s in method]
-                    _props: list = []
-                    _fallback: list = []
-                    for _name, _val in (raw.get("conditions") or {}).items():
-                        _v = _val.get("value") if isinstance(_val, dict) else _val
-                        _u = _val.get("unit", "") if isinstance(_val, dict) else ""
-                        qnode = _condition_quantity_node(_name, _v, _u) if _v is not None else None
-                        if qnode is not None:
-                            _props.append(qnode)
-                        else:
-                            _fallback.append(_property_value(_name, _val, "conditions"))
-                    if _props:
-                        snode["hasProperty"] = _props
-                    # Global safety limits (max_voltage_V, max_temperature_degC, ...)
-                    # are part of the protocol; emit each as a labelled PropertyValue
-                    # so they are not dropped from the publication graph.
-                    for _sk, _sv in (raw.get("safety") or {}).items():
-                        if _sv is not None:
-                            _fallback.append(_property_value(str(_sk), _sv, "safety"))
-                    if _fallback:
-                        snode["schema:additionalProperty"] = _fallback
-                    # Actionable layer: link runnable protocol files as distributions.
-                    if raw.get("artifacts"):
-                        snode["dcat:distribution"] = [
-                            _artifact_distribution(a) for a in raw["artifacts"] if isinstance(a, dict)
-                        ]
-                    test_spec_nodes.append(snode)
-                except Exception:
-                    continue
+        for raw in record_sets.get("test-protocol", []):
+            if not isinstance(raw, dict):
+                continue
+            try:
+                snode = test_protocol_node(raw, locator_url=_artifact_download_url)
+            except Exception:
+                continue
+            if snode is not None:
+                test_spec_nodes.append(snode)
 
         # ── Build dataset metadata ─────────────────────────────────────────────
         # A dataset may carry several distributions (files) — e.g. a normalised
@@ -6226,6 +6029,7 @@ class AuthoringWorkspace:
             "cell-spec":     "cell-spec",
             "cell-instance": "cell-instance",
             "test":          "test",
+            "test-protocol": "test-protocol",
             "dataset":       "dataset",
         }
 
@@ -6429,6 +6233,8 @@ class AuthoringWorkspace:
             size_code=raw.get("size_code"),
             iec_code=raw.get("iec_code"),
             country_of_origin=raw.get("country_of_origin"),
+            cell_configuration=raw.get("cell_configuration"),
+            reference_electrode=raw.get("reference_electrode"),
             rechargeable=raw.get("rechargeable"),
             year=raw.get("year"),
             specs=specs or None,

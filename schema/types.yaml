@@ -77,6 +77,24 @@ enums:
       research:    { description: "Research / experimental cell." }
       prototype:   { description: "Pre-production prototype." }
 
+  CellConfiguration:
+    description: >-
+      Electrode configuration of the cell as built. Absent means unknown; a
+      full cell is the safe reading of an unstated configuration. Stated
+      explicitly, the value overrides the reference_electrode half-cell
+      heuristic in the JSON-LD emitter.
+    permissible_values:
+      full_cell:
+        description: "Two working electrodes; the ordinary battery cell."
+      half_cell:
+        description: >-
+          One working electrode against a counter/reference electrode
+          (typically lithium metal). Types as BatteryHalfCell + HalfCellDevice.
+      three_electrode_cell:
+        description: >-
+          Working, counter and a separate reference electrode, so each electrode
+          potential is measured independently. Types as ThreeElectrodeCellDevice.
+
   CellGrade:
     description: >-
       Battery grade / reuse status per EU Battery Regulation 2023/1542.

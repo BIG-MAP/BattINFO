@@ -744,6 +744,8 @@ class Workspace:
         size_code: str | None = None,
         iec_code: str | None = None,
         country_of_origin: str | None = None,
+        cell_configuration: str | None = None,
+        reference_electrode: str | None = None,
         rechargeable: bool | None = None,
         year: int | None = None,
         positive_electrode_basis: str | None = None,
@@ -756,8 +758,9 @@ class Workspace:
         retrieved_at: int | str | None = None,
         comment: list[str] | None = None,
     ) -> CellSpec:
-        from battinfo.bundle import CellProductType
+        from battinfo.bundle import CellConfiguration, CellProductType
         resolved_pt = CellProductType(product_type) if product_type is not None else None
+        resolved_cfg = CellConfiguration(cell_configuration) if cell_configuration is not None else None
         cell_spec = CellSpec(
             manufacturer=manufacturer,
             model=model,
@@ -767,6 +770,8 @@ class Workspace:
             size_code=size_code,
             iec_code=iec_code,
             country_of_origin=country_of_origin,
+            cell_configuration=resolved_cfg,
+            reference_electrode=reference_electrode,
             rechargeable=rechargeable,
             year=year,
             positive_electrode_basis=positive_electrode_basis,
