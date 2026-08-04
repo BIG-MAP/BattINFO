@@ -5270,7 +5270,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "kind": {
               "type": "string",
               "minLength": 1,
-              "description": "Required Level-1 MaterialKind key from the curated material_kinds vocabulary (e.g. 'graphite', 'lfp', 'nmc811'). The aggregation axis of the Battery Genome; resolves to the kind's chemical-substance class IRI. An unknown kind is rejected at save time. See battinfo.material_kind_keys()."
+              "description": "Required Level-1 MaterialKind key from the curated material_kinds vocabulary (e.g. 'graphite', 'lfp', 'nmc811'). The aggregation axis of the Battery Genome; resolves to the kind's chemical-substance class IRI. An unknown kind is rejected at save time. See battinfo.materials.material_kind_keys()."
             },
             "grade": {
               "type": "string",
