@@ -31,6 +31,7 @@ classes:
       - t_protocol_id
       - t_description
       - t_status
+      - t_conditions
       - t_protocol
       - t_instrument
       - t_started_at
@@ -111,6 +112,20 @@ slots:
     description: Execution status (planned, running, completed, aborted, other).
     aliases:
       - status
+
+  # Open per-execution conditions map (temperature, voltage window, C-rate,
+  # frequency range, ...). Keys are snake_case; values may be scalars, strings,
+  # or {value, unit} quantities. No slot_uri: the JSON-LD emitter expands each
+  # entry to a schema:PropertyValue under schema:additionalProperty rather than a
+  # single predicate, so this documents the field without emitting a context term.
+  t_conditions:
+    range: string
+    inlined: true
+    description: >-
+      Per-execution test conditions and parameters as an open snake_case
+      name -> value map (temperature, voltage window, C-rate, frequency range).
+    aliases:
+      - conditions
 
   t_protocol:
     slot_uri: battinfo:protocolReference

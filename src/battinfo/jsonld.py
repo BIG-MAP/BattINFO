@@ -365,6 +365,25 @@ def test_to_jsonld(record: dict) -> dict:
         # Skip None / non-string entries so a partial record never emits {"@id": null}
         # (invalid JSON-LD — @id must be a string IRI).
         node["schema:result"] = [{"@id": d} for d in test["dataset_ids"] if isinstance(d, str) and d]
+    conditions = test.get("conditions")
+    if isinstance(conditions, Mapping) and conditions:
+        # Per-execution conditions are an open snake_case map (temperature,
+        # voltage window, C-rate, ...); values may be scalars, strings, or
+        # {value, unit} quantities. Emit each as a standards-only
+        # schema:PropertyValue (the same shape the cell-instance batch_id and the
+        # protocol-condition fallback already use) hung off schema:additionalProperty.
+        props: list[dict] = []
+        for name in sorted(conditions):
+            value = conditions[name]
+            pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
+            if isinstance(value, Mapping) and "value" in value:
+                pv["schema:value"] = value.get("value")
+                if value.get("unit"):
+                    pv["schema:unitText"] = value["unit"]
+            else:
+                pv["schema:value"] = value
+            props.append(pv)
+        node["schema:additionalProperty"] = props
     if prov:
         node["dcterms:source"] = _provenance(prov)
 
