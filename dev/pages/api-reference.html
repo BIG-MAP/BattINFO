@@ -701,6 +701,7 @@ enumerated in <a class="reference internal" href="property-reference.html"><span
 <dt class="field-odd">Fields<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bibliography</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_configuration</span> <span class="pre">(battinfo.bundle.CellConfiguration</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_specification_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">chemistry</span> <span class="pre">(str)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">comment</span> <span class="pre">(list[str])</span></code></p></li>
@@ -728,6 +729,7 @@ enumerated in <a class="reference internal" href="property-reference.html"><span
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">product_type</span> <span class="pre">(battinfo.bundle.CellProductType</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">properties</span> <span class="pre">(dict[str,</span> <span class="pre">Any])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rechargeable</span> <span class="pre">(bool</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reference_electrode</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">separator</span> <span class="pre">(battinfo.bundle.Separator</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">separator_spec_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size_code</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
@@ -970,7 +972,9 @@ pointing directly at one record directory.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>record</strong> – The plain-JSON record dict (as loaded from <code class="docutils literal notranslate"><span class="pre">.battinfo/records/</span></code>).</p></li>
-<li><p><strong>record_type</strong> – One of <code class="docutils literal notranslate"><span class="pre">&quot;cell-spec&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;cell-instance&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;test&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;dataset&quot;</span></code>.</p></li>
+<li><p><strong>record_type</strong> – One of <code class="docutils literal notranslate"><span class="pre">&quot;cell-spec&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;cell-instance&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;test&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;test-protocol&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;dataset&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;material-spec&quot;</span></code>/<code class="docutils literal notranslate"><span class="pre">&quot;material&quot;</span></code>,
+or a component spec/instance type.</p></li>
 <li><p><strong>context</strong> – <code class="docutils literal notranslate"><span class="pre">&quot;url&quot;</span></code> (default) references the hosted context (<code class="docutils literal notranslate"><span class="pre">_CONTEXT_URL</span></code>)
 with a one-line <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> — the hosted document carries the full
 vocabulary, so the record a reader sees stays simple. Resolved offline

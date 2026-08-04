@@ -531,6 +531,41 @@ and go on the ontology-additions backlog (a labeled <code class="docutils litera
 carries the node until the class is upstreamed). A kind may also carry curated,
 citable <code class="docutils literal notranslate"><span class="pre">reference_properties</span></code> (e.g. graphite 372 mAh/g) — the generic anchors the
 genome compares datasheet- and measurement-reported values against.</p>
+<section id="external-identity-anchors">
+<h3>External identity anchors<a class="headerlink" href="#external-identity-anchors" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">chemsub</span></code> is the EMMO identity. Materials science also runs on Wikidata, PubChem,
+the Materials Project, InChIKeys and CAS numbers, so a kind may additionally carry
+<code class="docutils literal notranslate"><span class="pre">wikidata_qid</span></code>, <code class="docutils literal notranslate"><span class="pre">pubchem_cid</span></code>, <code class="docutils literal notranslate"><span class="pre">mp_id</span></code>, <code class="docutils literal notranslate"><span class="pre">inchikey</span></code> and <code class="docutils literal notranslate"><span class="pre">cas_rn</span></code>. The three that have
+a stable dereferenceable form are emitted as <code class="docutils literal notranslate"><span class="pre">skos:exactMatch</span></code> links, which is how a
+consumer joins a BattINFO material to those systems with no lookup table:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Emitted as</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wikidata_qid</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">http://www.wikidata.org/entity/&lt;QID&gt;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pubchem_cid</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">https://pubchem.ncbi.nlm.nih.gov/compound/&lt;CID&gt;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mp_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">https://next-gen.materialsproject.org/materials/&lt;mp-id&gt;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">inchikey</span></code>, <code class="docutils literal notranslate"><span class="pre">cas_rn</span></code></p></td>
+<td><p>carried as literals only — neither has a canonical, freely-dereferenceable IRI</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two rules govern the anchors. <strong>An absent anchor means unverified, never guessed</strong>:
+a kind carries an identifier only once someone has checked it, so an empty field is
+information, not an oversight. And <strong><code class="docutils literal notranslate"><span class="pre">mp_id</span></code> denotes a representative ordered
+structure</strong>, so solid-solution families (the NMC ratios, NCA, LMFP) legitimately
+carry none — that absence is correct, not a gap to fill. No InChIKeys are populated
+yet; molecular-species curation is a later pass.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.materials</span><span class="w"> </span><span class="kn">import</span> <span class="n">material_kind</span><span class="p">,</span> <span class="n">material_kind_keys</span><span class="p">,</span> <span class="n">resolve_material_kind</span>
 
@@ -540,8 +575,19 @@ genome compares datasheet- and measurement-reported values against.</p>
 <span class="n">material_kind</span><span class="p">(</span><span class="s2">&quot;graphite&quot;</span><span class="p">)</span>                 <span class="c1"># the full entry (chemsub, emmo, refs)</span>
 </pre></div>
 </div>
-<p>The seed vocabulary bootstraps the contract; curation to the full set is a
-follow-up PR.</p>
+<p>The vocabulary covers 38 kinds: the common actives (graphite, hard carbon, LTO,
+silicon and Si/Gr, lithium and zinc metal; LFP, LMFP, LCO, LMO, LNMO, the four NMC
+ratios, NCA, MnO2), binders, conductive additives, the salts (LiPF6, LiTFSI, LiFSI,
+KOH), carbonate solvents and additives, separator and current-collector materials,
+plus alumina and NMP. Every one anchors to a <code class="docutils literal notranslate"><span class="pre">domain-chemical-substance</span></code> class.
+Adding a kind is a PR against <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/vocab/material_kinds.json</span></code>; the
+tests check that each new <code class="docutils literal notranslate"><span class="pre">emmo</span></code> class resolves in the bundled context and names the
+same substance as its <code class="docutils literal notranslate"><span class="pre">chemsub</span></code> anchor.</p>
+<p>One placement is worth flagging: NMP is a <strong>processing</strong> solvent (slurry casting),
+not an electrolyte solvent, and the family list has no <code class="docutils literal notranslate"><span class="pre">processing_solvent</span></code> value, so
+it sits under <code class="docutils literal notranslate"><span class="pre">other</span></code> with a <code class="docutils literal notranslate"><span class="pre">family_note</span></code> saying why. Add the family when a second
+processing solvent arrives rather than stretching <code class="docutils literal notranslate"><span class="pre">electrolyte_solvent</span></code> to cover it.</p>
+</section>
 </section>
 <section id="level-2-material-spec-first-class-record">
 <h2>Level 2 — material-spec (first-class record)<a class="headerlink" href="#level-2-material-spec-first-class-record" title="Link to this heading">#</a></h2>
@@ -666,7 +712,10 @@ fields each record carries.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-1-materialkind-a-curated-vocabulary">Level 1 — MaterialKind (a curated vocabulary)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-1-materialkind-a-curated-vocabulary">Level 1 — MaterialKind (a curated vocabulary)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#external-identity-anchors">External identity anchors</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-2-material-spec-first-class-record">Level 2 — material-spec (first-class record)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-3-material-instance-record">Level 3 — material (instance record)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#blessed-api">Blessed API</a></li>
