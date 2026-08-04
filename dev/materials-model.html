@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Test specs &#8212; BattINFO  documentation</title>
+    <title>Materials: kind, spec, instance &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'test-specs';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'materials-model';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.20.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Engineering cell description" href="engineering-cell-description.html" />
-    <link rel="prev" title="Cells" href="cell-fleet.html" />
+    <link rel="next" title="Materials" href="material-spec.html" />
+    <link rel="prev" title="CLI reference" href="pages/cli-reference.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -398,11 +398,11 @@
 <li class="toctree-l1"><a class="reference internal" href="pages/cli-reference.html">CLI reference</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="materials-model.html">Materials: kind, spec, instance</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Materials: kind, spec, instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Test specs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 <ul class="nav bd-sidenav">
@@ -463,7 +463,7 @@
     
     <li class="breadcrumb-item"><a href="pages/reference.html" class="nav-link">Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Test specs</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Materials: kind, spec, instance</span></li>
   </ul>
 </nav>
 </div>
@@ -480,167 +480,142 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="test-specs">
-<h1>Test specs<a class="headerlink" href="#test-specs" title="Link to this heading">#</a></h1>
-<p>A <strong>test-spec</strong> is the reusable, IRI-addressable description of a test
-procedure — the <em>spec</em> half of <code class="docutils literal notranslate"><span class="pre">test-spec</span></code> + <code class="docutils literal notranslate"><span class="pre">test</span></code>. A <code class="docutils literal notranslate"><span class="pre">test</span></code> (instance) links a cell-instance to
-a test-spec via <code class="docutils literal notranslate"><span class="pre">protocol_id</span></code> and to its <code class="docutils literal notranslate"><span class="pre">dataset</span></code>s.</p>
-<blockquote>
-<div><p><strong>One thing, three names.</strong> A <em>test spec</em> is stored as a <code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>
-record on disk and authored as the <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code> Python class — same object
-throughout. The <code class="docutils literal notranslate"><span class="pre">kind=</span></code> argument (the workspace calls it <code class="docutils literal notranslate"><span class="pre">type=</span></code>) takes any
-<code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code> value: <code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code>,
-<code class="docutils literal notranslate"><span class="pre">hppc</span></code>, <code class="docutils literal notranslate"><span class="pre">ici</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, <code class="docutils literal notranslate"><span class="pre">dcir</span></code>, <code class="docutils literal notranslate"><span class="pre">eis</span></code>, <code class="docutils literal notranslate"><span class="pre">impedance</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_ageing</span></code>,
-<code class="docutils literal notranslate"><span class="pre">formation</span></code>, <code class="docutils literal notranslate"><span class="pre">rpt</span></code>, <code class="docutils literal notranslate"><span class="pre">quasi_ocv</span></code>, <code class="docutils literal notranslate"><span class="pre">field</span></code>, <code class="docutils literal notranslate"><span class="pre">duty_cycle</span></code>, <code class="docutils literal notranslate"><span class="pre">wltp</span></code>, <code class="docutils literal notranslate"><span class="pre">nedc</span></code>,
-<code class="docutils literal notranslate"><span class="pre">sem</span></code>, <code class="docutils literal notranslate"><span class="pre">characterization</span></code>, <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
-</div></blockquote>
-<section id="authoring">
-<h2>Authoring<a class="headerlink" href="#authoring" title="Link to this heading">#</a></h2>
+  <section id="materials-kind-spec-instance">
+<h1>Materials: kind, spec, instance<a class="headerlink" href="#materials-kind-spec-instance" title="Link to this heading">#</a></h1>
+<p>Materials in BattINFO follow a <strong>three-level model</strong> — the spec + instance pattern
+every record family uses, with one universal level above it. It mirrors how cells
+work (chemistry/format vocabulary above <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code> above <code class="docutils literal notranslate"><span class="pre">cell</span></code>).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Level</p></th>
+<th class="head"><p>What it is</p></th>
+<th class="head"><p>Form</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1. <strong>kind</strong></p></td>
+<td><p>the <em>generic</em> material</p></td>
+<td><p>curated vocabulary (not a record)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">graphite</span></code>, <code class="docutils literal notranslate"><span class="pre">nmc811</span></code>, <code class="docutils literal notranslate"><span class="pre">lfp</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>2. <strong>spec</strong></p></td>
+<td><p>a <em>manufactured/synthesized product</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">material-spec</span></code> record</p></td>
+<td><p>Targray NMC811, grade X</p></td>
+</tr>
+<tr class="row-even"><td><p>3. <strong>instance</strong></p></td>
+<td><p>an <em>actual lot/batch</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">material</span></code> record</p></td>
+<td><p>lot <code class="docutils literal notranslate"><span class="pre">LOT-2026-04</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="level-1-materialkind-a-curated-vocabulary">
+<h2>Level 1 — MaterialKind (a curated vocabulary)<a class="headerlink" href="#level-1-materialkind-a-curated-vocabulary" title="Link to this heading">#</a></h2>
+<p>Generic graphite is universal reference data: the genome’s cross-dataset promise
+(“all graphite half-cell OCVs”) requires every publisher to converge on <strong>one</strong>
+identifier for graphite. So kinds are a <strong>shipped, versioned, curated vocabulary</strong>
+governed by PR — like the property vocabulary — <strong>not</strong> a user-authored record
+type. If level 1 were records, the corpus would grow fifty graphites.</p>
+<p>Each kind carries a canonical <code class="docutils literal notranslate"><span class="pre">key</span></code> (the ergonomic handle), a <code class="docutils literal notranslate"><span class="pre">label</span></code>, a <code class="docutils literal notranslate"><span class="pre">family</span></code>
+(<code class="docutils literal notranslate"><span class="pre">active_anode</span></code>, <code class="docutils literal notranslate"><span class="pre">active_cathode</span></code>, <code class="docutils literal notranslate"><span class="pre">binder</span></code>, <code class="docutils literal notranslate"><span class="pre">conductive_additive</span></code>,
+<code class="docutils literal notranslate"><span class="pre">electrolyte_solvent</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_salt</span></code>, <code class="docutils literal notranslate"><span class="pre">separator_material</span></code>,
+<code class="docutils literal notranslate"><span class="pre">current_collector_material</span></code>, <code class="docutils literal notranslate"><span class="pre">other</span></code>), an optional <code class="docutils literal notranslate"><span class="pre">formula</span></code>, tolerant-import
+<code class="docutils literal notranslate"><span class="pre">aliases</span></code> (“NMC 811”, “LiNi0.8Mn0.1Co0.1O2”, “Si/Gr”), and — the anchor — its
+<code class="docutils literal notranslate"><span class="pre">chemsub</span></code>: the material’s <strong>chemical-substance domain-ontology class IRI</strong> (the EMMO
+ecosystem’s <code class="docutils literal notranslate"><span class="pre">domain-chemical-substance</span></code>). The battinfo <code class="docutils literal notranslate"><span class="pre">key</span></code> is just the handle;
+<code class="docutils literal notranslate"><span class="pre">chemsub</span></code> is the semantic identity. Kinds missing from the ontology omit <code class="docutils literal notranslate"><span class="pre">chemsub</span></code>
+and go on the ontology-additions backlog (a labeled <code class="docutils literal notranslate"><span class="pre">ChemicalSubstance</span></code> fallback
+carries the node until the class is upstreamed). A kind may also carry curated,
+citable <code class="docutils literal notranslate"><span class="pre">reference_properties</span></code> (e.g. graphite 372 mAh/g) — the generic anchors the
+genome compares datasheet- and measurement-reported values against.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.materials</span><span class="w"> </span><span class="kn">import</span> <span class="n">material_kind</span><span class="p">,</span> <span class="n">material_kind_keys</span><span class="p">,</span> <span class="n">resolve_material_kind</span>
 
-<span class="n">battinfo</span><span class="o">.</span><span class="n">save_test_spec</span><span class="p">(</span><span class="n">battinfo</span><span class="o">.</span><span class="n">TestSpec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Capacity Check — C/10 at 25 C&quot;</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;CC-CV charge then slow C/10 discharge.&quot;</span><span class="p">,</span>
-    <span class="n">experiment</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Charge at C/3 until 4.2 V&quot;</span><span class="p">,</span> <span class="s2">&quot;Hold at 4.2 V until C/20&quot;</span><span class="p">,</span> <span class="s2">&quot;Discharge at C/10 until 2.5 V&quot;</span><span class="p">],</span>
-    <span class="n">conditions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;degC&quot;</span><span class="p">}},</span>
-<span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+<span class="n">battinfo</span><span class="o">.</span><span class="n">material_kinds</span><span class="p">()</span>                 <span class="c1"># the whole vocabulary</span>
+<span class="n">material_kind_keys</span><span class="p">()</span>                      <span class="c1"># the valid kind keys</span>
+<span class="n">resolve_material_kind</span><span class="p">(</span><span class="s2">&quot;NMC 811&quot;</span><span class="p">)</span>          <span class="c1"># -&gt; &quot;nmc811&quot; (aliases resolve)</span>
+<span class="n">material_kind</span><span class="p">(</span><span class="s2">&quot;graphite&quot;</span><span class="p">)</span>                 <span class="c1"># the full entry (chemsub, emmo, refs)</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">experiment</span></code> PyBaMM-style strings parse into the structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (steps with
-mode/direction/setpoints/termination); <code class="docutils literal notranslate"><span class="pre">facets</span></code> are derived automatically for filtering.
-The model is two-layer by design: a descriptive <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (what the procedure is) plus
-actionable <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code> (runnable protocol files carried as linked distributions).</p>
+<p>The seed vocabulary bootstraps the contract; curation to the full set is a
+follow-up PR.</p>
 </section>
-<section id="how-each-kind-is-modelled">
-<h2>How each kind is modelled<a class="headerlink" href="#how-each-kind-is-modelled" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">examples/test-protocol/</span></code> carries <strong>one example for every <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code></strong> value (20
-kinds), enforced by <code class="docutils literal notranslate"><span class="pre">tests/test_test_contract.py::test_test_protocol_examples_cover_full_battery_test_type_enum</span></code>.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Kind</p></th>
-<th class="head"><p>Modelled with</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>cycling, capacity_check, formation, rate_capability, hppc, ici, gitt, dcir, rpt, quasi_ocv, duty_cycle</p></td>
-<td><p>structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (CC/CV/rest/pulse steps) + <code class="docutils literal notranslate"><span class="pre">conditions</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>eis, impedance</p></td>
-<td><p>an <code class="docutils literal notranslate"><span class="pre">eis</span></code> method step (frequency window + AC amplitude) + <code class="docutils literal notranslate"><span class="pre">conditions</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>calendar_ageing</p></td>
-<td><p>storage <code class="docutils literal notranslate"><span class="pre">conditions</span></code> + check-up cadence</p></td>
-</tr>
-<tr class="row-odd"><td><p>wltp, nedc</p></td>
-<td><p>drive-cycle power profile — <code class="docutils literal notranslate"><span class="pre">description</span></code> + <code class="docutils literal notranslate"><span class="pre">protocol_url</span></code>; the full time-resolved trace is carried as a linked actionable artifact</p></td>
-</tr>
-<tr class="row-even"><td><p>sem, characterization, field, other</p></td>
-<td><p>minimal <code class="docutils literal notranslate"><span class="pre">name</span></code> + <code class="docutils literal notranslate"><span class="pre">kind</span></code> + <code class="docutils literal notranslate"><span class="pre">description</span></code> (no electrochemical method)</p></td>
-</tr>
-</tbody>
-</table>
+<section id="level-2-material-spec-first-class-record">
+<h2>Level 2 — material-spec (first-class record)<a class="headerlink" href="#level-2-material-spec-first-class-record" title="Link to this heading">#</a></h2>
+<p>A manufactured or lab-synthesized product, equal in standing to <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>:</p>
+<ul class="simple">
+<li><p><strong>Identity</strong> — a deterministic, content-derived IRI minted like every other
+engine type, from normalized <strong>(manufacturer, product, grade)</strong>. Re-authoring
+the same product is a no-op, never a duplicate. Lab-synthesized materials use the
+lab as manufacturer and the recipe/batch-family name as product. There is no
+random-id path. <strong>Processing is NOT part of spec identity</strong> (see level 3).</p></li>
+<li><p><strong>Required <code class="docutils literal notranslate"><span class="pre">kind</span></code></strong> — every spec names its level-1 kind (aliases welcome). This
+is the query backbone; an unknown kind is rejected at save with the valid keys.</p></li>
+<li><p><strong>Manufacturer as org link</strong> — <code class="docutils literal notranslate"><span class="pre">manufacturer.id</span></code> → an <code class="docutils literal notranslate"><span class="pre">organization</span></code> record IRI,
+name fallback tolerated.</p></li>
+<li><p><strong>Properties</strong> — datasheet values via the standard property mechanism, each
+eligible for per-property provenance (value/unit/<code class="docutils literal notranslate"><span class="pre">co_type</span></code>/<code class="docutils literal notranslate"><span class="pre">conditions</span></code>).</p></li>
+<li><p><strong>Attribution</strong> — <code class="docutils literal notranslate"><span class="pre">contributor</span></code> / <code class="docutils literal notranslate"><span class="pre">license</span></code> / <code class="docutils literal notranslate"><span class="pre">funding</span></code> are allowed on the
+schema and stamped by <code class="docutils literal notranslate"><span class="pre">ws.save</span></code>, exactly like every other record.</p></li>
+</ul>
+</section>
+<section id="level-3-material-instance-record">
+<h2>Level 3 — material (instance record)<a class="headerlink" href="#level-3-material-instance-record" title="Link to this heading">#</a></h2>
+<p>An actual batch/lot/portion realizing a spec:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">spec</span></code> link</strong> (required), <code class="docutils literal notranslate"><span class="pre">lot</span></code>/batch number, received/opened/expiry dates,
+supplier reference, <code class="docutils literal notranslate"><span class="pre">amount</span></code>, <code class="docutils literal notranslate"><span class="pre">storage</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">processing</span></code></strong> — the route (<code class="docutils literal notranslate"><span class="pre">aqueous</span></code> | <code class="docutils literal notranslate"><span class="pre">nmp</span></code> | <code class="docutils literal notranslate"><span class="pre">dry</span></code> | <code class="docutils literal notranslate"><span class="pre">other</span></code>), solvent, and
+free-text detail. <strong>Processing lives here, on the build, not on the spec</strong> —
+aqueous vs NMP is not a distinct product.</p></li>
+<li><p><strong>An OPEN property block</strong> for as-received / as-characterized measurements —
+unmapped keys get the standard labeled-fallback + warning, <em>not</em> a closed
+vocabulary.</p></li>
+<li><p><strong>Identity</strong> — deterministic from <strong>(spec_id, lot)</strong>.</p></li>
+</ul>
+</section>
+<section id="blessed-api">
+<h2>Blessed API<a class="headerlink" href="#blessed-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">license</span><span class="p">(</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">);</span> <span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="n">orcid</span><span class="o">=</span><span class="s2">&quot;0000-...&quot;</span><span class="p">)</span>
+
+<span class="n">nmc</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;material_spec&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Targray NMC811&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
+             <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Targray&quot;</span><span class="p">,</span> <span class="n">grade</span><span class="o">=</span><span class="s2">&quot;grade X&quot;</span><span class="p">,</span>
+             <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;d50_particle_size&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}})[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;material&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">nmc</span><span class="p">,</span> <span class="n">lot</span><span class="o">=</span><span class="s2">&quot;LOT-2026-04&quot;</span><span class="p">,</span>
+       <span class="n">processing</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;route&quot;</span><span class="p">:</span> <span class="s2">&quot;nmp&quot;</span><span class="p">,</span> <span class="s2">&quot;solvent&quot;</span><span class="p">:</span> <span class="s2">&quot;NMP&quot;</span><span class="p">},</span> <span class="n">storage</span><span class="o">=</span><span class="s2">&quot;dry room&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>   <span class="c1"># writes + stamps contributor/license/funding onto both records</span>
+</pre></div>
 </div>
+<p>No <code class="docutils literal notranslate"><span class="pre">ws._ws</span></code> is required for materials.</p>
+</section>
+<section id="progressive-fidelity-linkage-into-cells">
+<h2>Progressive-fidelity linkage into cells<a class="headerlink" href="#progressive-fidelity-linkage-into-cells" title="Link to this heading">#</a></h2>
+<p>Electrode composition components (and electrolyte solvents/salts, separator
+materials) reference a material at whichever level you know:</p>
+<ul class="simple">
+<li><p>a <strong>kind key</strong> — minimum (“the anode is graphite”), resolves to the vocabulary
+IRI / EMMO class;</p></li>
+<li><p>a <strong>material-spec IRI</strong> — better (“Targray NMC811 grade X”);</p></li>
+<li><p>a <strong>material-instance IRI</strong> — best (“this lot”), typically on the cell <em>build</em>.</p></li>
+</ul>
+<p>Express at the level you know and upgrade without re-modeling — the adoption funnel
+applied to materials. The transform renders whichever level is present as a
+properly-typed linked node; the link-integrity gate validates internal IRIs; and
+tolerant import maps free-text names through the alias table with warnings.</p>
 <blockquote>
-<div><p>The <code class="docutils literal notranslate"><span class="pre">kind</span></code> enum in <code class="docutils literal notranslate"><span class="pre">test-protocol.schema.json</span></code> is kept in sync with the <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code>
-Python enum (<code class="docutils literal notranslate"><span class="pre">battinfo.bundle.BatteryTestType</span></code>); the coverage test guards against drift.</p>
+<div><p>The full composition-linkage ladder (rewiring the cell-spec electrode/electrolyte
+models onto material references end-to-end) lands in a follow-up PR; the bridge in
+<a class="reference internal" href="material-spec.html#bridge-embedded-standalone"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">battinfo.materials</span></code></span></a> already lifts
+embedded materials to standalone specs for dedup today.</p>
 </div></blockquote>
-</section>
-<section id="going-deeper-semantic-depth-of-a-test-protocol">
-<h2>Going deeper: semantic depth of a test protocol<a class="headerlink" href="#going-deeper-semantic-depth-of-a-test-protocol" title="Link to this heading">#</a></h2>
-<p><em>Everything below is background for ontology-curious readers — nothing in it
-is needed to author or run a test spec.</em></p>
-<p>The current representation types the protocol at the class level and carries a free-text
-<code class="docutils literal notranslate"><span class="pre">description</span></code>. EMMO domain-electrochemistry has richer terms that allow a more explicit,
-machine-replicable representation — here is what is available and when to use it.</p>
-<section id="what-the-ontology-provides">
-<h3>What the ontology provides<a class="headerlink" href="#what-the-ontology-provides" title="Link to this heading">#</a></h3>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>EMMO term</p></th>
-<th class="head"><p>Meaning</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCycling</span></code></p></td>
-<td><p>The complete CC-CV cycle-life protocol</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCharging</span></code></p></td>
-<td><p>A single CC-CV charge step</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentDischarging</span></code></p></td>
-<td><p>A single CC discharge step</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Resting</span></code></p></td>
-<td><p>A rest / OCV hold step</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ElectrochemicalTestingProcedure</span></code></p></td>
-<td><p>General electrochemical test container</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SerialWorkflow</span></code> / <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code></p></td>
-<td><p>Structural containers for step sequences</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hasNext</span></code> / <code class="docutils literal notranslate"><span class="pre">precedes</span></code> / <code class="docutils literal notranslate"><span class="pre">follows</span></code></p></td>
-<td><p>Step-to-step sequencing predicates</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">StepDuration</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSignalCurrent</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSignalVoltage</span></code></p></td>
-<td><p>Per-step parameters</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>A 1C CC-CV cycle-life protocol could therefore be expressed as an <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code>
-containing a <code class="docutils literal notranslate"><span class="pre">SerialWorkflow</span></code> whose steps are:
-<code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCharging</span></code> → <code class="docutils literal notranslate"><span class="pre">Resting</span></code> → <code class="docutils literal notranslate"><span class="pre">ConstantCurrentDischarging</span></code> →
-<code class="docutils literal notranslate"><span class="pre">Resting</span></code>, each step carrying typed parameters for C-rate, voltage limit, cut-off
-current, rest duration, and temperature.</p>
-</section>
-<section id="pros-of-explicit-step-decomposition">
-<h3>Pros of explicit step decomposition<a class="headerlink" href="#pros-of-explicit-step-decomposition" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><strong>Machine-replicable</strong>: the test can be reproduced from the JSON-LD alone without
-parsing free text.</p></li>
-<li><p><strong>SPARQL-queryable at step level</strong>: structured queries like <em>“find all datasets charged
-to 4.2 V at 1C CC-CV”</em> become precise rather than text-search-based.</p></li>
-<li><p><strong>Parameter validation</strong>: step parameters (C-rate, voltage limits, temperatures) can
-be range-checked against cell specs and standards (IEC 62660, EUCAR) automatically.</p></li>
-<li><p><strong>Stable protocol identity</strong>: the semantic structure survives even if the free-text
-description is incomplete or updated.</p></li>
-</ul>
-</section>
-<section id="cons-and-practical-limits">
-<h3>Cons and practical limits<a class="headerlink" href="#cons-and-practical-limits" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><strong>Authoring burden</strong>: a four-step cycle becomes a graph of ~10 typed nodes. No
-researcher will author this by hand, so tooling is a prerequisite.</p></li>
-<li><p><strong>EMMO coverage gaps</strong>: GITT, interspersed EIS, multi-rate formation sequences, and
-temperature ramps do not yet have first-class EMMO step types. Mixed typed/free-text
-nodes undermine the value of the graph.</p></li>
-<li><p><strong>Cycler-file redundancy and false precision</strong>: the ground-truth protocol is usually
-the binary file in Biologic BT-Lab, Maccor, or Arbin format. A parallel step graph
-that was hand-authored can silently diverge from what was actually run — which is
-worse than no graph at all.</p></li>
-<li><p><strong>Version fragility</strong>: step-graph records couple tightly to specific EMMO term IRIs.
-An upstream rename invalidates stored records in a way that a text description does
-not.</p></li>
-</ul>
-</section>
-<section id="current-recommendation">
-<h3>Current recommendation<a class="headerlink" href="#current-recommendation" title="Link to this heading">#</a></h3>
-<p>Type the protocol at the class level (e.g. <code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCycling</span></code>) and
-record protocol-level parameters (C-rate, voltage window, temperature, cut-off
-condition) as typed properties. Keep the free-text <code class="docutils literal notranslate"><span class="pre">description</span></code> as the human-readable
-ground truth. Reserve step-level decomposition for cases where:</p>
-<ol class="arabic simple">
-<li><p>The protocol is simple enough to express without gaps (standard CC, CC-CV, or rest
-steps only), <strong>and</strong></p></li>
-<li><p>The step graph is generated programmatically from a machine-readable protocol
-definition (e.g. a cycler script), not authored by hand.</p></li>
-</ol>
-<p>When the cycler file is included as a dataset distribution, it already carries the
-authoritative step definition — the EMMO class typing on the protocol record is
-then sufficient for discovery and filtering.</p>
-</section>
+<p>See the <a class="reference internal" href="material-spec.html"><span class="std std-doc">material-spec / material field reference</span></a> for the exact
+fields each record carries.</p>
 </section>
 </section>
 
@@ -655,20 +630,20 @@ then sufficient for discovery and filtering.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="cell-fleet.html"
+       href="pages/cli-reference.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Cells</p>
+        <p class="prev-next-title">CLI reference</p>
       </div>
     </a>
     <a class="right-next"
-       href="engineering-cell-description.html"
+       href="material-spec.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Engineering cell description</p>
+        <p class="prev-next-title">Materials</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -691,15 +666,11 @@ then sufficient for discovery and filtering.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authoring">Authoring</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-each-kind-is-modelled">How each kind is modelled</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-deeper-semantic-depth-of-a-test-protocol">Going deeper: semantic depth of a test protocol</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-ontology-provides">What the ontology provides</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pros-of-explicit-step-decomposition">Pros of explicit step decomposition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cons-and-practical-limits">Cons and practical limits</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-recommendation">Current recommendation</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-1-materialkind-a-curated-vocabulary">Level 1 — MaterialKind (a curated vocabulary)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-2-material-spec-first-class-record">Level 2 — material-spec (first-class record)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-3-material-instance-record">Level 3 — material (instance record)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#blessed-api">Blessed API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#progressive-fidelity-linkage-into-cells">Progressive-fidelity linkage into cells</a></li>
 </ul>
   </nav></div>
 

@@ -26,6 +26,7 @@ One page per record family: the fields each carries, and how they link.
 .. toctree::
    :maxdepth: 1
 
+   ../materials-model
    ../material-spec
    ../component-specs
    ../cell-fleet
