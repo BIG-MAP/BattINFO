@@ -21,10 +21,10 @@
    "id": "b9975261",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:18.219906Z",
-     "iopub.status.busy": "2026-07-08T22:02:18.219906Z",
-     "iopub.status.idle": "2026-07-08T22:02:19.196244Z",
-     "shell.execute_reply": "2026-07-08T22:02:19.195210Z"
+     "iopub.execute_input": "2026-08-04T01:23:12.107210Z",
+     "iopub.status.busy": "2026-08-04T01:23:12.107210Z",
+     "iopub.status.idle": "2026-08-04T01:23:14.193141Z",
+     "shell.execute_reply": "2026-08-04T01:23:14.193141Z"
     }
    },
    "outputs": [
@@ -32,13 +32,13 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:337: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
+      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:483: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
       "  property_nodes = cell_spec_property_nodes(\n",
-      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:337: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
+      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:483: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
       "  property_nodes = cell_spec_property_nodes(\n",
-      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:337: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
+      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:483: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
       "  property_nodes = cell_spec_property_nodes(\n",
-      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:337: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
+      "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:483: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/wckm-y5a4-he0k-2scd carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
       "  property_nodes = cell_spec_property_nodes(\n"
      ]
     },
@@ -106,10 +106,10 @@
    "id": "df15cfe5",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:19.198259Z",
-     "iopub.status.busy": "2026-07-08T22:02:19.197268Z",
-     "iopub.status.idle": "2026-07-08T22:02:19.201202Z",
-     "shell.execute_reply": "2026-07-08T22:02:19.201202Z"
+     "iopub.execute_input": "2026-08-04T01:23:14.197520Z",
+     "iopub.status.busy": "2026-08-04T01:23:14.195775Z",
+     "iopub.status.idle": "2026-08-04T01:23:14.203987Z",
+     "shell.execute_reply": "2026-08-04T01:23:14.203987Z"
     }
    },
    "outputs": [
@@ -187,7 +187,7 @@
       "        \"@type\": \"RealData\",\n",
       "        \"hasNumberValue\": 8.25\n",
       "      },\n",
-      "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#WattHour\"\n",
+      "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#Watthour\"\n",
       "    },\n",
       "    {\n",
       "      \"@type\": [\n",
@@ -247,10 +247,16 @@
       "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978\"\n",
       "    }\n",
       "  ],\n",
+      "  \"hasPositiveElectrode\": {\n",
+      "    \"@type\": \"LithiumIronPhosphateElectrode\"\n",
+      "  },\n",
+      "  \"hasNegativeElectrode\": {\n",
+      "    \"@type\": \"GraphiteElectrode\"\n",
+      "  },\n",
       "  \"dcterms:source\": {\n",
       "    \"@type\": \"prov:Entity\",\n",
       "    \"dcterms:type\": \"datasheet\",\n",
-      "    \"prov:generatedAtTime\": \"2026-07-08T22:02:18+00:00\"\n",
+      "    \"prov:generatedAtTime\": \"2026-08-04T01:23:12+00:00\"\n",
       "  }\n",
       "}\n"
      ]
@@ -282,10 +288,10 @@
    "id": "310d641b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:19.203298Z",
-     "iopub.status.busy": "2026-07-08T22:02:19.203298Z",
-     "iopub.status.idle": "2026-07-08T22:02:19.206778Z",
-     "shell.execute_reply": "2026-07-08T22:02:19.206778Z"
+     "iopub.execute_input": "2026-08-04T01:23:14.205735Z",
+     "iopub.status.busy": "2026-08-04T01:23:14.205735Z",
+     "iopub.status.idle": "2026-08-04T01:23:14.215995Z",
+     "shell.execute_reply": "2026-08-04T01:23:14.215289Z"
     }
    },
    "outputs": [
@@ -362,10 +368,10 @@
    "id": "idf-code",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:19.208785Z",
-     "iopub.status.busy": "2026-07-08T22:02:19.208785Z",
-     "iopub.status.idle": "2026-07-08T22:02:19.213221Z",
-     "shell.execute_reply": "2026-07-08T22:02:19.213221Z"
+     "iopub.execute_input": "2026-08-04T01:23:14.215995Z",
+     "iopub.status.busy": "2026-08-04T01:23:14.215995Z",
+     "iopub.status.idle": "2026-08-04T01:23:14.230188Z",
+     "shell.execute_reply": "2026-08-04T01:23:14.228857Z"
     }
    },
    "outputs": [
@@ -400,10 +406,10 @@
    "id": "117501cc",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:19.215383Z",
-     "iopub.status.busy": "2026-07-08T22:02:19.215383Z",
-     "iopub.status.idle": "2026-07-08T22:02:19.219405Z",
-     "shell.execute_reply": "2026-07-08T22:02:19.219405Z"
+     "iopub.execute_input": "2026-08-04T01:23:14.234447Z",
+     "iopub.status.busy": "2026-08-04T01:23:14.234447Z",
+     "iopub.status.idle": "2026-08-04T01:23:14.246307Z",
+     "shell.execute_reply": "2026-08-04T01:23:14.244557Z"
     }
    },
    "outputs": [
@@ -414,7 +420,7 @@
       "Quantitative properties:\n",
       "  NominalCapacity: 2.5  (AmpereHour)\n",
       "  NominalVoltage: 3.3  (Volt)\n",
-      "  NominalEnergy: 8.25  (WattHour)\n",
+      "  NominalEnergy: 8.25  (Watthour)\n",
       "  Mass: 76.0  (Gram)\n",
       "  Diameter: 26.0  (MilliMetre)\n",
       "  Height: 65.0  (MilliMetre)\n",
@@ -457,10 +463,10 @@
    "id": "cfe8dd30",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:19.221899Z",
-     "iopub.status.busy": "2026-07-08T22:02:19.221899Z",
-     "iopub.status.idle": "2026-07-08T22:02:19.289349Z",
-     "shell.execute_reply": "2026-07-08T22:02:19.288339Z"
+     "iopub.execute_input": "2026-08-04T01:23:14.250324Z",
+     "iopub.status.busy": "2026-08-04T01:23:14.250324Z",
+     "iopub.status.idle": "2026-08-04T01:23:14.305818Z",
+     "shell.execute_reply": "2026-08-04T01:23:14.305818Z"
     }
    },
    "outputs": [
@@ -501,10 +507,10 @@
    "id": "8b6bd11a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:19.291347Z",
-     "iopub.status.busy": "2026-07-08T22:02:19.291347Z",
-     "iopub.status.idle": "2026-07-08T22:02:20.105700Z",
-     "shell.execute_reply": "2026-07-08T22:02:20.105184Z"
+     "iopub.execute_input": "2026-08-04T01:23:14.307834Z",
+     "iopub.status.busy": "2026-08-04T01:23:14.307834Z",
+     "iopub.status.idle": "2026-08-04T01:23:15.689229Z",
+     "shell.execute_reply": "2026-08-04T01:23:15.689229Z"
     }
    },
    "outputs": [
@@ -512,7 +518,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Triple count: 84\n"
+      "Triple count: 88\n"
      ]
     }
    ],
@@ -533,10 +539,10 @@
    "id": "efb494cf",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:20.108737Z",
-     "iopub.status.busy": "2026-07-08T22:02:20.107739Z",
-     "iopub.status.idle": "2026-07-08T22:02:20.114996Z",
-     "shell.execute_reply": "2026-07-08T22:02:20.113708Z"
+     "iopub.execute_input": "2026-08-04T01:23:15.695524Z",
+     "iopub.status.busy": "2026-08-04T01:23:15.693467Z",
+     "iopub.status.idle": "2026-08-04T01:23:15.705825Z",
+     "shell.execute_reply": "2026-08-04T01:23:15.704652Z"
     }
    },
    "outputs": [
@@ -544,90 +550,94 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "  N02ec34e13aa140f29bb76d84152f352b  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N02ec34e13aa140f29bb76d84152f352b  →  type  →  electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d\n",
-      "  N02ec34e13aa140f29bb76d84152f352b  →  prefLabel  →  InternalResistance\n",
-      "  N02ec34e13aa140f29bb76d84152f352b  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N29a0ffca9c5c48c28e1959b033109536\n",
-      "  N02ec34e13aa140f29bb76d84152f352b  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliOhm\n",
-      "  N048ee50c7a474c5892ed8e8c239059d4  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N048ee50c7a474c5892ed8e8c239059d4  →  type  →  electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937\n",
-      "  N048ee50c7a474c5892ed8e8c239059d4  →  prefLabel  →  CycleLife\n",
-      "  N048ee50c7a474c5892ed8e8c239059d4  →  value  →  >1000\n",
-      "  N048ee50c7a474c5892ed8e8c239059d4  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978\n",
-      "  N0be3e13e81d74b9bbc4d8d8a67516e35  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N0be3e13e81d74b9bbc4d8d8a67516e35  →  type  →  electrochemistry_639b844a_e801_436b_985d_28926129ead6\n",
-      "  N0be3e13e81d74b9bbc4d8d8a67516e35  →  prefLabel  →  NominalVoltage\n",
-      "  N0be3e13e81d74b9bbc4d8d8a67516e35  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Nd709f09b9f014877802017cd9e955a03\n",
-      "  N0be3e13e81d74b9bbc4d8d8a67516e35  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Volt\n",
-      "  N1f807c9607b74d46b3f3015580f6ec2b  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N1f807c9607b74d46b3f3015580f6ec2b  →  type  →  electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d\n",
-      "  N1f807c9607b74d46b3f3015580f6ec2b  →  prefLabel  →  NominalEnergy\n",
-      "  N1f807c9607b74d46b3f3015580f6ec2b  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N914bfb66cc4c494fbfb1a03c06c4200c\n",
-      "  N1f807c9607b74d46b3f3015580f6ec2b  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  WattHour\n",
-      "  N29a0ffca9c5c48c28e1959b033109536  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  N29a0ffca9c5c48c28e1959b033109536  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  6.0\n",
-      "  N2a02122579e0444c9c6db1497b9a6b00  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N2a02122579e0444c9c6db1497b9a6b00  →  type  →  electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100\n",
-      "  N2a02122579e0444c9c6db1497b9a6b00  →  prefLabel  →  NominalCapacity\n",
-      "  N2a02122579e0444c9c6db1497b9a6b00  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N6d9a8273972540ffab7abbda602be857\n",
-      "  N2a02122579e0444c9c6db1497b9a6b00  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  AmpereHour\n",
-      "  N2c54ca88908e4ba58e83699e5d068435  →  type  →  Organization\n",
-      "  N2c54ca88908e4ba58e83699e5d068435  →  name  →  A123 Systems\n",
-      "  N33d4fcbfdd3e4383a78f3a4800689baa  →  type  →  EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba\n",
-      "  N33d4fcbfdd3e4383a78f3a4800689baa  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N33d4fcbfdd3e4383a78f3a4800689baa  →  prefLabel  →  Height\n",
-      "  N33d4fcbfdd3e4383a78f3a4800689baa  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Nd0d412b06634464c9b7f043ce63ece7a\n",
-      "  N33d4fcbfdd3e4383a78f3a4800689baa  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre\n",
-      "  N557f0c79202a4a7aa3a66344df0a8615  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  N557f0c79202a4a7aa3a66344df0a8615  →  type  →  EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405\n",
-      "  N557f0c79202a4a7aa3a66344df0a8615  →  prefLabel  →  Mass\n",
-      "  N557f0c79202a4a7aa3a66344df0a8615  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Nc899b98a72fb430abf097b74d2dce7ef\n",
-      "  N557f0c79202a4a7aa3a66344df0a8615  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Gram\n",
-      "  N60729cd700894ebfb2e65e7fdb818135  →  type  →  battery_04a4e5a4_e6fd_43af_b1ca_4a16d5f8886c\n",
-      "  N60729cd700894ebfb2e65e7fdb818135  →  type  →  battery_2018e0da_4c25_46e9_83db_38431fc81ce0\n",
-      "  N60729cd700894ebfb2e65e7fdb818135  →  type  →  battery_68ed592a_7924_45d0_a108_94d6275d57f0\n",
-      "  N60729cd700894ebfb2e65e7fdb818135  →  type  →  battery_96addc62_ea04_449a_8237_4cd541dd8e5f\n",
-      "  N60729cd700894ebfb2e65e7fdb818135  →  type  →  battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40\n",
-      "  N60729cd700894ebfb2e65e7fdb818135  →  prefLabel  →  A123 Systems ANR26650M1-B\n",
-      "  N6d9a8273972540ffab7abbda602be857  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  N6d9a8273972540ffab7abbda602be857  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  2.5\n",
-      "  N6e9502cf28124a3aae53831aab0d6755  →  type  →  datasheet\n",
-      "  N6e9502cf28124a3aae53831aab0d6755  →  type  →  Entity\n",
-      "  N6e9502cf28124a3aae53831aab0d6755  →  generatedAtTime  →  2026-07-08T22:02:18+00:00\n",
-      "  N914bfb66cc4c494fbfb1a03c06c4200c  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  N914bfb66cc4c494fbfb1a03c06c4200c  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  8.25\n",
-      "  Nb8633a93ba784a47af62c085ac328c34  →  type  →  EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6\n",
-      "  Nb8633a93ba784a47af62c085ac328c34  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
-      "  Nb8633a93ba784a47af62c085ac328c34  →  prefLabel  →  Diameter\n",
-      "  Nb8633a93ba784a47af62c085ac328c34  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Ne089b35cd4f94c32834dcb43dba396eb\n",
-      "  Nb8633a93ba784a47af62c085ac328c34  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre\n",
-      "  Nc899b98a72fb430abf097b74d2dce7ef  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  Nc899b98a72fb430abf097b74d2dce7ef  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  76.0\n",
-      "  Nd0d412b06634464c9b7f043ce63ece7a  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  Nd0d412b06634464c9b7f043ce63ece7a  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  65.0\n",
-      "  Nd709f09b9f014877802017cd9e955a03  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  Nd709f09b9f014877802017cd9e955a03  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  3.3\n",
-      "  Ne089b35cd4f94c32834dcb43dba396eb  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
-      "  Ne089b35cd4f94c32834dcb43dba396eb  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  26.0\n",
-      "  wckm-y5a4-he0k-2scd  →  source  →  N6e9502cf28124a3aae53831aab0d6755\n",
+      "  N0379cdffbf56498b845455ef78356a80  →  type  →  electrochemistry_c831d963_629a_41ab_850f_97fb6841b739\n",
+      "  N051aff4ca3fd4b0f9b003e255976ac07  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  N051aff4ca3fd4b0f9b003e255976ac07  →  type  →  electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100\n",
+      "  N051aff4ca3fd4b0f9b003e255976ac07  →  prefLabel  →  NominalCapacity\n",
+      "  N051aff4ca3fd4b0f9b003e255976ac07  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N9c8620a4df5f4cdabafdfbc1feb23222\n",
+      "  N051aff4ca3fd4b0f9b003e255976ac07  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  AmpereHour\n",
+      "  N195dca1978fa4907bb2454b411a6febe  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  N195dca1978fa4907bb2454b411a6febe  →  type  →  electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d\n",
+      "  N195dca1978fa4907bb2454b411a6febe  →  prefLabel  →  NominalEnergy\n",
+      "  N195dca1978fa4907bb2454b411a6febe  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N497e106d520f4124a5978412fea2aa66\n",
+      "  N195dca1978fa4907bb2454b411a6febe  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Watthour\n",
+      "  N19dc2630a90a41569cc5371906b9cc91  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  N19dc2630a90a41569cc5371906b9cc91  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  6.0\n",
+      "  N1e78ca3bc69b4ba0bce274349ad42c94  →  type  →  Organization\n",
+      "  N1e78ca3bc69b4ba0bce274349ad42c94  →  name  →  A123 Systems\n",
+      "  N2d516272fe7f41cc8e3312ee57f9b37b  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  N2d516272fe7f41cc8e3312ee57f9b37b  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  26.0\n",
+      "  N3bbf8bfe66ec4447845db91f37ebda0d  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  N3bbf8bfe66ec4447845db91f37ebda0d  →  type  →  electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d\n",
+      "  N3bbf8bfe66ec4447845db91f37ebda0d  →  prefLabel  →  InternalResistance\n",
+      "  N3bbf8bfe66ec4447845db91f37ebda0d  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N19dc2630a90a41569cc5371906b9cc91\n",
+      "  N3bbf8bfe66ec4447845db91f37ebda0d  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliOhm\n",
+      "  N456f5accc3b54ea495f0f7a147b0095f  →  type  →  EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6\n",
+      "  N456f5accc3b54ea495f0f7a147b0095f  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  N456f5accc3b54ea495f0f7a147b0095f  →  prefLabel  →  Diameter\n",
+      "  N456f5accc3b54ea495f0f7a147b0095f  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N2d516272fe7f41cc8e3312ee57f9b37b\n",
+      "  N456f5accc3b54ea495f0f7a147b0095f  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre\n",
+      "  N497e106d520f4124a5978412fea2aa66  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  N497e106d520f4124a5978412fea2aa66  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  8.25\n",
+      "  N55c9e5e50bb44587a486de33d95fa306  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  N55c9e5e50bb44587a486de33d95fa306  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  3.3\n",
+      "  N5c481096881545b59361c4d27990dda3  →  type  →  battery_04a4e5a4_e6fd_43af_b1ca_4a16d5f8886c\n",
+      "  N5c481096881545b59361c4d27990dda3  →  type  →  battery_2018e0da_4c25_46e9_83db_38431fc81ce0\n",
+      "  N5c481096881545b59361c4d27990dda3  →  type  →  battery_68ed592a_7924_45d0_a108_94d6275d57f0\n",
+      "  N5c481096881545b59361c4d27990dda3  →  type  →  battery_96addc62_ea04_449a_8237_4cd541dd8e5f\n",
+      "  N5c481096881545b59361c4d27990dda3  →  type  →  battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40\n",
+      "  N5c481096881545b59361c4d27990dda3  →  prefLabel  →  A123 Systems ANR26650M1-B\n",
+      "  N8778da101e33437a819722129256db43  →  type  →  electrochemistry_1d0f15cb_d6b5_4c27_89ca_fe78adc1ce5b\n",
+      "  N9c8620a4df5f4cdabafdfbc1feb23222  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  N9c8620a4df5f4cdabafdfbc1feb23222  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  2.5\n",
+      "  Na77d40d4f9414abc871b674d57b5d363  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  Na77d40d4f9414abc871b674d57b5d363  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  65.0\n",
+      "  Nb0b92f5cbfe94deb9b808486f2022a5a  →  type  →  EMMO_18d180e4_5e3e_42f7_820c_e08951223486\n",
+      "  Nb0b92f5cbfe94deb9b808486f2022a5a  →  EMMO_faf79f53_749d_40b2_807c_d34244c192f4  →  76.0\n",
+      "  Ncd6d4f59e150403da2498c816083db39  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  Ncd6d4f59e150403da2498c816083db39  →  type  →  electrochemistry_639b844a_e801_436b_985d_28926129ead6\n",
+      "  Ncd6d4f59e150403da2498c816083db39  →  prefLabel  →  NominalVoltage\n",
+      "  Ncd6d4f59e150403da2498c816083db39  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  N55c9e5e50bb44587a486de33d95fa306\n",
+      "  Ncd6d4f59e150403da2498c816083db39  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Volt\n",
+      "  Nddf9e8118187406bb18e2aec6b61f228  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  Nddf9e8118187406bb18e2aec6b61f228  →  type  →  electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937\n",
+      "  Nddf9e8118187406bb18e2aec6b61f228  →  prefLabel  →  CycleLife\n",
+      "  Nddf9e8118187406bb18e2aec6b61f228  →  value  →  >1000\n",
+      "  Nddf9e8118187406bb18e2aec6b61f228  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978\n",
+      "  Ne1a2af9c01654dfdb6437dfc5b2c21cd  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  Ne1a2af9c01654dfdb6437dfc5b2c21cd  →  type  →  EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405\n",
+      "  Ne1a2af9c01654dfdb6437dfc5b2c21cd  →  prefLabel  →  Mass\n",
+      "  Ne1a2af9c01654dfdb6437dfc5b2c21cd  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Nb0b92f5cbfe94deb9b808486f2022a5a\n",
+      "  Ne1a2af9c01654dfdb6437dfc5b2c21cd  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  Gram\n",
+      "  Nf39dfa163c1c428f8e9a60116509bc8b  →  type  →  datasheet\n",
+      "  Nf39dfa163c1c428f8e9a60116509bc8b  →  type  →  Entity\n",
+      "  Nf39dfa163c1c428f8e9a60116509bc8b  →  generatedAtTime  →  2026-08-04T01:23:12+00:00\n",
+      "  Nfea1b7fb6b6b41c6b9064eea68ad52a4  →  type  →  EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba\n",
+      "  Nfea1b7fb6b6b41c6b9064eea68ad52a4  →  type  →  EMMO_d8aa8e1f_b650_416d_88a0_5118de945456\n",
+      "  Nfea1b7fb6b6b41c6b9064eea68ad52a4  →  prefLabel  →  Height\n",
+      "  Nfea1b7fb6b6b41c6b9064eea68ad52a4  →  EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0  →  Na77d40d4f9414abc871b674d57b5d363\n",
+      "  Nfea1b7fb6b6b41c6b9064eea68ad52a4  →  EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569  →  MilliMetre\n",
+      "  wckm-y5a4-he0k-2scd  →  source  →  Nf39dfa163c1c428f8e9a60116509bc8b\n",
       "  wckm-y5a4-he0k-2scd  →  type  →  CreativeWork\n",
       "  wckm-y5a4-he0k-2scd  →  type  →  battery_1cfbba6c_8824_4932_a23e_2141483acef7\n",
       "  wckm-y5a4-he0k-2scd  →  identifier  →  wckm-y5a4-he0k-2scd\n",
-      "  wckm-y5a4-he0k-2scd  →  manufacturer  →  N2c54ca88908e4ba58e83699e5d068435\n",
+      "  wckm-y5a4-he0k-2scd  →  manufacturer  →  N1e78ca3bc69b4ba0bce274349ad42c94\n",
       "  wckm-y5a4-he0k-2scd  →  model  →  ANR26650M1-B\n",
       "  wckm-y5a4-he0k-2scd  →  name  →  A123 Systems ANR26650M1-B\n",
       "  wckm-y5a4-he0k-2scd  →  schemaVersion  →  0.2.0\n",
       "  wckm-y5a4-he0k-2scd  →  size  →  R26650\n",
       "  wckm-y5a4-he0k-2scd  →  url  →  wckm-y5a4-he0k-2scd\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N02ec34e13aa140f29bb76d84152f352b\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N048ee50c7a474c5892ed8e8c239059d4\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N0be3e13e81d74b9bbc4d8d8a67516e35\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N1f807c9607b74d46b3f3015580f6ec2b\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N2a02122579e0444c9c6db1497b9a6b00\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N33d4fcbfdd3e4383a78f3a4800689baa\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N557f0c79202a4a7aa3a66344df0a8615\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nb8633a93ba784a47af62c085ac328c34\n",
-      "  wckm-y5a4-he0k-2scd  →  EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3  →  N60729cd700894ebfb2e65e7fdb818135\n"
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N051aff4ca3fd4b0f9b003e255976ac07\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N195dca1978fa4907bb2454b411a6febe\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N3bbf8bfe66ec4447845db91f37ebda0d\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  N456f5accc3b54ea495f0f7a147b0095f\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Ncd6d4f59e150403da2498c816083db39\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nddf9e8118187406bb18e2aec6b61f228\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Ne1a2af9c01654dfdb6437dfc5b2c21cd\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_e1097637_70d2_4895_973f_2396f04fa204  →  Nfea1b7fb6b6b41c6b9064eea68ad52a4\n",
+      "  wckm-y5a4-he0k-2scd  →  EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3  →  N5c481096881545b59361c4d27990dda3\n",
+      "  wckm-y5a4-he0k-2scd  →  electrochemistry_5d299271_3f68_494f_ab96_3db9acdd3138  →  N0379cdffbf56498b845455ef78356a80\n",
+      "  wckm-y5a4-he0k-2scd  →  electrochemistry_8e9cf965_9f92_46e8_b678_b50410ce3616  →  N8778da101e33437a819722129256db43\n"
      ]
     }
    ],
@@ -654,10 +664,10 @@
    "id": "f05bb577",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:20.119000Z",
-     "iopub.status.busy": "2026-07-08T22:02:20.117999Z",
-     "iopub.status.idle": "2026-07-08T22:02:21.630297Z",
-     "shell.execute_reply": "2026-07-08T22:02:21.629291Z"
+     "iopub.execute_input": "2026-08-04T01:23:15.709616Z",
+     "iopub.status.busy": "2026-08-04T01:23:15.709616Z",
+     "iopub.status.idle": "2026-08-04T01:23:15.862107Z",
+     "shell.execute_reply": "2026-08-04T01:23:15.861363Z"
     }
    },
    "outputs": [
@@ -665,20 +675,13 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "  note: using legacy records/examples/ layout (pre-0.8 workspace)\n",
       "  cell: a123-demo-multi-001  (IRI auto-assigned)\n",
-      "Saved 2 record(s) under <repo>\\docs\\guides\\_scratch\\guide-04\\multi\\.battinfo\\records\\examples:\n",
-      "  cell spec   A123 Systems ANR26650M1-B            [updated]  .battinfo\\records\\examples\\cell-spec\\cell-spec-e4t5-w9re-mpq6-8g7e.json\n",
-      "  cell        a123-demo-multi-001                  [updated]  .battinfo\\records\\examples\\cell-instance\\cell-aaqe-rvbd-c0b6-p1k3.json\n",
+      "Saved 2 record(s) under <repo>\\docs\\guides\\_scratch\\guide-04\\multi\\.battinfo\\records:\n",
+      "  cell spec   A123 Systems ANR26650M1-B            [created]  .battinfo\\records\\cell-spec\\cell-spec-e4t5-w9re-mpq6-8g7e.json\n",
+      "  cell        a123-demo-multi-001                  [created]  .battinfo\\records\\cell-instance\\cell-aaqe-rvbd-c0b6-p1k3.json\n",
       "\n",
-      "  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Combined graph: 35 triples from 2 files\n"
+      "  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.\n",
+      "Combined graph: 0 triples from 0 files\n"
      ]
     }
    ],
@@ -735,10 +738,10 @@
    "id": "97dfdfc6",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:02:21.633299Z",
-     "iopub.status.busy": "2026-07-08T22:02:21.633299Z",
-     "iopub.status.idle": "2026-07-08T22:02:21.639345Z",
-     "shell.execute_reply": "2026-07-08T22:02:21.638336Z"
+     "iopub.execute_input": "2026-08-04T01:23:15.862107Z",
+     "iopub.status.busy": "2026-08-04T01:23:15.862107Z",
+     "iopub.status.idle": "2026-08-04T01:23:15.876818Z",
+     "shell.execute_reply": "2026-08-04T01:23:15.876818Z"
     }
    },
    "outputs": [
@@ -746,8 +749,8 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Property map version: 0.3.0\n",
-      "Curated entries: 66\n",
+      "Property map version: 0.4.0\n",
+      "Curated entries: 71\n",
       "\n",
       "  ac_internal_resistance                     → ACInternalResistance\n",
       "  available_volume                           → Volume\n",
@@ -801,7 +804,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.11.1"
+   "version": "3.11.15"
   }
  },
  "nbformat": 4,

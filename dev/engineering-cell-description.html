@@ -602,16 +602,16 @@ coating holder, so no new field type is needed to express them.</p>
 <code class="docutils literal notranslate"><span class="pre">PrismaticCase</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalCase</span></code>, <code class="docutils literal notranslate"><span class="pre">CoinCase</span></code>, <code class="docutils literal notranslate"><span class="pre">CellCan</span></code>, <code class="docutils literal notranslate"><span class="pre">CellLid</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Terminal</span></code>, <code class="docutils literal notranslate"><span class="pre">CurrentCollectorTab</span></code>, <code class="docutils literal notranslate"><span class="pre">ElectrodeStack</span></code>, <code class="docutils literal notranslate"><span class="pre">CalenderedDensity</span></code>,
 <code class="docutils literal notranslate"><span class="pre">MassLoading</span></code>, <code class="docutils literal notranslate"><span class="pre">Thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">Volume</span></code>, and <code class="docutils literal notranslate"><span class="pre">Length</span></code>.</p>
-<p>A few terms are not yet in the ontology: <code class="docutils literal notranslate"><span class="pre">Seal</span></code>, <code class="docutils literal notranslate"><span class="pre">JellyRoll</span></code>, <code class="docutils literal notranslate"><span class="pre">CeramicCoating</span></code>,
-and cylindrical safety hardware such as a safety vent or current-interrupt
-device. Until they are added upstream (tracked in the ontology-additions queue),
-a part of one of these kinds is emitted carrying its authored label
+<p>Since domain-electrochemistry 0.36.0 the housing hardware that used to be
+unmapped also resolves: <code class="docutils literal notranslate"><span class="pre">Seal</span></code>, <code class="docutils literal notranslate"><span class="pre">Gasket</span></code>, <code class="docutils literal notranslate"><span class="pre">SafetyVent</span></code>, <code class="docutils literal notranslate"><span class="pre">CurrentInterruptDevice</span></code>,
+<code class="docutils literal notranslate"><span class="pre">InsulatorRing</span></code>, <code class="docutils literal notranslate"><span class="pre">WaveSpring</span></code>, <code class="docutils literal notranslate"><span class="pre">CeramicCoating</span></code>, and the wound electrode assembly
+<code class="docutils literal notranslate"><span class="pre">WoundStack</span></code> (whose altLabels are <code class="docutils literal notranslate"><span class="pre">JellyRoll</span></code> and <code class="docutils literal notranslate"><span class="pre">SwissRoll</span></code> — emitters use the
+prefLabel because only that resolves through a context).</p>
+<p>A part type outside that vocabulary is still emitted carrying its authored label
 (<code class="docutils literal notranslate"><span class="pre">skos:prefLabel</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:additionalType</span></code>) and fires a
 <code class="docutils literal notranslate"><span class="pre">semantic.hardware_part_unmapped</span></code> or <code class="docutils literal notranslate"><span class="pre">semantic.property_unmapped</span></code> warning — the
-value is preserved, never silently dropped, but it is not yet a typed EMMO node
-and will not survive a round-trip as a typed part. This is the expected state
-for those parts today, and it is why the cylindrical example below emits one
-warning for its vent.</p>
+value is preserved, never silently dropped, but it is not a typed EMMO node and
+will not survive a round-trip as a typed part.</p>
 </section>
 <section id="worked-examples">
 <h2>Worked examples<a class="headerlink" href="#worked-examples" title="Link to this heading">#</a></h2>
@@ -644,9 +644,8 @@ grounded in the DIGIBAT Discovery-Benchmark and the Cell Design Tool:</p>
 passes <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code>, emits a <code class="docutils literal notranslate"><span class="pre">CylindricalCase</span></code> node, and is stamped at the
 current <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>. Its case <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> is derived from <code class="docutils literal notranslate"><span class="pre">cell_format</span></code>
 (<code class="docutils literal notranslate"><span class="pre">cylindrical</span></code> → <code class="docutils literal notranslate"><span class="pre">CylindricalCase</span></code>). The safety vent is carried as a <code class="docutils literal notranslate"><span class="pre">vent</span></code>
-part — a dedicated <code class="docutils literal notranslate"><span class="pre">parts[].type</span></code> value. It has no EMMO class yet, so it is
-emitted with its authored label and a <code class="docutils literal notranslate"><span class="pre">semantic.hardware_part_unmapped</span></code> warning,
-pending an upstream <code class="docutils literal notranslate"><span class="pre">SafetyVent</span></code> term.</p>
+part — a dedicated <code class="docutils literal notranslate"><span class="pre">parts[].type</span></code> value, typed <code class="docutils literal notranslate"><span class="pre">SafetyVent</span></code> since
+domain-electrochemistry 0.36.0.</p>
 <p>The <strong>jelly-roll</strong> geometry of a wound cell is authored on the cell-spec’s
 <code class="docutils literal notranslate"><span class="pre">construction</span></code> block (the <code class="docutils literal notranslate"><span class="pre">CellConstruction</span></code> fields above: <code class="docutils literal notranslate"><span class="pre">winding_turns</span></code>,
 <code class="docutils literal notranslate"><span class="pre">cathode_sheet_count</span></code> / <code class="docutils literal notranslate"><span class="pre">anode_sheet_count</span></code> / <code class="docutils literal notranslate"><span class="pre">separator_sheet_count</span></code>,

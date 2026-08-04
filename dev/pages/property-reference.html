@@ -488,8 +488,8 @@
 unit IRI, by the curated mapping tables under
 <code class="docutils literal notranslate"><span class="pre">assets/mappings/domain-battery/</span></code> — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.</p>
-<section id="properties-66">
-<h2>Properties (66)<a class="headerlink" href="#properties-66" title="Link to this heading">#</a></h2>
+<section id="properties-71">
+<h2>Properties (71)<a class="headerlink" href="#properties-71" title="Link to this heading">#</a></h2>
 <p>The keys accepted in <code class="docutils literal notranslate"><span class="pre">properties={...}</span></code> on a cell spec, and the EMMO
 class each becomes in JSON-LD:</p>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -595,6 +595,12 @@ class each becomes in JSON-LD:</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_discharging_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d">MaximumDischargingTemperature</a></p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_pulse_charging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da">MaximumPulseChargingCurrent</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_pulse_discharging_current</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b">MaximumPulseDischargingCurrent</a></p></td>
+</tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_storage_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7">MaximumStorageTemperature</a></p></td>
 </tr>
@@ -624,6 +630,12 @@ class each becomes in JSON-LD:</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_voltage</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6">NominalVoltage</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operating_temperature_max</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553">MaximumOperatingTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operating_temperature_min</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51">MinimumOperatingTemperature</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">power_density</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a">PowerDensity</a></p></td>
@@ -679,22 +691,25 @@ class each becomes in JSON-LD:</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tortuosity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8">Tortuosity</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typical_energy</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typical_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68">TypicalCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">typical_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">upper_voltage_limit</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upper_voltage_limit</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88">UpperVoltageLimit</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">volume</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">volume</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed">Volume</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">wall_thickness</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wall_thickness</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656">Thickness</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">weight</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weight</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405">Mass</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">width</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">width</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0">Width</a></p></td>
 </tr>
 </tbody>
@@ -746,7 +761,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):</p>
 <td><p><a class="reference external" href="https://w3id.org/emmo#Kilogram">Kilogram</a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kWh</span></code></p></td>
-<td><p><a class="reference external" href="https://w3id.org/emmo#KiloWattHour">KiloWattHour</a></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#KiloWatthour">KiloWattHour</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">L</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#Litre">Litre</a></p></td>
@@ -800,7 +815,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):</p>
 <td><p><a class="reference external" href="http://qudt.org/vocab/unit/W-PER-L">WattPerLitre</a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Wh</span></code></p></td>
-<td><p><a class="reference external" href="https://w3id.org/emmo#WattHour">WattHour</a></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#Watthour">WattHour</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Wh/kg</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#WattHourPerKilogram">WattHourPerKilogram</a></p></td>
@@ -873,7 +888,7 @@ surface as machine-readable issues.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-66">Properties (66)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-71">Properties (71)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-35">Units (35)</a></li>
 </ul>
   </nav></div>
