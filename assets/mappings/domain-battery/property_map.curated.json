@@ -1,12 +1,13 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "status": "curated",
   "notes": [
     "Curated mapping entries promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
-    "IRIs verified against EMMO domain-battery 0.18.8 and domain-electrochemistry 0.34.0.",
+    "IRIs verified against EMMO domain-battery 0.20.1, domain-electrochemistry 0.36.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
     "Temperature properties corrected: candidates mapped these to process classes (Charging/Discharging);",
-    "correct mapping is to temperature-limit property classes in domain-electrochemistry."
+    "correct mapping is to temperature-limit property classes in domain-electrochemistry.",
+    "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending."
   ],
   "mappings": [
     {
@@ -301,6 +302,26 @@
       "notes": "Candidates incorrectly mapped this to the Discharging process class."
     },
     {
+      "key": "maximum_pulse_charging_current",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da",
+      "class_qname": "emmo:MaximumPulseChargingCurrent",
+      "class_pref_label": "MaximumPulseChargingCurrent",
+      "class_label": "MaximumPulseChargingCurrent",
+      "confidence": 1.0,
+      "notes": "Same class as the pulse_charging_current alias; both keys are datasheet spellings of the rating."
+    },
+    {
+      "key": "maximum_pulse_discharging_current",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b",
+      "class_qname": "emmo:MaximumPulseDischargingCurrent",
+      "class_pref_label": "MaximumPulseDischargingCurrent",
+      "class_label": "MaximumPulseDischargingCurrent",
+      "confidence": 1.0,
+      "notes": "Same class as the pulse_discharging_current alias; both keys are datasheet spellings of the rating."
+    },
+    {
       "key": "maximum_storage_temperature",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7",
@@ -394,6 +415,26 @@
       "class_pref_label": "NominalVoltage",
       "class_label": "NominalVoltage",
       "confidence": 1.0
+    },
+    {
+      "key": "operating_temperature_max",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553",
+      "class_qname": "emmo:MaximumOperatingTemperature",
+      "class_pref_label": "MaximumOperatingTemperature",
+      "class_label": "MaximumOperatingTemperature",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
+    },
+    {
+      "key": "operating_temperature_min",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51",
+      "class_qname": "emmo:MinimumOperatingTemperature",
+      "class_pref_label": "MinimumOperatingTemperature",
+      "class_label": "MinimumOperatingTemperature",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
     },
     {
       "key": "power_density",
@@ -563,6 +604,16 @@
       "class_pref_label": "Tortuosity",
       "class_label": "Tortuosity",
       "confidence": 1.0
+    },
+    {
+      "key": "typical_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68",
+      "class_qname": "emmo:TypicalCapacity",
+      "class_pref_label": "TypicalCapacity",
+      "class_label": "TypicalCapacity",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.36.0; the typical (not rated) capacity of a datasheet."
     },
     {
       "key": "typical_energy",

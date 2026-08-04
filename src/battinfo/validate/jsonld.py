@@ -154,7 +154,7 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "CurrentCollectorTab",
     "Electrode",
     "ElectrodeCoating",
-    # Housing / hardware (E1). Seal is a pending domain-battery term.
+    # Housing / hardware (E1).
     "CoinCase",
     "CylindricalCase",
     "PouchCase",
@@ -162,11 +162,31 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "CellLid",
     "CellCan",
     "Terminal",
-    "Seal",
     "Spring",
     "Spacer",
     "ElectrodeStack",
+    # Landed in domain-electrochemistry 0.36.0
+    "Seal",
+    "Gasket",
+    "SafetyVent",
+    "CurrentInterruptDevice",
+    "InsulatorRing",
+    "WaveSpring",
+    "CeramicCoating",
+    "WoundStack",
+    # JellyRoll / SwissRoll are WoundStack altLabels. Emitters use the prefLabel;
+    # kept so documents published before the flip still validate.
     "JellyRoll",
+    # Quantity classes new in domain-electrochemistry 0.36.0
+    "DryCoatingThickness",
+    "MinimumOperatingTemperature",
+    "MaximumOperatingTemperature",
+    "TypicalCapacity",
+    # Half-cell / three-electrode device classes. A battery half-cell types as
+    # BatteryHalfCell + HalfCellDevice, never as ElectrochemicalHalfCell.
+    "BatteryHalfCell",
+    "HalfCellDevice",
+    "ThreeElectrodeCellDevice",
     "ElectrolyteAdditive",
     "ElectrolyteSolution",
     "ExpandedMesh",

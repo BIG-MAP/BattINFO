@@ -34,6 +34,7 @@ def test_entity_type_map_and_extension_policy_packaged_copies_match_assets() -> 
     tracked = [
         ROOT / "assets" / "mappings" / "domain-battery" / "entity_type_map.json",
         ROOT / "assets" / "mappings" / "domain-battery" / "extension_policy.json",
+        ROOT / "assets" / "mappings" / "domain-battery" / "material_map.json",
         ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json",
         ROOT / "assets" / "mappings" / "domain-battery" / "unit_map.curated.json",
     ]
@@ -132,19 +133,79 @@ def test_entity_type_map_hard_carbon_anode_emits_electrode_node() -> None:
     assert neg.get("@type") == "HardCarbonElectrode", f"Expected HardCarbonElectrode, got: {neg}"
 
 
+def test_reference_electrode_stacks_the_half_cell_device_classes() -> None:
+    """A half-cell types as the DEVICE classes, never as ElectrochemicalHalfCell."""
+    from battinfo.transform.cell_spec_node import physical_type_stack
+
+    spec = {"cell_format": "coin", "chemistry": "li-metal",
+            "positive_electrode_basis": "lfp", "reference_electrode": "lithium"}
+    types = physical_type_stack(spec)
+    assert "BatteryHalfCell" in types and "HalfCellDevice" in types, types
+    assert "ElectrochemicalHalfCell" not in types
+
+    full_cell = {"cell_format": "coin", "chemistry": "li-ion",
+                 "positive_electrode_basis": "lfp", "negative_electrode_basis": "graphite"}
+    assert "BatteryHalfCell" not in physical_type_stack(full_cell)
+
+
+def test_descriptor_path_agrees_on_the_half_cell_type_stack() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+
+    node = _descriptor_specification_to_jsonld(
+        {"format": "coin", "chemistry": "li-metal", "positive_electrode_basis": "lfp",
+         "reference_electrode": "lithium"}
+    )
+    types = node["isDescriptionFor"]["@type"]
+    assert "BatteryHalfCell" in types and "HalfCellDevice" in types, types
+
+
+def test_material_map_resolves_stoichiometric_nmc_and_keeps_the_generic() -> None:
+    from battinfo.transform.json_to_jsonld import _material_emmo_class
+
+    assert _material_emmo_class("NMC811") == "LithiumNickelManganeseCobaltOxide811"
+    assert _material_emmo_class("nmc 622") == "LithiumNickelManganeseCobaltOxide622"
+    assert _material_emmo_class("NMC") == "LithiumNickelManganeseCobaltOxide"
+    assert _material_emmo_class("silicon-graphite") == "SiliconGraphite"
+    assert _material_emmo_class("LiTFSI") == "LithiumBistrifluoromethanesulfonylimide"
+
+
+def test_every_mapped_term_resolves_in_the_bundled_emmo_context() -> None:
+    """Emitted class prefLabels must expand through the pinned domain-battery context."""
+    context = _load_json(
+        ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
+    )["@context"]
+    material_map = _load_json(ROOT / "assets" / "mappings" / "domain-battery" / "material_map.json")
+    unresolved = [m["emmo_class"] for m in material_map["mappings"] if m["emmo_class"] not in context]
+    assert not unresolved, f"material_map classes missing from the EMMO context: {unresolved}"
+
+    entity_map = _load_json(ROOT / "assets" / "mappings" / "domain-battery" / "entity_type_map.json")
+    missing = [
+        battery_type
+        for section in entity_map["mappings"].values()
+        for entry in section.values()
+        for battery_type in entry.get("battery_types", [])
+        if battery_type not in context
+    ]
+    assert not missing, f"entity_type_map classes missing from the EMMO context: {missing}"
+
+
 def test_battinfo_application_ontology_imports_are_pinned() -> None:
     """battinfo.ttl must import domain-battery at a pinned version IRI, not a floating latest."""
     ontology_path = ROOT / "battinfo.ttl"
     content = ontology_path.read_text(encoding="utf-8")
     # Versioned IRI must be present; floating (unversioned) import is not acceptable.
-    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.19.0/battery>" in content, (
+    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.20.1/battery>" in content, (
         "battinfo.ttl must import domain-battery at a pinned version IRI. "
         "Update the import and this assertion together when upgrading."
     )
     # domain-electrochemistry must also be declared explicitly.
-    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.34.0/electrochemistry>" in content, (
+    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.36.0/electrochemistry>" in content, (
         "battinfo.ttl must explicitly import domain-electrochemistry at a pinned version IRI."
     )
+    # domain-chemical-substance carries the material vocabulary material_map.json uses.
+    assert (
+        "owl:imports <https://w3id.org/emmo/domain/chemical-substance/0.15.0/chemical-substance>" in content
+    ), "battinfo.ttl must explicitly import domain-chemical-substance at a pinned version IRI."
     # The ontology must carry a versionIRI.
     assert "owl:versionIRI" in content, "battinfo.ttl must declare owl:versionIRI."
     # No local hasInstance property should be defined (it belongs to domain-battery).

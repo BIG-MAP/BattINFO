@@ -336,6 +336,8 @@ def _property_type_term(name: str) -> str:
 # fallback ``co_type`` until the term lands, then flip the value here to True and
 # the ``co_type_pending`` class is emitted instead. Keeps JSON-LD validation green.
 # See docs/coincell-canonical.md §4.1 (RatedProperty).
+# Still False at domain-battery 0.20.1 / domain-electrochemistry 0.36.0: RatedProperty
+# was deliberately not added upstream (docs/internal/ontology-additions-needed.md §1).
 PENDING_CO_TYPE_AVAILABLE: dict[str, bool] = {"RatedProperty": False}
 
 
@@ -476,10 +478,14 @@ _DESCRIPTOR_PROPERTY_TERMS: dict[str, str] = {
     "calendered_density": "CalenderedDensity",
 }
 # Coating loading is the active-mass loading; coating thickness is the calendered value.
+# dry_thickness is the as-dried (pre-calendering) value — DryCoatingThickness landed in
+# domain-electrochemistry 0.36.0.
 _DESCRIPTOR_COATING_PROPERTY_TERMS: dict[str, str] = {
     **_DESCRIPTOR_PROPERTY_TERMS,
     "loading": "ActiveMassLoading",
     "thickness": "CalenderedCoatingThickness",
+    "dry_thickness": "DryCoatingThickness",
+    "dry_coating_thickness": "DryCoatingThickness",
 }
 
 
@@ -646,7 +652,7 @@ _ASSEMBLY_COUNT_FIELDS = (
 
 
 def _descriptor_electrode_assembly_to_jsonld(construction: dict[str, Any] | None) -> dict[str, Any] | None:
-    """Emit an ElectrodeStack / JellyRoll node from construction geometry fields.
+    """Emit an ElectrodeStack / WoundStack node from construction geometry fields.
 
     Returns ``None`` unless at least one assembly-geometry field is present. Sheet counts
     and winding turns (dimensionless) emit as ``schema:additionalProperty``; the
@@ -663,7 +669,9 @@ def _descriptor_electrode_assembly_to_jsonld(construction: dict[str, Any] | None
     assembly_type = str(construction.get("assembly_type") or "").lower()
     layering = str(construction.get("layering") or "").lower()
     is_wound = assembly_type == "wound" or "jelly" in layering or construction.get("winding_turns") is not None
-    node: dict[str, Any] = {"@type": "JellyRoll" if is_wound else "ElectrodeStack"}
+    # WoundStack is the EMMO prefLabel (domain-electrochemistry 0.36.0); JellyRoll and
+    # SwissRoll are its altLabels, so only WoundStack resolves through a context.
+    node: dict[str, Any] = {"@type": "WoundStack" if is_wound else "ElectrodeStack"}
 
     quantities = {key: construction[key] for key in _ASSEMBLY_QUANTITY_TERMS if construction.get(key)}
     prop_nodes = _descriptor_property_nodes(quantities, term_overrides=_ASSEMBLY_QUANTITY_TERMS)
@@ -687,12 +695,25 @@ _FORMAT_CASE_TYPE = {
     "pouch": "PouchCase",
     "prismatic": "PrismaticCase",
 }
+# Authored housing part type -> EMMO class. The seal/vent/CID/insulator-ring/gasket
+# entries landed in domain-electrochemistry 0.36.0; before that they fell through to
+# the schema:Thing fallback with a semantic.hardware_part_unmapped warning.
 _HARDWARE_PART_TYPE = {
     "lid": "CellLid",
     "can": "CellCan",
     "cap": "CellLid",
     "spring": "Spring",
+    "wave spring": "WaveSpring",
+    "wave-spring": "WaveSpring",
     "spacer": "Spacer",
+    "seal": "Seal",
+    "gasket": "Gasket",
+    "vent": "SafetyVent",
+    "safety vent": "SafetyVent",
+    "cid": "CurrentInterruptDevice",
+    "current interrupt device": "CurrentInterruptDevice",
+    "insulator": "InsulatorRing",
+    "insulator ring": "InsulatorRing",
 }
 
 
@@ -708,12 +729,12 @@ def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
 
     def _part_node(part: dict[str, Any]) -> dict[str, Any]:
         raw_type = str(part.get("type") or "").strip()
-        mapped = _HARDWARE_PART_TYPE.get(raw_type)
+        mapped = _HARDWARE_PART_TYPE.get(raw_type.lower())
         node: dict[str, Any] = {"@type": mapped or "schema:Thing"}
         if mapped is None and raw_type:
-            # An out-of-vocabulary part (e.g. "vent", "wave spring") has no EMMO
-            # class yet. Preserve the authored label instead of erasing it, and
-            # warn - matching the ConventionalProperty fallback pattern.
+            # An out-of-vocabulary part has no EMMO class yet. Preserve the authored
+            # label instead of erasing it, and warn - matching the
+            # ConventionalProperty fallback pattern.
             node["skos:prefLabel"] = raw_type
             node["schema:additionalType"] = raw_type
             warnings.warn(
@@ -1587,6 +1608,15 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     specification_comment_target = _profile_binding_target("specification.comment", "schema:description")
     format_mapping = _entity_mapping("format", specification.get("format")) or {"battery_types": ["BatteryCell"]}
     battery_type_list = list(format_mapping.get("battery_types", ["BatteryCell"]))
+
+    # A reference electrode is the schema's half-cell marker; an explicit
+    # cell_configuration wins. See the cell_configuration section of entity_type_map.
+    configuration = specification.get("cell_configuration")
+    if not configuration and specification.get("reference_electrode"):
+        configuration = "half-cell"
+    configuration_mapping = _entity_mapping("cell_configuration", configuration)
+    if configuration_mapping:
+        battery_type_list.extend(configuration_mapping.get("battery_types", []))
 
     chemistry_mapping = _entity_mapping("chemistry", specification.get("chemistry"))
     if chemistry_mapping:

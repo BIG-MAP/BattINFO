@@ -1,8 +1,13 @@
 """refresh_emmo_context.py — update the bundled EMMO domain-battery JSON-LD context.
 
-The context is fetched from the canonical w3id.org URL and written to
+The context is fetched at the version pinned in battinfo.ttl and written to
 src/battinfo/data/context/domain-battery.context.json.  Run this whenever
 upgrading the EMMO domain-battery dependency declared in battinfo.ttl.
+
+The default URL is the release tag, not the canonical w3id.org URL: w3id serves
+whatever the ontology's default branch currently holds, and the bundled copy has
+to match the pinned import so records stay reproducible. Point --url at
+https://w3id.org/emmo/domain/battery/context to preview the unreleased context.
 
 Usage:
     python .tools/quality/refresh_emmo_context.py
@@ -18,7 +23,12 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
+# Keep in step with the owl:imports pin in battinfo.ttl.
+PINNED_VERSION = "0.20.1"
+CONTEXT_URL = (
+    f"https://raw.githubusercontent.com/emmo-repo/domain-battery/{PINNED_VERSION}/context/context.json"
+)
+LATEST_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 CONTEXT_PATH = ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
 TIMEOUT = 20
 

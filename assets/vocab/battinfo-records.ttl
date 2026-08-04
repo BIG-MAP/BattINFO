@@ -48,16 +48,6 @@ battinfo:maximumPower a rdf:Property ;
     rdfs:comment "Placeholder for record key(s) 'maximum_power' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:operatingTemperatureMax a rdf:Property ;
-    rdfs:label "Operating Temperature Max"@en ;
-    rdfs:comment "Placeholder for record key(s) 'operating_temperature_max' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:operatingTemperatureMin a rdf:Property ;
-    rdfs:label "Operating Temperature Min"@en ;
-    rdfs:comment "Placeholder for record key(s) 'operating_temperature_min' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:powerCapability a rdf:Property ;
     rdfs:label "Power Capability"@en ;
     rdfs:comment "Placeholder for record key(s) 'power_capability' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
@@ -1060,13 +1050,13 @@ ns:nominalVoltageUnit a rdf:Property ;
 
 ns:operating_temperature_max a rdf:Property ;
     rdfs:label "Operating temperature max"@en ;
-    rdfs:seeAlso battinfo:operatingTemperatureMax ;
+    rdfs:seeAlso electrochemistry:electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:operatingTemperatureMax a rdf:Property ;
     rdfs:label "Operating Temperature Max"@en ;
     owl:equivalentProperty ns:operating_temperature_max ;
-    rdfs:seeAlso battinfo:operatingTemperatureMax ;
+    rdfs:seeAlso electrochemistry:electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:operating_temperature_max_unit a rdf:Property ;
@@ -1082,13 +1072,13 @@ ns:operatingTemperatureMaxUnit a rdf:Property ;
 
 ns:operating_temperature_min a rdf:Property ;
     rdfs:label "Operating temperature min"@en ;
-    rdfs:seeAlso battinfo:operatingTemperatureMin ;
+    rdfs:seeAlso electrochemistry:electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:operatingTemperatureMin a rdf:Property ;
     rdfs:label "Operating Temperature Min"@en ;
     owl:equivalentProperty ns:operating_temperature_min ;
-    rdfs:seeAlso battinfo:operatingTemperatureMin ;
+    rdfs:seeAlso electrochemistry:electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:operating_temperature_min_unit a rdf:Property ;
@@ -1417,13 +1407,13 @@ ns:thicknessUnit a rdf:Property ;
 
 ns:typical_capacity a rdf:Property ;
     rdfs:label "Typical capacity"@en ;
-    rdfs:seeAlso electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100 ;
+    rdfs:seeAlso electrochemistry:electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:typicalCapacity a rdf:Property ;
     rdfs:label "Typical Capacity"@en ;
     owl:equivalentProperty ns:typical_capacity ;
-    rdfs:seeAlso electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100 ;
+    rdfs:seeAlso electrochemistry:electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:typical_capacity_unit a rdf:Property ;

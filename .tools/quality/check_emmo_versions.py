@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BATTINFO_TTL = ROOT / "ontology" / "battinfo.ttl"
+BATTINFO_TTL = ROOT / "battinfo.ttl"
 
 # Map each declared IRI pattern to its GitHub repository.
 # Keyed by a display name; values are (iri_pattern_re, github_org_repo).
@@ -32,6 +32,12 @@ TRACKED_DEPS: dict[str, tuple[re.Pattern[str], str]] = {
     "domain-electrochemistry": (
         re.compile(r"owl:imports\s+<https://w3id\.org/emmo/domain/electrochemistry/([^/]+)/electrochemistry>"),
         "emmo-repo/domain-electrochemistry",
+    ),
+    "domain-chemical-substance": (
+        re.compile(
+            r"owl:imports\s+<https://w3id\.org/emmo/domain/chemical-substance/([^/]+)/chemical-substance>"
+        ),
+        "emmo-repo/domain-chemical-substance",
     ),
 }
 

@@ -82,16 +82,17 @@ Most engineering quantities and part types resolve to existing EMMO classes:
 `Terminal`, `CurrentCollectorTab`, `ElectrodeStack`, `CalenderedDensity`,
 `MassLoading`, `Thickness`, `Volume`, and `Length`.
 
-A few terms are not yet in the ontology: `Seal`, `JellyRoll`, `CeramicCoating`,
-and cylindrical safety hardware such as a safety vent or current-interrupt
-device. Until they are added upstream (tracked in the ontology-additions queue),
-a part of one of these kinds is emitted carrying its authored label
+Since domain-electrochemistry 0.36.0 the housing hardware that used to be
+unmapped also resolves: `Seal`, `Gasket`, `SafetyVent`, `CurrentInterruptDevice`,
+`InsulatorRing`, `WaveSpring`, `CeramicCoating`, and the wound electrode assembly
+`WoundStack` (whose altLabels are `JellyRoll` and `SwissRoll` — emitters use the
+prefLabel because only that resolves through a context).
+
+A part type outside that vocabulary is still emitted carrying its authored label
 (`skos:prefLabel` / `schema:additionalType`) and fires a
 `semantic.hardware_part_unmapped` or `semantic.property_unmapped` warning — the
-value is preserved, never silently dropped, but it is not yet a typed EMMO node
-and will not survive a round-trip as a typed part. This is the expected state
-for those parts today, and it is why the cylindrical example below emits one
-warning for its vent.
+value is preserved, never silently dropped, but it is not a typed EMMO node and
+will not survive a round-trip as a typed part.
 
 ## Worked examples
 
@@ -108,9 +109,8 @@ The cylindrical example is authored through `create_component_spec("housing", �
 passes `battinfo validate`, emits a `CylindricalCase` node, and is stamped at the
 current `schema_version`. Its case `@type` is derived from `cell_format`
 (`cylindrical` → `CylindricalCase`). The safety vent is carried as a `vent`
-part — a dedicated `parts[].type` value. It has no EMMO class yet, so it is
-emitted with its authored label and a `semantic.hardware_part_unmapped` warning,
-pending an upstream `SafetyVent` term.
+part — a dedicated `parts[].type` value, typed `SafetyVent` since
+domain-electrochemistry 0.36.0.
 
 The **jelly-roll** geometry of a wound cell is authored on the cell-spec's
 `construction` block (the `CellConstruction` fields above: `winding_turns`,

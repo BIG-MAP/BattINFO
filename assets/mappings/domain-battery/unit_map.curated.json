@@ -4,9 +4,10 @@
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
-    "IRIs verified against EMMO 1.0.x and domain-battery 0.18.7 context.",
+    "IRIs verified against EMMO 1.0.2, domain-battery 0.20.1, domain-electrochemistry 0.36.0 and domain-chemical-substance 0.15.0.",
     "All candidates with confidence 1.0 promoted. MANUAL_UNIT_TYPES entries consolidated here.",
-    "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core)."
+    "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core).",
+    "Wh and kWh: EMMO spells the local names Watthour / KiloWatthour (lower-case h) while the prefLabels read WattHour / KiloWattHour; the IRIs follow EMMO, the labels follow the prefLabel."
   ],
   "mappings": [
     {
@@ -75,8 +76,8 @@
     {
       "symbol": "Wh",
       "status": "curated",
-      "unit_iri": "https://w3id.org/emmo#WattHour",
-      "unit_qname": "emmo:WattHour",
+      "unit_iri": "https://w3id.org/emmo#Watthour",
+      "unit_qname": "emmo:Watthour",
       "unit_pref_label": "WattHour",
       "unit_label": "WattHour",
       "confidence": 1.0
@@ -84,8 +85,8 @@
     {
       "symbol": "kWh",
       "status": "curated",
-      "unit_iri": "https://w3id.org/emmo#KiloWattHour",
-      "unit_qname": "emmo:KiloWattHour",
+      "unit_iri": "https://w3id.org/emmo#KiloWatthour",
+      "unit_qname": "emmo:KiloWatthour",
       "unit_pref_label": "KiloWattHour",
       "unit_label": "KiloWattHour",
       "confidence": 1.0
