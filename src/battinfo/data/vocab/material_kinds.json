@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "description": "Curated, shipped vocabulary of generic material kinds (Level 1 of the three-level materials model). A kind is the universal reference identity of a material (graphite, LFP, NMC811, ...): the aggregation axis of the Battery Genome. Every material-spec carries a required `kind`; every material instance links a spec. Each kind's canonical semantic identity is its chemical-substance domain-ontology class IRI (`chemsub`); the battinfo `key` is the ergonomic handle. Kinds missing an ontology class omit `chemsub` and go on the ontology-additions backlog (labeled ns# fallback until upstreamed). This is a governance-by-PR vocabulary, NOT a user-authored record type. Curation to the full set (electrolytes, binders, separators, current collectors, further actives) is a follow-up PR; this file bootstraps the contract and seeds it. `chemsub` values use the domain-chemical-substance namespace (https://w3id.org/emmo/domain/chemical-substance#). `emmo` values are the domain-battery class local-name used to type JSON-LD nodes (must resolve in the bundled domain-battery context). `reference_properties` carry curated, citable generic anchors (value/unit/citation) that the genome compares datasheet- and measurement-reported distributions against; present only where a citable source exists.",
+  "version": "0.2.0",
+  "description": "Curated, shipped vocabulary of generic material kinds (Level 1 of the three-level materials model). A kind is the universal reference identity of a material (graphite, LFP, NMC811, ...): the aggregation axis of the Battery Genome. Every material-spec carries a required `kind`; every material instance links a spec. Each kind's canonical semantic identity is its chemical-substance domain-ontology class IRI (`chemsub`); the battinfo `key` is the ergonomic handle. Kinds missing an ontology class omit `chemsub` and go on the ontology-additions backlog (labeled ns# fallback until upstreamed). This is a governance-by-PR vocabulary, NOT a user-authored record type. `chemsub` values use the domain-chemical-substance namespace (https://w3id.org/emmo/domain/chemical-substance#), verified against release 0.15.0. `emmo` values are the domain-battery class local-name used to type JSON-LD nodes (must resolve in the bundled domain-battery context). `reference_properties` carry curated, citable generic anchors (value/unit/citation) that the genome compares datasheet- and measurement-reported distributions against; present only where a citable source exists. Optional EXTERNAL IDENTITY ANCHORS (`wikidata_qid`, `inchikey`, `pubchem_cid`, `mp_id`, `cas_rn`) tie a kind to the identifier systems the rest of materials science already uses; each is emitted as a `skos:exactMatch` link. They are populated only where the value has been verified — an absent anchor means unverified, never guessed. `mp_id` denotes a representative ORDERED structure in the Materials Project, so solid-solution families (NMC, NCA, LMFP) legitimately carry none. NMP is a processing solvent, not an electrolyte solvent; the families enum has no processing-solvent value, so it sits under `other` until one is added.",
   "families": [
     "active_anode",
     "active_cathode",
@@ -19,6 +19,9 @@
       "formula": "C",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
       "emmo": "Graphite",
+      "wikidata_qid": "Q5309",
+      "pubchem_cid": "5462310",
+      "mp_id": "mp-48",
       "aliases": ["graphite", "natural graphite", "synthetic graphite", "mesocarbon microbead", "mcmb", "gr", "c"],
       "reference_properties": {
         "specific_capacity": {"value": 372, "unit": "mAh/g", "citation": "https://doi.org/10.1039/D0SE00175A"},
@@ -31,6 +34,8 @@
       "formula": "Si",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_68c0876b_cb62_41cd_846d_95cc9d9a8733",
       "emmo": "Silicon",
+      "wikidata_qid": "Q670",
+      "mp_id": "mp-149",
       "aliases": ["silicon", "si", "nano-silicon", "silicon nanoparticles"],
       "reference_properties": {
         "specific_capacity": {"value": 3579, "unit": "mAh/g", "citation": "https://doi.org/10.1149/1.1652421"}
@@ -40,13 +45,32 @@
       "label": "Silicon-graphite composite",
       "family": "active_anode",
       "formula": "Si/C",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3f061928_e90f_4414_9308_d4c843ebb79a",
+      "emmo": "SiliconGraphite",
       "aliases": ["silicon graphite", "silicon-graphite", "si/gr", "si-gr", "silicon/graphite", "sigr", "graphite-silicon"]
+    },
+    "hard_carbon": {
+      "label": "Hard carbon",
+      "family": "active_anode",
+      "formula": "C",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_5cee19d2_f916_4264_a8ed_efed13a808d2",
+      "emmo": "HardCarbon",
+      "aliases": ["hard carbon", "hard-carbon", "hc", "non-graphitizable carbon", "non-graphitising carbon", "disordered carbon"]
+    },
+    "lto": {
+      "label": "Lithium titanate (LTO)",
+      "family": "active_anode",
+      "formula": "Li4Ti5O12",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_acdb232f_8041_4e11_8a11_5db2d2baae4d",
+      "emmo": "LithiumTitanate",
+      "aliases": ["lto", "li4ti5o12", "lithium titanate", "lithium titanium oxide", "lithium titanate oxide", "spinel lto"]
     },
     "lithium_metal": {
       "label": "Lithium metal",
       "family": "active_anode",
       "formula": "Li",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f",
+      "mp_id": "mp-135",
       "aliases": ["lithium metal", "lithium", "li metal", "li", "metallic lithium", "lithium foil"],
       "reference_properties": {
         "specific_capacity": {"value": 3862, "unit": "mAh/g", "citation": "https://doi.org/10.1038/nnano.2017.16"}
@@ -66,6 +90,9 @@
       "formula": "LiFePO4",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
       "emmo": "LithiumIronPhosphate",
+      "wikidata_qid": "Q3042400",
+      "pubchem_cid": "15320824",
+      "mp_id": "mp-19017",
       "aliases": ["lfp", "lifepo4", "lithium iron phosphate", "lithium iron phosphate (lfp)", "olivine lfp"],
       "reference_properties": {
         "specific_capacity": {"value": 170, "unit": "mAh/g", "citation": "https://doi.org/10.1149/1.1837571"}
@@ -85,7 +112,17 @@
       "formula": "LiCoO2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_4c62d334_a124_40b3_9fd1_fe713d01a6af",
       "emmo": "LithiumCobaltOxide",
+      "mp_id": "mp-22526",
       "aliases": ["lco", "licoo2", "lithium cobalt oxide"]
+    },
+    "lmo": {
+      "label": "Lithium manganese oxide (LMO)",
+      "family": "active_cathode",
+      "formula": "LiMn2O4",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_e8fafdc8_6cd3_4dd0_9630_10ca8e3f1827",
+      "emmo": "LithiumManganeseOxide",
+      "mp_id": "mp-22584",
+      "aliases": ["lmo", "limn2o4", "lithium manganese oxide", "spinel", "spinel lmo", "lithium manganate"]
     },
     "lnmo": {
       "label": "Lithium nickel manganese oxide (LNMO)",
@@ -99,32 +136,35 @@
       "label": "NMC111 (LiNi1/3Mn1/3Co1/3O2)",
       "family": "active_cathode",
       "formula": "LiNi0.33Mn0.33Co0.33O2",
-      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
-      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90",
+      "emmo": "LithiumNickelManganeseCobaltOxide111",
       "aliases": ["nmc111", "nmc 111", "nmc333", "ncm111", "lini0.33mn0.33co0.33o2", "lini1/3mn1/3co1/3o2"]
     },
     "nmc532": {
       "label": "NMC532 (LiNi0.5Mn0.3Co0.2O2)",
       "family": "active_cathode",
       "formula": "LiNi0.5Mn0.3Co0.2O2",
-      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
-      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_592acd61_23c8_4a1a_b41b_1eeabedc0710",
+      "emmo": "LithiumNickelManganeseCobaltOxide532",
+      "wikidata_qid": "Q121086662",
       "aliases": ["nmc532", "nmc 532", "ncm532", "lini0.5mn0.3co0.2o2"]
     },
     "nmc622": {
       "label": "NMC622 (LiNi0.6Mn0.2Co0.2O2)",
       "family": "active_cathode",
       "formula": "LiNi0.6Mn0.2Co0.2O2",
-      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
-      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_cfcde9c2_3a9c_4add_b27e_0ba0cedf1c70",
+      "emmo": "LithiumNickelManganeseCobaltOxide622",
+      "wikidata_qid": "Q121086348",
       "aliases": ["nmc622", "nmc 622", "ncm622", "lini0.6mn0.2co0.2o2"]
     },
     "nmc811": {
       "label": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
       "family": "active_cathode",
       "formula": "LiNi0.8Mn0.1Co0.1O2",
-      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3ac62305_acd6_4312_9e31_4f824bd2530d",
-      "emmo": "LithiumNickelManganeseCobaltOxide",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f",
+      "emmo": "LithiumNickelManganeseCobaltOxide811",
+      "wikidata_qid": "Q121086674",
       "aliases": ["nmc811", "nmc 811", "ncm811", "lini0.8mn0.1co0.1o2"]
     },
     "nca": {
@@ -178,7 +218,26 @@
       "formula": "LiPF6",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771",
       "emmo": "LithiumHexafluorophosphate",
+      "wikidata_qid": "Q2583808",
+      "pubchem_cid": "23688915",
+      "mp_id": "mp-9143",
       "aliases": ["lipf6", "lithium hexafluorophosphate"]
+    },
+    "litfsi": {
+      "label": "Lithium bis(trifluoromethanesulfonyl)imide (LiTFSI)",
+      "family": "electrolyte_salt",
+      "formula": "LiC2F6NO4S2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_8267551d_7572_42f6_888d_96ff0c78f3aa",
+      "emmo": "LithiumBistrifluoromethanesulfonylimide",
+      "aliases": ["litfsi", "lithium bis(trifluoromethanesulfonyl)imide", "lithium bistrifluoromethanesulfonylimide", "lithium bis(trifluoromethanesulfonyl)amide", "tfsi"]
+    },
+    "lifsi": {
+      "label": "Lithium bis(fluorosulfonyl)imide (LiFSI)",
+      "family": "electrolyte_salt",
+      "formula": "LiF2NO4S2",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_f12d9fa2_a9a8_44e9_8f24_ceb9e74b0731",
+      "emmo": "LithiumBisfluorosulfonylimide",
+      "aliases": ["lifsi", "lithium bis(fluorosulfonyl)imide", "lithium bisfluorosulfonylimide", "lithium bis(fluorosulfonyl)amide", "fsi"]
     },
     "koh": {
       "label": "Potassium hydroxide (KOH)",
@@ -194,6 +253,8 @@
       "formula": "C3H4O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226",
       "emmo": "EthyleneCarbonate",
+      "wikidata_qid": "Q421145",
+      "pubchem_cid": "7303",
       "aliases": ["ec", "ethylene carbonate"]
     },
     "emc": {
@@ -274,6 +335,15 @@
       "formula": "Al2O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_a2b46543_4d0f_488a_b51a_7ed3a4149170",
       "aliases": ["alumina", "aluminium oxide", "aluminum oxide", "al2o3", "al2o3 particles"]
+    },
+    "nmp": {
+      "label": "N-methyl-2-pyrrolidone (NMP)",
+      "family": "other",
+      "family_note": "Processing solvent (slurry casting), not an electrolyte solvent. The families enum has no processing_solvent value yet, so this sits under `other`.",
+      "formula": "C5H9NO",
+      "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_59c65403_b7f9_4852_a37a_e6295c7b026c",
+      "emmo": "NMethyl2Pyrrolidone",
+      "aliases": ["nmp", "n-methyl-2-pyrrolidone", "n-methylpyrrolidone", "1-methyl-2-pyrrolidone", "methylpyrrolidone"]
     }
   }
 }

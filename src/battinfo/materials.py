@@ -100,6 +100,40 @@ def material_kind(value: Any) -> dict[str, Any] | None:
     entry["key"] = key
     return entry
 
+
+# ── External identity anchors ──────────────────────────────────────────────────
+#
+# A kind's ``chemsub`` class is its EMMO identity; these are the identifiers the
+# rest of materials science already uses for the same substance. Resolving them to
+# dereferenceable IRIs lets a consumer join a BattINFO material to Wikidata,
+# PubChem or the Materials Project without a lookup table.
+#
+# ``inchikey`` and ``cas_rn`` are carried as literals only: neither has a canonical,
+# freely-dereferenceable IRI form, so neither is emitted as ``skos:exactMatch``.
+# InChIKeys are also NOT guessed — molecular-species curation is a later pass.
+EXTERNAL_ID_IRI_TEMPLATES: dict[str, str] = {
+    "wikidata_qid": "http://www.wikidata.org/entity/{}",
+    "pubchem_cid": "https://pubchem.ncbi.nlm.nih.gov/compound/{}",
+    "mp_id": "https://next-gen.materialsproject.org/materials/{}",
+}
+EXTERNAL_ID_FIELDS: tuple[str, ...] = ("wikidata_qid", "inchikey", "pubchem_cid", "mp_id", "cas_rn")
+
+
+def material_kind_exact_match_iris(entry: Mapping[str, Any] | None) -> list[str]:
+    """Dereferenceable IRIs for a kind entry's external identity anchors.
+
+    Ordered by :data:`EXTERNAL_ID_IRI_TEMPLATES` so emission is deterministic.
+    Absent anchors yield nothing — an anchor is only ever present when verified.
+    """
+    if not isinstance(entry, Mapping):
+        return []
+    iris: list[str] = []
+    for field, template in EXTERNAL_ID_IRI_TEMPLATES.items():
+        value = entry.get(field)
+        if isinstance(value, str) and value.strip():
+            iris.append(template.format(value.strip()))
+    return iris
+
 # Cell-cell-specific composition fractions are not intrinsic material properties,
 # so they are dropped when lifting an embedded holder to a standalone spec.
 _CELL_LOCAL_PROPERTY_KEYS = {"mass_fraction", "volume_fraction", "weight_fraction"}

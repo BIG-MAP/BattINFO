@@ -16,6 +16,7 @@ _CELL_TYPE_PRODUCT_TO_SNAKE = {
     "manufacturingPlace": "manufacturing_place",
     "batteryCategory": "battery_category",
     "referenceElectrode": "reference_electrode",
+    "cellConfiguration": "cell_configuration",
 }
 
 _DATASET_TO_SNAKE = {

@@ -1877,6 +1877,10 @@ def _material_node(body: dict[str, Any]) -> dict[str, Any]:
     ``schema:ChemicalSubstance`` node still carrying the chemsub link. When no
     kind is present (e.g. an embedded/imported material), fall back to resolving
     the name through the alias table, preserving prior behaviour.
+
+    The kind's verified external identity anchors (Wikidata, PubChem, Materials
+    Project) ride ``skos:exactMatch``, so a consumer can join the node to the
+    identifier systems the rest of materials science already uses.
     """
     node: dict[str, Any] = {}
     if isinstance(body.get("id"), str):
@@ -1890,14 +1894,20 @@ def _material_node(body: dict[str, Any]) -> dict[str, Any]:
         kind_entry = material_kind(kind)
     emmo_class = None
     same_as = None
+    exact_matches: list[str] = []
     if kind_entry is not None:
+        from battinfo.materials import material_kind_exact_match_iris
+
         emmo_class = kind_entry.get("emmo")
         same_as = kind_entry.get("chemsub")
+        exact_matches = material_kind_exact_match_iris(kind_entry)
     if emmo_class is None and isinstance(name, str) and name:
         emmo_class = _material_emmo_class(name)
     node["@type"] = emmo_class or "schema:ChemicalSubstance"
     if same_as:
         node["schema:sameAs"] = {"@id": same_as}
+    if exact_matches:
+        node["skos:exactMatch"] = [{"@id": iri} for iri in exact_matches]
     if isinstance(name, str) and name:
         node["schema:name"] = name
     if isinstance(body.get("formula"), str) and body["formula"]:

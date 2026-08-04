@@ -31,6 +31,28 @@ carries the node until the class is upstreamed). A kind may also carry curated,
 citable `reference_properties` (e.g. graphite 372 mAh/g) — the generic anchors the
 genome compares datasheet- and measurement-reported values against.
 
+### External identity anchors
+
+`chemsub` is the EMMO identity. Materials science also runs on Wikidata, PubChem,
+the Materials Project, InChIKeys and CAS numbers, so a kind may additionally carry
+`wikidata_qid`, `pubchem_cid`, `mp_id`, `inchikey` and `cas_rn`. The three that have
+a stable dereferenceable form are emitted as `skos:exactMatch` links, which is how a
+consumer joins a BattINFO material to those systems with no lookup table:
+
+| Field | Emitted as |
+| --- | --- |
+| `wikidata_qid` | `http://www.wikidata.org/entity/<QID>` |
+| `pubchem_cid` | `https://pubchem.ncbi.nlm.nih.gov/compound/<CID>` |
+| `mp_id` | `https://next-gen.materialsproject.org/materials/<mp-id>` |
+| `inchikey`, `cas_rn` | carried as literals only — neither has a canonical, freely-dereferenceable IRI |
+
+Two rules govern the anchors. **An absent anchor means unverified, never guessed**:
+a kind carries an identifier only once someone has checked it, so an empty field is
+information, not an oversight. And **`mp_id` denotes a representative ordered
+structure**, so solid-solution families (the NMC ratios, NCA, LMFP) legitimately
+carry none — that absence is correct, not a gap to fill. No InChIKeys are populated
+yet; molecular-species curation is a later pass.
+
 ```python
 import battinfo
 from battinfo.materials import material_kind, material_kind_keys, resolve_material_kind
@@ -41,8 +63,19 @@ resolve_material_kind("NMC 811")          # -> "nmc811" (aliases resolve)
 material_kind("graphite")                 # the full entry (chemsub, emmo, refs)
 ```
 
-The seed vocabulary bootstraps the contract; curation to the full set is a
-follow-up PR.
+The vocabulary covers 38 kinds: the common actives (graphite, hard carbon, LTO,
+silicon and Si/Gr, lithium and zinc metal; LFP, LMFP, LCO, LMO, LNMO, the four NMC
+ratios, NCA, MnO2), binders, conductive additives, the salts (LiPF6, LiTFSI, LiFSI,
+KOH), carbonate solvents and additives, separator and current-collector materials,
+plus alumina and NMP. Every one anchors to a `domain-chemical-substance` class.
+Adding a kind is a PR against `src/battinfo/data/vocab/material_kinds.json`; the
+tests check that each new `emmo` class resolves in the bundled context and names the
+same substance as its `chemsub` anchor.
+
+One placement is worth flagging: NMP is a **processing** solvent (slurry casting),
+not an electrolyte solvent, and the family list has no `processing_solvent` value, so
+it sits under `other` with a `family_note` saying why. Add the family when a second
+processing solvent arrives rather than stretching `electrolyte_solvent` to cover it.
 
 ## Level 2 — material-spec (first-class record)
 

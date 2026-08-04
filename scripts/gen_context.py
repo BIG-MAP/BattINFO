@@ -24,7 +24,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo.jsonld import _CONTEXT_INLINE, TEST_METHOD_CONTEXT_TERMS  # noqa: E402
+from battinfo.jsonld import (  # noqa: E402
+    _CONTEXT_INLINE,
+    TEST_METHOD_CONTEXT_TERMS,
+    TEST_PROTOCOL_CONTEXT_TERMS,
+)
 from battinfo.transform.cell_spec_node import label_to_compact  # noqa: E402
 
 OUT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
@@ -42,6 +46,12 @@ def build() -> dict:
     context: dict = dict(_CONTEXT_INLINE)
     context.update(label_to_compact())
     context.update(TEST_METHOD_CONTEXT_TERMS)
+    # Test-protocol vocabulary. setdefault, not update: where a term is already
+    # present from the class table its full-IRI form wins, so adding protocol
+    # emission to record_to_jsonld introduces new terms without rewriting old ones
+    # (a published version's meaning must never change).
+    for term, value in TEST_PROTOCOL_CONTEXT_TERMS.items():
+        context.setdefault(term, value)
     return {"license": LICENSE, "@context": context}
 
 

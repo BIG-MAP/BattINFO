@@ -95,6 +95,14 @@ Also mapped in the same pass, though published earlier: `MaximumPulseChargingCur
 
 ### domain-chemical-substance 0.15.0
 
+The kind vocabulary (`material_kinds.json`) is fully anchored against this release: all
+38 kinds carry a `chemsub` class, with `SiliconGraphite`, `HardCarbon`, `LithiumTitanate`,
+`LithiumManganeseOxide`, `LithiumBistrifluoromethanesulfonylimide`,
+`LithiumBisfluorosulfonylimide` and `NMethyl2Pyrrolidone` newly available, and the four
+NMC ratios moved off the generic `LithiumNickelManganeseCobaltOxide` onto their
+stoichiometric classes. `tests/test_materials_first_class.py` checks every `emmo` class
+resolves in the bundled context and agrees with its `chemsub` anchor.
+
 `LithiumNickelManganeseCobaltOxide111` / `532` / `622` / `811` (altLabels NMC111 …) and
 `SiliconGraphite` are wired in `material_map.json`; a named NMC ratio now resolves to its
 own class and bare "NMC" keeps the generic one. The pre-existing `LiTFSI`, `LiFSI` and
@@ -108,11 +116,32 @@ own class and bare "NMC" keeps the generic one. The pre-existing `LiTFSI`, `LiFS
 **Half-cell semantics (decision).** A battery half-cell types as the DEVICE classes
 `BatteryHalfCell` + `HalfCellDevice`, never as `ElectrochemicalHalfCell`: upstream
 annotates that class with an explicit warning against the conflation (it is one electrode
-plus one electrolyte, not an experimental setup). The cell-spec schema has no explicit
-configuration field, so the emitter reads the existing `reference_electrode` field — the
-schema's own half-cell marker — and an explicit `cell_configuration` value wins when one
-is present. Add `cell_configuration` to `cell-spec.schema.json` if the heuristic ever
-needs overriding (three-electrode full cells being the obvious case).
+plus one electrolyte, not an experimental setup).
+
+`cell_spec.cell_configuration` (`full_cell` | `half_cell` | `three_electrode_cell`,
+optional, no default) now carries the statement. The `reference_electrode` heuristic
+survives as the fallback for records that never state a configuration, but an explicit
+value wins in both directions — `full_cell` suppresses the heuristic, which is what a
+three-electrode full cell or a commercial cell under potential monitoring needs.
+`three_electrode_cell` types as `ThreeElectrodeCellDevice`; `full_cell` adds no device
+class at all. Both spellings (`three-electrode`, `three-electrode-cell`) are keyed in
+`entity_type_map.json` so tolerant import and the schema enum land on the same mapping.
+
+### Test-protocol method classes (chameo, via domain-electrochemistry 0.36.0)
+
+`record_to_jsonld` emits test-protocol records as of the vocabulary top-up, and types the
+plan node with the published characterisation-method class where the protocol's kind names
+one: `GalvanostaticIntermittentTitrationTechnique` (gitt),
+`PseudoOpenCircuitVoltageMethod` (quasi_ocv), `ElectrochemicalImpedanceSpectroscopy`
+(eis/impedance), `HPPC`, `CyclingTest`, `CRateTest`, `CapacityTest`, `FormationCycling`.
+The map is `battinfo.jsonld.TEST_METHOD_CLASS`; the IRIs are read from the bundled
+domain-battery context rather than hard-coded, so the emitter, the hosted records context
+and the validator allowlist cannot drift apart. Kinds with no published class
+(`ici`, `dcir`, `calendar_ageing`, `rpt`, the drive cycles) keep the untyped
+`prov:Plan` / `schema:HowTo` node — those are the open candidates if upstream wants them.
+
+This closes readiness finding **M5** (test protocols were the last record type without
+JSON-LD emission).
 
 ## Already published & in use (no action)
 

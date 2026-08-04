@@ -219,6 +219,15 @@
         "reference_electrode": {
           "type": "string",
           "description": "Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE')."
+        },
+        "cell_configuration": {
+          "type": "string",
+          "enum": [
+            "full_cell",
+            "half_cell",
+            "three_electrode_cell"
+          ],
+          "description": "Electrode configuration as built. Optional; absent means unstated (read as a full cell unless a reference_electrode is present). Stated explicitly it overrides that heuristic: half_cell types the JSON-LD as BatteryHalfCell + HalfCellDevice, three_electrode_cell as ThreeElectrodeCellDevice, full_cell suppresses both."
         }
       }
     },

@@ -219,6 +219,24 @@ class CellProductType(str, Enum):
     """
 
 
+class CellConfiguration(str, Enum):
+    """
+    Electrode configuration of the cell as built. Absent means unknown; a full cell is the safe reading of an unstated configuration. Stated explicitly, the value overrides the reference_electrode half-cell heuristic in the JSON-LD emitter.
+    """
+    full_cell = "full_cell"
+    """
+    Two working electrodes; the ordinary battery cell.
+    """
+    half_cell = "half_cell"
+    """
+    One working electrode against a counter/reference electrode (typically lithium metal). Types as BatteryHalfCell + HalfCellDevice.
+    """
+    three_electrode_cell = "three_electrode_cell"
+    """
+    Working, counter and a separate reference electrode, so each electrode potential is measured independently. Types as ThreeElectrodeCellDevice.
+    """
+
+
 class CellGrade(str, Enum):
     """
     Battery grade / reuse status per EU Battery Regulation 2023/1542.
@@ -398,6 +416,9 @@ class CellSpecification(ConfiguredBaseModel):
     ct_battery_category: Optional[BatteryCategoryEU] = Field(default=None, description="""EU Battery Regulation 2023/1542 battery category (LMT, EV, Industrial, Stationary, Portable, SLI).""", json_schema_extra = { "linkml_meta": {'aliases': ['battery_category'],
          'domain_of': ['CellSpecification'],
          'slot_uri': 'battinfo:batteryCategory'} })
+    ct_cell_configuration: Optional[CellConfiguration] = Field(default=None, description="""Electrode configuration as built (full_cell, half_cell, three_electrode_cell). Optional; absent means unstated, which the emitter reads as a full cell unless a reference_electrode is present.""", json_schema_extra = { "linkml_meta": {'aliases': ['cell_configuration'],
+         'domain_of': ['CellSpecification'],
+         'slot_uri': 'battinfo:cellConfiguration'} })
     ct_specs: Optional[SpecSet] = Field(default=None, description="""Quantitative performance specification for this cell type.""", json_schema_extra = { "linkml_meta": {'aliases': ['properties'], 'domain_of': ['CellSpecification'], 'slot_uri': 'battinfo:specs'} })
 
 

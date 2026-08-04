@@ -273,6 +273,16 @@ def _allowed_type_terms() -> set[str]:
         if isinstance(emmo_class, str) and emmo_class:
             allowed.add(emmo_class)
 
+    # A material-spec types itself from its kind's curated ``emmo`` class, so the
+    # kind vocabulary is a term source in its own right — reading it here means
+    # adding a kind cannot produce a document the validator then rejects.
+    from battinfo.materials import material_kinds  # noqa: PLC0415
+
+    for entry in material_kinds().get("kinds", {}).values():
+        emmo_class = entry.get("emmo")
+        if isinstance(emmo_class, str) and emmo_class:
+            allowed.add(emmo_class)
+
     return allowed
 
 

@@ -24,6 +24,41 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Test-protocol JSON-LD (readiness finding M5)**: `record_to_jsonld` now emits
+  test-protocol records — the last record type it could not. The node is a
+  `prov:Plan` / `schema:HowTo` that additionally types itself with the published
+  characterisation-method class where the protocol's kind names one (GITT,
+  pseudo-OCV, EIS, HPPC, cycling, rate capability, capacity check, formation),
+  carries the descriptive method as a `hasTask` chain of typed EMMO process nodes,
+  and stamps contributor/license/funding like every other record. The publication
+  graph builder in `ws.py` had the only implementation; both callers now share one
+  emitter in `battinfo.jsonld`, so a protocol published in a deposit and one
+  exported standalone are the same graph. `ws.export()` writes protocols too.
+
+- **`cell_spec.cell_configuration`**: optional `full_cell` | `half_cell` |
+  `three_electrode_cell`, with no default. Absent still means unstated, which the
+  emitter reads through the existing `reference_electrode` heuristic; a stated value
+  wins in both directions, so `full_cell` suppresses the heuristic for a
+  three-electrode full cell or a commercial cell under potential monitoring.
+  `half_cell` types as `BatteryHalfCell` + `HalfCellDevice`, `three_electrode_cell`
+  as `ThreeElectrodeCellDevice`. `reference_electrode` — permitted by the schema but
+  previously unmodelled, so unauthorable and dropped on save — joins the model at the
+  same time.
+
+- **Material kind vocabulary top-up (0.2.0)**: six kinds added (`lto`, `lmo`,
+  `hard_carbon`, `litfsi`, `lifsi`, `nmp`), taking the vocabulary to 38, and every
+  kind now anchors to a `domain-chemical-substance` class — `silicon_graphite` and
+  the four NMC ratios repoint onto the stoichiometric classes published in 0.15.0
+  instead of sharing the generic `LithiumNickelManganeseCobaltOxide`.
+
+- **External identity anchors on material kinds**: optional `wikidata_qid`,
+  `inchikey`, `pubchem_cid`, `mp_id` and `cas_rn`. The three with a dereferenceable
+  form emit as `skos:exactMatch` (Wikidata, PubChem, Materials Project), so a
+  material joins those systems without a lookup table. Anchors are populated only
+  where verified — an absent one means unverified, never guessed — and no InChIKeys
+  are populated yet. `mp_id` denotes a representative ordered structure, so the
+  solid-solution families carry none by design.
+
 - **`Test.conditions`**: the `Test` model now carries the open, snake_case
   per-execution conditions map (temperature, voltage window, C-rate, frequency
   range, ...) that the test JSON Schema already defined but the model could not

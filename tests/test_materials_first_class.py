@@ -108,10 +108,15 @@ def test_m6_jsonld_emitted_for_spec_and_instance() -> None:
 def test_m6_kind_without_emmo_class_uses_labeled_fallback() -> None:
     from battinfo.jsonld import record_to_jsonld
 
-    # silicon_graphite is a genuine ontology gap: no emmo class, no chemsub.
-    spec = api.create_material_spec(name="Anode blend", kind="si/gr", validate=False)
+    # mno2 is anchored in chemical-substance but has no domain-battery class the
+    # bundled context resolves, so the node falls back to a labeled
+    # schema:ChemicalSubstance that still carries the chemsub link.
+    spec = api.create_material_spec(name="EMD cathode powder", kind="mno2", validate=False)
     ld = record_to_jsonld(spec, "material-spec")
     assert ld["@type"] == "schema:ChemicalSubstance"  # labeled fallback, not invented term
+    assert ld["schema:sameAs"]["@id"].startswith(
+        "https://w3id.org/emmo/domain/chemical-substance#"
+    )
 
 
 # ── kind vocabulary + validation ────────────────────────────────────────────────
@@ -144,13 +149,70 @@ def test_missing_kind_blocks_strict_save_only(tmp_path: Path) -> None:
 
 def test_kinds_carry_chemsub_or_are_flagged_gaps() -> None:
     kinds = battinfo.material_kinds()["kinds"]
-    # the 12 seed kinds required by the model are present
-    required = {"graphite", "silicon", "silicon_graphite", "lnmo", "lfp", "nmc111",
-                "nmc532", "nmc811", "lithium_metal", "pvdf", "carbon_black", "lipf6"}
+    # the full seed set the model requires is present
+    required = {"graphite", "silicon", "silicon_graphite", "hard_carbon", "lto",
+                "lnmo", "lfp", "lmo", "nmc111", "nmc532", "nmc622", "nmc811",
+                "lithium_metal", "pvdf", "carbon_black", "lipf6", "litfsi",
+                "lifsi", "nmp"}
     assert required.issubset(kinds)
-    # mapped kinds anchor to the chemical-substance ontology
-    assert kinds["graphite"]["chemsub"].startswith(
-        "https://w3id.org/emmo/domain/chemical-substance#"
-    )
-    # a genuine gap omits chemsub (ontology-additions backlog), does not invent one
-    assert "chemsub" not in kinds["silicon_graphite"]
+    # every chemsub anchor is a chemical-substance class IRI; none is invented
+    for key, entry in kinds.items():
+        chemsub = entry.get("chemsub")
+        assert chemsub is None or chemsub.startswith(
+            "https://w3id.org/emmo/domain/chemical-substance#substance_"
+        ), f"{key} carries a non-chemical-substance anchor"
+    # silicon_graphite was the seed's ontology gap; chemical-substance 0.15.0
+    # published SiliconGraphite, so it now anchors like the rest
+    assert kinds["silicon_graphite"]["emmo"] == "SiliconGraphite"
+
+
+def test_every_kind_emmo_class_resolves_in_the_bundled_context() -> None:
+    """A kind's ``emmo`` class must be a term the domain-battery context resolves,
+    and must name the same substance as its ``chemsub`` anchor."""
+    import json
+    from importlib import resources
+
+    ctx_file = resources.files("battinfo").joinpath("data", "context", "domain-battery.context.json")
+    with ctx_file.open("r", encoding="utf-8") as handle:
+        context = json.load(handle)["@context"]
+    for key, entry in battinfo.material_kinds()["kinds"].items():
+        emmo_class = entry.get("emmo")
+        if emmo_class is None:
+            continue
+        assert emmo_class in context, f"{key}: {emmo_class} does not resolve in the bundled context"
+        if entry.get("chemsub"):
+            assert context[emmo_class] == entry["chemsub"], f"{key}: emmo/chemsub disagree"
+
+
+def test_external_identity_anchors_emit_as_exact_match() -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    spec = api.create_material_spec(name="SLP30", kind="graphite", validate=False)
+    matches = {m["@id"] for m in record_to_jsonld(spec, "material-spec")["skos:exactMatch"]}
+    assert matches == {
+        "http://www.wikidata.org/entity/Q5309",
+        "https://pubchem.ncbi.nlm.nih.gov/compound/5462310",
+        "https://next-gen.materialsproject.org/materials/mp-48",
+    }
+    # a kind with no verified anchors emits none, rather than a guessed one
+    plain = api.create_material_spec(name="PVDF binder", kind="pvdf", validate=False)
+    assert "skos:exactMatch" not in record_to_jsonld(plain, "material-spec")
+
+
+def test_no_inchikeys_are_guessed() -> None:
+    """The field exists on the schema; molecular-species curation follows later.
+    Populating it with anything unverified is the failure mode this guards."""
+    kinds = battinfo.material_kinds()["kinds"]
+    assert not [k for k, e in kinds.items() if e.get("inchikey")]
+
+
+def test_anchor_fields_stay_inside_the_declared_set() -> None:
+    """A typo'd anchor key would silently emit nothing; pin the field names."""
+    from battinfo.materials import EXTERNAL_ID_FIELDS, EXTERNAL_ID_IRI_TEMPLATES
+
+    known = {"label", "family", "family_note", "formula", "chemsub", "emmo",
+             "aliases", "reference_properties", *EXTERNAL_ID_FIELDS}
+    for key, entry in battinfo.material_kinds()["kinds"].items():
+        unexpected = set(entry) - known
+        assert not unexpected, f"{key} carries unrecognised fields {unexpected}"
+    assert set(EXTERNAL_ID_IRI_TEMPLATES).issubset(EXTERNAL_ID_FIELDS)
