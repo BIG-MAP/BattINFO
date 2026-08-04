@@ -166,13 +166,13 @@ ns:calendarLifeUnit a rdf:Property ;
 
 ns:capacity_fade a rdf:Property ;
     rdfs:label "Capacity fade"@en ;
-    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6> ;
+    rdfs:seeAlso electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:capacityFade a rdf:Property ;
     rdfs:label "Capacity Fade"@en ;
     owl:equivalentProperty ns:capacity_fade ;
-    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6> ;
+    rdfs:seeAlso electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:capacity_fade_unit a rdf:Property ;
@@ -1116,13 +1116,13 @@ ns:powerCapabilityUnit a rdf:Property ;
 
 ns:power_density a rdf:Property ;
     rdfs:label "Power density"@en ;
-    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a> ;
+    rdfs:seeAlso electrochemistry:electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:powerDensity a rdf:Property ;
     rdfs:label "Power Density"@en ;
     owl:equivalentProperty ns:power_density ;
-    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a> ;
+    rdfs:seeAlso electrochemistry:electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:power_density_unit a rdf:Property ;
@@ -1347,13 +1347,13 @@ ns:specificEnergyUnit a rdf:Property ;
 
 ns:specific_power a rdf:Property ;
     rdfs:label "Specific power"@en ;
-    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7> ;
+    rdfs:seeAlso electrochemistry:electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:specificPower a rdf:Property ;
     rdfs:label "Specific Power"@en ;
     owl:equivalentProperty ns:specific_power ;
-    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7> ;
+    rdfs:seeAlso electrochemistry:electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7 ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:specific_power_unit a rdf:Property ;

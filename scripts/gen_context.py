@@ -41,17 +41,33 @@ OUT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
 LICENSE = "https://www.apache.org/licenses/LICENSE-2.0"
 
 
+def _published() -> dict:
+    """The v1 terms already served at the hosted URL, or ``{}`` before first write."""
+    if not OUT.exists():
+        return {}
+    return json.loads(OUT.read_text(encoding="utf-8")).get("@context", {})
+
+
 def build() -> dict:
-    """The complete records context: base conveniences + class table + method terms."""
-    context: dict = dict(_CONTEXT_INLINE)
-    context.update(label_to_compact())
-    context.update(TEST_METHOD_CONTEXT_TERMS)
-    # Test-protocol vocabulary. setdefault, not update: where a term is already
-    # present from the class table its full-IRI form wins, so adding protocol
-    # emission to record_to_jsonld introduces new terms without rewriting old ones
-    # (a published version's meaning must never change).
-    for term, value in TEST_PROTOCOL_CONTEXT_TERMS.items():
-        context.setdefault(term, value)
+    """The complete records context: base conveniences + class table + method terms.
+
+    v1 is append-only. Every source below is merged with ``setdefault`` on top of
+    the terms already published, so regenerating can add a term but can never
+    rewrite one: a document minted against v1 keeps expanding to the same graph
+    forever. Changing what an existing term means requires a v2 file, not an edit
+    here — and the drift check will not paper over it, because the inline context
+    and v1 would then disagree and ``test_url_mode_is_compact_and_equivalent``
+    fails until the bump is made deliberately.
+    """
+    context: dict = _published()
+    for source in (
+        _CONTEXT_INLINE,
+        label_to_compact(),
+        TEST_METHOD_CONTEXT_TERMS,
+        TEST_PROTOCOL_CONTEXT_TERMS,
+    ):
+        for term, value in source.items():
+            context.setdefault(term, value)
     return {"license": LICENSE, "@context": context}
 
 

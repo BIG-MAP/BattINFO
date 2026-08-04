@@ -63,9 +63,13 @@ jobs:
         run: uv run --no-sync python .tools/quality/lint_identifier_policy.py
       - name: Packaged examples are in sync with source
         run: uv run --no-sync python scripts/sync_examples.py --check
-      - name: EMMO context freshness (informational)
-        continue-on-error: true
+      # Hard gate. The LinkML slot_uri declarations are the single source of
+      # truth for records.context.json; when this drifts, hand edits to the
+      # shipped context are being silently overwritten on the next regeneration.
+      - name: Records context is in sync with the schema
         run: uv run --no-sync python scripts/assemble_context.py --check
+      - name: Hosted v1 context is in sync
+        run: uv run --no-sync python scripts/gen_context.py --check
       - name: Upload coverage report
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         uses: actions/upload-artifact@v7

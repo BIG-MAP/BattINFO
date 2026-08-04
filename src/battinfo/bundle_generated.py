@@ -350,13 +350,13 @@ class Provenance(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/battinfo/schema/types'})
 
-    source_type: Optional[ProvenanceSourceType] = Field(default=None, description="""Origin category of the record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'battinfo:sourceType'} })
-    source_url: Optional[str] = Field(default=None, description="""URL of the original source document.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'battinfo:sourceURL'} })
-    source_file: Optional[str] = Field(default=None, description="""Filename of the source document.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'battinfo:sourceFile'} })
+    source_type: Optional[ProvenanceSourceType] = Field(default=None, description="""Origin category of the record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'dcterms:type'} })
+    source_url: Optional[str] = Field(default=None, description="""URL of the original source document.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'prov:hadPrimarySource'} })
+    source_file: Optional[str] = Field(default=None, description="""Filename of the source document.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance']} })
     citation: Optional[str] = Field(default=None, description="""Citable reference URL.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'dcterms:bibliographicCitation'} })
-    citation_doi: Optional[str] = Field(default=None, description="""DOI of the citable reference.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'battinfo:citationDOI'} })
-    retrieved_at: Optional[int] = Field(default=None, description="""Epoch timestamp when the record was retrieved/ingested.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'battinfo:retrievedAt'} })
-    workflow_version: Optional[str] = Field(default=None, description="""Version of the ingestion workflow that created this record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'battinfo:workflowVersion'} })
+    citation_doi: Optional[str] = Field(default=None, description="""DOI of the citable reference.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'bibo:doi'} })
+    retrieved_at: Optional[int] = Field(default=None, description="""Epoch timestamp when the record was retrieved/ingested.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'prov:generatedAtTime'} })
+    workflow_version: Optional[str] = Field(default=None, description="""Version of the ingestion workflow that created this record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'pav:version'} })
     curated_by: Optional[str] = Field(default=None, description="""ORCID or name of the person who curated this record.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Provenance'], 'slot_uri': 'dcterms:contributor'} })
 
 
@@ -509,10 +509,10 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b'} })
     specific_power: Optional[SpecValue] = Field(default=None, description="""Gravimetric power density.""", json_schema_extra = { "linkml_meta": {'aliases': ['Specific power [W/kg]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:specificPower'} })
+         'slot_uri': 'electrochemistry:electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7'} })
     power_density: Optional[SpecValue] = Field(default=None, description="""Volumetric power density.""", json_schema_extra = { "linkml_meta": {'aliases': ['Power density [W/L]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:powerDensity'} })
+         'slot_uri': 'electrochemistry:electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a'} })
     power_energy_ratio: Optional[SpecValue] = Field(default=None, description="""Ratio of rated power to rated energy.""", json_schema_extra = { "linkml_meta": {'aliases': ['Power-to-energy ratio [W/Wh]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'battinfo:powerEnergyRatio'} })
@@ -593,7 +593,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df'} })
     capacity_fade: Optional[SpecValue] = Field(default=None, description="""Capacity fade rate per cycle or per year.""", json_schema_extra = { "linkml_meta": {'aliases': ['Capacity fade [1/cycle]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:capacityFade'} })
+         'slot_uri': 'electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6'} })
     capacity_threshold_exhaustion: Optional[SpecValue] = Field(default=None, description="""Capacity threshold defining battery exhaustion per EU Battery Regulation.""", json_schema_extra = { "linkml_meta": {'aliases': ['Capacity threshold for exhaustion [1]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'battinfo:capacityThresholdExhaustion'} })
