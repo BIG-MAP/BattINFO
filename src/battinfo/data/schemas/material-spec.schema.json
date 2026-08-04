@@ -35,6 +35,15 @@
           "minLength": 1,
           "description": "Human-readable material name / grade (e.g. 'LFP', 'Graphite', 'NMC811', 'PVDF')."
         },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required Level-1 MaterialKind key from the curated material_kinds vocabulary (e.g. 'graphite', 'lfp', 'nmc811'). The aggregation axis of the Battery Genome; resolves to the kind's chemical-substance class IRI. An unknown kind is rejected at save time. See battinfo.materials.material_kind_keys()."
+        },
+        "grade": {
+          "type": "string",
+          "description": "Manufacturer grade / product version (e.g. 'grade X', 'v2'). Part of spec identity together with manufacturer and product."
+        },
         "material_class": {
           "type": "string",
           "enum": [
@@ -172,6 +181,22 @@
       "items": {
         "type": "string"
       }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
+    },
+    "contributor": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "minItems": 1,
+      "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Stamped by ws.save."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "License under which this record is released, as an SPDX identifier (e.g. \"cc-by-4.0\") or a URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
     }
   },
   "$defs": {
@@ -227,6 +252,99 @@
           "$ref": "#/$defs/Organization"
         }
       ]
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Person"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "given_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri"
+        },
+        "affiliation": {
+          "$ref": "#/$defs/Organization"
+        }
+      }
     },
     "MaterialRef": {
       "description": "Reference to another material by canonical material-spec IRI and/or a free-text name.",

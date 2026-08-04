@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/shzh-t2jt-wwqv-k54m",
     "short_id": "shzht2",
     "name": "LCO",
+    "kind": "lco",
     "material_class": "active_material",
     "electrode_polarity": "positive",
     "formula": "LiCoO2",

@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
     "short_id": "npa40d",
     "name": "NMC811",
+    "kind": "nmc811",
     "material_class": "active_material",
     "electrode_polarity": "positive",
     "formula": "LiNi0.8Mn0.1Co0.1O2",

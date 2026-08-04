@@ -337,6 +337,59 @@ def _validate_controlled_values(
             )
 
 
+def _validate_material_kind(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    issue_severity: str,
+) -> None:
+    """A material-spec's ``kind`` must resolve to the curated vocabulary.
+
+    The kind is the Battery Genome's aggregation axis, so an authored spec is
+    required to carry one. It is enforced here rather than as a JSON-schema
+    required field so tolerant flows (lifting embedded materials, interop import)
+    still structurally validate while the strict authoring gate rejects a spec
+    with no kind:
+
+    - kind present but unknown -> hard error listing the valid keys (the
+      save-time rejection); create_material_spec also raises on an explicit
+      unknown kind, so this is the backstop for hand-built records;
+    - kind missing -> the policy's hard severity (error under strict / ws.save,
+      warning under default) so blessed authoring requires it.
+    """
+    spec = doc.get("material_spec")
+    if not isinstance(spec, Mapping):
+        return
+    from battinfo.materials import material_kind_keys, resolve_material_kind
+
+    kind = spec.get("kind")
+    if not isinstance(kind, str) or not kind.strip():
+        _append_issue(
+            issues,
+            code="semantic.material_kind_missing",
+            severity=issue_severity,
+            path="material_spec.kind",
+            message=(
+                "material spec has no kind. Set a Level-1 kind from the curated "
+                f"vocabulary. Valid kinds: {', '.join(material_kind_keys())}."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    if resolve_material_kind(kind) is None:
+        _append_issue(
+            issues,
+            code="semantic.material_kind_unknown",
+            severity="error",
+            path="material_spec.kind",
+            message=(
+                f"unknown material kind '{kind}'. Valid kinds: "
+                f"{', '.join(material_kind_keys())}."
+            ),
+            resource_type=resource_type,
+        )
+
+
 def _validate_size_code(
     doc: dict[str, Any],
     issues: list[ValidationIssue],
@@ -801,6 +854,7 @@ def validate_semantic_report(
 
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
     _validate_controlled_values(doc, issues, resource_type)
+    _validate_material_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_size_code(doc, issues, resource_type, hard_issue_severity)
     # Non-finite numerics are invalid anywhere in the record (RFC 8259); walk the
     # whole doc so nested quantities (electrode coating, etc.) are caught, not just

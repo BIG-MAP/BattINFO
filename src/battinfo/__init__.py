@@ -27,6 +27,7 @@ from battinfo.api import (
 from battinfo.bundle import BattinfoBundle, Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec
 from battinfo.bundle_generated import SpecValue
 from battinfo.jsonld import record_to_jsonld
+from battinfo.materials import material_kinds
 from battinfo.publication import build_publication_package, load_publication_package
 from battinfo.publication import publish as publish_publication_package
 from battinfo.validate import validate_record, validate_record_report
@@ -49,6 +50,7 @@ __all__ = [
     "build_publication_package",
     "bulk_save_session",
     "load_publication_package",
+    "material_kinds",
     "publish",
     "publish_publication_package",
     "q",

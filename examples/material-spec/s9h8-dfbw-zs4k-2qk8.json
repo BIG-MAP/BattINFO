@@ -4,6 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8",
     "short_id": "s9h8df",
     "name": "KOH",
+    "kind": "koh",
     "material_class": "electrolyte_salt",
     "formula": "KOH",
     "chemistry_family": "alkali-hydroxide",

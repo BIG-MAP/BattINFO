@@ -999,7 +999,25 @@ _SAVE_DISPLAY: list[tuple[str, str]] = [
     ("test_specs", "test spec"),
     ("tests", "test"),
     ("datasets", "dataset"),
+    ("material_specs", "material spec"),
+    ("materials", "material"),
 ]
+
+
+def _dedupe_records_by_id(records: list[dict], candidate: dict, body_key: str) -> list[dict]:
+    """Append *candidate* unless a record with the same canonical id is present.
+
+    Re-adding an identical (content-derived) material in one session is a no-op —
+    the deterministic id makes the duplicate detectable — while a genuinely
+    edited record with the same id replaces the earlier one so ws.save writes the
+    latest version.
+    """
+    cand_id = candidate.get(body_key, {}).get("id")
+    if cand_id is None:
+        return [*records, candidate]
+    out = [r for r in records if r.get(body_key, {}).get("id") != cand_id]
+    out.append(candidate)
+    return out
 
 # Canonical BDF column names — the targets for convert_csv() hints.  This is a
 # discovery aid for users; the authoritative mapping lives in interop/battdat.py.
@@ -1196,6 +1214,14 @@ class AuthoringWorkspace:
         # paths written by the most recent ws.save() — submit() uses this to
         # avoid re-submitting records from previous sessions in the same directory
         self._session_paths: set[Path] = set()
+        # First-class material queues (Level 2 spec / Level 3 instance). Materials
+        # are not engine model objects, so the AuthoringWorkspace holds their
+        # canonical records and writes them in ws.save() through the SAME stamp
+        # path as every other record. Keyed spec index lets ws.add("material")
+        # resolve spec= by name/short_id/IRI without ws._ws.
+        self._material_specs: builtins.list[dict] = []
+        self._materials: builtins.list[dict] = []
+        self._material_specs_by_ref: dict[str, dict] = {}
         # workspace-level funding project (grant); lazily loaded from
         # .battinfo/workspace.json on first access via _get_project()
         self._project_ref: ProjectRef | None = None
@@ -2507,6 +2533,10 @@ class AuthoringWorkspace:
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
             return self._add_equipment(**kwargs)
+        if rt_key == "material-spec":
+            return self._add_material_spec(**kwargs)
+        if rt_key == "material":
+            return self._add_material(**kwargs)
         try:
             rt = _canon_type(record_type)
         except ValueError:
@@ -2516,10 +2546,13 @@ class AuthoringWorkspace:
         if rt == "test":
             return self._add_tests(**kwargs)
         raise ValueError(
-            f"add() supports type 'cell', 'test', and 'equipment' (got {record_type!r}). "
+            f"add() supports type 'cell', 'test', 'equipment', 'material_spec', and "
+            f"'material' (got {record_type!r}). "
             "Author a cell-spec/test-spec with ws.load(<draft file>); attach datasets "
             "via ws.add('test', data=...); register lab equipment via "
-            "ws.add('equipment', spec=..., serial_number=...)."
+            "ws.add('equipment', spec=..., serial_number=...); author materials via "
+            "ws.add('material_spec', name=..., kind=...) and "
+            "ws.add('material', spec=..., lot=...)."
         )
 
     def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
@@ -2542,18 +2575,27 @@ class AuthoringWorkspace:
         # file afterwards — lets an unchanged, already-stamped re-save report
         # [unchanged] and skip the write entirely.
         stamp_fn, stamp_counts = self._record_stamp()
+        # Materials are written first (same stamp path) so the engine's index
+        # rebuild picks them up and a material instance's spec reference resolves
+        # on disk.
+        material_results = self._save_materials(
+            mode=mode, validation_policy=validation_policy, stamp=stamp_fn
+        )
         result = self._ws.save(
             mode=mode,
             resolve_references=False,
             validation_policy=validation_policy,
             stamp=stamp_fn,
         )
+        result["material_specs"] = material_results["material_specs"]
+        result["materials"] = material_results["materials"]
         # How many records the funding block actually reached this save: every
         # candidate is stamped, but only newly-created or genuinely-changed records
         # are written — an unchanged re-save reaches zero, so it prints nothing.
         stamped = 0
         if stamp_counts["funding"]:
-            for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
+            for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs",
+                        "material_specs", "materials"):
                 for item in result.get(key, []):
                     if isinstance(item, dict) and (
                         item.get("status") == "created" or item.get("content_changed")
@@ -2561,7 +2603,8 @@ class AuthoringWorkspace:
                         stamped += 1
         # Track the exact files written so submit() only sends this session's work.
         self._session_paths = set()
-        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs"):
+        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs",
+                    "material_specs", "materials"):
             for item in result.get(key, []):
                 p = item.get("path") if isinstance(item, dict) else str(item)
                 if p:
@@ -2585,6 +2628,14 @@ class AuthoringWorkspace:
         for ds_obj in self._ws.datasets:
             if ds_obj.id:
                 name_by_id[ds_obj.id] = ds_obj.name or "dataset"
+        for ms in self._material_specs:
+            body = ms.get("material_spec", {})
+            if body.get("id"):
+                name_by_id[body["id"]] = body.get("name") or "material spec"
+        for m in self._materials:
+            body = m.get("material", {})
+            if body.get("id"):
+                name_by_id[body["id"]] = body.get("lot_id") or body.get("name") or "material"
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
         print(f"Saved {total} record(s) under {self._ws.source_root}:")
@@ -2612,6 +2663,38 @@ class AuthoringWorkspace:
             # as mockery (red-team W1.3).
             print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
+
+    def _save_materials(
+        self, *, mode: str, validation_policy: str, stamp: Any = None
+    ) -> dict:
+        """Write queued material specs then instances through the shared stamp path.
+
+        Materials are not engine model objects, so they are persisted here rather
+        than by ``self._ws.save``. They flow through the SAME ``stamp`` callback as
+        every other record (PR #324 pre-compare stamp), so funding / contributor /
+        license reach material records too (fixes readiness H2), and an unchanged
+        already-stamped re-save is reported ``unchanged`` — no compare-before-stamp
+        bug. Specs are written before instances so an instance's spec reference
+        resolves on disk under strict validation.
+        """
+        from battinfo.api import save_material, save_material_spec  # noqa: PLC0415
+
+        source_root = self._ws.source_root
+        spec_results = [
+            save_material_spec(
+                rec, source_root=source_root, mode=mode, resolve_references=False,
+                validation_policy=validation_policy, stamp=stamp,
+            )
+            for rec in self._material_specs
+        ]
+        material_results = [
+            save_material(
+                rec, source_root=source_root, mode=mode, resolve_references=False,
+                validation_policy=validation_policy, stamp=stamp,
+            )
+            for rec in self._materials
+        ]
+        return {"material_specs": spec_results, "materials": material_results}
 
     def _rel_to_root(self, path: str) -> str:
         """Render *path* relative to the workspace root for compact display."""
@@ -5682,6 +5765,23 @@ class AuthoringWorkspace:
             catalog_node["schema:keywords"] = sorted(_kw)
             catalog_node["dcat:keyword"]    = sorted(_kw)   # DCAT mirror of schema:keywords
 
+        # Standalone material records (Level 2 spec / Level 3 instance) become
+        # first-class deposit nodes: the domain-battery emitter types each by its
+        # kind (kind -> EMMO class + chemical-substance sameAs, labeled fallback
+        # where a class is missing), and the consolidated context resolves those
+        # terms. Cells reference these via material_spec_id on their electrode
+        # components; publishing the standalone nodes makes the links resolve.
+        material_nodes: builtins.list[dict] = []
+        for _mkey in ("material-spec", "material"):
+            for _mrec in record_sets.get(_mkey, []):
+                if not isinstance(_mrec, dict):
+                    continue
+                from battinfo.transform.json_to_jsonld import to_jsonld  # noqa: PLC0415
+
+                _mg = (to_jsonld(_mrec, target="domain-battery").get("@graph") or [])
+                if _mg:
+                    material_nodes.append(dict(_mg[0]))
+
         graph = (
             [catalog_node]
             + ([provider_node] if provider_node else [])
@@ -5691,6 +5791,7 @@ class AuthoringWorkspace:
             + test_spec_nodes
             + instance_nodes
             + test_nodes
+            + material_nodes
             # Equipment provenance: the units/channels the tests actually ran on,
             # so hasTestEquipment / prov:used resolve to described nodes.
             + [equipment_nodes[k] for k in sorted(equipment_nodes)]
@@ -6801,6 +6902,85 @@ class AuthoringWorkspace:
             print(f"  channels:       {n_channels} registered  ({unit_label}/CH1 .. {unit_label}/CH{n_channels})")
             print(f"\n  Next: ws.add('test', ..., channel='{unit_label}/CH1') to attach a test.")
         return [equipment_record, *channel_records]
+
+    def _add_material_spec(self, name: str | None = None, **kwargs) -> builtins.list:
+        """Author a first-class material spec (Level 2), queued for ws.save().
+
+        ``ws.add("material_spec", name="Targray NMC811", kind="nmc811",
+        manufacturer="Targray", grade="grade X", property={...})``
+
+        The IRI is content-derived from (manufacturer, product, grade): re-adding
+        the same product is a no-op, never a duplicate. ``kind`` is required and
+        resolved against the curated vocabulary (aliases welcome); an unknown kind
+        raises listing the valid keys. Attribution (contributor/license/funding)
+        is stamped onto the record by ws.save, like every other record type.
+        """
+        from battinfo.api import create_material_spec  # noqa: PLC0415
+
+        if not name and not kwargs.get("id") and not kwargs.get("uid"):
+            raise ValueError(
+                "ws.add('material_spec', ...) needs name=... (and kind=...). "
+                "Example: ws.add('material_spec', name='LFP', kind='lfp')."
+            )
+        record = create_material_spec(validate=False, name=name, **kwargs)
+        self._material_specs = _dedupe_records_by_id(self._material_specs, record, "material_spec")
+        body = record["material_spec"]
+        self._register_material_spec_keys(body)
+        kind = body.get("kind", "")
+        print(f"  material-spec:  {body.get('name', name)}  [{kind}]  {body['id']}")
+        return [record]
+
+    def _register_material_spec_keys(self, spec_body: dict) -> None:
+        """Index a material spec under every reference form ``spec=`` accepts."""
+        spec_id = spec_body.get("id")
+        if not spec_id:
+            return
+        self._material_specs_by_ref[spec_id] = spec_body
+        for key in (spec_body.get("name"), spec_body.get("short_id"), spec_body.get("product_id")):
+            if isinstance(key, str) and key.strip():
+                self._material_specs_by_ref[key.strip().lower()] = spec_body
+
+    def _resolve_material_spec_arg(self, spec: Any) -> str:
+        """Resolve ``spec=`` for ws.add('material', ...) to a material_spec IRI."""
+        if isinstance(spec, dict) and isinstance(spec.get("material_spec"), dict):
+            body = spec["material_spec"]
+            self._register_material_spec_keys(body)
+            return body["id"]
+        if isinstance(spec, str) and spec.strip():
+            text = spec.strip()
+            if text.startswith("https://w3id.org/battinfo/"):
+                return text
+            found = self._material_specs_by_ref.get(text.lower())
+            if found is not None:
+                return found["id"]
+            raise ValueError(
+                f"Unknown material spec {spec!r}. Pass a material_spec IRI, the record "
+                "from ws.add('material_spec', ...), or a name added in this session."
+            )
+        raise ValueError(
+            "ws.add('material', ...) needs spec=<material-spec record, IRI, or name>."
+        )
+
+    def _add_material(self, spec: Any = None, *, lot: str | None = None, **kwargs) -> builtins.list:
+        """Author a first-class material instance (Level 3), queued for ws.save().
+
+        ``ws.add("material", spec=nmc811_spec, lot="LOT-2026-04",
+        processing={"route": "nmp", "solvent": "NMP"}, storage="dry room")``
+
+        Links a material spec (required), carries the lot/batch, dates, amount,
+        storage, an instance-level ``processing`` block (aqueous vs NMP lives
+        here, never on the spec), and an OPEN property block for as-received
+        measurements. The IRI is content-derived from (spec_id, lot).
+        """
+        from battinfo.api import create_material  # noqa: PLC0415
+
+        spec_id = self._resolve_material_spec_arg(spec)
+        record = create_material(validate=False, material_spec_id=spec_id, lot=lot, **kwargs)
+        self._materials = _dedupe_records_by_id(self._materials, record, "material")
+        body = record["material"]
+        label = body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
+        print(f"  material:       {label}  {body['id']}")
+        return [record]
 
     def _register_channel_keys(self, channel_body: dict, equipment_body: dict) -> None:
         """Index a channel under every reference form ``channel=`` accepts."""

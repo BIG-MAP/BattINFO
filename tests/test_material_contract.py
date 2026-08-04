@@ -165,7 +165,7 @@ def test_material_spec_composition_reference_resolves(tmp_path: Path) -> None:
     base = api.create_material_spec(uid="base23456789abcd", name="NMC811", material_class="active_material")
     api.save_material_spec(base, source_root=tmp_path)
     coated = api.create_material_spec(
-        uid="coat23456789abcd", name="Al2O3-coated NMC811", material_class="active_material",
+        uid="coat23456789abcd", name="Al2O3-coated NMC811", kind="nmc811", material_class="active_material",
         composition={"base_material_id": base["material_spec"]["id"]},
     )
     api.save_material_spec(coated, source_root=tmp_path)

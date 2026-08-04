@@ -50,8 +50,23 @@
         "received_date": {
           "$ref": "#/$defs/FlexDate"
         },
+        "opened_date": {
+          "$ref": "#/$defs/FlexDate",
+          "description": "Date this lot was first opened / put into use."
+        },
         "expires_at": {
           "$ref": "#/$defs/FlexDate"
+        },
+        "amount": {
+          "$ref": "modules/common/quantity.schema.json",
+          "description": "Quantity of this lot on hand or consumed (e.g. mass in g, volume in mL)."
+        },
+        "storage": {
+          "type": "string",
+          "description": "Storage conditions for this lot (e.g. 'argon glovebox', 'dry room, -40 degC dew point')."
+        },
+        "processing": {
+          "$ref": "#/$defs/Processing"
         },
         "datasets": {
           "type": "array",
@@ -140,9 +155,50 @@
       "items": {
         "type": "string"
       }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
+    },
+    "contributor": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "minItems": 1,
+      "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Stamped by ws.save."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "License under which this record is released, as an SPDX identifier (e.g. \"cc-by-4.0\") or a URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
     }
   },
   "$defs": {
+    "Processing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this lot was processed into an electrode/coating. Processing is a property of the instance/build, NOT of the spec identity (aqueous vs NMP is not a distinct product).",
+      "properties": {
+        "route": {
+          "type": "string",
+          "enum": [
+            "aqueous",
+            "nmp",
+            "dry",
+            "other"
+          ],
+          "description": "Processing route: water-based (aqueous), NMP solvent-based, solvent-free (dry), or other."
+        },
+        "solvent": {
+          "type": "string",
+          "description": "Processing solvent (e.g. 'water', 'NMP')."
+        },
+        "detail": {
+          "type": "string",
+          "description": "Free-text processing detail (mixing, drying, calendering, ...)."
+        }
+      }
+    },
     "UnixTime": {
       "type": "integer",
       "minimum": 0,
@@ -234,6 +290,99 @@
           "$ref": "#/$defs/Organization"
         }
       ]
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Person"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "given_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri"
+        },
+        "affiliation": {
+          "$ref": "#/$defs/Organization"
+        }
+      }
     }
   }
 }
