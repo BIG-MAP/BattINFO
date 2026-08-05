@@ -471,14 +471,18 @@ slots:
       - "Volumetric energy density [Wh/L]"
 
   specific_power:
-    slot_uri: battinfo:specificPower
+    # electrochemistry:SpecificPower (domain-electrochemistry 0.36.0), an
+    # ElectrochemicalPerformanceQuantity: power divided by mass.
+    slot_uri: electrochemistry:electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7
     range: SpecValue
     description: Gravimetric power density.
     aliases:
       - "Specific power [W/kg]"
 
   power_density:
-    slot_uri: battinfo:powerDensity
+    # electrochemistry:PowerDensity (domain-electrochemistry 0.36.0), an
+    # ElectrochemicalPerformanceQuantity: power divided by volume.
+    slot_uri: electrochemistry:electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a
     range: SpecValue
     description: Volumetric power density.
     aliases:
@@ -673,7 +677,14 @@ slots:
       - "Calendar life [years]"
 
   capacity_fade:
-    slot_uri: battinfo:capacityFade
+    # electrochemistry:CapacityFade (domain-electrochemistry 0.36.0). Known
+    # imprecision: upstream classifies CapacityFade as an
+    # ElectrochemicalDegradationPhenomenon (a NaturalProcess), not a quantity,
+    # so a unit-bearing value is a category stretch. It is still the right
+    # identifier to publish — the concept exists upstream, and minting
+    # battinfo:capacityFade would fork it into two IRIs for one concept. Tracked
+    # in docs/internal/ontology-additions-needed.md as a quantity-class request.
+    slot_uri: electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6
     range: SpecValue
     description: Capacity fade rate per cycle or per year.
     aliases:

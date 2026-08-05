@@ -80,6 +80,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **The LinkML schema is the source of truth for the records context again.**
+  `scripts/assemble_context.py --check` had been failing on ten keys, unnoticed,
+  because its CI step ran `continue-on-error`. Every disputed key resolved in
+  favour of the shipped context, so no published IRI changed; what changed is the
+  `slot_uri:` declarations that produce them. Administrative provenance now
+  declares the standard terms it has emitted since the vocabulary-policy pass
+  (`source_type` -> `dcterms:type`, `source_url` -> `prov:hadPrimarySource`,
+  `citation_doi` -> `bibo:doi`, `retrieved_at` -> `prov:generatedAtTime`,
+  `workflow_version` -> `pav:version`); `source_file` drops its `slot_uri`
+  entirely, because no standard vocabulary names the concept and the emitter never
+  published it. `capacity_fade`, `power_density` and `specific_power` point at the
+  `domain-electrochemistry` 0.36.0 classes rather than `battinfo:` mints. The
+  generator learned three things the file already knew: the `bibo`/`pav`/`skos`
+  prefixes (`skos` backs directly-emitted `skos:prefLabel` keys, so pruning it
+  would silently delete every human label), `dcterms:created`/`modified` as
+  `xsd:dateTime` (the emitter converts epochs to ISO-8601 before they become RDF),
+  and no `"C"` unit symbol (in records `C` is only ever a C-rate, and a Coulomb
+  term here shadows the correct mapping).
+
+- **`records.context.v1.json` is append-only by construction.** `gen_context.py`
+  merges every source with `setdefault` on top of what is already published, so
+  regenerating can add a term but can never rewrite one. Bumping to a v2 file is
+  the only way to change what a published term means.
+
+- **The records-context freshness check is a hard CI gate**, alongside a new one
+  for the hosted v1 context.
+
 - **Emitter convergence step 4 — `record_to_jsonld` adopts the canonical
   cell-spec shape**: `cell_spec_to_jsonld` now delegates to the shared
   canonical builder (`battinfo.transform.cell_spec_node.build_cell_spec_node`),
@@ -592,6 +619,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Datasets always emit the schema-required `access_url` (falling back to the provenance URL, then
   a stable id-derived value), so a dataset built directly from the model can no longer serialize
   into a schema-invalid record.
+
+### Fixed
+
+- **Schema/model parity is now swept, not discovered.** `Test.conditions` (#329)
+  and `reference_electrode` (#334) were the same bug found twice: a property the
+  JSON schema defines that the model cannot express, or accepts and drops on save.
+  `tests/test_schema_model_parity.py` walks all 362 properties of all 21 record
+  types and fails on either shape, with an allowlist that carries a reason per
+  entry and a companion test that fails when a listed gap is quietly closed. The
+  sweep found no new silent-loss bugs, and 22 further schema properties with no
+  authoring path: the EU Battery Regulation passport fields
+  (`hazardous_substances`, `battery_status`, `dpp_status`, `service_start_date`,
+  ...), a few schema.org descriptive slots, and `TestSpec.conditions`, which is
+  typed `dict[str, Quantity]` and so cannot hold the textual conditions the schema
+  permits (readiness finding M4, still open).
 
 ## [0.7.0] — 2026-06-19
 

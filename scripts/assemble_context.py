@@ -44,6 +44,14 @@ PREFIXES: dict[str, str] = {
     "dqv":              "http://www.w3.org/ns/dqv#",
     "oa":               "http://www.w3.org/ns/oa#",
     "earl":             "http://www.w3.org/ns/earl#",
+    # bibo/pav each back exactly one term (citation_doi, workflow_version); skos
+    # backs none, but the emitters write skos:prefLabel directly as an expanded
+    # key on nodes carrying this context, and JSON-LD silently discards a key
+    # whose prefix it cannot resolve. Prefixes serve emitted CURIEs as well as
+    # context terms, so never prune this table by scanning term values.
+    "bibo":             "http://purl.org/ontology/bibo/",
+    "pav":              "http://purl.org/pav/",
+    "skos":             "http://www.w3.org/2004/02/skos/core#",
     # No QUDT prefixes: quantities use ONE EMMO serialization
     # (hasNumericalPart/hasNumericalValue/hasMeasurementUnit) in both the published
     # battinfo.json and the SHACL validation view. The few compound-unit IRIs sourced
@@ -168,19 +176,34 @@ UNIT_SYMBOLS: dict[str, str] = {
     "h":      "emmo:Hour",
     "min":    "emmo:Minute",
     "s":      "emmo:Second",
-    "C":      "emmo:CoulombUnit",
+    # No "C" entry. In real records the bare symbol "C" is only ever a C-rate,
+    # and resolve_unit_iri() consults this context before the test-condition
+    # table, so a "C" -> Coulomb term here silently shadows the correct
+    # electrochemistry:AmperePerAmpereHour mapping (commit 41b7db3).
     "1":      "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
     "%":      "emmo:Percent",
 }
 
 # ── Provenance/DCAT typed terms ────────────────────────────────────────────────
+# created_at/modified_at are xsd:dateTime, NOT xsd:integer: the record stores a
+# Unix epoch int, but the emitter converts it to ISO-8601 UTC before it becomes
+# RDF (_epoch_to_iso in jsonld.py), and the context describes the graph, not the
+# record. Declaring xsd:integer here republishes raw epochs to DCMI/DCAT
+# harvesters as malformed dates (commit 4774c4d).
 TYPED_TERMS: dict[str, object] = {
     "license":        {"@id": "dcterms:license",   "@type": "@id"},
-    "created_at":     {"@id": "dcterms:created",   "@type": "xsd:integer"},
-    "modified_at":    {"@id": "dcterms:modified",  "@type": "xsd:integer"},
+    "created_at":     {"@id": "dcterms:created",   "@type": "xsd:dateTime"},
+    "modified_at":    {"@id": "dcterms:modified",  "@type": "xsd:dateTime"},
     # Note: cell production/expiry are emitted directly as typed schema:productionDate
     # / schema:expires values (xsd:gYearMonth), so no extra aliases are declared here.
 }
+
+# ── Slots whose value is an IRI reference, not a literal ──────────────────────
+# The IRI these expand to lives in the schema (slot_uri); only the JSON-LD typing
+# is declared here, because @type is a serialization concern LinkML has no slot
+# for. The emitter writes {"@id": ...} for these, so the term must say @type: @id
+# or a processor reads the value as a plain string.
+IRI_VALUED_SLOTS: frozenset[str] = frozenset({"source_url"})
 
 
 def _compact_iri(raw_uri: str, prefixes: dict[str, str]) -> str:
@@ -279,7 +302,9 @@ def build_context(schema_dir: Path) -> dict:
     for slot_name, iri in slot_iris.items():
         if any(slot_name.startswith(p) for p in skip_prefixes):
             continue
-        keep[slot_name] = iri
+        keep[slot_name] = (
+            {"@id": iri, "@type": "@id"} if slot_name in IRI_VALUED_SLOTS else iri
+        )
 
     ctx: dict = {"@version": 1.1}
     ctx.update(PREFIXES)

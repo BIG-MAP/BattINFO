@@ -42,6 +42,20 @@ first-class:
 | **`WeldWidth`** | `weld_width` | tab/terminal weld width |
 | **`TapeWidth`** | `tape_width` | tab insulating-tape width |
 
+A different shape of gap, same section: **a `CapacityFade` quantity class.**
+`capacity_fade` is a `%`- or `1/cycle`-valued datasheet slot, and the only
+upstream term for the concept — `electrochemistry:CapacityFade`
+(`electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6`) — is an
+`ElectrochemicalDegradationPhenomenon`, i.e. it sits on the EMMO *Process*
+branch, not under `CategorizedPhysicalQuantity`. The slot points at it anyway
+(minting `battinfo:capacityFade` would fork one concept across two IRIs), and
+`src/battinfo/data/shapes/cell-spec.shapes.ttl` gives that phenomenon a numeric
+part and a unit. What is wanted upstream is a quantity class under
+`ElectrochemicalPerformanceQuantity` — the fade *rate*, related to the phenomenon
+rather than identical to it. `ChargeRetention`/`CapacityRetention`
+(`electrochemistry_49efb72a_…`) is not a substitute: it is defined for
+open-circuit stand, not cycling.
+
 To wire after publishing: add a curated entry to
 `assets/mappings/domain-battery/property_map.curated.json` (and the `src/battinfo/data`
 mirror) with the new `class_iri` — the descriptor then emits the real `@type` instead of

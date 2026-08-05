@@ -40,19 +40,24 @@ namespace (ideally promoted into the BattINFO ontology), or migration to an EMMO
 if one exists:
 
 ```
-battinfo:capacityFade                 battinfo:powerCapability
-battinfo:capacityThresholdExhaustion  battinfo:powerDensity
+battinfo:capacityThresholdExhaustion  battinfo:powerCapability
 battinfo:chargingTime                 battinfo:powerEnergyRatio
-battinfo:citationDOI                  battinfo:retrievedAt
 battinfo:cycleLifeCRate               battinfo:roundTripEnergyEfficiency
 battinfo:maximumPower                 battinfo:roundTripEnergyEfficiency50Pct
-battinfo:specificPower                battinfo:sourceFile
-battinfo:sourceType / sourceURL       battinfo:workflowVersion
 ```
 
 `battinfo:operatingTemperatureMin` / `Max` left this list at
 domain-electrochemistry 0.36.0, which published `MinimumOperatingTemperature` /
 `MaximumOperatingTemperature`.
+
+`capacityFade` / `powerDensity` / `specificPower` left it too: all three exist in
+domain-electrochemistry 0.36.0, and the schema now points the slots at those
+classes. The administrative mints `citationDOI`, `retrievedAt`, `sourceType`,
+`sourceURL` and `workflowVersion` were retired in favour of `bibo:doi`,
+`prov:generatedAtTime`, `dcterms:type`, `prov:hadPrimarySource` and
+`pav:version`; `sourceFile` has no standard term and is simply not published as
+RDF. This list is the eight-term closed inventory in
+`assets/vocab/battinfo-records.ttl`.
 
 ## Unit IRI verification (Tier 2 follow-up)
 

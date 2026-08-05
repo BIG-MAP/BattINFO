@@ -43,7 +43,7 @@ if (process.argv.includes("--check")) {
   const current = existsSync(OUT) ? readFileSync(OUT, "utf-8") : "";
   if (current.replace(/\r\n/g, "\n") !== body.replace(/\r\n/g, "\n")) {
     console.error(
-      "lib/records-context.generated.ts drifts from src/battinfo/data/context/records.context.json.\n" +
+      "lib/records-context.generated.ts drifts from src/battinfo/data/context/records.context.v1.json.\n" +
         "Run `npm run sync:context` in web/ and commit the result.",
     );
     process.exit(1);

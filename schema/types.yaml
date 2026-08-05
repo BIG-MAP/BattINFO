@@ -5,6 +5,10 @@ description: Shared types and enumerations used across BattINFO record schemas.
 prefixes:
   linkml:   https://w3id.org/linkml/
   battinfo: https://w3id.org/battinfo/
+  dcterms:  http://purl.org/dc/terms/
+  prov:     http://www.w3.org/ns/prov#
+  bibo:     http://purl.org/ontology/bibo/
+  pav:      http://purl.org/pav/
 
 default_prefix: battinfo
 default_range: string
@@ -231,17 +235,24 @@ slots:
     aliases:
       - value_text
 
-  # Provenance slots
+  # Provenance slots.
+  # Administrative provenance re-homes to standard vocabularies: the battinfo:
+  # namespace carries no semantics that dcterms/PROV/BIBO/PAV already express
+  # (vocabulary policy, commit 9b47b42). The human-readable snake_case keys stay;
+  # only the identifiers they expand to changed.
   source_type:
-    slot_uri: battinfo:sourceType
+    slot_uri: dcterms:type
     range: ProvenanceSourceType
     description: Origin category of the record.
   source_url:
-    slot_uri: battinfo:sourceURL
+    slot_uri: prov:hadPrimarySource
     range: uri
     description: URL of the original source document.
   source_file:
-    slot_uri: battinfo:sourceFile
+    # No slot_uri on purpose: no standard vocabulary has a term for "filename of
+    # the source document", and minting battinfo:sourceFile would put an
+    # undereferenceable IRI in the published context. The value stays in the
+    # canonical JSON record; the provenance node never emits it as RDF.
     range: string
     description: Filename of the source document.
   citation:
@@ -249,15 +260,15 @@ slots:
     range: uri
     description: Citable reference URL.
   citation_doi:
-    slot_uri: battinfo:citationDOI
+    slot_uri: bibo:doi
     range: string
     description: DOI of the citable reference.
   retrieved_at:
-    slot_uri: battinfo:retrievedAt
+    slot_uri: prov:generatedAtTime
     range: UnixTimestamp
     description: Epoch timestamp when the record was retrieved/ingested.
   workflow_version:
-    slot_uri: battinfo:workflowVersion
+    slot_uri: pav:version
     range: string
     description: Version of the ingestion workflow that created this record.
   curated_by:
