@@ -26,6 +26,7 @@ from battinfo.api._shared import (
     _validate_canonical_record,
     _validate_publication_artifact,
 )
+from battinfo.jsonld import schema_checksum_terms
 from battinfo.transform.cell_spec_node import build_cell_spec_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
@@ -152,13 +153,6 @@ def _schema_distribution_value(value: Any, *, part_of_id: str) -> dict[str, Any]
         and not isinstance(checksum, Mapping)
     ):
         return None
-    if not (
-        isinstance(checksum, Mapping)
-        and isinstance(checksum.get("algorithm"), str)
-        and checksum["algorithm"].lower() == "sha256"
-        and isinstance(checksum.get("value"), str)
-    ):
-        return None
     out: dict[str, Any] = {"@type": "schema:DataDownload"}
     if isinstance(value.get("name"), str):
         out["schema:name"] = value["name"]
@@ -173,7 +167,10 @@ def _schema_distribution_value(value: Any, *, part_of_id: str) -> dict[str, Any]
     if isinstance(value.get("accessLevel"), str):
         out["schema:accessLevel"] = value["accessLevel"]
     out["schema:isPartOf"] = {"@id": part_of_id}
-    out["schema:sha256"] = checksum["value"]
+    # schema:sha256 for a genuine sha256, a named PropertyValue for anything else.
+    # Previously a non-sha256 (or absent) checksum dropped the WHOLE distribution
+    # from the resolved document — URL, format and size with it.
+    out.update(schema_checksum_terms(checksum))
     return out
 
 

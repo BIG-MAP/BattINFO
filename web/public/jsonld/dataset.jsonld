@@ -3,14 +3,61 @@
   "@type": "http://www.w3.org/ns/dcat#Dataset",
   "@id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
   "dcterms:title": "Cell cycling run for BattINFO cell 3m6k9t",
+  "dcterms:description": "Raw cycling and metadata export for one physical cell.",
+  "schema:description": "Raw cycling and metadata export for one physical cell.",
   "dcterms:license": {
     "@id": "https://creativecommons.org/licenses/by/4.0/"
   },
   "dcat:accessURL": {
     "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x"
   },
+  "dcat:keyword": [
+    "battery cycling",
+    "time series",
+    "lithium-ion"
+  ],
+  "schema:keywords": [
+    "battery cycling",
+    "time series",
+    "lithium-ion"
+  ],
   "dcterms:created": "2026-02-22T00:00:00Z",
   "dcterms:modified": "2026-02-22T00:00:00Z",
+  "dcterms:issued": "2026-02-22T00:00:00Z",
+  "schema:datePublished": "2026-02-22T00:00:00Z",
+  "schema:measurementTechnique": [
+    "cycling"
+  ],
+  "schema:measurementMethod": [
+    "galvanostatic cycling"
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "voltage",
+      "schema:unitText": "V"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "current",
+      "schema:unitText": "A"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "capacity",
+      "schema:unitText": "Ah"
+    }
+  ],
+  "schema:citation": [
+    {
+      "@type": "schema:CreativeWork",
+      "@id": "https://doi.org/10.5281/zenodo.1234567",
+      "schema:url": "https://doi.org/10.5281/zenodo.1234567",
+      "schema:additionalType": "dataset",
+      "bibo:doi": "10.5281/zenodo.1234567",
+      "schema:identifier": "example_dataset_2026"
+    }
+  ],
   "dcterms:subject": [
     {
       "@id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
@@ -22,13 +69,16 @@
   "dcat:distribution": [
     {
       "@type": "dcat:Distribution",
+      "schema:name": "Raw cycling HDF5 archive",
       "dcat:downloadURL": {
         "@id": "https://example.org/lab-data/dataset-1f8r-6v2k-9p4m-3t7x/raw.h5"
       },
       "dcat:mediaType": "application/x-hdf5",
       "spdx:checksum": {
         "@type": "spdx:Checksum",
-        "spdx:checksumAlgorithm": "spdx:checksumAlgorithm_sha256",
+        "spdx:checksumAlgorithm": {
+          "@id": "spdx:checksumAlgorithm_sha256"
+        },
         "spdx:checksumValue": "8fbf34bd0f8a0caef6f5ce6cc1f8e6a2d8f0123982fc624d6f7f3f7e27b95a89"
       }
     }
