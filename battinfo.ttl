@@ -23,9 +23,9 @@
 #   assets/vocab/emmo-labels.ttl - skos:prefLabel companion for every EMMO
 #     term the record emitters use (scripts/gen_emmo_labels.py)
 #
-# EMMO dependency versions (pinned 2026-08-04):
-#   domain-battery            0.20.1
-#   domain-electrochemistry   0.36.0
+# EMMO dependency versions (pinned 2026-08-10):
+#   domain-battery            0.20.2
+#   domain-electrochemistry   0.37.2
 #   domain-chemical-substance 0.15.0
 #   EMMO core                 1.0.2
 #
@@ -44,8 +44,8 @@ battinfo: a owl:Ontology ;
     # and domain-chemical-substance transitively; we declare them
     # explicitly here for transparency and to document the exact versions
     # tested against this application ontology.
-    owl:imports <https://w3id.org/emmo/domain/battery/0.20.1/battery> ;
-    owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.36.0/electrochemistry> ;
+    owl:imports <https://w3id.org/emmo/domain/battery/0.20.2/battery> ;
+    owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.37.2/electrochemistry> ;
     owl:imports <https://w3id.org/emmo/domain/chemical-substance/0.15.0/chemical-substance> ;
 
     dcterms:title "Battery Interface Ontology (BattINFO)"@en ;

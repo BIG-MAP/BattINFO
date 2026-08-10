@@ -185,11 +185,13 @@ shapes:CycleLifeValueShape a sh:NodeShape ;
     ] .
 
 # ── Efficiency / fade percentages ─────────────────────────────────────────────
-# round_trip_energy_efficiency has no published EMMO class yet, so its quantity
-# node is typed with the battinfo: placeholder term (see records context).
+# domain-electrochemistry 0.37.1 published RoundTripEnergyEfficiency, so new
+# records type the quantity node with it. Records minted against the frozen v1
+# context still carry the battinfo: placeholder, so both are targeted.
 
 shapes:RoundTripEfficiencyValueShape a sh:NodeShape ;
-    sh:targetClass battinfo:roundTripEnergyEfficiency ;
+    sh:targetClass electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11 ,
+                   battinfo:roundTripEnergyEfficiency ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.0 ;
@@ -198,8 +200,11 @@ shapes:RoundTripEfficiencyValueShape a sh:NodeShape ;
         sh:message   "Round-trip energy efficiency (%) must be in [0, 100]."
     ] .
 
+# CapacityFadeRate (0.37.1) replaced the CapacityFade phenomenon class for this
+# slot; the phenomenon IRI stays targeted for records already published with it.
 shapes:CapacityFadeValueShape a sh:NodeShape ;
-    sh:targetClass electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6 ;
+    sh:targetClass electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0 ,
+                   electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6 ;
     sh:property [
         sh:path      ( emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0 emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4 ) ;
         sh:minInclusive 0.0 ;

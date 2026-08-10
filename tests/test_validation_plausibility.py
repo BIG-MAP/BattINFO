@@ -256,12 +256,15 @@ def test_specset_keys_are_mapped_or_consciously_deferred() -> None:
     """
     import json as _json
 
+    # Shrunk by domain-electrochemistry 0.37.1, which published ChargingTime,
+    # MaximumPower, PowerToEnergyRatio, RoundTripEnergyEfficiency and
+    # EndOfLifeCapacityThreshold. What is left has no upstream class: the two
+    # nominal-continuous currents are still open requests, and the C-rate /
+    # 50%-SOC keys are measurement qualifiers upstream does not name.
     KNOWN_UNMAPPED = {
-        "capacity_threshold_exhaustion", "charging_time",
-        "cycle_life_c_rate", "maximum_power",
+        "cycle_life_c_rate",
         "nominal_continuous_charging_current", "nominal_continuous_discharging_current",
-        "power_capability", "power_energy_ratio",
-        "round_trip_energy_efficiency", "round_trip_energy_efficiency_50pct",
+        "round_trip_energy_efficiency_50pct",
     }
     spec_set = set(_json.loads(
         (ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json")

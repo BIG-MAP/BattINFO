@@ -198,8 +198,8 @@ only to a throwaway `_scratch/` directory next to it.
 
 | Layer | What it provides |
 |-------|-----------------|
-| `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.19.0 and domain-electrochemistry 0.34.0 with pinned versioned IRIs |
-| [`assets/mappings/domain-battery/`](assets/mappings/domain-battery/) | 47 curated property→EMMO-IRI mappings and 27 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
+| `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.20.2 and domain-electrochemistry 0.37.2 with pinned versioned IRIs |
+| [`assets/mappings/domain-battery/`](assets/mappings/domain-battery/) | 77 curated property→EMMO-IRI mappings and 35 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 23 JSON Schema (draft 2020-12) files covering cell specs, cell instances, electrodes, electrolytes, separators, tests, datasets, and organisations |
 | [`src/battinfo/transform/json_to_jsonld.py`](src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | [`src/battinfo/validate/`](src/battinfo/validate/) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |

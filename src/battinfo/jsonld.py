@@ -90,7 +90,7 @@ def _load_test_method_context_terms() -> dict:
 
 # Test-protocol ``kind`` -> characterisation-method class prefLabel. Only kinds whose
 # method has a published class are mapped; anything else keeps the untyped plan node.
-# Every prefLabel below is verified against domain-electrochemistry 0.36.0 (which
+# Every prefLabel below is verified against domain-electrochemistry 0.37.2 (which
 # imports chameo) and resolves in the bundled domain-battery context.
 TEST_METHOD_CLASS: dict[str, str] = {
     "gitt":            "GalvanostaticIntermittentTitrationTechnique",
@@ -508,7 +508,9 @@ def test_protocol_to_jsonld(record: dict) -> dict:
 _BATTERY_TYPE_IRIS: dict[str, str] = {
     "BatteryCell":         "https://w3id.org/emmo/domain/battery#battery_68ed592a_7924_45d0_a108_94d6275d57f0",
     "CylindricalBattery":  "https://w3id.org/emmo/domain/battery#battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
-    "PrismaticBattery":    "https://w3id.org/emmo/domain/battery#battery_86c9ca80-de6f-417f-afdc-a7e52fa6322d",
+    # Underscore-named twin minted in domain-battery 0.20.2; the hyphen-named
+    # original is deprecated upstream (dcterms:isReplacedBy, issue #73).
+    "PrismaticBattery":    "https://w3id.org/emmo/domain/battery#battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
     "PouchCell":           "https://w3id.org/emmo/domain/battery#battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
     "CoinCell":            "https://w3id.org/emmo/domain/battery#battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
     "LithiumIonBattery":   "https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f",

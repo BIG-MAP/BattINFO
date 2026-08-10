@@ -4,7 +4,7 @@ description: >-
   Schema for CellSpecification (product specification) records.  Covers product identity
   fields, regulatory metadata, and the full SpecSet of quantitative properties.
   Property IRIs are taken from the domain-battery and domain-electrochemistry
-  EMMO modules (pinned to battery 0.19.0 / electrochemistry 0.34.0).
+  EMMO modules (pinned to battery 0.20.2 / electrochemistry 0.37.2).
 
 prefixes:
   linkml:           https://w3id.org/linkml/
@@ -440,14 +440,19 @@ slots:
 
   # Power
   power_capability:
-    slot_uri: battinfo:powerCapability
+    # electrochemistry:MaximumPower (domain-electrochemistry 0.37.1), whose
+    # altLabel is PowerCapability — one upstream class, so both keys point here
+    # rather than forking one concept across two IRIs. v1 keeps the old
+    # battinfo: mint (append-only); see the PR body.
+    slot_uri: electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0
     range: SpecValue
     description: Continuous power output capability.
     aliases:
       - "Power capability [W]"
 
   maximum_power:
-    slot_uri: battinfo:maximumPower
+    # electrochemistry:MaximumPower (domain-electrochemistry 0.37.1).
+    slot_uri: electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0
     range: SpecValue
     description: Peak (pulse) power output.
     aliases:
@@ -489,7 +494,8 @@ slots:
       - "Power density [W/L]"
 
   power_energy_ratio:
-    slot_uri: battinfo:powerEnergyRatio
+    # electrochemistry:PowerToEnergyRatio (domain-electrochemistry 0.37.1).
+    slot_uri: electrochemistry:electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c
     range: SpecValue
     description: Ratio of rated power to rated energy.
     aliases:
@@ -526,7 +532,10 @@ slots:
 
   # Efficiency
   round_trip_energy_efficiency:
-    slot_uri: battinfo:roundTripEnergyEfficiency
+    # electrochemistry:RoundTripEnergyEfficiency (domain-electrochemistry 0.37.1).
+    # The 50%-SOC variant below stays a battinfo: mint: upstream names the
+    # quantity, not the state-of-charge qualifier it is measured at.
+    slot_uri: electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11
     range: SpecValue
     description: Ratio of discharge energy to charge energy (full charge-discharge cycle).
     aliases:
@@ -677,21 +686,24 @@ slots:
       - "Calendar life [years]"
 
   capacity_fade:
-    # electrochemistry:CapacityFade (domain-electrochemistry 0.36.0). Known
-    # imprecision: upstream classifies CapacityFade as an
-    # ElectrochemicalDegradationPhenomenon (a NaturalProcess), not a quantity,
-    # so a unit-bearing value is a category stretch. It is still the right
-    # identifier to publish — the concept exists upstream, and minting
-    # battinfo:capacityFade would fork it into two IRIs for one concept. Tracked
-    # in docs/internal/ontology-additions-needed.md as a quantity-class request.
-    slot_uri: electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6
+    # electrochemistry:CapacityFadeRate (domain-electrochemistry 0.37.1),
+    # altLabel CapacityFadePerCycle. This closes the category stretch this slot
+    # carried until now: it used to point at electrochemistry:CapacityFade
+    # (e3d3d21c), which upstream classifies as an
+    # ElectrochemicalDegradationPhenomenon (a NaturalProcess), so a unit-bearing
+    # value was typed as a process. CapacityFadeRate is the quantity that was
+    # requested in docs/internal/ontology-additions-needed.md and is now
+    # published. records.context.v1.json is frozen on the old phenomenon IRI
+    # (append-only); see the PR body for the divergence.
+    slot_uri: electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0
     range: SpecValue
     description: Capacity fade rate per cycle or per year.
     aliases:
       - "Capacity fade [1/cycle]"
 
   capacity_threshold_exhaustion:
-    slot_uri: battinfo:capacityThresholdExhaustion
+    # electrochemistry:EndOfLifeCapacityThreshold (domain-electrochemistry 0.37.1).
+    slot_uri: electrochemistry:electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5
     range: SpecValue
     description: Capacity threshold defining battery exhaustion per EU Battery Regulation.
     aliases:
@@ -699,7 +711,8 @@ slots:
 
   # Charging / self-discharge
   charging_time:
-    slot_uri: battinfo:chargingTime
+    # electrochemistry:ChargingTime (domain-electrochemistry 0.37.1).
+    slot_uri: electrochemistry:electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7
     range: SpecValue
     description: Time to charge from 0% to 100% SOC at standard rate.
     aliases:

@@ -1,6 +1,6 @@
 {
   "version": "0.3.0",
-  "description": "Curated mapping from common battery material names/abbreviations to EMMO class terms. Used to type constituent nodes in electrode coating and electrolyte JSON-LD. All class terms must resolve in the bundled domain-battery context (verified against EMMO domain-battery 0.20.1, domain-electrochemistry 0.36.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2).",
+  "description": "Curated mapping from common battery material names/abbreviations to EMMO class terms. Used to type constituent nodes in electrode coating and electrolyte JSON-LD. All class terms must resolve in the bundled domain-battery context (verified against EMMO domain-battery 0.20.2, domain-electrochemistry 0.37.2, domain-chemical-substance 0.15.0 and EMMO 1.0.2).",
   "mappings": [
     {
       "symbol": "LFP",

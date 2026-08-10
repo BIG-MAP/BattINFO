@@ -4,7 +4,7 @@
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
-    "IRIs verified against EMMO 1.0.2, domain-battery 0.20.1, domain-electrochemistry 0.36.0 and domain-chemical-substance 0.15.0.",
+    "IRIs verified against EMMO 1.0.2, domain-battery 0.20.2, domain-electrochemistry 0.37.2 and domain-chemical-substance 0.15.0.",
     "All candidates with confidence 1.0 promoted. MANUAL_UNIT_TYPES entries consolidated here.",
     "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core).",
     "Wh and kWh: EMMO spells the local names Watthour / KiloWatthour (lower-case h) while the prefLabels read WattHour / KiloWattHour; the IRIs follow EMMO, the labels follow the prefLabel."

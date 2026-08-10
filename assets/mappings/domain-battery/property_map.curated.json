@@ -4,7 +4,7 @@
   "notes": [
     "Curated mapping entries promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
-    "IRIs verified against EMMO domain-battery 0.20.1, domain-electrochemistry 0.36.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
+    "IRIs verified against EMMO domain-battery 0.20.2, domain-electrochemistry 0.37.2, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
     "Temperature properties corrected: candidates mapped these to process classes (Charging/Discharging);",
     "correct mapping is to temperature-limit property classes in domain-electrochemistry.",
     "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending."
@@ -49,11 +49,22 @@
     {
       "key": "capacity_fade",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6",
-      "class_qname": "emmo:CapacityFade",
-      "class_pref_label": "CapacityFade",
-      "class_label": "CapacityFade",
-      "confidence": "1.0"
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0",
+      "class_qname": "emmo:CapacityFadeRate",
+      "class_pref_label": "CapacityFadeRate",
+      "class_label": "CapacityFadeRate",
+      "confidence": 1.0,
+      "notes": "Repointed in domain-electrochemistry 0.37.1 from CapacityFade (an ElectrochemicalDegradationPhenomenon, so a unit-bearing value was typed as a process) to the CapacityFadeRate quantity."
+    },
+    {
+      "key": "capacity_threshold_exhaustion",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5",
+      "class_qname": "emmo:EndOfLifeCapacityThreshold",
+      "class_pref_label": "EndOfLifeCapacityThreshold",
+      "class_label": "EndOfLifeCapacityThreshold",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.37.1; previously emitted as a battinfo: fallback term."
     },
     {
       "key": "certified_usable_energy",
@@ -91,6 +102,16 @@
       "class_pref_label": "MinimumChargingTemperature",
       "class_label": "MinimumChargingTemperature",
       "confidence": 1.0
+    },
+    {
+      "key": "charging_time",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7",
+      "class_qname": "emmo:ChargingTime",
+      "class_pref_label": "ChargingTime",
+      "class_label": "ChargingTime",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.37.1; previously emitted as a battinfo: fallback term."
     },
     {
       "key": "charging_voltage",
@@ -302,6 +323,16 @@
       "notes": "Candidates incorrectly mapped this to the Discharging process class."
     },
     {
+      "key": "maximum_power",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
+      "class_qname": "emmo:MaximumPower",
+      "class_pref_label": "MaximumPower",
+      "class_label": "MaximumPower",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.37.1; previously emitted as a battinfo: fallback term."
+    },
+    {
       "key": "maximum_pulse_charging_current",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da",
@@ -437,6 +468,16 @@
       "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
     },
     {
+      "key": "power_capability",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
+      "class_qname": "emmo:MaximumPower",
+      "class_pref_label": "MaximumPower",
+      "class_label": "MaximumPower",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.37.1. PowerCapability is an altLabel of MaximumPower, so this key and maximum_power share one upstream class rather than forking one concept across two IRIs."
+    },
+    {
       "key": "power_density",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a",
@@ -444,6 +485,16 @@
       "class_pref_label": "PowerDensity",
       "class_label": "PowerDensity",
       "confidence": "1.0"
+    },
+    {
+      "key": "power_energy_ratio",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c",
+      "class_qname": "emmo:PowerToEnergyRatio",
+      "class_pref_label": "PowerToEnergyRatio",
+      "class_label": "PowerToEnergyRatio",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.37.1; previously emitted as a battinfo: fallback term."
     },
     {
       "key": "press_density",
@@ -514,6 +565,16 @@
       "co_type": "ConventionalProperty",
       "co_type_pending": "RatedProperty",
       "co_type_pending_note": "Upgrade co_type to RatedProperty once published in domain-battery."
+    },
+    {
+      "key": "round_trip_energy_efficiency",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11",
+      "class_qname": "emmo:RoundTripEnergyEfficiency",
+      "class_pref_label": "RoundTripEnergyEfficiency",
+      "class_label": "RoundTripEnergyEfficiency",
+      "confidence": 1.0,
+      "notes": "New in domain-electrochemistry 0.37.1; previously emitted as a battinfo: fallback term."
     },
     {
       "key": "self_discharge_rate",

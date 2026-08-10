@@ -497,10 +497,10 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d'} })
     power_capability: Optional[SpecValue] = Field(default=None, description="""Continuous power output capability.""", json_schema_extra = { "linkml_meta": {'aliases': ['Power capability [W]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:powerCapability'} })
+         'slot_uri': 'electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0'} })
     maximum_power: Optional[SpecValue] = Field(default=None, description="""Peak (pulse) power output.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum power [W]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:maximumPower'} })
+         'slot_uri': 'electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0'} })
     specific_energy: Optional[SpecValue] = Field(default=None, description="""Gravimetric energy density (energy per unit mass).""", json_schema_extra = { "linkml_meta": {'aliases': ['Specific energy [Wh/kg]', 'Gravimetric energy density [Wh/kg]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9'} })
@@ -515,7 +515,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a'} })
     power_energy_ratio: Optional[SpecValue] = Field(default=None, description="""Ratio of rated power to rated energy.""", json_schema_extra = { "linkml_meta": {'aliases': ['Power-to-energy ratio [W/Wh]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:powerEnergyRatio'} })
+         'slot_uri': 'electrochemistry:electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c'} })
     internal_resistance: Optional[SpecValue] = Field(default=None, description="""General internal resistance.""", json_schema_extra = { "linkml_meta": {'aliases': ['Internal resistance [mOhm]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d'} })
@@ -530,7 +530,7 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'emmo:EMMO_79a02de5_b884_4eab_bc18_f67997d597a2'} })
     round_trip_energy_efficiency: Optional[SpecValue] = Field(default=None, description="""Ratio of discharge energy to charge energy (full charge-discharge cycle).""", json_schema_extra = { "linkml_meta": {'aliases': ['Round-trip energy efficiency [1]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:roundTripEnergyEfficiency'} })
+         'slot_uri': 'electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11'} })
     round_trip_energy_efficiency_50pct: Optional[SpecValue] = Field(default=None, description="""Round-trip efficiency measured at 50% state of charge.""", json_schema_extra = { "linkml_meta": {'aliases': ['Round-trip energy efficiency at 50% SOC [1]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'battinfo:roundTripEnergyEfficiency50Pct'} })
@@ -593,13 +593,13 @@ class SpecSet(ConfiguredBaseModel):
          'slot_uri': 'electrochemistry:electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df'} })
     capacity_fade: Optional[SpecValue] = Field(default=None, description="""Capacity fade rate per cycle or per year.""", json_schema_extra = { "linkml_meta": {'aliases': ['Capacity fade [1/cycle]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'electrochemistry:electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6'} })
+         'slot_uri': 'electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0'} })
     capacity_threshold_exhaustion: Optional[SpecValue] = Field(default=None, description="""Capacity threshold defining battery exhaustion per EU Battery Regulation.""", json_schema_extra = { "linkml_meta": {'aliases': ['Capacity threshold for exhaustion [1]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:capacityThresholdExhaustion'} })
+         'slot_uri': 'electrochemistry:electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5'} })
     charging_time: Optional[SpecValue] = Field(default=None, description="""Time to charge from 0% to 100% SOC at standard rate.""", json_schema_extra = { "linkml_meta": {'aliases': ['Charging time [min]'],
          'domain_of': ['SpecSet'],
-         'slot_uri': 'battinfo:chargingTime'} })
+         'slot_uri': 'electrochemistry:electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7'} })
     self_discharge_rate: Optional[SpecValue] = Field(default=None, description="""Self-discharge rate (capacity loss per unit time in storage).""", json_schema_extra = { "linkml_meta": {'aliases': ['Self-discharge rate [%/month]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e'} })

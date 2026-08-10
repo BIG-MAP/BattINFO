@@ -10,7 +10,7 @@ Policy (2026-07-07): battinfo never mints domain semantics. Missing terms are ad
 EMMO domain-battery / domain-electrochemistry / domain-chemical-substance upstream (we
 control them), not here.
 
-Currently pinned: domain-battery 0.20.1, domain-electrochemistry 0.36.0,
+Currently pinned: domain-battery 0.20.2, domain-electrochemistry 0.37.2,
 domain-chemical-substance 0.15.0, EMMO 1.0.2.
 
 ## 1. Property-nature qualifier (coin-cell initiative)
@@ -41,20 +41,6 @@ first-class:
 | **`ElectrolyteDoseCoefficient`** | `dose_coefficient` | electrolyte dosing (g/Ah) |
 | **`WeldWidth`** | `weld_width` | tab/terminal weld width |
 | **`TapeWidth`** | `tape_width` | tab insulating-tape width |
-
-A different shape of gap, same section: **a `CapacityFade` quantity class.**
-`capacity_fade` is a `%`- or `1/cycle`-valued datasheet slot, and the only
-upstream term for the concept — `electrochemistry:CapacityFade`
-(`electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6`) — is an
-`ElectrochemicalDegradationPhenomenon`, i.e. it sits on the EMMO *Process*
-branch, not under `CategorizedPhysicalQuantity`. The slot points at it anyway
-(minting `battinfo:capacityFade` would fork one concept across two IRIs), and
-`src/battinfo/data/shapes/cell-spec.shapes.ttl` gives that phenomenon a numeric
-part and a unit. What is wanted upstream is a quantity class under
-`ElectrochemicalPerformanceQuantity` — the fade *rate*, related to the phenomenon
-rather than identical to it. `ChargeRetention`/`CapacityRetention`
-(`electrochemistry_49efb72a_…`) is not a substitute: it is defined for
-open-circuit stand, not cycling.
 
 To wire after publishing: add a curated entry to
 `assets/mappings/domain-battery/property_map.curated.json` (and the `src/battinfo/data`
@@ -141,6 +127,34 @@ three-electrode full cell or a commercial cell under potential monitoring needs.
 class at all. Both spellings (`three-electrode`, `three-electrode-cell`) are keyed in
 `entity_type_map.json` so tolerant import and the schema enum land on the same mapping.
 
+### domain-electrochemistry 0.37.1 / 0.37.2
+
+Six quantity classes landed and drained seven `battinfo:` placeholders. All are wired in
+`property_map.curated.json` and the LinkML `slot_uri`s; the descriptor now emits the
+upstream `@type` instead of the fallback term.
+
+| Key | Was | Now |
+|---|---|---|
+| `capacity_fade` | `electrochemistry:CapacityFade` (a phenomenon) | `CapacityFadeRate` (`electrochemistry_5b59a86e_…`) |
+| `charging_time` | `battinfo:chargingTime` | `ChargingTime` (`electrochemistry_a3d54f83_…`) |
+| `maximum_power` | `battinfo:maximumPower` | `MaximumPower` (`electrochemistry_4e6c4e9d_…`) |
+| `power_capability` | `battinfo:powerCapability` | `MaximumPower` — `PowerCapability` is its altLabel |
+| `power_energy_ratio` | `battinfo:powerEnergyRatio` | `PowerToEnergyRatio` (`electrochemistry_917660a7_…`) |
+| `round_trip_energy_efficiency` | `battinfo:roundTripEnergyEfficiency` | `RoundTripEnergyEfficiency` (`electrochemistry_c413d29a_…`) |
+| `capacity_threshold_exhaustion` | `battinfo:capacityThresholdExhaustion` | `EndOfLifeCapacityThreshold` (`electrochemistry_02dc55b3_…`) |
+
+`CapacityFadeRate` is the quantity class this file asked for: `capacity_fade` used to
+point at `electrochemistry:CapacityFade`, an `ElectrochemicalDegradationPhenomenon` on
+the EMMO *Process* branch, so a unit-bearing datasheet value was typed as a process.
+
+`CapacityLoss` and `ChargeRecovery` also landed but have no save-gate key, so they are
+allowlisted only. Wiring them is a future save-gate addition (`capacity_loss`,
+`capacity_retention`, `charge_recovery`), not part of this pass.
+
+Still unmapped, with no upstream class: `cycle_life_c_rate`,
+`round_trip_energy_efficiency_50pct` (measurement qualifiers upstream does not name) and
+the two `nominal_continuous_*_current` keys from section 4.
+
 ### Test-protocol method classes (chameo, via domain-electrochemistry 0.36.0)
 
 `record_to_jsonld` emits test-protocol records as of the vocabulary top-up, and types the
@@ -170,22 +184,51 @@ charging / discharging temperature limits, and the electrode chemistry classes
 
 ## Upstream defects to report
 
-Found while re-verifying every emitted IRI against the 0.20.1 closure. None is caused by
-this repo; each is worked around locally.
+Found while re-verifying every emitted IRI against the 0.20.2 / 0.37.2 / 0.15.0 / 1.0.2
+closure. None is caused by this repo; each is worked around locally.
 
-- **`PrismaticBattery` local name uses hyphens.** `battery_86c9ca80-de6f-417f-afdc-a7e52fa6322d`,
-  where every other domain-battery term uses underscores. Present since at least 0.19.0.
-  The battinfo tables now copy it verbatim so the term expands to an IRI that exists; if
-  upstream normalizes it, update `_STATIC_LABEL_TO_COMPACT`, `_BATTERY_TYPE_IRIS` and
-  `scripts/assemble_context.py` together.
 - **`Watthour` / `KiloWatthour` spelling.** EMMO's local names carry a lower-case "h"
   while the prefLabels read `WattHour` / `KiloWattHour`. `unit_map.curated.json` now
   follows the IRI and keeps the prefLabel as the label.
-- **Deprecated classes still in active use.** The closure marks these
-  `owl:deprecated true` with no stated successor, yet they are the only classes for the
-  concepts: `LithiumIon{CobaltOxide,Graphite,IronPhosphate,ManganeseIronPhosphate,ManganeseOxide,NickelCobaltAluminiumOxide,NickelManganeseCobaltOxide,Titanate}Battery`
-  and `Lithium{CobaltOxide,IronPhosphate,ManganeseIronPhosphate,ManganeseOxide,NickelManganeseCobaltOxide,Titanate}Electrode`,
-  plus `SiliconGraphiteElectrode`. Deprecated since before 0.19.0 / 0.34.0, so this is not
-  a regression — but either the deprecations or the battinfo mappings need to move.
 - **`FaradaicEfficiency` / `CoulombicEfficiency` label swap (0.36.0).** IRIs unchanged;
   battinfo only maps `InitialCoulombicEfficiency`, which is unaffected.
+- **Two `hasTestEquipment` object properties (new in 0.20.2).**
+  `battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c` (which battinfo declares and
+  emits) and `electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c`
+  now both carry that prefLabel. Neither is deprecated and neither points at the other,
+  but the upstream domain-battery context repointed the *label* to the electrochemistry
+  one, so a consumer resolving `hasTestEquipment` through that context and a consumer
+  reading a battinfo record's own context land on different IRIs. battinfo keeps the
+  battery term (still live, and already published in v1); upstream should merge them or
+  deprecate one with `dcterms:isReplacedBy`.
+- **Duplicate `CapacityLoss`.** `electrochemistry_652b94f1_…` has it as prefLabel while
+  `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
+  resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
+- **Five context terms resolve to IRIs outside the import closure.** The published
+  domain-battery 0.20.2 context maps `ChemicalMaterial`, `ElementalMaterial`,
+  `ChemicallyDefinedMaterial`, `hasORCID` and `AngularWaveNumber` to
+  `https://w3id.org/emmo#EMMO_{8a41ed1b…, a086af15…, a96e2152…, e117f976…, e4791212…}`,
+  none of which is defined in EMMO 1.0.2 or in any imported module. Likely left over from
+  a pre-1.0 EMMO. battinfo emits none of them, so nothing is broken here — but any
+  consumer expanding those terms gets an IRI that does not dereference.
+
+### Resolved upstream
+
+- **`PrismaticBattery` local name used hyphens.** Fixed in domain-battery 0.20.2:
+  upstream minted the underscore-named twin `battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d`
+  and deprecated the hyphenated original with `dcterms:isReplacedBy`
+  ([domain-battery#73](https://github.com/emmo-repo/domain-battery/issues/73)).
+  `_STATIC_LABEL_TO_COMPACT`, `_BATTERY_TYPE_IRIS` and `scripts/assemble_context.py`
+  now emit the twin; the validator still accepts the hyphenated IRI so records published
+  before the flip keep validating, and the frozen v1 context still serves it.
+- **Deprecated chemistry classes still in active use.** Resolved in domain-battery 0.20.2
+  / domain-electrochemistry 0.37.2
+  ([domain-battery#74](https://github.com/emmo-repo/domain-battery/issues/74)). All 15 are
+  now first-class defined classes:
+  `LithiumIon{CobaltOxide,Graphite,IronPhosphate,ManganeseIronPhosphate,ManganeseOxide,NickelCobaltAluminiumOxide,NickelManganeseCobaltOxide,Titanate}Battery`,
+  `Lithium{CobaltOxide,IronPhosphate,ManganeseIronPhosphate,ManganeseOxide,NickelManganeseCobaltOxide,Titanate}Electrode`
+  and `SiliconGraphiteElectrode` (defined as `hasActiveMaterial some` chemical-substance
+  `SiliconGraphite`). The battinfo mappings that used them needed no change and no code
+  caveat existed to remove. Note that the **silicon-oxide** siblings
+  (`LithiumIonSilicon{,Oxide,OxideGraphite,Graphite}Battery`, `SiliconOxideElectrode`,
+  `SiliconOxideGraphiteElectrode`) are still deprecated — battinfo maps none of them.
