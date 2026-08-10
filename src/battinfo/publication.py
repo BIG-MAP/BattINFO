@@ -27,6 +27,7 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
+from battinfo.jsonld import schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -397,15 +398,7 @@ def _schema_distribution_node(value: Mapping[str, Any], *, part_of_id: str) -> d
     if isinstance(access_level, str):
         node["schema:accessLevel"] = access_level
     node["schema:isPartOf"] = {"@id": part_of_id}
-    if isinstance(checksum, Mapping) and isinstance(checksum.get("algorithm"), str) and isinstance(checksum.get("value"), str):
-        if checksum["algorithm"].lower() == "sha256":
-            node["schema:sha256"] = checksum["value"]
-        else:
-            node["schema:checksum"] = {
-                "@type": "schema:PropertyValue",
-                "schema:propertyID": checksum["algorithm"],
-                "schema:value": checksum["value"],
-            }
+    node.update(schema_checksum_terms(checksum))
     return node
 
 

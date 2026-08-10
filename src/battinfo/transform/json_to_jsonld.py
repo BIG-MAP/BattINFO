@@ -1867,6 +1867,92 @@ _MATERIAL_PROPERTY_TERMS: dict[str, str] = {
 }
 
 
+# Processing-route token -> human label. The tokens are the `route` enum of
+# material.schema.json; the label rides the emitted DefinedTerm so a reader need
+# not fetch the schema to know what "nmp" means.
+_PROCESSING_ROUTE_LABELS: dict[str, str] = {
+    "aqueous": "Water-based (aqueous) processing",
+    "nmp": "NMP solvent-based processing",
+    "dry": "Solvent-free (dry) processing",
+    "other": "Other processing route",
+}
+
+
+def _solvent_node(solvent: str) -> dict[str, Any] | None:
+    """A solvent name -> a typed chemical-substance node, or a labeled one.
+
+    Resolves through the curated material-kind vocabulary, so a solvent that is
+    also a known kind (NMP) carries its chemical-substance class IRI and EMMO
+    type. An unknown solvent (water has no chemical-substance anchor in the
+    bundled ontology) still emits, carrying its name — a labeled node beats a
+    dropped one.
+    """
+    if not isinstance(solvent, str) or not solvent.strip():
+        return None
+    from battinfo.materials import material_kind
+
+    entry = material_kind(solvent)
+    node: dict[str, Any] = {}
+    if entry is not None:
+        chemsub = entry.get("chemsub")
+        emmo = entry.get("emmo")
+        if isinstance(chemsub, str) and chemsub:
+            node["@id"] = chemsub
+        if isinstance(emmo, str) and emmo:
+            node["@type"] = emmo
+    node.setdefault("@type", "schema:ChemicalSubstance")
+    node["schema:name"] = solvent.strip()
+    return node
+
+
+def _processing_node(processing: Any) -> dict[str, Any] | None:
+    """A material instance's ``processing`` block -> a typed EMMO process node.
+
+    Processing is the reason material instances exist as a level (aqueous vs NMP
+    is a build property, not a distinct product), so it has to survive into the
+    semantic view. The block becomes the EMMO ``Manufacturing`` process that
+    produced this lot, hung off the material with ``prov:wasGeneratedBy``:
+
+    * ``route``   -> a ``schema:DefinedTerm`` carrying the controlled token and
+      its label, hung on ``dcterms:type`` (the same standard predicate the
+      artifact-role token already uses; no ``battinfo:`` term is minted, and no
+      term-set IRI either, since that vocabulary is not hosted yet).
+    * ``solvent`` -> ``hasSolvent`` pointing at the substance, typed by its
+      chemical-substance class where the vocabulary knows it. When the record
+      states no solvent but the route names one (``nmp``), the route resolves it,
+      since the enum defines that route AS the solvent.
+    * ``detail``  -> ``schema:description``.
+    """
+    if not isinstance(processing, dict) or not processing:
+        return None
+    route = processing.get("route")
+    solvent = processing.get("solvent")
+    detail = processing.get("detail")
+
+    node: dict[str, Any] = {"@type": "Manufacturing", "skos:prefLabel": "Manufacturing"}
+    if isinstance(route, str) and route.strip():
+        token = route.strip()
+        term: dict[str, Any] = {"@type": "schema:DefinedTerm", "schema:termCode": token}
+        label = _PROCESSING_ROUTE_LABELS.get(token.lower())
+        if label:
+            term["schema:name"] = label
+        node["dcterms:type"] = term
+    if not (isinstance(solvent, str) and solvent.strip()) and isinstance(route, str):
+        # The route names its own solvent for the solvent-based routes; an
+        # unknown route simply resolves to nothing and is left alone.
+        from battinfo.materials import material_kind
+
+        if material_kind(route) is not None:
+            solvent = route
+    solvent_node = _solvent_node(solvent) if isinstance(solvent, str) else None
+    if solvent_node:
+        node["hasSolvent"] = solvent_node
+    if isinstance(detail, str) and detail.strip():
+        node["schema:description"] = detail.strip()
+    # Nothing beyond the bare process type is not worth a node.
+    return node if len(node) > 2 else None
+
+
 def _material_node(body: dict[str, Any]) -> dict[str, Any]:
     """Build a domain-battery JSON-LD node for a material spec/instance body.
 
@@ -1914,9 +2000,22 @@ def _material_node(body: dict[str, Any]) -> dict[str, Any]:
         node["schema:molecularFormula"] = body["formula"]
     if isinstance(body.get("material_spec_id"), str):
         node["schema:isVariantOf"] = {"@id": body["material_spec_id"]}
+    # Lot / batch identity: the strings that tie this record to the physical
+    # container on the shelf. schema:identifier carries them as named
+    # PropertyValues so each keeps the name of the system that issued it.
+    identifiers = [
+        {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
+        for key in ("lot_id", "batch_id")
+        if isinstance(body.get(key), str) and body[key].strip()
+    ]
+    if identifiers:
+        node["schema:identifier"] = identifiers[0] if len(identifiers) == 1 else identifiers
     prop_nodes = _descriptor_property_nodes(body.get("property"), term_overrides=_MATERIAL_PROPERTY_TERMS)
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+    processing = _processing_node(body.get("processing"))
+    if processing:
+        node["prov:wasGeneratedBy"] = processing
     return node
 
 
@@ -1926,6 +2025,12 @@ def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
     citation = _citation_to_jsonld(data.get("provenance"))
     if citation is not None:
         node["schema:citation"] = citation
+    # Envelope notes are authored free text about this lot; the publication graph
+    # already carries them as schema:comment, so the record emitter matches it
+    # rather than dropping them.
+    notes = [n for n in (data.get("notes") or []) if isinstance(n, str) and n.strip()]
+    if notes:
+        node["schema:comment"] = notes[0] if len(notes) == 1 else notes
     return {
         "@context": _base_context(
             include_battinfo=True,

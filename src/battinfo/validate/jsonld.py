@@ -146,6 +146,8 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "ElectrolyticConductivity",
     "Mass",
     "MassLoading",
+    # The EMMO process a material lot's `processing` block emits as.
+    "Manufacturing",
     "NPRatio",
     "TheoreticalCapacity",
     "Tortuosity",

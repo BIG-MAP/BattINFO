@@ -358,6 +358,80 @@ def protocol_property_value(name: str, value: Any, group: str = "") -> dict:
     return node
 
 
+# ── File checksums ────────────────────────────────────────────────────────────
+#
+# A published digest is an assertion about a file, and a deposit is permanent, so
+# the algorithm is always taken from the record and never assumed. SPDX 2.x names
+# its hash-algorithm individuals ``spdx:checksumAlgorithm_<name>``; only the
+# algorithms SPDX actually defines get an IRI. Anything else (the dataset
+# schema's "other" escape hatch) keeps its name as a plain literal rather than
+# inventing an SPDX term that does not exist.
+_SPDX_CHECKSUM_ALGORITHMS: frozenset[str] = frozenset({
+    "adler32", "blake2b256", "blake2b384", "blake2b512", "blake3",
+    "md2", "md4", "md5", "md6",
+    "sha1", "sha224", "sha256", "sha384", "sha512",
+    "sha3_256", "sha3_384", "sha3_512",
+})
+
+
+def _checksum_parts(checksum: Any) -> tuple[str, str] | None:
+    """``(algorithm, value)`` from a record checksum block, or None if unusable."""
+    if not isinstance(checksum, Mapping):
+        return None
+    algorithm = checksum.get("algorithm")
+    value = checksum.get("value")
+    if not isinstance(value, str) or not value.strip():
+        return None
+    if not isinstance(algorithm, str) or not algorithm.strip():
+        return None
+    return algorithm.strip().lower(), value.strip()
+
+
+def checksum_node(checksum: Any) -> dict | None:
+    """A record ``checksum`` block -> an ``spdx:Checksum`` node, or None.
+
+    The node carries the algorithm the record ACTUALLY states. Emitting an md5
+    digest under the sha256 term would publish a false claim about the file, so
+    the algorithm is never defaulted; where SPDX defines the algorithm the term
+    is an IRI reference, so it links to the SPDX individual rather than being a
+    look-alike string.
+    """
+    parts = _checksum_parts(checksum)
+    if parts is None:
+        return None
+    algorithm, value = parts
+    node: dict = {"@type": "spdx:Checksum"}
+    if algorithm in _SPDX_CHECKSUM_ALGORITHMS:
+        node["spdx:checksumAlgorithm"] = {"@id": f"spdx:checksumAlgorithm_{algorithm}"}
+    else:
+        node["spdx:checksumAlgorithm"] = algorithm
+    node["spdx:checksumValue"] = value
+    return node
+
+
+def schema_checksum_terms(checksum: Any) -> dict:
+    """A record ``checksum`` block -> its schema.org terms (``{}`` when unusable).
+
+    schema.org names exactly one algorithm (``schema:sha256``), so that term is
+    reserved for a genuine sha256; every other algorithm rides a named
+    ``schema:PropertyValue`` instead of being relabeled as one.
+    """
+    parts = _checksum_parts(checksum)
+    if parts is None:
+        return {}
+    algorithm, value = parts
+    if algorithm == "sha256":
+        return {"schema:sha256": value}
+    return {
+        "schema:checksum": {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": algorithm,
+            "schema:name": algorithm,
+            "schema:value": value,
+        }
+    }
+
+
 def artifact_distribution_node(art: Mapping[str, Any], *, locator_url: Callable[[str], Any] | None = None) -> dict:
     """An actionable artifact link -> a ``dcat:Distribution`` node, so the runnable
     protocol file is machine-discoverable alongside the descriptive method.
@@ -398,11 +472,10 @@ def artifact_distribution_node(art: Mapping[str, Any], *, locator_url: Callable[
     if fmt:
         node["dcterms:format"] = fmt
     if art.get("sha256"):
-        node["spdx:checksum"] = {
-            "@type": "spdx:Checksum",
-            "spdx:algorithm": "spdx:checksumAlgorithm_sha256",
-            "spdx:checksumValue": art["sha256"],
-        }
+        # The artifact model names this field sha256, so the algorithm is known;
+        # it still goes through the shared builder so every checksum in every
+        # document has one shape and one predicate.
+        node["spdx:checksum"] = checksum_node({"algorithm": "sha256", "value": art["sha256"]})
     return node
 
 
@@ -711,8 +784,73 @@ def test_to_jsonld(record: dict) -> dict:
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
 
 
+def _schema_variable_measured(values: Any) -> list[dict]:
+    """``variable_measured`` entries -> ``schema:PropertyValue`` nodes.
+
+    Same shape the publication path emits, so a dataset described once reads the
+    same whether it is fetched as a record or out of a deposit.
+    """
+    out: list[dict] = []
+    if not isinstance(values, list):
+        return out
+    for value in values:
+        if not isinstance(value, Mapping):
+            continue
+        name = value.get("name")
+        if not isinstance(name, str) or not name.strip():
+            continue
+        node: dict = {"@type": "schema:PropertyValue", "schema:name": name}
+        if isinstance(value.get("description"), str):
+            node["schema:description"] = value["description"]
+        if isinstance(value.get("unit_text"), str):
+            node["schema:unitText"] = value["unit_text"]
+        same_as = value.get("same_as") or value.get("sameAs")
+        if isinstance(same_as, str):
+            node["schema:sameAs"] = same_as
+            node["schema:propertyID"] = same_as
+        out.append(node)
+    return out
+
+
+def _schema_citations(values: Any) -> list:
+    """``citations`` entries -> ``schema:CreativeWork`` nodes (or plain strings)."""
+    out: list = []
+    if not isinstance(values, list):
+        return out
+    for value in values:
+        if isinstance(value, str) and value.strip():
+            out.append(value)
+            continue
+        if not isinstance(value, Mapping):
+            continue
+        node: dict = {"@type": "schema:CreativeWork"}
+        url = value.get("url")
+        if isinstance(url, str):
+            node["@id"] = url
+            node["schema:url"] = url
+        if isinstance(value.get("name"), str):
+            node["schema:name"] = value["name"]
+        if isinstance(value.get("kind"), str):
+            node["schema:additionalType"] = value["kind"]
+        if isinstance(value.get("doi"), str):
+            node["bibo:doi"] = value["doi"]
+        if isinstance(value.get("citation_key"), str):
+            node["schema:identifier"] = value["citation_key"]
+        if len(node) > 1:
+            out.append(node)
+    return out
+
+
 def dataset_to_jsonld(record: dict) -> dict:
-    """Transform a dataset record dict to JSON-LD."""
+    """Transform a dataset record dict to JSON-LD.
+
+    DCAT carries the catalog skeleton (title, access, subject, distributions);
+    schema.org carries the discovery layer (description, keywords, measured
+    variables, techniques, citations), because DCAT has no term for most of it
+    and schema.org is what dataset search engines read. Where both vocabularies
+    name a field, both are emitted — the same twinning the publication graph
+    already does — so neither kind of consumer has to guess.
+    """
     ds   = record.get("dataset") or {}
     prov = record.get("provenance") or {}
 
@@ -722,14 +860,36 @@ def dataset_to_jsonld(record: dict) -> dict:
         "@id":      ds.get("id", ""),
         "dcterms:title": ds.get("name"),
     }
+    if ds.get("description"):
+        node["dcterms:description"] = ds["description"]
+        node["schema:description"] = ds["description"]
     if ds.get("license"):
         node["dcterms:license"] = {"@id": ds["license"]}
     if ds.get("access_url"):
         node["dcat:accessURL"] = {"@id": ds["access_url"]}
+    keywords = [k for k in (ds.get("keywords") or []) if isinstance(k, str) and k.strip()]
+    if keywords:
+        node["dcat:keyword"] = keywords
+        node["schema:keywords"] = keywords
     if ds.get("created_at"):
         node["dcterms:created"] = _epoch_to_iso(ds["created_at"])
     if ds.get("modified_at"):
         node["dcterms:modified"] = _epoch_to_iso(ds["modified_at"])
+    if ds.get("published_at"):
+        node["dcterms:issued"] = _epoch_to_iso(ds["published_at"])
+        node["schema:datePublished"] = _epoch_to_iso(ds["published_at"])
+    techniques = [t for t in (ds.get("measurement_techniques") or []) if isinstance(t, str) and t.strip()]
+    if techniques:
+        node["schema:measurementTechnique"] = techniques
+    methods = [m for m in (ds.get("measurement_methods") or []) if isinstance(m, str) and m.strip()]
+    if methods:
+        node["schema:measurementMethod"] = methods
+    variables = _schema_variable_measured(ds.get("variable_measured"))
+    if variables:
+        node["schema:variableMeasured"] = variables
+    citations = _schema_citations(ds.get("citations"))
+    if citations:
+        node["schema:citation"] = citations
     about = ds.get("about")
     if about:
         # Tolerate a single IRI string (wrap it) instead of iterating it
@@ -745,17 +905,23 @@ def dataset_to_jsonld(record: dict) -> dict:
         ld_dists = []
         for d in dists:
             dist: dict = {"@type": "dcat:Distribution"}
+            if d.get("name"):
+                dist["schema:name"] = d["name"]
+            if d.get("description"):
+                dist["schema:description"] = d["description"]
             if d.get("content_url"):
                 dist["dcat:downloadURL"] = {"@id": d["content_url"]}
             if d.get("encoding_format"):
                 dist["dcat:mediaType"] = d["encoding_format"]
-            cs = d.get("checksum")
-            if isinstance(cs, Mapping):
-                dist["spdx:checksum"] = {
-                    "@type": "spdx:Checksum",
-                    "spdx:checksumAlgorithm": f"spdx:checksumAlgorithm_{cs.get('algorithm', '')}",
-                    "spdx:checksumValue":     cs.get("value", ""),
-                }
+            # File size: dcat:byteSize is an integer, schema:contentSize is text;
+            # the record stores the string form, so only a digit string casts.
+            size = str(d.get("content_size") or "")
+            if size.isdigit():
+                dist["dcat:byteSize"] = int(size)
+                dist["schema:contentSize"] = size
+            checksum = checksum_node(d.get("checksum"))
+            if checksum is not None:
+                dist["spdx:checksum"] = checksum
             ld_dists.append(dist)
         node["dcat:distribution"] = ld_dists
 

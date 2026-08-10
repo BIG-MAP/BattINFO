@@ -22,7 +22,7 @@ import json
 import os
 import re
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -302,6 +302,25 @@ _CONFORMANCE_IRI = {
     "non-conformant": "earl:failed",
     "unknown":        "earl:cantTell",
 }
+
+
+def _spdx_algorithm_name(checksum: Any) -> str | None:
+    """Read the algorithm back out of an emitted ``spdx:Checksum`` node.
+
+    The term may be an IRI reference (``{"@id": "spdx:checksumAlgorithm_md5"}``),
+    the same CURIE as a bare string, or a plain algorithm name for something SPDX
+    does not define — all three are accepted, so a deposit round-trips whichever
+    emitter wrote it.
+    """
+    if not isinstance(checksum, Mapping):
+        return None
+    term = checksum.get("spdx:checksumAlgorithm") or checksum.get("spdx:algorithm")
+    if isinstance(term, Mapping):
+        term = term.get("@id")
+    if not isinstance(term, str) or not term.strip():
+        return None
+    return term.rsplit("checksumAlgorithm_", 1)[-1].strip() or None
+
 
 _UNIX_EPOCH = "1970-01-01T00:00:00Z"
 
@@ -1176,6 +1195,11 @@ class AuthoringWorkspace:
         self._session_credentials: dict[str, str] = {}
         # name -> Cell, keyed by short_id for test matching
         self._cells_by_short_id: dict[str, Any] = {}
+        # Lookup keys that two or more DIFFERENT cells answer to. A display name
+        # is not an identifier: a batch may legitimately share one public label
+        # across many serials. Such a key cannot pick a cell, so resolving it
+        # raises instead of silently returning whichever cell was indexed last.
+        self._ambiguous_cell_keys: set[str] = set()
         # True once cell instances saved in a previous session have been lazily
         # loaded from .battinfo/records/cell-instance/ into the index above, so a
         # fresh process can still resolve a cell by serial (day-2 rehydration).
@@ -2910,6 +2934,25 @@ class AuthoringWorkspace:
         print(f"  Loaded {count} cell instance(s) into matching index.")
         return count
 
+    def _index_cell(self, cell: Any, *keys: str | None) -> None:
+        """Index ``cell`` under every lookup key it answers to (and each key's short id).
+
+        A cell's IDENTITY is its serial number; its name is display text, so a
+        batch may share one public label across many serials. When a key already
+        points at a *different* cell it is recorded as ambiguous rather than
+        overwritten, and :meth:`_resolve_cell` then refuses to guess.
+        """
+        for key in keys:
+            if not key:
+                continue
+            for k in (key, _short_id(key)):
+                if not k:
+                    continue
+                existing = self._cells_by_short_id.get(k)
+                if existing is not None and existing is not cell:
+                    self._ambiguous_cell_keys.add(k)
+                self._cells_by_short_id[k] = cell
+
     def _index_saved_cells(self) -> int:
         """Load cell instances saved on disk into the serial → cell index (quiet).
 
@@ -2937,15 +2980,8 @@ class AuthoringWorkspace:
                     serial_number=ci.get("serial_number"),
                     batch_id=ci.get("batch_id"),
                 )
-                for label in (ci.get("name"), ci.get("serial_number")):
-                    if label:
-                        self._cells_by_short_id[label] = cell
-                        sid = _short_id(label)
-                        if sid:
-                            self._cells_by_short_id[sid] = cell
-                stored_sid = ci.get("short_id", "")
-                if stored_sid:
-                    self._cells_by_short_id[stored_sid] = cell
+                self._index_cell(cell, ci.get("serial_number"), ci.get("name"),
+                                 ci.get("short_id") or None)
                 count += 1
             except Exception as exc:
                 print(f"  WARNING: could not load {src.name} -- {exc}")
@@ -3260,11 +3296,7 @@ class AuthoringWorkspace:
             )
             cell.id = iri
             sn = node.get("schema:serialNumber", "")
-            if sn:
-                self._cells_by_short_id[sn] = cell
-            sid = _short_id(sn)
-            if sid:
-                self._cells_by_short_id[sid] = cell
+            self._index_cell(cell, sn)
             print(f"  instance: {sn or iri}")
 
         # ── 7. Import tests + datasets ─────────────────────────────────────────
@@ -3328,7 +3360,7 @@ class AuthoringWorkspace:
                     status="completed",
                     access_url=dl_url,
                     format=fmt,
-                    checksum_algorithm=cs.get("spdx:checksumAlgorithm", "").split("_")[-1] or None,
+                    checksum_algorithm=_spdx_algorithm_name(cs),
                     checksum_value=cs.get("spdx:checksumValue") or None,
                 )
                 # Preserve the test IRI and the dataset IRI from the JSON-LD
@@ -3363,6 +3395,7 @@ class AuthoringWorkspace:
         """
         self._ws = self._make_engine()
         self._cells_by_short_id = {}
+        self._ambiguous_cell_keys = set()
         self._session_paths = set()
         print("Workspace cleared.")
 
@@ -4873,7 +4906,9 @@ class AuthoringWorkspace:
         any JSON-LD tool that resolves the embedded context.
         """
         from battinfo.jsonld import (
+            checksum_node,
             funding_to_jsonld,
+            schema_checksum_terms,
             test_protocol_node,
         )
 
@@ -5209,12 +5244,14 @@ class AuthoringWorkspace:
                     for dist in (ds.get("distributions") or []):
                         url   = dist.get("content_url") or ""
                         fname = _file_uri_to_path(url).name
-                        cs    = dist.get("checksum", {})
                         dists.append({
                             "filename":     fname,
                             "content_url":  url,
                             "format":       dist.get("encoding_format", ""),
-                            "checksum":     cs.get("value", ""),
+                            # The whole checksum block, algorithm included. Carrying
+                            # only the value here is what let an md5 digest be
+                            # published under the sha256 term downstream.
+                            "checksum":     dist.get("checksum") or {},
                             "role":         dist.get("role", ""),
                             "description":  dist.get("description", ""),
                             "content_size": dist.get("content_size", ""),
@@ -5308,13 +5345,12 @@ class AuthoringWorkspace:
                 if meta.get("test_iri") and not is_raw:
                     dnode["prov:wasGeneratedBy"] = {"@id": meta["test_iri"]}
 
-                if dist["checksum"]:
-                    dnode["spdx:checksum"] = {
-                        "@type":                  "spdx:Checksum",
-                        # IRI reference to the SPDX algorithm individual, not a literal.
-                        "spdx:checksumAlgorithm": {"@id": "spdx:checksumAlgorithm_sha256"},
-                        "spdx:checksumValue":     dist["checksum"],
-                    }
+                # The algorithm is the record's, never assumed: a deposit is
+                # permanent, and an md5 digest published as a sha256 is a false
+                # statement about the file rather than a missing one.
+                _checksum = checksum_node(dist["checksum"])
+                if _checksum is not None:
+                    dnode["spdx:checksum"] = _checksum
                 # File size: dcat:byteSize is an integer; schema:contentSize is text.
                 _size = str(dist.get("content_size") or "")
                 if _size.isdigit():
@@ -5331,8 +5367,9 @@ class AuthoringWorkspace:
                     "schema:name":          fname,
                     "schema:isPartOf":      {"@id": ds_id},
                 }
-                if dist["checksum"]:
-                    sdl["schema:sha256"] = dist["checksum"]
+                # schema:sha256 names one algorithm, so it is reserved for a real
+                # sha256; anything else rides a named PropertyValue.
+                sdl.update(schema_checksum_terms(dist["checksum"]))
                 if dist.get("description"):
                     sdl["schema:description"] = dist["description"]
                 if _size.isdigit():
@@ -6264,12 +6301,7 @@ class AuthoringWorkspace:
             serial_number=result.get("serial_number"),
             batch_id=result.get("batch_id"),
         )
-        for label in (result.get("name"), result.get("serial_number")):
-            if label:
-                self._cells_by_short_id[label] = cell
-                sid = _short_id(label)
-                if sid:
-                    self._cells_by_short_id[sid] = cell
+        self._index_cell(cell, result.get("serial_number"), result.get("name"))
         return cell
 
     def _reference_spec(self, result: dict) -> Any:
@@ -6357,9 +6389,11 @@ class AuthoringWorkspace:
     ) -> builtins.list:
         """Create cell instances.
 
-        * ``names`` — human labels (e.g. lab batch IDs); the primary identifier.
+        * ``names`` — human labels (e.g. lab batch IDs); display text, which
+          several cells of one batch may share.
         * ``serial_numbers`` — manufacturer serials (optional); parallel to ``names``
-          when both are given.
+          when both are given. The serial is the cell's identity: it de-duplicates
+          the batch and must be unique within it.
         * ``iris`` — pre-allocated IRIs to reuse instead of minting (parallel, equal length).
         * ``from_file`` — JSON file mapping ``{name: pre-allocated-IRI}``.
         """
@@ -6403,19 +6437,50 @@ class AuthoringWorkspace:
             else:
                 entries = [(n, s, None) for (n, s) in pairs]
 
-            # Drop duplicates and cells already in this session (by their label).
-            seen: set[str] = set()
+            # Drop cells already in this session, keyed on IDENTITY.
+            #
+            # A cell instance is identified by its serial number. The name is
+            # display text: a batch may legitimately share one public label
+            # across many physical cells (95 cells under 12 labels is a real
+            # shape), so keying the de-duplication on the label collapsed such a
+            # batch to one cell per label and lost the rest without failing.
+            # Prefer the serial; fall back to the name only when no serial is
+            # supplied, which is the single-label case the old key served.
+            seen: dict[str, str | None] = {}
             already: list[str] = []
+            repeated_serials: list[str] = []
+            repeated_names: list[str] = []
             deduped: list[tuple[str | None, str | None, str | None]] = []
             for n, s, iri in entries:
-                label = n or s or ""
-                if label in seen:
+                key = s or n or ""
+                if key and key in seen:
+                    # Two entries claiming one identity. A repeated serial is a
+                    # contradiction in the input (loud); a repeated bare name is
+                    # merely indistinguishable (warn and keep the first).
+                    (repeated_serials if s else repeated_names).append(key)
                     continue
-                if label and label in self._cells_by_short_id:
-                    already.append(label)
+                if key and key in self._cells_by_short_id:
+                    already.append(key)
                     continue
-                seen.add(label)
+                if key:
+                    seen[key] = n
                 deduped.append((n, s, iri))
+            if repeated_serials:
+                dupes = sorted(set(repeated_serials))
+                raise ValueError(
+                    f"serial_numbers contains {len(repeated_serials)} repeated serial(s): "
+                    f"{dupes[:5]}" + (" ..." if len(dupes) > 5 else "") + ". "
+                    "A serial number identifies one physical cell, so it cannot appear "
+                    "twice in one batch. Names may repeat; serials may not."
+                )
+            if repeated_names:
+                dupes = sorted(set(repeated_names))
+                print(
+                    f"  WARNING: {len(repeated_names)} repeated name(s) with no serial "
+                    f"-- keeping the first of each: {dupes[:5]}"
+                    + (" ..." if len(dupes) > 5 else "")
+                    + "\n           Pass serial_numbers=[...] to author them as distinct cells."
+                )
             if already:
                 print(f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
                       + (" ..." if len(already) > 5 else ""))
@@ -6457,13 +6522,10 @@ class AuthoringWorkspace:
             )
             if iri is not None:
                 cell.id = iri
-            # Index by both the name and the serial (and their short IDs) for matching.
-            for cell_key in (name, serial):
-                if cell_key:
-                    self._cells_by_short_id[cell_key] = cell
-                    sid = _short_id(cell_key)
-                    if sid:
-                        self._cells_by_short_id[sid] = cell
+            # Index by both the serial and the name (and their short IDs) for
+            # matching. The serial goes first so it wins the identity slot; a
+            # name shared by several cells is flagged ambiguous, not overwritten.
+            self._index_cell(cell, serial, name)
             cells.append(cell)
             print(f"  cell: {name or serial}  {iri or '(IRI auto-assigned)'}")
         return cells
@@ -7122,10 +7184,19 @@ class AuthoringWorkspace:
             sid = _short_id(s)
 
             def _lookup() -> Any:
-                hit = self._cells_by_short_id.get(s)
-                if hit is None and sid:
-                    hit = self._cells_by_short_id.get(sid)
-                return hit
+                for key in (s, sid):
+                    if not key:
+                        continue
+                    if key in self._ambiguous_cell_keys:
+                        raise ValueError(
+                            f"{key!r} matches more than one cell in this workspace, so it "
+                            "cannot identify one. It is a display name shared by several "
+                            "cells; reference the cell by its serial number or IRI instead."
+                        )
+                    hit = self._cells_by_short_id.get(key)
+                    if hit is not None:
+                        return hit
+                return None
 
             hit = _lookup()
             if hit is None:
@@ -7188,6 +7259,16 @@ class AuthoringWorkspace:
         tests = []
         for f in matched_files:
             sid = _short_id(f.stem)
+            ambiguous = next(
+                (k for k in (sid, f.stem) if k and k in self._ambiguous_cell_keys), None
+            )
+            if ambiguous is not None:
+                # Matching this file to "a" cell would attach the measurement to
+                # an arbitrary one of several. Skip it and say why.
+                unmatched.append(f)
+                print(f"  AMBIGUOUS {f.name} -- {ambiguous!r} matches more than one cell; "
+                      "name the file after the serial number")
+                continue
             if sid and sid in self._cells_by_short_id:
                 cell, how = self._cells_by_short_id[sid], f'short id "{sid}"'
             elif f.stem in self._cells_by_short_id:
