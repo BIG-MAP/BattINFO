@@ -489,8 +489,8 @@
 unit IRI, by the curated mapping tables under
 <code class="docutils literal notranslate"><span class="pre">assets/mappings/domain-battery/</span></code> — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.</p>
-<section id="properties-71">
-<h2>Properties (71)<a class="headerlink" href="#properties-71" title="Link to this heading">#</a></h2>
+<section id="properties-77">
+<h2>Properties (77)<a class="headerlink" href="#properties-77" title="Link to this heading">#</a></h2>
 <p>The keys accepted in <code class="docutils literal notranslate"><span class="pre">properties={...}</span></code> on a cell spec, and the EMMO
 class each becomes in JSON-LD:</p>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -513,19 +513,25 @@ class each becomes in JSON-LD:</p>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405">Mass</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">capacity_fade</span></code></p></td>
-<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6">CapacityFade</a></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0">CapacityFadeRate</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">certified_usable_energy</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">capacity_threshold_exhaustion</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5">EndOfLifeCapacityThreshold</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">certified_usable_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_cutoff_voltage</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_cutoff_voltage</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88">UpperVoltageLimit</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_max</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_max</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260">MaximumChargingTemperature</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_min</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_min</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49">MinimumChargingTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_time</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7">ChargingTime</a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_voltage</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87">ChargingVoltage</a></p></td>
@@ -596,71 +602,83 @@ class each becomes in JSON-LD:</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_discharging_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d">MaximumDischargingTemperature</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_pulse_charging_current</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_power</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0">MaximumPower</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_pulse_charging_current</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da">MaximumPulseChargingCurrent</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_pulse_discharging_current</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_pulse_discharging_current</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b">MaximumPulseDischargingCurrent</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_storage_temperature</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">maximum_storage_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7">MaximumStorageTemperature</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min_capacity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5">MinimumCapacity</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_capacity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5">MinimumCapacity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_charging_temperature</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_charging_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49">MinimumChargingTemperature</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_discharging_temperature</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_discharging_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b">MinimumDischargingTemperature</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_storage_temperature</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">minimum_storage_temperature</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302">MinimumStorageTemperature</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_p_ratio</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_p_ratio</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723">NPRatio</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100">NominalCapacity</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_energy</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_voltage</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_voltage</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6">NominalVoltage</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operating_temperature_max</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operating_temperature_max</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553">MaximumOperatingTemperature</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">operating_temperature_min</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operating_temperature_min</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51">MinimumOperatingTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">power_capability</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0">MaximumPower</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">power_density</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a">PowerDensity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">press_density</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">power_energy_ratio</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c">PowerToEnergyRatio</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">press_density</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379">CalenderedDensity</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pulse_charging_current</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pulse_charging_current</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da">MaximumPulseChargingCurrent</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pulse_discharging_current</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pulse_discharging_current</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b">MaximumPulseDischargingCurrent</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rated_areal_discharge_capacity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rated_areal_discharge_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a">AreicCapacity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rated_capacity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rated_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26">RatedCapacity</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rated_energy</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rated_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rated_specific_discharge_capacity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rated_specific_discharge_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee">DischargingSpecificCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">round_trip_energy_efficiency</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11">RoundTripEnergyEfficiency</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">self_discharge_rate</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e">SelfDischargeRate</a></p></td>
@@ -889,7 +907,7 @@ surface as machine-readable issues.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-71">Properties (71)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-77">Properties (77)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-35">Units (35)</a></li>
 </ul>
   </nav></div>
