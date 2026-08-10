@@ -7,6 +7,49 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **EMMO pins: domain-battery 0.20.1 → 0.20.2, domain-electrochemistry 0.36.0 →
+  0.37.2** (chemical-substance 0.15.0 and EMMO 1.0.2 unchanged). The bundled
+  domain-battery context is refreshed to the 0.20.2 release, and every EMMO IRI
+  in the curated mappings, static label tables, contexts and generated vocab was
+  re-verified against the new closure: no dangling or drifted reference outside
+  the frozen v1 context.
+
+- **`PrismaticBattery` points at the underscore-named twin.** domain-battery
+  0.20.2 minted `battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d` and deprecated the
+  hyphenated original with `dcterms:isReplacedBy` (upstream issue #73). New records
+  carry the twin; the validator still accepts the hyphenated IRI, and the frozen
+  v1 context still serves it, so records published before the flip keep validating.
+
+- **Seven quantity slots leave the `battinfo:` namespace** for classes published in
+  domain-electrochemistry 0.37.1: `capacity_fade` → `CapacityFadeRate`,
+  `charging_time` → `ChargingTime`, `maximum_power` and `power_capability` →
+  `MaximumPower` (`PowerCapability` is its altLabel, so both keys share one class),
+  `power_energy_ratio` → `PowerToEnergyRatio`, `round_trip_energy_efficiency` →
+  `RoundTripEnergyEfficiency`, `capacity_threshold_exhaustion` →
+  `EndOfLifeCapacityThreshold`. `capacity_fade` also stops being a category error:
+  it used to point at `CapacityFade`, an `ElectrochemicalDegradationPhenomenon` on
+  the Process branch, so a unit-bearing datasheet value was typed as a process.
+  `records.context.v1.json` is append-only, so the six new class labels are added
+  there while the seven pre-existing snake_case terms keep their published values —
+  URL-context documents carry the new IRIs only for the class labels until a v2.
+
+- **The `battinfo:` vocabulary honesty check sees the whole source tree.** It
+  matched only double-quoted CURIEs, so `bundle_generated.py` — where LinkML
+  renders `slot_uri` metadata with single quotes — was invisible to it, along with
+  46 terms it never had to account for. The inventory is now sourced from the
+  schema and from every published context as well as the working one, because
+  retiring a term from the working context must not un-publish its IRI: documents
+  minted against v1 still expand to it. `assets/vocab/battinfo-records.ttl` grows
+  from 8 to 46 declared terms, all of which now dereference.
+
+### Fixed
+
+- **`RoundTripEfficiencyValueShape` and `CapacityFadeValueShape`** targeted only the
+  pre-0.37.1 classes, so the plausibility ranges silently stopped applying to
+  records typed with the new ones. Both now target the new and the published IRI.
+
 ### Security
 
 - **Dependabot backlog (web/)**: `postcss` bumped 8.4.39 → 8.5.16 and pinned

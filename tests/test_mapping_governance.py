@@ -194,12 +194,12 @@ def test_battinfo_application_ontology_imports_are_pinned() -> None:
     ontology_path = ROOT / "battinfo.ttl"
     content = ontology_path.read_text(encoding="utf-8")
     # Versioned IRI must be present; floating (unversioned) import is not acceptable.
-    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.20.1/battery>" in content, (
+    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.20.2/battery>" in content, (
         "battinfo.ttl must import domain-battery at a pinned version IRI. "
         "Update the import and this assertion together when upgrading."
     )
     # domain-electrochemistry must also be declared explicitly.
-    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.36.0/electrochemistry>" in content, (
+    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.37.2/electrochemistry>" in content, (
         "battinfo.ttl must explicitly import domain-electrochemistry at a pinned version IRI."
     )
     # domain-chemical-substance carries the material vocabulary material_map.json uses.

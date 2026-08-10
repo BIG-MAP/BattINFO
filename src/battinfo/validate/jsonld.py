@@ -182,6 +182,17 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "MinimumOperatingTemperature",
     "MaximumOperatingTemperature",
     "TypicalCapacity",
+    # Quantity classes new in domain-electrochemistry 0.37.1. The six that back a
+    # schema slot arrive automatically via property_map.curated.json; these two
+    # have no save-gate key yet, so they are named here to keep imported and
+    # hand-authored documents that already use them valid.
+    "CapacityLoss",
+    "ChargeRecovery",
+    # PowerCapability / CapacityFadePerCycle are altLabels of MaximumPower /
+    # CapacityFadeRate. Emitters use the prefLabel; kept so documents written
+    # against the altLabel still validate.
+    "PowerCapability",
+    "CapacityFadePerCycle",
     # Half-cell / three-electrode device classes. A battery half-cell types as
     # BatteryHalfCell + HalfCellDevice, never as ElectrochemicalHalfCell.
     "BatteryHalfCell",

@@ -11,8 +11,9 @@ The vocabulary written to assets/vocab/battinfo-records.ttl is therefore an
 explicit, closed inventory:
 
   (a) PLACEHOLDER terms — every battinfo: alias in the bundled records context
-      (data/context/records.context.json). Each awaits an upstream EMMO term
-      (step-6 drain, gated on domain-battery/electrochemistry releases).
+      (data/context/records.context.json) AND every battinfo: slot_uri/class_uri
+      declared in schema/*.yaml. Each awaits an upstream EMMO term (step-6
+      drain, gated on domain-battery/electrochemistry releases).
   (b) RESIDUE terms — hand-curated, genuinely-local record-plumbing terms the
       code still emits, each with a hand-written rdfs:comment. Currently empty.
 
@@ -41,9 +42,16 @@ import json
 import re
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
+SCHEMA_DIR = ROOT / "schema"
 OUT = ROOT / "assets" / "vocab" / "battinfo-records.ttl"
 CONTEXT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.json"
+# The frozen, hosted context. Its terms stay published forever, so its
+# battinfo: aliases stay in the inventory even after the working context
+# repoints them at an upstream EMMO class.
+PUBLISHED_CONTEXT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
 SAVE_GATE = ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json"
 UNIT_MAP = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "unit_map.curated.json"
 
@@ -57,8 +65,12 @@ UNIT_MAP = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / 
 NS = "https://w3id.org/battinfo/ns#"
 
 # ── Scan patterns (the honesty check) ─────────────────────────────────────────
-CURIE_RE = re.compile(r'"battinfo:([A-Za-z_][A-Za-z0-9_]*)"')
-FULL_IRI_RE = re.compile(r'"https://w3id\.org/battinfo/([A-Za-z][A-Za-z0-9_]*)"')
+# Both quote styles. Hand-written source uses double quotes, but LinkML's
+# gen-pydantic renders the `linkml_meta` slot_uri/class_uri declarations with
+# single quotes, so a double-quote-only scan skipped bundle_generated.py in its
+# entirety — 46 battinfo: CURIEs the inventory never had to account for.
+CURIE_RE = re.compile(r"""["']battinfo:([A-Za-z_][A-Za-z0-9_]*)["']""")
+FULL_IRI_RE = re.compile(r"""["']https://w3id\.org/battinfo/([A-Za-z][A-Za-z0-9_]*)["']""")
 # CURIE-form f-strings mint vocabulary terms; full-IRI f-strings under the
 # slash namespace mint record *identifiers* (spec/<uid>, cell/<uid> - policy
 # section 3), which are not vocabulary terms and are out of scope here.
@@ -88,13 +100,46 @@ RESIDUE: dict[str, str] = {}
 
 
 def placeholder_terms() -> dict[str, list[str]]:
-    """battinfo: aliases in the records context -> the record keys aliasing them."""
-    context = json.loads(CONTEXT.read_text(encoding="utf-8"))["@context"]
+    """battinfo: placeholder term -> the record keys that alias it.
+
+    Sourced from BOTH the records context and the LinkML schema. The context
+    alone is not the whole surface: assemble_context.py drops internal
+    prefixed slot names (ci_, ts_, ct_, ...) from the emitted context, so
+    schema-declared terms like battinfo:batchId never appeared as placeholders
+    even though the generated models and the published schema both carry them.
+    Every battinfo: IRI that exists anywhere must dereference here.
+    """
     out: dict[str, list[str]] = {}
-    for key, value in context.items():
-        iri = value.get("@id") if isinstance(value, dict) else value
-        if isinstance(iri, str) and iri.startswith("battinfo:"):
-            out.setdefault(iri[len("battinfo:"):], []).append(key)
+
+    # Both the working context and every frozen published context. Retiring a
+    # term from the working context (because an upstream EMMO class finally
+    # landed) must not un-publish its IRI: documents minted against v1 still
+    # expand to battinfo:<term>, so w3id.org/battinfo/<term> has to keep
+    # dereferencing for as long as that context version is served.
+    for path in (CONTEXT, PUBLISHED_CONTEXT):
+        if not path.exists():
+            continue
+        context = json.loads(path.read_text(encoding="utf-8"))["@context"]
+        for key, value in context.items():
+            iri = value.get("@id") if isinstance(value, dict) else value
+            if isinstance(iri, str) and iri.startswith("battinfo:"):
+                keys = out.setdefault(iri[len("battinfo:"):], [])
+                if key not in keys:
+                    keys.append(key)
+
+    for path in sorted(SCHEMA_DIR.glob("*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            continue
+        for block, uri_key in (("slots", "slot_uri"), ("classes", "class_uri")):
+            for name, defn in (data.get(block) or {}).items():
+                if not isinstance(defn, dict):
+                    continue
+                iri = defn.get(uri_key)
+                if isinstance(iri, str) and iri.startswith("battinfo:"):
+                    keys = out.setdefault(iri[len("battinfo:"):], [])
+                    if name not in keys:
+                        keys.append(name)
     return out
 
 

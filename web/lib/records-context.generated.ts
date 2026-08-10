@@ -502,6 +502,12 @@ export const recordsContext: Record<string, unknown> = {
     "CapacityTest": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_137dc19f_a3af_49af_971f_743d27e09f43",
     "FormationCycling": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cb223440_51bd_4f16_a536_96ec408e7de4",
     "ControlProperty": "electrochemistry:electrochemistry_33e6986c_b35a_4cae_9a94_acb23248065c",
-    "AmperePerAmpereHour": "electrochemistry:AmperePerAmpereHour"
+    "AmperePerAmpereHour": "electrochemistry:AmperePerAmpereHour",
+    "CapacityFadeRate": "electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0",
+    "EndOfLifeCapacityThreshold": "electrochemistry:electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5",
+    "ChargingTime": "electrochemistry:electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7",
+    "MaximumPower": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
+    "PowerToEnergyRatio": "electrochemistry:electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c",
+    "RoundTripEnergyEfficiency": "electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11"
   }
 };

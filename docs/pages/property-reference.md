@@ -9,7 +9,7 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (71)
+## Properties (77)
 
 The keys accepted in `properties={...}` on a cell spec, and the EMMO
 class each becomes in JSON-LD:
@@ -20,11 +20,13 @@ class each becomes in JSON-LD:
 | `available_volume` | [Volume](https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed) |
 | `calendar_life` | [CalendarLife](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df) |
 | `cap_assembly_weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
-| `capacity_fade` | [CapacityFade](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3d3d21c_cb9a_498c_bdb0_63c964f0d3c6) |
+| `capacity_fade` | [CapacityFadeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0) |
+| `capacity_threshold_exhaustion` | [EndOfLifeCapacityThreshold](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5) |
 | `certified_usable_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `charging_cutoff_voltage` | [UpperVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88) |
 | `charging_temperature_max` | [MaximumChargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260) |
 | `charging_temperature_min` | [MinimumChargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49) |
+| `charging_time` | [ChargingTime](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7) |
 | `charging_voltage` | [ChargingVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87) |
 | `continuous_charging_current` | [MaximumContinuousChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78) |
 | `continuous_discharging_current` | [MaximumContinuousDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5) |
@@ -48,6 +50,7 @@ class each becomes in JSON-LD:
 | `maximum_continuous_charging_current` | [MaximumContinuousChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78) |
 | `maximum_continuous_discharging_current` | [MaximumContinuousDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5) |
 | `maximum_discharging_temperature` | [MaximumDischargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d) |
+| `maximum_power` | [MaximumPower](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0) |
 | `maximum_pulse_charging_current` | [MaximumPulseChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da) |
 | `maximum_pulse_discharging_current` | [MaximumPulseDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b) |
 | `maximum_storage_temperature` | [MaximumStorageTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7) |
@@ -62,7 +65,9 @@ class each becomes in JSON-LD:
 | `nominal_voltage` | [NominalVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6) |
 | `operating_temperature_max` | [MaximumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553) |
 | `operating_temperature_min` | [MinimumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51) |
+| `power_capability` | [MaximumPower](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0) |
 | `power_density` | [PowerDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a) |
+| `power_energy_ratio` | [PowerToEnergyRatio](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c) |
 | `press_density` | [CalenderedDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379) |
 | `pulse_charging_current` | [MaximumPulseChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1b2a7137_64d4_483a_8437_dcb3bedcb6da) |
 | `pulse_discharging_current` | [MaximumPulseDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b) |
@@ -70,6 +75,7 @@ class each becomes in JSON-LD:
 | `rated_capacity` | [RatedCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26) |
 | `rated_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `rated_specific_discharge_capacity` | [DischargingSpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee) |
+| `round_trip_energy_efficiency` | [RoundTripEnergyEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11) |
 | `self_discharge_rate` | [SelfDischargeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e) |
 | `single_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
 | `specific_energy` | [SpecificEnergy](https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9) |

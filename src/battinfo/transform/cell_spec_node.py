@@ -88,9 +88,11 @@ _STATIC_LABEL_TO_COMPACT: dict[str, str] = {
     "BatteryCell":             "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
     "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
     "CylindricalBattery":      "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
-    # Upstream spells this one local name with hyphens, not underscores. Copied as
-    # published so the term expands to an IRI that exists in domain-battery.
-    "PrismaticBattery":        "battery:battery_86c9ca80-de6f-417f-afdc-a7e52fa6322d",
+    # domain-battery 0.20.2 minted an underscore-named twin and deprecated the
+    # hyphen-named original (dcterms:isReplacedBy, upstream issue #73). Records
+    # minted from here carry the twin; the validator still accepts the hyphen
+    # form so previously published records keep validating.
+    "PrismaticBattery":        "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
     "PouchCell":               "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
     "CoinCell":                "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
     "LithiumIonBattery":                   "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
