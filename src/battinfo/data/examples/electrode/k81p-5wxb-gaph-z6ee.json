@@ -1,9 +1,9 @@
 {
   "schema_version": "0.2.0",
   "electrode": {
-    "id": "https://w3id.org/battinfo/electrode/svnh-5a39-fjrz-em1a",
-    "electrode_spec_id": "https://w3id.org/battinfo/spec/fvwx-7fq1-wwfs-fn3g",
-    "short_id": "svnh5a",
+    "id": "https://w3id.org/battinfo/electrode/k81p-5wxb-gaph-z6ee",
+    "electrode_spec_id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
+    "short_id": "k81p5w",
     "property": {
       "diameter": {
         "value": 16,

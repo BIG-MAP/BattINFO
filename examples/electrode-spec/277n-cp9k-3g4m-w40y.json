@@ -1,9 +1,11 @@
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/8pdh-vrd3-tjar-8mgq",
-    "short_id": "8pdhvr",
+    "id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y",
+    "short_id": "277ncp",
     "name": "MnO2 cathode",
+    "kind": "mno2",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/fwnh-2wkq-n9wm-fdab",
     "coating": {
       "component": {
         "active_material": [

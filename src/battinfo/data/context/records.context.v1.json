@@ -502,6 +502,8 @@
     "ChargingTime": "electrochemistry:electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7",
     "MaximumPower": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
     "PowerToEnergyRatio": "electrochemistry:electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c",
-    "RoundTripEnergyEfficiency": "electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11"
+    "RoundTripEnergyEfficiency": "electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11",
+    "LithiumNickelManganeseOxideElectrode": "electrochemistry:electrochemistry_41ddf723_245f_4ce8_b9b1_7d9b3b9eea7d",
+    "ZincElectrode": "electrochemistry:electrochemistry_424bf750_7df5_49b5_ba73_ba74397a166b"
   }
 }

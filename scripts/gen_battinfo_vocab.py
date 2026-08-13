@@ -207,6 +207,15 @@ _NS_CLASSES: dict[str, str | None] = {
     "TestSpec": None,
     "BatteryTest": "BatteryTest",
     "Dataset": None,
+    # Material and electrode records became submittable alongside the five above;
+    # their envelope @type needs a defining subject too, or a served record
+    # dereferences to nothing. None throughout: the grounding classes live in the
+    # domain-battery context, not the records context this generator reads, and a
+    # key that resolves to nothing would be a mapping that only looks present.
+    "MaterialSpec": None,
+    "Material": None,
+    "ElectrodeSpec": None,
+    "Electrode": None,
 }
 # Registry Turtle projection spellings that MUST resolve to the same class as
 # their canonical ns# sibling (documented divergence: the registry emits these

@@ -296,6 +296,13 @@ def _allowed_type_terms() -> set[str]:
         if isinstance(emmo_class, str) and emmo_class:
             allowed.add(emmo_class)
 
+    # An electrode-spec stacks its polarity class onto the chemistry class from
+    # the entity map above. Same argument as the kind vocabulary: read the ONE
+    # table the emitter uses, so the emitter cannot produce a type this rejects.
+    from battinfo.electrodes import ELECTRODE_POLARITY_TYPES  # noqa: PLC0415
+
+    allowed.update(ELECTRODE_POLARITY_TYPES.values())
+
     return allowed
 
 

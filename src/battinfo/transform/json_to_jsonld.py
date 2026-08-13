@@ -483,9 +483,23 @@ _DESCRIPTOR_PROPERTY_TERMS: dict[str, str] = {
 _DESCRIPTOR_COATING_PROPERTY_TERMS: dict[str, str] = {
     **_DESCRIPTOR_PROPERTY_TERMS,
     "loading": "ActiveMassLoading",
+    "areal_loading": "ActiveMassLoading",
     "thickness": "CalenderedCoatingThickness",
+    "calendered_thickness": "CalenderedCoatingThickness",
+    "calendered_coating_thickness": "CalenderedCoatingThickness",
     "dry_thickness": "DryCoatingThickness",
     "dry_coating_thickness": "DryCoatingThickness",
+}
+
+# Electrode-spec / electrode design values. Same specializations as the coating
+# (an electrode's loading IS its coating's active-mass loading — authors put it
+# at whichever level reads naturally, and both map to the same EMMO class), plus
+# the areal capacity terms an electrode design states.
+_ELECTRODE_PROPERTY_TERMS: dict[str, str] = {
+    **_DESCRIPTOR_COATING_PROPERTY_TERMS,
+    "areal_capacity": "AreicCapacity",
+    "nominal_areal_capacity": "AreicCapacity",
+    "reversible_areal_capacity": "AreicCapacity",
 }
 
 
@@ -1508,9 +1522,19 @@ def _apply_specification_composition(battery: dict[str, Any], specification: dic
                     tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
                 if len(tab_node) > 1:
                     electrode_node["hasCurrentCollectorTab"] = tab_node
-            prop_nodes = _descriptor_property_nodes(electrode_data.get("property"))
+            prop_nodes = _descriptor_property_nodes(
+                electrode_data.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS
+            )
             if prop_nodes:
                 electrode_node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+            # An inline holder may cite the standalone electrode-spec it realizes,
+            # the same seam material_spec_id gives an inline material. Emitted as
+            # schema:isVariantOf (the holder IS NOT the spec); the top-level
+            # positive/negative_electrode_spec_id fields keep their @id-merge
+            # behaviour below, so both reference styles stay valid.
+            holder_spec_ref = electrode_data.get("electrode_spec_id")
+            if isinstance(holder_spec_ref, str) and holder_spec_ref:
+                electrode_node["schema:isVariantOf"] = {"@id": holder_spec_ref}
         basis = specification.get(basis_field)
         basis_label = basis.strip() if isinstance(basis, str) else ""
         if isinstance(node_type, str) and node_type:
@@ -2043,24 +2067,149 @@ def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _electrode_holder_node(body: dict[str, Any]) -> dict[str, Any]:
-    node: dict[str, Any] = {"@type": "Electrode"}
+def _electrode_kind_node_type(kind: Any, polarity: Any) -> str | None:
+    """The chemistry-specific EMMO electrode class for a kind, or ``None``.
+
+    Reuses the curated ``*_electrode_basis`` entity mappings the cell-spec
+    emitter already uses — a kind is looked up on the side its polarity implies,
+    then on the other side, so ``silicon_graphite`` reaches
+    ``SiliconGraphiteElectrode`` whether or not the record states a polarity.
+    (``_entity_mapping`` normalises the underscore form to the map's hyphenated
+    keys, so no second spelling table is needed.)
+    """
+    if not isinstance(kind, str) or not kind.strip():
+        return None
+    fields = ("positive_electrode_basis", "negative_electrode_basis")
+    if polarity == "negative":
+        fields = fields[::-1]
+    for field in fields:
+        mapping = _entity_mapping(field, kind)
+        node_type = (mapping or {}).get("node_type")
+        if isinstance(node_type, str) and node_type:
+            return node_type
+    return None
+
+
+def _electrode_types(kind: Any, polarity: Any) -> str | list[str]:
+    """``@type`` for an electrode node: chemistry class + polarity class.
+
+    The chemistry defined-classes (GraphiteElectrode, LithiumIronPhosphateElectrode,
+    …) say what the electrode is made of; they do not encode which side it is on,
+    so the polarity class is stacked on top.
+    """
+    from battinfo.electrodes import ELECTRODE_POLARITY_TYPES
+
+    types: list[str] = []
+    node_type = _electrode_kind_node_type(kind, polarity)
+    if node_type:
+        types.append(node_type)
+    polarity_type = ELECTRODE_POLARITY_TYPES.get(str(polarity or ""))
+    if polarity_type:
+        types.append(polarity_type)
+    if not types:
+        return "Electrode"
+    return types[0] if len(types) == 1 else types
+
+
+def _electrode_holder_node(
+    body: dict[str, Any], *, kind: Any = None, polarity: Any = None
+) -> dict[str, Any]:
+    """The shared electrode node: type, coating, current collector, tab, properties.
+
+    Used for a standalone electrode-spec/electrode record and for an inline
+    cell-spec electrode holder, so there is one electrode emitter, never two.
+    """
+    node: dict[str, Any] = {"@type": _electrode_types(kind, polarity)}
     coating = _descriptor_electrode_coating_to_jsonld(body.get("coating"))
     if coating:
         node["hasCoating"] = coating
     cc = _descriptor_current_collector_to_jsonld(body.get("current_collector"))
     if cc:
         node["hasCurrentCollector"] = cc
-    prop_nodes = _descriptor_property_nodes(body.get("property"))
+    tab = body.get("tab")
+    if isinstance(tab, dict) and tab:
+        tab_node: dict[str, Any] = {"@type": "CurrentCollectorTab"}
+        if tab.get("material"):
+            tab_node["schema:material"] = tab["material"]
+        tab_props = _descriptor_property_nodes(tab.get("property"))
+        if tab_props:
+            tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
+        if len(tab_node) > 1:
+            node["hasCurrentCollectorTab"] = tab_node
+    prop_nodes = _descriptor_property_nodes(
+        body.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS
+    )
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
     return node
 
 
+def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
+    """Emit a standalone electrode-spec / electrode record as domain-battery JSON-LD.
+
+    The spec's ``kind`` is the semantic anchor, exactly as a material-spec's is:
+    it types the node with the chemistry-specific EMMO electrode class, stacked
+    with the polarity class. ``active_material_spec_id`` rides ``hasActiveMaterial``
+    as a linked node — the seam back to the powder record. ``processing`` becomes
+    the ``prov:wasGeneratedBy`` Manufacturing process (the same emitter a material
+    lot uses), which is why an aqueous and an NMP electrode are legible as
+    different designs and not just different strings.
+    """
+    is_spec = isinstance(data.get("electrode_spec"), dict)
+    body = data.get("electrode_spec") if is_spec else data.get("electrode")
+    body = body if isinstance(body, dict) else {}
+
+    spec_body = body
+    if not is_spec:
+        # An instance carries no chemistry of its own; its type comes from the
+        # spec it realizes, which is not resolvable here, so it stays generic.
+        spec_body = {}
+    node = _electrode_holder_node(
+        body, kind=spec_body.get("kind"), polarity=spec_body.get("polarity")
+    )
+    if isinstance(body.get("id"), str):
+        node["@id"] = body["id"]
+    if isinstance(body.get("name"), str) and body["name"]:
+        node["schema:name"] = body["name"]
+    active_ref = body.get("active_material_spec_id")
+    if isinstance(active_ref, str) and active_ref:
+        node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
+    if isinstance(body.get("electrode_spec_id"), str):
+        node["schema:isVariantOf"] = {"@id": body["electrode_spec_id"]}
+    # Batch identity: the strings tying this record to the physical stack of
+    # electrodes on the bench, as named schema:PropertyValues (as materials do).
+    identifiers = [
+        {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
+        for key in ("batch_id", "lot_id")
+        if isinstance(body.get(key), str) and body[key].strip()
+    ]
+    if identifiers:
+        node["schema:identifier"] = identifiers[0] if len(identifiers) == 1 else identifiers
+    processing = _processing_node(body.get("processing"))
+    if processing:
+        node["prov:wasGeneratedBy"] = processing
+    if isinstance(body.get("description"), str) and body["description"]:
+        node["schema:description"] = body["description"]
+    citation = _citation_to_jsonld(data.get("provenance"))
+    if citation is not None:
+        node["schema:citation"] = citation
+    notes = [n for n in (data.get("notes") or []) if isinstance(n, str) and n.strip()]
+    if notes:
+        node["schema:comment"] = notes[0] if len(notes) == 1 else notes
+    return {
+        "@context": _base_context(
+            include_battinfo=True,
+            include_has_battery=False,
+            include_has_measurement=False,
+            include_has_property=True,
+            include_bibo=_citation_doi_value(data.get("provenance")) is not None,
+        ),
+        "@graph": [node],
+    }
+
+
 def _component_holder_node(family: str, body: dict[str, Any]) -> dict[str, Any]:
     """Build the domain-battery node for a component holder body, reusing the cell emitters."""
-    if family == "electrode":
-        return _electrode_holder_node(body)
     if family == "electrolyte":
         return _descriptor_electrolyte_to_jsonld(body) or {"@type": "ElectrolyteSolution"}
     if family == "separator":
@@ -2114,6 +2263,16 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("material_spec"), dict) or isinstance(data.get("material"), dict):
         return _to_domain_battery_jsonld_material(data)
+    # A first-class electrode record. Checked before the cell-spec branch would
+    # ever see it, and gated on schema_version so a cell descriptor carrying an
+    # inline `electrode` holder is never mistaken for an electrode record.
+    if (
+        isinstance(data.get("electrode_spec"), dict)
+        or (isinstance(data.get("electrode"), dict) and data.get("schema_version") is not None
+            and not isinstance(data.get("cell_spec"), dict)
+            and not isinstance(data.get("specification"), dict))
+    ):
+        return _to_domain_battery_jsonld_electrode(data)
     # Record-level classification wins over component-family sniffing: a cell_spec
     # (or descriptor) record carries inline component blocks (housing, electrodes,
     # separator, ...) as fields, and those keys collide with the standalone

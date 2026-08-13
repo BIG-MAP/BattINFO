@@ -3384,7 +3384,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/electrode-spec.schema.json",
       "title": "BattINFO Electrode Spec",
-      "description": "Reusable electrode specification (coating + current collector). The 'spec' half of the electrode-spec + electrode pair; references material-specs by IRI.",
+      "description": "A coated electrode as a designed artifact: active-material kind, coating composition, design values (loading, thicknesses, areal capacity), current collector and processing route. The 'spec' half of the electrode-spec + electrode pair; an electrode instance is a physical batch realizing this spec. The material spec describes the powder; the electrode spec describes the electrode.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -3413,7 +3413,13 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "name": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "description": "Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2')."
+            },
+            "kind": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
             },
             "polarity": {
               "type": "string",
@@ -3421,30 +3427,50 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "positive",
                 "negative",
                 "unknown"
-              ]
+              ],
+              "description": "Electrode polarity. Derived from the kind's family when not authored (active_cathode -> positive, active_anode -> negative)."
+            },
+            "grade": {
+              "type": "string",
+              "description": "Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name."
+            },
+            "active_material_spec_id": {
+              "$ref": "#/$defs/MaterialSpecIri",
+              "description": "Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry."
             },
             "coating": {
-              "$ref": "modules/components/electrode-coating.schema.json"
+              "$ref": "modules/components/electrode-coating.schema.json",
+              "description": "Coating composition and coating-level design values. 'component.active_material / binder / additive' each carry a weight fraction under property.mass_fraction — the same shape a cell-spec's inline electrode coating uses, so a composition authored here is the composition a cell reads."
             },
             "current_collector": {
-              "$ref": "modules/components/current-collector.schema.json"
+              "$ref": "modules/components/current-collector.schema.json",
+              "description": "Current-collector foil: material (name and/or material_spec_id) and its thickness under property."
             },
             "tab": {
               "type": "object",
               "title": "CurrentCollectorTab",
               "description": "Electrode current-collector tab (width, thickness, length, weld_width, tape_width)."
             },
+            "processing": {
+              "$ref": "#/$defs/Processing"
+            },
             "manufacturer": {
-              "$ref": "#/$defs/OrgRef"
+              "$ref": "#/$defs/OrgRef",
+              "description": "Producer of this electrode design — a vendor for a purchased electrode, or the lab that designed it for an in-house coating. Part of spec identity."
             },
             "supplier": {
               "$ref": "#/$defs/OrgRef"
             },
             "product_id": {
-              "type": "string"
+              "type": "string",
+              "description": "Producer product / design identifier. Preferred over 'name' as the product half of the spec identity when present."
             },
             "property": {
-              "$ref": "modules/common/quantitative-properties.schema.json"
+              "$ref": "modules/common/quantitative-properties.schema.json",
+              "description": "Electrode-level design values: areal loading ('loading'), dry and calendered coating thickness ('dry_thickness' / 'calendered_thickness'), nominal areal capacity ('areal_capacity'), porosity, diameter / width / length. An open snake_case map — new design values need no schema change."
+            },
+            "description": {
+              "type": "string"
             },
             "comment": {
               "type": "string"
@@ -3459,12 +3485,32 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "items": {
             "type": "string"
           }
+        },
+        "funding": {
+          "$ref": "#/$defs/Funding"
+        },
+        "contributor": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "minItems": 1,
+          "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Stamped by ws.save."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License under which this record is released, as an SPDX identifier (e.g. \"cc-by-4.0\") or a URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
         }
       },
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
           "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "MaterialSpecIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -3473,6 +3519,31 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "UnixTime": {
           "type": "integer",
           "minimum": 0
+        },
+        "Processing": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "How this electrode is made. Unlike a material lot's processing (an instance property — the same powder may or may not be carbon-coated), an electrode's route is part of the DESIGN: an aqueous-processed electrode is a different spec from an NMP-processed one, and the spec identity includes the route.",
+          "properties": {
+            "route": {
+              "type": "string",
+              "enum": [
+                "aqueous",
+                "nmp",
+                "dry",
+                "other"
+              ],
+              "description": "Processing route: water-based (aqueous), NMP solvent-based, solvent-free (dry), or other."
+            },
+            "solvent": {
+              "type": "string",
+              "description": "Processing solvent (e.g. 'water', 'NMP')."
+            },
+            "detail": {
+              "type": "string",
+              "description": "Free-text processing detail (mixing, coating, drying, calendering, ...)."
+            }
+          }
         },
         "OrganizationIri": {
           "type": "string",
@@ -3511,6 +3582,99 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/Organization"
             }
           ]
+        },
+        "Funding": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+          "required": [
+            "identifier"
+          ],
+          "properties": {
+            "type": {
+              "const": "Grant"
+            },
+            "id": {
+              "type": "string",
+              "format": "uri"
+            },
+            "identifier": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string"
+            },
+            "acronym": {
+              "type": "string"
+            },
+            "program": {
+              "type": "string"
+            },
+            "funder": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "type": {
+                  "const": "Organization"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "same_as": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          }
+        },
+        "Person": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Person"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "given_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "family_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            },
+            "affiliation": {
+              "$ref": "#/$defs/Organization"
+            }
+          }
         },
         "Provenance": {
           "type": "object",
@@ -3559,6 +3723,19 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "retrieved_at": {
               "$ref": "#/$defs/UnixTime"
             },
+            "file_hash": {
+              "type": "string",
+              "pattern": "^[A-Fa-f0-9]{64}$"
+            },
+            "workflow_version": {
+              "type": "string"
+            },
+            "curated_by": {
+              "type": "string"
+            },
+            "comment": {
+              "type": "string"
+            },
             "battinfo_version": {
               "type": "string",
               "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
@@ -3575,7 +3752,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/electrode.schema.json",
       "title": "BattINFO Electrode Instance",
-      "description": "A physical electrode (built sheet/disc) realizing an electrode-spec. The 'instance' half of the electrode-spec + electrode pair.",
+      "description": "A physical electrode batch (coated web, sheet or punched discs) realizing an electrode-spec. The 'instance' half of the electrode-spec + electrode pair; as-built actuals live in the open 'property' map, never in a closed vocabulary.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -3600,35 +3777,62 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/ComponentIri"
             },
             "electrode_spec_id": {
-              "$ref": "#/$defs/ComponentSpecIri"
+              "$ref": "#/$defs/ComponentSpecIri",
+              "description": "Canonical IRI of the electrode-spec this batch realizes. Required: a built electrode without a design is not describable."
             },
             "short_id": {
               "$ref": "#/$defs/ShortId"
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Human-readable label for this batch."
             },
             "lot_id": {
-              "type": "string"
+              "type": "string",
+              "description": "Producer / supplier lot number for a purchased electrode."
             },
             "batch_id": {
-              "type": "string"
+              "type": "string",
+              "description": "Coating batch label (e.g. 'Si-AQ-1'). Together with the spec IRI this is the batch's identity — the IRI is minted from the pair."
             },
             "supplier": {
               "$ref": "#/$defs/OrgRef"
             },
             "manufactured_at": {
+              "$ref": "#/$defs/FlexDate",
+              "description": "Date this batch was coated / built."
+            },
+            "received_date": {
+              "$ref": "#/$defs/FlexDate",
+              "description": "Date a purchased batch was received."
+            },
+            "expires_at": {
               "$ref": "#/$defs/FlexDate"
+            },
+            "amount": {
+              "$ref": "modules/common/quantity.schema.json",
+              "description": "Quantity of this batch on hand or consumed (e.g. coated area in cm2, web length in m, mass in g)."
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of discrete pieces in this batch (e.g. punched discs)."
+            },
+            "storage": {
+              "type": "string",
+              "description": "Storage conditions for this batch (e.g. 'argon glovebox', 'dry room, -40 degC dew point')."
             },
             "datasets": {
               "type": "array",
               "items": {
                 "$ref": "#/$defs/DatasetLink"
               },
-              "uniqueItems": true
+              "uniqueItems": true,
+              "description": "Characterization datasets for this batch (thickness maps, SEM, adhesion, half-cell checks, ...)."
             },
             "property": {
-              "$ref": "modules/common/quantitative-properties.schema.json"
+              "$ref": "modules/common/quantitative-properties.schema.json",
+              "description": "As-built batch actuals — measured loading, measured calendered thickness, measured porosity, disc diameter, disc mass. An open snake_case map: whatever this batch was actually measured for is recordable without a schema change."
             },
             "comment": {
               "type": "string"
@@ -3643,6 +3847,22 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "items": {
             "type": "string"
           }
+        },
+        "funding": {
+          "$ref": "#/$defs/Funding"
+        },
+        "contributor": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "minItems": 1,
+          "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Stamped by ws.save."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License under which this record is released, as an SPDX identifier (e.g. \"cc-by-4.0\") or a URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
         }
       },
       "$defs": {
@@ -3736,6 +3956,99 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           ]
         },
+        "Funding": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+          "required": [
+            "identifier"
+          ],
+          "properties": {
+            "type": {
+              "const": "Grant"
+            },
+            "id": {
+              "type": "string",
+              "format": "uri"
+            },
+            "identifier": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string"
+            },
+            "acronym": {
+              "type": "string"
+            },
+            "program": {
+              "type": "string"
+            },
+            "funder": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "type": {
+                  "const": "Organization"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "same_as": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          }
+        },
+        "Person": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Person"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "given_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "family_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            },
+            "affiliation": {
+              "$ref": "#/$defs/Organization"
+            }
+          }
+        },
         "Provenance": {
           "type": "object",
           "additionalProperties": false,
@@ -3782,6 +4095,19 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "retrieved_at": {
               "$ref": "#/$defs/UnixTime"
+            },
+            "file_hash": {
+              "type": "string",
+              "pattern": "^[A-Fa-f0-9]{64}$"
+            },
+            "workflow_version": {
+              "type": "string"
+            },
+            "curated_by": {
+              "type": "string"
+            },
+            "comment": {
+              "type": "string"
             },
             "battinfo_version": {
               "type": "string",
@@ -6382,6 +6708,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "electrode_spec_id": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials."
+        },
         "coating": {
           "$ref": "electrode-coating.schema.json"
         },
@@ -6410,6 +6741,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         }
       },
       "anyOf": [
+        {
+          "required": [
+            "electrode_spec_id"
+          ]
+        },
         {
           "required": [
             "coating"

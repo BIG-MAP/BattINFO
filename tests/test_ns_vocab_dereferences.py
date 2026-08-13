@@ -30,7 +30,10 @@ NS = "https://w3id.org/battinfo/ns#"
 
 # rdf_type stamped by the BattINFO submission envelope for each record type
 # (api/_staging.py, ws.py). These are the canonical served ``@type`` names.
-BATTINFO_RDF_TYPES = {"CellSpec", "BatteryCell", "TestSpec", "BatteryTest", "Dataset"}
+BATTINFO_RDF_TYPES = {
+    "CellSpec", "BatteryCell", "TestSpec", "BatteryTest", "Dataset",
+    "MaterialSpec", "Material", "ElectrodeSpec", "Electrode",
+}
 
 
 def _defined_ns_subjects() -> set[str]:

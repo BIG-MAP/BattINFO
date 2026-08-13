@@ -7,6 +7,11 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "electrode_spec_id": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials."
+    },
     "coating": {
       "$ref": "electrode-coating.schema.json"
     },
@@ -35,6 +40,11 @@
     }
   },
   "anyOf": [
+    {
+      "required": [
+        "electrode_spec_id"
+      ]
+    },
     {
       "required": [
         "coating"

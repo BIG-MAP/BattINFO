@@ -1,15 +1,17 @@
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/a86t-cxgj-c8h4-2y7b",
-    "short_id": "a86tcx",
-    "name": "LFP cathode",
+    "id": "https://w3id.org/battinfo/spec/vsee-7yg4-c9af-xvkc",
+    "short_id": "vsee7y",
+    "name": "LMFP cathode",
+    "kind": "lmfp",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/qwae-x6cg-c61k-njw7",
     "coating": {
       "component": {
         "active_material": [
           {
-            "name": "LFP",
-            "material_spec_id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
+            "name": "LMFP",
+            "material_spec_id": "https://w3id.org/battinfo/spec/qwae-x6cg-c61k-njw7",
             "property": {
               "mass_fraction": {
                 "value": 0.96,
@@ -71,6 +73,6 @@
     "retrieved_at": 1781772766
   },
   "notes": [
-    "LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil)."
+    "LMFP cathode (96/2/2 LMFP/PVDF/carbon black on Al foil)."
   ]
 }

@@ -1,15 +1,17 @@
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/ck8b-r1dz-h8my-3k05",
-    "short_id": "ck8br1",
-    "name": "LNMO cathode",
+    "id": "https://w3id.org/battinfo/spec/ahp4-5fyp-tcdk-fj87",
+    "short_id": "ahp45f",
+    "name": "LCO cathode",
+    "kind": "lco",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/shzh-t2jt-wwqv-k54m",
     "coating": {
       "component": {
         "active_material": [
           {
-            "name": "LNMO",
-            "material_spec_id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
+            "name": "LCO",
+            "material_spec_id": "https://w3id.org/battinfo/spec/shzh-t2jt-wwqv-k54m",
             "property": {
               "mass_fraction": {
                 "value": 0.96,
@@ -45,7 +47,7 @@
       },
       "property": {
         "loading": {
-          "value": 19,
+          "value": 18,
           "unit": "mg/cm2"
         }
       }
@@ -71,6 +73,6 @@
     "retrieved_at": 1781772766
   },
   "notes": [
-    "LNMO cathode (96/2/2 LNMO/PVDF/carbon black on Al foil)."
+    "LCO cathode (96/2/2 LCO/PVDF/carbon black on Al foil)."
   ]
 }

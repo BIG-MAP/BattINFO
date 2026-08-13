@@ -262,7 +262,43 @@ def build_index(
         except Exception as exc:  # noqa: BLE001
             failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
 
-    # Component families (electrode/separator/…): one generic indexer per family.
+    # Electrodes: first-class, so they get their own counts and rows rather than
+    # being folded into the generic component bucket. The row carries the fields a
+    # reader filters on — kind and polarity for a design, its spec and batch for a
+    # built batch.
+    def _index_electrodes(
+        subdir: str, record_key: str, fields: tuple[str, ...]
+    ) -> list[dict[str, Any]]:
+        directory = src_root / subdir
+        rows: list[dict[str, Any]] = []
+        for path in sorted(directory.glob(glob)) if directory.exists() else []:
+            try:
+                doc = _load_json(path)
+                if validate:
+                    _validate_canonical_record(doc, source_root=src_root, policy=validation_policy)
+                body = doc.get(record_key, {})
+                if not isinstance(body, Mapping) or not isinstance(body.get("id"), str):
+                    raise ValueError(f"missing {record_key}.id")
+                row = {
+                    "id": body["id"],
+                    "short_id": body.get("short_id") or _short_id_from_iri(body["id"]),
+                    "name": body.get("name"),
+                    "path": _relative_or_absolute(path, src_root),
+                }
+                row.update({field: body.get(field) for field in fields})
+                rows.append(row)
+            except Exception as exc:  # noqa: BLE001
+                failures.append({"file": _relative_or_absolute(path, src_root), "error": str(exc)})
+        return rows
+
+    electrode_specs = _index_electrodes(
+        "electrode-spec", "electrode_spec", ("kind", "polarity", "active_material_spec_id")
+    )
+    electrodes = _index_electrodes(
+        "electrode", "electrode", ("electrode_spec_id", "batch_id", "lot_id")
+    )
+
+    # Component families (separator/electrolyte/…): one generic indexer per family.
     component_index: dict[str, list[dict[str, Any]]] = {}
     component_count = 0
     for family in COMPONENT_FAMILIES:
@@ -304,6 +340,8 @@ def build_index(
         "dataset_count": len(datasets),
         "material_spec_count": len(material_specs),
         "material_count": len(materials),
+        "electrode_spec_count": len(electrode_specs),
+        "electrode_count": len(electrodes),
         "component_count": component_count,
         "total_count": (
             len(cell_specs)
@@ -313,6 +351,8 @@ def build_index(
             + len(datasets)
             + len(material_specs)
             + len(materials)
+            + len(electrode_specs)
+            + len(electrodes)
             + component_count
         ),
         "failed": len(failures),
@@ -324,6 +364,8 @@ def build_index(
         "datasets": datasets,
         "material_specs": material_specs,
         "materials": materials,
+        "electrode_specs": electrode_specs,
+        "electrodes": electrodes,
         "components": component_index,
     }
 
@@ -378,6 +420,16 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         if isinstance(doc.get("material_count"), int)
         else len(doc.get("materials", [])) if isinstance(doc.get("materials"), list) else 0
     )
+    electrode_spec_count = (
+        int(doc["electrode_spec_count"])
+        if isinstance(doc.get("electrode_spec_count"), int)
+        else len(doc.get("electrode_specs", [])) if isinstance(doc.get("electrode_specs"), list) else 0
+    )
+    electrode_count = (
+        int(doc["electrode_count"])
+        if isinstance(doc.get("electrode_count"), int)
+        else len(doc.get("electrodes", [])) if isinstance(doc.get("electrodes"), list) else 0
+    )
     total_count = (
         int(doc["total_count"])
         if isinstance(doc.get("total_count"), int)
@@ -388,6 +440,8 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         + dataset_count
         + material_spec_count
         + material_count
+        + electrode_spec_count
+        + electrode_count
     )
     failed = int(doc["failed"]) if isinstance(doc.get("failed"), int) else 0
 
@@ -400,6 +454,8 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
         "dataset_count": dataset_count,
         "material_spec_count": material_spec_count,
         "material_count": material_count,
+        "electrode_spec_count": electrode_spec_count,
+        "electrode_count": electrode_count,
         "total_count": total_count,
         "failed": failed,
     }

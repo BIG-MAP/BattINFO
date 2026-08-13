@@ -294,6 +294,22 @@ ns:Dataset a owl:Class ;
     rdfs:label "Dataset"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
+ns:MaterialSpec a owl:Class ;
+    rdfs:label "Material Spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:Material a owl:Class ;
+    rdfs:label "Material"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ElectrodeSpec a owl:Class ;
+    rdfs:label "Electrode Spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:Electrode a owl:Class ;
+    rdfs:label "Electrode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
 ns:CellSpecification a owl:Class ;
     rdfs:label "Cell Specification"@en ;
     owl:equivalentClass ns:CellSpec ;

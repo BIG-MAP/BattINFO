@@ -1,9 +1,11 @@
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/f75a-tq2f-4tey-nba7",
-    "short_id": "f75atq",
+    "id": "https://w3id.org/battinfo/spec/m5qz-ry48-xpgh-p9s3",
+    "short_id": "m5qzry",
     "name": "NMC622 cathode",
+    "kind": "nmc622",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/s2m9-ksma-nb61-8tpa",
     "coating": {
       "component": {
         "active_material": [

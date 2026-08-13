@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.2.0",
+  "electrode": {
+    "id": "https://w3id.org/battinfo/electrode/m3x3-anrx-d9kq-b56f",
+    "electrode_spec_id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55",
+    "short_id": "m3x3an",
+    "name": "Si-Gr anode, batch Si-AQ-1",
+    "batch_id": "Si-AQ-1",
+    "storage": "dry room, -40 degC dew point",
+    "manufactured_at": 1772582400,
+    "amount": {
+      "value": 1250,
+      "unit": "cm2"
+    },
+    "count": 48,
+    "property": {
+      "loading": {
+        "value": 6.35,
+        "unit": "mg/cm2"
+      },
+      "calendered_thickness": {
+        "value": 49,
+        "unit": "um"
+      },
+      "diameter": {
+        "value": 15,
+        "unit": "mm"
+      },
+      "mass": {
+        "value": 11.2,
+        "unit": "mg"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1786492800,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "As-built actuals for one coating batch: measured loading and thickness differ from the design values on the spec, which is exactly why the batch is its own record."
+  ]
+}
