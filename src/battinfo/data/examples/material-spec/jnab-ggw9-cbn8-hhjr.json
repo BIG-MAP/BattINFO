@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.2.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",
+    "short_id": "jnabgg",
+    "name": "Silicon-graphite composite",
+    "kind": "silicon_graphite",
+    "material_class": "active_material",
+    "electrode_polarity": "negative",
+    "formula": "Si/C",
+    "property": {
+      "specific_capacity": {
+        "value": 450,
+        "unit": "mAh/g"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1786492800,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "Generic Si/Gr blend (nominal 450 mAh/g); a real grade carries its manufacturer and grade."
+  ]
+}

@@ -998,7 +998,15 @@ _SAVE_DISPLAY: list[tuple[str, str]] = [
     ("datasets", "dataset"),
     ("material_specs", "material spec"),
     ("materials", "material"),
+    ("electrode_specs", "electrode spec"),
+    ("electrodes", "electrode"),
 ]
+
+# Result keys written by the side-record path (records the engine does not model),
+# in write order: specs before instances so a reference resolves on disk.
+_SIDE_RECORD_KEYS: tuple[str, ...] = (
+    "material_specs", "materials", "electrode_specs", "electrodes",
+)
 
 
 def _dedupe_records_by_id(records: list[dict], candidate: dict, body_key: str) -> list[dict]:
@@ -1224,6 +1232,11 @@ class AuthoringWorkspace:
         self._material_specs: builtins.list[dict] = []
         self._materials: builtins.list[dict] = []
         self._material_specs_by_ref: dict[str, dict] = {}
+        # First-class electrode queues, same arrangement: the designed electrode
+        # (spec) and the coated batch (instance).
+        self._electrode_specs: builtins.list[dict] = []
+        self._electrodes: builtins.list[dict] = []
+        self._electrode_specs_by_ref: dict[str, dict] = {}
         # workspace-level funding project (grant); lazily loaded from
         # .battinfo/workspace.json on first access via _get_project()
         self._project_ref: ProjectRef | None = None
@@ -2544,6 +2557,10 @@ class AuthoringWorkspace:
             return self._add_material_spec(**kwargs)
         if rt_key == "material":
             return self._add_material(**kwargs)
+        if rt_key == "electrode-spec":
+            return self._add_electrode_spec(**kwargs)
+        if rt_key == "electrode":
+            return self._add_electrode(**kwargs)
         try:
             rt = _canon_type(record_type)
         except ValueError:
@@ -2553,13 +2570,15 @@ class AuthoringWorkspace:
         if rt == "test":
             return self._add_tests(**kwargs)
         raise ValueError(
-            f"add() supports type 'cell', 'test', 'equipment', 'material_spec', and "
-            f"'material' (got {record_type!r}). "
+            f"add() supports type 'cell', 'test', 'equipment', 'material_spec', "
+            f"'material', 'electrode_spec', and 'electrode' (got {record_type!r}). "
             "Author a cell-spec/test-spec with ws.load(<draft file>); attach datasets "
             "via ws.add('test', data=...); register lab equipment via "
             "ws.add('equipment', spec=..., serial_number=...); author materials via "
             "ws.add('material_spec', name=..., kind=...) and "
-            "ws.add('material', spec=..., lot=...)."
+            "ws.add('material', spec=..., lot=...); author electrodes via "
+            "ws.add('electrode_spec', name=..., kind=...) and "
+            "ws.add('electrode', spec=..., batch=...)."
         )
 
     def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
@@ -2582,10 +2601,10 @@ class AuthoringWorkspace:
         # file afterwards — lets an unchanged, already-stamped re-save report
         # [unchanged] and skip the write entirely.
         stamp_fn, stamp_counts = self._record_stamp()
-        # Materials are written first (same stamp path) so the engine's index
-        # rebuild picks them up and a material instance's spec reference resolves
-        # on disk.
-        material_results = self._save_materials(
+        # Side records (materials, electrodes) are written first (same stamp path)
+        # so the engine's index rebuild picks them up and an instance's spec
+        # reference resolves on disk.
+        side_results = self._save_side_records(
             mode=mode, validation_policy=validation_policy, stamp=stamp_fn
         )
         result = self._ws.save(
@@ -2594,15 +2613,15 @@ class AuthoringWorkspace:
             validation_policy=validation_policy,
             stamp=stamp_fn,
         )
-        result["material_specs"] = material_results["material_specs"]
-        result["materials"] = material_results["materials"]
+        result.update(side_results)
         # How many records the funding block actually reached this save: every
         # candidate is stamped, but only newly-created or genuinely-changed records
         # are written — an unchanged re-save reaches zero, so it prints nothing.
         stamped = 0
+        _STAMPED_KEYS = ("cell_specs", "cell_instances", "tests", "datasets", "test_specs",
+                         *_SIDE_RECORD_KEYS)
         if stamp_counts["funding"]:
-            for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs",
-                        "material_specs", "materials"):
+            for key in _STAMPED_KEYS:
                 for item in result.get(key, []):
                     if isinstance(item, dict) and (
                         item.get("status") == "created" or item.get("content_changed")
@@ -2610,8 +2629,7 @@ class AuthoringWorkspace:
                         stamped += 1
         # Track the exact files written so submit() only sends this session's work.
         self._session_paths = set()
-        for key in ("cell_specs", "cell_instances", "tests", "datasets", "test_specs",
-                    "material_specs", "materials"):
+        for key in _STAMPED_KEYS:
             for item in result.get(key, []):
                 p = item.get("path") if isinstance(item, dict) else str(item)
                 if p:
@@ -2643,6 +2661,16 @@ class AuthoringWorkspace:
             body = m.get("material", {})
             if body.get("id"):
                 name_by_id[body["id"]] = body.get("lot_id") or body.get("name") or "material"
+        for es in self._electrode_specs:
+            body = es.get("electrode_spec", {})
+            if body.get("id"):
+                name_by_id[body["id"]] = body.get("name") or "electrode spec"
+        for e in self._electrodes:
+            body = e.get("electrode", {})
+            if body.get("id"):
+                name_by_id[body["id"]] = (
+                    body.get("batch_id") or body.get("lot_id") or body.get("name") or "electrode"
+                )
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
         print(f"Saved {total} record(s) under {self._ws.source_root}:")
@@ -2671,37 +2699,45 @@ class AuthoringWorkspace:
             print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
 
-    def _save_materials(
+    def _save_side_records(
         self, *, mode: str, validation_policy: str, stamp: Any = None
     ) -> dict:
-        """Write queued material specs then instances through the shared stamp path.
+        """Write queued material and electrode records through the shared stamp path.
 
-        Materials are not engine model objects, so they are persisted here rather
-        than by ``self._ws.save``. They flow through the SAME ``stamp`` callback as
-        every other record (PR #324 pre-compare stamp), so funding / contributor /
-        license reach material records too (fixes readiness H2), and an unchanged
+        Materials and electrodes are not engine model objects, so they are
+        persisted here rather than by ``self._ws.save``. They flow through the SAME
+        ``stamp`` callback as every other record (PR #324 pre-compare stamp), so
+        funding / contributor / license reach them too, and an unchanged
         already-stamped re-save is reported ``unchanged`` — no compare-before-stamp
-        bug. Specs are written before instances so an instance's spec reference
-        resolves on disk under strict validation.
+        bug. Ordering matters: material specs, then material instances, then
+        electrode specs (which may reference a material spec), then electrode
+        batches — every reference resolves on disk before the record naming it is
+        validated under strict policy.
         """
-        from battinfo.api import save_material, save_material_spec  # noqa: PLC0415
+        from battinfo.api import (  # noqa: PLC0415
+            save_electrode,
+            save_electrode_spec,
+            save_material,
+            save_material_spec,
+        )
 
         source_root = self._ws.source_root
-        spec_results = [
-            save_material_spec(
-                rec, source_root=source_root, mode=mode, resolve_references=False,
-                validation_policy=validation_policy, stamp=stamp,
-            )
-            for rec in self._material_specs
-        ]
-        material_results = [
-            save_material(
-                rec, source_root=source_root, mode=mode, resolve_references=False,
-                validation_policy=validation_policy, stamp=stamp,
-            )
-            for rec in self._materials
-        ]
-        return {"material_specs": spec_results, "materials": material_results}
+
+        def _write(saver: Any, records: builtins.list[dict]) -> builtins.list[dict]:
+            return [
+                saver(
+                    rec, source_root=source_root, mode=mode, resolve_references=False,
+                    validation_policy=validation_policy, stamp=stamp,
+                )
+                for rec in records
+            ]
+
+        return {
+            "material_specs": _write(save_material_spec, self._material_specs),
+            "materials": _write(save_material, self._materials),
+            "electrode_specs": _write(save_electrode_spec, self._electrode_specs),
+            "electrodes": _write(save_electrode, self._electrodes),
+        }
 
     def _rel_to_root(self, path: str) -> str:
         """Render *path* relative to the workspace root for compact display."""
@@ -3526,6 +3562,8 @@ class AuthoringWorkspace:
             "test-spec": "test-protocol", "test_spec": "test-protocol",
             "test-protocol": "test-protocol",
             "test": "test", "dataset": "dataset",
+            "material-spec": "material-spec", "material": "material",
+            "electrode-spec": "electrode-spec", "electrode": "electrode",
         }
         allowed: set[str] | None
         if only is not None:
@@ -3543,13 +3581,20 @@ class AuthoringWorkspace:
                 if token is None:
                     raise ValueError(
                         f"unknown record type {rt!r} in only=. Valid values: "
-                        "cell-spec, cell-instance, test-spec, test, dataset."
+                        "cell-spec, cell-instance, test-spec, test, dataset, "
+                        "material-spec, material, electrode-spec, electrode."
                     )
                 allowed.add(token)
         else:
             allowed = None  # None means all types
 
-        _SUBDIRS = ("cell-spec", "cell-instance", "test-protocol", "test", "dataset")
+        # Every record type ws.save() can write must be submittable, or a saved
+        # record silently never reaches the registry. Specs precede the instances
+        # that reference them so the registry sees a resolvable target first.
+        _SUBDIRS = (
+            "material-spec", "material", "electrode-spec", "electrode",
+            "cell-spec", "cell-instance", "test-protocol", "test", "dataset",
+        )
 
         def _all_in(subdir: str) -> list[Path]:
             d = records_dir / subdir
@@ -3696,6 +3741,55 @@ class AuthoringWorkspace:
             proto_iri = t_inner.get("protocol_id")
             if proto_iri:
                 spec_tests.setdefault(proto_iri, []).append(t_iri)
+
+        # ── Materials and electrodes ──────────────────────────────────────────
+        # These are ordinary records that ws.save() writes, so they submit like
+        # any other; they were previously absent from _SUBDIRS, which meant a
+        # saved material or electrode silently never reached the registry.
+        # Specs first, then the instances that reference them.
+        for subdir, record_key, resource_type, rdf_type, spec_ref in (
+            ("material-spec", "material_spec", "material_spec", "MaterialSpec", None),
+            ("material", "material", "material", "Material", "material_spec_id"),
+            ("electrode-spec", "electrode_spec", "electrode_spec", "ElectrodeSpec", None),
+            ("electrode", "electrode", "electrode", "Electrode", "electrode_spec_id"),
+        ):
+            spec_resource_type = f"{resource_type}_spec"
+            for src in _selected(subdir):
+                raw = parsed[src]
+                body = raw.get(record_key, {})
+                title = (
+                    body.get("name") or body.get("batch_id") or body.get("lot_id")
+                    or body.get("short_id") or src.stem
+                )
+                source_local_id = body.get("short_id") or src.stem
+                if resolved_doi:
+                    raw = dict(raw)
+                    prov = dict(raw.get("provenance") or {})
+                    prov.setdefault("citation_doi", resolved_doi)
+                    raw["provenance"] = prov
+                record_links = []
+                if spec_ref and isinstance(body.get(spec_ref), str):
+                    record_links.append({
+                        "relationship": "instanceOf",
+                        "resource_type": spec_resource_type,
+                        "canonical_iri": body[spec_ref],
+                    })
+                if isinstance(body.get("active_material_spec_id"), str):
+                    record_links.append({
+                        "relationship": "hasActiveMaterial",
+                        "resource_type": "material_spec",
+                        "canonical_iri": body["active_material_spec_id"],
+                    })
+                payload = _simple_submission_payload(
+                    raw, resource_type=resource_type, rdf_type=rdf_type,
+                    record_key=record_key, wid=wid, pid=pid, ver=ver,
+                    source_local_id=source_local_id, title=title,
+                    related_resources=record_links,
+                )
+                outcomes.append(_journaled_submit(journal, payload, url, key, title,
+                                                  source_local_id=source_local_id,
+                                                  publication_mode=publication_mode,
+                                                  validation=validations[src]))
 
         # ── Cell specs ────────────────────────────────────────────────────────
         for src in _selected("cell-spec"):
@@ -6848,6 +6942,101 @@ class AuthoringWorkspace:
         body = record["material"]
         label = body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
         print(f"  material:       {label}  {body['id']}")
+        return [record]
+
+    def _add_electrode_spec(self, name: str | None = None, **kwargs) -> builtins.list:
+        """Author a first-class electrode spec (the designed electrode), queued for ws.save().
+
+        ``ws.add("electrode_spec", name="Si-Gr anode (aqueous)", kind="silicon_graphite",
+        manufacturer="SINTEF", composition={"active": 0.90, "binder": {"name": "CMC", "fraction": 0.05},
+        "additive": {"name": "Carbon black", "fraction": 0.05}},
+        processing={"route": "aqueous", "solvent": "water"},
+        current_collector={"name": "Copper foil", "thickness": {"value": 10, "unit": "um"}},
+        property={"loading": {"value": 6.2, "unit": "mg/cm2"}})``
+
+        ``kind`` names the ACTIVE material and is required — that is what makes a
+        purchased electrode with unknown powder still describable and comparable.
+        ``active_material_spec_id`` is optional and links the powder record when
+        it exists. The IRI is content-derived from (producer, product, grade,
+        kind, processing route): re-adding the same design is a no-op, while an
+        aqueous and an NMP version of the same recipe are two specs, as they
+        should be. Attribution is stamped by ws.save like every other record.
+        """
+        from battinfo.api import create_electrode_spec  # noqa: PLC0415
+
+        if not name and not kwargs.get("id") and not kwargs.get("uid"):
+            raise ValueError(
+                "ws.add('electrode_spec', ...) needs name=... (and kind=...). Example: "
+                "ws.add('electrode_spec', name='Graphite anode', kind='graphite')."
+            )
+        record = create_electrode_spec(validate=False, name=name, **kwargs)
+        self._electrode_specs = _dedupe_records_by_id(
+            self._electrode_specs, record, "electrode_spec"
+        )
+        body = record["electrode_spec"]
+        self._register_electrode_spec_keys(body)
+        kind = body.get("kind", "")
+        route = (body.get("processing") or {}).get("route")
+        label = f"{kind}/{route}" if route else kind
+        print(f"  electrode-spec: {body.get('name', name)}  [{label}]  {body['id']}")
+        return [record]
+
+    def _register_electrode_spec_keys(self, spec_body: dict) -> None:
+        """Index an electrode spec under every reference form ``spec=`` accepts."""
+        spec_id = spec_body.get("id")
+        if not spec_id:
+            return
+        self._electrode_specs_by_ref[spec_id] = spec_body
+        for key in (spec_body.get("name"), spec_body.get("short_id"), spec_body.get("product_id")):
+            if isinstance(key, str) and key.strip():
+                self._electrode_specs_by_ref[key.strip().lower()] = spec_body
+
+    def _resolve_electrode_spec_arg(self, spec: Any) -> str:
+        """Resolve ``spec=`` for ws.add('electrode', ...) to an electrode_spec IRI."""
+        if isinstance(spec, dict) and isinstance(spec.get("electrode_spec"), dict):
+            body = spec["electrode_spec"]
+            self._register_electrode_spec_keys(body)
+            return str(body["id"])
+        if isinstance(spec, str) and spec.strip():
+            text = spec.strip()
+            if text.startswith("https://w3id.org/battinfo/"):
+                return text
+            found = self._electrode_specs_by_ref.get(text.lower())
+            if found is not None:
+                return str(found["id"])
+            raise ValueError(
+                f"Unknown electrode spec {spec!r}. Pass an electrode_spec IRI, the record "
+                "from ws.add('electrode_spec', ...), or a name added in this session."
+            )
+        raise ValueError(
+            "ws.add('electrode', ...) needs spec=<electrode-spec record, IRI, or name>."
+        )
+
+    def _add_electrode(self, spec: Any = None, *, batch: str | None = None, **kwargs) -> builtins.list:
+        """Author a first-class electrode batch (the coated web/discs), queued for ws.save().
+
+        ``ws.add("electrode", spec=si_gr_anode, batch="Si-AQ-1",
+        manufactured_at="2026-03-04", count=40, storage="dry room",
+        property={"loading": {"value": 6.4, "unit": "mg/cm2"}})``
+
+        Links an electrode spec (required), carries the batch label, dates,
+        amount/count, storage, and an OPEN ``property`` block for as-built
+        actuals — whatever this batch was actually measured for, without a schema
+        change. The IRI is content-derived from (spec_id, batch).
+        """
+        from battinfo.api import create_electrode  # noqa: PLC0415
+
+        spec_id = self._resolve_electrode_spec_arg(spec)
+        record = create_electrode(
+            validate=False, electrode_spec_id=spec_id, batch=batch, **kwargs
+        )
+        self._electrodes = _dedupe_records_by_id(self._electrodes, record, "electrode")
+        body = record["electrode"]
+        label = (
+            body.get("batch_id") or body.get("lot_id") or body.get("name")
+            or body["id"].rsplit("/", 1)[-1]
+        )
+        print(f"  electrode:      {label}  {body['id']}")
         return [record]
 
     def _register_channel_keys(self, channel_body: dict, equipment_body: dict) -> None:

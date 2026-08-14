@@ -15,8 +15,9 @@ from battinfo.validate.record import validate_record
 ROOT = Path(__file__).resolve().parents[1]
 
 # (base, record_key, family-arg, instance-create-wrapper, expected JSON-LD @type token)
+# electrode is deliberately absent: it graduated out of the generic component
+# families into a first-class model with its own contract (test_electrode_contract.py).
 FAMILIES = [
-    ("electrode", "electrode", "electrode", "Electrode"),
     ("separator", "separator", "separator", "Separator"),
     ("current-collector", "current_collector", "current_collector", "CurrentCollector"),
     ("electrolyte", "electrolyte", "electrolyte", "Electrolyte"),

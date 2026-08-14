@@ -1,9 +1,9 @@
 {
   "schema_version": "0.2.0",
   "electrode": {
-    "id": "https://w3id.org/battinfo/electrode/d0jr-dyky-y31a-3gcr",
-    "electrode_spec_id": "https://w3id.org/battinfo/spec/t947-yem5-73n7-beb7",
-    "short_id": "d0jrdy",
+    "id": "https://w3id.org/battinfo/electrode/sbfx-ka57-1ky3-hkgk",
+    "electrode_spec_id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
+    "short_id": "sbfxka",
     "property": {
       "diameter": {
         "value": 11,

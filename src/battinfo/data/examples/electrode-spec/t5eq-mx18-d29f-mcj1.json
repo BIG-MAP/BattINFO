@@ -1,0 +1,100 @@
+{
+  "schema_version": "0.2.0",
+  "electrode_spec": {
+    "id": "https://w3id.org/battinfo/spec/t5eq-mx18-d29f-mcj1",
+    "short_id": "t5eqmx",
+    "name": "Si-Gr anode",
+    "kind": "silicon_graphite",
+    "polarity": "negative",
+    "grade": "NMP",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "Silicon-graphite composite",
+            "property": {
+              "mass_fraction": {
+                "value": 0.9,
+                "unit": "1"
+              }
+            },
+            "material_spec_id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr"
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "material_spec_id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
+            "property": {
+              "mass_fraction": {
+                "value": 0.05,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
+            "property": {
+              "mass_fraction": {
+                "value": 0.05,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "current_collector": {
+      "name": "Copper foil",
+      "property": {
+        "thickness": {
+          "value": 10,
+          "unit": "um"
+        }
+      }
+    },
+    "processing": {
+      "route": "nmp",
+      "solvent": "NMP",
+      "detail": "planetary mixing, 120 degC drying, calendered to 35% porosity"
+    },
+    "manufacturer": {
+      "type": "Organization",
+      "name": "SINTEF"
+    },
+    "property": {
+      "loading": {
+        "value": 6.2,
+        "unit": "mg/cm2"
+      },
+      "dry_thickness": {
+        "value": 60,
+        "unit": "um"
+      },
+      "calendered_thickness": {
+        "value": 47,
+        "unit": "um"
+      },
+      "areal_capacity": {
+        "value": 2.8,
+        "unit": "mAh/cm2"
+      },
+      "porosity": {
+        "value": 0.35,
+        "unit": "1"
+      }
+    }
+  },
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1786492800,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "Si-Gr anode, NMP-processed (PVDF binder). Same recipe and loading as the aqueous sibling; the different route makes it a different design, and a different IRI."
+  ]
+}

@@ -390,6 +390,94 @@ def _validate_material_kind(
         )
 
 
+def _validate_electrode_kind(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    issue_severity: str,
+) -> None:
+    """An electrode-spec's ``kind`` must name an active material from the vocabulary.
+
+    Same contract as :func:`_validate_material_kind`, on the same axis: the
+    electrode's kind is the ACTIVE material it is built from, so a graphite anode
+    aggregates with every other graphite anode whether or not its powder was
+    authored as a material-spec. Enforced here rather than as a JSON-schema
+    required field so tolerant import still validates structurally.
+
+    A kind that resolves but is not an active material (a binder, a salt) is a
+    warning, not an error: the record is still usable and the author, not the
+    validator, is best placed to fix the mix-up.
+    """
+    spec = doc.get("electrode_spec")
+    if not isinstance(spec, Mapping):
+        return
+    from battinfo.electrodes import (
+        electrode_kind_keys,
+        is_active_kind,
+        resolve_electrode_kind,
+    )
+
+    kind = spec.get("kind")
+    if not isinstance(kind, str) or not kind.strip():
+        _append_issue(
+            issues,
+            code="semantic.electrode_kind_missing",
+            severity=issue_severity,
+            path="electrode_spec.kind",
+            message=(
+                "electrode spec has no kind. Set the active material's kind from the "
+                f"curated vocabulary. Valid kinds: {', '.join(electrode_kind_keys())}."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    if resolve_electrode_kind(kind) is None:
+        _append_issue(
+            issues,
+            code="semantic.electrode_kind_unknown",
+            severity="error",
+            path="electrode_spec.kind",
+            message=(
+                f"unknown electrode kind '{kind}'. Valid kinds: "
+                f"{', '.join(electrode_kind_keys())}."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    if not is_active_kind(kind):
+        _append_issue(
+            issues,
+            code="semantic.electrode_kind_not_active",
+            severity="warning",
+            path="electrode_spec.kind",
+            message=(
+                f"electrode kind '{kind}' is not an active material. An electrode's kind "
+                "names what it stores charge with, not its binder or additive. Valid "
+                f"kinds: {', '.join(electrode_kind_keys())}."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    # Polarity and kind must agree: an LFP anode is a typo, not a design.
+    from battinfo.electrodes import electrode_polarity_for_kind
+
+    polarity = spec.get("polarity")
+    implied = electrode_polarity_for_kind(kind)
+    if isinstance(polarity, str) and polarity in ("positive", "negative") and polarity != implied:
+        _append_issue(
+            issues,
+            code="semantic.electrode_polarity_conflict",
+            severity="warning",
+            path="electrode_spec.polarity",
+            message=(
+                f"polarity '{polarity}' disagrees with kind '{kind}', which is a "
+                f"{implied} active material. Drop the polarity to let it be derived, "
+                "or correct one of the two."
+            ),
+            resource_type=resource_type,
+        )
+
+
 def _validate_size_code(
     doc: dict[str, Any],
     issues: list[ValidationIssue],
@@ -855,6 +943,7 @@ def validate_semantic_report(
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
     _validate_controlled_values(doc, issues, resource_type)
     _validate_material_kind(doc, issues, resource_type, hard_issue_severity)
+    _validate_electrode_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_size_code(doc, issues, resource_type, hard_issue_severity)
     # Non-finite numerics are invalid anywhere in the record (RFC 8259); walk the
     # whole doc so nested quantities (electrode coating, etc.) are caught, not just
@@ -868,7 +957,7 @@ def validate_semantic_report(
         _validate_property_mappability(specs, issues, resource_type)
 
     # material-spec / material carry their quantities under <body>.property
-    for body_key in ("material_spec", "material"):
+    for body_key in ("material_spec", "material", "electrode_spec", "electrode"):
         body = doc.get(body_key)
         if isinstance(body, Mapping) and isinstance(body.get("property"), Mapping):
             _validate_specs(body["property"], issues, resource_type, hard_issue_severity)

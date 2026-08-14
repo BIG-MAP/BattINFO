@@ -32,8 +32,8 @@
     "source_url": null,
     "retrieved_at": 1781772767
   },
-  "positive_electrode_spec_id": "https://w3id.org/battinfo/spec/8pdh-vrd3-tjar-8mgq",
-  "negative_electrode_spec_id": "https://w3id.org/battinfo/spec/znwy-gmhg-34rb-qs1j",
+  "positive_electrode_spec_id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y",
+  "negative_electrode_spec_id": "https://w3id.org/battinfo/spec/3abg-gxzh-6487-9eex",
   "electrolyte_spec_id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94",
   "separator_spec_id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
   "housing_spec_id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",

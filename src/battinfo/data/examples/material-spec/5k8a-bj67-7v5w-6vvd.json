@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.2.0",
+  "material_spec": {
+    "id": "https://w3id.org/battinfo/spec/5k8a-bj67-7v5w-6vvd",
+    "short_id": "5k8abj",
+    "name": "CMC",
+    "kind": "cmc",
+    "material_class": "binder",
+    "electrode_polarity": "none"
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1786492800,
+    "battinfo_version": "0.7.0"
+  },
+  "notes": [
+    "Carboxymethyl cellulose binder, the water-processible counterpart to PVDF."
+  ]
+}

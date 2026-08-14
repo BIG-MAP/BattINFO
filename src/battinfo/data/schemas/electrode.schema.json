@@ -3,7 +3,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/electrode.schema.json",
   "title": "BattINFO Electrode Instance",
-  "description": "A physical electrode (built sheet/disc) realizing an electrode-spec. The 'instance' half of the electrode-spec + electrode pair.",
+  "description": "A physical electrode batch (coated web, sheet or punched discs) realizing an electrode-spec. The 'instance' half of the electrode-spec + electrode pair; as-built actuals live in the open 'property' map, never in a closed vocabulary.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -28,35 +28,62 @@
           "$ref": "#/$defs/ComponentIri"
         },
         "electrode_spec_id": {
-          "$ref": "#/$defs/ComponentSpecIri"
+          "$ref": "#/$defs/ComponentSpecIri",
+          "description": "Canonical IRI of the electrode-spec this batch realizes. Required: a built electrode without a design is not describable."
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable label for this batch."
         },
         "lot_id": {
-          "type": "string"
+          "type": "string",
+          "description": "Producer / supplier lot number for a purchased electrode."
         },
         "batch_id": {
-          "type": "string"
+          "type": "string",
+          "description": "Coating batch label (e.g. 'Si-AQ-1'). Together with the spec IRI this is the batch's identity — the IRI is minted from the pair."
         },
         "supplier": {
           "$ref": "#/$defs/OrgRef"
         },
         "manufactured_at": {
+          "$ref": "#/$defs/FlexDate",
+          "description": "Date this batch was coated / built."
+        },
+        "received_date": {
+          "$ref": "#/$defs/FlexDate",
+          "description": "Date a purchased batch was received."
+        },
+        "expires_at": {
           "$ref": "#/$defs/FlexDate"
+        },
+        "amount": {
+          "$ref": "modules/common/quantity.schema.json",
+          "description": "Quantity of this batch on hand or consumed (e.g. coated area in cm2, web length in m, mass in g)."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of discrete pieces in this batch (e.g. punched discs)."
+        },
+        "storage": {
+          "type": "string",
+          "description": "Storage conditions for this batch (e.g. 'argon glovebox', 'dry room, -40 degC dew point')."
         },
         "datasets": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/DatasetLink"
           },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "description": "Characterization datasets for this batch (thickness maps, SEM, adhesion, half-cell checks, ...)."
         },
         "property": {
-          "$ref": "modules/common/quantitative-properties.schema.json"
+          "$ref": "modules/common/quantitative-properties.schema.json",
+          "description": "As-built batch actuals — measured loading, measured calendered thickness, measured porosity, disc diameter, disc mass. An open snake_case map: whatever this batch was actually measured for is recordable without a schema change."
         },
         "comment": {
           "type": "string"
@@ -71,6 +98,22 @@
       "items": {
         "type": "string"
       }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
+    },
+    "contributor": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "minItems": 1,
+      "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Stamped by ws.save."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "License under which this record is released, as an SPDX identifier (e.g. \"cc-by-4.0\") or a URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
     }
   },
   "$defs": {
@@ -164,6 +207,99 @@
         }
       ]
     },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced. Maps to schema:funding / schema:Grant in JSON-LD.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Person"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "given_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri"
+        },
+        "affiliation": {
+          "$ref": "#/$defs/Organization"
+        }
+      }
+    },
     "Provenance": {
       "type": "object",
       "additionalProperties": false,
@@ -210,6 +346,19 @@
         },
         "retrieved_at": {
           "$ref": "#/$defs/UnixTime"
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "workflow_version": {
+          "type": "string"
+        },
+        "curated_by": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
         },
         "battinfo_version": {
           "type": "string",

@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.5.0",
   "status": "curated",
   "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
   "notes": [
@@ -229,6 +229,32 @@
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
         ]
+      },
+      "nmc111": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonNickelManganeseCobaltOxideBattery"
+        ]
+      },
+      "nmc532": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonNickelManganeseCobaltOxideBattery"
+        ]
+      },
+      "nmc622": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
+        "battery_types": [
+          "LithiumIonNickelManganeseCobaltOxideBattery"
+        ]
+      },
+      "lnmo": {
+        "relation": "hasPositiveElectrode",
+        "node_type": "LithiumNickelManganeseOxideElectrode",
+        "battery_types": []
       }
     },
     "negative_electrode_basis": {
@@ -286,6 +312,11 @@
         "battery_types": [
           "LithiumMetalBattery"
         ]
+      },
+      "zinc": {
+        "relation": "hasNegativeElectrode",
+        "node_type": "ZincElectrode",
+        "battery_types": []
       }
     }
   }

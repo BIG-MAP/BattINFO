@@ -1108,23 +1108,25 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
             f"Supported: {sorted({k.replace('_','-') for k in _TRANSFORMERS})}."
         )
     node = fn(record)
-    # Funding (workspace grant) → schema:funding/Grant, for every record kind whose
-    # node uses the schema.org context. Material/component nodes delegate to the
-    # domain-battery emitter (a different context) and are skipped.
-    if fn is not _material_to_jsonld:
-        grant = funding_to_jsonld(record.get("funding"))
-        if grant is not None:
-            node["schema:funding"] = grant
-        people = contributor_to_jsonld(record.get("contributor"))
-        if people is not None:
-            node["schema:contributor"] = people
-        # Record-level license (FAIR R1.1) → dcterms:license, the same convention
-        # the dataset emitter uses. Cell specs/instances/tests carry it at the
-        # record top level (stamped from the workspace default); datasets carry it
-        # on the dataset body and emit it from dataset_to_jsonld, so this only
-        # reaches the non-dataset record kinds.
-        if record.get("license") and "dcterms:license" not in node:
-            node["dcterms:license"] = {"@id": record["license"]}
+    # Funding (workspace grant) → schema:funding/Grant, for EVERY record kind.
+    # Material and component nodes carry a domain-battery context rather than the
+    # records context, but that context declares the same `schema:` and
+    # `dcterms:` prefixes, so the attribution ws.save stamps onto them survives
+    # into their linked data too — a record whose attribution is stamped but
+    # never emitted is attribution nobody can read.
+    grant = funding_to_jsonld(record.get("funding"))
+    if grant is not None:
+        node["schema:funding"] = grant
+    people = contributor_to_jsonld(record.get("contributor"))
+    if people is not None:
+        node["schema:contributor"] = people
+    # Record-level license (FAIR R1.1) → dcterms:license, the same convention
+    # the dataset emitter uses. Cell specs/instances/tests carry it at the
+    # record top level (stamped from the workspace default); datasets carry it
+    # on the dataset body and emit it from dataset_to_jsonld, so this only
+    # reaches the non-dataset record kinds.
+    if record.get("license") and "dcterms:license" not in node:
+        node["dcterms:license"] = {"@id": record["license"]}
     if context == "url" and isinstance(node.get("@context"), dict):
         # Swap the inline records context for the hosted reference. Only the
         # records-context nodes (a dict @context) are affected; material/component

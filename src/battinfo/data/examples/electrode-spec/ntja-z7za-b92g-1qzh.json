@@ -1,18 +1,20 @@
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/fvwx-7fq1-wwfs-fn3g",
-    "short_id": "fvwx7f",
-    "name": "Graphite anode",
+    "id": "https://w3id.org/battinfo/spec/ntja-z7za-b92g-1qzh",
+    "short_id": "ntjaz7",
+    "name": "LNMO cathode",
+    "kind": "lnmo",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
     "coating": {
       "component": {
         "active_material": [
           {
-            "name": "Graphite",
-            "material_spec_id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
+            "name": "LNMO",
+            "material_spec_id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
             "property": {
               "mass_fraction": {
-                "value": 0.95,
+                "value": 0.96,
                 "unit": "1"
               }
             }
@@ -20,10 +22,11 @@
         ],
         "binder": [
           {
-            "name": "CMC/SBR",
+            "name": "PVDF",
+            "material_spec_id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
             "property": {
               "mass_fraction": {
-                "value": 0.04,
+                "value": 0.02,
                 "unit": "1"
               }
             }
@@ -35,7 +38,7 @@
             "material_spec_id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
             "property": {
               "mass_fraction": {
-                "value": 0.01,
+                "value": 0.02,
                 "unit": "1"
               }
             }
@@ -44,25 +47,21 @@
       },
       "property": {
         "loading": {
-          "value": 11.5,
+          "value": 19,
           "unit": "mg/cm2"
-        },
-        "thickness": {
-          "value": 72,
-          "unit": "um"
         }
       }
     },
     "current_collector": {
-      "name": "Copper foil",
+      "name": "Aluminium foil",
       "property": {
         "thickness": {
-          "value": 10,
+          "value": 15,
           "unit": "um"
         }
       }
     },
-    "polarity": "negative",
+    "polarity": "positive",
     "manufacturer": {
       "type": "Organization",
       "name": "Canrud",
@@ -71,9 +70,9 @@
   },
   "provenance": {
     "source_type": "datasheet",
-    "retrieved_at": 1781742522
+    "retrieved_at": 1781772766
   },
   "notes": [
-    "Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells."
+    "LNMO cathode (96/2/2 LNMO/PVDF/carbon black on Al foil)."
   ]
 }

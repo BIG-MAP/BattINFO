@@ -48,6 +48,8 @@ from battinfo.api import (  # noqa: E402
     create_channel,
     create_component_instance,
     create_component_spec,
+    create_electrode,
+    create_electrode_spec,
     create_equipment,
     create_equipment_spec,
     create_material,
@@ -77,7 +79,7 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
             "(ws.license / ws.project / ws.contributor), not authored on the model"
         )
         for entity_type in ("cell-spec", "cell", "test-protocol", "test", "dataset",
-                            "material-spec", "material")
+                            "material-spec", "material", "electrode-spec", "electrode")
         for prop in ("license", "funding", "contributor")
         # dataset carries its license on the dataset body, which IS modeled
         if not (entity_type == "dataset" and prop == "license")
@@ -120,6 +122,9 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
     ("material-spec", "comment"): "MaterialSpecInput exposes description=; comment is the record-level notes slot",
     ("material", "comment"): "MaterialInput has no comment field; notes= lands at the record top level",
 
+    # Electrode link/collection shapes whose modeled form differs from the record's.
+    ("electrode", "datasets"): "ElectrodeInput has no dataset link field; dataset_ids= builds the {id, role} link shape",
+
     # Faceted query metadata, written by the indexer rather than the author.
     ("test-protocol", "facets"): "derived query facets written by the record indexer, not authored",
 }
@@ -161,6 +166,10 @@ def _builders() -> dict[str, Callable[..., dict]]:
         "material": _api_builder(create_material, {
             "uid": UID, "name": "probe", "material_spec_id": SPEC_IRI,
         }),
+        "electrode-spec": _api_builder(create_electrode_spec, {"uid": UID, "name": "probe"}),
+        "electrode": _api_builder(create_electrode, {
+            "uid": UID, "name": "probe", "electrode_spec_id": SPEC_IRI,
+        }),
         "equipment-spec": _api_builder(create_equipment_spec, {"uid": UID, "name": "probe"}),
         "equipment": _api_builder(create_equipment, {
             "uid": UID, "equipment_spec_id": SPEC_IRI, "serial_number": "S1",
@@ -196,6 +205,9 @@ _SCHEMA_CACHE: dict[str, dict] = {}
 # Values for properties whose schema constraint a generic sampler cannot satisfy.
 SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
     ("material-spec", "kind"): "graphite",  # closed vocabulary lives in code, not in the schema
+    # Same: the electrode kind names an ACTIVE material from that same vocabulary.
+    ("electrode-spec", "kind"): "graphite",
+    ("electrode-spec", "active_material_spec_id"): SPEC_IRI,
 }
 
 _PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en"}

@@ -1,15 +1,17 @@
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/t947-yem5-73n7-beb7",
-    "short_id": "t947ye",
-    "name": "NMC811 cathode",
+    "id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
+    "short_id": "m6y0tk",
+    "name": "LFP cathode",
+    "kind": "lfp",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
     "coating": {
       "component": {
         "active_material": [
           {
-            "name": "NMC811",
-            "material_spec_id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
+            "name": "LFP",
+            "material_spec_id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
             "property": {
               "mass_fraction": {
                 "value": 0.96,
@@ -45,12 +47,8 @@
       },
       "property": {
         "loading": {
-          "value": 21,
+          "value": 20,
           "unit": "mg/cm2"
-        },
-        "thickness": {
-          "value": 64,
-          "unit": "um"
         }
       }
     },
@@ -72,9 +70,9 @@
   },
   "provenance": {
     "source_type": "datasheet",
-    "retrieved_at": 1781742522
+    "retrieved_at": 1781772766
   },
   "notes": [
-    "NMC811 cathode (96/2/2 NMC811/PVDF/carbon black on Al foil). Discovery-Benchmark NMC811-Graphite cells."
+    "LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil)."
   ]
 }

@@ -73,6 +73,51 @@ def cell_instance_identity_seed(
     )
 
 
+def electrode_spec_identity_seed(
+    *,
+    producer: str | None,
+    product: str | None,
+    grade: str | None = None,
+    kind: str | None = None,
+    route: str | None = None,
+) -> str:
+    """Identity seed for an electrode spec — shared by every minting surface.
+
+    Mirrors the material-spec seed (producer, product, grade, kind) and adds the
+    processing *route*. That addition is deliberate, not decoration: for an
+    electrode the route is a DESIGN decision — an aqueous-processed electrode is a
+    different spec from an NMP-processed one — so leaving it out would collapse
+    two genuinely different designs onto one IRI and silently lose one of them.
+    (A material lot's processing is the opposite: an instance property, and
+    correctly absent from the material-spec seed.)
+    """
+    return "::".join(
+        [
+            "electrode-spec",
+            (producer or "unknown-producer").strip().lower(),
+            (product or "unknown-product").strip().lower(),
+            (grade or "").strip().lower(),
+            (kind or "").strip().lower(),
+            (route or "").strip().lower(),
+        ]
+    )
+
+
+def electrode_identity_seed(*, electrode_spec_id: str | None, batch: str | None) -> str:
+    """Identity seed for a physical electrode batch — (spec IRI, batch label).
+
+    Mirrors the material-instance seed: re-authoring the same batch of the same
+    design lands on the existing record instead of minting a duplicate.
+    """
+    return "::".join(
+        [
+            "electrode",
+            (electrode_spec_id or "").strip(),
+            (batch or "").strip(),
+        ]
+    )
+
+
 @dataclass(frozen=True)
 class EntityKind:
     """Metadata describing one BattINFO record type.
@@ -175,8 +220,12 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
 # Entity families that follow the generic component spec/instance pattern (reuse an
 # existing embedded holder schema). Underscore identifiers; the generic API derives the
 # hyphen IRI namespace via ``family.replace("_", "-")``.
+#
+# ``electrode`` is deliberately NOT here: it graduated to a first-class family with its
+# own typed models, curated ``kind``, deterministic identity and emitter — the same
+# promotion ``material`` had. Its records still live under the same registry entries
+# above; only the generic authoring/emission plumbing no longer applies to it.
 COMPONENT_FAMILIES: tuple[str, ...] = (
-    "electrode",
     "separator",
     "current_collector",
     "electrolyte",
