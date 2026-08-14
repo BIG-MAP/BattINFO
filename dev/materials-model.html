@@ -400,6 +400,7 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Materials: kind, spec, instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
 <li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
@@ -654,12 +655,13 @@ IRI / EMMO class;</p></li>
 applied to materials. The transform renders whichever level is present as a
 properly-typed linked node; the link-integrity gate validates internal IRIs; and
 tolerant import maps free-text names through the alias table with warnings.</p>
-<blockquote>
-<div><p>The full composition-linkage ladder (rewiring the cell-spec electrode/electrolyte
-models onto material references end-to-end) lands in a follow-up PR; the bridge in
-<a class="reference internal" href="material-spec.html#bridge-embedded-standalone"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">battinfo.materials</span></code></span></a> already lifts
-embedded materials to standalone specs for dedup today.</p>
-</div></blockquote>
+<p>The electrode half of that ladder is built: an <a class="reference internal" href="electrodes-model.html"><span class="std std-doc">electrode-spec</span></a>
+names its active material’s <code class="docutils literal notranslate"><span class="pre">kind</span></code> and may reference the powder’s <code class="docutils literal notranslate"><span class="pre">material-spec</span></code>, so
+a powder, the electrodes made from it, and the cells built from those electrodes are one
+chain. The bridge in
+<a class="reference internal" href="material-spec.html#bridge-embedded-standalone"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">battinfo.materials</span></code></span></a> also lifts embedded
+materials to standalone specs for dedup. The electrolyte/separator half is still a
+follow-up.</p>
 <p>See the <a class="reference internal" href="material-spec.html"><span class="std std-doc">material-spec / material field reference</span></a> for the exact
 fields each record carries.</p>
 </section>

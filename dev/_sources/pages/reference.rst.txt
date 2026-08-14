@@ -28,6 +28,7 @@ One page per record family: the fields each carries, and how they link.
 
    ../materials-model
    ../material-spec
+   ../electrodes-model
    ../component-specs
    ../cell-fleet
    ../test-specs

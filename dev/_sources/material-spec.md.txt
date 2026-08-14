@@ -157,6 +157,7 @@ grounded in the DIGIBAT Discovery-Benchmark coin-cell corpus; LNMO, zinc, and KO
 synthetic reference examples.
 
 > Electrolyte *formulations* (e.g. "7M KOH in H₂O", "1M LiPF₆ EC:EMC 3:7") are modelled
-> by the forthcoming `electrolyte-spec` family, which assembles these material-spec
-> constituents. See the spec/instance roadmap for the remaining component families
-> (electrode, electrolyte, separator, current-collector, housing).
+> by the [`electrolyte-spec`](component-specs.md) family, which assembles these
+> material-spec constituents; coated electrodes are modelled by
+> [`electrode-spec`](electrodes-model.md), which names its active material's kind and may
+> reference the powder's material-spec.

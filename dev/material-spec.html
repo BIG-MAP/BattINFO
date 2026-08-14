@@ -59,7 +59,7 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Components" href="component-specs.html" />
+    <link rel="next" title="Electrodes: kind, powder spec, electrode spec, batch" href="electrodes-model.html" />
     <link rel="prev" title="Materials: kind, spec, instance" href="materials-model.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -400,6 +400,7 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="materials-model.html">Materials: kind, spec, instance</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
 <li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
@@ -702,9 +703,10 @@ grounded in the DIGIBAT Discovery-Benchmark coin-cell corpus; LNMO, zinc, and KO
 synthetic reference examples.</p>
 <blockquote>
 <div><p>Electrolyte <em>formulations</em> (e.g. “7M KOH in H₂O”, “1M LiPF₆ EC:EMC 3:7”) are modelled
-by the forthcoming <code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code> family, which assembles these material-spec
-constituents. See the spec/instance roadmap for the remaining component families
-(electrode, electrolyte, separator, current-collector, housing).</p>
+by the <a class="reference internal" href="component-specs.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code></span></a> family, which assembles these
+material-spec constituents; coated electrodes are modelled by
+<a class="reference internal" href="electrodes-model.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></span></a>, which names its active material’s kind and may
+reference the powder’s material-spec.</p>
 </div></blockquote>
 </section>
 </section>
@@ -729,11 +731,11 @@ constituents. See the spec/instance roadmap for the remaining component families
       </div>
     </a>
     <a class="right-next"
-       href="component-specs.html"
+       href="electrodes-model.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Components</p>
+        <p class="prev-next-title">Electrodes: kind, powder spec, electrode spec, batch</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

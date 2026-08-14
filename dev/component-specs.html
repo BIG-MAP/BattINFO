@@ -60,7 +60,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Cells" href="cell-fleet.html" />
-    <link rel="prev" title="Materials" href="material-spec.html" />
+    <link rel="prev" title="Electrodes: kind, powder spec, electrode spec, batch" href="electrodes-model.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -400,6 +400,7 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="materials-model.html">Materials: kind, spec, instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
 <li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
@@ -483,10 +484,11 @@
   <section id="components">
 <h1>Components<a class="headerlink" href="#components" title="Link to this heading">#</a></h1>
 <p>BattINFO models every entity as a <strong>spec + instance</strong> pair. After materials
-(<a class="reference internal" href="material-spec.html"><span class="std std-doc">material-spec.md</span></a>), the five <strong>component</strong> families let a cell be
-described from reusable, IRI-addressable parts. Each family is a thin registry entry that
-reuses an existing embedded holder shape; component-specs reference <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> records
-by IRI.</p>
+(<a class="reference internal" href="material-spec.html"><span class="std std-doc">material-spec.md</span></a>) and electrodes
+(<a class="reference internal" href="electrodes-model.html"><span class="std std-doc">electrodes-model.md</span></a>), four <strong>component</strong> families let the rest of a
+cell be described from reusable, IRI-addressable parts. Each family is a thin registry entry
+that reuses an existing embedded holder shape; component-specs reference <code class="docutils literal notranslate"><span class="pre">material-spec</span></code>
+records by IRI.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Family</p></th>
@@ -496,27 +498,22 @@ by IRI.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>electrode</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode</span></code></p></td>
-<td><p>coating active/binder/additive <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>electrolyte</p></td>
+<tr class="row-even"><td><p>electrolyte</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">electrolyte</span></code></p></td>
 <td><p>salt + solvent + additive <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>separator</p></td>
+<tr class="row-odd"><td><p>separator</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">separator</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>current-collector</p></td>
+<tr class="row-even"><td><p>current-collector</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">current-collector-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">current-collector</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>housing</p></td>
+<tr class="row-odd"><td><p>housing</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">housing</span></code></p></td>
 <td><p>(materials as strings)</p></td>
@@ -524,25 +521,19 @@ by IRI.</p>
 </tbody>
 </table>
 </div>
+<p>Electrodes used to be a fifth generic family. They are now first-class — a curated <code class="docutils literal notranslate"><span class="pre">kind</span></code>,
+deterministic identity that includes the processing route, design values, and their own
+emitter — so they have their own page: <a class="reference internal" href="electrodes-model.html"><span class="std std-doc">Electrodes</span></a>.</p>
 <section id="generic-api-per-family-wrappers">
 <h2>Generic API + per-family wrappers<a class="headerlink" href="#generic-api-per-family-wrappers" title="Link to this heading">#</a></h2>
 <p>A generic factory in <code class="docutils literal notranslate"><span class="pre">api.py</span></code> is parameterized by family; thin per-family wrappers are
 generated from the entity registry, so the surface matches the cell/material API:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrode_spec</span><span class="p">,</span> <span class="n">save_electrode_spec</span><span class="p">,</span> <span class="n">create_component_spec</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_separator_spec</span><span class="p">,</span> <span class="n">create_component_spec</span>
 
-<span class="c1"># electrode-spec whose coating references standalone material-specs by IRI</span>
-<span class="n">electrode</span> <span class="o">=</span> <span class="n">create_electrode_spec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811 cathode&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Canrud&quot;</span><span class="p">,</span>
-    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">NMC811_IRI</span><span class="p">,</span>
-                                 <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
-            <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">}],</span>
-            <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">CB_IRI</span><span class="p">}]},</span>
-            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">}}},</span>
-        <span class="s2">&quot;current_collector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}},</span>
-    <span class="p">})</span>
-<span class="n">save_electrode_spec</span><span class="p">(</span><span class="n">electrode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
+<span class="n">separator</span> <span class="o">=</span> <span class="n">create_separator_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Celgard 2400&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Celgard&quot;</span><span class="p">,</span>
+    <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="s2">&quot;polypropylene&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="s2">&quot;monolayer&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}})</span>
 
 <span class="c1"># generic form is also available</span>
 <span class="n">create_component_spec</span><span class="p">(</span><span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;…&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
@@ -553,7 +544,8 @@ each save — is <a class="reference internal" href="howto/build-a-cell-from-com
 <p>Per family you get <code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">save_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;_specs</span></code>,
 <code class="docutils literal notranslate"><span class="pre">template_&lt;family&gt;_spec</span></code> and the bare-name instance equivalents (<code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;</span></code>,
 <code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;s</span></code>). Generic functions <code class="docutils literal notranslate"><span class="pre">create/save/query/template_component_spec(family,</span> <span class="pre">…)</span></code>
-(and <code class="docutils literal notranslate"><span class="pre">_instance</span></code>) underlie them.</p>
+(and <code class="docutils literal notranslate"><span class="pre">_instance</span></code>) underlie them. Electrodes expose the same function names, but as
+hand-written first-class builders rather than generated wrappers.</p>
 <section id="naming-convention">
 <h3>Naming convention<a class="headerlink" href="#naming-convention" title="Link to this heading">#</a></h3>
 <p>Family identifiers use <strong>underscores</strong> (<code class="docutils literal notranslate"><span class="pre">current_collector</span></code>); the IRI namespace uses
@@ -571,9 +563,8 @@ and emit <code class="docutils literal notranslate"><span class="pre">OrganicEle
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">examples/&lt;family&gt;-spec/*</span></code> + <code class="docutils literal notranslate"><span class="pre">examples/&lt;family&gt;/*</span></code> (single source of truth, mirrored into the
-wheel). Coverage: NMC811 cathode + graphite anode electrodes; Celgard PP + ceramic-coated PE
-separators; Al/Cu current collectors; organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah
-prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
+wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
+organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
 Cell-specs reference these component-specs by IRI today via the five <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code>
 fields — see <a class="reference internal" href="cell-fleet.html"><span class="std std-doc">Cells</span></a> for the reference seam and the example fleet
 that uses it.</p>
@@ -591,12 +582,12 @@ that uses it.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="material-spec.html"
+       href="electrodes-model.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Materials</p>
+        <p class="prev-next-title">Electrodes: kind, powder spec, electrode spec, batch</p>
       </div>
     </a>
     <a class="right-next"

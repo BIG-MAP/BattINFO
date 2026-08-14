@@ -142,10 +142,13 @@ applied to materials. The transform renders whichever level is present as a
 properly-typed linked node; the link-integrity gate validates internal IRIs; and
 tolerant import maps free-text names through the alias table with warnings.
 
-> The full composition-linkage ladder (rewiring the cell-spec electrode/electrolyte
-> models onto material references end-to-end) lands in a follow-up PR; the bridge in
-> [`battinfo.materials`](material-spec.md#bridge-embedded--standalone) already lifts
-> embedded materials to standalone specs for dedup today.
+The electrode half of that ladder is built: an [electrode-spec](electrodes-model.md)
+names its active material's `kind` and may reference the powder's `material-spec`, so
+a powder, the electrodes made from it, and the cells built from those electrodes are one
+chain. The bridge in
+[`battinfo.materials`](material-spec.md#bridge-embedded--standalone) also lifts embedded
+materials to standalone specs for dedup. The electrolyte/separator half is still a
+follow-up.
 
 See the [material-spec / material field reference](material-spec.md) for the exact
 fields each record carries.
