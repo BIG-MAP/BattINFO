@@ -358,6 +358,68 @@ def test_cell_spec_electrode_holder_may_cite_an_electrode_spec() -> None:
     assert node["hasNegativeElectrode"]["schema:isVariantOf"] == {"@id": SPEC_IRI}
 
 
+def test_both_electrode_spec_seams_are_authorable_and_round_trip() -> None:
+    """E1: the inline seam was schema-only, so only one of the two was authorable.
+
+    Both must survive to_record -> from_record. They do NOT emit the same
+    statement, and must not: the top-level field says the cell spec's electrode
+    IS that design (the @id merges onto the electrode node), the inline field
+    says this holder is a variant OF it (schema:isVariantOf). See
+    docs/electrodes-model.md for which to reach for.
+    """
+    from battinfo.bundle import CellSpec, Electrode
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    cs = CellSpec(
+        id="https://w3id.org/battinfo/spec/1111-2222-3333-4444",
+        name="Demo cell", manufacturer="Demo Co", model="Demo",
+        format="coin", chemistry="lithium_ion",
+        positive_electrode_spec_id=SPEC_IRI,
+        negative_electrode=Electrode(
+            coating={"component": {"active_material": [{"name": "Graphite"}]}},
+        ),
+    )
+    cs.negative_electrode.electrode_spec_id = SPEC_IRI
+
+    record = cs.to_record()
+    assert record["positive_electrode_spec_id"] == SPEC_IRI
+    assert record["negative_electrode"]["electrode_spec_id"] == SPEC_IRI
+
+    reloaded = CellSpec.from_record(record)
+    assert reloaded.positive_electrode_spec_id == SPEC_IRI
+    assert reloaded.negative_electrode.electrode_spec_id == SPEC_IRI
+    assert reloaded.to_record() == record
+
+    node = to_jsonld(record, target="domain-battery")["@graph"][0]
+    assert node["hasPositiveElectrode"]["@id"] == SPEC_IRI
+    assert node["hasNegativeElectrode"]["schema:isVariantOf"] == {"@id": SPEC_IRI}
+
+
+def test_inline_current_collector_cites_its_foil_material_spec() -> None:
+    """Found by extending the parity guard to nested holders, same family as E1."""
+    from battinfo.bundle import CellSpec, CurrentCollector, Electrode
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    material_spec = "https://w3id.org/battinfo/spec/9999-8888-7777-6666"
+    cs = CellSpec(
+        id="https://w3id.org/battinfo/spec/1111-2222-3333-4444",
+        name="Demo cell", manufacturer="Demo Co", model="Demo",
+        format="coin", chemistry="lithium_ion",
+        positive_electrode=Electrode(
+            current_collector=CurrentCollector(
+                name="Aluminium foil", material_spec_id=material_spec,
+            ),
+        ),
+    )
+    record = cs.to_record()
+    assert record["positive_electrode"]["current_collector"]["material_spec_id"] == material_spec
+    assert CellSpec.from_record(record).to_record() == record
+
+    node = to_jsonld(record, target="domain-battery")["@graph"][0]
+    collector = node["hasPositiveElectrode"]["hasCurrentCollector"]
+    assert collector["schema:isVariantOf"] == {"@id": material_spec}
+
+
 def test_electrode_spec_reference_only_holder_is_valid() -> None:
     from battinfo.validate.record import validate_record
 

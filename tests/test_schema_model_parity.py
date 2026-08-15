@@ -1,6 +1,6 @@
 """Guard: every JSON-schema property of every record type is reachable through a model.
 
-Three bugs of one family were found one at a time, each by a human authoring real
+Four bugs of one family were found one at a time, each by a human authoring real
 data rather than by a test:
 
 * ``Test.conditions`` — the schema defined it, the ``Test`` model had no such
@@ -9,12 +9,22 @@ data rather than by a test:
   it on save (fixed in #334).
 * ``TestSpec.conditions`` — typed ``dict[str, Quantity]``, so the textual
   conditions the schema permits are inexpressible (open; listed below as M4).
+* ``positive_electrode.electrode_spec_id`` — the schema defined it, the JSON-LD
+  emitter read it and the registry vendored it, but the inline ``Electrode``
+  holder is ``extra="forbid"`` and had no such field, so the seam the electrode
+  docs recommend could not be authored at all (readiness finding E1).
+
+E1 escaped this module for a structural reason worth naming: the sweep walked the
+record body and its top-level siblings and stopped there, so a component holder
+was checked as one property (``positive_electrode`` reaches the model) and never
+opened. :func:`test_every_nested_component_property_is_reachable` opens it.
 
 The schema is the save-time contract and the models are the authoring surface, so
 a property that exists in one and not the other is data a user cannot express, or
 data they express and silently lose. This module sweeps all of it: for every
-registered entity kind, every property the JSON schema declares (record body plus
-the top-level siblings) must be either
+registered entity kind, every property the JSON schema declares (record body,
+top-level siblings, and the closed object schemas nested under either) must be
+either
 
 * **reachable** — the model/builder accepts it under its own name or a declared
   authoring alias, and
@@ -322,6 +332,22 @@ def _unknown_property_error(exc: Exception, prop: str) -> bool:
     return False
 
 
+def _unknown_nested_error(exc: Exception, path: tuple[str, ...]) -> bool:
+    """True when *exc* rejects the nested key at *path* as not modeled.
+
+    Pydantic reports the full location of a rejected key inside a nested model
+    (``('positive_electrode', 'electrode_spec_id')``), so match on the tail: the
+    holder may sit under a list index or an alias that shifts the head.
+    """
+    if not isinstance(exc, ValidationError):
+        return False
+    return any(
+        error["type"] in {"extra_forbidden", "unexpected_keyword_argument"}
+        and tuple(str(part) for part in error["loc"])[-len(path):] == path
+        for error in exc.errors()
+    )
+
+
 def _schema_properties(kind: Any) -> list[tuple[str, str, dict]]:
     """``(location, property, subschema)`` for the record body and its siblings."""
     root = _load_schema(kind.schema_file)
@@ -384,6 +410,152 @@ def _sweep() -> tuple[list[str], list[str], int]:
                 dropped.append(f"{entity_type}.{prop} ({location}) accepted a value but to_record() omitted it")
 
     return unreachable, dropped, exercised
+
+
+# ── The nested sweep ──────────────────────────────────────────────────────────
+# The sweep above treats a component holder as one property. This one opens it:
+# for every closed object schema (``additionalProperties: false`` with declared
+# properties) reachable from a record type, each of its own properties must be
+# authorable through the model that holds it, and scalars must survive to the
+# record. That is where E1 lived, and where the same seam on the current
+# collector was found with it.
+
+# Nested location -> why it is not reachable, same contract as KNOWN_GAPS.
+KNOWN_NESTED_GAPS: dict[tuple[str, str], str] = {}
+
+# How deep to open holders. 3 reaches cell-spec.positive_electrode.coating
+# .component (holder -> sub-holder -> material component), which is the deepest
+# closed object the component schemas define.
+_MAX_NESTED_DEPTH = 3
+
+
+def _closed_object(subschema: dict, root: dict, base: str) -> tuple[dict, dict, str] | None:
+    """(schema, root, base) when *subschema* is a closed object with properties."""
+    schema, root, base = _deref(subschema, root, base)
+    kind = schema.get("type")
+    if isinstance(kind, list):
+        kind = next((entry for entry in kind if entry != "null"), None)
+    if kind != "object" or schema.get("additionalProperties") is not False:
+        return None
+    if not isinstance(schema.get("properties"), dict) or not schema["properties"]:
+        return None
+    return schema, root, base
+
+
+def _nested_sweep() -> tuple[list[str], list[str], int]:
+    """(unreachable, dropped-on-save, nested properties actually exercised)."""
+    unreachable: list[str] = []
+    dropped: list[str] = []
+    exercised = 0
+
+    for kind in ENTITY_KINDS:
+        entity_type = kind.entity_type
+        build = BUILDERS[entity_type]
+        root = _load_schema(kind.schema_file)
+        baseline = build()
+
+        def walk(
+            subschema: dict, sub_root: dict, base: str,
+            path: tuple[str, ...], record_path: tuple[str, ...], depth: int,
+            *, _entity_type: str = entity_type, _build: Any = build,
+        ) -> None:
+            nonlocal exercised
+            opened = _closed_object(subschema, sub_root, base)
+            if opened is None or depth > _MAX_NESTED_DEPTH:
+                return
+            obj_schema, obj_root, obj_base = opened
+            # A schema-valid payload satisfies the holder's own required keys, so
+            # a model that normalizes on a required field (an agent needs a name)
+            # is not misread as dropping the property under test.
+            required = {
+                name: sample_value(obj_schema["properties"][name], obj_root, name, obj_base)
+                for name in obj_schema.get("required", [])
+                if name in obj_schema["properties"]
+            }
+            for name, nested_schema in obj_schema["properties"].items():
+                if (_entity_type, ".".join(path + (name,))) in KNOWN_NESTED_GAPS:
+                    continue
+                value = sample_value(nested_schema, obj_root, name, obj_base)
+                if value is None:
+                    continue
+                payload: Any = {**required, name: value}
+                for segment in reversed(path[1:]):
+                    payload = {segment: payload}
+                exercised += 1
+                try:
+                    record = _build(**{path[0]: payload})
+                except Exception as exc:  # noqa: BLE001 - classified here
+                    if _unknown_nested_error(exc, path[1:] + (name,)):
+                        unreachable.append(f"{_entity_type}.{'.'.join(path + (name,))}")
+                    continue  # anything else is a sample-shape mismatch, not a gap
+
+                if _is_scalar(nested_schema, obj_root, obj_base):
+                    cursor: Any = record
+                    for segment in record_path + path:
+                        cursor = cursor.get(segment) if isinstance(cursor, dict) else None
+                        if cursor is None:
+                            break
+                    if not isinstance(cursor, dict) or name not in cursor:
+                        dropped.append(f"{_entity_type}.{'.'.join(path + (name,))}")
+                walk(nested_schema, obj_root, obj_base, path + (name,), record_path, depth + 1)
+
+        for location, prop, subschema in _schema_properties(kind):
+            target = baseline.get(kind.record_key, {}) if location == "body" else baseline
+            if prop in target:
+                continue  # derived: the builder writes the whole block itself
+            record_path = () if location == "top" else (kind.record_key,)
+            walk(subschema, root, kind.schema_file, (prop,), record_path, 0)
+
+    return unreachable, dropped, exercised
+
+
+def test_every_nested_component_property_is_reachable() -> None:
+    """E1's family: a closed holder must model every property its schema declares."""
+    unreachable, _, _ = _nested_sweep()
+    assert not unreachable, (
+        "properties of nested component schemas with no authoring path. Add the "
+        "field to the holder model, or add it to KNOWN_NESTED_GAPS with a "
+        "reason:\n  " + "\n  ".join(sorted(unreachable))
+    )
+
+
+def test_no_nested_property_is_dropped_between_the_model_and_the_record() -> None:
+    """A nested value the model accepts must reach the record."""
+    _, dropped, _ = _nested_sweep()
+    assert not dropped, (
+        "nested values accepted by the model but missing from the built record:\n  "
+        + "\n  ".join(sorted(dropped))
+    )
+
+
+def test_nested_sweep_actually_exercises_the_corpus() -> None:
+    """The sweep that would have caught E1 must keep opening holders."""
+    _, _, exercised = _nested_sweep()
+    assert exercised >= 800, (
+        f"only {exercised} nested properties round-tripped a value; the nested sweep is degrading"
+    )
+
+
+def test_known_nested_gaps_all_carry_a_reason() -> None:
+    empty = [key for key, reason in KNOWN_NESTED_GAPS.items() if not reason.strip()]
+    assert not empty, f"KNOWN_NESTED_GAPS entries without a reason: {empty}"
+
+
+def test_electrode_holder_models_both_spec_seams() -> None:
+    """E1 by name, on both polarities, through the blessed authoring path."""
+    from battinfo.bundle import Electrode
+
+    inline = CellSpec(
+        id=SPEC_IRI, name="probe",
+        positive_electrode=Electrode(electrode_spec_id=SPEC_IRI),
+        negative_electrode=Electrode(electrode_spec_id=SPEC_IRI),
+    )
+    # Assignment after construction is the shape the readiness report used.
+    inline.positive_electrode.electrode_spec_id = SPEC_IRI
+    record = inline.to_record()
+    assert record["positive_electrode"]["electrode_spec_id"] == SPEC_IRI
+    assert record["negative_electrode"]["electrode_spec_id"] == SPEC_IRI
+    assert CellSpec.from_record(record).positive_electrode.electrode_spec_id == SPEC_IRI
 
 
 def test_every_schema_property_is_reachable_through_a_model() -> None:

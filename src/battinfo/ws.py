@@ -821,6 +821,49 @@ def _provider(creators: list[dict] | None, contributors: list[dict] | None) -> t
 # Derived from the entity registry so new record types are picked up automatically.
 _RECORD_SET_DIRS = record_set_dirs()
 
+# Record types :meth:`AuthoringWorkspace._assemble_zenodo_jsonld` promotes to
+# standalone deposit nodes by emitting each record on its own. Every other type
+# reaches the graph through a dedicated builder (cell specs, cells, tests, test
+# protocols, datasets) or through the record that references it (equipment and
+# channels, from the tests that ran on them).
+#
+# A type in neither group is read off disk by :func:`_read_record_sets` and then
+# silently dropped — records that save, validate and emit cleanly but never reach
+# the artifact a reader gets. That is what happened to the whole electrode layer.
+# ``tests/test_deposit_coverage.py`` sweeps ``ENTITY_KINDS`` against
+# :data:`DEPOSIT_COVERAGE_EXEMPT` so the next type added fails a test rather than
+# going missing from a deposit.
+DEPOSIT_STANDALONE_KINDS: tuple[str, ...] = (
+    "material-spec",
+    "material",
+    "electrode-spec",
+    "electrode",
+)
+
+# entity_type -> why a record of that type is not a described node in the deposit
+# graph. Equipment and channels are NOT here: the test emitter builds a described
+# node for each unit and channel a test ran on (hasTestEquipment / prov:used).
+DEPOSIT_COVERAGE_EXEMPT: dict[str, str] = {
+    "equipment-spec": (
+        "the model behind a unit: the deposit describes the units the tests ran "
+        "on (built from the test's equipment_id), not the product line, so a "
+        "spec with no test attached has nothing to attach to. G11 tracks the "
+        "wider equipment-family publication gap"
+    ),
+    **{
+        entity_type: (
+            "generic component family: described inline on the cell spec that uses "
+            "it, not yet promoted to a standalone deposit node"
+        )
+        for entity_type in (
+            "separator-spec", "separator",
+            "current-collector-spec", "current-collector",
+            "electrolyte-spec", "electrolyte",
+            "housing-spec", "housing",
+        )
+    },
+}
+
 
 def _read_record_sets(source_root: Path) -> dict[str, list[dict]]:
     """Load a workspace's saved records into the canonical ``record_sets`` mapping.
@@ -5699,14 +5742,17 @@ class AuthoringWorkspace:
             catalog_node["schema:keywords"] = sorted(_kw)
             catalog_node["dcat:keyword"]    = sorted(_kw)   # DCAT mirror of schema:keywords
 
-        # Standalone material records (Level 2 spec / Level 3 instance) become
-        # first-class deposit nodes: the domain-battery emitter types each by its
-        # kind (kind -> EMMO class + chemical-substance sameAs, labeled fallback
-        # where a class is missing), and the consolidated context resolves those
-        # terms. Cells reference these via material_spec_id on their electrode
-        # components; publishing the standalone nodes makes the links resolve.
-        material_nodes: builtins.list[dict] = []
-        for _mkey in ("material-spec", "material"):
+        # Standalone material and electrode records (Level 2 spec / Level 3
+        # instance) become first-class deposit nodes: the domain-battery emitter
+        # types each by its kind (kind -> EMMO class + chemical-substance sameAs
+        # for materials, chemistry + polarity classes for electrodes, labeled
+        # fallback where a class is missing) and carries its composition,
+        # processing and spec link; the consolidated context resolves those
+        # terms. Cells reference these via material_spec_id / electrode_spec_id
+        # on their components, so publishing the standalone nodes is what makes
+        # those links resolve inside the deposit.
+        standalone_nodes: builtins.list[dict] = []
+        for _mkey in DEPOSIT_STANDALONE_KINDS:
             for _mrec in record_sets.get(_mkey, []):
                 if not isinstance(_mrec, dict):
                     continue
@@ -5714,7 +5760,7 @@ class AuthoringWorkspace:
 
                 _mg = (to_jsonld(_mrec, target="domain-battery").get("@graph") or [])
                 if _mg:
-                    material_nodes.append(dict(_mg[0]))
+                    standalone_nodes.append(dict(_mg[0]))
 
         graph = (
             [catalog_node]
@@ -5725,7 +5771,7 @@ class AuthoringWorkspace:
             + test_spec_nodes
             + instance_nodes
             + test_nodes
-            + material_nodes
+            + standalone_nodes
             # Equipment provenance: the units/channels the tests actually ran on,
             # so hasTestEquipment / prov:used resolve to described nodes.
             + [equipment_nodes[k] for k in sorted(equipment_nodes)]

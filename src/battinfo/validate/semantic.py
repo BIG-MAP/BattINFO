@@ -572,23 +572,21 @@ def _curated_property_map() -> dict[str, str]:
 def _component_property_terms() -> frozenset[str]:
     """Property keys the component emitters resolve WITHOUT the curated map.
 
-    Imported from the transform itself (fraction keys and the descriptor /
-    coating term tables), so this set can never drift from what the JSON-LD
-    emitters actually accept.
-    """
-    from battinfo.transform.json_to_jsonld import (
-        _DESCRIPTOR_COATING_PROPERTY_TERMS,
-        _DESCRIPTOR_PROPERTY_TERMS,
-        _FRACTION_PROPERTY_TERMS,
-    )
+    Derived from ``COMPONENT_PROPERTY_TERM_TABLES`` — the transform's own
+    registry of every holder ``property`` term table — rather than by naming the
+    tables here, so this set cannot drift from what the JSON-LD emitters accept.
+    Listing them by hand is what let ``_ELECTRODE_PROPERTY_TERMS`` be added to
+    the emitter without reaching the validator, which then warned that a mapped
+    ``areal_capacity`` had no mapping.
 
-    return frozenset(
-        {
-            *_FRACTION_PROPERTY_TERMS,
-            *_DESCRIPTOR_PROPERTY_TERMS,
-            *_DESCRIPTOR_COATING_PROPERTY_TERMS,
-        }
-    )
+    The set is a union across holders, not a per-holder table: a key any
+    component emitter maps is accepted on every component. That is deliberately
+    permissive (a coating term on an electrolyte body does not warn) and matches
+    the behaviour this check has always had.
+    """
+    from battinfo.transform.json_to_jsonld import COMPONENT_PROPERTY_TERM_TABLES
+
+    return frozenset(key for table in COMPONENT_PROPERTY_TERM_TABLES for key in table)
 
 
 def _validate_property_mappability(
@@ -962,10 +960,11 @@ def validate_semantic_report(
         if isinstance(body, Mapping) and isinstance(body.get("property"), Mapping):
             _validate_specs(body["property"], issues, resource_type, hard_issue_severity)
 
-    # Every component body's property block gets the mappability check, with
-    # the transform's descriptor/fraction keys treated as known (they resolve
-    # without the curated map). Coating properties resolve through the coating
-    # term table, so electrode coatings are checked too.
+    # Every component body's property block gets the mappability check, with the
+    # transform's own holder term tables (fraction, descriptor, coating,
+    # electrode, material) treated as known — they resolve without the curated
+    # map. Coating properties resolve through the coating term table, so
+    # electrode coatings are checked too.
     _component_known = _component_property_terms()
 
     def _check_props(block: Any, prefix: str) -> None:
