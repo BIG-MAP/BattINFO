@@ -159,15 +159,20 @@ itself, and the processing route as `prov:wasGeneratedBy`. A batch emits
 
 ## Cells reference electrodes
 
-A cell-spec can cite a designed electrode two ways, both optional and both
-additive — existing embedded electrode fields stay valid:
+A cell-spec can cite a designed electrode two ways, both optional and both additive — existing embedded electrode fields stay valid. They say different things, so pick on meaning rather than taste:
 
-- top-level `positive_electrode_spec_id` / `negative_electrode_spec_id`, which
-  merge the spec's `@id` onto the emitted electrode node;
-- `electrode_spec_id` **inside** the `positive_electrode` / `negative_electrode`
-  holder, which emits `schema:isVariantOf` — the same seam
-  `material_spec_id` gives an inline material, for cells that describe their
-  electrode inline *and* want to say which design it realizes.
+- **Prefer** the top-level `positive_electrode_spec_id` / `negative_electrode_spec_id` when the cell spec's electrode simply *is* the published design. The spec's `@id` merges onto the emitted electrode node, so the cell spec and the design are one node in the graph.
+- Use `electrode_spec_id` **inside** the `positive_electrode` / `negative_electrode` holder when the inline description is a *variant* of the design, or when both electrodes need independent inline detail. It emits `schema:isVariantOf` — the same seam `material_spec_id` gives an inline material — which states that the holder realizes the design without claiming to be it.
+
+Both are authorable from the model:
+
+```python
+cs.positive_electrode_spec_id = "https://w3id.org/battinfo/spec/rkf4-xz0y-h8kz-rmxz"   # preferred
+cs.negative_electrode = electrode(bom=bom(active_material=material("Graphite")))
+cs.negative_electrode.electrode_spec_id = "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
+```
+
+An inline current collector cites the foil material the same way, through `current_collector.material_spec_id`.
 
 Cell instances do not yet reference electrode batches; there is no natural slot on
 `cell_instance` today, and inventing one was out of scope for the promotion.

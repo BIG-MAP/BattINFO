@@ -658,16 +658,18 @@ itself, and the processing route as <code class="docutils literal notranslate"><
 </section>
 <section id="cells-reference-electrodes">
 <h2>Cells reference electrodes<a class="headerlink" href="#cells-reference-electrodes" title="Link to this heading">#</a></h2>
-<p>A cell-spec can cite a designed electrode two ways, both optional and both
-additive — existing embedded electrode fields stay valid:</p>
+<p>A cell-spec can cite a designed electrode two ways, both optional and both additive — existing embedded electrode fields stay valid. They say different things, so pick on meaning rather than taste:</p>
 <ul class="simple">
-<li><p>top-level <code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code>, which
-merge the spec’s <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> onto the emitted electrode node;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">electrode_spec_id</span></code> <strong>inside</strong> the <code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code>
-holder, which emits <code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> — the same seam
-<code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code> gives an inline material, for cells that describe their
-electrode inline <em>and</em> want to say which design it realizes.</p></li>
+<li><p><strong>Prefer</strong> the top-level <code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code> when the cell spec’s electrode simply <em>is</em> the published design. The spec’s <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> merges onto the emitted electrode node, so the cell spec and the design are one node in the graph.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">electrode_spec_id</span></code> <strong>inside</strong> the <code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code> holder when the inline description is a <em>variant</em> of the design, or when both electrodes need independent inline detail. It emits <code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> — the same seam <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code> gives an inline material — which states that the holder realizes the design without claiming to be it.</p></li>
 </ul>
+<p>Both are authorable from the model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cs</span><span class="o">.</span><span class="n">positive_electrode_spec_id</span> <span class="o">=</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/rkf4-xz0y-h8kz-rmxz&quot;</span>   <span class="c1"># preferred</span>
+<span class="n">cs</span><span class="o">.</span><span class="n">negative_electrode</span> <span class="o">=</span> <span class="n">electrode</span><span class="p">(</span><span class="n">bom</span><span class="o">=</span><span class="n">bom</span><span class="p">(</span><span class="n">active_material</span><span class="o">=</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;Graphite&quot;</span><span class="p">)))</span>
+<span class="n">cs</span><span class="o">.</span><span class="n">negative_electrode</span><span class="o">.</span><span class="n">electrode_spec_id</span> <span class="o">=</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r&quot;</span>
+</pre></div>
+</div>
+<p>An inline current collector cites the foil material the same way, through <code class="docutils literal notranslate"><span class="pre">current_collector.material_spec_id</span></code>.</p>
 <p>Cell instances do not yet reference electrode batches; there is no natural slot on
 <code class="docutils literal notranslate"><span class="pre">cell_instance</span></code> today, and inventing one was out of scope for the promotion.</p>
 </section>
