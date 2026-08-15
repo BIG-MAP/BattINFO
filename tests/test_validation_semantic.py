@@ -209,3 +209,82 @@ def test_property_unmapped_message_matches_transform_reality() -> None:
     assert "fallback" in issue.message
     assert "OMITTED" not in issue.message
 
+
+# ── The validator must accept exactly what the emitters map ───────────────────
+# _component_property_terms() used to name the transform's term tables one by
+# one. #342 added _ELECTRODE_PROPERTY_TERMS to the emitter and nothing added it
+# here, so a correct electrode design value warned that it had no mapping — while
+# the helper's own docstring claimed the set "can never drift". Three warnings
+# for zero defects in the Flores corpus (E5), and _MATERIAL_PROPERTY_TERMS had
+# drifted the same way for eight more keys.
+
+
+@pytest.mark.parametrize(
+    "key", ["areal_capacity", "nominal_areal_capacity", "reversible_areal_capacity"]
+)
+def test_electrode_design_values_do_not_warn(key: str) -> None:
+    """E5: the electrode emitter maps these to AreicCapacity; nothing may warn."""
+    rec = {
+        "schema_version": "0.2.0",
+        "electrode_spec": {
+            "id": "https://w3id.org/battinfo/electrode-spec/aaaa-bbbb-cccc-dddd",
+            "name": "Purchased graphite electrode",
+            "kind": "graphite",
+            "property": {key: {"value": 3.4, "unit": "mA.h/cm2"}},
+        },
+        "provenance": {"source_type": "datasheet"},
+    }
+    report = validate_semantic_report(rec, policy=STRICT_SEMANTIC)
+    assert [i.code for i in report.issues] == []
+
+
+@pytest.mark.parametrize("key", ["bet_surface_area", "specific_capacity", "particle_size_d50"])
+def test_material_datasheet_values_do_not_warn(key: str) -> None:
+    """Same drift on _MATERIAL_PROPERTY_TERMS: ordinary powder datasheet keys."""
+    rec = {
+        "schema_version": "0.2.0",
+        "material_spec": {
+            "id": "https://w3id.org/battinfo/material-spec/aaaa-bbbb-cccc-dddd",
+            "name": "Graphite powder",
+            "property": {key: {"value": 2.5, "unit": "m2/g"}},
+        },
+        "provenance": {"source_type": "datasheet"},
+    }
+    hits = [
+        i.path
+        for i in validate_semantic_report(rec, policy=STRICT_SEMANTIC).issues
+        if i.code == "semantic.property_unmapped"
+    ]
+    assert hits == []
+
+
+def test_every_emitter_property_table_is_registered() -> None:
+    """A new holder term table must join the registry the validator reads.
+
+    Naming the tables in two places is what allowed the drift. The emitter now
+    exports one registry; this pins that no ``_<holder>_PROPERTY_TERMS`` can be
+    added to the transform without appearing in it.
+    """
+    from battinfo.transform import json_to_jsonld as emitter
+
+    registered = {id(table) for table in emitter.COMPONENT_PROPERTY_TERM_TABLES}
+    unregistered = sorted(
+        name
+        for name in dir(emitter)
+        if name.endswith("_PROPERTY_TERMS") and id(getattr(emitter, name)) not in registered
+    )
+    assert not unregistered, (
+        "property term tables the emitter uses but COMPONENT_PROPERTY_TERM_TABLES "
+        "does not list, so the semantic validator will warn about keys the emitter "
+        f"maps: {unregistered}"
+    )
+
+
+def test_validator_known_keys_equal_the_emitter_registry() -> None:
+    """The invariant the docstring claims, asserted rather than assumed."""
+    from battinfo.transform.json_to_jsonld import COMPONENT_PROPERTY_TERM_TABLES
+    from battinfo.validate.semantic import _component_property_terms
+
+    expected = {key for table in COMPONENT_PROPERTY_TERM_TABLES for key in table}
+    assert set(_component_property_terms()) == expected
+

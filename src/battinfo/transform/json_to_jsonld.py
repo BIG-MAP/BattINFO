@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import warnings
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from functools import lru_cache
 from importlib import resources
@@ -501,6 +502,12 @@ _ELECTRODE_PROPERTY_TERMS: dict[str, str] = {
     "nominal_areal_capacity": "AreicCapacity",
     "reversible_areal_capacity": "AreicCapacity",
 }
+
+# NOTE: a new ``_<holder>_PROPERTY_TERMS`` table must be registered in
+# :data:`COMPONENT_PROPERTY_TERM_TABLES` (defined below, once every table exists).
+# The semantic validator derives its "resolves without the curated map" key set from
+# that tuple, so an unregistered table makes the validator warn about keys the
+# emitter maps — the drift that shipped ``areal_capacity`` warnings.
 
 
 def _descriptor_property_nodes(
@@ -1889,6 +1896,27 @@ _MATERIAL_PROPERTY_TERMS: dict[str, str] = {
     "average_voltage": "Voltage",
     "mass": "Mass",
 }
+
+
+# Every holder ``property`` term table the component emitters pass to
+# :func:`_descriptor_property_nodes` as ``term_overrides``. This is the single
+# source the semantic validator reads to decide which property keys resolve
+# WITHOUT the curated map (``validate.semantic._component_property_terms``), so
+# the validator accepts exactly what the emitters map.
+#
+# Registration is enforced by a guard test: every module-level
+# ``_<holder>_PROPERTY_TERMS`` must appear here, and the validator's key set must
+# equal this union. Tables that drive blocks the validator does not check as a
+# holder ``property`` dict (``_ASSEMBLY_QUANTITY_TERMS`` for construction
+# quantities, ``_MEASUREMENT_PARAMETER_TERMS`` for test conditions) are
+# deliberately named differently and stay out.
+COMPONENT_PROPERTY_TERM_TABLES: tuple[Mapping[str, str], ...] = (
+    _FRACTION_PROPERTY_TERMS,
+    _DESCRIPTOR_PROPERTY_TERMS,
+    _DESCRIPTOR_COATING_PROPERTY_TERMS,
+    _ELECTRODE_PROPERTY_TERMS,
+    _MATERIAL_PROPERTY_TERMS,
+)
 
 
 # Processing-route token -> human label. The tokens are the `route` enum of
