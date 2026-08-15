@@ -1408,6 +1408,10 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
     The name (e.g. 'Aluminium foil') is parsed to build an @type list that stacks the
     substrate material and physical form onto CurrentCollector:
         'Aluminium foil' → ['CurrentCollector', 'Aluminium', 'Foil']
+
+    ``material_spec_id`` cites the standalone material-spec for the foil material,
+    emitted as ``schema:isVariantOf`` — the same reference seam a material
+    component and an inline electrode carry.
     """
     if not isinstance(cc, dict):
         return None
@@ -1416,6 +1420,9 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
     node: dict[str, Any] = {"@type": cc_types if len(cc_types) > 1 else cc_types[0]}
     if name:
         node["schema:name"] = name
+    spec_ref = cc.get("material_spec_id")
+    if isinstance(spec_ref, str) and spec_ref.strip():
+        node["schema:isVariantOf"] = {"@id": spec_ref}
     prop_nodes = _descriptor_property_nodes(cc.get("property"))
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes

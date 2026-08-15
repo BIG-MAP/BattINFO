@@ -46,6 +46,41 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **The deposit graph dropped the whole electrode layer (readiness finding E2).**
+  `_assemble_zenodo_jsonld` promoted standalone `material-spec` and `material`
+  records to first-class deposit nodes and nothing else, so `electrode-spec` and
+  `electrode` records were read off disk, never used, and absent from
+  `deposit.jsonld`: 301 nodes for the Flores corpus's 323 records, with the
+  processing routes, compositions and design values missing from the published
+  artifact. Both types are now promoted with their full emission. The set is
+  named in `ws.DEPOSIT_STANDALONE_KINDS`, and `tests/test_deposit_coverage.py`
+  sweeps every registered entity kind against `ws.DEPOSIT_COVERAGE_EXEMPT`, so a
+  record type that cannot reach a deposit is a test failure rather than a report
+  footnote.
+
+- **The inline electrode-spec seam was not authorable (readiness finding E1).**
+  `positive_electrode.electrode_spec_id` was in the JSON schema, read by the
+  JSON-LD emitter and vendored by the registry, but the pydantic `Electrode`
+  holder is `extra="forbid"` and had no such field, so the seam
+  `docs/electrodes-model.md` recommends could only be written by hand-editing
+  the record. Added to the model, along with `CurrentCollector.material_spec_id`
+  (the same schema-only seam on the foil material, now also emitted as
+  `schema:isVariantOf`), which the extended parity guard found alongside it. The
+  doc now says which of the two spec seams to prefer and why they state
+  different things.
+
+- **The semantic validator warned about electrode design values it maps
+  (readiness finding E5).** `_component_property_terms()` listed the emitter's
+  holder term tables one by one and was never extended with the electrode table
+  added in #342, so a correct `areal_capacity` on an electrode spec warned
+  `semantic.property_unmapped` — three warnings for zero defects in the Flores
+  corpus, breaking the invariant the helper's own docstring claims.
+  `_MATERIAL_PROPERTY_TERMS` had drifted the same way for eight more keys
+  (`bet_surface_area`, `specific_capacity`, `particle_size_d50` and friends). The
+  emitter now exports one registry, `COMPONENT_PROPERTY_TERM_TABLES`, the
+  validator derives its key set from it, and a guard test fails if any
+  `_<holder>_PROPERTY_TERMS` table is missing from the registry.
+
 - **`RoundTripEfficiencyValueShape` and `CapacityFadeValueShape`** targeted only the
   pre-0.37.1 classes, so the plausibility ranges silently stopped applying to
   records typed with the new ones. Both now target the new and the published IRI.

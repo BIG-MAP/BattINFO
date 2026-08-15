@@ -971,6 +971,7 @@ class CurrentCollector(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
+    material_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.")
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
@@ -1002,8 +1003,25 @@ class CurrentCollectorTab(BaseModel):
 
 
 class Electrode(BaseModel):
+    """An electrode described inline on a cell spec.
+
+    Two seams cite a standalone electrode-spec record, and both round-trip and
+    emit:
+
+    * ``CellSpec.positive_electrode_spec_id`` / ``negative_electrode_spec_id`` —
+      the top-level sibling. **Preferred** for a cell spec whose electrode IS the
+      published design: the emitter merges the referenced ``@id`` onto the
+      emitted electrode node, so the cell spec and the design are one node.
+    * ``Electrode.electrode_spec_id`` (this field) — the inline holder cites a
+      design it realizes while keeping its own embedded fields, emitted as
+      ``schema:isVariantOf``. Use it when the inline description differs from the
+      design (a variant), or when both electrodes of one cell spec need
+      independent inline detail.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
+    electrode_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer CellSpec.positive_electrode_spec_id / negative_electrode_spec_id when the cell spec's electrode simply IS that design.")
     coating: Coating | None = None
     current_collector: CurrentCollector | None = None
     tab: CurrentCollectorTab | None = None
