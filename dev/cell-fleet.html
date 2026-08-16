@@ -490,7 +490,7 @@ turn reference material-specs — completing the three-level graph
 <strong>cell → component → material</strong>.</p>
 <section id="reference-seam">
 <h2>Reference seam<a class="headerlink" href="#reference-seam" title="Link to this heading">#</a></h2>
-<p>A cell-spec gains five optional top-level reference fields (siblings of the inline
+<p>A cell-spec gains seven optional top-level reference fields (siblings of the inline
 <code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code>/<code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>/… holders):</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -502,18 +502,24 @@ turn reference material-specs — completing the three-level graph
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">working_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode_spec_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">separator_spec_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">separator_spec_id</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>Which electrode pair a cell uses follows from its <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> — polarity
+for a full cell, role for a half or three-electrode cell. See
+<a class="reference internal" href="electrodes-model.html#cells-reference-electrodes"><span class="std std-ref">Electrodes: cells reference electrodes</span></a>.</p>
 <p>A cell may <strong>reference</strong>, <strong>inline</strong>, or both — inline holders stay optional, so existing
 records are unaffected. The JSON-LD emits reference nodes
 (<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">&lt;electrode-spec</span> <span class="pre">IRI&gt;}</span></code>, etc.);
