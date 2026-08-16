@@ -337,6 +337,121 @@ def _validate_controlled_values(
             )
 
 
+# Electrode holders on a cell-spec, by family. The polarity holders describe a
+# full cell; the role holders describe a cell that has no polarity to assign.
+_POLARITY_ELECTRODE_FIELDS = ("positive_electrode", "negative_electrode")
+_ROLE_ELECTRODE_FIELDS = ("working_electrode", "counter_electrode")
+_ROLELESS_CONFIGURATIONS = {"half_cell", "half-cell", "three_electrode_cell",
+                            "three-electrode-cell", "three-electrode"}
+
+
+def _populated_electrode_fields(doc: Mapping[str, Any], fields: tuple[str, ...]) -> list[str]:
+    """The electrode holders of *fields* this record actually populates.
+
+    An inline holder and its ``*_spec_id`` sibling both place an electrode, so
+    both count. Holders may sit at the record top level (the schema's shape) or
+    inside the ``cell_spec`` body (older payloads), so both are read.
+    """
+    product = doc.get("cell_spec")
+    body: Mapping[str, Any] = product if isinstance(product, Mapping) else {}
+    found: list[str] = []
+    for field in fields:
+        for key in (field, f"{field}_spec_id"):
+            value = doc.get(key)
+            if value is None:
+                value = body.get(key)
+            if isinstance(value, Mapping) and value:
+                found.append(key)
+            elif isinstance(value, str) and value.strip():
+                found.append(key)
+    return found
+
+
+def _validate_electrode_role_coherence(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """The electrode holders must match the cell configuration.
+
+    Upstream ruling: do not use polarity in a half cell — name the electrodes by
+    role (working / counter / reference) instead. So a ``half_cell`` or
+    ``three_electrode_cell`` belongs in ``working_electrode`` /
+    ``counter_electrode``, and a ``full_cell`` in ``positive_electrode`` /
+    ``negative_electrode``.
+
+    Warnings, never errors: the funnel stays tolerant, and both holder families
+    round-trip and emit whatever the configuration says. What is never allowed is
+    silence — a record that mixes the two families, or that names its electrodes
+    against its own stated configuration, says so here.
+    """
+    product = doc.get("cell_spec")
+    if not isinstance(product, Mapping):
+        return
+    configuration = product.get("cell_configuration")
+    configuration = configuration.strip().lower() if isinstance(configuration, str) else None
+    if configuration is None and product.get("reference_electrode"):
+        # The emitter's own fallback: an unstated configuration with a reference
+        # electrode reads as a half cell, so the coherence check reads it that way too.
+        configuration = "half_cell"
+    roleless = configuration in _ROLELESS_CONFIGURATIONS
+
+    polarity_fields = _populated_electrode_fields(doc, _POLARITY_ELECTRODE_FIELDS)
+    role_fields = _populated_electrode_fields(doc, _ROLE_ELECTRODE_FIELDS)
+    if not polarity_fields and not role_fields:
+        return
+
+    stated = f"cell_configuration '{configuration}'" if configuration else "an unstated cell_configuration"
+    if polarity_fields and role_fields:
+        preferred, discouraged = (
+            (_ROLE_ELECTRODE_FIELDS, polarity_fields) if roleless
+            else (_POLARITY_ELECTRODE_FIELDS, role_fields)
+        )
+        _append_issue(
+            issues,
+            code="semantic.electrode_holders_mixed",
+            severity="warning",
+            path=discouraged[0],
+            message=(
+                f"this cell-spec populates both polarity holders ({', '.join(polarity_fields)}) "
+                f"and role holders ({', '.join(role_fields)}); with {stated} the electrodes "
+                f"belong in {' / '.join(preferred)}. Two families describing one electrode "
+                "emit two nodes in the JSON-LD - keep one."
+            ),
+            resource_type=resource_type,
+        )
+        return
+
+    if polarity_fields and roleless:
+        _append_issue(
+            issues,
+            code="semantic.electrode_role_expected",
+            severity="warning",
+            path=polarity_fields[0],
+            message=(
+                f"{stated} has no positive/negative polarity to assign, but this cell-spec "
+                f"names its electrodes by polarity ({', '.join(polarity_fields)}). Use "
+                "working_electrode / counter_electrode (and reference_electrode for a "
+                "three-electrode cell) instead."
+            ),
+            resource_type=resource_type,
+        )
+    elif role_fields and not roleless:
+        _append_issue(
+            issues,
+            code="semantic.electrode_polarity_expected",
+            severity="warning",
+            path=role_fields[0],
+            message=(
+                f"{stated} is read as a full cell, whose electrodes have a polarity, but this "
+                f"cell-spec names its electrodes by role ({', '.join(role_fields)}). Use "
+                "positive_electrode / negative_electrode, or state "
+                "cell_configuration='half_cell' / 'three_electrode_cell' if that is what this is."
+            ),
+            resource_type=resource_type,
+        )
+
+
 def _validate_material_kind(
     doc: dict[str, Any],
     issues: list[ValidationIssue],
@@ -940,6 +1055,7 @@ def validate_semantic_report(
 
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
     _validate_controlled_values(doc, issues, resource_type)
+    _validate_electrode_role_coherence(doc, issues, resource_type)
     _validate_material_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_electrode_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_size_code(doc, issues, resource_type, hard_issue_severity)
@@ -982,6 +1098,7 @@ def validate_semantic_report(
         # Inline electrode bodies carried directly on a cell spec (not just the
         # standalone electrode records) emit fallback terms too, so check them.
         "positive_electrode", "negative_electrode",
+        "working_electrode", "counter_electrode",
         "electrolyte_spec", "electrolyte",
         "separator_spec", "separator",
         "current_collector_spec", "current_collector",

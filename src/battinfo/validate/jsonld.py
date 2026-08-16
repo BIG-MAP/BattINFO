@@ -200,6 +200,12 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "BatteryHalfCell",
     "HalfCellDevice",
     "ThreeElectrodeCellDevice",
+    # Electrode role classes, for the cells above: a cell with no polarity names
+    # its electrodes by role. The three are non-disjoint upstream, which is what
+    # lets a half cell's counter electrode also be its reference.
+    "WorkingElectrode",
+    "CounterElectrode",
+    "ReferenceElectrode",
     "ElectrolyteAdditive",
     "ElectrolyteSolution",
     "ExpandedMesh",

@@ -334,6 +334,8 @@ def validate_references_report(
         for ref_field, expected_type in (
             ("positive_electrode_spec_id", "electrode-spec"),
             ("negative_electrode_spec_id", "electrode-spec"),
+            ("working_electrode_spec_id", "electrode-spec"),
+            ("counter_electrode_spec_id", "electrode-spec"),
             ("electrolyte_spec_id", "electrolyte-spec"),
             ("separator_spec_id", "separator-spec"),
             ("housing_spec_id", "housing-spec"),

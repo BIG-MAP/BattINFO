@@ -199,6 +199,35 @@ def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
     return field_map.get(variant) if variant != key else None
 
 
+# Role-based electrode holders. A cell that is not a full cell has no polarity to
+# assign — the upstream ruling is to name the electrodes by role instead — so
+# these holders carry the electrodes of a half cell or a three-electrode cell.
+_ROLE_ELECTRODE_HOLDERS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    ("working_electrode", "hasWorkingElectrode", ("WorkingElectrode",)),
+    ("counter_electrode", "hasCounterElectrode", ("CounterElectrode",)),
+)
+
+
+def _cell_configuration_key(cell: Mapping[str, Any]) -> str | None:
+    """The cell configuration of a cell-spec / specification dict, entity-map keyed.
+
+    An explicit ``cell_configuration`` wins. ``reference_electrode`` is the
+    schema's half-cell marker ("counter/reference electrode for half-cell
+    configurations") and remains the fallback for records that never state a
+    configuration. Returns the hyphenated form ``entity_type_map.json`` is keyed
+    on (``"half-cell"``), or None when neither is present.
+
+    One reading, shared by the descriptor emitter, the canonical node builder and
+    the role-holder typing above, so the three can never drift apart.
+    """
+    configuration = _normalize_term(cell.get("cell_configuration"))
+    if configuration is None and cell.get("reference_electrode"):
+        configuration = "half-cell"
+    if configuration is None:
+        return None
+    return re.sub(r"[\s_,/]+", "-", configuration)
+
+
 def _load_mapping_file(*parts: str) -> dict[str, Any]:
     packaged_path = resources.files("battinfo").joinpath("data", "mappings", "domain-battery", *parts)
     if packaged_path.is_file():
@@ -1496,59 +1525,96 @@ def _descriptor_separator_to_jsonld(separator: dict[str, Any] | None) -> dict[st
     return node if len(node) > 1 else None
 
 
+def _electrode_holder_body(electrode_data: Any) -> dict[str, Any]:
+    """The role-independent body of an inline electrode holder.
+
+    Coating, current collector, tab, design properties and the
+    ``electrode_spec_id`` seam. What an electrode is MADE OF does not depend on
+    the place it is given in the cell, so the polarity holders
+    (``positive_electrode`` / ``negative_electrode``) and the role holders
+    (``working_electrode`` / ``counter_electrode``) share this builder exactly;
+    only the outer ``@type`` and the relation differ.
+    """
+    node: dict[str, Any] = {}
+    if not isinstance(electrode_data, dict):
+        return node
+    coating = _descriptor_electrode_coating_to_jsonld(electrode_data.get("coating"))
+    if coating:
+        node["hasCoating"] = coating
+    cc = _descriptor_current_collector_to_jsonld(electrode_data.get("current_collector"))
+    if cc:
+        node["hasCurrentCollector"] = cc
+    tab = electrode_data.get("tab")
+    if isinstance(tab, dict):
+        tab_node: dict[str, Any] = {"@type": "CurrentCollectorTab"}
+        if tab.get("material"):
+            tab_node["schema:material"] = tab["material"]
+        _converter_component_metadata(tab_node, tab)
+        tab_props = _descriptor_property_nodes(tab.get("property"))
+        if tab_props:
+            tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
+        if len(tab_node) > 1:
+            node["hasCurrentCollectorTab"] = tab_node
+    prop_nodes = _descriptor_property_nodes(
+        electrode_data.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS
+    )
+    if prop_nodes:
+        node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
+    # An inline holder may cite the standalone electrode-spec it realizes, the
+    # same seam material_spec_id gives an inline material. Emitted as
+    # schema:isVariantOf (the holder IS NOT the spec); the top-level
+    # *_electrode_spec_id fields keep their @id-merge behaviour, so both
+    # reference styles stay valid.
+    holder_spec_ref = electrode_data.get("electrode_spec_id")
+    if isinstance(holder_spec_ref, str) and holder_spec_ref:
+        node["schema:isVariantOf"] = {"@id": holder_spec_ref}
+    return node
+
+
 def _apply_specification_composition(battery: dict[str, Any], specification: dict[str, Any]) -> None:
     """Apply the electrochemical composition tree of a specification-shaped dict.
 
-    Adds hasPositiveElectrode / hasNegativeElectrode (coating, current collector,
-    tab), hasElectrolyte and hasSeparator to *battery* in place. Shared by the
-    descriptor emitter (``to_jsonld(target="domain-battery")``) and the canonical
-    cell-spec node builder (``transform.cell_spec_node.build_cell_spec_node``) so
-    every user-facing semantic output emits the same composition (emitter
-    convergence — never a third emitter).
+    Adds the electrode relations (coating, current collector, tab), hasElectrolyte
+    and hasSeparator to *battery* in place. Shared by the descriptor emitter
+    (``to_jsonld(target="domain-battery")``) and the canonical cell-spec node
+    builder (``transform.cell_spec_node.build_cell_spec_node``) so every
+    user-facing semantic output emits the same composition (emitter convergence —
+    never a third emitter).
+
+    Two holder families, by cell configuration. A full cell has a polarity, so its
+    electrodes emit as hasPositiveElectrode / hasNegativeElectrode. A half cell or
+    a three-electrode cell has none — upstream ruling: do not use polarity in a
+    half cell — so its electrodes emit by ROLE as hasWorkingElectrode /
+    hasCounterElectrode. In a half cell the counter electrode is also the
+    reference (the HalfCellDevice axiom), so it carries both role classes; in a
+    three-electrode cell the record's separate ``reference_electrode`` field
+    carries the reference.
     """
+    configuration = _cell_configuration_key(specification)
+    roleless = configuration in {"half-cell", "three-electrode", "three-electrode-cell"}
+    roles_authored = any(
+        isinstance(specification.get(key), dict) for key, _, _ in _ROLE_ELECTRODE_HOLDERS
+    )
+
     for basis_field, data_key, default_relation in (
         ("positive_electrode_basis", "positive_electrode", "hasPositiveElectrode"),
         ("negative_electrode_basis", "negative_electrode", "hasNegativeElectrode"),
     ):
         electrode_data = specification.get(data_key)
+        if roleless and roles_authored and not isinstance(electrode_data, dict):
+            # A cell with no polarity does not get a polarity electrode invented
+            # for it from its chemistry basis: the role holders ARE its electrodes.
+            # The basis still types the cell itself, so nothing is lost. An
+            # authored polarity HOLDER is never dropped this way — that would be
+            # silent data loss; the save gate warns about it instead.
+            continue
         mapping = _entity_mapping(basis_field, specification.get(basis_field)) or {}
         # Relation is fixed by which side this is; the entity mapping only refines
         # the @type. Never gate electrode emission on a mapped chemistry basis —
         # an electrode that has composition data must never be dropped.
         relation = mapping.get("relation") or default_relation
         node_type = mapping.get("node_type")
-        electrode_node: dict[str, Any] = {}
-        if isinstance(electrode_data, dict):
-            coating = _descriptor_electrode_coating_to_jsonld(electrode_data.get("coating"))
-            if coating:
-                electrode_node["hasCoating"] = coating
-            cc = _descriptor_current_collector_to_jsonld(electrode_data.get("current_collector"))
-            if cc:
-                electrode_node["hasCurrentCollector"] = cc
-            tab = electrode_data.get("tab")
-            if isinstance(tab, dict):
-                tab_node: dict[str, Any] = {"@type": "CurrentCollectorTab"}
-                if tab.get("material"):
-                    tab_node["schema:material"] = tab["material"]
-                _converter_component_metadata(tab_node, tab)
-                tab_props = _descriptor_property_nodes(tab.get("property"))
-                if tab_props:
-                    tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
-                if len(tab_node) > 1:
-                    electrode_node["hasCurrentCollectorTab"] = tab_node
-            prop_nodes = _descriptor_property_nodes(
-                electrode_data.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS
-            )
-            if prop_nodes:
-                electrode_node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
-            # An inline holder may cite the standalone electrode-spec it realizes,
-            # the same seam material_spec_id gives an inline material. Emitted as
-            # schema:isVariantOf (the holder IS NOT the spec); the top-level
-            # positive/negative_electrode_spec_id fields keep their @id-merge
-            # behaviour below, so both reference styles stay valid.
-            holder_spec_ref = electrode_data.get("electrode_spec_id")
-            if isinstance(holder_spec_ref, str) and holder_spec_ref:
-                electrode_node["schema:isVariantOf"] = {"@id": holder_spec_ref}
+        electrode_node = _electrode_holder_body(electrode_data)
         basis = specification.get(basis_field)
         basis_label = basis.strip() if isinstance(basis, str) else ""
         if isinstance(node_type, str) and node_type:
@@ -1566,6 +1632,20 @@ def _apply_specification_composition(battery: dict[str, Any], specification: dic
             electrode_node["skos:prefLabel"] = basis_label
         if electrode_node:
             battery[relation] = electrode_node
+
+    for data_key, relation, role_types in _ROLE_ELECTRODE_HOLDERS:
+        electrode_data = specification.get(data_key)
+        if not isinstance(electrode_data, dict):
+            continue
+        electrode_node = _electrode_holder_body(electrode_data)
+        types = list(role_types)
+        if data_key == "counter_electrode" and configuration == "half-cell":
+            # A half cell's counter electrode IS its reference electrode. Stated
+            # on the node, not as a second relation, so the graph carries one
+            # electrode playing two roles rather than two electrodes.
+            types.append("ReferenceElectrode")
+        electrode_node["@type"] = types[0] if len(types) == 1 else types
+        battery[relation] = electrode_node
 
     electrolyte_node = _descriptor_electrolyte_to_jsonld(specification.get("electrolyte"))
     if electrolyte_node:
@@ -1604,6 +1684,8 @@ def _apply_specification_structure_and_refs(battery: dict[str, Any], specificati
     for ref_field, relation in (
         ("positive_electrode_spec_id", "hasPositiveElectrode"),
         ("negative_electrode_spec_id", "hasNegativeElectrode"),
+        ("working_electrode_spec_id", "hasWorkingElectrode"),
+        ("counter_electrode_spec_id", "hasCounterElectrode"),
         ("electrolyte_spec_id", "hasElectrolyte"),
         ("separator_spec_id", "hasSeparator"),
     ):
@@ -1649,9 +1731,7 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
 
     # A reference electrode is the schema's half-cell marker; an explicit
     # cell_configuration wins. See the cell_configuration section of entity_type_map.
-    configuration = specification.get("cell_configuration")
-    if not configuration and specification.get("reference_electrode"):
-        configuration = "half-cell"
+    configuration = _cell_configuration_key(specification)
     configuration_mapping = _entity_mapping("cell_configuration", configuration)
     if configuration_mapping:
         battery_type_list.extend(configuration_mapping.get("battery_types", []))
@@ -2335,9 +2415,17 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
         }
         if "size_code" in product:
             specification["size_code"] = product["size_code"]
+        # The configuration statement and its half-cell marker live in the record
+        # body; carry them across or this path reads every cell as a full cell and
+        # types the role holders against the wrong configuration.
+        for body_field in ("cell_configuration", "reference_electrode"):
+            if body_field in product:
+                specification[body_field] = product[body_field]
         for field in ("construction", "positive_electrode", "negative_electrode",
+                      "working_electrode", "counter_electrode",
                       "electrolyte", "separator", "housing",
                       "positive_electrode_spec_id", "negative_electrode_spec_id",
+                      "working_electrode_spec_id", "counter_electrode_spec_id",
                       "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
             if field in data:
                 specification[field] = data[field]

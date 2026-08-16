@@ -224,7 +224,15 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
         "binder": "binder",
         "additive": "conductive_additive",
     }
-    for electrode_key, polarity in (("positive_electrode", "positive"), ("negative_electrode", "negative")):
+    # Role holders carry no polarity: a half cell or a three-electrode cell has
+    # none to assign, so their active materials are extracted with "none" rather
+    # than a guessed side.
+    for electrode_key, polarity in (
+        ("positive_electrode", "positive"),
+        ("negative_electrode", "negative"),
+        ("working_electrode", "none"),
+        ("counter_electrode", "none"),
+    ):
         electrode = data.get(electrode_key)
         if not isinstance(electrode, Mapping):
             continue

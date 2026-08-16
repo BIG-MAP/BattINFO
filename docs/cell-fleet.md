@@ -8,15 +8,20 @@ turn reference material-specs — completing the three-level graph
 
 ## Reference seam
 
-A cell-spec gains five optional top-level reference fields (siblings of the inline
+A cell-spec gains seven optional top-level reference fields (siblings of the inline
 `positive_electrode`/`electrolyte`/… holders):
 
 | Field | Resolves to |
 | --- | --- |
 | `positive_electrode_spec_id` / `negative_electrode_spec_id` | `electrode-spec` |
+| `working_electrode_spec_id` / `counter_electrode_spec_id` | `electrode-spec` |
 | `electrolyte_spec_id` | `electrolyte-spec` |
 | `separator_spec_id` | `separator-spec` |
 | `housing_spec_id` | `housing-spec` |
+
+Which electrode pair a cell uses follows from its `cell_configuration` — polarity
+for a full cell, role for a half or three-electrode cell. See
+[Electrodes: cells reference electrodes](electrodes-model.md#cells-reference-electrodes).
 
 A cell may **reference**, **inline**, or both — inline holders stay optional, so existing
 records are unaffected. The JSON-LD emits reference nodes

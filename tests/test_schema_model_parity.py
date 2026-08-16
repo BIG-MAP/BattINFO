@@ -541,21 +541,24 @@ def test_known_nested_gaps_all_carry_a_reason() -> None:
     assert not empty, f"KNOWN_NESTED_GAPS entries without a reason: {empty}"
 
 
-def test_electrode_holder_models_both_spec_seams() -> None:
-    """E1 by name, on both polarities, through the blessed authoring path."""
+@pytest.mark.parametrize("holder", ["positive_electrode", "negative_electrode",
+                                    "working_electrode", "counter_electrode"])
+def test_electrode_holder_models_both_spec_seams(holder: str) -> None:
+    """E1 by name, on every electrode holder, through the blessed authoring path.
+
+    The role holders (working / counter) are the same shape as the polarity ones,
+    so the seam that went missing on ``positive_electrode`` is pinned on all four
+    rather than left to the sweep alone.
+    """
     from battinfo.bundle import Electrode
 
-    inline = CellSpec(
-        id=SPEC_IRI, name="probe",
-        positive_electrode=Electrode(electrode_spec_id=SPEC_IRI),
-        negative_electrode=Electrode(electrode_spec_id=SPEC_IRI),
-    )
+    inline = CellSpec(id=SPEC_IRI, name="probe", **{holder: Electrode(electrode_spec_id=SPEC_IRI)})
     # Assignment after construction is the shape the readiness report used.
-    inline.positive_electrode.electrode_spec_id = SPEC_IRI
+    getattr(inline, holder).electrode_spec_id = SPEC_IRI
     record = inline.to_record()
-    assert record["positive_electrode"]["electrode_spec_id"] == SPEC_IRI
-    assert record["negative_electrode"]["electrode_spec_id"] == SPEC_IRI
-    assert CellSpec.from_record(record).positive_electrode.electrode_spec_id == SPEC_IRI
+    assert record[holder]["electrode_spec_id"] == SPEC_IRI
+    assert getattr(CellSpec.from_record(record), holder).electrode_spec_id == SPEC_IRI
+    assert CellSpec.from_record(record).to_record() == record
 
 
 def test_every_schema_property_is_reachable_through_a_model() -> None:

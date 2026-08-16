@@ -510,6 +510,21 @@ export const recordsContext: Record<string, unknown> = {
     "PowerToEnergyRatio": "electrochemistry:electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c",
     "RoundTripEnergyEfficiency": "electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11",
     "LithiumNickelManganeseOxideElectrode": "electrochemistry:electrochemistry_41ddf723_245f_4ce8_b9b1_7d9b3b9eea7d",
-    "ZincElectrode": "electrochemistry:electrochemistry_424bf750_7df5_49b5_ba73_ba74397a166b"
+    "ZincElectrode": "electrochemistry:electrochemistry_424bf750_7df5_49b5_ba73_ba74397a166b",
+    "hasWorkingElectrode": {
+      "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
+      "@type": "@id"
+    },
+    "hasCounterElectrode": {
+      "@id": "electrochemistry:electrochemistry_e08d43cf_93e4_49c6_bcb6_472be52ae7fc",
+      "@type": "@id"
+    },
+    "hasReferenceElectrode": {
+      "@id": "electrochemistry:electrochemistry_5eb197ea_0c3e_4ea2_8392_81152ee91515",
+      "@type": "@id"
+    },
+    "WorkingElectrode": "electrochemistry:electrochemistry_fb988878_ee54_4350_9ee9_228c00c3ad35",
+    "CounterElectrode": "electrochemistry:electrochemistry_871bc4a4_2d17_4b88_9b0f_7ab85f14afea",
+    "ReferenceElectrode": "electrochemistry:electrochemistry_7729c34e_1ae9_403d_b933_1765885e7f29"
   }
 };
