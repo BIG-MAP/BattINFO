@@ -69,6 +69,36 @@ def test_descriptor_path_agrees_with_the_canonical_path() -> None:
     assert "ThreeElectrodeCellDevice" in node["isDescriptionFor"]["@type"]
 
 
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ({"cell_configuration": "half_cell"}, "HalfCellDevice"),
+        ({"cell_configuration": "three_electrode_cell"}, "ThreeElectrodeCellDevice"),
+        ({"reference_electrode": "lithium"}, "HalfCellDevice"),
+    ],
+)
+def test_a_canonical_record_keeps_its_configuration_through_the_descriptor_path(
+    body: dict[str, str], expected: str
+) -> None:
+    """The record -> descriptor adapter used to drop both configuration fields.
+
+    It copied identity, format, chemistry and the bases, so a half cell exported
+    with ``to_jsonld(target="domain-battery")`` typed as a plain cell while the
+    canonical node builder typed it correctly — the two emitters disagreed on the
+    one field whose job is to say what kind of cell this is.
+    """
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    record = CellSpec(
+        id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", name="Probe",
+        manufacturer="Lab", model="P-1", format="coin", chemistry="li-ion", **body,
+    ).to_record()
+
+    descriptor = to_jsonld(record, target="domain-battery")["@graph"][0]
+    assert expected in descriptor["isDescriptionFor"]["@type"]
+    assert descriptor["isDescriptionFor"]["@type"] == record_to_jsonld(record, "cell-spec")["isDescriptionFor"]["@type"]
+
+
 # ── authoring + persistence ────────────────────────────────────────────────────
 
 def test_authoring_round_trips_through_save_and_emission(tmp_path: Path) -> None:

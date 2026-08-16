@@ -125,6 +125,7 @@ def _cell_spec_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
     if "properties" in doc:
         specification["property"] = doc["properties"]
     for field in ("construction", "positive_electrode", "negative_electrode",
+                  "working_electrode", "counter_electrode",
                   "electrolyte", "separator", "housing"):
         if field in doc:
             specification[field] = doc[field]
@@ -159,7 +160,7 @@ def _library_cell_spec_filename(manufacturer: str, model: str) -> str:
 # CellDatasheetInput, this accepts the FULL physical structure, not just construction/property.
 _LIBRARY_SPEC_OPTIONAL_FIELDS = (
     "size_code", "construction", "property", "positive_electrode", "negative_electrode",
-    "electrolyte", "separator", "housing",
+    "working_electrode", "counter_electrode", "electrolyte", "separator", "housing",
 )
 
 
@@ -1031,6 +1032,8 @@ def _assert_id_matches_uid(entity_id: str, uid: str) -> None:
 _COMPONENT_SPEC_REF_NAMESPACES = {
     "positive_electrode_spec_id": "electrode-spec",
     "negative_electrode_spec_id": "electrode-spec",
+    "working_electrode_spec_id": "electrode-spec",
+    "counter_electrode_spec_id": "electrode-spec",
     "electrolyte_spec_id": "electrolyte-spec",
     "separator_spec_id": "separator-spec",
     "housing_spec_id": "housing-spec",

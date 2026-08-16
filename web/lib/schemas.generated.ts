@@ -1557,6 +1557,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "negative_electrode": {
           "$ref": "modules/components/electrode.schema.json"
         },
+        "working_electrode": {
+          "$ref": "modules/components/electrode.schema.json",
+          "description": "Inline working-electrode structure. Role holder for a half_cell or three_electrode_cell: a cell that is not a full cell has no positive/negative polarity to assign, so the electrode under study is the working electrode. Emitted as hasWorkingElectrode with @type WorkingElectrode."
+        },
+        "counter_electrode": {
+          "$ref": "modules/components/electrode.schema.json",
+          "description": "Inline counter-electrode structure. Role holder for a half_cell or three_electrode_cell. In a half cell the counter electrode also serves as the reference, so it is emitted with @type [CounterElectrode, ReferenceElectrode]; in a three-electrode cell the separate reference_electrode field carries the reference role."
+        },
         "electrolyte": {
           "$ref": "modules/components/electrolyte.schema.json"
         },
@@ -1573,6 +1581,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "negative_electrode_spec_id": {
           "$ref": "#/$defs/ElectrodeSpecIri",
           "description": "Optional canonical IRI of a standalone electrode-spec for the negative electrode."
+        },
+        "working_electrode_spec_id": {
+          "$ref": "#/$defs/ElectrodeSpecIri",
+          "description": "Optional canonical IRI of a standalone electrode-spec for the working electrode (used instead of, or alongside, the inline working_electrode holder)."
+        },
+        "counter_electrode_spec_id": {
+          "$ref": "#/$defs/ElectrodeSpecIri",
+          "description": "Optional canonical IRI of a standalone electrode-spec for the counter electrode."
         },
         "electrolyte_spec_id": {
           "$ref": "#/$defs/ElectrolyteSpecIri",

@@ -127,6 +127,34 @@ three-electrode full cell or a commercial cell under potential monitoring needs.
 class at all. Both spellings (`three-electrode`, `three-electrode-cell`) are keyed in
 `entity_type_map.json` so tolerant import and the schema enum land on the same mapping.
 
+**Electrode roles (decision, maintainer ruling).** *Do not use polarity in a half cell —
+use reference, working and counter electrode instead of positive or negative electrode.*
+`cell_spec` therefore carries a second electrode holder family, `working_electrode` /
+`counter_electrode` (with `working_electrode_spec_id` / `counter_electrode_spec_id`
+mirroring the polarity siblings), selected by `cell_configuration`. They emit
+`hasWorkingElectrode` / `hasCounterElectrode` typed `WorkingElectrode`
+(`electrochemistry_fb988878_…`) and `CounterElectrode` (`electrochemistry_871bc4a4_…`).
+
+The three role classes are non-disjoint upstream, which is what lets a half cell's counter
+electrode also be its reference — the `HalfCellDevice` axiom. So under `half_cell` the
+counter electrode is typed `[CounterElectrode, ReferenceElectrode]`
+(`electrochemistry_7729c34e_…`) on one node, never as a second `hasReferenceElectrode`
+relation to a second electrode. Under `three_electrode_cell` there IS a third electrode,
+so the record's separate `reference_electrode` field carries the reference and the counter
+electrode is typed `CounterElectrode` alone.
+
+Composition typing is deliberately role-independent: one shared builder emits the holder
+body (coating, current collector, tab, design properties, the `electrode_spec_id` seam) for
+both families, because what an electrode is made of does not depend on the role it is given.
+Cell typing is likewise unchanged — the device classes still come from `cell_configuration`.
+What the roles do change is the basis fallback: once a non-full cell states its electrodes by
+role, `positive_electrode_basis` / `negative_electrode_basis` no longer emit a polarity-named
+electrode node beside them (they keep contributing to the cell `@type` stack). An electrode
+the author actually wrote into a polarity holder is never suppressed this way; the save gate
+warns about the mismatch instead. `electrode_spec.polarity` is untouched — that is the
+design's intended full-cell side, derived from the kind, and roles are a cell-level
+assignment.
+
 ### domain-electrochemistry 0.37.1 / 0.37.2
 
 Six quantity classes landed and drained seven `battinfo:` placeholders. All are wired in

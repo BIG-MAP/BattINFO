@@ -511,6 +511,9 @@ def cell_description(
     properties: PropertySet | None = None,
     positive_electrode: Electrode | None = None,
     negative_electrode: Electrode | None = None,
+    working_electrode: Electrode | None = None,
+    counter_electrode: Electrode | None = None,
+    cell_configuration: str | None = None,
     electrolyte: Electrolyte | None = None,
     separator: Separator | None = None,
     coin_hardware: dict[str, Any] | None = None,  # DEPRECATED: pass ``housing`` instead (auto-migrated).
@@ -541,8 +544,14 @@ def cell_description(
         size_code: IEC or custom size code, e.g. ``"R18650"``, ``"P0035"``.
         construction: Assembly description from :func:`construction`.
         properties: Cell-level quantitative properties (capacity, voltage, etc.).
-        positive_electrode: Positive electrode from :func:`electrode`.
-        negative_electrode: Negative electrode from :func:`electrode`.
+        positive_electrode: Positive electrode from :func:`electrode` (full cell).
+        negative_electrode: Negative electrode from :func:`electrode` (full cell).
+        working_electrode: Working electrode from :func:`electrode`. Use this and
+            ``counter_electrode`` instead of the polarity pair when the cell is a
+            half cell or a three-electrode cell, which have no polarity to assign.
+        counter_electrode: Counter electrode from :func:`electrode`. In a half cell
+            it also carries the reference role.
+        cell_configuration: ``full_cell``, ``half_cell`` or ``three_electrode_cell``.
         electrolyte: Electrolyte from :func:`electrolyte_recipe`.
         separator: Separator from :func:`separator_spec`.
         coin_hardware: DEPRECATED legacy coin-hardware dict (case/lid/can/spring/spacer);
@@ -571,6 +580,9 @@ def cell_description(
         properties=properties or PropertySet(),
         positive_electrode=positive_electrode,
         negative_electrode=negative_electrode,
+        working_electrode=working_electrode,
+        counter_electrode=counter_electrode,
+        cell_configuration=cell_configuration,
         electrolyte=electrolyte,
         separator=separator,
         coin_hardware=coin_hardware or {},

@@ -1005,13 +1005,22 @@ class CurrentCollectorTab(BaseModel):
 class Electrode(BaseModel):
     """An electrode described inline on a cell spec.
 
+    One shape serves both the polarity holders (``positive_electrode`` /
+    ``negative_electrode``, for a full cell) and the role holders
+    (``working_electrode`` / ``counter_electrode``, for a half cell or a
+    three-electrode cell). The holder it sits in states the electrode's place in
+    the cell; the body — coating, current collector, tab, properties — is the
+    same either way, because an electrode's composition does not depend on the
+    role it is given.
+
     Two seams cite a standalone electrode-spec record, and both round-trip and
     emit:
 
-    * ``CellSpec.positive_electrode_spec_id`` / ``negative_electrode_spec_id`` —
-      the top-level sibling. **Preferred** for a cell spec whose electrode IS the
-      published design: the emitter merges the referenced ``@id`` onto the
-      emitted electrode node, so the cell spec and the design are one node.
+    * ``CellSpec.positive_electrode_spec_id`` / ``negative_electrode_spec_id``
+      (and their ``working_``/``counter_`` siblings) — the top-level reference.
+      **Preferred** for a cell spec whose electrode IS the published design: the
+      emitter merges the referenced ``@id`` onto the emitted electrode node, so
+      the cell spec and the design are one node.
     * ``Electrode.electrode_spec_id`` (this field) — the inline holder cites a
       design it realizes while keeping its own embedded fields, emitted as
       ``schema:isVariantOf``. Use it when the inline description differs from the
@@ -1021,7 +1030,7 @@ class Electrode(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    electrode_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer CellSpec.positive_electrode_spec_id / negative_electrode_spec_id when the cell spec's electrode simply IS that design.")
+    electrode_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer the cell spec's matching *_electrode_spec_id sibling when the cell spec's electrode simply IS that design.")
     coating: Coating | None = None
     current_collector: CurrentCollector | None = None
     tab: CurrentCollectorTab | None = None
@@ -1324,8 +1333,12 @@ class CellSpec(BundleJsonModel):
     properties: dict[str, Any] = Field(default_factory=dict, description="Quantitative spec properties as name -> {value, unit} quantity objects (authoring alias: specs=; run 'battinfo properties list' for valid names).")
     # Datasheet structure (merged from the former CellSpec).
     construction: dict[str, Any] = Field(default_factory=dict, description="As-designed construction details (assembly type, layering, stack geometry).")
-    positive_electrode: Electrode | None = Field(default=None, description="Inline positive-electrode datasheet structure (coating, current collector, composition).")
-    negative_electrode: Electrode | None = Field(default=None, description="Inline negative-electrode datasheet structure (coating, current collector, composition).")
+    positive_electrode: Electrode | None = Field(default=None, description="Inline positive-electrode datasheet structure (coating, current collector, composition). Polarity holder: for a full cell.")
+    negative_electrode: Electrode | None = Field(default=None, description="Inline negative-electrode datasheet structure (coating, current collector, composition). Polarity holder: for a full cell.")
+    # Role holders. A half cell or a three-electrode cell has no positive/negative
+    # polarity to assign, so its electrodes are named by the role they play.
+    working_electrode: Electrode | None = Field(default=None, description="Inline working-electrode structure. Role holder: use for cell_configuration half_cell or three_electrode_cell instead of the polarity holders. Emitted as hasWorkingElectrode / @type WorkingElectrode.")
+    counter_electrode: Electrode | None = Field(default=None, description="Inline counter-electrode structure. Role holder: use for cell_configuration half_cell or three_electrode_cell. In a half cell it also carries the reference role (@type CounterElectrode + ReferenceElectrode).")
     electrolyte: Electrolyte | None = Field(default=None, description="Inline electrolyte description (solvents, salts, additives).")
     separator: Separator | None = Field(default=None, description="Inline separator description (material, thickness, coating).")
     housing: Housing | None = Field(default=None, description="Format-neutral housing description (case, seal, tabs; replaces the retired coin_hardware dict).")
@@ -1333,6 +1346,8 @@ class CellSpec(BundleJsonModel):
     # instead of, or alongside, the inline holders above).
     positive_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone positive-electrode-spec record referenced instead of (or alongside) the inline structure.")
     negative_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone negative-electrode-spec record.")
+    working_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the working electrode (role holder sibling).")
+    counter_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the counter electrode (role holder sibling).")
     electrolyte_spec_id: str | None = Field(default=None, description="IRI of a standalone electrolyte-spec record.")
     separator_spec_id: str | None = Field(default=None, description="IRI of a standalone separator-spec record.")
     housing_spec_id: str | None = Field(default=None, description="IRI of a standalone housing-spec record.")
@@ -1353,7 +1368,8 @@ class CellSpec(BundleJsonModel):
     def _coerce_mapping_fields(cls, value: Any) -> Any:
         return _mapping_from_object(value)
 
-    @field_validator("positive_electrode", "negative_electrode", "electrolyte", "separator", mode="before")
+    @field_validator("positive_electrode", "negative_electrode", "working_electrode",
+                     "counter_electrode", "electrolyte", "separator", mode="before")
     @classmethod
     def _coerce_component(cls, value: Any) -> Any:
         if isinstance(value, Mapping):
@@ -1521,6 +1537,8 @@ class CellSpec(BundleJsonModel):
             datasheet_revision=product.get("datasheet_revision"),
             positive_electrode_spec_id=record.get("positive_electrode_spec_id"),
             negative_electrode_spec_id=record.get("negative_electrode_spec_id"),
+            working_electrode_spec_id=record.get("working_electrode_spec_id"),
+            counter_electrode_spec_id=record.get("counter_electrode_spec_id"),
             electrolyte_spec_id=record.get("electrolyte_spec_id"),
             separator_spec_id=record.get("separator_spec_id"),
             housing_spec_id=record.get("housing_spec_id"),
@@ -1531,6 +1549,8 @@ class CellSpec(BundleJsonModel):
             else {},
             positive_electrode=copy.deepcopy(record.get("positive_electrode")),
             negative_electrode=copy.deepcopy(record.get("negative_electrode")),
+            working_electrode=copy.deepcopy(record.get("working_electrode")),
+            counter_electrode=copy.deepcopy(record.get("counter_electrode")),
             electrolyte=copy.deepcopy(record.get("electrolyte")),
             separator=copy.deepcopy(record.get("separator")),
             housing=copy.deepcopy(record.get("housing"))
@@ -1666,6 +1686,7 @@ class CellSpec(BundleJsonModel):
         if self.manufacturer_id is not None:
             record["cell_spec"]["manufacturer"]["id"] = self.manufacturer_id
         for _ref in ("positive_electrode_spec_id", "negative_electrode_spec_id",
+                     "working_electrode_spec_id", "counter_electrode_spec_id",
                      "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
             _ref_value = getattr(self, _ref)
             if _ref_value is not None:
@@ -1685,6 +1706,10 @@ class CellSpec(BundleJsonModel):
             record["positive_electrode"] = self.positive_electrode.model_dump(mode="json", exclude_none=True)
         if self.negative_electrode is not None:
             record["negative_electrode"] = self.negative_electrode.model_dump(mode="json", exclude_none=True)
+        if self.working_electrode is not None:
+            record["working_electrode"] = self.working_electrode.model_dump(mode="json", exclude_none=True)
+        if self.counter_electrode is not None:
+            record["counter_electrode"] = self.counter_electrode.model_dump(mode="json", exclude_none=True)
         if self.electrolyte is not None:
             record["electrolyte"] = self.electrolyte.model_dump(mode="json", exclude_none=True)
         if self.separator is not None:
@@ -1738,6 +1763,8 @@ class CellSpec(BundleJsonModel):
             properties=dict(specification.get("property", {})) if isinstance(specification.get("property"), Mapping) else {},
             positive_electrode=copy.deepcopy(specification.get("positive_electrode")),
             negative_electrode=copy.deepcopy(specification.get("negative_electrode")),
+            working_electrode=copy.deepcopy(specification.get("working_electrode")),
+            counter_electrode=copy.deepcopy(specification.get("counter_electrode")),
             electrolyte=copy.deepcopy(specification.get("electrolyte")),
             separator=copy.deepcopy(specification.get("separator")),
             housing=copy.deepcopy(specification.get("housing"))
@@ -1772,6 +1799,10 @@ class CellSpec(BundleJsonModel):
             specification["positive_electrode"] = self.positive_electrode.model_dump(mode="json", exclude_none=True)
         if self.negative_electrode is not None:
             specification["negative_electrode"] = self.negative_electrode.model_dump(mode="json", exclude_none=True)
+        if self.working_electrode is not None:
+            specification["working_electrode"] = self.working_electrode.model_dump(mode="json", exclude_none=True)
+        if self.counter_electrode is not None:
+            specification["counter_electrode"] = self.counter_electrode.model_dump(mode="json", exclude_none=True)
         if self.electrolyte is not None:
             specification["electrolyte"] = self.electrolyte.model_dump(mode="json", exclude_none=True)
         if self.separator is not None:

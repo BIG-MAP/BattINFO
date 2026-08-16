@@ -174,6 +174,44 @@ cs.negative_electrode.electrode_spec_id = "https://w3id.org/battinfo/spec/d7qr-n
 
 An inline current collector cites the foil material the same way, through `current_collector.material_spec_id`.
 
+## Half cells name their electrodes by role, not by polarity
+
+Positive and negative are properties of a *full* cell: they say which side of a working battery an electrode sits on. A half cell has no such sides. Neither does a three-electrode cell, where the point of the third electrode is to measure a potential that has no polarity of its own. Upstream ruling: **do not use polarity in a half cell — use reference, working and counter electrode instead.**
+
+So a cell-spec has two holder families, and `cell_configuration` picks between them:
+
+| `cell_configuration` | Electrode holders | Emitted as |
+| --- | --- | --- |
+| `full_cell` (or unstated) | `positive_electrode`, `negative_electrode` | `hasPositiveElectrode`, `hasNegativeElectrode` |
+| `half_cell` | `working_electrode`, `counter_electrode` | `hasWorkingElectrode`, `hasCounterElectrode` |
+| `three_electrode_cell` | `working_electrode`, `counter_electrode`, plus `reference_electrode` | as above, with the reference named separately |
+
+The role holders are the same shape as the polarity ones — inline `coating` / `current_collector` / `tab` / `property`, the `electrode_spec_id` seam, and the top-level `working_electrode_spec_id` / `counter_electrode_spec_id` siblings — because *what an electrode is made of does not depend on the role it is given*. Only the relation and the `@type` change.
+
+```python
+ws.describe_cell(
+    manufacturer="Lab", model="HC-1", format="coin", chemistry="li-ion",
+    cell_configuration="half_cell",
+    working_electrode=electrode(bom=bom(active_material=material("Graphite"))),
+    counter_electrode=electrode(bom=bom(active_material=material("Lithium"))),
+)
+```
+
+A half cell's counter electrode is also its potential reference — there is no third electrode to be one. That is stated on the node rather than as a second relation, so the graph carries one electrode playing two roles instead of two electrodes:
+
+```json
+"hasWorkingElectrode": {"@type": "WorkingElectrode", "hasCoating": {"…": "…"}},
+"hasCounterElectrode": {"@type": ["CounterElectrode", "ReferenceElectrode"], "…": "…"}
+```
+
+In a three-electrode cell the separate `reference_electrode` field carries the reference, so the counter electrode is typed `CounterElectrode` alone. The cell's own typing is untouched by any of this: `half_cell` still stacks `BatteryHalfCell` + `HalfCellDevice`, `three_electrode_cell` still stacks `ThreeElectrodeCellDevice`.
+
+**Talking about half-cell voltage.** Describe the measurement as working *versus* counter (or versus reference), not as positive versus negative. A graphite half cell measured against lithium metal has the graphite as the working electrode whichever direction the current runs; calling it the "positive electrode" because it happens to sit at the higher potential in this build states something about the build, not about the design.
+
+**Mixing the families warns.** Authoring polarity holders on a stated half cell, role holders on a full cell, or both families at once each produce a save-time **warning** naming the pair that fits the configuration. Never an error: the funnel stays tolerant, both families round-trip, and an authored electrode is never dropped. What is dropped for a role-holder half cell is the polarity electrode node the emitter used to invent from `positive_electrode_basis` / `negative_electrode_basis` alone — those bases stay as chemistry descriptors and keep typing the cell, but they no longer put a polarity-named electrode in the graph beside the roles.
+
+**Roles are not `electrode_spec.polarity`.** That field is the *design's* intended full-cell side, derived from the electrode kind (an LFP cathode is a positive-electrode design). Roles are assigned at the cell level, by the holder an electrode sits in. So the same graphite anode design can be the working electrode of a half cell, and neither statement contradicts the other.
+
 Cell instances do not yet reference electrode batches; there is no natural slot on
 `cell_instance` today, and inventing one was out of scope for the promotion.
 

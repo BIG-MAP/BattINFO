@@ -1,6 +1,7 @@
 """Bridge between inline cell-spec component holders and standalone component-specs.
 
-A cell-spec may inline its components (``positive_electrode``, ``negative_electrode``,
+A cell-spec may inline its components (``positive_electrode``/``negative_electrode`` for a
+full cell, ``working_electrode``/``counter_electrode`` for a half or three-electrode cell,
 ``electrolyte``, ``separator``, ``housing``) or reference standalone component-specs by
 IRI (``*_spec_id``). These helpers lift the inline holders into standalone
 ``electrode-spec``/``electrolyte-spec``/``separator-spec``/``housing-spec`` records so a
@@ -18,6 +19,9 @@ from battinfo._workspace import _stable_uid
 _HOLDER_FAMILIES = (
     ("positive_electrode", "electrode", "positive electrode"),
     ("negative_electrode", "electrode", "negative electrode"),
+    # Role holders, for a half cell or a three-electrode cell.
+    ("working_electrode", "electrode", "working electrode"),
+    ("counter_electrode", "electrode", "counter electrode"),
     ("electrolyte", "electrolyte", "electrolyte"),
     ("separator", "separator", "separator"),
     ("housing", "housing", "housing"),

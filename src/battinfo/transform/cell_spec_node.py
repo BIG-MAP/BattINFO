@@ -43,6 +43,7 @@ from battinfo.transform.json_to_jsonld import (
     _HARDWARE_PART_TYPE,
     _apply_specification_composition,
     _apply_specification_structure_and_refs,
+    _cell_configuration_key,
     _descriptor_quantity_node,
     _entity_mapping,
     _epoch_to_iso8601,
@@ -136,6 +137,11 @@ _COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
     # relations
     "hasPositiveElectrode",
     "hasNegativeElectrode",
+    # Role relations, for cells that have no polarity to assign (half cell,
+    # three-electrode cell).
+    "hasWorkingElectrode",
+    "hasCounterElectrode",
+    "hasReferenceElectrode",
     "hasElectrolyte",
     "hasSeparator",
     "hasCoating",
@@ -152,6 +158,9 @@ _COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
     "hasConstituent",
     # component / constituent classes
     "Electrode",
+    "WorkingElectrode",
+    "CounterElectrode",
+    "ReferenceElectrode",
     "ElectrodeCoating",
     "CurrentCollector",
     "CurrentCollectorTab",
@@ -274,9 +283,7 @@ def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
     """
     table = label_to_compact()
     types: list[str] = []
-    configuration = cell_spec.get("cell_configuration")
-    if not configuration and cell_spec.get("reference_electrode"):
-        configuration = "half-cell"
+    configuration = _cell_configuration_key(cell_spec)
     for section, key in (
         ("format", cell_spec.get("cell_format")),
         ("cell_configuration", configuration),
@@ -382,11 +389,15 @@ _COMPOSITION_FIELDS: tuple[str, ...] = (
     "construction",
     "positive_electrode",
     "negative_electrode",
+    "working_electrode",
+    "counter_electrode",
     "electrolyte",
     "separator",
     "housing",
     "positive_electrode_spec_id",
     "negative_electrode_spec_id",
+    "working_electrode_spec_id",
+    "counter_electrode_spec_id",
     "electrolyte_spec_id",
     "separator_spec_id",
     "housing_spec_id",
@@ -401,6 +412,10 @@ def _composition_view(record: Mapping[str, Any], cell: Mapping[str, Any]) -> dic
         "format": cell.get("cell_format") or cell.get("format"),
         "positive_electrode_basis": cell.get("positive_electrode_basis"),
         "negative_electrode_basis": cell.get("negative_electrode_basis"),
+        # The role holders type against the configuration (a half cell's counter
+        # electrode is also its reference), so the view has to carry it.
+        "cell_configuration": cell.get("cell_configuration"),
+        "reference_electrode": cell.get("reference_electrode"),
     }
     for field in _COMPOSITION_FIELDS:
         value = record.get(field)

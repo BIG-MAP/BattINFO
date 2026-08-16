@@ -46,6 +46,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **The descriptor emitter read every canonical cell-spec as a full cell.**
+  `to_jsonld(record, target="domain-battery")` normalises a cell-spec record into
+  the descriptor shape, and that adapter copied identity, format, chemistry and the
+  electrode bases but not `cell_configuration` or `reference_electrode`. A half cell
+  published through the canonical node builder therefore typed as `BatteryHalfCell`
+  + `HalfCellDevice` while the same record exported through the descriptor path
+  typed as a plain cell — the two emitters disagreed on the one field whose whole
+  job is to say what kind of cell this is. Both fields are carried across now, and
+  the single reading of them (explicit configuration wins, `reference_electrode` is
+  the fallback marker) lives in one helper the descriptor path, the canonical node
+  builder and the new role-holder typing all share, so they cannot drift apart
+  again.
+
 - **The deposit graph dropped the whole electrode layer (readiness finding E2).**
   `_assemble_zenodo_jsonld` promoted standalone `material-spec` and `material`
   records to first-class deposit nodes and nothing else, so `electrode-spec` and
@@ -101,6 +114,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   dependency sweep.
 
 ### Added
+
+- **Role-based electrode holders — `working_electrode` / `counter_electrode`.**
+  Maintainer ruling: do not use polarity in a half cell; use reference, working and
+  counter electrode instead. Positive and negative describe the two sides of a
+  *full* cell, and a half cell or a three-electrode cell has no such sides, so a
+  cell-spec now carries a second electrode holder family selected by
+  `cell_configuration`. The role holders are the same shape as the polarity ones —
+  the inline `Electrode` (coating, current collector, tab, `property`, the
+  `electrode_spec_id` seam) plus top-level `working_electrode_spec_id` /
+  `counter_electrode_spec_id` siblings — so nothing about authoring an electrode
+  changes except where it goes.
+
+  They emit `hasWorkingElectrode` / `hasCounterElectrode`, typed `WorkingElectrode`
+  and `CounterElectrode`. Under `half_cell` the counter electrode also carries
+  `ReferenceElectrode`: a half cell has no third electrode, so its counter IS its
+  reference (the `HalfCellDevice` axiom, and why the three role classes are
+  non-disjoint upstream). It is stated as a second `@type` on the one node, never as
+  a second relation to a second electrode. Under `three_electrode_cell` the record's
+  separate `reference_electrode` field carries the reference and the counter
+  electrode is typed `CounterElectrode` alone. Cell typing is untouched —
+  `BatteryHalfCell` + `HalfCellDevice` and `ThreeElectrodeCellDevice` still come
+  from `cell_configuration` — and so is composition typing: one shared builder emits
+  the holder body for both families, because what an electrode is made of does not
+  depend on the role it is given. `electrode_spec.polarity` also stays as it is:
+  that is the *design's* intended full-cell side, derived from the kind, while roles
+  are assigned at the cell level by the holder an electrode sits in.
+
+  Mismatches are a save-time **warning**, never an error — the funnel stays
+  tolerant and both families round-trip. Polarity holders on a stated half or
+  three-electrode cell raise `semantic.electrode_role_expected`; role holders on a
+  full cell (or an unstated configuration, which reads as one) raise
+  `semantic.electrode_polarity_expected`; populating both families raises
+  `semantic.electrode_holders_mixed`, which names the pair that fits the
+  configuration. The six role terms are appended to the frozen v1 records context.
 
 - **Test-protocol JSON-LD (readiness finding M5)**: `record_to_jsonld` now emits
   test-protocol records — the last record type it could not. The node is a
