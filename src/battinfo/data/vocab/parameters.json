@@ -9,6 +9,13 @@
       "kind": "scalar",
       "description": "Practical (not theoretical) reversible specific capacity of the active material."
     },
+    "theoretical_specific_capacity": {
+      "label": "Theoretical specific capacity",
+      "scopes": ["material"],
+      "unit": "mAh/g",
+      "kind": "scalar",
+      "description": "Theoretical specific capacity from stoichiometry (e.g. LiC6 372 mAh/g). Deliberately a separate key from specific_capacity: theoretical values never satisfy a model tier's practical-capacity requirement, and conflating them would corrupt design estimates."
+    },
     "density": {
       "label": "True density",
       "scopes": ["material"],
