@@ -9,6 +9,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`theoretical_specific_capacity` joins the parameter vocabulary.** The curated
+  material-kind reference anchors (graphite 372 mAh/g, silicon 3579, lithium
+  metal 3862, LFP 170) are theoretical stoichiometric capacities, while
+  `specific_capacity` is defined as the practical reversible value a design
+  tool may trust. They get their own key so the anchors can be published as
+  claims without a theoretical value ever satisfying a model tier's
+  practical-capacity requirement. No tier contract changes.
+
 - **Parameter sets emit JSON-LD and reach the deposit graph.** The exemption #347
   recorded is repaid: a parameter-set record now emits as one `schema:Dataset`
   node whose claims hang off the claim batch, not the target — asserting Chen
