@@ -81,7 +81,7 @@ In JSON-LD both ride `schema:valueReference` as named `schema:PropertyValue` qua
 ]
 ```
 
-Not an EMMO class, because there is not one: the pinned closure publishes no `StandardDeviation`, `Variance` or `SampleCount` ([tracked upstream](internal/ontology-additions-needed.md)). It does publish `MetrologicalUncertainty`, which is deliberately not used here — the spread of a batch of eight discs is a property of a population of distinct objects, not the uncertainty attributed to a single measurand, and typing it as uncertainty would claim something the number does not support.
+Not an EMMO class, because there is not one: the pinned closure publishes no `StandardDeviation`, `Variance` or `SampleCount`, and the additions are queued upstream. It does publish `MetrologicalUncertainty`, which is deliberately not used here — the spread of a batch of eight discs is a property of a population of distinct objects, not the uncertainty attributed to a single measurand, and typing it as uncertainty would claim something the number does not support.
 
 ### Structured composition
 
