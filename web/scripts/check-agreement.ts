@@ -36,6 +36,7 @@ const RECORD_DIRS = [
   "equipment-spec",
   "equipment",
   "channel",
+  "parameter-set",
   "organization",
 ];
 

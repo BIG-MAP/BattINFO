@@ -64,6 +64,7 @@ from battinfo.api import (  # noqa: E402
     create_equipment_spec,
     create_material,
     create_material_spec,
+    create_parameter_set,
 )
 from battinfo.bundle import Cell, CellSpec, Dataset, Test, TestSpec  # noqa: E402
 from battinfo.entities import COMPONENT_FAMILIES, ENTITY_KINDS  # noqa: E402
@@ -89,7 +90,8 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
             "(ws.license / ws.project / ws.contributor), not authored on the model"
         )
         for entity_type in ("cell-spec", "cell", "test-protocol", "test", "dataset",
-                            "material-spec", "material", "electrode-spec", "electrode")
+                            "material-spec", "material", "electrode-spec", "electrode",
+                            "parameter-set")
         for prop in ("license", "funding", "contributor")
         # dataset carries its license on the dataset body, which IS modeled
         if not (entity_type == "dataset" and prop == "license")
@@ -186,6 +188,14 @@ def _builders() -> dict[str, Callable[..., dict]]:
         }),
         "channel": _api_builder(create_channel, {
             "uid": UID, "equipment_id": f"https://w3id.org/battinfo/equipment/{UID}", "index": 1,
+        }),
+        "parameter-set": _api_builder(create_parameter_set, {
+            "uid": UID, "name": "probe", "material_kind": "graphite",
+            "claims": [{
+                "parameter": "density",
+                "quantity": {"value": 2.26, "unit": "g/cm3"},
+                "provenance_class": "literature",
+            }],
         }),
     }
     for family in COMPONENT_FAMILIES:

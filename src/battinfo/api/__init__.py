@@ -112,6 +112,13 @@ from battinfo.api._index import (
     build_index,
     index_stats,
 )
+from battinfo.api._parameters import (
+    _record_from_parameter_set,
+    create_parameter_set,
+    query_parameter_sets,
+    save_parameter_set,
+    template_parameter_set,
+)
 from battinfo.api._records import (
     _COMPONENT_SPEC_REF_NAMESPACES,
     _LIBRARY_SPEC_OPTIONAL_FIELDS,
@@ -357,6 +364,10 @@ __all__ = [
     "create_equipment_spec",
     "create_equipment",
     "create_channel",
+    "create_parameter_set",
+    "save_parameter_set",
+    "query_parameter_sets",
+    "template_parameter_set",
     "save_component_spec",
     "save_component_instance",
     "query_component_specs",

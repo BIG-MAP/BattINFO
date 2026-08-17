@@ -214,6 +214,12 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # ``equipment_id`` lives in the record body, uid minted deterministically
     # from (equipment uid, index) — IDENTIFIER_POLICY 6.1.
     EntityKind("channel", "channel", "channel.schema.json", "channel", "channel"),
+    # Parameter sets are claim batches (one source, one target) rather than a
+    # spec+instance pair: a reusable description, minted under spec/ like every
+    # other one. The target link (material_kind / material_spec_id /
+    # cell_spec_id) lives in the record body, uid minted deterministically from
+    # (target, name) so re-importing the same source is idempotent.
+    EntityKind("parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "spec"),
 )
 
 

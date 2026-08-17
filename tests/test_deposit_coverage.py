@@ -40,6 +40,7 @@ from battinfo.api import (  # noqa: E402
     create_equipment_spec,
     create_material,
     create_material_spec,
+    create_parameter_set,
 )
 from battinfo.bundle import Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec  # noqa: E402
 from battinfo.entities import COMPONENT_FAMILIES, ENTITY_KINDS  # noqa: E402
@@ -93,6 +94,15 @@ def _record_sets() -> dict[str, list[dict]]:
         serial_number="SN-1",
     )
     channel = create_channel(validate=False, uid=UID, equipment_id=EQUIPMENT_IRI, index=1)
+    parameter_set = create_parameter_set(
+        validate=False, uid="4444-5555-6666-7777", name="Demo source - graphite",
+        material_kind="graphite",
+        claims=[{
+            "parameter": "specific_capacity",
+            "quantity": {"value": 372.0, "unit": "mAh/g"},
+            "provenance_class": "literature",
+        }],
+    )
 
     cell_spec = CellSpec(
         id=CELL_SPEC_IRI, name="Demo half cell", manufacturer="Demo Co", model="DEMO-1",
@@ -131,6 +141,7 @@ def _record_sets() -> dict[str, list[dict]]:
         "equipment-spec": [equipment_spec],
         "equipment": [equipment],
         "channel": [channel],
+        "parameter-set": [parameter_set],
     }
     # Generic component families (separator, current-collector, electrolyte,
     # housing): spec + instance, so the sweep sees them too.
