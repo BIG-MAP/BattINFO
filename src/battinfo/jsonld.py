@@ -1070,6 +1070,22 @@ def _material_to_jsonld(record: dict) -> dict:
     return {"@context": doc.get("@context"), **node}
 
 
+def _parameter_set_to_jsonld(record: dict) -> dict:
+    """Transform a parameter-set record (claim batch) to JSON-LD.
+
+    Same delegation as materials: the domain-battery emitter builds the
+    schema:Dataset claim node (scalar claims as EMMO-typed hasProperty
+    quantities, curves/expressions under schema:variableMeasured, the target
+    on schema:about).
+    """
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    doc = to_jsonld(record, target="domain-battery")
+    graph = doc.get("@graph") or []
+    node = dict(graph[0]) if graph else {}
+    return {"@context": doc.get("@context"), **node}
+
+
 # Same delegation for component spec/instance records (electrode, separator, …).
 _component_to_jsonld = _material_to_jsonld
 
@@ -1105,6 +1121,8 @@ _TRANSFORMERS = {
     "housing-spec": _component_to_jsonld,
     "housing_spec": _component_to_jsonld,
     "housing":      _component_to_jsonld,
+    "parameter-set": _parameter_set_to_jsonld,
+    "parameter_set": _parameter_set_to_jsonld,
 }
 
 

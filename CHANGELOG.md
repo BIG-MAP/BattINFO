@@ -9,6 +9,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Parameter sets emit JSON-LD and reach the deposit graph.** The exemption #347
+  recorded is repaid: a parameter-set record now emits as one `schema:Dataset`
+  node whose claims hang off the claim batch, not the target — asserting Chen
+  2020's diffusivity directly onto graphite would collapse "this source claims
+  X" into "X", which is the epistemic distinction the claim model exists to
+  keep. The target rides `schema:about` (a `material_kind` types itself from the
+  curated vocabulary and identifies as its chemical-substance class IRI, exactly
+  like a material node; spec targets stay plain references so the described node
+  lives in its own record). Scalar claims go through the same EMMO quantity
+  emitter every component uses (`hasProperty` with real units and the labeled
+  fallback for terms EMMO lacks); curve and expression claims ride
+  `schema:variableMeasured` as PropertyValues — the expression string is carried
+  verbatim, a curve is described (points, x-quantity, hysteresis branch) without
+  restating the table the record file beside it already ships. Per-claim
+  provenance class, method, and citation overrides survive onto each claim node;
+  the record-level citation rides the dataset node. `record_to_jsonld` accepts
+  `"parameter-set"`, and the kind moved from `DEPOSIT_COVERAGE_EXEMPT` to
+  `DEPOSIT_STANDALONE_KINDS`, so published parameter sets are described nodes in
+  every deposit rather than files a reader must open blind.
+
 - **Parameter claims: the `parameter-set` record type.** Simulation parameters now
   have a home as *claims*: one record = one source (paper, BPX file, lab fit) making
   claims about one target — a curated `material_kind` ("graphite", "nmc811"), a
