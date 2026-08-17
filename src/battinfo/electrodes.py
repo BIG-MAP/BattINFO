@@ -18,6 +18,7 @@ claim an LFP anode by typo.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 # Kind families that name an ACTIVE material, and the electrode polarity each
@@ -42,6 +43,77 @@ ELECTRODE_POLARITY_TYPES: dict[str, str] = {
 #: electrode's route is part of the DESIGN: an aqueous-processed electrode is a
 #: different spec from an NMP-processed one, and the identity seed says so.
 PROCESSING_ROUTES: tuple[str, ...] = ("aqueous", "nmp", "dry", "other")
+
+#: Electrode ROLE -> the relation a cell uses to name the electrode playing it.
+#: Role is assigned by the cell, not carried by the electrode: the same disc is a
+#: working electrode in one build and a counter electrode in another, so the
+#: relation belongs to the cell that placed it.
+ELECTRODE_ROLE_RELATIONS: dict[str, str] = {
+    "working": "hasWorkingElectrode",
+    "counter": "hasCounterElectrode",
+}
+
+#: Cell configurations with no polarity to assign. Their electrodes are named by
+#: role instead (upstream ruling, BIG-MAP/BattINFO#345). Written in both the
+#: underscore form the schema enum uses and the hyphenated form the entity map is
+#: keyed on, because both spellings reach this table.
+ROLELESS_CONFIGURATIONS: frozenset[str] = frozenset(
+    {"half_cell", "half-cell", "three_electrode_cell", "three-electrode-cell", "three-electrode"}
+)
+
+#: The configurations in which one electrode closes the circuit AND serves as the
+#: potential reference, so the counter electrode carries both role classes.
+_HALF_CELL_CONFIGURATIONS: frozenset[str] = frozenset({"half_cell", "half-cell"})
+
+
+def normalize_cell_configuration(value: Any) -> str | None:
+    """Lower-cased, hyphenated cell configuration, or ``None``.
+
+    ``"Half Cell"``, ``"half_cell"`` and ``"half-cell"`` all read as
+    ``"half-cell"``, so a configuration written in any of the spellings the stack
+    carries (schema enum, entity-map key, free text) reaches the same rule.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return re.sub(r"[\s_,/]+", "-", value.strip().lower())
+
+
+def electrode_role_types(role: str, configuration: Any = None) -> list[str]:
+    """EMMO ``@type`` classes for an electrode placed in *role* by a cell.
+
+    ``"working"`` is always ``WorkingElectrode``. ``"counter"`` is
+    ``CounterElectrode``, plus ``ReferenceElectrode`` in a half cell: a half cell
+    has no third electrode, so its counter electrode IS its reference (the
+    ``HalfCellDevice`` axiom, and why the three role classes are non-disjoint
+    upstream). That is a second class on the one electrode, never a second
+    electrode.
+
+    The single implementation of that rule. The cell-spec holder emitter, the
+    cell-instance emitters and the deposit-graph builder all call it, so a cell
+    cannot say one thing about its counter electrode in one artifact and another
+    thing in the next.
+    """
+    if role == "working":
+        return ["WorkingElectrode"]
+    if role != "counter":
+        raise ValueError(
+            f"Unknown electrode role {role!r}. Known roles: {sorted(ELECTRODE_ROLE_RELATIONS)}."
+        )
+    if normalize_cell_configuration(configuration) in _HALF_CELL_CONFIGURATIONS:
+        return ["CounterElectrode", "ReferenceElectrode"]
+    return ["CounterElectrode"]
+
+
+def electrode_role_link(role: str, electrode_id: str, configuration: Any = None) -> dict[str, Any]:
+    """A cell's reference to the physical electrode it built into *role*.
+
+    A linked node, not an inline copy: the ``@id`` is the electrode record's own
+    IRI, so the electrode's chemistry, design link and as-built values stay on the
+    electrode record and merge onto this node by ``@id``. The ``@type`` here is the
+    role the cell assigned — the one thing the electrode record cannot know.
+    """
+    types = electrode_role_types(role, configuration)
+    return {"@id": electrode_id, "@type": types[0] if len(types) == 1 else types}
 
 
 def electrode_kind_keys() -> list[str]:

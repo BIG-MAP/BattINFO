@@ -291,6 +291,32 @@ def validate_references_report(
                 allow_missing=allow_missing,
             )
 
+        # The electrode batches built into this cell. They resolve to `electrode`
+        # records (the physical batch), not to `electrode-spec` — the cell spec
+        # already carries the design link.
+        for role_field in ("working_electrode_id", "counter_electrode_id"):
+            electrode_id = doc["cell_instance"].get(role_field)
+            if not isinstance(electrode_id, str):
+                continue
+            _check_reference(
+                issues=issues,
+                ref_id=electrode_id,
+                expected_type="electrode",
+                path=f"cell_instance.{role_field}",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    "Referenced electrode not found in source_root. Save the electrode "
+                    f"record first or disable resolve_references. Missing: {electrode_id}"
+                ),
+                mismatch_message=(
+                    "Referenced electrode must resolve to an electrode record in source_root "
+                    f"(an electrode-spec is the design, not the built batch). Found a different "
+                    f"record type for: {electrode_id}"
+                ),
+                allow_missing=allow_missing,
+            )
+
         dataset_ids: list[tuple[str, str]] = []
         datasets = doc.get("datasets", [])
         if isinstance(datasets, list):

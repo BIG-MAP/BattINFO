@@ -675,7 +675,58 @@ def cell_spec_to_jsonld(record: dict) -> dict:
     return {"@context": context, **build_cell_spec_node(record)}
 
 
-def cell_instance_to_jsonld(record: dict) -> dict:
+def electrode_role_links(cell_instance: Mapping, cell_spec: Mapping | None = None) -> dict:
+    """``{relation: node}`` for the electrodes a cell instance was built from.
+
+    The cell cites the ``electrode`` records physically in it, one per role, as
+    linked nodes: the ``@id`` is the electrode record's own IRI, so its chemistry,
+    design link and as-built values merge onto the node from the electrode record
+    rather than being copied here. The ``@type`` is the role the cell assigned,
+    which is the one thing the electrode record cannot know — the same disc is a
+    working electrode in one build and a counter electrode in another.
+
+    *cell_spec* is the instance's spec body, when the caller has it. The half-cell
+    rule needs it: an instance states no configuration of its own, so whether its
+    counter electrode is also its reference is read off the spec, the same way an
+    instance inherits its physical type and its manufacturer from the spec. Given
+    no spec, the counter electrode types as ``CounterElectrode`` alone — the
+    honest reading of a record that does not say it is a half cell.
+    """
+    from battinfo.electrodes import ELECTRODE_ROLE_RELATIONS, electrode_role_link  # noqa: PLC0415
+
+    configuration = None
+    if isinstance(cell_spec, Mapping):
+        configuration = cell_spec.get("cell_configuration")
+        if configuration is None and cell_spec.get("reference_electrode"):
+            configuration = "half_cell"
+    links: dict = {}
+    for role, relation in ELECTRODE_ROLE_RELATIONS.items():
+        electrode_id = cell_instance.get(f"{role}_electrode_id")
+        if isinstance(electrode_id, str) and electrode_id:
+            links[relation] = electrode_role_link(role, electrode_id, configuration)
+    return links
+
+
+def _role_context_terms() -> dict:
+    """The electrode-role terms, taken from the shared prefLabel -> IRI table.
+
+    ``records.context.json`` is generated from the schema's ``slot_uri``
+    declarations and carries no EMMO class terms, so a document that names an
+    electrode role has to bring those terms with it or they will not resolve
+    offline. Read from ``label_to_compact()`` — the same table that fed the
+    hosted v1 context — so the inline and URL forms cannot disagree.
+    """
+    from battinfo.transform.cell_spec_node import label_to_compact  # noqa: PLC0415
+
+    table = label_to_compact()
+    wanted = (
+        "hasWorkingElectrode", "hasCounterElectrode",
+        "WorkingElectrode", "CounterElectrode", "ReferenceElectrode",
+    )
+    return {term: table[term] for term in wanted if term in table}
+
+
+def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -> dict:
     """Transform a cell-instance record dict to JSON-LD.
 
     Standard vocabularies only (IDENTIFIER_POLICY.md section 14): the physical
@@ -684,13 +735,22 @@ def cell_instance_to_jsonld(record: dict) -> dict:
     (the same pair the resolver emits), the batch id rides in a
     ``schema:identifier`` PropertyValue, and datasets hang off
     ``schema:workExample`` — no ``battinfo:`` predicates.
+
+    Electrode roles are the exception to "standard vocabularies only", as they
+    are on the cell spec: ``hasWorkingElectrode`` / ``hasCounterElectrode`` are
+    EMMO relations, because nothing in schema.org says what an electrode is.
+    Pass *cell_spec* (the spec's body) to let a half cell's counter electrode
+    also type as its reference; see :func:`electrode_role_links`.
     """
     ci   = record.get("cell_instance") or {}
     prov = record.get("provenance") or {}
     datasets = record.get("datasets") or []
 
+    role_links = electrode_role_links(ci, cell_spec)
+    context: dict = {**_CONTEXT_INLINE, **_role_context_terms()} if role_links else _CONTEXT_INLINE
+
     node: dict = {
-        "@context": _CONTEXT_INLINE,
+        "@context": context,
         "@type":    ["BatteryCell", "schema:IndividualProduct"],
         "@id":      ci.get("id", ""),
         "schema:serialNumber": ci.get("serial_number"),
@@ -698,6 +758,7 @@ def cell_instance_to_jsonld(record: dict) -> dict:
     if ci.get("cell_spec_id"):
         node["hasDescription"] = {"@id": ci["cell_spec_id"]}
         node["schema:isVariantOf"] = {"@id": ci["cell_spec_id"]}
+    node.update(role_links)
     if ci.get("batch_id"):
         node["schema:identifier"] = {
             "@type": "schema:PropertyValue",

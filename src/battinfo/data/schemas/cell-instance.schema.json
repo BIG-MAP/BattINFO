@@ -30,6 +30,14 @@
         "cell_spec_id": {
           "$ref": "#/$defs/SpecIri"
         },
+        "working_electrode_id": {
+          "$ref": "#/$defs/ElectrodeIri",
+          "description": "Canonical IRI of the electrode record (the physical batch or disc) built into this cell as its working electrode. The cell spec says which electrode design the cell uses; this says which built electrode went into this individual cell."
+        },
+        "counter_electrode_id": {
+          "$ref": "#/$defs/ElectrodeIri",
+          "description": "Canonical IRI of the electrode record built into this cell as its counter electrode. In a half cell that electrode is also the reference electrode, so it is emitted with both role classes."
+        },
         "name": {
           "type": "string",
           "description": "Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number."
@@ -327,6 +335,10 @@
     "SpecIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "ElectrodeIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "Funding": {
       "type": "object",

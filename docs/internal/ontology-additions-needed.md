@@ -70,6 +70,22 @@ closure. Until EMMO gains these terms, the keys validate with a
   `power_energy_ratio`, `round_trip_energy_efficiency(_50pct)`
   (see `tests/test_validation_plausibility.py` `KNOWN_UNMAPPED` — the list may only shrink).
 
+## 5. Statistical dispersion of a sample (gap E7, 2026-08-17)
+
+A quantity may now state the spread of the sample it summarises — `standard_deviation` and `sample_count` alongside `value` and `unit` — because a batch average without its spread is the number labs actually have and could not publish. There is no EMMO class for either.
+
+| Candidate term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`StandardDeviation`** | Class | property-nature qualifier or a `Quantity` subclass | The sample standard deviation of a set of measured values, in the unit of the value it qualifies. |
+| **`SampleCount`** | Class | dimensionless quantity | How many members the summary was computed over. `CountingUnit` exists for the unit; the quantity does not. |
+| **`hasSampleStatistic`** | Object property | on a `Property` | Attach the above to the property they qualify, the way `hasMeasurementParameter` attaches a condition. |
+
+Searched and absent from the 0.20.2 / 0.37.2 / 1.0.2 closure: `StandardDeviation`, `StandardUncertainty`, `Variance`, `ArithmeticMean`, `Median`, `SampleCount`, `SampleSize`, `StatisticalQuantity`, `hasStandardDeviation`. The `Mean*` classes present (`MeanFreePath`, `MeanPoreSize`, …) are physics quantities, not statistics.
+
+`MetrologicalUncertainty` (`EMMO_847724b7_…`) and `hasMetrologicalUncertainty` (`EMMO_662c64e7_…`) **are** in the closure and were deliberately not used. Per VIM, measurement uncertainty characterises the dispersion of values attributable to one measurand; a sample standard deviation over eight electrode discs characterises a population of distinct physical objects. Reusing the class would be a category claim of the same kind as the `CapacityFade` mapping fixed in 0.37.1, so the emitter says what it has instead: `schema:valueReference` → a named `schema:PropertyValue`.
+
+To wire after publishing: `_SAMPLE_STATISTIC_TERMS` and `_apply_sample_statistics` in `transform/json_to_jsonld.py` are the only emission site (both quantity-node builders route through it); add the class to `validate/jsonld.py` `_EXPLICIT_ALLOWED_TYPE_TERMS`, and append the terms to `records.context.v1.json` via `scripts/gen_context.py`. Records already published with the `schema:` qualifier keep expanding as they do, so the flip is additive rather than a v2.
+
 ## Landed upstream — stubs flipped
 
 ### domain-electrochemistry 0.36.0
