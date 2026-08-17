@@ -2218,6 +2218,173 @@ def _material_node(body: dict[str, Any]) -> dict[str, Any]:
     return node
 
 
+def _parameter_target_node(body: dict[str, Any]) -> dict[str, Any] | None:
+    """The node a parameter set's claims are about (schema:about).
+
+    A material_kind target types itself from the curated vocabulary exactly the
+    way a material node does (kind -> EMMO class, chemsub IRI as the node
+    identity); spec targets are plain IRI references — the described node lives
+    in the target's own record, so the reference must not restate it.
+    """
+    for field in ("material_spec_id", "cell_spec_id"):
+        if isinstance(body.get(field), str) and body[field]:
+            return {"@id": body[field]}
+    kind = body.get("material_kind")
+    if not isinstance(kind, str) or not kind:
+        return None
+    from battinfo.materials import material_kind
+
+    entry = material_kind(kind) or {}
+    node: dict[str, Any] = {"@type": entry.get("emmo") or "schema:ChemicalSubstance"}
+    if entry.get("chemsub"):
+        node["@id"] = entry["chemsub"]
+    node["schema:name"] = entry.get("label") or kind
+    return node
+
+
+def _parameter_claim_annotations(claim: dict[str, Any]) -> dict[str, Any]:
+    """Per-claim decorations shared by both claim emissions."""
+    out: dict[str, Any] = {}
+    if isinstance(claim.get("method"), str) and claim["method"]:
+        out["schema:measurementTechnique"] = claim["method"]
+    if isinstance(claim.get("provenance_class"), str) and claim["provenance_class"]:
+        out["schema:additionalProperty"] = {
+            "@type": "schema:PropertyValue",
+            "schema:name": "provenance_class",
+            "schema:value": claim["provenance_class"],
+        }
+    citation_url = _citation_url_value(claim)
+    if citation_url is not None:
+        citation: dict[str, Any] = {"@id": citation_url, "@type": "schema:CreativeWork"}
+        doi = _citation_doi_value(claim)
+        if doi is not None:
+            citation["bibo:doi"] = doi
+        out["schema:citation"] = citation
+    return out
+
+
+def _parameter_claim_variable_node(claim: dict[str, Any]) -> dict[str, Any] | None:
+    """A curve or expression claim as a schema:PropertyValue.
+
+    The graph carries the claim's identity, shape, and provenance; the full
+    x/y table (or expression string, which IS carried — it is one line) lives
+    in the record file that ships beside the graph in every deposit. Restating
+    a 100-point OCP table inside the publication graph would bloat every
+    deposit for consumers that need the record file anyway.
+    """
+    parameter = claim.get("parameter")
+    if not isinstance(parameter, str) or not parameter:
+        return None
+    node: dict[str, Any] = {"@type": "schema:PropertyValue", "schema:name": parameter}
+    curve = claim.get("curve")
+    expression = claim.get("expression")
+    if isinstance(curve, dict):
+        xs = curve.get("x") if isinstance(curve.get("x"), list) else []
+        parts = [f"tabulated curve vs {curve.get('x_quantity', 'x')}", f"{len(xs)} points"]
+        if isinstance(curve.get("branch"), str):
+            parts.append(f"{curve['branch']} branch")
+        node["schema:description"] = ", ".join(parts)
+        if isinstance(curve.get("y_unit"), str):
+            node["schema:unitText"] = curve["y_unit"]
+    elif isinstance(expression, dict):
+        if isinstance(expression.get("text"), str):
+            node["schema:value"] = expression["text"]
+        language = expression.get("language")
+        node["schema:description"] = (
+            f"expression ({language})" if isinstance(language, str) else "expression"
+        )
+    else:
+        return None
+    node.update(_parameter_claim_annotations(claim))
+    return node
+
+
+def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, Any]:
+    """Emit a parameter-set record as one schema:Dataset node.
+
+    The node is the claim batch, not the target: claims are what one source
+    says, so they hang off the parameter-set node (scalar claims as EMMO-typed
+    ``hasProperty`` quantities through the same emitter every component uses;
+    curves/expressions as schema:PropertyValue under schema:variableMeasured),
+    and the target rides ``schema:about``. Asserting the values directly onto
+    the target node would collapse "Chen 2020 claims D=3.3e-14" into
+    "D=3.3e-14", which is exactly the epistemic distinction the claim model
+    exists to keep.
+    """
+    body = data.get("parameter_set") if isinstance(data.get("parameter_set"), dict) else {}
+    node: dict[str, Any] = {}
+    if isinstance(body.get("id"), str):
+        node["@id"] = body["id"]
+    node["@type"] = "schema:Dataset"
+    if isinstance(body.get("name"), str) and body["name"]:
+        node["schema:name"] = body["name"]
+    if isinstance(body.get("description"), str) and body["description"]:
+        node["schema:description"] = body["description"]
+    about = _parameter_target_node(body)
+    if about is not None:
+        node["schema:about"] = about
+
+    scope_values = [
+        {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
+        for key in ("scope", "electrode_polarity")
+        if isinstance(body.get(key), str) and body[key]
+    ]
+    model_context = body.get("model_context")
+    if isinstance(model_context, dict):
+        scope_values.extend(
+            {"@type": "schema:PropertyValue", "schema:name": f"source_{key}", "schema:value": value}
+            for key, value in sorted(model_context.items())
+            if isinstance(value, str) and value
+        )
+    if scope_values:
+        node["schema:additionalProperty"] = (
+            scope_values[0] if len(scope_values) == 1 else scope_values
+        )
+
+    property_nodes: list[dict[str, Any]] = []
+    variable_nodes: list[dict[str, Any]] = []
+    for claim in body.get("claims") or []:
+        if not isinstance(claim, dict):
+            continue
+        quantity = claim.get("quantity")
+        if isinstance(quantity, dict) and isinstance(claim.get("parameter"), str):
+            for emitted in _descriptor_property_nodes({claim["parameter"]: quantity}):
+                emitted.update(_parameter_claim_annotations(claim))
+                property_nodes.append(emitted)
+            continue
+        variable = _parameter_claim_variable_node(claim)
+        if variable is not None:
+            variable_nodes.append(variable)
+    if property_nodes:
+        node["hasProperty"] = property_nodes[0] if len(property_nodes) == 1 else property_nodes
+    if variable_nodes:
+        node["schema:variableMeasured"] = (
+            variable_nodes[0] if len(variable_nodes) == 1 else variable_nodes
+        )
+
+    citation = _citation_to_jsonld(data.get("provenance"))
+    if citation is not None:
+        node["schema:citation"] = citation
+    notes = [n for n in (data.get("notes") or []) if isinstance(n, str) and n.strip()]
+    if notes:
+        node["schema:comment"] = notes[0] if len(notes) == 1 else notes
+    return {
+        "@context": _base_context(
+            include_battinfo=True,
+            include_has_battery=False,
+            include_has_measurement=False,
+            include_has_property=True,
+            include_bibo=_citation_doi_value(data.get("provenance")) is not None
+            or any(
+                _citation_doi_value(c) is not None
+                for c in (body.get("claims") or [])
+                if isinstance(c, dict)
+            ),
+        ),
+        "@graph": [node],
+    }
+
+
 def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
     body = data.get("material_spec") if isinstance(data.get("material_spec"), dict) else data.get("material")
     node = _material_node(body if isinstance(body, dict) else {})
@@ -2436,6 +2603,8 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
+    if isinstance(data.get("parameter_set"), dict):
+        return _to_domain_battery_jsonld_parameter_set(data)
     if isinstance(data.get("material_spec"), dict) or isinstance(data.get("material"), dict):
         return _to_domain_battery_jsonld_material(data)
     # A first-class electrode record. Checked before the cell-spec branch would

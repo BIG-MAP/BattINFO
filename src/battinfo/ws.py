@@ -838,6 +838,7 @@ DEPOSIT_STANDALONE_KINDS: tuple[str, ...] = (
     "material",
     "electrode-spec",
     "electrode",
+    "parameter-set",
 )
 
 # entity_type -> why a record of that type is not a described node in the deposit
@@ -849,11 +850,6 @@ DEPOSIT_COVERAGE_EXEMPT: dict[str, str] = {
         "on (built from the test's equipment_id), not the product line, so a "
         "spec with no test attached has nothing to attach to. G11 tracks the "
         "wider equipment-family publication gap"
-    ),
-    "parameter-set": (
-        "claim batches save/validate/collate but have no JSON-LD emitter yet; "
-        "promoting them to standalone deposit nodes (EMMO-typed claims) is the "
-        "parameter-campaign Phase 2 follow-up"
     ),
     **{
         entity_type: (

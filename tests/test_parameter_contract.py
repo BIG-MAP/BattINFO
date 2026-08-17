@@ -16,6 +16,7 @@ Design rules under test:
 """
 from __future__ import annotations
 
+import json
 import re
 
 import pytest
@@ -447,6 +448,90 @@ def test_bpx_reimport_is_idempotent() -> None:
     second = {r["parameter_set"]["name"]: r["parameter_set"]["id"]
               for r in import_bpx_parameters(_bpx(), **kwargs)}
     assert first == second
+
+
+# ── JSON-LD emission ─────────────────────────────────────────────────────────
+
+
+def _emitted(record=None) -> dict:
+    from battinfo.jsonld import record_to_jsonld
+
+    return record_to_jsonld(record or _record(), "parameter-set")
+
+
+def test_jsonld_node_is_a_dataset_about_the_kind() -> None:
+    node = _emitted()
+    assert node["@id"] == _record()["parameter_set"]["id"]
+    assert node["@type"] == "schema:Dataset"
+    about = node["schema:about"]
+    # kind target types itself from the curated vocabulary and identifies as
+    # the chemical-substance class IRI, like a material node does
+    assert about["@type"] == "Graphite"
+    assert about["@id"].startswith("https://w3id.org/emmo/domain/chemical-substance#")
+
+
+def test_jsonld_spec_target_is_a_plain_reference() -> None:
+    record = _record(material_kind=None, material_spec_id=MATERIAL_SPEC_IRI)
+    node = _emitted(record)
+    assert node["schema:about"] == {"@id": MATERIAL_SPEC_IRI}
+
+
+def test_jsonld_scalar_claims_are_emmo_quantities_with_provenance() -> None:
+    node = _emitted()
+    props = node["hasProperty"]
+    props = props if isinstance(props, list) else [props]
+    radius = next(p for p in props if "particleRadius" in str(p.get("@type")))
+    assert radius["hasNumericalPart"]["hasNumberValue"] == 5.86e-06
+    annotation = radius["schema:additionalProperty"]
+    assert annotation["schema:name"] == "provenance_class"
+    assert annotation["schema:value"] == "fitted"
+
+
+def test_jsonld_curve_claims_describe_without_restating_the_table() -> None:
+    node = _emitted()
+    variables = node["schema:variableMeasured"]
+    variables = variables if isinstance(variables, list) else [variables]
+    ocp = next(v for v in variables if v["schema:name"] == "ocp")
+    assert "3 points" in ocp["schema:description"]
+    assert ocp["schema:measurementTechnique"] == "GITT"
+    # the graph describes the curve; the table itself stays in the record file
+    assert "[0.0" not in json.dumps(ocp)
+    assert "schema:value" not in ocp
+
+
+def test_jsonld_expression_claims_carry_the_expression() -> None:
+    node = _emitted()
+    variables = node["schema:variableMeasured"]
+    variables = variables if isinstance(variables, list) else [variables]
+    diffusivity = next(v for v in variables if v["schema:name"] == "solid_diffusivity")
+    assert diffusivity["schema:value"] == "3.3e-14 * x"
+    assert "bpx" in diffusivity["schema:description"]
+
+
+def test_jsonld_claim_citation_overrides_ride_the_claim_node() -> None:
+    record = _record(claims=[{
+        "parameter": "density",
+        "quantity": {"value": 2.26, "unit": "g/cm3"},
+        "provenance_class": "literature",
+        "citation_doi": "10.1039/D0SE00175A",
+    }])
+    node = _emitted(record)
+    prop = node["hasProperty"]
+    prop = prop[0] if isinstance(prop, list) else prop
+    assert prop["schema:citation"]["bibo:doi"] == "10.1039/D0SE00175A"
+    # record-level citation still rides the dataset node
+    assert node["schema:citation"]["bibo:doi"] == "10.1149/1945-7111/ab9050"
+
+
+def test_jsonld_source_context_is_readable() -> None:
+    record = _record(model_context={"tool": "BPX", "name": "Chen2020"})
+    node = _emitted(record)
+    extras = node["schema:additionalProperty"]
+    extras = extras if isinstance(extras, list) else [extras]
+    by_name = {e["schema:name"]: e["schema:value"] for e in extras}
+    assert by_name["source_tool"] == "BPX"
+    assert by_name["source_name"] == "Chen2020"
+    assert by_name["scope"] == "material"
 
 
 # ── workspace integration ────────────────────────────────────────────────────
