@@ -9,6 +9,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Parameter claims: the `parameter-set` record type.** Simulation parameters now
+  have a home as *claims*: one record = one source (paper, BPX file, lab fit) making
+  claims about one target — a curated `material_kind` ("graphite", "nmc811"), a
+  specific `material_spec_id`, or a `cell_spec_id` for fitted sets and build
+  parameters. Many records may claim values for the same parameter of the same
+  material; the spread across sources is the point, and `battinfo.parameters.
+  collate_claims` folds any number of records into `{parameter: [claim, ...]}` with
+  per-claim source context. Each claim carries exactly one of `quantity` (scalar with
+  unit/conditions), `curve` (tabulated y(x), e.g. an OCP with a hysteresis `branch`),
+  or `expression` (a BPX-style function string kept verbatim), plus its own
+  `provenance_class` (measured/fitted/literature/assumed/derived); the record-level
+  provenance block carries the source citation. IRIs mint under `spec/` with a uid
+  derived from (target, scope, name), so re-importing the same source is idempotent.
+
+  The shipped parameter vocabulary (`data/vocab/parameters.json`) defines the
+  canonical keys, their physical scopes and units, and the model-tier completeness
+  contract: `battinfo.parameters.completeness()` answers "which of bote/spm/spme/p2d
+  can this material's claims support, and what is missing" — the same machine-readable
+  contract downstream surfaces vendor so every consumer applies identical rules.
+  Unknown keys are tolerated (tolerant-import policy) but never count toward a tier.
+
+  Surface: `create_parameter_set` / `save_parameter_set` / `query_parameter_sets` /
+  `template_parameter_set` on `battinfo.api`; `ws.add("parameter_set", name=...,
+  material=..., claims=[...])` queues through the same stamp path as materials, so
+  contributor/license/funding reach the records. `from_bpx_parameters` /
+  `import_bpx_parameters` extract the physics blocks `from_bpx` deliberately skips:
+  electrode-material claims target the material the caller names (BPX does not name
+  its materials), build claims (thickness/porosity/transport, separator, electrolyte)
+  target the cell spec, and every unmapped field is warned, never silently dropped.
+  Parameter sets are deposit-exempt for now (no JSON-LD emitter yet — the parameter
+  campaign's Phase 2 follow-up, tracked in `DEPOSIT_COVERAGE_EXEMPT`).
+
 - **A cell instance can cite the electrodes built into it.** `cell_instance` gains
   optional `working_electrode_id` and `counter_electrode_id`, pointing at `electrode`
   records — the coated batch or punched disc, not the `electrode-spec` design the cell

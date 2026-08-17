@@ -1,0 +1,265 @@
+{
+  "version": "0.1.0",
+  "description": "Curated vocabulary of simulation-parameter keys and model-tier completeness contracts. A parameter claim (parameter-set record) uses these canonical snake_case keys; unknown keys are tolerated on import but only canonical keys count toward tier completeness. Each entry states the physical scope(s) the parameter belongs to (material = intrinsic to an active material; electrode/separator = the manufactured build; electrolyte = the formulated liquid; cell = whole-cell fits), the canonical unit, and where applicable the BPX source field it maps from (block + name, since BPX reuses names like 'Conductivity [S.m-1]' across blocks with different meanings). The tiers block is the machine-readable completeness contract consumed by battinfo.parameters.completeness() and vendored downstream (registry, web) so every surface applies identical rules.",
+  "parameters": {
+    "specific_capacity": {
+      "label": "Practical specific capacity",
+      "scopes": ["material"],
+      "unit": "mAh/g",
+      "kind": "scalar",
+      "description": "Practical (not theoretical) reversible specific capacity of the active material."
+    },
+    "density": {
+      "label": "True density",
+      "scopes": ["material"],
+      "unit": "g/cm3",
+      "kind": "scalar",
+      "description": "Crystallographic/true density of the active material (not electrode/tap density)."
+    },
+    "first_cycle_efficiency": {
+      "label": "First-cycle coulombic efficiency",
+      "scopes": ["material"],
+      "unit": "1",
+      "kind": "scalar",
+      "description": "First-cycle coulombic efficiency in a half cell; drives lithium-inventory slippage in full-cell balancing."
+    },
+    "ocp": {
+      "label": "Open-circuit potential",
+      "scopes": ["material"],
+      "unit": "V",
+      "kind": "curve",
+      "x_quantity": "stoichiometry",
+      "description": "Half-cell open-circuit potential vs Li/Li+ as a function of stoichiometry. Use curve.branch for lithiation/delithiation where hysteresis matters.",
+      "bpx": {"electrode": "OCP [V]"}
+    },
+    "entropic_coefficient": {
+      "label": "Entropic change coefficient",
+      "scopes": ["material"],
+      "unit": "V/K",
+      "kind": "any",
+      "x_quantity": "stoichiometry",
+      "bpx": {"electrode": "Entropic change coefficient [V.K-1]"}
+    },
+    "particle_radius": {
+      "label": "Particle radius",
+      "scopes": ["material"],
+      "unit": "m",
+      "kind": "scalar",
+      "bpx": {"electrode": "Particle radius [m]"}
+    },
+    "solid_diffusivity": {
+      "label": "Solid-phase diffusivity",
+      "scopes": ["material"],
+      "unit": "m2/s",
+      "kind": "any",
+      "x_quantity": "stoichiometry",
+      "bpx": {"electrode": "Diffusivity [m2.s-1]"}
+    },
+    "max_concentration": {
+      "label": "Maximum lithium concentration",
+      "scopes": ["material"],
+      "unit": "mol/m3",
+      "kind": "scalar",
+      "bpx": {"electrode": "Maximum concentration [mol.m-3]"}
+    },
+    "reaction_rate_constant": {
+      "label": "Reaction rate constant",
+      "scopes": ["material"],
+      "unit": "mol.m-2.s-1",
+      "kind": "scalar",
+      "bpx": {"electrode": "Reaction rate constant [mol.m-2.s-1]"}
+    },
+    "stoichiometry_min": {
+      "label": "Minimum stoichiometry",
+      "scopes": ["material"],
+      "unit": "1",
+      "kind": "scalar",
+      "bpx": {"electrode": "Minimum stoichiometry"}
+    },
+    "stoichiometry_max": {
+      "label": "Maximum stoichiometry",
+      "scopes": ["material"],
+      "unit": "1",
+      "kind": "scalar",
+      "bpx": {"electrode": "Maximum stoichiometry"}
+    },
+    "diffusivity_activation_energy": {
+      "label": "Diffusivity activation energy",
+      "scopes": ["material", "electrolyte"],
+      "unit": "J/mol",
+      "kind": "scalar",
+      "bpx": {"electrode": "Diffusivity activation energy [J.mol-1]", "electrolyte": "Diffusivity activation energy [J.mol-1]"}
+    },
+    "reaction_rate_activation_energy": {
+      "label": "Reaction rate constant activation energy",
+      "scopes": ["material"],
+      "unit": "J/mol",
+      "kind": "scalar",
+      "bpx": {"electrode": "Reaction rate constant activation energy [J.mol-1]"}
+    },
+    "thickness": {
+      "label": "Layer thickness",
+      "scopes": ["electrode", "separator"],
+      "unit": "m",
+      "kind": "scalar",
+      "description": "Coating thickness per side (electrode scope) or separator thickness.",
+      "bpx": {"electrode": "Thickness [m]", "separator": "Thickness [m]"}
+    },
+    "porosity": {
+      "label": "Porosity",
+      "scopes": ["electrode", "separator"],
+      "unit": "1",
+      "kind": "scalar",
+      "bpx": {"electrode": "Porosity", "separator": "Porosity"}
+    },
+    "transport_efficiency": {
+      "label": "Transport efficiency",
+      "scopes": ["electrode", "separator"],
+      "unit": "1",
+      "kind": "scalar",
+      "description": "Porous-medium transport efficiency epsilon/tau (Bruggeman epsilon^1.5 when unmeasured).",
+      "bpx": {"electrode": "Transport efficiency", "separator": "Transport efficiency"}
+    },
+    "electronic_conductivity": {
+      "label": "Electronic conductivity",
+      "scopes": ["electrode"],
+      "unit": "S/m",
+      "kind": "scalar",
+      "description": "Effective electronic conductivity of the porous electrode (BPX electrode-block 'Conductivity').",
+      "bpx": {"electrode": "Conductivity [S.m-1]"}
+    },
+    "surface_area_per_volume": {
+      "label": "Surface area per unit volume",
+      "scopes": ["electrode"],
+      "unit": "1/m",
+      "kind": "scalar",
+      "bpx": {"electrode": "Surface area per unit volume [m-1]"}
+    },
+    "initial_concentration": {
+      "label": "Initial salt concentration",
+      "scopes": ["electrolyte"],
+      "unit": "mol/m3",
+      "kind": "scalar",
+      "bpx": {"electrolyte": "Initial concentration [mol.m-3]"}
+    },
+    "transference_number": {
+      "label": "Cation transference number",
+      "scopes": ["electrolyte"],
+      "unit": "1",
+      "kind": "scalar",
+      "bpx": {"electrolyte": "Cation transference number"}
+    },
+    "ionic_conductivity": {
+      "label": "Ionic conductivity",
+      "scopes": ["electrolyte"],
+      "unit": "S/m",
+      "kind": "any",
+      "x_quantity": "concentration",
+      "description": "Electrolyte ionic conductivity, typically a function of salt concentration (BPX electrolyte-block 'Conductivity').",
+      "bpx": {"electrolyte": "Conductivity [S.m-1]"}
+    },
+    "electrolyte_diffusivity": {
+      "label": "Electrolyte diffusivity",
+      "scopes": ["electrolyte"],
+      "unit": "m2/s",
+      "kind": "any",
+      "x_quantity": "concentration",
+      "bpx": {"electrolyte": "Diffusivity [m2.s-1]"}
+    },
+    "conductivity_activation_energy": {
+      "label": "Conductivity activation energy",
+      "scopes": ["electrolyte"],
+      "unit": "J/mol",
+      "kind": "scalar",
+      "bpx": {"electrolyte": "Conductivity activation energy [J.mol-1]"}
+    },
+    "series_resistance": {
+      "label": "Series resistance",
+      "scopes": ["cell"],
+      "unit": "Ohm",
+      "kind": "scalar",
+      "description": "Lumped ohmic series resistance of the cell (ECM R0 / DCIR-style fits)."
+    }
+  },
+  "tiers": {
+    "bote": {
+      "description": "Back-of-the-envelope design estimation: capacity, energy, OCV construction and electrode balancing.",
+      "requires": {
+        "material": ["specific_capacity", "density", "ocp", "first_cycle_efficiency"]
+      }
+    },
+    "spm": {
+      "description": "Single Particle Model: adds solid-phase diffusion and interfacial kinetics per electrode material.",
+      "requires": {
+        "material": [
+          "specific_capacity",
+          "density",
+          "ocp",
+          "first_cycle_efficiency",
+          "particle_radius",
+          "solid_diffusivity",
+          "max_concentration",
+          "reaction_rate_constant",
+          "stoichiometry_min",
+          "stoichiometry_max"
+        ]
+      }
+    },
+    "spme": {
+      "description": "SPM with electrolyte: adds electrolyte transport plus the manufactured electrode/separator build.",
+      "requires": {
+        "material": [
+          "specific_capacity",
+          "density",
+          "ocp",
+          "first_cycle_efficiency",
+          "particle_radius",
+          "solid_diffusivity",
+          "max_concentration",
+          "reaction_rate_constant",
+          "stoichiometry_min",
+          "stoichiometry_max"
+        ],
+        "electrode": ["thickness", "porosity", "transport_efficiency"],
+        "separator": ["thickness", "porosity", "transport_efficiency"],
+        "electrolyte": [
+          "initial_concentration",
+          "transference_number",
+          "ionic_conductivity",
+          "electrolyte_diffusivity"
+        ]
+      }
+    },
+    "p2d": {
+      "description": "Pseudo-two-dimensional (DFN): adds electrode-scale charge transport.",
+      "requires": {
+        "material": [
+          "specific_capacity",
+          "density",
+          "ocp",
+          "first_cycle_efficiency",
+          "particle_radius",
+          "solid_diffusivity",
+          "max_concentration",
+          "reaction_rate_constant",
+          "stoichiometry_min",
+          "stoichiometry_max"
+        ],
+        "electrode": [
+          "thickness",
+          "porosity",
+          "transport_efficiency",
+          "electronic_conductivity",
+          "surface_area_per_volume"
+        ],
+        "separator": ["thickness", "porosity", "transport_efficiency"],
+        "electrolyte": [
+          "initial_concentration",
+          "transference_number",
+          "ionic_conductivity",
+          "electrolyte_diffusivity"
+        ]
+      }
+    }
+  }
+}

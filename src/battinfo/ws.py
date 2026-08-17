@@ -850,6 +850,11 @@ DEPOSIT_COVERAGE_EXEMPT: dict[str, str] = {
         "spec with no test attached has nothing to attach to. G11 tracks the "
         "wider equipment-family publication gap"
     ),
+    "parameter-set": (
+        "claim batches save/validate/collate but have no JSON-LD emitter yet; "
+        "promoting them to standalone deposit nodes (EMMO-typed claims) is the "
+        "parameter-campaign Phase 2 follow-up"
+    ),
     **{
         entity_type: (
             "generic component family: described inline on the cell spec that uses "
@@ -1043,12 +1048,13 @@ _SAVE_DISPLAY: list[tuple[str, str]] = [
     ("materials", "material"),
     ("electrode_specs", "electrode spec"),
     ("electrodes", "electrode"),
+    ("parameter_sets", "param set"),
 ]
 
 # Result keys written by the side-record path (records the engine does not model),
 # in write order: specs before instances so a reference resolves on disk.
 _SIDE_RECORD_KEYS: tuple[str, ...] = (
-    "material_specs", "materials", "electrode_specs", "electrodes",
+    "material_specs", "materials", "electrode_specs", "electrodes", "parameter_sets",
 )
 
 
@@ -1280,6 +1286,9 @@ class AuthoringWorkspace:
         self._electrode_specs: builtins.list[dict] = []
         self._electrodes: builtins.list[dict] = []
         self._electrode_specs_by_ref: dict[str, dict] = {}
+        # Parameter-set queue (claim batches about a material kind / material
+        # spec / cell spec), same side-record arrangement as materials.
+        self._parameter_sets: builtins.list[dict] = []
         # workspace-level funding project (grant); lazily loaded from
         # .battinfo/workspace.json on first access via _get_project()
         self._project_ref: ProjectRef | None = None
@@ -2604,6 +2613,8 @@ class AuthoringWorkspace:
             return self._add_electrode_spec(**kwargs)
         if rt_key == "electrode":
             return self._add_electrode(**kwargs)
+        if rt_key in ("parameter-set", "parameters"):
+            return self._add_parameter_set(**kwargs)
         try:
             rt = _canon_type(record_type)
         except ValueError:
@@ -2614,14 +2625,16 @@ class AuthoringWorkspace:
             return self._add_tests(**kwargs)
         raise ValueError(
             f"add() supports type 'cell', 'test', 'equipment', 'material_spec', "
-            f"'material', 'electrode_spec', and 'electrode' (got {record_type!r}). "
+            f"'material', 'electrode_spec', 'electrode', and 'parameter_set' "
+            f"(got {record_type!r}). "
             "Author a cell-spec/test-spec with ws.load(<draft file>); attach datasets "
             "via ws.add('test', data=...); register lab equipment via "
             "ws.add('equipment', spec=..., serial_number=...); author materials via "
             "ws.add('material_spec', name=..., kind=...) and "
             "ws.add('material', spec=..., lot=...); author electrodes via "
             "ws.add('electrode_spec', name=..., kind=...) and "
-            "ws.add('electrode', spec=..., batch=...)."
+            "ws.add('electrode', spec=..., batch=...); collate parameter claims via "
+            "ws.add('parameter_set', name=..., material=..., claims=[...])."
         )
 
     def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
@@ -2714,6 +2727,10 @@ class AuthoringWorkspace:
                 name_by_id[body["id"]] = (
                     body.get("batch_id") or body.get("lot_id") or body.get("name") or "electrode"
                 )
+        for ps in self._parameter_sets:
+            body = ps.get("parameter_set", {})
+            if body.get("id"):
+                name_by_id[body["id"]] = body.get("name") or "parameter set"
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
         print(f"Saved {total} record(s) under {self._ws.source_root}:")
@@ -2762,6 +2779,7 @@ class AuthoringWorkspace:
             save_electrode_spec,
             save_material,
             save_material_spec,
+            save_parameter_set,
         )
 
         source_root = self._ws.source_root
@@ -2780,6 +2798,7 @@ class AuthoringWorkspace:
             "materials": _write(save_material, self._materials),
             "electrode_specs": _write(save_electrode_spec, self._electrode_specs),
             "electrodes": _write(save_electrode, self._electrodes),
+            "parameter_sets": _write(save_parameter_set, self._parameter_sets),
         }
 
     def _rel_to_root(self, path: str) -> str:
@@ -7040,6 +7059,56 @@ class AuthoringWorkspace:
         body = record["material"]
         label = body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
         print(f"  material:       {label}  {body['id']}")
+        return [record]
+
+    def _add_parameter_set(
+        self, name: str | None = None, *, material: Any = None, **kwargs
+    ) -> builtins.list:
+        """Collate parameter claims from one source about one target, queued for ws.save().
+
+        ``ws.add("parameter_set", name="Chen 2020 - graphite", material="graphite",
+        citation_doi="10.1149/1945-7111/ab9050", default_provenance_class="fitted",
+        claims=[{"parameter": "particle_radius",
+                 "quantity": {"value": 5.86e-6, "unit": "m"}}, ...])``
+
+        ``material=`` resolves ergonomically: a curated material-kind key or alias
+        ("graphite", "NMC 811") targets the generic chemistry; a material-spec
+        record, IRI, or a name added in this session targets that product. Pass
+        ``cell_spec_id=`` instead for cell-level fitted sets. One source = one
+        record; the IRI derives from (target, scope, name), so re-adding the same
+        source is a no-op, never a duplicate.
+        """
+        from battinfo.api import create_parameter_set  # noqa: PLC0415
+        from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        if not name:
+            raise ValueError(
+                "ws.add('parameter_set', ...) needs name=... (convention: "
+                "'<source> - <target>'), a target (material=... or cell_spec_id=...), "
+                "and claims=[...]."
+            )
+        if material is not None:
+            if any(kwargs.get(f) for f in ("material_kind", "material_spec_id", "cell_spec_id")):
+                raise ValueError(
+                    "pass either material=... or an explicit target "
+                    "(material_kind/material_spec_id/cell_spec_id), not both."
+                )
+            kind = resolve_material_kind(material) if isinstance(material, str) else None
+            if kind is not None:
+                kwargs["material_kind"] = kind
+            else:
+                kwargs["material_spec_id"] = self._resolve_material_spec_arg(material)
+        record = create_parameter_set(validate=False, name=name, **kwargs)
+        self._parameter_sets = _dedupe_records_by_id(self._parameter_sets, record, "parameter_set")
+        body = record["parameter_set"]
+        target = (
+            body.get("material_kind")
+            or body.get("material_spec_id")
+            or body.get("cell_spec_id")
+            or "?"
+        )
+        n_claims = len(body.get("claims", []))
+        print(f"  param set:      {body.get('name', name)}  [{target}, {n_claims} claim(s)]  {body['id']}")
         return [record]
 
     def _add_electrode_spec(self, name: str | None = None, **kwargs) -> builtins.list:

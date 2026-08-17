@@ -614,6 +614,306 @@ def _coerce_cell_spec(source: Any) -> tuple[dict[str, Any], dict[str, Any]]:
     )
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# Import:  BPX physics parameters  ──►  parameter-set claim records
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# :func:`from_bpx` deliberately imports only the cell-level spec subset; the
+# physics parameters (microstructure, transport, kinetics, OCPs) now have a
+# home — ``parameter-set`` records. One BPX file = one source making claims
+# about several targets: each electrode's *material* parameters (targeting a
+# material kind or material spec the caller names), and the *build* parameters
+# (electrode thickness/porosity, separator, electrolyte) targeting the cell
+# spec the file parameterises. BPX value forms map 1:1 onto claim forms:
+# number → quantity, {"x": [...], "y": [...]} → curve, "expression string" →
+# expression(language="bpx").
+
+_BPX_ELECTRODE_BLOCKS = {"negative": "Negative electrode", "positive": "Positive electrode"}
+
+# claim-key groups per BPX block, split by the vocabulary's scope: an electrode
+# block mixes intrinsic material parameters with manufactured-build parameters,
+# and they must land in different parameter sets (different targets).
+_BPX_BLOCK_SCOPES = {
+    "separator": "separator",
+    "electrolyte": "electrolyte",
+}
+
+
+@dataclass
+class BpxParameterImportResult:
+    """Result of :func:`from_bpx_parameters`.
+
+    Attributes
+    ----------
+    claims:
+        Claim lists keyed by block: ``negative_material`` / ``positive_material``
+        (intrinsic material claims), ``negative_electrode`` /
+        ``positive_electrode`` (manufactured-build claims), ``separator``,
+        ``electrolyte``. Every claim is schema-shaped (``parameter`` + one of
+        ``quantity``/``curve``/``expression``).
+    title / bpx_version / model_type / description / source_file:
+        BPX header fields, as in :class:`BpxImportResult`.
+    warnings:
+        Unmapped fields and skipped values.
+    """
+
+    claims: dict[str, list[dict[str, Any]]]
+    title: str | None
+    bpx_version: str | None
+    model_type: str | None
+    description: str | None
+    source_file: str | None
+    warnings: list[str] = field(default_factory=list)
+
+    def to_records(
+        self,
+        *,
+        materials: Mapping[str, str] | None = None,
+        cell_spec_id: str | None = None,
+        name: str | None = None,
+        default_provenance_class: str = "fitted",
+        **record_kwargs: Any,
+    ) -> list[dict[str, Any]]:
+        """Build canonical parameter-set records from the imported claims.
+
+        ``materials`` maps ``"negative"`` / ``"positive"`` (and optionally
+        ``"electrolyte"``, ``"separator"``) to a target: a curated material-kind
+        key/alias or a material-spec IRI. Electrode-material claims without a
+        mapping are skipped with a warning — BPX does not name its materials, so
+        the caller must. Build claims (electrode/separator/electrolyte scope)
+        target ``cell_spec_id`` and are skipped with a warning when it is absent
+        (unless a material target was given for that block).
+
+        ``record_kwargs`` (citation_doi, source_url, notes, ...) pass through to
+        every record. Records validate against the parameter-set schema.
+        """
+        from battinfo.api import create_parameter_set  # noqa: PLC0415
+
+        materials = dict(materials or {})
+        base = name or self.title or self.source_file or "BPX import"
+        model_context = {
+            "tool": "BPX",
+            **({"name": self.title} if self.title else {}),
+            **({"model": self.model_type} if self.model_type else {}),
+            **({"version": self.bpx_version} if self.bpx_version else {}),
+        }
+
+        def _target_fields(value: str) -> dict[str, str]:
+            from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+            kind = resolve_material_kind(value)
+            if kind is not None:
+                return {"material_kind": kind}
+            if isinstance(value, str) and value.startswith("https://w3id.org/battinfo/"):
+                return {"material_spec_id": value}
+            raise ValueError(
+                f"materials[...] value {value!r} is neither a curated material kind "
+                "nor a material-spec IRI."
+            )
+
+        records: list[dict[str, Any]] = []
+
+        def _emit(block: str, scope: str, label: str, **target: str) -> None:
+            block_claims = self.claims.get(block) or []
+            if not block_claims:
+                return
+            records.append(
+                create_parameter_set(
+                    name=f"{base} - {label}",
+                    scope=scope,
+                    claims=block_claims,
+                    model_context=model_context,
+                    default_provenance_class=default_provenance_class,
+                    **target,
+                    **record_kwargs,
+                )
+            )
+
+        for side in ("negative", "positive"):
+            material_target = materials.get(side)
+            if material_target is not None:
+                _emit(
+                    f"{side}_material", "material", f"{side} electrode material",
+                    **_target_fields(material_target),
+                )
+            elif self.claims.get(f"{side}_material"):
+                self.warnings.append(
+                    f"{side} electrode material claims skipped: BPX does not name the "
+                    f"material — pass materials={{'{side}': '<kind or material-spec IRI>'}}."
+                )
+            if self.claims.get(f"{side}_electrode"):
+                if cell_spec_id is not None:
+                    _emit(
+                        f"{side}_electrode", "electrode", f"{side} electrode build",
+                        electrode_polarity=side, cell_spec_id=cell_spec_id,
+                    )
+                else:
+                    self.warnings.append(
+                        f"{side} electrode build claims (thickness/porosity/...) skipped: "
+                        "pass cell_spec_id=... to target the cell design they describe."
+                    )
+
+        for block, scope in _BPX_BLOCK_SCOPES.items():
+            if not self.claims.get(block):
+                continue
+            block_material = materials.get(block)
+            if block_material is not None:
+                _emit(block, scope, block, **_target_fields(block_material))
+            elif cell_spec_id is not None:
+                _emit(block, scope, block, cell_spec_id=cell_spec_id)
+            else:
+                self.warnings.append(
+                    f"{block} claims skipped: pass cell_spec_id=... (or a "
+                    f"materials={{'{block}': ...}} target)."
+                )
+        return records
+
+
+def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Map one BPX field value to a claim body (quantity/curve/expression), or None."""
+    unit = str(entry.get("unit", "1"))
+    if isinstance(raw_value, bool):
+        return None
+    if isinstance(raw_value, (int, float)):
+        if not math.isfinite(raw_value):
+            return None
+        return {"parameter": key, "quantity": {"value": float(raw_value), "unit": unit}}
+    if isinstance(raw_value, str) and raw_value.strip():
+        return {
+            "parameter": key,
+            "expression": {"text": raw_value.strip(), "language": "bpx", "argument": "x"},
+        }
+    if isinstance(raw_value, Mapping):
+        xs, ys = raw_value.get("x"), raw_value.get("y")
+        if isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys) and len(xs) >= 2:
+            curve: dict[str, Any] = {
+                "x_quantity": str(entry.get("x_quantity", "stoichiometry")),
+                "x": [float(v) for v in xs],
+                "y": [float(v) for v in ys],
+                "y_unit": unit,
+            }
+            x_unit = {"concentration": "mol/m3", "temperature": "K"}.get(curve["x_quantity"])
+            if x_unit:
+                curve["x_unit"] = x_unit
+            return {"parameter": key, "curve": curve}
+    return None
+
+
+def _extract_block_claims(
+    block_params: Mapping[str, Any],
+    bpx_block: str,
+    warnings: list[str],
+    block_label: str,
+) -> dict[str, list[dict[str, Any]]]:
+    """Split one BPX block's fields into material- and build-scope claim lists."""
+    from battinfo.parameters import parameter_entry, resolve_bpx_field  # noqa: PLC0415
+
+    material_claims: list[dict[str, Any]] = []
+    build_claims: list[dict[str, Any]] = []
+    unknown: list[str] = []
+    for field_name, raw_value in block_params.items():
+        key = resolve_bpx_field(bpx_block, field_name)
+        if key is None:
+            unknown.append(field_name)
+            continue
+        entry = parameter_entry(key) or {}
+        claim = _bpx_value_to_claim(key, raw_value, entry)
+        if claim is None:
+            warnings.append(
+                f"BPX {block_label} field '{field_name}' has unusable value "
+                f"{raw_value!r}; skipped."
+            )
+            continue
+        scopes = entry.get("scopes", [])
+        (material_claims if "material" in scopes else build_claims).append(claim)
+    if unknown:
+        warnings.append(
+            f"BPX {block_label} fields with no parameter mapping: "
+            f"{', '.join(unknown[:8])}" + (" …" if len(unknown) > 8 else "")
+        )
+    return {"material": material_claims, "build": build_claims}
+
+
+def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterImportResult:
+    """Import BPX physics parameters as parameter-set claims.
+
+    Extracts the electrode, separator, and electrolyte blocks that
+    :func:`from_bpx` deliberately skips, as schema-shaped claims grouped by
+    block. Cell-level fields stay with :func:`from_bpx` (they are spec
+    properties, not claims). Call :meth:`BpxParameterImportResult.to_records`
+    (or :func:`import_bpx_parameters`) to mint the canonical records.
+
+    Examples
+    --------
+    >>> result = from_bpx_parameters("chen2020.json")
+    >>> records = result.to_records(
+    ...     materials={"negative": "graphite", "positive": "nmc811"},
+    ...     citation_doi="10.1149/1945-7111/ab9050",
+    ... )
+    """
+    warnings: list[str] = []
+    data, source_file = _load_bpx(source)
+    title, bpx_version, model_type, description = _extract_header(data)
+
+    params_raw = (
+        data.get("Parameterisation")
+        or data.get("parameterisation")
+        or data.get("parameters")
+        or {}
+    )
+    claims: dict[str, list[dict[str, Any]]] = {}
+    if not isinstance(params_raw, Mapping) or not params_raw:
+        warnings.append("BPX file has no 'Parameterisation' block; no claims extracted.")
+        params_raw = {}
+
+    for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
+        block = params_raw.get(block_name)
+        if isinstance(block, Mapping) and block:
+            split = _extract_block_claims(block, "electrode", warnings, block_name)
+            if split["material"]:
+                claims[f"{side}_material"] = split["material"]
+            if split["build"]:
+                claims[f"{side}_electrode"] = split["build"]
+
+    for block_name, bpx_block in (("Separator", "separator"), ("Electrolyte", "electrolyte")):
+        block = params_raw.get(block_name)
+        if isinstance(block, Mapping) and block:
+            split = _extract_block_claims(block, bpx_block, warnings, block_name)
+            merged = split["material"] + split["build"]
+            if merged:
+                claims[bpx_block] = merged
+
+    if not claims:
+        warnings.append("No parameter claims found in BPX electrode/separator/electrolyte blocks.")
+
+    return BpxParameterImportResult(
+        claims=claims,
+        title=title,
+        bpx_version=bpx_version,
+        model_type=model_type,
+        description=description,
+        source_file=source_file,
+        warnings=warnings,
+    )
+
+
+def import_bpx_parameters(
+    source: Mapping[str, Any] | str | Path,
+    *,
+    materials: Mapping[str, str] | None = None,
+    cell_spec_id: str | None = None,
+    **record_kwargs: Any,
+) -> list[dict[str, Any]]:
+    """One-call BPX physics import: claims extracted and minted as records.
+
+    Convenience for ``from_bpx_parameters(source).to_records(...)``; use the
+    two-step form when you need to inspect claims or warnings first.
+    """
+    return from_bpx_parameters(source).to_records(
+        materials=materials, cell_spec_id=cell_spec_id, **record_kwargs
+    )
+
+
 def _instance_reference(
     meta: Mapping[str, Any], cell_instance: Mapping[str, Any] | Any | None
 ) -> str | None:

@@ -147,6 +147,13 @@ registry's publish gate, and the [browser validator](https://battinfo.org/valida
 - **Required in `channel`:** `id`, `equipment_id`, `index`
 - **Schema:** [`channel.schema.json`](https://w3id.org/battinfo/schema/channel.schema.json)
 
+## parameter-set
+
+- **Record key (discriminator):** `parameter_set`
+- **Required top-level:** `schema_version`, `parameter_set`, `provenance`
+- **Required in `parameter_set`:** `id`, `name`, `claims`
+- **Schema:** [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter-set.schema.json)
+
 ## organization
 
 - **Record key (discriminator):** `organization`

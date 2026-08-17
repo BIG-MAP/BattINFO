@@ -213,6 +213,19 @@ registering the same channel twice is idempotent. Channels are
 instance-only: there is no channel-spec kind — per-channel ratings are
 properties of the equipment spec.
 
+### 6.3 Parameter sets (2026-08-17)
+
+Parameter sets (claim batches: one source's parameter claims about one
+target) are descriptions and mint under `spec/`. They are not a
+spec+instance pair — there is no "parameter instance"; the target link
+(`material_kind` / `material_spec_id` / `cell_spec_id`) lives in the record
+body, never in the address. UIDs mint deterministically from
+`(target, scope, name)`, so re-importing the same source (the same paper or
+BPX file) lands on the existing record instead of duplicating it. Parameter
+*keys* ("solid_diffusivity", ...) are vocabulary entries
+(`data/vocab/parameters.json`), never namespace segments and never
+battinfo-minted classes (SS14).
+
 ## 7. Resolver and Dereferencing Policy
 
 BattINFO IRIs identify resources and MUST resolve via HTTP.
