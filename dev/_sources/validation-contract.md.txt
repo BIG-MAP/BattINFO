@@ -113,5 +113,7 @@ Exit codes:
 
 Reference validation is supported against repository-style source trees through `source_root`.
 
+Every `*_id` field on a record body resolves to a record of one expected type, and a reference that resolves to the wrong type is `reference.type_mismatch` rather than a pass. The distinctions the checks enforce are meaningful ones: `cell_instance.cell_spec_id` must be a `cell-spec`, while `cell_instance.working_electrode_id` / `counter_electrode_id` must be `electrode` records — the built batch, not the `electrode-spec` design, which the cell spec already links.
+
 This is sufficient for the core scope, but it is not yet the long-term scalability model for larger external registries or snapshots.
 

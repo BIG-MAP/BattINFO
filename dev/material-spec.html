@@ -582,6 +582,27 @@ condition is itself a quantity (<code class="docutils literal notranslate"><span
 with each condition as a <code class="docutils literal notranslate"><span class="pre">hasMeasurementParameter</span></code>. Plausibility bounds and unit
 compatibility are checked for known material keys during semantic validation.</p>
 </section>
+<section id="properties-that-summarise-a-sample">
+<h3>Properties that summarise a sample<a class="headerlink" href="#properties-that-summarise-a-sample" title="Link to this heading">#</a></h3>
+<p>A lab number is often a batch average. When it is, say so: <code class="docutils literal notranslate"><span class="pre">standard_deviation</span></code> (in the same unit as <code class="docutils literal notranslate"><span class="pre">value</span></code>) and <code class="docutils literal notranslate"><span class="pre">sample_count</span></code> sit alongside <code class="docutils literal notranslate"><span class="pre">value</span></code> and <code class="docutils literal notranslate"><span class="pre">unit</span></code> on the same quantity, so the mean and its spread stay one property instead of competing for the same EMMO class.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;loading&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.6472</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mg/cm2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;standard_deviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3017</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sample_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;min_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.2844</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0667</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>A zero standard deviation is published, not suppressed: it says every member of the sample carried the same number, which is a finding about how the value was obtained rather than a missing value.</p>
+<p>In JSON-LD both ride <code class="docutils literal notranslate"><span class="pre">schema:valueReference</span></code> as named <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> qualifiers on the property node — the standard deviation carrying the quantity’s unit, the count carrying none:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;schema:valueReference&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;schema:propertyID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;standard_deviation&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3017</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mg/cm2&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;schema:propertyID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sample_count&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Not an EMMO class, because there is not one: the pinned closure publishes no <code class="docutils literal notranslate"><span class="pre">StandardDeviation</span></code>, <code class="docutils literal notranslate"><span class="pre">Variance</span></code> or <code class="docutils literal notranslate"><span class="pre">SampleCount</span></code>, and the additions are queued upstream. It does publish <code class="docutils literal notranslate"><span class="pre">MetrologicalUncertainty</span></code>, which is deliberately not used here — the spread of a batch of eight discs is a property of a population of distinct objects, not the uncertainty attributed to a single measurand, and typing it as uncertainty would claim something the number does not support.</p>
+</section>
 <section id="structured-composition">
 <h3>Structured composition<a class="headerlink" href="#structured-composition" title="Link to this heading">#</a></h3>
 <p>For derived/blended grades, <code class="docutils literal notranslate"><span class="pre">composition</span></code> references other material-specs by IRI:</p>
@@ -761,6 +782,7 @@ reference the powder’s material-spec.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records">Records</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#material-spec"><code class="docutils literal notranslate"><span class="pre">material-spec</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-with-conditions">Properties with conditions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-that-summarise-a-sample">Properties that summarise a sample</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#structured-composition">Structured composition</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#material"><code class="docutils literal notranslate"><span class="pre">material</span></code></a></li>
 </ul>
