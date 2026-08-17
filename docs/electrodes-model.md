@@ -212,8 +212,37 @@ In a three-electrode cell the separate `reference_electrode` field carries the r
 
 **Roles are not `electrode_spec.polarity`.** That field is the *design's* intended full-cell side, derived from the electrode kind (an LFP cathode is a positive-electrode design). Roles are assigned at the cell level, by the holder an electrode sits in. So the same graphite anode design can be the working electrode of a half cell, and neither statement contradicts the other.
 
-Cell instances do not yet reference electrode batches; there is no natural slot on
-`cell_instance` today, and inventing one was out of scope for the promotion.
+## Cell instances cite the discs they were built from
+
+A cell spec says which electrode *design* a cell of this type uses. It cannot say which coating run, which sheet, which disc went into the cell on the bench — and in a coin-cell corpus there are as many electrode instances as cell instances, one punched disc each. `cell_instance` therefore carries `working_electrode_id` and `counter_electrode_id`, pointing at `electrode` records (the batch), not at `electrode-spec` records (the design). The schema enforces the `electrode/` segment, so aiming one of these at a spec is a validation error rather than a silent duplicate of the link the cell spec already has.
+
+The naming follows the role holders on the cell spec, for the reason given above: a cell that is not a full cell has no polarity to hand out, and role is what the cell assigns. The same disc is a working electrode in one build and a counter electrode in another, so the role belongs to the cell, not to the electrode record.
+
+```python
+disc = ws.add("electrode", spec=anode, batch="Si-AQ-1", count=48)[0]
+
+# One batch across a set of cells punched from the same web:
+ws.add("cell", spec=half_cell, serial_numbers=["c-1", "c-2", "c-3"],
+       working_electrode_id=disc["electrode"]["id"],
+       counter_electrode_id=li_disc["electrode"]["id"])
+
+# Or one electrode record per cell, in cell order:
+ws.add("cell", spec=half_cell, serial_numbers=["c-1", "c-2", "c-3"],
+       working_electrode_id=[disc_1, disc_2, disc_3])
+```
+
+A list of the wrong length is refused rather than zipped short — attaching the wrong physical disc to a physical cell is worse than failing.
+
+Emission is a **linked node**: the `@id` is the electrode record's own IRI, and the only thing the cell adds is the role class. The electrode's chemistry, design link and as-built values stay on the electrode record and merge onto the same node in the graph, so nothing is restated in two places to drift apart.
+
+```json
+"hasWorkingElectrode": {"@id": "https://w3id.org/battinfo/electrode/k81p-…", "@type": "WorkingElectrode"},
+"hasCounterElectrode": {"@id": "https://w3id.org/battinfo/electrode/m3x3-…", "@type": ["CounterElectrode", "ReferenceElectrode"]}
+```
+
+The second `@type` there is the half-cell rule again, and it comes from the spec: an instance states no configuration of its own, so it reads the one it conforms to, the same way it inherits its physical type and its manufacturer. Where the spec is in hand — the publication graph, the deposit graph — a half cell's counter electrode carries `ReferenceElectrode` too. `record_to_jsonld` transforms a single record and cannot resolve the spec, so there the counter electrode types as `CounterElectrode` alone; pass `cell_spec=` to `cell_instance_to_jsonld` when you have it. Silence about the configuration is not evidence of a half cell.
+
+The link is deliberately **not** part of the cell's identity seed, which stays (spec, serial/batch/name). Folding an electrode into it would re-mint every published cell IRI the day a lab filled the field in.
 
 ## Examples
 

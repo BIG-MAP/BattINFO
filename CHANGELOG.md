@@ -7,6 +7,72 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A cell instance can cite the electrodes built into it.** `cell_instance` gains
+  optional `working_electrode_id` and `counter_electrode_id`, pointing at `electrode`
+  records — the coated batch or punched disc, not the `electrode-spec` design the cell
+  spec already links. #342 deferred this as "no natural slot", having looked at the
+  fourteen fields the record then had; the genome review asked for it directly ("the
+  electrode should be linked to material and cell", "the same number of electrode
+  instances as cell instances"), and #345 had by then decided what such a link is
+  called. So the slot is not missing, it is named, and named the same way the cell
+  spec's role holders are: role is assigned by the cell, because the same disc is a
+  working electrode in one build and a counter electrode in another.
+
+  Emission is a linked node — the `@id` is the electrode record's own IRI, and the only
+  thing the cell contributes is the role class, so the electrode's chemistry, design
+  link and as-built values stay on the electrode record and merge onto one node instead
+  of being restated where they can drift. The half-cell rule follows #345 exactly: under
+  `cell_configuration: half_cell` the counter electrode also carries `ReferenceElectrode`,
+  a second `@type` on the one node rather than a second relation. An instance states no
+  configuration of its own, so it reads its spec — the same inheritance that already
+  gives it its physical type. Where the spec is not resolvable (`record_to_jsonld`
+  transforms one record; so does the w3id resolver) the counter electrode types as
+  `CounterElectrode` alone, because silence about the configuration is not evidence of a
+  half cell. The counter-is-reference rule now has one implementation,
+  `electrodes.electrode_role_types`, which the cell-spec holder emitter also calls, so a
+  half cell cannot say one thing on its spec and another on its cell.
+
+  Authoring: `ws.add("cell", …, working_electrode_id=…, counter_electrode_id=…)` takes
+  one IRI for a batch of cells punched from one web, or a list assigning one electrode
+  per cell — the shape the corpus actually has. A list of the wrong length is refused
+  rather than zipped short. The reference resolves like every other `*_id`
+  (`reference.missing` / `reference.type_mismatch`), and the schema pattern is scoped to
+  the `electrode/` segment, so aiming the field at a spec fails instead of silently
+  duplicating the design link. The IRI is deliberately not in the cell's identity seed:
+  folding it in would re-mint every published cell the day a lab filled the field in.
+
+- **A quantity can state the spread of the sample it summarises (gap E7).** `value` and
+  `unit` gain optional `standard_deviation` and `sample_count` on the same quantity —
+  the component `property` map and the cell-spec/cell-instance spec set both. The Flores
+  corpus had per-batch statistics and published them as prose ("`3.6472 +/- 0.3017
+  mg/cm2` … n = 8 cells") in a `notes` string, because the model had a slot for the mean
+  and none for the spread: a structured key would have been dropped by the emitter, and
+  a second property key mapping to `ActiveMassLoading` would have collided with the
+  first. The number describing how much a batch varied was therefore unqueryable, and
+  invisible to the EES crosswalk that asks for exactly it.
+
+  Emission attaches both to the property node they qualify, through
+  `schema:valueReference` — the `qualifier_relation` the cell-spec profile has declared
+  since it was written and nothing used — as named `schema:PropertyValue` nodes, the
+  deviation carrying the quantity's unit and the count carrying none. Not an EMMO class,
+  because there is not one: the pinned closure publishes no `StandardDeviation`,
+  `Variance` or `SampleCount`. It does publish `MetrologicalUncertainty`, which is
+  deliberately not used — a sample standard deviation over eight discs describes a
+  population of distinct objects, not the uncertainty attributed to one measurand, and
+  typing it as uncertainty would be a category claim of the same kind as the
+  `CapacityFade` mapping fixed in 0.37.1. The gap and the flip-when-published wiring are
+  in `docs/internal/ontology-additions-needed.md`. A zero deviation is published rather
+  than suppressed (three of the corpus's twelve batches repeat one declared number on
+  every row, so 0 is the finding); a spread stated in `%` rescales with the value into
+  the `[0, 1]` fraction encoding; and the prose form stays valid, so the records already
+  on Zenodo keep validating — they simply no longer have to say it that way.
+
+  No context change for either addition: the electrode role terms were appended to the
+  frozen v1 context by #345, and the statistics use the already-declared `schema:`
+  prefix rather than minting a term.
+
 ### Changed
 
 - **EMMO pins: domain-battery 0.20.1 → 0.20.2, domain-electrochemistry 0.36.0 →

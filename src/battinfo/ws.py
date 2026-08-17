@@ -3058,6 +3058,8 @@ class AuthoringWorkspace:
                     name=ci.get("name"),
                     serial_number=ci.get("serial_number"),
                     batch_id=ci.get("batch_id"),
+                    working_electrode_id=ci.get("working_electrode_id"),
+                    counter_electrode_id=ci.get("counter_electrode_id"),
                 )
                 self._index_cell(cell, ci.get("serial_number"), ci.get("name"),
                                  ci.get("short_id") or None)
@@ -5044,6 +5046,7 @@ class AuthoringWorkspace:
         """
         from battinfo.jsonld import (
             checksum_node,
+            electrode_role_links,
             funding_to_jsonld,
             schema_checksum_terms,
             test_protocol_node,
@@ -5163,9 +5166,23 @@ class AuthoringWorkspace:
                             "expires_at":      ci.get("expires_at"),
                             "batch_id":        ci.get("batch_id"),
                             "conformance":    ci.get("conformance"),
+                            # The electrode records built into this cell, kept
+                            # whole so the node builder can role-type them.
+                            "cell_instance":  ci,
                         }
                 except Exception:
                     continue
+
+        # ── Map cell-spec IRI → the spec BODY ──────────────────────────────────
+        # Not the built node: the half-cell rule reads cell_configuration, which
+        # is a record field, and the emitted node states the configuration only
+        # as a @type. Same lookup the physical-type inheritance below uses, so an
+        # instance reads one spec, once.
+        cell_spec_bodies: dict[str, dict] = {}
+        for raw in record_sets.get("cell-spec", []) or []:
+            body = raw.get("cell_spec") if isinstance(raw, dict) else None
+            if isinstance(body, dict) and body.get("id"):
+                cell_spec_bodies[body["id"]] = body
 
         # ── Equipment / channel lookups (test provenance) ──────────────────────
         # Registered lab equipment records let a test's equipment_id/channel_id
@@ -5608,6 +5625,14 @@ class AuthoringWorkspace:
                 "dcterms:conformsTo":  {"@id": cell_spec_id},   # instance-of link
                 "hasDescription":      {"@id": cell_spec_id},
             }
+            # The electrode records this cell was built from. The spec body is in
+            # hand here, so a half cell's counter electrode also carries
+            # ReferenceElectrode — the reading an instance cannot make alone.
+            inode.update(
+                electrode_role_links(
+                    inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)
+                )
+            )
             if inst.get("name"):
                 inode["schema:name"] = inst["name"]
             if inst.get("serial_number"):
@@ -6526,6 +6551,8 @@ class AuthoringWorkspace:
         production_date: int | str | None = None,
         expiration_date: int | str | None = None,
         conformance: Any = None,
+        working_electrode_id: Any = None,
+        counter_electrode_id: Any = None,
     ) -> builtins.list:
         """Create cell instances.
 
@@ -6536,6 +6563,11 @@ class AuthoringWorkspace:
           the batch and must be unique within it.
         * ``iris`` — pre-allocated IRIs to reuse instead of minting (parallel, equal length).
         * ``from_file`` — JSON file mapping ``{name: pre-allocated-IRI}``.
+        * ``working_electrode_id`` / ``counter_electrode_id`` — the ``electrode``
+          record each cell was built from. One IRI applies to every cell (a batch
+          of cells punched from one coated web); a list assigns them one per cell,
+          in the order the cells are created, for the case where each cell got its
+          own disc. Same one-or-parallel shape as ``conformance``.
         """
         spec = self._coerce_cell_spec_arg(spec)
         # Build (name, serial, iri) entries.
@@ -6649,8 +6681,26 @@ class AuthoringWorkspace:
         else:
             confs = [_coerce_conformance(conformance)] * len(entries)
 
+        # Electrode links: one IRI shared by the batch, or one per cell. A list of
+        # the wrong length is a silent mis-assignment of physical parts to physical
+        # cells, so it is refused rather than zipped short.
+        def _per_cell(value: Any, label: str) -> builtins.list[Any]:
+            if isinstance(value, (builtins.list, tuple)):
+                if len(value) != len(entries):
+                    raise ValueError(
+                        f"{label} list must match the number of cells "
+                        f"({len(value)} vs {len(entries)})."
+                    )
+                return builtins.list(value)
+            return [value] * len(entries)
+
+        working_ids = _per_cell(working_electrode_id, "working_electrode_id")
+        counter_ids = _per_cell(counter_electrode_id, "counter_electrode_id")
+
         cells = []
-        for (name, serial, iri), conf in zip(entries, confs):
+        for (name, serial, iri), conf, working_id, counter_id in zip(
+            entries, confs, working_ids, counter_ids
+        ):
             cell = self._ws.cell(
                 spec,
                 name=name,
@@ -6659,6 +6709,8 @@ class AuthoringWorkspace:
                 manufactured_at=production_date,
                 expires_at=expiration_date,
                 conformance=conf,
+                working_electrode_id=working_id,
+                counter_electrode_id=counter_id,
             )
             if iri is not None:
                 cell.id = iri

@@ -1835,6 +1835,8 @@ class Cell(BundleJsonModel):
     name: str | None = Field(default=None, description="Display name; defaults to the serial number or batch id.")
     cell_spec_id: str | None = Field(default=None, description="IRI of the cell spec this physical cell instantiates (required at save).")
     cell_spec: CellSpec | None = Field(default=None, exclude=True, repr=False, description="Linked cell-spec object (alternative to cell_spec_id; may also be passed positionally).")
+    working_electrode_id: str | None = Field(default=None, description="IRI of the electrode record built into this cell as its working electrode (the physical disc/batch, not the design).")
+    counter_electrode_id: str | None = Field(default=None, description="IRI of the electrode record built into this cell as its counter electrode; in a half cell it is also the reference electrode.")
     serial_number: str | None = Field(default=None, description="Manufacturer or lab serial number of this individual cell.")
     batch_id: str | None = Field(default=None, description="Production or delivery batch identifier.")
     grade: str | None = Field(default=None, description="Sorting/binning grade assigned to this cell (e.g. 'A', 'B').")
@@ -1924,6 +1926,8 @@ class Cell(BundleJsonModel):
                 or cell_instance["id"].rstrip("/").split("/")[-1]
             ),
             cell_spec_id=str(cell_instance["cell_spec_id"]),
+            working_electrode_id=cell_instance.get("working_electrode_id"),
+            counter_electrode_id=cell_instance.get("counter_electrode_id"),
             serial_number=cell_instance.get("serial_number"),
             batch_id=cell_instance.get("batch_id"),
             grade=cell_instance.get("grade"),
@@ -1951,6 +1955,8 @@ class Cell(BundleJsonModel):
                 "id": self.id,
                 "short_id": _short_id(self.id),
                 "cell_spec_id": self.cell_spec_id,
+                "working_electrode_id": self.working_electrode_id,
+                "counter_electrode_id": self.counter_electrode_id,
                 "name": self.name,
                 "serial_number": self.serial_number,
                 "batch_id": self.batch_id,

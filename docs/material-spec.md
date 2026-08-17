@@ -57,6 +57,32 @@ In JSON-LD this emits a typed EMMO property (`[SpecificCapacity, MeasuredPropert
 with each condition as a `hasMeasurementParameter`. Plausibility bounds and unit
 compatibility are checked for known material keys during semantic validation.
 
+### Properties that summarise a sample
+
+A lab number is often a batch average. When it is, say so: `standard_deviation` (in the same unit as `value`) and `sample_count` sit alongside `value` and `unit` on the same quantity, so the mean and its spread stay one property instead of competing for the same EMMO class.
+
+```json
+"loading": {
+  "value": 3.6472, "unit": "mg/cm2",
+  "standard_deviation": 0.3017, "sample_count": 8,
+  "min_value": 3.2844, "max_value": 4.0667
+}
+```
+
+A zero standard deviation is published, not suppressed: it says every member of the sample carried the same number, which is a finding about how the value was obtained rather than a missing value.
+
+In JSON-LD both ride `schema:valueReference` as named `schema:PropertyValue` qualifiers on the property node — the standard deviation carrying the quantity's unit, the count carrying none:
+
+```json
+"schema:valueReference": [
+  {"@type": "schema:PropertyValue", "schema:propertyID": "standard_deviation",
+   "schema:value": 0.3017, "schema:unitText": "mg/cm2"},
+  {"@type": "schema:PropertyValue", "schema:propertyID": "sample_count", "schema:value": 8}
+]
+```
+
+Not an EMMO class, because there is not one: the pinned closure publishes no `StandardDeviation`, `Variance` or `SampleCount` ([tracked upstream](internal/ontology-additions-needed.md)). It does publish `MetrologicalUncertainty`, which is deliberately not used here — the spread of a batch of eight discs is a property of a population of distinct objects, not the uncertainty attributed to a single measurand, and typing it as uncertainty would claim something the number does not support.
+
 ### Structured composition
 
 For derived/blended grades, `composition` references other material-specs by IRI:

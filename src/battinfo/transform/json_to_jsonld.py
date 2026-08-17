@@ -431,6 +431,55 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
 }
 
 
+#: Sample-statistic key -> the ``schema:propertyID`` naming it on the qualifier
+#: node, and whether it carries the quantity's unit. A standard deviation is in
+#: the same unit as the value it qualifies; a count is dimensionless.
+_SAMPLE_STATISTIC_TERMS: tuple[tuple[str, bool], ...] = (
+    ("standard_deviation", True),
+    ("sample_count", False),
+)
+
+
+def _apply_sample_statistics(
+    node: dict[str, Any], quantity: Mapping[str, Any], unit: Any = None
+) -> None:
+    """Attach ``standard_deviation`` / ``sample_count`` to a quantity node.
+
+    Emitted as ``schema:valueReference`` qualifiers on the SAME property node —
+    the ``qualifier_relation`` the cell-spec profile has declared since it was
+    written — so a spread stays attached to the number it describes instead of
+    becoming a second, competing property of the thing.
+
+    Why ``schema:PropertyValue`` and not an EMMO class: there is none. The EMMO
+    closure this release pins has no ``StandardDeviation``, ``Variance`` or
+    ``SampleCount`` (see docs/internal/ontology-additions-needed.md). It does
+    have ``MetrologicalUncertainty``, and that is deliberately NOT used: a sample
+    standard deviation over eight electrode discs describes the spread of a
+    population of distinct objects, not the uncertainty attributed to one
+    measurand, and typing it as uncertainty would be a category claim the number
+    does not support. A named ``schema:PropertyValue`` says exactly what is
+    there and nothing more, and flips to the EMMO class the day one is published.
+    """
+    for key, carries_unit in _SAMPLE_STATISTIC_TERMS:
+        value = quantity.get(key)
+        if value is None or isinstance(value, bool) or not isinstance(value, (int, float)):
+            continue
+        qualifier: dict[str, Any] = {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": key,
+            "schema:value": value,
+        }
+        if carries_unit and unit:
+            qualifier["schema:unitText"] = unit
+        existing = node.get("schema:valueReference")
+        if existing is None:
+            node["schema:valueReference"] = qualifier
+        elif isinstance(existing, list):
+            existing.append(qualifier)
+        else:
+            node["schema:valueReference"] = [existing, qualifier]
+
+
 def _descriptor_quantity_node(
     name: str, quantity: dict[str, Any], *, term: str | None = None
 ) -> dict[str, Any] | None:
@@ -463,6 +512,8 @@ def _descriptor_quantity_node(
         node["hasMeasurementUnit"] = iri
     elif unit:
         node["schema:unitText"] = unit
+
+    _apply_sample_statistics(node, quantity, unit)
 
     conditions = quantity.get("conditions")
     if isinstance(conditions, dict):
@@ -1295,6 +1346,7 @@ def _emmo_quantity_node(
         node["hasMeasurementUnit"] = iri
     elif unit:
         node["schema:unitText"] = unit
+    _apply_sample_statistics(node, quantity, unit)
     return node
 
 
@@ -1319,11 +1371,19 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
             # emit verbatim via the standard path rather than crashing the whole
             # document transform on `value / 100`.
             return _emmo_quantity_node(emmo_type, quantity)
-        return {
+        node = {
             "@type": [emmo_type, "ConventionalProperty"],
             "hasNumericalPart": {"@type": "RealData", "hasNumberValue": scaled},
             "hasMeasurementUnit": _UNIT_ONE_IRI,
         }
+        # A spread stated in % rescales with the value it qualifies, or the
+        # emitted node would pair a [0,1] mean with a 0-100 deviation.
+        rescaled = dict(quantity)
+        deviation = quantity.get("standard_deviation")
+        if isinstance(deviation, (int, float)) and not isinstance(deviation, bool):
+            rescaled["standard_deviation"] = round(float(deviation) / 100, 6)
+        _apply_sample_statistics(node, rescaled)
+        return node
     return _emmo_quantity_node(emmo_type, quantity)
 
 

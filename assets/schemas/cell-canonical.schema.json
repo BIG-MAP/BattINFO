@@ -407,6 +407,16 @@
           "type": "string",
           "minLength": 1
         },
+        "standard_deviation": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Dispersion of the sample the value summarises, in the same unit as value. A sample standard deviation over sample_count members, not a measurement uncertainty. Zero is meaningful: it says every member carried the same number."
+        },
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many members the value (and standard_deviation) were computed over — e.g. 8 cells. Without it a spread cannot be read."
+        },
         "unit_code": {
           "type": "string",
           "minLength": 1

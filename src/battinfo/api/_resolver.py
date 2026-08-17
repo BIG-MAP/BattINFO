@@ -26,7 +26,7 @@ from battinfo.api._shared import (
     _validate_canonical_record,
     _validate_publication_artifact,
 )
-from battinfo.jsonld import schema_checksum_terms
+from battinfo.jsonld import electrode_role_links, schema_checksum_terms
 from battinfo.transform.cell_spec_node import build_cell_spec_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
@@ -369,6 +369,11 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         }
         if inst.get("serial_number"):
             out["schema:serialNumber"] = inst.get("serial_number")
+        # The electrodes physically in this cell. The resolver serves one record,
+        # so it cannot read the spec: the counter electrode types by role alone
+        # and the half-cell reference reading is left to the paths that have the
+        # spec in hand (the deposit graph and the publication package).
+        out.update(electrode_role_links(inst))
         datasets: list[dict[str, str]] = []
         for dataset in doc.get("datasets", []):
             if isinstance(dataset, Mapping) and isinstance(dataset.get("id"), str):

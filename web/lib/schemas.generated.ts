@@ -657,6 +657,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "minLength": 1
             },
+            "standard_deviation": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Dispersion of the sample the value summarises, in the same unit as value. A sample standard deviation over sample_count members, not a measurement uncertainty. Zero is meaningful: it says every member carried the same number."
+            },
+            "sample_count": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many members the value (and standard_deviation) were computed over — e.g. 8 cells. Without it a spread cannot be read."
+            },
             "unit_code": {
               "type": "string",
               "minLength": 1
@@ -797,6 +807,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "cell_spec_id": {
               "$ref": "#/$defs/SpecIri"
+            },
+            "working_electrode_id": {
+              "$ref": "#/$defs/ElectrodeIri",
+              "description": "Canonical IRI of the electrode record (the physical batch or disc) built into this cell as its working electrode. The cell spec says which electrode design the cell uses; this says which built electrode went into this individual cell."
+            },
+            "counter_electrode_id": {
+              "$ref": "#/$defs/ElectrodeIri",
+              "description": "Canonical IRI of the electrode record built into this cell as its counter electrode. In a half cell that electrode is also the reference electrode, so it is emitted with both role classes."
             },
             "name": {
               "type": "string",
@@ -1095,6 +1113,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "SpecIri": {
           "type": "string",
           "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "ElectrodeIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",
@@ -6510,6 +6532,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "value_text": {
           "type": "string",
           "minLength": 1
+        },
+        "standard_deviation": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Dispersion of the sample the value summarises, in the same unit as value. A sample standard deviation over sample_count members, not a measurement uncertainty. Zero is meaningful: it says every member carried the same number."
+        },
+        "sample_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many members the value (and standard_deviation) were computed over — e.g. 8 electrode discs. Without it a spread cannot be read."
         },
         "unit_text": {
           "type": "string",

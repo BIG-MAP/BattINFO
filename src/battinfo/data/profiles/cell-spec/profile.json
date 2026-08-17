@@ -400,9 +400,11 @@
       "max_value",
       "typical_value",
       "unit",
-      "unit_text"
+      "unit_text",
+      "standard_deviation",
+      "sample_count"
     ],
-    "human_json_semantics": "schema.org QuantitativeValue adapted to snake_case",
+    "human_json_semantics": "schema.org QuantitativeValue adapted to snake_case, plus the sample statistics (standard_deviation, sample_count) a lab number summarising several members carries",
     "jsonld_rendering": {
       "property_relation": "hasProperty",
       "property_node_type": "ConventionalProperty",

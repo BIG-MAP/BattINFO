@@ -27,7 +27,7 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.jsonld import schema_checksum_terms
+from battinfo.jsonld import electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -1128,6 +1128,11 @@ def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: 
     }
     if inst.get("serial_number"):
         node["schema:serialNumber"] = inst["serial_number"]
+    # The electrodes built into this cell. The spec is an argument here, so the
+    # half-cell reading (counter electrode is also the reference) is available.
+    node.update(
+        electrode_role_links(inst, {"cell_configuration": cell_spec.cell_configuration})
+    )
     return _without_none(node)
 
 
